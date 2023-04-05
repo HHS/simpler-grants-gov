@@ -11,7 +11,7 @@ approvers:
 
 reviewers:
 
-- TBA
+- decause-gov
 
 | Roles | Responsibilities | Requirements | Defined by |
 | --- |:--- |:--- |:--- |
