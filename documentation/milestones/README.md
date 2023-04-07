@@ -8,7 +8,7 @@ The milestones are also graphed in the [dependency diagram](./external_milestone
 
 Some milestones below have full definitions that are defined on standalone pages in the [individual_milestones](./individual_milesstones/) directory. These will have links underneath their name that take you to their full description on another page.
 
-Other milestones in teh short descriptions page are not yet groomed and prepared enough to have milestone descriptions. These have short summaries underneath them. Eventually, when they are getting closer to starting execution, these short descriptions will be replaced by defining them according to the [Milestone Template](./external_milestone_template.md) and creating separate pages for their definitions.
+Other milestones in the short descriptions page are not yet groomed and prepared enough to have milestone descriptions. These have short summaries underneath them. Eventually, when they are getting closer to starting execution, these short descriptions will be replaced by defining them according to the [Milestone Template](./external_milestone_template.md) and creating separate pages for their definitions.
 
 Please note that these are *not* fixed or final milestones. We fully expect they will evolve rapidly based on feedback from others and what we learn as we research, build, and test. All feedback on how these should be changed or adapted is very welcome!
 
