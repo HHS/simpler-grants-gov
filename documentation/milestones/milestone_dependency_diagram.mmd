@@ -32,6 +32,7 @@ flowchart LR
     subgraph User-Research
         Research-Synthesis
         Generative-User-Research:::finished --> Research-Synthesis:::executing
+        Research-Synthesis --> ev1[Research Synthesis informs *everything*\n related to UI/UX.\nLines not shown here for simplicity.]
         Generative-User-Research --> User-Research-TBD
         Document-GrantSolutions
         User-Research-Compensation
@@ -80,7 +81,6 @@ flowchart LR
         CMS --> CMS-Open-Source
         CMS-Open-Source & i18n --> Translation-Process:::northStar
         FE-CI-CD --> Foundational-UI:::northStar
-        Research-Synthesis --> Foundational-UI
         Foundational-UI --> Search-UI
         Foundational-UI --> NOFO-Recommendations-UI
     end
@@ -153,9 +153,6 @@ flowchart LR
         Hackathon-Apply --> Hackathon-Apply-Internal-Entry
         Analytics-API --> Hackathon-Data
         Hackathon-Data --> Hackathon-Data-Internal-Entry
-        Research-Synthesis --> Hackathon-Listing-Internal-Entry
-        Research-Synthesis --> Hackathon-Apply-Internal-Entry
-        Research-Synthesis --> Hackathon-Data-Internal-Entry
     end
 
     subgraph Communications Tooling
