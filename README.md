@@ -58,6 +58,23 @@ A modernization effort for Grants.gov.
 1. Visit [localhost:9001](https://localhost:9001) to view the server
 -->
 
+### Setting up development tools 
+
+#### Configuring pre-commit hooks
+
+To promote consistent code style and quality, we use git pre-commit hooks to
+automatically lint and reformat our code before every commit we make to the codebase.
+Pre-commit hooks are defined in the file [`.pre-commit-config.yaml`](../.pre-commit-config.yaml).
+
+1.  First, install [`pre-commit`](https://pre-commit.com/) globally:
+
+        $ brew install pre-commit
+
+2.  While in the root `grants-api` directory, run `pre-commit install` to install
+    the specific git hooks used in this repository.
+
+Now, any time you commit code to the repository, the hooks will run on all modified files automatically. If you wish, you can force a re-run on all files with `pre-commit run --all-files`.
+
 ### Testing
 
 ## Contributing
