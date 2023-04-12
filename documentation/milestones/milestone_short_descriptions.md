@@ -116,7 +116,7 @@ Metrics:
 * Number of total API calls made
 * Error rate of API calls
 * Uptime of service
-* etc. 
+* etc.
 
 ## beta.grants.gov domain
 Diagram short name: `Beta-Domain`
@@ -176,7 +176,7 @@ Metrics:
 * Duration of time it takes per deploy
 * Duration of time it takes per rollback
 
-For discussion: is a STAGING environment and `staging` branch necessary at this stage, or should we continuously deploy to PROD as feature branches are merged into `main`? 
+For discussion: is a STAGING environment and `staging` branch necessary at this stage, or should we continuously deploy to PROD as feature branches are merged into `main`?
 
 ## CI-CD-Metrics
 Diagram short name: `CI-CD-Metrics`
@@ -208,7 +208,7 @@ Metrics:
 
 * Number of unique monthly average users of API documentation
 * Number of repeat users of API documentation
-* Feedback survey results on usability of API documentation? 
+* Feedback survey results on usability of API documentation?
 
 ## Webhooks for opportunities
 Diagram short name: `Webhooks-Opportunities`
@@ -272,6 +272,13 @@ Configure the following things for the open source group:
 3. Mailing list (Google Group, GSA List, or alternative)
 
 Then schedule and execute a kickoff meeting with interested attendees.
+
+## Bug bounty
+Diagram short name: `Bug-Bounty`
+
+Dependencies: `None`
+
+Start executing an ongoing bug bounty that provides a means for security researchers to disclose their findings in a manner additive to our existing responsible disclosure policy.
 
 # NOFO milestones
 
@@ -593,9 +600,9 @@ Diagram short name: `i18n`
 
 Dependencies: `FE-Plan`, `CMS`
 
-Implement an internationalization framework (to support multiple languages) we believe can scale as the site scales. 
+Implement an internationalization framework (to support multiple languages) we believe can scale as the site scales.
 
-Invest early in this. It is much easier to build internationalization in from the beginning than it is to add support for it to an existing codebase. 
+Invest early in this. It is much easier to build internationalization in from the beginning than it is to add support for it to an existing codebase.
 
 ## Translation process & contracts
 
@@ -609,9 +616,9 @@ This could include using the State Department for translation like many USDS web
 
 Preference for integrating the external team that does translations directly into the codebase so they can make their own pull requests to content.
 
-Define languages planned on support for website. The most common languages are published by the Census: https://www.census.gov/library/stories/2022/12/languages-we-speak-in-united-states.html. A reasonable option for a starting point for supported languages would be Spanish and either Mandarin or Cantonese (the Census marks both of these as 'Chinese' so it is not clear which is the 3rd most commonly spoken language in the US). 
+Define languages planned on support for website. The most common languages are published by the Census: https://www.census.gov/library/stories/2022/12/languages-we-speak-in-united-states.html. A reasonable option for a starting point for supported languages would be Spanish and either Mandarin or Cantonese (the Census marks both of these as 'Chinese' so it is not clear which is the 3rd most commonly spoken language in the US).
 
-For language data, there is more detailed microdata found in the Microdata Access Tool (MDAT).  Here's a table using the 2021 1-year ACS Public Use Microdata Sample (PUMS) file: https://data.census.gov/mdat/#/search?ds=ACSPUMS1Y2021&rv=HHLANP&wt=WGTP. 
+For language data, there is more detailed microdata found in the Microdata Access Tool (MDAT).  Here's a table using the 2021 1-year ACS Public Use Microdata Sample (PUMS) file: https://data.census.gov/mdat/#/search?ds=ACSPUMS1Y2021&rv=HHLANP&wt=WGTP.
 
 Ideally, every release of new content should be followed shortly thereafter by translations in key supported languages. Milestones will not be complete until their related content is released in all supported languages.
 
@@ -809,6 +816,13 @@ Diagram short name: `User-Research-TBD`
 Dependencies: `Generative-User-Research`
 
 Additional user research milestones to be defined later on topics such as search, apply, etc. These need to be fleshed out in detail.
+
+## Unified cross-platform branding and identity
+Diagram short name: `Unified-Brand`
+
+Dependencies: `Research-Synthesis`
+
+Develop a unified brand and visual/comms identity that communicates Office of Grants and/or grants.gov vision and principles across multiple platforms (web, email, PowerPoint, etc).
 
 # Expanded UI milestones
 
