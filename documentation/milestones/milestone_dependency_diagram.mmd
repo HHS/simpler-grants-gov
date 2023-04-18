@@ -33,7 +33,8 @@ flowchart LR
         Research-Synthesis
         Generative-User-Research:::finished --> Research-Synthesis:::executing
         Research-Synthesis --> ev1[Research Synthesis informs *everything*\n related to UI/UX.\nLines not shown here for simplicity.]
-        Generative-User-Research --> User-Research-TBD
+        Research-Synthesis --> User-Research-TBD
+        Research-Synthesis --> Unified-Brand
         Document-GrantSolutions
         User-Research-Compensation
         User-Research-Database
@@ -160,6 +161,7 @@ flowchart LR
         Comms-Platforms --> Open-Source-Tools
         Open-Source-Tools & Comms-Platforms --> Open-Source-Group:::northStar
         Open-Source-Group --> Hackathon-Listing
+        Bug-Bounty
     end
 
     subgraph Legend
