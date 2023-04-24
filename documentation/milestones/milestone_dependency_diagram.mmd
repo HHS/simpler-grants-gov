@@ -35,6 +35,7 @@ flowchart LR
         Research-Synthesis --> ev1[Research Synthesis informs *everything*\n related to UI/UX.\nLines not shown here for simplicity.]
         Research-Synthesis --> User-Research-TBD
         Research-Synthesis --> Unified-Brand
+        Research-Synthesis --> User-Research-NOFO-Writing
         Document-GrantSolutions
         User-Research-Compensation
         User-Research-Database
@@ -73,6 +74,7 @@ flowchart LR
     end
 
     subgraph User interface
+        Web-Analytics-Legacy
         FE-Plan
         FE-CI-CD
         FE-Plan --> FE-CI-CD
@@ -88,6 +90,7 @@ flowchart LR
 
     subgraph Expanded-UI
         NOFO-Listing-UI
+        NOFO-Listing-UI & User-Research-NOFO-Writing --> NOFO-Listing-UI-Enhanced:::northStar
         Foundational-UI --> NOFO-Listing-UI
         Foundational-UI --> Sam-Assistance-UI
         Document-Sam --> Sam-Assistance-UI
@@ -146,6 +149,8 @@ flowchart LR
         Hackathon-Listing:::northStar
         Recruit-Hackathon-Workgroups
         Recruit-Hackathon-Participants
+        RFI
+        RFI-Tools
         Hacakthon-Page & NOFO-Prototypes --> Hackathon-Listing
         Recruit-Hackathon-Workgroups & Recruit-Hackathon-Participants --> Hackathon-Listing
         Hackathon-Listing --> Hackathon-Apply
@@ -157,7 +162,8 @@ flowchart LR
     end
 
     subgraph Communications Tooling
-        Comms-Platforms:::planning --> Milestone-Template:::planning
+        Setup-Meetings
+        Comms-Platforms:::planning --> Milestone-Template:::executing
         Comms-Platforms --> Open-Source-Tools
         Open-Source-Tools & Comms-Platforms --> Open-Source-Group:::northStar
         Open-Source-Group --> Hackathon-Listing

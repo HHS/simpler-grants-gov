@@ -240,15 +240,14 @@ Based on initial research, the level of effort should be assessed to determine w
 ## Communication platforms
 Diagram short name: `Comms-Platforms`
 
-[Link](./milestones/communication_platforms.md)
+[Link](./individual_milestones/communication_platforms.md)
 
 ## Milestone template published
 Diagram short name: `Milestone-Template`
 
-[Link](./milestones/milestone_template_published.md)
+[Link](./individual_milestones/milestone_template_published.md)
 
 ## Open source tools
-
 Diagram short name: `Open-Source-Tools`
 
 Dependencies: `Comms-Platforms`
@@ -259,6 +258,8 @@ Configure the following things in the open source repository:
 2. Responsible disclosure policy
 3. Wiki (or link to wiki)
 4. Contributions guide
+5. Anti-deficiency act explainer
+6. Paperwork reduction act explainer
 
 ## Open source group kickoff
 Diagram short name: `Open-Source-Group`
@@ -279,6 +280,55 @@ Diagram short name: `Bug-Bounty`
 Dependencies: `None`
 
 Start executing an ongoing bug bounty that provides a means for security researchers to disclose their findings in a manner additive to our existing responsible disclosure policy.
+
+## Setup recurring meetings
+Diagram short name: `Setup-Meetings`
+
+Dependencies: `None`
+
+Setup ongoing meetings that are necessary for delivery across all teams working on grants.gov and NOFO simplification.
+
+These meetings will help us align with a two-week sprint cycle. As much as possible, meetings will be open to members of the open source community and general public.
+
+Where possible and appropriate, it would be great to use 'unconference' tooling (the CEJST team used GitHub issues, but this had a challenging user experience) so that any participant can propose a topic for discussion for either themselves or others to facilitate. On the CEJST team, the team would propose a topic subject, description, duration, and facilitator name. For instance, here's an example entry:
+
+    Subject: Review latest user research findings
+    Description: We just completed two weeks of our latest user research study and want to review the findings and answer questions for anyone interested
+    Duration: 30 minutes
+    Facilitator: Abdul
+
+Ideally these topics would have updates as well to let participants indicate which presentations they're most interested in seeing.
+
+As of this time, it probably makes most sense to have all these meetings online, or at least in a hybrid online/in-person format.
+
+These should be discussed and refined, and we're open to all ideas about how to make this more effective, but here's an example set of meetings:
+
+1. Team of teams: sprint planning (60m, once per 2 weeks)
+  - Review delivery plan for each team for the coming 2 week sprint
+  - This meeting is at the start of the sprint.
+2. Team of teams: burndown check-in (30m, once per 2 weeks)
+  - Mid-sprint review of burndown charts against delivery.
+  - This meeting is in the middle of the sprint.
+3. Demo of demos (60m, once per 2 weeks)
+  - All teams present demos of what was delivered this sprint.
+4. Retro (60m, once per 2 weeks)
+  - Retrospective on what went well, what could go better, review and agree upon specific ideas for improvements
+  - Using a tool such as EasyRetro
+  - At the end of the agenda, each person self-reports how happy they are with their work and the project right now, and what could be done to make them happier.
+5. Open discussion calendar holds (60m, once per two weeks)
+  - Calendar hold to keep time on everyone's calendar for whatever ad-hoc topics are needed.
+  - Use unconference tooling
+6. Milestone pre-planning (15m, as needed)
+  - One meeting per milestone definition
+  - Do a quick overview of milestones that are getting ready to be defined
+7. Milestone planning (60m, as needed)
+  - One meeting per milestone definition
+  - Present near-final draft of milestone definition, according to milestone template.
+  - Review and get feedback from all attendees, answer all outstanding questions
+  - Mark milestone as fully defined and ready to be worked.
+8. Grants.gov tea time (60m, once per two weeks)
+  - A casual social hang to get to know each other better as people outside of just our daily work.
+  - Host this during a casual part of the sprint cycle (not the beginning or end).
 
 # NOFO milestones
 
@@ -488,6 +538,20 @@ For this milestone, we would recruit at least three participants for each of thr
 
 Recruit at least 3 organizations that have said they are interested in participating in the first hackathon phase on NOFO listings.
 
+## Request for information (RFI)
+Diagram short name: `RFI`
+
+Dependencies: `None`
+
+Begin a request for information (RFI) process to solicit public comment on NOFO design and simplicity.
+
+## Request for information (RFI) tooling
+Diagram short name: `RFI-Tools`
+
+Dependencies: `None`
+
+Configure and deploy better tools for soliciting and processing responses from the request for information (RFI) process.
+
 ## Hackathon Phase 1: NOFO listing
 Diagram short name: `Hackathon-Listing`
 
@@ -593,6 +657,16 @@ Diagram short name: `Web-Analytics`
 Dependencies: `FE-Plan`
 
 Choose and implement a web analytics framework, such as analytics.gov or Google Analytics, where all data can be made publicly available.
+
+## Grants.gov analytics
+
+Diagram short name: `Web-Analytics-Legacy`
+
+Dependencies: `None`
+
+Establish existing baseline of customer satisfaction and other analytics in existing grants.gov.
+
+The longer we have this baseline data, the more we can use the baseline comparison to ensure that beta.grants.gov provides an improved user experience with higher rates of customer satisfaction.
 
 ## Internationalization framework
 
@@ -813,9 +887,20 @@ Ideally, this database would also have some (appropriate) characteristics of the
 ## Additional user research TBD
 Diagram short name: `User-Research-TBD`
 
-Dependencies: `Generative-User-Research`
+Dependencies: `Research-Synthesis`
 
 Additional user research milestones to be defined later on topics such as search, apply, etc. These need to be fleshed out in detail.
+
+## NOFO writing journey mapping
+Diagram short name: `User-Research-NOFO-Writing`
+
+Dependencies: `Research-Synthesis`
+
+Conduct user research on the process of grantors writing NOFO listings.
+
+This includes the stages of planning, budgeting, designing, developing, writing, getting approvals on content, and posting.
+
+Producing a user journey on this topic would be essential for developing features relating to enhanced NOFO listing pages, because we need to understand how users write and post their NOFOs.
 
 ## Unified cross-platform branding and identity
 Diagram short name: `Unified-Brand`
@@ -834,6 +919,29 @@ Dependencies: `Foundational-UI`, `Research-synthesis`
 A page for individual NOFO listings.
 
 Should likely be built using configurable page template. For instance, using query parameters (or path parameters?) users should be able to view the NOFO listing in an alternative template format. This will make it easier to try new, modified designs for improved user experiences in the future and allow customization for users. (For instance, a third party could contribute a template via open source code that can be easily configured by users who want to use that third-party template.)
+
+This milestone uses *only* the standard fields and data that are available for all NOFOs in the grants.gov legacy database.
+
+## Enhanced NOFO Listing page
+Diagram short name: `NOFO-Listing-UI-Enhanced`
+
+Dependencies: `NOFO-Listing-UI`, `User-Research-NOFO-Writing`
+
+Target launch date: Between January 2024 and March 2024
+
+An enhanced page for individual NOFO listings, to be launched with at least 5 real, live NOFOs by approximately March 2024.
+
+This listing page should have interactive contents, informed by best practices in design and user research on the topic, that make the content of the NOFOs easily accessible to users. The content should have a better user experience than simply a link to a PDF.
+
+In planning this milestone, it's useful to know that most HHS OpDivs develop and submit NOFOs through GrantSolutions, using templates within GrantSolutions. GrantSolutions also provides a structured review process that facilitates getting several rounds of review of the NOFO listing and approvals from various departments (legal, budget, etc) before any content is approved as final. When the final approvals are in and the user chooses to submit the NOFO listing, GrantSolutions then posts the content over system-to-system connections to grants.gov.
+
+One challenge of this milestone is that unlike its dependency, `NOFO-Listing-UI`, it may require using specialized content that is not available through the legacy grants.gov databases. This may require setting up a new service or API that allows this new content to be submitted. This may require updating GrantSolutions and its accompanying workflows to support that new content.
+
+Alternatively, the content management for new NOFO listings may be as simple as configuring a headless CMS to support permissioning and approvals by the program staff. More user research is necessary to understand the journey map of NOFO writers and ensure that this enhanced NOFO listing milestone has all of its dependencies known.
+
+Definition of done:
+* For five or more NOFOs, program staff writing the NOFOs are able to submit the listing's content through an automated service of some kind that then populates the data onto beta.grants.gov.
+* For five or more NOFOs, those listings are available in production at beta.grants.gov with an enhanced page listing experience for real programs.
 
 ## Sam.gov assistance page
 Diagram short name: `Sam-Assistance-UI`

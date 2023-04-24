@@ -34,6 +34,10 @@ Explore options for tracking of tickets with ability to track epics and burndown
 
 * GitHub with Zenhub
 
+Explore options for a shared calendar of dates across teams, such as:
+
+* Confluence?
+
 These should be selected, implemented, and deployed.
 
 For the wiki-style tool, we need integrated page analytics so we can view stats such as the number of total visits to a page (or collection of pages) as well as unique visitors, time on page, etc.
@@ -60,6 +64,8 @@ Any code used to deploy or integrate these services should be made open source.
 - [ ] At least 3 members of the general public are onboarded to all tools.
 - [ ] Integrate Google Analytics or similar tool into wiki-style tool.
 - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
+- [ ] Default 'templates' are created for tickets, epics, etc, that have the fields we've decided are necessary for the project.
+- [ ] [to be added - definition of done for calendar]
 
 ### Proposed metrics for measuring goals/value/definition of done
 
