@@ -659,7 +659,6 @@ Dependencies: `FE-Plan`
 Choose and implement a web analytics framework, such as analytics.gov or Google Analytics, where all data can be made publicly available.
 
 ## Grants.gov analytics
-
 Diagram short name: `Web-Analytics-Legacy`
 
 Dependencies: `None`
