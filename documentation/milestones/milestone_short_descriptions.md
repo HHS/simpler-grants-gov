@@ -143,6 +143,13 @@ Document versioning in API docs.
 
 Also develop and execute release management plan with plan for release cycles, release notes, etc.
 
+## Performance testing framework
+Diagram short name: `Performance-Testing`
+
+Dependencies: `DB-API-Plan`
+
+Setup and start running performance testing framework for testing systems under load.
+
 ## ATO
 
 Diagram short name: `ATO`
