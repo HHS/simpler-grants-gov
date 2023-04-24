@@ -564,6 +564,8 @@ Diagram short name: `Hackathon-Listing`
 
 Dependencies: `Open-Source-Group`, `Hackathon-Page`, `RFI`, `NOFO-Prototypes`, `Recruit-Hackathon-Workgroups`, `Recruit-Hackathon-Participants`
 
+Target date: aim to kick off this hackathon by March 2024 at the latest
+
 Phase 1 of the hackathon: the listing itself.
 
 Key parts of this milestone:
@@ -726,6 +728,8 @@ Dependencies: `GET-Opportunities`
 Diagram short name: `Search-UI`
 
 Dependencies: `Search-API`, `Foundational-UI`
+
+Target date: aim to launch this in beta.grants.gov by sometime between December 2024 and March 2024.
 
 Front-end for search API.
 
