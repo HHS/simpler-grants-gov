@@ -196,6 +196,8 @@ For discussion: is a STAGING environment and `staging` branch necessary at this 
 
 Ideally, we would like to ensure a certain percentage of our ongoing sprint velocity (at least 20-30% at the beginning?) is devoted to improving our developer tools (i.e., autoformatters, build tools, etc) and communication tools (i.e., our wiki, milestones docs, etc). By investing in speeding up team productivity, we will drastically increase the speed of our delivery.
 
+We should track the percentage of story points devoted to improving team efficiency and joy and ensure that they're hitting at least our target percentage each sprint.
+
 ## CI-CD-Metrics
 Diagram short name: `CI-CD-Metrics`
 
