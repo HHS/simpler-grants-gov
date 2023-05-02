@@ -79,6 +79,8 @@ Dependencies: `Onboard-Dev-Team`
 
 Make an analysis of needs and alternatives and try to identify whether any aspects of the grants.gov experience would be better suited to using software-as-a-service (SaaS) alternatives such as Salesforce, Shopify, or other frameworks rather than developing a custom build.
 
+Write an analysis of alternatives with pros/cons/recommendations.
+
 ## DB & API planning
 Diagram short name: `DB-API-Plan`
 
