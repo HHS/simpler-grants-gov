@@ -119,6 +119,9 @@ flowchart LR
     end
 
     subgraph Initial API deployment
+        Onboard-Dev-Team --> SaaS-Plan
+        SaaS-Plan
+        SaaS-Plan --> DB-API-Plan
         Onboard-Dev-Team:::planning
         Onboard-Dev-Team --> Dev-Tools
         Onboard-Dev-Team --> DB-API-Plan
@@ -135,6 +138,7 @@ flowchart LR
         API-Docs-Plan & Beta-Domain --> API-Docs
         DB-API-Plan --> API-Versioning
         DB-API-Plan --> Performance-Testing
+        DB-API-Plan --> Opportunity-Protocol
         ATO
         ATO --> CI-CD
         DB-API-Plan --> CI-CD

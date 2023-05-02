@@ -72,10 +72,17 @@ This will dramatically speed up development because it will allow any developer 
 
 By having consistent test data, we can create integration tests that look for expected and unexpected behaviors.
 
+## Review of software-as-a-service (SaaS) alternatives
+Diagram short name: `SaaS-Plan`
+
+Dependencies: `Onboard-Dev-Team`
+
+Make an analysis of needs and alternatives and try to identify whether any aspects of the grants.gov experience would be better suited to using software-as-a-service (SaaS) alternatives such as Salesforce, Shopify, or other frameworks rather than developing a custom build.
+
 ## DB & API planning
 Diagram short name: `DB-API-Plan`
 
-Dependencies: `None`
+Dependencies: `SaaS-Plan`
 
 Make an analysis of needs and alternatives and choose:
 
