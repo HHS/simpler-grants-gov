@@ -72,10 +72,19 @@ This will dramatically speed up development because it will allow any developer 
 
 By having consistent test data, we can create integration tests that look for expected and unexpected behaviors.
 
+## Review of software-as-a-service (SaaS) alternatives
+Diagram short name: `SaaS-Plan`
+
+Dependencies: `Onboard-Dev-Team`
+
+Make an analysis of needs and alternatives and try to identify whether any aspects of the grants.gov experience would be better suited to using software-as-a-service (SaaS) alternatives such as Salesforce, Shopify, or other frameworks rather than developing a custom build.
+
+Write an analysis of alternatives with pros/cons/recommendations.
+
 ## DB & API planning
 Diagram short name: `DB-API-Plan`
 
-Dependencies: `None`
+Dependencies: `SaaS-Plan`
 
 Make an analysis of needs and alternatives and choose:
 
@@ -185,6 +194,10 @@ Metrics:
 
 For discussion: is a STAGING environment and `staging` branch necessary at this stage, or should we continuously deploy to PROD as feature branches are merged into `main`?
 
+Ideally, we would like to ensure a certain percentage of our ongoing sprint velocity (at least 20-30% at the beginning?) is devoted to improving our developer tools (i.e., autoformatters, build tools, etc) and communication tools (i.e., our wiki, milestones docs, etc). By investing in speeding up team productivity, we will drastically increase the speed of our delivery.
+
+We should track the percentage of story points devoted to improving team efficiency and joy and ensure that they're hitting at least our target percentage each sprint.
+
 ## CI-CD-Metrics
 Diagram short name: `CI-CD-Metrics`
 
@@ -231,7 +244,6 @@ Metrics:
 * Number of total webhooks calls received
 
 ## Back-end dependency fundraising tracking
-
 Diagram short name: `Dependency-Fundraising-Tracking`
 
 Dependencies: `DB-API-Plan`
@@ -241,6 +253,17 @@ For the front-end, there is a great tool (https://backyourstack.com/) that shows
 This milestone is to add to that tool support for backend packages such as Python that are raising funds through OpenCollective.
 
 Based on initial research, the level of effort should be assessed to determine whether the time it would take to implement this milestone is worth the result. If it's longer than 2 weeks time of one developer, it may not be worth it.
+
+## Develop opportunity protocol
+Diagram short name: `Opportunity-Protocol`
+
+Dependencies: `DB-API-Plan`
+
+Investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some private-sector grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
+
+The protocol would be implemented by our particular API ecosystem, but other platforms could implement the same protocol as well.
+
+Much more investigation is needed to define this milestone.
 
 # Communications Tooling
 
@@ -336,6 +359,19 @@ These should be discussed and refined, and we're open to all ideas about how to 
 8. Grants.gov tea time (60m, once per two weeks)
   - A casual social hang to get to know each other better as people outside of just our daily work.
   - Host this during a casual part of the sprint cycle (not the beginning or end).
+9. Open source community gathering (60m, once per two weeks)
+  - A gathering of members of the public specifically to talk about issues relevant to the open source nature of the project.
+
+To organize the delivery of this milestone, it may be useful to create a ticket for each of the meetings underneath the overall milestone epic.
+
+For each of these meetings, their definition of done is:
+
+* Meeting invites sent
+* Method for easily adding people to the invites is documented publicly
+* Recurring agenda set (in our shared comms tools (e.g., our Wiki) and in body of the calendar invite)
+* Roles are set (e.g., an MC or rotating MC schedule is assigned)
+* We've had at least one of these meetings
+
 
 # NOFO milestones
 
