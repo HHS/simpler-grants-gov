@@ -13,7 +13,7 @@ class MilestoneBase(BaseModel):
 class Milestone(MilestoneBase):
     """Contains a summary of details about a project milestone"""
 
-    status: str
+    status: str | None = None
     section: str | None = None
     dependencies: list[str] | None = None
 

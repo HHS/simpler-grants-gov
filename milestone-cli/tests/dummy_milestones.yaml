@@ -1,0 +1,53 @@
+version: "0.1.0"
+sections:
+  project-goals:
+    heading: Project goals
+    description: Description of Auth milestones
+    diagram_name: Define goals
+    milestones:
+      define-goals:
+        status: complete
+        heading: Define and publish core project goals
+        diagram_name: Define-Goals
+        dependencies: null
+        description: |
+          Define and publish core project goals, with proposed key metrics for all goals.
+
+          Define both short and long-term goals.
+      measurement-strategy:
+        status: planning
+        heading: Measurement strategy
+        diagram_name: Measurement-Strategy
+        dependencies: [define-goals]
+        description: Define and publish core project measurement strategy.
+      measurement-dashboard:
+        status:
+        heading: Public measurement dashboards
+        diagram_name: Measurement-Dashboard
+        dependencies: [measurement-strategy]
+        description: Launch initial public measurement dashboard.
+  initial-api-deployment:
+    heading: Initial API deployment milestones
+    description: Description of Auth milestones
+    diagram_name: Initial API deployment
+    milestones:
+      onboard-dev-team:
+        status: executing
+        heading: Onboard development team
+        diagram_name: Onboard-Dev-Team
+        dependencies: null
+        description: Have the software development team for this effort start their work and get systems access.
+      dev-tools:
+        status: not_started
+        heading: Developer tools
+        diagram_name: Dev-Tools
+        dependencies: [onboard-dev-team, measurement-strategies]
+        description: |
+          Install developer tools for backend, including:
+
+            - Automated test framework
+            - Linters, code quality checkers, and code autoformatters
+            - Automated test coverage analysis
+            - API description linter (Spectral or alternative) - this can also be saved until API milestone
+            - Security scan of packages (Snyk or alternative)
+            - etc
