@@ -6,7 +6,7 @@ sections:
     diagram_name: Define goals
     milestones:
       define-goals:
-        status: complete
+        status: finished
         heading: Define and publish core project goals
         diagram_name: Define-Goals
         dependencies: null
@@ -38,7 +38,7 @@ sections:
         dependencies: null
         description: Have the software development team for this effort start their work and get systems access.
       dev-tools:
-        status: not_started
+        status:
         heading: Developer tools
         diagram_name: Dev-Tools
         dependencies: [onboard-dev-team, measurement-strategy]

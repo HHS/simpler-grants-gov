@@ -8,7 +8,7 @@
 | Property           | Value  |
 | ------------------ | ------ |
 | ID                 | `{{ milestone }}` |
-| Status             | {{ details.status }} |
+| Status             | {{ details.status if details.status else 'TODO' }} |
 | Diagram Short Name | `{{ details.diagram_name }}` |
 
 Dependencies: {{ milestone.dependencies }}
