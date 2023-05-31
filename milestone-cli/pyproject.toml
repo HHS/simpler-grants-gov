@@ -22,4 +22,4 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core>=1.0.0"]
 
 [tool.poetry.scripts]
-milestone = "milestone_cli.cli:app"
+milestones = "milestone_cli.cli:app"
