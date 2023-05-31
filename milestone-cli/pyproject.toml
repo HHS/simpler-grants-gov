@@ -8,6 +8,7 @@ authors = ["widal001 <williamdaly422@gmail.com>"]
 python = "^3.10"
 pydantic = "^1.10.8"
 PyYAML = "^6.0"
+Jinja2 = "^3.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.3.1"
