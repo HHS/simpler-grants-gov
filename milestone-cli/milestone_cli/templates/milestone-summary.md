@@ -8,10 +8,16 @@
 | Property           | Value  |
 | ------------------ | ------ |
 | ID                 | `{{ milestone }}` |
-| Status             | {{ details.status if details.status else 'TODO' }} |
+| Status             | {{ details.status if details.status else "TODO" }} |
 | Diagram Short Name | `{{ details.diagram_name }}` |
 
-Dependencies: {{ milestone.dependencies }}
+{% if details.dependencies %}
+Dependencies: {% for dependency in details.dependencies -%}
+`{{ dependency }}`{{", " if not loop.last else "" }}
+{%- endfor %}
+{%- else %}
+Dependencies: None
+{% endif %}
 
 {{ details.description }}
 {% endfor -%}
