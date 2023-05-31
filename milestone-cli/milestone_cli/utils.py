@@ -14,7 +14,15 @@ def load_milestones_from_yaml_file(file_path: Path) -> MilestoneSummary:
 
 
 def render_milestone_template(template_path: Path, params: str) -> str:
-    """"""
-    with open(template_path) as f:
-        template = jinja2.Template(f.read())
+    """Load and populate a milestone template with the parameters provided"""
+    template = jinja2.Template(template_path.read_text())
     return template.render(params=params)
+
+
+def create_or_replace_file(file_path: Path, new_contents: str) -> None:
+    """Create or replace a file with the contents provided"""
+    # create file and parent directory
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.touch(exist_ok=True)
+    # overwrite contents of the file
+    file_path.write_text(new_contents)

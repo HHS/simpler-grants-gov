@@ -1,15 +1,18 @@
+from pathlib import Path
 import pytest
+import re
 
 from milestone_cli.utils import (
     load_milestones_from_yaml_file,
     render_milestone_template,
+    create_or_replace_file,
     MilestoneSummary,
 )
 from tests.conftest import TEST_DIR, TEMPLATE_DIR
 
 YAML_PATH = TEST_DIR / "dummy_milestones.yaml"
 MARKDOWN_PATH = TEMPLATE_DIR / "milestone-summary.md"
-MERMAID_PATH = TEMPLATE_DIR / "mermaid-diagram.mmd"
+MERMAID_PATH = TEMPLATE_DIR / "milestone-diagram.mmd"
 
 
 @pytest.fixture(scope="module", name="summary")
@@ -48,9 +51,55 @@ class TestRenderTemplate:
     """Tests the render_milestone_template() function"""
 
     def test_milestone_summary_markdown(self, params) -> None:
-        """Tests rendering markdown file"""
+        """Checks that the milestone-summary.md template renders correctly"""
         # execution
         output = render_milestone_template(MARKDOWN_PATH, params)
-        # validation
         print(output)
-        assert 0
+        # validation - number of sections and milestones
+        assert len(re.findall("\n# ", output)) == 3  # 2 sections and appendix
+        assert len(re.findall("\n## ", output)) == 6  # 5 milestones and appendix
+
+    def test_milestone_mermaid_diagram(self, params) -> None:
+        """Checks that the milestone-diagram.mmd template renders correctly"""
+        # execution
+        output = render_milestone_template(MERMAID_PATH, params)
+        # validation - number of subgraphs and dependencies
+        assert len(re.findall("subgraph", output)) == 3  # 2 sections and legend
+        assert len(re.findall("--> ", output)) == 6  # 4 milestones and 2 in legend
+
+
+class TestCreateOrReplaceFile:
+    """Tests the create_or_replace_file() function"""
+
+    CONTENTS = """
+    # Heading 1
+    ### Heading 3
+    """
+
+    def test_create_file_if_it_does_not_exist(self, tmp_path: Path):
+        """The output file should be created if it does not exist"""
+        # setup
+        output = tmp_path / "output.md"
+        assert output.exists() is False
+        # execution
+        create_or_replace_file(output, new_contents=self.CONTENTS)
+        # validation
+        assert output.exists() is True
+        assert output.read_text() == self.CONTENTS
+
+    def test_replace_contents_of_existing_file(self, tmp_path: Path):
+        """The previous contents of the output file should be replaced"""
+        # setup -- create file
+        output = tmp_path / "output.md"
+        output.touch(exist_ok=True)
+        assert output.exists() is True
+        # setup -- write contents to be replaced
+        old_contents = "Remove this text"
+        output.write_text(old_contents)
+        output.read_text() == old_contents
+        # execution
+        create_or_replace_file(output, new_contents=self.CONTENTS)
+        # validation
+        new_contents = output.read_text()
+        assert old_contents not in new_contents
+        assert new_contents == self.CONTENTS
