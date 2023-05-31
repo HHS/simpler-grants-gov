@@ -1,0 +1,38 @@
+%% A note on syntax:
+%% 1. Since node IDs cannot have spaces, prefer to give each milestone a short name with any spaces replaced by `-`. For instance, "Development Tools Implemented" becomes "Dev-Tools".
+
+%% For unclear reasons, PyCharm's mermaid editor does not support title attributes. Comment on or off the title as needed.
+
+%% ---
+%% title: Grants.gov modernization milestones
+%% ---
+
+%% Diagram is oriented left-to-right ("LR") rather than top-to-bottom
+
+flowchart LR
+
+    {% for section in params.sections.values() %}
+    subgraph {{ section.diagram_name -}}
+        {% for milestone in section.milestones.values() %}
+        {{ milestone.diagram_name }}:::{{ milestone.status if milestone.status else 'TODO' -}}
+        {% endfor %}
+    end
+    {% endfor %}
+
+    subgraph Legend
+        direction LR
+        a1[This milestone is finished]:::finished      -->  a2[This milestone is being executed]:::executing
+        a3[This milestone is being planned]:::planning -->  a4[This milestone is not yet planned]
+        a5[This milestone is a 'north star' milestone]:::northStar
+    end
+
+    %% List relationships %%
+    {%- for dependency in params.dependencies %}
+    {{ dependency.upstream }} --> {{ dependency.downstream -}}
+    {% endfor %}
+
+    %% Define some styles
+    classDef planning fill:#9999FF
+    classDef executing fill:#FF6633
+    classDef finished fill:#99FF33
+    classDef northStar fill:#cc99ff
