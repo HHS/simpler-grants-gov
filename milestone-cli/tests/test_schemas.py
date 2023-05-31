@@ -102,12 +102,27 @@ class TestDependencies:
         assert output == []
 
 
-class TestGetMilestonesBySection:
-    """Tests the MilestoneSummary.get_milestones_by_section() method"""
+@pytest.fixture(scope="class", name="params")
+def jinja_params_fixture(summary: MilestoneSummary) -> dict:
+    """Export the summary once for the duration of the class"""
+    return summary.export_jinja_params()
 
-    def test_returns_list_of_milestones(
+
+class TestExportJinjaParams:
+    """Tests the MilestoneSummary.export_jinja_params() method"""
+
+    def test_includes_dependencies_for_diagram(
         self,
+        params: dict,
         summary: MilestoneSummary,
     ) -> None:
-        """Should return a list of Milestone objects"""
-        assert 1
+        """"""
+        # setup
+        dependencies = params.get("dependencies")
+        expected = {
+            "upstream": "Define-Goals",
+            "downstream": "Measurement-Strategy",
+        }
+        # validation
+        assert len(dependencies) == len(summary.dependencies)
+        assert dependencies[0] == expected

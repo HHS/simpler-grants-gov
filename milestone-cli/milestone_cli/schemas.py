@@ -7,14 +7,12 @@ class MilestoneBase(BaseModel):
     heading: str
     diagram_name: str
     description: str
-    key: str | None = None
 
 
 class Milestone(MilestoneBase):
     """Contains a summary of details about a project milestone"""
 
     status: str | None = None
-    section: str | None = None
     dependencies: list[str] | None = None
 
 
@@ -29,6 +27,13 @@ class Dependency(BaseModel):
 
     upstream: Milestone
     downstream: Milestone
+
+    def jinja_export(self) -> dict:
+        """Export just the diagram names for jinja templating"""
+        return {
+            "upstream": self.upstream.diagram_name,
+            "downstream": self.downstream.diagram_name,
+        }
 
 
 class MilestoneSummary(BaseModel):
@@ -45,7 +50,8 @@ class MilestoneSummary(BaseModel):
         for parent in milestone.dependencies:
             upstream = self.milestones.get(parent)
             if not upstream:
-                raise KeyError  # TODO: Change to custom error type
+                # TODO: Change to custom error type
+                raise KeyError(f"'{parent}' not found in list of milestones")
             deps.append(Dependency(upstream=upstream, downstream=milestone))
         return deps
 
@@ -66,4 +72,11 @@ class MilestoneSummary(BaseModel):
             milestone: details
             for section in self.sections.values()
             for milestone, details in section.milestones.items()
+        }
+
+    def export_jinja_params(self) -> dict:
+        """Exports sections and milestones for use in jinja templates"""
+        return {
+            **self.dict(),
+            "dependencies": [dep.jinja_export() for dep in self.dependencies],
         }

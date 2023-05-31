@@ -41,7 +41,7 @@ sections:
         status: not_started
         heading: Developer tools
         diagram_name: Dev-Tools
-        dependencies: [onboard-dev-team, measurement-strategies]
+        dependencies: [onboard-dev-team, measurement-strategy]
         description: |
           Install developer tools for backend, including:
 
