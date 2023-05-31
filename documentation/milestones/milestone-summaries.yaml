@@ -1,0 +1,682 @@
+version: "0.1.0"
+sections:
+  project-goals:
+    heading: Project goals
+    description: Description of Auth milestones
+    diagram_name: Define goals
+    milestones:
+      define-goals:
+        status: northStar
+        heading: Define and publish core project goals
+        diagram_name: Define-Goals
+        dependencies: null
+        description: |
+          Define and publish core project goals, with proposed key metrics for all goals.
+
+          Define both short and long-term goals.
+      measurement-strategy:
+        status:
+        heading: Measurement strategy
+        diagram_name: Measurement-Strategy
+        dependencies: [define-goals]
+        description: Define and publish core project measurement strategy.
+      measurement-dashboard:
+        status:
+        heading: Public measurement dashboards
+        diagram_name: Measurement-Dashboard
+        dependencies: [measurement-strategy]
+        description: Launch initial public measurement dashboard.
+  initial-api-deployment:
+    heading: Initial API deployment milestones
+    description: Description of Auth milestones
+    diagram_name: Initial API deployment
+    milestones:
+      onboard-dev-team:
+        status: planning
+        heading: Onboard development team
+        diagram_name: Onboard-Dev-Team
+        dependencies: null
+        description: Have the software development team for this effort start their work and get systems access.
+      dev-tools:
+        status:
+        heading: Developer tools
+        diagram_name: Dev-Tools
+        dependencies: null
+        description: |
+          Install developer tools for backend, including:
+
+            - Automated test framework
+            - Linters, code quality checkers, and code autoformatters
+            - Automated test coverage analysis
+            - API description linter (Spectral or alternative) - this can also be saved until API milestone
+            - Security scan of packages (Snyk or alternative)
+            - etc
+      db-replica:
+        status:
+        heading: DB replica
+        diagram_name: DB-Replica
+        dependencies: null
+        description: >
+          Create a replica of AWS PROD database for legacy grants.gov in a beta.grants.gov environment. 
+          Replica should (1) journal all changes from legacy DB to new system DB and (2) support uptime 
+          even while legacy DB is undergoing planned or unplanned downtime, maintenance, and upgrades.
+
+          The creation of this replica should be scripted using infrastructure as code.
+      db-test-data:
+        status:
+        heading: Test data and schema
+        diagram_name: DB-Test-Data
+        dependencies: [db-replica]
+        description: |
+          Create a script or other automated tool that:
+
+          1. Generates a database matching the schema of the beta.grants.gov core replica DB.
+          2. Generates consistent fake example data that can be used for testing. (e.g., using the same random seed to generate consistent data, or saving test data values somewhere accessible)
+
+          This will dramatically speed up development because it will allow any developer to generate a local copy of the database that acts the same as the PROD beta.grants.gov database in their environment.
+
+          By having consistent test data, we can create integration tests that look for expected and unexpected behaviors.
+      saas-plan:
+        status:
+        heading: Review of software-as-a-service (SaaS) alternatives
+        diagram_name: SaaS-Plan
+        dependencies: [onboard-dev-team]
+        description: TODO add description
+      db-api-plan:
+        status:
+        heading: DB & API planning
+        diagram_name: DB-API-Plan
+        dependencies: [saas-plan]
+        description: TODO add description
+      api-docs-plan:
+        status:
+        heading: Serialization and API documentation planning
+        diagram_name: API-Docs-Plan
+        dependencies: [db-api-plan]
+        description: TODO add description
+      get-opportunities:
+        status: northStar
+        heading: GET opportunities
+        diagram_name: GET-Opportunities
+        dependencies:
+          [db-api-plan, db-test-data, db-replica, dev-tools, beta-domain]
+        description: TODO add description
+      beta-domain:
+        status:
+        heading: beta.grants.gov domain
+        diagram_name: Beta-Domain
+        dependencies: null
+        description: TODO add description
+      feature-flags:
+        status:
+        heading: Feature flag framework
+        diagram_name: Feature-Flags
+        dependencies: [onboard-dev-team]
+        description: TODO add description
+      api-versioning:
+        status:
+        heading: API versioning framework
+        diagram_name: API-Versioning
+        dependencies: [db-api-plan]
+        description: TODO add description
+      performance-testing:
+        status:
+        heading: Performance testing framework
+        diagram_name: Performance-Testing
+        dependencies: [db-api-plan]
+        description: TODO add description
+      ato:
+        status:
+        heading: ATO
+        diagram_name: ATO
+        dependencies: [db-api-plan]
+        description: TODO add description
+      ci-cd:
+        status:
+        heading: CI-CD
+        diagram_name: CI-CD
+        dependencies: [db-api-plan, ato]
+        description: TODO add description
+      ci-cd-metrics:
+        status:
+        heading: CI-CD-Metrics
+        diagram_name: CI-CD-Metrics
+        dependencies: [ci-cd]
+        description: TODO add description
+      api-docs:
+        status:
+        heading: API documentation
+        diagram_name: API-Docs
+        dependencies: [api-docs-plan, get-opportunities, beta-domain]
+        description: TODO add description
+      webhooks-opportunities:
+        status:
+        heading: Webhooks for opportunities
+        diagram_name: Webhooks-Opportunities
+        dependencies: [db-api-plan, get-opportunities]
+        description: TODO add description
+      dependency-fundraising-tracking:
+        status:
+        heading: Back-end dependency fundraising tracking
+        diagram_name: Dependency-Fundraising-Tracking
+        dependencies: [db-api-plan]
+        description: TODO add description
+      opportunity-protocol:
+        status:
+        heading: Develop opportunity protocol
+        diagram_name: Opportunity-Protocol
+        dependencies: [db-api-plan]
+        description: TODO add description
+  communications-tooling:
+    heading: Communications Tooling
+    description: Description of Auth milestones
+    diagram_name: Communications Tooling
+    milestones:
+      comms-platforms:
+        status:
+        heading: Communication platforms
+        diagram_name: Comms-Platforms
+        dependencies: null
+        description: TODO add description
+      milestone-template:
+        status: executing
+        heading: Milestone template published
+        diagram_name: Milestone-Template
+        dependencies: null
+        description: TODO add description
+      open-source-tools:
+        status:
+        heading: Open source tools
+        diagram_name: Open-Source-Tools
+        dependencies: [comms-platforms]
+        description: TODO add description
+      open-source-group:
+        status: northStar
+        heading: Open source group kickoff
+        diagram_name: Open-Source-Group
+        dependencies: [open-source-tools, comms-platforms]
+        description: TODO add description
+      bug-bounty:
+        status:
+        heading: Bug bounty
+        diagram_name: Bug-Bounty
+        dependencies: null
+        description: TODO add description
+      setup-meetings:
+        status:
+        heading: Setup recurring meetings
+        diagram_name: Setup-Meetings
+        dependencies: null
+        description: TODO add description
+  nofo:
+    heading: NOFO milestones
+    description: Description of Auth milestones
+    diagram_name: NOFO
+    milestones:
+      nofo-milestone-planning:
+        status: executing
+        heading: NOFO milestone planning
+        diagram_name: NOFO-Milestone-Planning
+        dependencies: null
+        description: TODO add description
+      nofo-prototypes:
+        status: planning
+        heading: NOFO prototypes
+        diagram_name: NOFO-prototypes
+        dependencies: null
+        description: TODO add description
+      nofo-prototypes-metrics:
+        status:
+        heading: Define usability test metrics for NOFO prototypes
+        diagram_name: NOFO-Prototypes-Metrics
+        dependencies: null
+        description: TODO add description
+      nofo-prototypes-learnings:
+        status:
+        heading: Report on learnings from NOFO prototypes
+        diagram_name: NOFO-Prototypes-Learnings
+        dependencies: [nofo-prototypes-metrics, nofo-prototypes]
+        description: TODO add description
+      nofos-readability-scoring:
+        status:
+        heading: Readability scoring for NOFOs
+        diagram_name: NOFOs-Readability-Scoring
+        dependencies: [nofos-text]
+        description: TODO add description
+      nofos-writing-assistance-plan:
+        status: planning
+        heading: "Writing assistance tools for NOFOs: planning stage"
+        diagram_name: NOFOs-Writing-Assistance-Plan
+        dependencies: null
+        description: TODO add description
+      nofos-writing-assistance:
+        status:
+        heading: "Writing assistance tools for NOFOs: implementation stage"
+        diagram_name: NOFOs-Writing-Assistance
+        dependencies: [nofos-writing-assistance-plan]
+        description: TODO add description
+      start-pra-comment:
+        status: planning
+        heading: PRA submitted & public comment started
+        diagram_name: Start-PRA-Comment
+        dependencies: null
+        description: TODO add description
+  analytics:
+    heading: Analytics milestones
+    description: Description of Auth milestones
+    diagram_name: Communications Tooling
+    milestones:
+      analytics-api:
+        status:
+        heading: Operational analytics endpoint
+        diagram_name: Analytics-API
+        dependencies: [define-goals, get-opportunities]
+        description: TODO add description
+      data-quality-api:
+        status:
+        heading: Data quality analytics endpoint
+        diagram_name: Data-Quality-API
+        dependencies: [analytics-api]
+        description: TODO add description
+      analytics-visualization:
+        status: northStar
+        heading: Data analytics visualization
+        diagram_name: Analytics-Visualization
+        dependencies: [measurement-dashboard, analytics-api, data-quality-api]
+        description: TODO add description
+      place-of-performance-api:
+        status:
+        heading: Publish place of performance data
+        diagram_name: Place-Of-Performance-API
+        dependencies: [analytics-api]
+        description: TODO add description
+      place-of-performance-visualization:
+        status: northStar
+        heading: Place of performance analytics visualization
+        diagram_name: Place-Of-Performance-Visualization
+        dependencies: [place-of-performance-api]
+        description: TODO add description
+  auth:
+    heading: Auth milestones
+    description: Description of Auth milestones
+    diagram_name: AuthN and AuthZ
+    milestones:
+      document-authn-authz:
+        status:
+        heading: Document authentication (authN) and authorization (authZ) frameworks
+        diagram_name: Document-AuthN-AuthZ
+        dependencies: null
+        description: TODO add description
+      authn-api:
+        status:
+        heading: Authenticate via API using Login.gov
+        diagram_name: AuthN-API
+        dependencies: [get-opportunities, document-authn-authz]
+        description: TODO add description
+      authz-api:
+        status:
+        heading: Authorize via API
+        diagram_name: AuthZ-API
+        dependencies: [authn-api, document-authn-authz]
+        description: TODO add description
+      oauth:
+        status:
+        heading: OAuth
+        diagram_name: OAuth
+        dependencies: [authn-api]
+        description: TODO add description
+      entity-api:
+        status: northStar
+        heading: User and entity information endpoint
+        diagram_name: Entity-API
+        dependencies: [authn-api]
+        description: TODO add description
+  sam-gov-integration:
+    heading: Sam.gov integration milestones
+    description: Description of Auth milestones
+    diagram_name: Sam.gov integration
+    milestones:
+      document-sam:
+        status:
+        heading: Document sam.gov tasks
+        diagram_name: Document-Sam
+        dependencies: null
+        description: TODO add description
+      sam-apis:
+        status: northStar
+        heading: Integrate sam.gov APIs
+        diagram_name: Sam-APIs
+        dependencies: [document-sam]
+        description: TODO add description
+      sam-help-desk:
+        status:
+        heading: Integrate sam.gov and grants.gov help desk
+        diagram_name: Sam-Help-Desk
+        dependencies: [document-sam]
+        description: TODO add description
+  hackathon:
+    heading: Hackathon milestones
+    description: Description of Auth milestones
+    diagram_name: Hackathon
+    milestones:
+      hackathon-page:
+        status:
+        heading: Hackathon informational page
+        diagram_name: Hackathon-Page
+        dependencies: null
+        description: TODO add description
+      recruit-hackathon-participants:
+        status:
+        heading: Recruit hackathon participants
+        diagram_name: Recruit-Hackathon-Participants
+        dependencies: null
+        description: TODO add description
+      recruit-hackathon-workgroups:
+        status:
+        heading: Recruit hackathon workgroups
+        diagram_name: Recruit-Hackathon-Workgroups
+        dependencies: null
+        description: TODO add description
+      rfi:
+        status:
+        heading: Request for information (RFI)
+        diagram_name: RFI
+        dependencies: null
+        description: TODO add description
+      rfi-tools:
+        status:
+        heading: Request for information (RFI) tooling
+        diagram_name: RFI-Tools
+        dependencies: null
+        description: TODO add description
+      hackathon-listing:
+        status: northStar
+        heading: "Hackathon Phase 1: NOFO listing"
+        diagram_name: Hackathon-Listing
+        dependencies:
+          [
+            open-source-group,
+            hackathon-page,
+            rfi,
+            nofo-prototypes,
+            recruit-hackathon-workgroups,
+            recruit-hackathon-participants,
+          ]
+        description: TODO add description
+      hackathon-listing-internal-entry:
+        status:
+        heading: "Hackathon NOFO listing: Internal entry"
+        diagram_name: hackathon-listing-Internal-Entry
+        dependencies: [hackathon-listing, research-synthesis]
+        description: TODO add description
+      hackathon-apply:
+        status:
+        heading: "Hackathon Phase 2: Apply"
+        diagram_name: Hackathon-Apply
+        dependencies: [hackathon-listing]
+        description: TODO add description
+      hackathon-apply-internal-entry:
+        status:
+        heading: "Hackathon NOFO Apply: Internal entry"
+        diagram_name: Hackathon-Apply-Internal-Entry
+        dependencies: [hackathon-apply, research-synthesis]
+        description: TODO add description
+      hackathon-data:
+        status:
+        heading: "Hackathon Phase 3: Data"
+        diagram_name: Hackathon-Data
+        dependencies: [hackathon-apply, analytics-api]
+        description: TODO add description
+      hackathon-data-internal-entry:
+        status:
+        heading: "Hackathon data: Internal entry"
+        diagram_name: Hackathon-Data-Internal-Entry
+        dependencies: [hackathon-data]
+        description: TODO add description
+  user-interface:
+    heading: User interface milestones
+    description: Description of Auth milestones
+    diagram_name: User interface
+    milestones:
+      fe-plan:
+        status:
+        heading: Front-end planning
+        diagram_name: FE-Plan
+        dependencies: null
+        description: TODO add description
+      fe-ci-cd:
+        status:
+        heading: Front-end CI-CD
+        diagram_name: FE-CI-CD
+        dependencies: [fe-plan]
+        description: TODO add description
+      cms:
+        status:
+        heading: CMS
+        diagram_name: CMS
+        dependencies: [fe-plan]
+        description: TODO add description
+      cms-open-source:
+        status:
+        heading: Open source CMS content
+        diagram_name: CMS-Open-Source
+        dependencies: [cms]
+        description: TODO add description
+      web-analytics:
+        status:
+        heading: Web analytics
+        diagram_name: Web-Analytics
+        dependencies: [fe-plan]
+        description: TODO add description
+      web-analytics-legacy:
+        status:
+        heading: Grants.gov analytics
+        diagram_name: Web-Analytics-Legacy
+        dependencies: null
+        description: TODO add description
+      i18n:
+        status:
+        heading: Internationalization framework
+        diagram_name: i18n
+        dependencies: [fe-plan, cms]
+        description: TODO add description
+      translation-process:
+        status: northStar
+        heading: Translation process & contracts
+        diagram_name: Translation-Process
+        dependencies: [i18n, cms-open-source]
+        description: TODO add description
+      foundational-ui:
+        status: northStar
+        heading: Foundational UI
+        diagram_name: Foundational-UI
+        dependencies: [fe-ci-cd, research-synthesis]
+        description: TODO add description
+  search:
+    heading: Search milestones
+    description: Description of Auth milestones
+    diagram_name: Search
+    milestones:
+      search-api:
+        status:
+        heading: Search API
+        diagram_name: Search-API
+        dependencies: [get-opportunities]
+        description: TODO add description
+      search-ui:
+        status: northStar
+        heading: Search UI
+        diagram_name: Search-UI
+        dependencies: [search-api, foundational-ui]
+        description: TODO add description
+      nofos-text:
+        status:
+        heading: Full text of NOFOs stored as text
+        diagram_name: NOFOs-Text
+        dependencies: [get-opportunities]
+        description: TODO add description
+      nofos-text-search:
+        status:
+        heading: Full text search of NOFOs
+        diagram_name: NOFOs-Text-Search
+        dependencies: [nofos-text, search-api]
+        description: TODO add description
+      search-api-2.0:
+        status:
+        heading: Tuned search API (Search 2.0)
+        diagram_name: Search-API-2.0
+        dependencies: [nofos-text-search]
+        description: TODO add description
+      geographic-search:
+        status:
+        heading: Geographic search
+        diagram_name: Geographic-Search
+        dependencies: [search-api]
+        description: TODO add description
+      search-user-research:
+        status:
+        heading: User research for search
+        diagram_name: Search-User-Research
+        dependencies: [search-api]
+        description: TODO add description
+      additional-search:
+        status:
+        heading: Additional search
+        diagram_name: Additional-Search
+        dependencies: [search-user-research]
+        description: TODO add description
+  personalization:
+    heading: Personalization milestones
+    description: Description of Auth milestones
+    diagram_name: Personalization
+    milestones:
+      save-nofos:
+        status:
+        heading: Save NOFOs to profile
+        diagram_name: Save-NOFOs
+        dependencies: [entity-api]
+        description: TODO add description
+      nofos-worked:
+        status:
+        heading: Show NOFOs the user has worked on
+        diagram_name: NOFOs-Worked
+        dependencies: [entity-api]
+        description: TODO add description
+      nofo-recommendations-api:
+        status: northStar
+        heading: NOFO Recommendations API
+        diagram_name: NOFO-Recommendations-API
+        dependencies: [save-nofos, nofos-worked, profile-builder]
+        description: TODO add description
+      nofo-recommendations-ui:
+        status:
+        heading: NOFO Recommendations UI
+        diagram_name: NOFO-Recommendations-UI
+        dependencies: [nofo-recommendations-api, search-ui]
+        description: TODO add description
+      profile-builder:
+        status:
+        heading: Profile builder
+        diagram_name: Profile-Builder
+        dependencies: [entity-api]
+        description: TODO add description
+  user-research:
+    heading: User research milestones
+    description: Description of Auth milestones
+    diagram_name: User-Research
+    milestones:
+      generative-user-research:
+        status: finished
+        heading: Generative user research
+        diagram_name: Generative-User-Research
+        dependencies: null
+        description: TODO add description
+      research-synthesis:
+        status: executing
+        heading: Research synthesis and vision
+        diagram_name: Research-synthesis
+        dependencies: [generative-user-research]
+        description: TODO add description
+      document-grantsolutions:
+        status:
+        heading: Document GrantSolutions integration points
+        diagram_name: Document-GrantSolutions
+        dependencies: null
+        description: TODO add description
+      user-research-compensation:
+        status:
+        heading: User research compensation
+        diagram_name: User-Research-Compensation
+        dependencies: null
+        description: TODO add description
+      user-research-database:
+        status:
+        heading: User research participants database
+        diagram_name: User-Research-Database
+        dependencies: null
+        description: TODO add description
+      user-research-tbd:
+        status:
+        heading: Additional user research TBD
+        diagram_name: User-Research-TBD
+        dependencies: [research-synthesis]
+        description: TODO add description
+      user-research-nofo-writing:
+        status:
+        heading: NOFO writing journey mapping
+        diagram_name: User-Research-NOFO-Writing
+        dependencies: [research-synthesis]
+        description: TODO add description
+      unified-brand:
+        status:
+        heading: Unified cross-platform branding and identity
+        diagram_name: Unified-Brand
+        dependencies: [research-synthesis]
+        description: TODO add description
+  expanded-ui:
+    heading: Expanded UI milestones
+    description: Description of Auth milestones
+    diagram_name: User-Research
+    milestones:
+      nofo-listing-ui:
+        status:
+        heading: NOFO Listing page
+        diagram_name: NOFO-Listing-UI
+        dependencies: [foundational-ui, research-synthesis]
+        description: TODO add description
+      nofo-listing-ui-enhanced:
+        status: northStar
+        heading: Enhanced NOFO Listing page
+        diagram_name: NOFO-Listing-UI-Enhanced
+        dependencies: [nofo-listing-ui, user-research-nofo-writing]
+        description: TODO add description
+      sam-assistance-ui:
+        status:
+        heading: Sam.gov assistance page
+        diagram_name: Sam-Assistance-UI
+        dependencies: [foundational-ui, document-sam, research-synthesis]
+        description: TODO add description
+      grants-assistance-ui:
+        status:
+        heading: Grants.gov assistance page
+        diagram_name: Grants-Assistance-UI
+        dependencies: [foundational-ui, research-synthesis]
+        description: TODO add description
+      help-ui:
+        status:
+        heading: Help page
+        diagram_name: Help-UI
+        dependencies: [foundational-ui, research-synthesis]
+        description: TODO add description
+      authn-ui:
+        status:
+        heading: Authentication (authN) page
+        diagram_name: AuthN-UI
+        dependencies: [foundational-ui, authn-api, research-synthesis]
+        description: TODO add description
+      authz-ui:
+        status:
+        heading: Authorization (authZ) page
+        diagram_name: AuthZ-UI
+        dependencies: [foundational-ui, authz-api, research-synthesis]
+        description: TODO add description
