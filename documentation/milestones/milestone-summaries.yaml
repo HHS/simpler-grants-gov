@@ -57,8 +57,8 @@ sections:
         diagram_name: DB-Replica
         dependencies: null
         description: >
-          Create a replica of AWS PROD database for legacy grants.gov in a beta.grants.gov environment. 
-          Replica should (1) journal all changes from legacy DB to new system DB and (2) support uptime 
+          Create a replica of AWS PROD database for legacy grants.gov in a beta.grants.gov environment.
+          Replica should (1) journal all changes from legacy DB to new system DB and (2) support uptime
           even while legacy DB is undergoing planned or unplanned downtime, maintenance, and upgrades.
 
           The creation of this replica should be scripted using infrastructure as code.

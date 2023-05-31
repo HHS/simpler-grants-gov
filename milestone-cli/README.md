@@ -9,7 +9,7 @@ The milestone CLI tool streamlines the process of validating and publishing chan
 The following items are pre-requisites for installing this CLI tool:
 
 - Python version 3.10 or greater
-- Poetry 
+- Poetry
 
 Validate that these requirements are met with:
 ```shell

@@ -58,7 +58,7 @@ A modernization effort for Grants.gov.
 1. Visit [localhost:9001](https://localhost:9001) to view the server
 -->
 
-### Setting up development tools 
+### Setting up development tools
 
 #### Configuring pre-commit hooks
 
