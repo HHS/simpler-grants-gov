@@ -13,7 +13,7 @@ def load_milestones_from_yaml_file(file_path: Path) -> MilestoneSummary:
     return MilestoneSummary(**contents)
 
 
-def render_milestone_template(template_path: Path, params: str) -> str:
+def render_milestone_template(template_path: Path, params: dict) -> str:
     """Load and populate a milestone template with the parameters provided"""
     template = jinja2.Template(template_path.read_text())
     return template.render(params=params)

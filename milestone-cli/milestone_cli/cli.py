@@ -35,7 +35,7 @@ def hello_world(name: str | None = None):
 @app.command(name="validate")
 def validate_yaml_file_contents(
     yaml_file: str | None = None,
-) -> MilestoneSummary:
+) -> MilestoneSummary | None:
     """Loads MilestoneSummary from yaml file and validates contents"""
     if not yaml_file:
         file_path = MILESTONE_FILE
@@ -43,10 +43,10 @@ def validate_yaml_file_contents(
         file_path = Path(yaml_file).absolute()
     if not file_path.exists():
         print(f"No file found at {file_path}")
-        return
+        return None
     if file_path.suffix not in (".yaml", ".yml"):
         print(f"{file_path} is not a path to a yaml file")
-        return
+        return None
     milestones = load_milestones_from_yaml_file(file_path)
     print("Everything looks good")
     return milestones
@@ -67,6 +67,8 @@ def populate_output_file(
         print("Command must either be 'populate summary' or 'populate diagram'")
     # load milestones and get output path
     milestones = validate_yaml_file_contents(yaml_file)
+    if not milestones:
+        return
     file_path = Path(output_file).absolute()
     print(f"Writing {kind} to {file_path}")
     # create or replace output file with rendered template

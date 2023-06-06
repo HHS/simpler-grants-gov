@@ -72,9 +72,9 @@ class TestDependencies:
     ) -> None:
         """Should return a separate Dependency object for each dependency"""
         # setup
-        goals = summary.milestones.get("define-goals")
-        measure = summary.milestones.get("measurement-strategy")
-        comms = summary.milestones.get("comms-platform")
+        goals = summary.milestones["define-goals"]
+        measure = summary.milestones["measurement-strategy"]
+        comms = summary.milestones["comms-platform"]
         expected = [
             Dependency(upstream=goals, downstream=measure),
             Dependency(upstream=goals, downstream=comms),
@@ -118,7 +118,7 @@ class TestExportJinjaParams:
     ) -> None:
         """"""
         # setup
-        dependencies = params.get("dependencies")
+        dependencies: list = params["dependencies"]
         expected = {
             "upstream": "Define-Goals",
             "downstream": "Measurement-Strategy",
