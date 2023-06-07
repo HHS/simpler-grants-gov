@@ -19,13 +19,11 @@ poetry --version
 
 ### Quickstart
 
-1. Install the package: `poetry install`
-2. Activate a shell: `poetry shell`
-3. Validate the milestone yaml file: `milestones validate`
-4. Populate the files:
-   - Diagram: `milestones populate diagram ./diagram.mmd`
-   - Summary: `milestones populate summary ./summary.md`
-5. Exit the shell session: `exit`
+1. Install the package: `make install`
+2. Validate the milestone yaml file: `make milestones_check`
+3. Populate the files:
+   - Diagram: `make milestones_diagram`
+   - Summary: `make milestones_summary`
 
 
 ## Made with

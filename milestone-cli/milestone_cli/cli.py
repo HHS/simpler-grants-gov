@@ -1,3 +1,4 @@
+"""Defines the command line entry points to load and populate milestone files"""
 from pathlib import Path
 
 import typer
@@ -36,7 +37,15 @@ def hello_world(name: str | None = None):
 def validate_yaml_file_contents(
     yaml_file: str | None = None,
 ) -> MilestoneSummary | None:
-    """Loads MilestoneSummary from yaml file and validates contents"""
+    """Loads MilestoneSummary from yaml file and validates contents
+
+    Args:
+        yaml_file: Pathlike string to the yaml file which contains milestone details
+
+    Returns:
+        An instance of MilestoneSummary when the details can be parsed from the
+        yaml file, None if the file doesn't exist or there are parsing errors
+    """
     if not yaml_file:
         file_path = MILESTONE_FILE
     else:
@@ -58,7 +67,13 @@ def populate_output_file(
     output_file: str,
     yaml_file: str | None = None,
 ) -> None:
-    """Populate either the diagram or the summary file"""
+    """Populate either the diagram or the summary file
+
+    Args:
+        kind: The type of document we are populating, must be "diagram" or "summary"
+        output_file: Pathlike string to the output file to populate
+        yaml_file: Pathlike string to yaml file from which to load milestone details
+    """
     if kind == "diagram":
         template_path = DIAGRAM_TEMPLATE
     elif kind == "summary":
