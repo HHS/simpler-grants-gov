@@ -265,6 +265,8 @@ The protocol would be implemented by our particular API ecosystem, but other pla
 
 Much more investigation is needed to define this milestone.
 
+For some research on common form fields, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
+
 # Communications Tooling
 
 ## Communication platforms
