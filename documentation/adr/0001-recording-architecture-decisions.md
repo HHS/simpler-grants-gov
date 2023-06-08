@@ -20,7 +20,7 @@ _What is the best way to document key architectural decisions made within the pr
 - **Portable:** The decision records should be able to travel with the code when it's forked, cloned, etc.
 - **Maintainable:** The system we adopt should be easy to maintain or amend as needed.
 
-## Considered Options
+## Options Considered
 
 - ADRs in the repo `docs/` folder
 - Comments and docstrings in the code itself
