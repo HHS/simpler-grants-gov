@@ -13,12 +13,15 @@ flowchart LR
 
     subgraph NOFO
         NOFO-Milestone-Planning:::executing
-        NOFO-Prototypes:::planning
-        Start-PRA-Comment:::planning
-        NOFO-Prototypes-Metrics
-        NOFO-Prototypes-Metrics & NOFO-Prototypes --> NOFO-Prototypes-Learnings
+        NOFO-Prototypes:::executing
+        Start-PRA-Comment:::executing
+        NOFO-Prototypes-Metrics:::executing
+        NOFO-Prototypes-Metrics & NOFO-Prototypes -->
+        NOFO-Prototypes-Learnings:::planning
         NOFOs-Readability-Scoring
         NOFOs-Writing-Assistance-Plan:::planning --> NOFOs-Writing-Assistance
+        NOFO-Grant-Solutions-Templates
+        NOFO-Prototypes --> NOFO-Grant-Solutions-Templates
     end
 
     subgraph Personalization
@@ -31,7 +34,7 @@ flowchart LR
 
     subgraph User-Research
         Research-Synthesis
-        Generative-User-Research:::finished --> Research-Synthesis:::executing
+        Generative-User-Research:::finished --> Research-Synthesis:::finished
         Research-Synthesis --> ev1[Research Synthesis informs *everything*\n related to UI/UX.\nLines not shown here for simplicity.]
         Research-Synthesis --> User-Research-TBD
         Research-Synthesis --> Unified-Brand
@@ -76,6 +79,7 @@ flowchart LR
     subgraph User interface
         Web-Analytics-Legacy
         FE-Plan
+        FE-Plan --> Static-Site:::northStar
         FE-CI-CD
         FE-Plan --> FE-CI-CD
         FE-Plan --> CMS
@@ -122,13 +126,14 @@ flowchart LR
         Onboard-Dev-Team --> SaaS-Plan
         SaaS-Plan
         SaaS-Plan --> DB-API-Plan
-        Onboard-Dev-Team:::planning
+        Onboard-Dev-Team:::executing
         Onboard-Dev-Team --> Dev-Tools
         Onboard-Dev-Team --> DB-API-Plan
         Onboard-Dev-Team --> Feature-Flags
         DB-API-Plan --> API-Docs-Plan
         Onboard-Dev-Team --> DB-Replica
         Beta-Domain
+        Beta-Domain --> Static-Site
         DB-Replica --> DB-Test-Data
         DB-API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
         DB-API-Plan & GET-Opportunities --> Webhooks-Opportunities
@@ -140,20 +145,22 @@ flowchart LR
         DB-API-Plan --> Performance-Testing
         DB-API-Plan --> Opportunity-Protocol
         ATO
-        ATO --> CI-CD
+        CI-CD
         DB-API-Plan --> CI-CD
         CI-CD --> CI-CD-Metrics
+        CI-CD --> Incident-Response
         DB-API-Plan --> Dependency-Fundraising-Tracking
         GET-Opportunities --> Search-API
         GET-Opportunities --> NOFOs-Text
     end
 
     subgraph Hackathon
-        Hacakthon-Page
+        Participatory-Plan
+        Participatory-Plan --> Hacakthon-Page
         Hackathon-Data
         Hackathon-Listing:::northStar
-        Recruit-Hackathon-Workgroups
-        Recruit-Hackathon-Participants
+        Participatory-Plan --> Recruit-Hackathon-Workgroups
+        Participatory-Plan --> Recruit-Hackathon-Participants
         RFI
         RFI-Tools
         Hacakthon-Page & NOFO-Prototypes --> Hackathon-Listing

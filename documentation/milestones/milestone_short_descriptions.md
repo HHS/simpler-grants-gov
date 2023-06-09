@@ -33,7 +33,6 @@ Dependencies: `None`
 Have the software development team for this effort start their work and get systems access.
 
 ## Developer tools
-
 Diagram short name: `Dev-Tools`
 
 Dependencies: `None`
@@ -45,10 +44,20 @@ Install developer tools for backend, including:
 - Automated test coverage analysis
 - API description linter (Spectral or alternative) - this can also be saved until API milestone
 - Security scan of packages (Snyk or alternative)
+- Unified logging including cross-request IDs
 - etc
 
-## DB replica
+## Incident response
+Diagram short name: `Incident-Response`
 
+Dependencies: `CI-CD`
+
+Setup incident response alerts (through analytics services and logs) as well as escalation tools (such as PagerDuty).
+
+Document incident response plan and coverage schedule. All individuals on the schedule are trained in incident response best practices.
+
+
+## DB replica
 Diagram short name: `DB-Replica`
 
 Dependencies: `None`
@@ -160,7 +169,6 @@ Dependencies: `DB-API-Plan`
 Setup and start running performance testing framework for testing systems under load.
 
 ## ATO
-
 Diagram short name: `ATO`
 
 Dependencies: `DB-API-Plan`
@@ -170,7 +178,7 @@ Review planned public deployment of services with Jacob, our security officer, t
 ## CI-CD
 Diagram short name: `CI-CD`
 
-Dependencies: `DB-API-Plan`, `ATO`
+Dependencies: `DB-API-Plan`
 
 Based on the plan defined in `DB-API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
 
@@ -433,6 +441,18 @@ Dependencies: `None`
 
 Submit generic clearance documents to secure generic PRA approval. The approval does not need to be completed to complete the milestone, but the documents do need to be submitted and the public comment period needs to be started by posting them publicly.
 
+## Update NOFO templates in grant solutions
+Diagram short name: `NOFO-Grant-Solutions-Templates`
+
+Dependencies: `None`
+
+Work with GrantSolutions to implement new templates for NOFO writers to use that are compatible with the simplified, accessible templates designed by the NOFO simplification team.
+
+The GrantSolutions software currently provides What You See Is What You Get (WYSIWYG) editing using two software frameworks:
+
+* CKEditor
+* Aspose
+
 # Analytics milestones
 
 ## Operational analytics endpoint
@@ -544,10 +564,21 @@ This may not be feasible.
 
 # Hackathon milestones
 
+## Plan participatory processes
+Diagram short name: `Participatory-Plan`
+
+Dependencies: `None`
+
+Make a plan for the overall approach to participatory processes for the grants.gov open source project, including:
+
+* Participant advisory council & governance procedures
+* "Hackathon" with challenge budget
+* Ongoing sprint/quarterly planning for "budgeting" software delivery based on story points
+
 ## Hackathon informational page
 Diagram short name: `Hackathon-Page`
 
-Dependencies: `None`
+Dependencies: `Participatory-Plan`
 
 Deploy a webpage somewhere that gives a full description of the hackathon plan, invitation, signup, etc.
 
@@ -654,8 +685,31 @@ A submission, by the software development modernization team for grants.gov, for
 
 # User interface milestones
 
-## Front-end planning
+## Static site launch with NOFO content
+Diagram short name: `Static-Site`
 
+Dependencies: `Beta-Domain`, `FE-Plan`
+
+Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort.
+
+This content could include:
+
+* Information about the goals and structure of the NOFO simplification project
+* Links to the four NOFO prototypes
+* Information about how to sign up for future updates
+* Information about upcoming events
+
+The benefits of launching this site would be:
+
+* Increase awareness of the NOFO simplification effort
+* Providing a single web presence for information about the NOFO simplification effort
+* Delivering quick wins that motivate technical milestone completion, such as securing the beta domain
+
+Content may update frequently, so it would be important for content updates to be relatively easily to implement -- which may suggest doing a static site (such as GitHub Pages) or integrating a Content Management System (such as Storyblok, which is being implemented for the existing grants.gov service).
+
+However, if rushing to create and deploy this site, and maintain and update its content, provides more distraction from the path of technical delivery of the grants.gov modernization than it provides benefits, we should consider alternative methods for making a single web presence for NOFO simplification information.
+
+## Front-end planning
 Diagram short name: `FE-Plan`
 
 Dependencies: `None`
@@ -663,7 +717,6 @@ Dependencies: `None`
 Choose language (e.g., TypeScript), framework (e.g., React) and testing framework (e.g., Jest) for front-end.
 
 ## Front-end CI-CD
-
 Diagram short name: `FE-CI-CD`
 
 Dependencies: `FE-Plan`
