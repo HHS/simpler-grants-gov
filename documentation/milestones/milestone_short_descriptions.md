@@ -67,10 +67,9 @@ Create a replica of AWS PROD database for legacy grants.gov in a beta.grants.gov
 The creation of this replica should be scripted using infrastructure as code.
 
 ## Test data and schema
-
 Diagram short name: `DB-Test-Data`
 
-Dependencies: `DB-Replica`
+Dependencies: `DB-Replica`, `DB-API-Plan`
 
 Create a script or other automated tool that:
 
