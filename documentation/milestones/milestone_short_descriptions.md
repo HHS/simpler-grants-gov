@@ -104,6 +104,13 @@ Make an analysis of needs and alternatives and choose:
 * API language (e.g., Python, Node)
 * API deployment (e.g., EC2, serverless, or alternative)
 
+## Infrastructure-as-code
+Diagram short name: `Infrastructure-as-Code`
+
+Dependencies: `DB-API-Plan`
+
+Setup and deploy initial infrastructure, with 100% of the deployment managed through an infrastructure-as-code solution.
+
 ## Serialization and API documentation planning
 Diagram short name: `API-Docs-Plan`
 
