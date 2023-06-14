@@ -24,7 +24,7 @@
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets k.o. criterion decision driver | which satisfies x condition | ... }.
+Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -64,5 +64,5 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ## Links <!-- OPTIONAL -->
 
-- [{Link type}](link to adr) <!-- example: Refined by [xxx](yyyymmdd-xxx.md) -->
+- [{Link name}](link to external resource)
 - ...
