@@ -301,7 +301,7 @@ This plan will need to account for any concerns about fairness that could be bro
 
 ## API security planning
 
-Diagram short name: `api-security`
+Diagram short name: `API-Security`
 
 Dependencies: `DB-API-Plan`, `GET-Opportunities`
 
