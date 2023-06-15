@@ -188,8 +188,8 @@ flowchart LR
 
     subgraph Legend
         direction LR
-        a1[This milestone is finished]:::finished -->         a2[This milestone is being executed]:::executing
-        a3[This milestone is being planned]:::planning -->         a4[This milestone is not yet planned]
+        a4[This milestone is not yet planned] --> a3[This milestone is being planned]:::planning
+        a2[This milestone is being executed]:::executing --> a1[This milestone is finished]:::finished
         a5[This milestone is a 'north star' milestone]:::northStar
     end
 
