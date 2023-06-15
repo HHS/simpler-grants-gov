@@ -104,6 +104,13 @@ Make an analysis of needs and alternatives and choose:
 * API language (e.g., Python, Node)
 * API deployment (e.g., EC2, serverless, or alternative)
 
+## Infrastructure-as-code
+Diagram short name: `Infrastructure-as-Code`
+
+Dependencies: `DB-API-Plan`
+
+Setup and deploy initial infrastructure, with 100% of the deployment managed through an infrastructure-as-code solution.
+
 ## Serialization and API documentation planning
 Diagram short name: `API-Docs-Plan`
 
@@ -273,6 +280,15 @@ The protocol would be implemented by our particular API ecosystem, but other pla
 Much more investigation is needed to define this milestone.
 
 For some research on common form fields, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
+
+## Plan for A/B testing
+Diagram short name: `AB-Testing-Plan`
+
+Dependencies: `DB-API-Plan`
+
+Make a plan for the technological and legal/process aspects of A/B testing experiences in beta.grants.gov.
+
+This plan will need to account for any concerns about fairness that could be brought up by exposing some users to updated content as compared to other users.
 
 # Communications Tooling
 

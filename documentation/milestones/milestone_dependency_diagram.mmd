@@ -134,6 +134,7 @@ flowchart LR
         Onboard-Dev-Team --> DB-Replica
         Beta-Domain
         Beta-Domain --> Static-Site
+        DB-API-Plan --> Infrastructure-as-Code
         DB-Replica & DB-API-Plan --> DB-Test-Data
         DB-API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
         DB-API-Plan & GET-Opportunities --> Webhooks-Opportunities
@@ -144,6 +145,7 @@ flowchart LR
         DB-API-Plan --> API-Versioning
         DB-API-Plan --> Performance-Testing
         DB-API-Plan --> Opportunity-Protocol
+        DB-API-Plan--> AB-Testing-Plan
         ATO
         CI-CD
         DB-API-Plan --> CI-CD
