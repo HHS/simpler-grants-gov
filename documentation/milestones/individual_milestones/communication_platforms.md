@@ -34,26 +34,69 @@ Explore options for group chat, such as:
 * Open source alternatives like Mattermost, etc
 * Others?
 
-Explore options for wiki-style storage and editing of documents, such as:
+## Technical description
 
-* Confluence
-* Github wiki
-* Open source wiki platforms
-* Others?
+For each of the following tools:
+
+- Evaluate a set of options according to the criteria listed below
+- Select an option and document that choice as an ADR
+- Implement and onboard members of the team to that tool
+- Make any code used to deploy or integrate these services open source
+
+### Chat
+
+Explore and evaluate options for group chat, such as:
+
+- [Slack](https://slack.com/features)
+- [Discord](https://discord.com/)
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software)
+- [GitHub Discussions](https://docs.github.com/en/discussions/collaborating-with-your-community-using-discussions/about-discussions)
+- [Rocket.chat](https://www.rocket.chat/)
+- [Mattermost](https://mattermost.com/)
+- Others as suggested by dev team
+
+### Wiki
+
+Explore and evaluate options for wiki-style storage and editing of documents, such as:
+
+- [Confluence](https://www.atlassian.com/software/confluence)
+- [Notion](https://www.notion.so/product)
+- [GitHub Wiki](https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis)
+- [GitBook](https://www.gitbook.com/)
+- [Wiki.js](https://js.wiki/)
+- Git-based Headless CMS
+- API-based Headless CMS
+- Others as suggested by dev team
+
+### Ticket tracking
 
 Explore options for tracking of tickets with ability to track epics and burndown charts, such as:
 
-* GitHub with Zenhub
+- [GitHub](https://github.com/) with [Zenhub](https://www.zenhub.com/)
+- [Atlassian Jira](https://www.atlassian.com/software/jira)
+- [Asana](https://asana.com/)
+- Others as suggested by dev team
+
+### Shared calendar
 
 Explore options for a shared calendar of dates across teams, such as:
 
-* Confluence?
+- [Confluence](https://www.atlassian.com/software/confluence/team-calendars)
+- [Google Calendar](https://support.google.com/calendar/answer/37083?hl=en)
+- Others as suggested by dev team
+
+### Listserv
 
 Explore options for a way to host listserves, such as:
 
-* Google Groups
-* [GSA's listserves](http://listserv.gsa.gov/)
-* Others?
+- [Google Groups](https://support.google.com/groups/answer/46601?hl=en&ref_topic=9216&sjid=6954506169775690555-NA)
+- [GSA's listservs](http://listserv.gsa.gov/)
+- [Groups.io](https://groups.io/)
+- [Mailman GNU](https://list.org/)
+- [GroupServer](http://groupserver.org/)
+- Others as suggested by dev team
+
+### Email Inbox
 
 Explore options for a way to host an email inbox, such as `grants.simplification@hhs.gov`, where multiple staff can access the mailbox and respond to the messages, such as:
 
