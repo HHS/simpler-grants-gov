@@ -60,22 +60,42 @@ Any code used to deploy or integrate these services should be made open source.
 
 ### Definition of done
 
-- [ ] Onboarding instructions for new users are clearly and accessibly documented in a public place.
-- [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in a public place.
-- [ ] Without logging in, members of the public can see tickets and wiki documents.
-- [ ] New users can be onboarded to chat for no cost to the user in a process that takes less than 2 days.
-- [ ] New users can be onboarded to wiki for no cost to the user in a process that takes less than 2 days.
-- [ ] Services are accessible to all people on the HHS network, White House network, public internet, and preferably most or all agency networks.
-- [ ] In chat, users can send private messages to each other as well as view private and public channels. Users can use emojis to react to messages.
-- [ ] In wiki, users can see history of changes to all documents.
-- [ ] In tickets, users can create epics (or a similar concept) and track burndown.
-- [ ] At least 5 members of HHS full-time staff are onboarded to all tools.
-- [ ] At least 5 members of contractor teams (employed by HHS) are onboarded to all tools.
-- [ ] At least 3 members of the general public are onboarded to all tools.
-- [ ] Integrate Google Analytics or similar tool into wiki-style tool.
-- [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
-- [ ] Default 'templates' are created for tickets, epics, etc, that have the fields we've decided are necessary for the project.
-- [ ] [to be added - definition of done for calendar, email listserves, email inboxes]
+- [ ] The following conditions have been satisfied for all tools:
+  - [ ] At least 5 members of HHS full-time staff have been onboarded.
+  - [ ] At least 5 members of contractor teams (employed by HHS) have been onboarded.
+  - [ ] At least 3 members of the general public have been onboarded.
+  - [ ] New users can be onboarded to the tool for no cost to the user in a process that takes less than 2 days.
+  - [ ] Services are accessible to all people on the HHS network, White House network, public internet, and preferably most or all agency networks.
+  - [ ] Onboarding instructions for new users are clearly and accessibly documented in a public place.
+  - [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in a public place.
+  - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
+  - [ ] An ADR has been recorded which documents the tool chosen and the reasons for selecting it
+- [ ] Chat is live with the following conditions satisfied:
+  - [ ] Users can post messages to public channels (potentially with some restrictions applied).
+  - [ ] Users can send private messages to each other as well as view private and public channels.
+  - [ ] Users can reply to messages in a thread that other users can see.
+  - [ ] Users can use emojis to react to messages.
+- [ ] Wiki is live with the following conditions satisfied:
+  - [ ] At least 1 document has been added to the wiki.
+  - [ ] Without logging in, members of the public can see wiki documents.
+  - [ ] Users can see history of changes to all documents.
+  - [ ] Web analytics have been integrated into the wiki and administrators can report on unique users, page views, etc.
+- [ ] Ticketing system is live with the following conditions satisfied:
+  - [ ] Without logging in, members of the public can see tickets that are being worked on.
+  - [ ] Default 'templates' have been created for tickets, epics, etc, that have the fields we've decided are necessary for the project.
+  - [ ] Users can create epics (or a similar concept) and track burndown.
+  - [ ] Members of the public can submit feature requests or report bugs
+- [ ] Calendar is live with the following conditions satisfied:
+  - [ ] At least 1 event has been added
+  - [ ] Without logging in, members of the public can see calendar events that are open to the public
+  - [ ] Members of the public can copy events to their own calendar and/or RSVP to attend the event
+- [ ] Email listserv is live with the following conditions satisfied
+  - [ ] At least one email has been sent out to the listserv
+  - [ ] Any member of the listserv can send emails to the entire listserv
+  - [ ] Any member of the listserv can reply all to an email
+  - [ ] Any member of the listserv can reply directly to an email sender
+- [ ] Shared email inbox is live with the following conditions satisfied
+  - [ ] At least 1 email has been received
 
 ### Proposed metrics for measuring goals/value/definition of done
 
