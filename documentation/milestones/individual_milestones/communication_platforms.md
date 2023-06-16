@@ -99,12 +99,24 @@ Any code used to deploy or integrate these services should be made open source.
 
 ### Proposed metrics for measuring goals/value/definition of done
 
-1. Number of monthly active users in Chat, total
-2. Number of monthly active users in wiki, total
-3. Number of monthly active users in Chat, external
-4. Number of monthly active users in wiki, external
-5. Weekly volume of Chat messages
-6. Weekly volume of wiki edits/contributions
+TODO: See if we can reduce the list of metrics to track
+
+1. Chat Metrics
+   1. Number of monthly active users in chat, total
+   2. Number of monthly active users in chat, external
+   3. Weekly volume of Chat messages
+2. Wiki Metrics
+   1. Number of monthly active users in wiki, total
+   2. Number of monthly active users in wiki, visitors
+   3. Weekly volume of wiki edits/contributions
+3. Calendar Metric: Number of external users attending public meetings
+4. Listserv Metrics
+   1. Number of subscribed users in listserv, total
+   2. Number of subscribed users in listserv, external
+   3. Average number of responses in listserv thread
+5. Shared Inbox Messages:
+   1. Weekly volume of messages to shared inbox
+   2. Average response time for a message
 
 ### Destination for live updating metrics
 
