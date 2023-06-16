@@ -1,8 +1,19 @@
 # Communication platforms
 
+| Field           | Value          |
+| --------------- | -------------- |
+| Document Status | Final Draft    |
+| Epic Link       | TODO: Add Link |
+| Epic Dashboard  | TODO: Add Link |
+| Target Release  | TODO: Add Date |
+| Product Owner   | Lucas Brown    |
+| Document Owner  | Billy Daly     |
+| Lead Developer  | TODO: Add Name |
+| Lead Designer   | TODO: Add Name |
+
 ## Short description
 
-Implement chat, wiki, ticket tracking, calendar, email listserves, and email inboxes in a way accessible for all team members and the public.
+Implement chat, wiki, ticket tracking, calendar, email listservs, and email inboxes in a way accessible for all team members and the public.
 
 ## Goals
 
