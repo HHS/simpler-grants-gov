@@ -101,21 +101,33 @@ Explore options for a way to host listserves, such as:
 - [GroupServer](http://groupserver.org/)
 - Others as suggested by dev team
 
-### Email Inbox
+### Email inbox
 
 Explore options for a way to host an email inbox, such as `grants.simplification@hhs.gov`, where multiple staff can access the mailbox and respond to the messages, such as:
 
-* HHS internal options
+- [Front](https://front.com/)
+- [Loop Email](https://www.intheloop.io/pricing-us/)
+- [Google collaborative inbox](https://support.google.com/a/users/answer/167430?hl=en)
+- HHS internal options
+- Others as suggested by dev team
 
-These should be selected, implemented, and deployed.
+### Video conference
+
+Explore options for supporting video calls both among project collaborators and members of the public, such as:
+
+- [Zoom](https://zoom.us/)
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software)
+- [Google Meet](https://meet.google.com/)
+- [Jitsi](https://jitsi.org/)
+- Others as suggested by dev team
+
+### General requirements
 
 For the wiki-style tool, we need integrated page analytics so we can view stats such as the number of total visits to a page (or collection of pages) as well as unique visitors, time on page, etc.
 
 The wiki-style tool should have internationalization capabilities or we should document
 
 Ideally, the tool would have the ability to designate some users as direct editors of pages (do not need permission before merging changes) and some users as suggesters (can submit suggested changes that need to be approved by one or more editors before they get merged).
-
-Any code used to deploy or integrate these services should be made open source.
 
 ### Definition of done
 
