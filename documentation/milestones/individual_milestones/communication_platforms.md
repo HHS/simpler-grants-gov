@@ -23,16 +23,21 @@ We must have easy-to-use and effective tools for communicating as a team. These 
 
 These need to be accessible to internal (HHS or employed by HHS) partners as well as external partners (members of the general public).
 
-### Technical description
+### User stories
 
-Explore options for group chat, such as:
-
-* Slack
-* HipChat
-* Discord
-* Microsoft Teams
-* Open source alternatives like Mattermost, etc
-* Others?
+- As a **full-time HHS staff member**, I want to:
+  -  adopt tools that are intuitive and easy to use, so that I can spend less time learning how to use these tools and more time completing the important work they are designed to facilitate.
+  -  review contributions from external users before those changes are published, so that we can ensure the content aligns with our values as an agency.
+  -  be able to access these communication platforms from within the HHS network, so that I can reliably get work done while I'm at the office.
+- As a **member of an HHS contractor team**, I want to:
+  -  adopt tools require as little ongoing maintenance, so that I minimize the amount of time spent supporting the deliverables associated with this milestone and begin working on delivering future milestones.
+  -  monitor user participation across these platforms, so that I can understand how well we are engaging stakeholders throughout this process.
+  -  track metrics about our projects like task burndown, so that we can monitor progress and identify blockers more quickly.
+- As a **member of the public**, I want to:
+  -  know when HHS is hosting public meetings about grants.gov, so that I can help inform the priorities and roadmap for the new grants.gov
+  -  be able to access and view project documents and tasks without logging in, so that I can understand the priorities of the project and the progress being made on those priorities.
+  -  be able to report issues with or requests features for the team work on, so that the new version of grants.gov actually meets my needs.
+  -  be able to ask questions about or recommend improvements to documentation, so that the documentation is clear and easy to understand for other members of the public as well.
 
 ## Technical description
 
