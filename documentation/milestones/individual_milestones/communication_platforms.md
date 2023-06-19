@@ -167,6 +167,11 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] Any member of the listserv can reply directly to an email sender
 - [ ] Shared email inbox is live with the following conditions satisfied
   - [ ] At least 1 email has been received
+- [ ] Video conference is live with the following conditions satisfied
+  - [ ] At least one public meeting has been hosted
+  - [ ] At least one public meeting has been recorded, with recording and transcript uploaded to the wiki
+  - [ ] Users can join the call via video or phone
+  - [ ] Users can access a live transcript during the video call
 
 ### Proposed metrics for measuring goals/value/definition of done
 
@@ -185,9 +190,12 @@ TODO: See if we can reduce the list of metrics to track
    1. Number of subscribed users in listserv, total
    2. Number of subscribed users in listserv, external
    3. Average number of responses in listserv thread
-5. Shared Inbox Messages:
+5. Shared Inbox Messages
    1. Weekly volume of messages to shared inbox
    2. Average response time for a message
+6. Video Conference
+   1. Number of attendees, total (public meetings)
+   2. Number of attendees, external (public meetings)
 
 ### Destination for live updating metrics
 
