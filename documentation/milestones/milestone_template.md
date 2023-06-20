@@ -14,7 +14,14 @@
 
 ### Business description & value
 
-### Technical description
+### User Stories
+
+- As a **{type of user 1}**, I want to:
+  - {perform action 1}, so that {goal or motivation for action}
+  - {perform action 2}, so that {goal or motivation for action}
+- As a **{type of user 2}**, I want to:
+  - {perform action 1}, so that {goal or motivation for action}
+  - {perform action 2}, so that {goal or motivation for action}
 
 ### Definition of done
 
