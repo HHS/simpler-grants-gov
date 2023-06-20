@@ -305,7 +305,7 @@ Diagram short name: `API-Security`
 
 Dependencies: `DB-API-Plan`, `GET-Opportunities`
 
-Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`
+Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`.
 
 At a minimum the plan should address the following security needs and determine if/when they should be implemented before the broader Auth milestones are addressed:
 - Authenticating requests with API keys
