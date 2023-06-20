@@ -37,6 +37,8 @@ Diagram short name: `Dev-Tools`
 
 Dependencies: `None`
 
+Milestone definition: [Developer tools milestone](./individual_milestones/developer_tools.md)
+
 Install developer tools for backend, including:
 
 - Automated test framework
