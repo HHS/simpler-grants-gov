@@ -1,4 +1,14 @@
-# Milestone name
+| Field           | Value                                    |
+| --------------- | ---------------------------------------- |
+| Document Status | [One of: Draft, Final Draft, Completed ] |
+| Epic Link       | TODO: Add Link                           |
+| Epic Dashboard  | TODO: Add Link                           |
+| Target Release  | TODO: Add Date                           |
+| Product Owner   | TODO: Add Name                           |
+| Document Owner  | TODO: Add Name                           |
+| Lead Developer  | TODO: Add Name                           |
+| Lead Designer   | TODO: Add Name                           |
+
 
 ## Goals
 
@@ -71,24 +81,6 @@ Are there any fields being shared publicly that have never been shared in PROD b
 
 ### Security considerations
 
-## Delivery
+Are there any security vulnerabilities that need to be addressed as part of this milestone?
 
-### Target release
-
-### Product owner
-
-### Milestone document owner
-
-### Document status
-
-Choose one of: [Draft/Final Draft/Milestone Completed]
-
-### Lead designer
-
-### Lead developer
-
-## Documentation
-
-Epic name for this milestone in Zenhub:
-
-Dashboard for this epic: [link to Zenhub]
+1. [to be added]
