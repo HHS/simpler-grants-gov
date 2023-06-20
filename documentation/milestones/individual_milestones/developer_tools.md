@@ -26,11 +26,19 @@ While enforcing compliance with these standards may increase the time and energy
 ### User stories
 
 - As a **full-time HHS staff member**, I want to:
-  - {action} so that {goal or motivation}
+  - ensure that the codebase meets certain quality standards, so that it will be easier to onboard future maintainers and developers to the project
+  - have a mechanism for catching potential code issues during development or code review, so that we are not introducing bugs or security vulnerabilities in production
 - As an **open source contributor**, I want to:
-  - {action} so that {goal or motivation}
+  - be able to reference documentation explaining how to use the developer tools, so that I don't have to learn how to use these tools on my own in order to contribute to the project
+  - have full test coverage for the codebase, so that I know when I've introduce code that changes or breaks existing behavior
+  - have code formatting and standards enforced with automated tooling, so that I don't have to learn and check that my code adheres to those standards manually
+  - be able to report security vulnerabilities to project maintainers directly, so that they can quickly create and deploy a fix before the vulnerability is made public
 - As a **maintainer of the project**, I want to:
-  - {action} so that {goal or motivation}
+  - have code quality checks run automatically on each push, so that formatting, linting, or security issues are caught before being deployed to production
+  - ensure that new contributions meet certain thresholds for test coverage, so that code contributions from internal and external developers also include tests which validate the code's behavior
+  - be automatically notified when updates are available for project dependencies, so that easily evaluate and adopt these new updates and ensure our dependencies don't become stale
+  - be notified when a security vulnerability is detected in our project or in an upstream dependency, so we can work to quickly address the vulnerability and deploy a fix
+  - securely manage and rotate keys and secrets related to the project, so that we minimize the risk of secrets being exposed or compromised
 
 ## Technical description
 
@@ -151,19 +159,19 @@ started and completed?
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
-1. [to be added]
+1. None
 
 ### Services being integrated in PROD for the first time
 
 Are there multiple services that are being connected for the first time in PROD?
 
-1. [to be added]
+1. None
 
 ### Data being shared publicly for the first time
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
-1. [to be added]
+1. None
 
 ### Security considerations
 
