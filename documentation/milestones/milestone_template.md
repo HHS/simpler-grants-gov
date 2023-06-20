@@ -1,3 +1,5 @@
+# {Milestone name}
+
 | Field           | Value                                    |
 | --------------- | ---------------------------------------- |
 | Document Status | [One of: Draft, Final Draft, Completed ] |
@@ -10,9 +12,15 @@
 | Lead Designer   | TODO: Add Name                           |
 
 
+## Short description
+
+{1-2 sentences describing milestone at a high-level}
+
 ## Goals
 
 ### Business description & value
+
+{3-4 sentences that describe why this milestone is critical to the project}
 
 ### User Stories
 
@@ -22,6 +30,12 @@
 - As a **{type of user 2}**, I want to:
   - {perform action 1}, so that {goal or motivation for action}
   - {perform action 2}, so that {goal or motivation for action}
+
+## Technical description
+
+### {Optional Sub-deliverable}
+
+{List reqiurements specific to this sub-deliverable, options to consider, etc.}
 
 ### Definition of done
 
