@@ -80,7 +80,8 @@ While enforcing compliance with these standards may increase the time and energy
   - [ ] Instructions for how to adopt and use these tools is clearly documented in a public space
   - [ ] At least 5 internal developers/maintainers have adopted and run these tools on a cloned version of the repo
   - [ ] At least 3 open source contributors have adopted and run these tools on a forked version of the repo
-- [ ] Automated testing framework is live and meets the following conditions:
+  - [ ] ADRs documenting the selection of these tools and standards have been created and approved
+- [ ] **Automated testing framework** is live and meets the following conditions:
   - [ ] At least 1 unit test has been added to the codebase
   - [ ] At least 1 integration test has been added to the codebase
   - [ ] Unit tests are run on every push to the remote GitHub repository
@@ -88,16 +89,26 @@ While enforcing compliance with these standards may increase the time and energy
   - [ ] Code which fails any of the unit or integration tests will be blocked from merging into `main`
   - [ ] A report on the percentage of code covered by tests is available after every test run
   - [ ] Code whose test coverage falls below a certain threshold will be blocked from merging into `main`
-- [ ] Code quality checks are live and meet the following conditions:
+- [ ] **Code quality checks** are live and meet the following conditions:
   - [ ] All checks are run on every push to the remote GitHub repository
   - [ ] The most important checks are run on every local commit
   - [ ] Code which fails any of these checks will be blocked from merging into `main`
-- [ ] Security checks are live and meet the following conditions:
+- [ ] **Security checks** are live and meet the following conditions:
   - [ ] At least 1 (test) security vulnerability report has been submitted
   - [ ] Maintainers are notified within 1 hour of a vulnerability being reported within the grants API codebase
   - [ ] Maintainers are notified within 72 hours of a vulnerability being reported on an upstream dependency
   - [ ] Security checks are running on every push to the remote GitHub repository
   - [ ] Code which fails any of these security checks is blocked from merging into `main`
+- [ ] **Dependency management** is live and meets the following conditions:
+  - [ ] At least 2 upstream dependencies have been added to the project
+  - [ ] Compatible versions of upstream dependencies are automatically detected when a new dependency is added
+  - [ ] Maintainers are notified when a new minor or major version of an upstream dependency is available
+- [ ] **Config & secrets management** is live and meets the following conditions:
+  - [ ] At least 1 configuration variable has been added to the project
+  - [ ] This config variable has different values when it is running in different environments (e.g. dev, staging, and prod)
+  - [ ] At least 2 internal developers can access a shared value of this variable locally
+  - [ ] Developers can change the value of this config variable in their local environment without changing it for other developers
+  - [ ] An integration test has been created to validate that this variable is injected at runtime
 
 ### Proposed metrics for measuring goals/value/definition of done
 
@@ -135,6 +146,7 @@ Are there any notable capabilities / milestones do NOT we expect to be in place 
 beginning of work on this milestone?
 
 - **CI/CD:** While the checks should run automatically each time code is pushed to GitHub, these checks will be incorporated more formally into a CI/CD pipeline in a separate milestone
+- **Internationalization:** While this milestone will involve content that needs to be translated, we are not likely to have the mechanism for supporting translation in place by the time work starts on this milestone.
 
 ### Open questions
 
@@ -152,8 +164,14 @@ The following work will *not* be completed as part of this milestone:
 
 Does this milestone involve delivering any content that needs translation?
 
+- Instructions for adopting and using developer tools
+- Instructions for reporting security vulnerabilities
+
 If so, when will English-language content be locked? Then when will translation be
 started and completed?
+
+- Languages to support TBD
+- Translation timeline TBD
 
 ### Services going into PROD for the first time
 
