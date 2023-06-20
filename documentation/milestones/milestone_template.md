@@ -13,16 +13,19 @@
 
 
 ## Short description
+<!-- Required -->
 
 {1-2 sentences describing milestone at a high-level}
 
 ## Goals
 
 ### Business description & value
+<!-- Required -->
 
 {3-4 sentences that describe why this milestone is critical to the project}
 
 ### User Stories
+<!-- Required -->
 
 - As a **{type of user 1}**, I want to:
   - {perform action 1}, so that {goal or motivation for action}
@@ -34,10 +37,12 @@
 ## Technical description
 
 ### {Optional Sub-deliverable}
+<!-- Optional -->
 
 {List reqiurements specific to this sub-deliverable, options to consider, etc.}
 
 ### Definition of done
+<!-- Required -->
 
 - [ ] [to be added]
 - [ ] Code is deployed to `main` & PROD
@@ -46,12 +51,17 @@
 - [ ] Translations are live in PROD (if necessary)
 
 ### Proposed metrics for measuring goals/value/definition of done
+<!-- Required -->
+
+1. {Metric 1}
 
 ### Destination for live updating metrics
+<!-- Optional -->
 
 ## Planning
 
 ### Assumptions & dependencies
+<!-- Optional -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
@@ -64,10 +74,12 @@ beginning of work on this milestone?
 - [ ] [to be added]
 
 ### Open questions
+<!-- Optional -->
 
 - [ ] [to be added]
 
 ### Not doing
+<!-- Optional -->
 
 The following work will *not* be completed as part of this milestone:
 
@@ -76,6 +88,7 @@ The following work will *not* be completed as part of this milestone:
 ## Integrations
 
 ### Translations
+<!-- Optional -->
 
 Does this milestone involve delivering any content that needs translation?
 
@@ -83,24 +96,28 @@ If so, when will English-language content be locked? Then when will translation 
 started and completed?
 
 ### Services going into PROD for the first time
+<!-- Optional -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
 1. [to be added]
 
 ### Services being integrated in PROD for the first time
+<!-- Optional -->
 
 Are there multiple services that are being connected for the first time in PROD?
 
 1. [to be added]
 
 ### Data being shared publicly for the first time
+<!-- Optional -->
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
 1. [to be added]
 
 ### Security considerations
+<!-- Optional -->
 
 Are there any security vulnerabilities that need to be addressed as part of this milestone?
 
