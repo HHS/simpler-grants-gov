@@ -35,7 +35,7 @@ Have the software development team for this effort start their work and get syst
 ## Developer tools
 Diagram short name: `Dev-Tools`
 
-Dependencies: `None`
+Dependencies: `Onboard-Dev-Team`, `DB-API-Plan`
 
 Install developer tools for backend, including:
 
@@ -79,6 +79,15 @@ Create a script or other automated tool that:
 This will dramatically speed up development because it will allow any developer to generate a local copy of the database that acts the same as the PROD beta.grants.gov database in their environment.
 
 By having consistent test data, we can create integration tests that look for expected and unexpected behaviors.
+
+## Legacy architecture documentation
+Diagram short name: `Legacy-Architecture`
+
+Dependencies: `None`
+
+Create or update existing documentation about the legacy system architecture in order to help inform the DB API Plan for new development.
+
+While the new Search API will be greenfield development, it's helpful to document how the legacy system currently interacts with other Federally managed systems in order to understand the integrations that the new grants.gov site will be expected to support in the future. These external dependencies may inform some architectural decisions we make early in the project.
 
 ## Review of software-as-a-service (SaaS) alternatives
 Diagram short name: `SaaS-Plan`
@@ -289,6 +298,19 @@ Dependencies: `DB-API-Plan`
 Make a plan for the technological and legal/process aspects of A/B testing experiences in beta.grants.gov.
 
 This plan will need to account for any concerns about fairness that could be brought up by exposing some users to updated content as compared to other users.
+
+## API security planning
+
+Diagram short name: `API-Security`
+
+Dependencies: `DB-API-Plan`, `GET-Opportunities`
+
+Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`.
+
+At a minimum the plan should address the following security needs and determine if/when they should be implemented before the broader Auth milestones are addressed:
+- Authenticating requests with API keys
+- Rate limiting API requests
+- Managing access with scopes/claims
 
 # Communications Tooling
 

@@ -126,12 +126,13 @@ flowchart LR
         Onboard-Dev-Team --> SaaS-Plan
         SaaS-Plan
         SaaS-Plan --> DB-API-Plan
+        Legacy-Architecture
         Onboard-Dev-Team:::executing
-        Onboard-Dev-Team --> Dev-Tools
         Onboard-Dev-Team --> DB-API-Plan
         Onboard-Dev-Team --> Feature-Flags
         DB-API-Plan --> API-Docs-Plan
         Onboard-Dev-Team --> DB-Replica
+        Onboard-Dev-Team & DB-API-Plan --> Dev-Tools
         Beta-Domain
         Beta-Domain --> Static-Site
         DB-API-Plan --> Infrastructure-as-Code
@@ -154,6 +155,7 @@ flowchart LR
         DB-API-Plan --> Dependency-Fundraising-Tracking
         GET-Opportunities --> Search-API
         GET-Opportunities --> NOFOs-Text
+        DB-API-Plan & GET-Opportunities --> API-Security
     end
 
     subgraph Hackathon
