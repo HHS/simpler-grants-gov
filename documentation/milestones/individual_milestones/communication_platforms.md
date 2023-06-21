@@ -136,7 +136,7 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] At least 5 members of contractor teams (employed by HHS) have been onboarded.
   - [ ] At least 3 members of the general public have been onboarded.
   - [ ] New users can be onboarded to the tool for no cost to the user in a process that takes less than 2 days.
-  - [ ] Services are accessible to all people on the HHS network, White House network, public internet, and preferably most or all agency networks.
+  - [ ] Services are accessible to all people on the HHS network, public internet, and *preferably* the White House network and most or all agency networks
   - [ ] Onboarding instructions for new users are clearly and accessibly documented in a public place.
   - [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in a public place.
   - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
