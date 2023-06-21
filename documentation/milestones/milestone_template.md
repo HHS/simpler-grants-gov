@@ -56,7 +56,7 @@
 1. {Metric 1}
 
 ### Destination for live updating metrics
-<!-- Optional -->
+<!-- Required -->
 
 ## Planning
 
@@ -88,7 +88,7 @@ The following work will *not* be completed as part of this milestone:
 ## Integrations
 
 ### Translations
-<!-- Optional -->
+<!-- Required -->
 
 Does this milestone involve delivering any content that needs translation?
 
@@ -96,29 +96,31 @@ If so, when will English-language content be locked? Then when will translation 
 started and completed?
 
 ### Services going into PROD for the first time
-<!-- Optional -->
+<!-- Required -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
 1. [to be added]
 
 ### Services being integrated in PROD for the first time
-<!-- Optional -->
+<!-- Required -->
 
 Are there multiple services that are being connected for the first time in PROD?
 
 1. [to be added]
 
 ### Data being shared publicly for the first time
-<!-- Optional -->
+<!-- Required -->
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
 1. [to be added]
 
 ### Security considerations
-<!-- Optional -->
+<!-- Required -->
 
-Are there any security vulnerabilities that need to be addressed as part of this milestone?
+Does this milestone expose any new attack vectors or expand the attack surface of the product? 
+
+If so, how are we addressing these risks?
 
 1. [to be added]
