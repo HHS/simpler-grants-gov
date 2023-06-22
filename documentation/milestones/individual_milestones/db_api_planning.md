@@ -195,61 +195,62 @@ Some factors to consider are:
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
 
-- [ ] [to be added]
+- [x] **Onboard dev team:** The dev team will be evaluating and making many of these key architectural decisions
 
 Are there any notable capabilities / milestones do NOT we expect to be in place at the
 beginning of work on this milestone?
 
-- [ ] [to be added]
+- [x] None
 
 ### Open questions
 <!-- Optional -->
 
-- [ ] [to be added]
+- [x] None
 
 ### Not doing
 <!-- Optional -->
 
 The following work will *not* be completed as part of this milestone:
 
-1. [to be added]
+1. **Deploying services:** This milestone involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
 
 ## Integrations
 
 ### Translations
 <!-- Required -->
 
-Does this milestone involve delivering any content that needs translation?
+*Does this milestone involve delivering any content that needs translation?*
 
-If so, when will English-language content be locked? Then when will translation be
-started and completed?
+*If so, when will English-language content be locked? Then when will translation be started and completed?*
+
+- No
 
 ### Services going into PROD for the first time
 <!-- Required -->
 
-This can include services going into PROD behind a feature flag that is not turned on.
+*This can include services going into PROD behind a feature flag that is not turned on.*
 
-1. [to be added]
+1. No
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
-Are there multiple services that are being connected for the first time in PROD?
+*Are there multiple services that are being connected for the first time in PROD?*
 
-1. [to be added]
+1. No
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
-Are there any fields being shared publicly that have never been shared in PROD before?
+*Are there any fields being shared publicly that have never been shared in PROD before?*
 
-1. [to be added]
+1. No
 
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product? 
+*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
 
-If so, how are we addressing these risks?
+*If so, how are we addressing these risks?*
 
-1. [to be added]
+1. No
