@@ -173,11 +173,18 @@ Some factors to consider are:
 ### Definition of done
 <!-- Required -->
 
-- [ ] [to be added]
-- [ ] Code is deployed to `main` & PROD
-- [ ] Services are live in PROD (may be behind feature flag)
-- [ ] Metrics are published in PROD.
-- [ ] Translations are live in PROD (if necessary)
+- [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate)
+- [ ] An ADR has been recorded and published to `main` for each of the following choices:
+  - [ ] API Language
+  - [ ] API Framework
+  - [ ] API Type
+  - [ ] API Deployment Service
+  - [ ] Database Type
+  - [ ] Database Management System (DBMS)
+  - [ ] Database Hosting Service
+- [ ] Architecture diagram
+  - [ ] An architecture diagram has been published to the `main` branch of the repository
+  - [ ] The diagram is stored in a format that supports tracking individual changes with version control
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
