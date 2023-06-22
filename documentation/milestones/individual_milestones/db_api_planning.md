@@ -27,15 +27,19 @@ Formalize a series of architectural decisions about the API, including the techn
 ### User Stories
 <!-- Required -->
 
-- As a **HHS Staff Member**, I want:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
+- As an **HHS Staff Member**, I want:
+  - the API to be built using well-established tools and frameworks, so that it will be easier to hire future HHS staff and contractors who are familiar with the technology stack
+  - the deployment services we select to be FedRAMP compliant and covered under our existing ATO (where possible), so that we minimize the amount of time we need to spend seeking approval for new technology
+  - to balance direct operating and hosting costs with staff resources required to maintain these tools, so that we are making intentional investments that minimize maintenance overhead without exceeding our budget
 - As a **project maintainer**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
-- As an **open source contributor**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
+  - select tools that satisfy both the current and future needs of the project, so that we can minimize the number of languages and frameworks we support (where possible) and don't need to reimplement existing features at a later point in the time
+  - leverage hosting services that are relatively easy to maintain and scale, so that we can prioritize developing important product features over managing basic infrastructure
+- As an **open source contributor**, I want:
+  - the API to be built using tools that are popular with a robust open source community, so that I have a lot of resources to reference and learn from if I want to contribute to the project
+  - the API to use services that can be hosted or at least mocked locally, so that I can test all of the required parts of the application on my own machine without signing up for a new platform
+- As a **consumer of the API**, I want:
+  - the API to adhere to a well-established API paradigm, so that I'm familiar with how to structure requests and process responses
+  - the API to support my most common use cases (e.g. querying a list of NOFOs that match certain search criteria), so that it "just works" out of the box without having to spend much time learning how to use it
 
 ## Technical description
 
