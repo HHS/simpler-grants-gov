@@ -419,6 +419,60 @@ For each of these meetings, their definition of done is:
 * Roles are set (e.g., an MC or rotating MC schedule is assigned)
 * We've had at least one of these meetings
 
+# Design Tooling milestones 
+
+## Prototyping tools
+Diagram short name: `Prototyping-Tools`
+
+Dependencies: `None`
+
+We must have easy-to-use and effective tools for design. It is crucial that they can be used collboratively as a team. The tools and assets they generate must be accessible to internal partners (HHS or employed by HHS) as well as external partners (members of the general public). Platform availability, live collbaration, and handoff features should be assessed. 
+
+Explore wireframing and prototyping tools such as:
+
+- Figma
+- Adobe XD
+- InVision Studio
+- Sketch
+
+## Diagramming and whiteboarding tools 
+Diagram short name: `Diagramming-Tools`
+
+Dependencies: `None`
+
+Diagrams are a great design tool when figuring out the essentials, the flow of pages, and conditional logic. Diagrams can become the artifact engineers reference in implementation. This is an especially fast way of working when using a robust design system (USDWS). Low-fidelity design artifacts like diagrams prevent engineers from misinterpreting visual design intent. If engineers use the components described in diagrams and follow established design patterns, then they've met the requirements. If a designer needs to communicate styling that differs from established patterns, it's a good signal to step back and align with the engineer. 
+
+Diagramming tools aren't used only by designers. As engineers create artifacts like architectural diagrams. Diagrams improve collaboration between disciplines by annotating business requirements, policy requirements, context for why design decisions were made, or how the API should be used. Needs of of all disciplines and collborative use should be assessed.
+
+Explore tools that work for all disciplines, such as: 
+
+- Lucidchart
+- Visio 
+- Figjam
+- Draw.io
+- ClickUp
+- Miro
+- Mural
+
+## Research operations tools
+Diagram short name: `Research-Operations-Tools`
+
+Dependencies: `Prototyping-Tools`
+
+As a community and userbase grows, so does the need for moderated and unmoderated usability testing. It's important that participants are screened, identified, incentivized, and engaged in equitable ways. Tools should be evalutated for how they allow for various testing methodologies (card sorting, tree testing, first-click testing, surveys, screen recording, etc), how they integrate with our prototyping tools, scalability, and how they organize qualitative and quantitative insights. 
+
+Explore tools for participant recruitment, such as: 
+
+- Ethnio 
+- User Interviews
+- Respondent
+
+Explore tools for unmoderated usability testing, such as: 
+
+- Maze
+- UserTesting
+- UsabilityHub
+- Optimal Workshop
 
 # NOFO milestones
 
