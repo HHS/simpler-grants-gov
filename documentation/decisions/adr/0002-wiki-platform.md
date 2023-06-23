@@ -17,6 +17,7 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 #### Must Have
 
 - **Usability:** Non-technical users should be able to access and create content with minimal training or guidance.
+- **Public Access:** Members of the public should be able to read public documentation in the wiki without needing to sign up or login to a service.
 - **Content Review:** Collaborators should be able to review and edit draft content before those changes are published.
 - **Version History:** Editors should be able to see and restore previous versions of a given page.
 - **Multi-Media:** The platform should support multiple types of media (e.g. videos, images, file uploads, tables, diagrams) with minimal configuration.
@@ -24,11 +25,13 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 - **Web Analytics:** The platform should provide support for tracking site usage and other web analytics.
 - **Onboarding Costs:** Onboarding new members to the platform should be relatively inexpensive, both in terms of staff time/resources and direct costs (e.g. licensing fees).
 - **Maintenance Costs:** It should not be prohibitively expensive to maintain the wiki, both in terms of staff time/resources and direct costs (e.g. hosting fees).
+- **Authority to Operate (ATO):** The platform already must be authorized under the Grants.gov ATO (Authority to Operate) or ATO coverage must be requested.
 
 #### Nice to Have
 
 - **External Contributions:** Members of the public should be able to suggest changes to wiki content and internal stakeholders should be able to review those contributions before they are published.
 - **Data Access:** Content generated and stored in the wiki should be accessible outside of the wiki platform, either through syncing content to an HHS owned repository or through an official API.
+- **Machine Readability:** The wiki platform should also support storing and exposing content in a machine-readable format so that certain types structured data can be managed within and accessed from the wiki without parsing.
 - **Open Source:** The tool used to manage and host the wiki content should be open source, if possible.
 
 ## Options Considered
@@ -65,6 +68,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - **Hosting:** SaaS
 - **Pricing:** [$5.75 (standard) or $11 (premium) per user per month](confluence-pricing)
+- **Public Access:** Supported, but limited to individual pages or entire spaces
 - **Content Review:** Supported through drafts, not enforceable
 - **Supported Media:** TODO
 - **I18n:** Limited third party plugins for automating translation
@@ -100,6 +104,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - **Hosting:** SaaS
 - **Pricing:** [$8 (pro) or $15(business) per user per month](notion-pricing)
+- **Public Access:** Supported, but oriented around individual pages
 - **Content Review:** Not supported
 - **Supported Media:** TODO
 - **I18n:** Third-party beta plugin for translation
@@ -135,6 +140,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - **Hosting:** SaaS
 - **Pricing:** Free for public repositories
+- **Public Access:** Supported by default
 - **Content Review:** TODO
 - **Supported Media:** TODO
 - **I18n:** TODO
@@ -158,9 +164,13 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - **Hosting:** SaaS
 - **Pricing:** [Free (open source projects)](gitbook-oss) or [$6.70 (plus) per user per month](gitbook-pricing)
+- **Public Access:** Supported by default
+- **Content Review:** Supported by default
+- **Supported Media:** TODO
 - **I18n:** Native support with [page collections and variants](gitbook-i18n)
 - **Web Analytics:** [Google Analytics integration](gitbook-ga) available
 - **Open Source Status:** Propietary
+- **Data Access:** TODO
 
 #### Pros
 
@@ -193,6 +203,7 @@ A "headless" CMS separates the creation and management of web content from the f
 
 - **Hosting:** Self-hosted
 - **Pricing:** Cost of self hosting
+- **Public Access:** TODO
 - **Content Review:** TODO
 - **Supported Media:** TODO
 - **I18n:** Depends on static site generator (e.g. [Next.js i18n routing](next-i18n))
@@ -216,6 +227,7 @@ A "headless" CMS separates the creation and management of web content from the f
 
 - **Hosting:** Self-hosted or SaaS
 - **Pricing:** Free for self-hosted ([Strapi](strapi-pricing-self)) or $99/mo for SaaS ([Strapi](strapi-pricing-cloud) and [Directus](directus-pricing-cloud))
+- **Public Access:** TODO
 - **Content Review:** TODO
 - **Supported Media:** TODO
 - **I18n:** Depends on static site generator (e.g. [Next.js i18n routing](next-i18n))
