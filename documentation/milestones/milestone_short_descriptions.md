@@ -1054,12 +1054,12 @@ Document all tasks that need to be completed on GrantSolutions to enable functio
 
 Document which of these tasks can be completed using APIs vs which must go through the GrantSolutions.gov user interface.
 
-## User research compensation
-Diagram short name: `User-Research-Compensation`
+## User research incentives
+Diagram short name: `User-Research-Incentives`
 
 Dependencies: `Design-Tooling`
 
-Investigate potentially setting up a system for compensation user research participants, modeled after the compensation system developed by USDS at the White House.
+Investigate potentially setting up a system for incentives user research participants, modeled after the incentives system developed by USDS at the White House.
 
 This will promote fairness, as well as increasing the quality and diversity of our pool of user research participants, by compensating participants for sharing their lived experience and expertise.
 
