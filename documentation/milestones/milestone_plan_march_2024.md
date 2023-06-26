@@ -14,13 +14,18 @@ In order to reduce redundant information, this document only refers to milestone
 
 The following milestones are considered essential to finish before March 2024. They serve as "north star" milestones because they provide clear, simple goals of delivering value to our users and stakeholders. At the same time, they require many dependencies to be completed in order for them to be completed, so they help organize the rest of the work on the platform.
 
-* Open-Source-Group
-* Hackathon-Listing
+### Backend-related north star milestones
 * GET-Opportunities
+* Measurement-Dashboard
+
+### User-interface-related north star milestones
 * Foundational-UI
 * Search-UI
 * NOFO-Listing-UI-Enhanced
-* Measurement-Dashboard
+
+### Participatory-processes-related north star milestones
+* Open-Source-Group
+* Hackathon-Listing
 
 ## Additional milestones
 
@@ -30,6 +35,8 @@ These milestones should also be delivered by March 2024, but are not considered 
 * User-Research-NOFO-Writing
 * User-Research-Incentives
 * i18n
+* Plan-Grants-as-a-Platform
+* Participatory-Plan
 
 ## Milestone subgraphs
 
