@@ -1,8 +1,8 @@
-# Grants.gov: Milestones plan for March 2024
+# Grants.gov: Milestones plan for January 2024
 
 ## Overview
 
-In order to plan appropriately and organize our efforts, it is helpful to have a broad plan that covers our goals for the coming months, through March 2024.
+In order to plan appropriately and organize our efforts, it is helpful to have a broad plan that covers our goals for the coming months, through January 2024.
 
 As much as possible, this work should be delivered iteratively so that the work is delivered early and often, and not saved for a 'big bang' delivery near the end of the time period.
 
@@ -11,8 +11,7 @@ In order to reduce redundant information, this document only refers to milestone
 *Note: there is probably a better format / location for saving this plan, but for now I'm getting started in this directory and file. Other suggestions on location are extremely welcome.*
 
 ## North star milestones
-
-The following milestones are considered essential to finish before March 2024. They serve as "north star" milestones because they provide clear, simple goals of delivering value to our users and stakeholders. At the same time, they require many dependencies to be completed in order for them to be completed, so they help organize the rest of the work on the platform.
+The following milestones are considered essential to finish before January 2024. They serve as "north star" milestones because they provide clear, simple goals of delivering value to our users and stakeholders. At the same time, they require many dependencies to be completed in order for them to be completed, so they help organize the rest of the work on the platform.
 
 ### Backend-related north star milestones
 * GET-Opportunities
@@ -21,15 +20,12 @@ The following milestones are considered essential to finish before March 2024. T
 ### User-interface-related north star milestones
 * Foundational-UI
 * Search-UI
-* NOFO-Listing-UI-Enhanced
 
 ### Participatory-processes-related north star milestones
 * Open-Source-Group
-* Hackathon-Listing
 
 ## Additional milestones
-
-These milestones should also be delivered by March 2024, but are not considered 'north star' milestones in the sense meant above.
+These milestones should also be delivered by January 2024, but are not considered 'north star' milestones in the sense meant above.
 
 * Unified-Brand
 * User-Research-NOFO-Writing
@@ -49,4 +45,9 @@ For the next six months, in order to successfully complete the milestones above 
 * Initial API deployment
 
 ## Stretch goals
+
+* NOFO-Listing-UI-Enhanced
+  * Note that we hope to have `NOFO-Listing-UI-Enhanced` ready by March 2024, so this milestone should be partially or mostly completed by January 2024.
+* Hackathon-Listing
+  * Note that we hope to have `Hackathon-Listing` ready by March 2024, so this milestone should be partially or mostly completed by January 2024.
 * AuthN-API
