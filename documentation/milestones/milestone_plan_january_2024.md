@@ -1,7 +1,6 @@
 # Grants.gov: Milestones plan for January 2024
 
 ## Overview
-
 In order to plan appropriately and organize our efforts, it is helpful to have a broad plan that covers our goals for the coming months, through January 2024.
 
 As much as possible, this work should be delivered iteratively so that the work is delivered early and often, and not saved for a 'big bang' delivery near the end of the time period.
@@ -35,7 +34,6 @@ These milestones should also be delivered by January 2024, but are not considere
 * Participatory-Plan
 
 ## Milestone subgraphs
-
 Many subgraphs are related to the milestones above. These are the groupings labeled in the [dependency diagram](./milestone_dependency_diagram.mmd) as subgraphs. For instance, the top left of the dependency diagram currently has a yellow/beige box labeled "Communications Tooling." That is the "Communications Tooling" subgraph, and all the milestones inside that box are considered part of that subgraph.
 
 For the next six months, in order to successfully complete the milestones above in accordance with the quality standards of this project, it would be important to finish most, if not all of, the milestones within the following subgraphs:
@@ -45,7 +43,6 @@ For the next six months, in order to successfully complete the milestones above 
 * Initial API deployment
 
 ## Stretch goals
-
 * NOFO-Listing-UI-Enhanced
   * Note that we hope to have `NOFO-Listing-UI-Enhanced` ready by March 2024, so this milestone should be partially or mostly completed by January 2024.
 * Hackathon-Listing
