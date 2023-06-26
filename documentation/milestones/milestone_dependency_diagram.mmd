@@ -13,7 +13,7 @@ flowchart LR
 
     subgraph NOFO
         NOFO-Milestone-Planning:::executing
-        NOFO-Prototypes:::executing
+        NOFO-Prototypes:::finished
         Start-PRA-Comment:::executing
         NOFO-Prototypes-Metrics:::executing
         NOFO-Prototypes-Metrics & NOFO-Prototypes -->
@@ -143,10 +143,10 @@ flowchart LR
         GET-Opportunities --> AuthN-API
         GET-Opportunities --> Analytics-API
         API-Docs-Plan & Beta-Domain --> API-Docs
-        API-Plan --> API-Versioning
-        API-Plan --> Performance-Testing
-        DB-Plan & API-Plan --> Opportunity-Protocol
-        API-Plan--> AB-Testing-Plan
+        DB-API-Plan --> API-Versioning
+        DB-API-Plan --> Performance-Testing
+        DB-API-Plan & API-Plan --> Plan-Grants-as-a-Platform
+        DB-API-Plan--> AB-Testing-Plan
         ATO
         CI-CD
         API-Plan --> CI-CD

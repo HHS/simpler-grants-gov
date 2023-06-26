@@ -275,18 +275,26 @@ This milestone is to add to that tool support for backend packages such as Pytho
 
 Based on initial research, the level of effort should be assessed to determine whether the time it would take to implement this milestone is worth the result. If it's longer than 2 weeks time of one developer, it may not be worth it.
 
-## Develop opportunity protocol
-Diagram short name: `Opportunity-Protocol`
+## Plan grants-as-a-platform
+Diagram short name: `Plan-Grants-as-a-Platform`
 
 Dependencies: `DB-Plan`, `API-Plan`
 
-Investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some private-sector grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
+Many of the most successful modern web ecosystems are design as platforms or platforms-as-a-service.
 
-The protocol would be implemented by our particular API ecosystem, but other platforms could implement the same protocol as well.
+This milestone is to design a plan for (1) considering whether that model makes sense for grants.gov, and if the answer is yes, then (2) developing a well-documented but agile-oriented plan for implementing grants.gov modernization as a platform.
+
+If grants.gov is implemented as a platform, then the open source framework would be something any organization or individual could use for grantmaking and/or financial decisionmaking and allocation. This provides obvious benefits to the ecosystem of grantmaking outside of just grants.gov.
+
+But selfishly, for the sake of grants.gov's core mission, designing its system as a platform would very likely make the service a more effective product, with better API boundaries and cleaner "separation of concerns" between services and processes. This approach would also likely make it easier for agencies who use grants.gov to make grants for themselves to customize their software and processes for their own needs. (For instance, while all federal agencies list all of their opportunities on grants.gov, roughly half of federal agencies use grants.gov to host the applications for their grants, and half use their own software systems. A design of grants-as-a-platform could make it easier for those external systems to integrate with grants.gov.)
+
+As part of this design and planning to complete this milestone, we should investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some state, local, and philanthropic grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
+
+The protocol would be implemented by our particular platform, but other platforms could implement the same protocol as well.
+
+For some research on common form fields that could be relevant to the protocol, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
 
 Much more investigation is needed to define this milestone.
-
-For some research on common form fields, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
 
 ## Plan for A/B testing
 Diagram short name: `AB-Testing-Plan`

@@ -29,6 +29,7 @@ These milestones should also be delivered by March 2024, but are not considered 
 * Unified-Brand
 * User-Research-NOFO-Writing
 * User-Research-Incentives
+* i18n
 
 ## Milestone subgraphs
 
