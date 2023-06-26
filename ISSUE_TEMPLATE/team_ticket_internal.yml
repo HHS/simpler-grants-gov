@@ -1,0 +1,33 @@
+name: Ticket (Internal Use Only)
+description: Tracking our work through tickets
+title: "[Ticket]: "
+labels: ["backlog"]
+assignees:
+  - octocat
+body:
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User story
+      description: A clear and concise description from the perspective of the user.
+      placeholder: Tell us about it from the user's perspective!
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: A clear and concise checklist of expectations including definition of done.
+      placeholder: Explain the steps to success!
+    validations:
+      required: true
+  - type: textarea
+    id: testing
+    attributes:
+      label: Describe the proposed testing strategy
+      description: A clear and concise description of what testing is required.
+  - type: textarea
+    id: screenshots-and-context
+    attributes:
+      label: Screenshots and additional context
+      description: Please upload any relevant screenshots and include additional context.

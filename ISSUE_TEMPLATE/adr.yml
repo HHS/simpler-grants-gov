@@ -1,0 +1,31 @@
+name: ADR 
+description: Create a new ADR
+title: "[ADR]: "
+labels: ["adr", "decision"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to create this ADR!
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and Problem Statement
+      description: Important decisions about the structure of a codebase, the tools or platforms adopted, and the scope or vision of a product are made all throughout a project's lifecycle. Often these decisions are made and changed blindly with little record of why that decision was made, making it difficult for other collaborators and even the original decision makers to understand the justification behind that decision in the future.
+    validations:
+      required: false
+  - type: dropdown
+    id: drivers
+    attributes:
+      label: Decision drivers
+      description: What are the decision drivers? 
+      options:
+        - Explicit (Important decisions about the project architecture should be clear and unambiguous)
+        - Documented (There should be a written record describing which decisions are made)
+        - Accessible (Decision records should be centrally located, searchable, and accessible to non-technical audiences)
+        - Portable (The decision records should be able to travel with the code when it's forked, cloned, etc.)
+        - Maintainable (The system we adopt should be easy to maintain or amend as needed.)
+    validations:
+      required: true
