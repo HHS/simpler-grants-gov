@@ -1,9 +1,9 @@
 # Recording Architecture Decisions
 
 - **Status:** Proposed
-- **Last Modified:** 2023-06-07
-- **Related Issue:** TODO
-- **Deciders:** TODO
+- **Last Modified:** 2023-06-26
+- **Related Issue:** [#34](https://github.com/HHS/grants-api/issues/34)
+- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly
 - **Tags:** ADRs
 
 ## Context and Problem Statement
@@ -19,29 +19,32 @@ _What is the best way to document key architectural decisions made within the pr
 - **Accessible:** Decision records should be centrally located, searchable, and accessible to non-technical audiences
 - **Portable:** The decision records should be able to travel with the code when it's forked, cloned, etc.
 - **Maintainable:** The system we adopt should be easy to maintain or amend as needed.
+- **Publicly Documented:** Decisions should be part of the public record so that external stakeholders (including open source contributors) understand the rationale behind each decision.
 
 ## Options Considered
 
 - ADRs in the repo `docs/` folder
 - Comments and docstrings in the code itself
-- Articles in the project Wiki tab
+- Articles in the project's Wiki
 
 ## Decision Outcome <!-- REQUIRED -->
 
 Decisions will be documented using Architecture Decision Records (ADRs) as described by [Joel Parker Henderson](joel) and the [ADR GitHub organization](https://adr.github.io/). The template for this project's ADRs will be adapted from the [MADR template](adrs).
+
+**NOTE:** We may want to revisit this decision to reconsider storing them in the Project Wiki once that wiki is established. Ideally ADRs could be drafted/edited and visible in the wiki but also synced with the repo -- some wiki solutions provide this option.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
 - ADRs travel with the repo when it's cloned, forked, etc.
 - ADRs can be incorporated in the Issue and PR workflow
 - Changes to ADRs will be listed in the project's commit history
-- ADRs written in Markdown are accessible to non-technical audiences
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- Certain urgent decisions may take longer to finalize if they need to be documented and agreed upon, slowing down
+- Certain urgent decisions may take longer to finalize if they need to be documented and agreed upon, slowing down the process of finalizing key decisions with the project
 - Unless regularly maintained and complied with, it could be easy for the ADRs to become out of sync with the actual decisions made about the architecture
 - If the project is organized as a set of microservices with different repositories, we'll have to decide whether to keep ADRs in a central repo or record those decisions in the repo to which they are relevant which may reduce discoverability and accessibility
+- Non-technical users may have a more challenging time creating and editing ADRs if they are not familiar with Markdown or GitHub
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
