@@ -7,9 +7,9 @@
 
 ## Context and Problem Statement
 
-This ADR is to decide what programming language the API server for beta.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encoumpass all the backend responsibilities of grants.gov
+This ADR is to decide what programming language the API server for beta.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encompass all the backend responsibilities of grants.gov
 
-In addition to the Nava and HHS teams ability to develop and maintain an API in the chosen language, it is also important that this language lend itself to open source engagement.
+In addition to the Nava and HHS teams ability to develop and maintain an API in the chosen language, it is also important that this language lends itself to open source engagement.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -72,6 +72,7 @@ Node JS is used to build fast, highly scalable network applications based on an 
   - Fast single threaded but asynchronous event driven operation
   - Free and open source to use
   - Same language as most front-end apps requiring less context switching for developers
+  - Could use the same framework for frontend, simplifying infrastructure
 - **Cons**
   - Not as mature as other options
   - Responsiveness may be slowed by any CPU intensive computation
