@@ -48,6 +48,17 @@ For each of the following tools:
 - Implement and onboard members of the team to that tool
 - Make any code used to deploy or integrate these services open source
 
+The tools are listed (roughly) in priority order based on their importance to collaboration within the project and the availability of substitutes.
+
+### Ticket tracking
+
+Explore options for tracking of tickets with ability to track epics and burndown charts, such as:
+
+- [GitHub](https://github.com/) with [Zenhub](https://www.zenhub.com/)
+- [Atlassian Jira](https://www.atlassian.com/software/jira)
+- [Asana](https://asana.com/)
+- Others as suggested by dev team
+
 ### Chat
 
 Explore and evaluate options for group chat, such as:
@@ -58,6 +69,24 @@ Explore and evaluate options for group chat, such as:
 - [GitHub Discussions](https://docs.github.com/en/discussions/collaborating-with-your-community-using-discussions/about-discussions)
 - [Rocket.chat](https://www.rocket.chat/)
 - [Mattermost](https://mattermost.com/)
+- Others as suggested by dev team
+
+### Shared calendar
+
+Explore options for a shared calendar of dates across teams, such as:
+
+- [Confluence](https://www.atlassian.com/software/confluence/team-calendars)
+- [Google Calendar](https://support.google.com/calendar/answer/37083?hl=en)
+- Others as suggested by dev team
+
+### Video conference
+
+Explore options for supporting video calls both among project collaborators and members of the public, such as:
+
+- [Zoom](https://zoom.us/)
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software)
+- [Google Meet](https://meet.google.com/)
+- [Jitsi](https://jitsi.org/)
 - Others as suggested by dev team
 
 ### Wiki
@@ -71,23 +100,6 @@ Explore and evaluate options for wiki-style storage and editing of documents, su
 - [Wiki.js](https://js.wiki/)
 - Git-based Headless CMS
 - API-based Headless CMS
-- Others as suggested by dev team
-
-### Ticket tracking
-
-Explore options for tracking of tickets with ability to track epics and burndown charts, such as:
-
-- [GitHub](https://github.com/) with [Zenhub](https://www.zenhub.com/)
-- [Atlassian Jira](https://www.atlassian.com/software/jira)
-- [Asana](https://asana.com/)
-- Others as suggested by dev team
-
-### Shared calendar
-
-Explore options for a shared calendar of dates across teams, such as:
-
-- [Confluence](https://www.atlassian.com/software/confluence/team-calendars)
-- [Google Calendar](https://support.google.com/calendar/answer/37083?hl=en)
 - Others as suggested by dev team
 
 ### Listserv
@@ -111,16 +123,6 @@ Explore options for a way to host an email inbox, such as `grants.simplification
 - HHS internal options
 - Others as suggested by dev team
 
-### Video conference
-
-Explore options for supporting video calls both among project collaborators and members of the public, such as:
-
-- [Zoom](https://zoom.us/)
-- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software)
-- [Google Meet](https://meet.google.com/)
-- [Jitsi](https://jitsi.org/)
-- Others as suggested by dev team
-
 ### General requirements
 
 For the wiki-style tool, we need integrated page analytics so we can view stats such as the number of total visits to a page (or collection of pages) as well as unique visitors, time on page, etc.
@@ -142,26 +144,31 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
   - [ ] An ADR has been recorded which documents the tool chosen and the reasons for selecting it
   - [ ] An ADR has been recorded which outlines the norms around how these tools should be used collectively as part of a broader team communication plan
-- [ ] Chat is live with the following conditions satisfied:
-  - [ ] Users can post messages to public channels (potentially with some restrictions applied).
-  - [ ] Users can send private messages to each other as well as view private and public channels.
-  - [ ] Users can reply to messages in a thread that other users can see.
-  - [ ] Users can use emojis to react to messages.
-- [ ] Wiki is live with the following conditions satisfied:
-  - [ ] At least 1 document has been added to the wiki (preferably the onboarding instructions for these tools)
-  - [ ] Without logging in, members of the public can see wiki documents.
-  - [ ] Users can see history of changes to all documents.
-  - [ ] Web analytics have been integrated into the wiki and administrators can report on unique users, page views, etc.
 - [ ] Ticketing system is live with the following conditions satisfied:
   - [ ] At least 1 ticket has been created and assigned to an epic (or an equivalent concept).
   - [ ] Without logging in, members of the public can see tickets that are being worked on.
   - [ ] Default 'templates' have been created for tickets, epics, etc, that have the fields we've decided are necessary for the project.
   - [ ] Users can track tickets in sprints and monitor things like burndown.
   - [ ] Members of the public can submit feature requests or report bugs
+- [ ] Chat is live with the following conditions satisfied:
+  - [ ] Users can post messages to public channels (potentially with some restrictions applied).
+  - [ ] Users can send private messages to each other as well as view private and public channels.
+  - [ ] Users can reply to messages in a thread that other users can see.
+  - [ ] Users can use emojis to react to messages.
 - [ ] Calendar is live with the following conditions satisfied:
   - [ ] At least 1 event has been added
   - [ ] Without logging in, members of the public can see calendar events that are open to the public
   - [ ] Members of the public can copy events to their own calendar and/or RSVP to attend the event
+- [ ] Video conference is live with the following conditions satisfied
+  - [ ] At least one public meeting has been hosted
+  - [ ] At least one public meeting has been recorded, with recording and transcript uploaded to the wiki
+  - [ ] Users can join the call via video or phone
+  - [ ] Users can access a live transcript during the video call
+- [ ] Wiki is live with the following conditions satisfied:
+  - [ ] At least 1 document has been added to the wiki (preferably the onboarding instructions for these tools)
+  - [ ] Without logging in, members of the public can see wiki documents.
+  - [ ] Users can see history of changes to all documents.
+  - [ ] Web analytics have been integrated into the wiki and administrators can report on unique users, page views, etc.
 - [ ] Email listserv is live with the following conditions satisfied
   - [ ] At least one email has been sent out to the listserv
   - [ ] Any member of the listserv can send emails to the entire listserv
@@ -169,35 +176,35 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] Any member of the listserv can reply directly to an email sender
 - [ ] Shared email inbox is live with the following conditions satisfied
   - [ ] At least 1 email has been received
-- [ ] Video conference is live with the following conditions satisfied
-  - [ ] At least one public meeting has been hosted
-  - [ ] At least one public meeting has been recorded, with recording and transcript uploaded to the wiki
-  - [ ] Users can join the call via video or phone
-  - [ ] Users can access a live transcript during the video call
 
 ### Proposed metrics for measuring goals/value/definition of done
 
 TODO: See if we can reduce the list of metrics to track
 
-1. Chat Metrics
+1. Ticket Tracking Metrics
+   1. Total story points assigned per sprint
+   2. Total story points completed per sprint
+2. Chat Metrics
    1. Number of monthly active users in chat, total
    2. Number of monthly active users in chat, external
    3. Weekly volume of Chat messages
-2. Wiki Metrics
+3. Calendar Metrics
+   1. Number of public meetings per quarter
+   2. Number of external users attending public meetings
+4. Video Conference
+   1. Number of attendees, total (public meetings)
+   2. Number of attendees, external (public meetings)
+5. Wiki Metrics
    1. Number of monthly active users in wiki, total
    2. Number of monthly active users in wiki, visitors
    3. Weekly volume of wiki edits/contributions
-3. Calendar Metric: Number of external users attending public meetings
-4. Listserv Metrics
+6. Listserv Metrics
    1. Number of subscribed users in listserv, total
    2. Number of subscribed users in listserv, external
    3. Average number of responses in listserv thread
-5. Shared Inbox Messages
+7. Shared Inbox Metrics
    1. Weekly volume of messages to shared inbox
    2. Average response time for a message
-6. Video Conference
-   1. Number of attendees, total (public meetings)
-   2. Number of attendees, external (public meetings)
 
 ### Destination for live updating metrics
 
