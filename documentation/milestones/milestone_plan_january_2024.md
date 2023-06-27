@@ -23,6 +23,8 @@ The following milestones are considered essential to finish before January 2024.
 
 ### Participatory-processes-related north star milestones
 * Open-Source-Group
+* Participant-Advisory-Councils
+* Participatory-Tooling
 
 ## Additional milestones
 These milestones should also be delivered by January 2024, but are not considered 'north star' milestones in the sense meant above.

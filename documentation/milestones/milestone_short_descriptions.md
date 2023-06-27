@@ -626,6 +626,25 @@ Make a plan for the overall approach to participatory processes for the grants.g
 * "Hackathon" with challenge budget
 * Ongoing sprint/quarterly planning for "budgeting" software delivery based on story points
 
+## Participant advisory councils
+Diagram short name: `Participant-Advisory-Councils`
+
+Dependencies: `Participatory-Plan`
+
+Setup multiple participant advisory councils representing key stakeholders for grants.gov modernization as well as NOFO simplification.
+
+Details of this plan to be developed during `Participatory-Plan`.
+
+
+## Participatory tooling
+Diagram short name: `Participatory-Tooling`
+
+Dependencies: `Participatory-Plan`
+
+Setup and configure tooling that supports participant engagement processes, such as participatory budgeting software and processes. These processes can be used in the hackathon processes as well as potentially for stakeholder input during ongoing sprint/quarterly planning.
+
+Details of this plan to be developed during `Participatory-Plan`.
+
 ## Hackathon informational page
 Diagram short name: `Hackathon-Page`
 

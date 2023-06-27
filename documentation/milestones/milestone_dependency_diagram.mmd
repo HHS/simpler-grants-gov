@@ -161,13 +161,15 @@ flowchart LR
     subgraph Hackathon
         Participatory-Plan
         Participatory-Plan --> Hacakthon-Page
+        Participatory-Plan --> Participant-Advisory-Councils
+        Participatory-Plan --> Participatory-Tooling
         Hackathon-Data
         Hackathon-Listing:::northStar
         Participatory-Plan --> Recruit-Hackathon-Workgroups
         Participatory-Plan --> Recruit-Hackathon-Participants
         RFI
         RFI-Tools
-        Hacakthon-Page & NOFO-Prototypes --> Hackathon-Listing
+        Hacakthon-Page & NOFO-Prototypes & Participatory-Tooling --> Hackathon-Listing
         Recruit-Hackathon-Workgroups & Recruit-Hackathon-Participants --> Hackathon-Listing
         Hackathon-Listing --> Hackathon-Apply
         Hackathon-Listing --> Hackathon-Listing-Internal-Entry
