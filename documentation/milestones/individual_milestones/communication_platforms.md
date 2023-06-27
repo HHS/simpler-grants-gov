@@ -8,8 +8,8 @@
 | Target Release  | TODO: Add Date |
 | Product Owner   | Lucas Brown    |
 | Document Owner  | Billy Daly     |
-| Lead Developer  | TODO: Add Name |
-| Lead Designer   | TODO: Add Name |
+| Lead Developer  | Aaron Couch    |
+| Lead Designer   | Andy Cochran   |
 
 ## Short description
 
@@ -141,20 +141,22 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in a public place.
   - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
   - [ ] An ADR has been recorded which documents the tool chosen and the reasons for selecting it
+  - [ ] An ADR has been recorded which outlines the norms around how these tools should be used collectively as part of a broader team communication plan
 - [ ] Chat is live with the following conditions satisfied:
   - [ ] Users can post messages to public channels (potentially with some restrictions applied).
   - [ ] Users can send private messages to each other as well as view private and public channels.
   - [ ] Users can reply to messages in a thread that other users can see.
   - [ ] Users can use emojis to react to messages.
 - [ ] Wiki is live with the following conditions satisfied:
-  - [ ] At least 1 document has been added to the wiki.
+  - [ ] At least 1 document has been added to the wiki (preferably the onboarding instructions for these tools)
   - [ ] Without logging in, members of the public can see wiki documents.
   - [ ] Users can see history of changes to all documents.
   - [ ] Web analytics have been integrated into the wiki and administrators can report on unique users, page views, etc.
 - [ ] Ticketing system is live with the following conditions satisfied:
+  - [ ] At least 1 ticket has been created and assigned to an epic (or an equivalent concept).
   - [ ] Without logging in, members of the public can see tickets that are being worked on.
   - [ ] Default 'templates' have been created for tickets, epics, etc, that have the fields we've decided are necessary for the project.
-  - [ ] Users can create epics (or a similar concept) and track burndown.
+  - [ ] Users can track tickets in sprints and monitor things like burndown.
   - [ ] Members of the public can submit feature requests or report bugs
 - [ ] Calendar is live with the following conditions satisfied:
   - [ ] At least 1 event has been added
@@ -199,7 +201,7 @@ TODO: See if we can reduce the list of metrics to track
 
 ### Destination for live updating metrics
 
-Not yet known.
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
 
 ## Planning
 
