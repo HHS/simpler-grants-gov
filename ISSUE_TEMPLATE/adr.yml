@@ -1,31 +1,48 @@
 name: ADR 
-description: Create a new ADR
+description: Record an architectural decision about the project
 title: "[ADR]: "
-labels: ["adr", "decision"]
+labels: ["docs: adr"]
 assignees:
   - octocat
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to create this ADR!
+        Record an architectural decision about the project
+  - type: markdown
+    attributes:
+      value: |
+        **Example** [Wiki ADR](https://github.com/HHS/grants-api/issues/30)
   - type: textarea
-    id: context
+    id: description
     attributes:
-      label: Context and Problem Statement
-      description: Important decisions about the structure of a codebase, the tools or platforms adopted, and the scope or vision of a product are made all throughout a project's lifecycle. Often these decisions are made and changed blindly with little record of why that decision was made, making it difficult for other collaborators and even the original decision makers to understand the justification behind that decision in the future.
-    validations:
-      required: false
-  - type: dropdown
-    id: drivers
-    attributes:
-      label: Decision drivers
-      description: What are the decision drivers? 
-      options:
-        - Explicit (Important decisions about the project architecture should be clear and unambiguous)
-        - Documented (There should be a written record describing which decisions are made)
-        - Accessible (Decision records should be centrally located, searchable, and accessible to non-technical audiences)
-        - Portable (The decision records should be able to travel with the code when it's forked, cloned, etc.)
-        - Maintainable (The system we adopt should be easy to maintain or amend as needed.)
+      label: Description
+      description: 1-2 sentence summary of the decision that needs to be made
     validations:
       required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: List of options to evaluate
+    validations:
+      required: false
+  - type: textarea
+    id: decision-criteria
+    attributes:
+      label: Decision Criteria
+      description: List of decision criteria to evaluate
+    validations:
+      required: false
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      options:
+        - label: The ADR is drafted and stored in `documentation/decisions/adr`
+        - label: The ADR is included in the necessary table of contents in the ADR/decision folder
+        - label: The ADR describes the drivers and pros and cons of the decision
+        - label: The ADR has been reviewed and approved by the internal team
+        - label: The ADR satisfies requirements that are outlined in the ADR template
+    validations:
+      required: true      
