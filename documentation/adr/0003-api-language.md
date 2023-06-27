@@ -3,7 +3,7 @@
 - **Status:** Draft 
 - **Last Modified:** 2023-06-26
 - **Related Issue:** [#27](https://github.com/HHS/grants-api/issues/27) 
-- **Deciders:** Lucas Brown, Aaron Couch, Sammy Steiner, Daphne Gold
+- **Deciders:** Lucas Brown, Aaron Couch, Sammy Steiner, Daphne Gold, Billy Daly
 
 ## Context and Problem Statement
 
