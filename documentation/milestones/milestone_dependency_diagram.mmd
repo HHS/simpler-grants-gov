@@ -179,8 +179,9 @@ flowchart LR
 
     subgraph Communications Tooling
         Setup-Meetings
-        Comms-Platforms:::planning --> Milestone-Template:::executing
+        Comms-Platforms:::executing --> Milestone-Template:::executing
         Comms-Platforms --> Open-Source-Tools
+        Comms-Platforms --> HHS-Internal-Site
         Open-Source-Tools & Comms-Platforms --> Open-Source-Group:::northStar
         Open-Source-Group --> Hackathon-Listing
         Bug-Bounty

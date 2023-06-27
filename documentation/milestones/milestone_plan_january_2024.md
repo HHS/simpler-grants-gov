@@ -17,6 +17,7 @@ The following milestones are considered essential to finish before January 2024.
 * Measurement-Dashboard
 
 ### User-interface-related north star milestones
+* Static-Site
 * Foundational-UI
 * Search-UI
 
@@ -32,6 +33,7 @@ These milestones should also be delivered by January 2024, but are not considere
 * i18n
 * Plan-Grants-as-a-Platform
 * Participatory-Plan
+* Document-Sam
 
 ## Milestone subgraphs
 Many subgraphs are related to the milestones above. These are the groupings labeled in the [dependency diagram](./milestone_dependency_diagram.mmd) as subgraphs. For instance, the top left of the dependency diagram currently has a yellow/beige box labeled "Communications Tooling." That is the "Communications Tooling" subgraph, and all the milestones inside that box are considered part of that subgraph.

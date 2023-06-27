@@ -330,6 +330,15 @@ Diagram short name: `Milestone-Template`
 
 [Link](./individual_milestones/milestone_template_published.md)
 
+## HHS NOFO transformation internal site
+Diagram short name: `HHS-Internal-Site`
+
+Dependencies: `Comms-Platforms`
+
+Create a site where HHS staff can work privately on the NOFO transformation effort, sharing resources, training, Q&As, legal questions, etc.
+
+Ideally, this would use the same communication platforms as implemented in the milestone `Comms-Platforms`. For instance, it could be a wiki directory with access restricted to HHS employees.
+
 ## Open source tools
 Diagram short name: `Open-Source-Tools`
 
