@@ -419,7 +419,6 @@ For each of these meetings, their definition of done is:
 * Roles are set (e.g., an MC or rotating MC schedule is assigned)
 * We've had at least one of these meetings
 
-
 # NOFO milestones
 
 ## NOFO milestone planning
@@ -722,10 +721,61 @@ A submission, by the software development modernization team for grants.gov, for
 
 # User interface milestones
 
+## Design tooling
+Diagram short name: `Design-Tooling`
+
+Dependencies: `None`
+
+We must have easy-to-use and effective tools for design. It is crucial that they can be used collboratively as a team. The tools and the assets they generate must be accessible to internal partners (HHS or employed by HHS) as well as external partners (members of the general public).
+
+### Protoptyping
+Make an analysis of needs for wireframing and prototyping tools that facilitate design conversation, can be used in research activities, and provide artifacts for stakeholder review. Platform availability, live collbaration, interactivity, and handoff features should be assessed.
+
+Explore tools such as:
+
+- Figma
+- Adobe XD
+- InVision Studio
+- Sketch
+
+### Diagramming
+Diagrams are a great design tool when figuring out the essentials, the flow of pages, and conditional logic. Diagrams can become the artifact engineers reference in implementation. This is an especially fast way of working when using a robust design system (USDWS). Low-fidelity design artifacts like diagrams prevent engineers from misinterpreting visual design intent. If engineers use the components described in diagrams and follow established design patterns, then they've met the requirements. If a designer needs to communicate styling that differs from established patterns, it's a good signal to step back and align with the engineer.
+
+Diagramming tools aren't used only by designers. As engineers create artifacts like architectural diagrams. Diagrams improve collaboration between disciplines by annotating business requirements, policy requirements, context for why design decisions were made, or how the API should be used. Needs of of all disciplines and collborative use should be assessed.
+
+Explore tools that work for all disciplines, such as:
+
+- Mural (note: existing HHS licenses)
+- Lucidchart
+- Miro
+- Visio
+- Figjam
+- Draw.io
+- ClickUp
+
+_\* A diagramming tool such as MermaidJS or GraphViz may be chosen for creating tecnhical documentation in a machine-readable, version-controled format in addition to a more collaborative tool for design, research, meetings, and general purposes. If multiple tools are chosen, the intended use cases of each should be clearly delineated._
+
+### Research Operation
+As a community and userbase grows, so does the need for moderated and unmoderated usability testing. It's important that participants are screened, identified, provided incentives, and engaged in equitable ways. Tools should be evalutated for how they allow for various testing methodologies (card sorting, tree testing, first-click testing, surveys, screen recording, etc), how they integrate with our prototyping tools, scalability, and how they organize qualitative and quantitative insights.
+
+Explore tools for participant recruitment/incentivization, such as:
+
+- Ethnio
+- User Interviews
+- Respondent
+
+Explore tools for unmoderated usability testing, such as:
+
+- Maze
+- Dovetail
+- UserTesting
+- UsabilityHub
+- Optimal Workshop
+
 ## Static site launch with NOFO content
 Diagram short name: `Static-Site`
 
-Dependencies: `Beta-Domain`, `FE-Plan`
+Dependencies: `Beta-Domain`, `Design-Tooling`, `FE-Plan`
 
 Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort.
 
@@ -835,7 +885,7 @@ Ideally, every release of new content should be followed shortly thereafter by t
 ## Foundational UI
 Diagram short name: `Foundational-UI`
 
-Dependencies: `FE-CI-CD`, `Research-Synthesis`
+Dependencies: `Design-Tooling`, `FE-CI-CD`, `Research-Synthesis`
 
 Build and deploy a basic UI framework for the site, using USWDS, informed by research synthesis.
 
@@ -1007,7 +1057,7 @@ Document which of these tasks can be completed using APIs vs which must go throu
 ## User research compensation
 Diagram short name: `User-Research-Compensation`
 
-Dependencies: `None`
+Dependencies: `Design-Tooling`
 
 Investigate potentially setting up a system for compensation user research participants, modeled after the compensation system developed by USDS at the White House.
 
@@ -1016,7 +1066,7 @@ This will promote fairness, as well as increasing the quality and diversity of o
 ## User research participants database
 Diagram short name: `User-Research-Database`
 
-Dependencies: `None`
+Dependencies: `Design-Tooling`
 
 Create a database that is easy to maintain and update of potential participants for ongoing user research to contact about future user research opportunities.
 
