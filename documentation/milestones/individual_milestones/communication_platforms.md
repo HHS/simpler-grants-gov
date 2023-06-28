@@ -102,6 +102,25 @@ Explore and evaluate options for wiki-style storage and editing of documents, su
 - API-based Headless CMS
 - Others as suggested by dev team
 
+### Document sharing
+
+Explore and evaluate options for drafting, sharing, and collaborating on internal project documents:
+
+- One of the wiki options above
+- [Google Drive](https://www.google.com/drive/)
+- [Microsoft Sharepoint](https://www.microsoft.com/en-us/microsoft-365/sharepoint/collaboration)
+- [Dropbox](https://www.dropbox.com/)
+- Others as suggested by dev team
+
+### Sprint retro
+
+Explore and evaluate options for a tool that helps facilitate sprint retrospectives, such as:
+
+- [EasyRetro](https://easyretro.io/)
+- [TeamRetro](https://www.teamretro.com/)
+- [Reetro](https://reetro.io/)
+- Others as suggested by dev team
+
 ### Listserv
 
 Explore options for a way to host listserves, such as:
@@ -113,13 +132,14 @@ Explore options for a way to host listserves, such as:
 - [GroupServer](http://groupserver.org/)
 - Others as suggested by dev team
 
-### Email inbox
+### Contact us
 
-Explore options for a way to host an email inbox, such as `grants.simplification@hhs.gov`, where multiple staff can access the mailbox and respond to the messages, such as:
+Explore options for solutions that allow membres of of the public to submit questions or comments about the project as an alternative to a public forum like a listserv:
 
 - [Front](https://front.com/)
 - [Loop Email](https://www.intheloop.io/pricing-us/)
 - [Google collaborative inbox](https://support.google.com/a/users/answer/167430?hl=en)
+- Contact us form on the website
 - HHS internal options
 - Others as suggested by dev team
 
@@ -169,13 +189,22 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] Without logging in, members of the public can see wiki documents.
   - [ ] Users can see history of changes to all documents.
   - [ ] Web analytics have been integrated into the wiki and administrators can report on unique users, page views, etc.
+- [ ] Document sharing platform is live with the following conditions satisfied:
+  - [ ] At least 1 document has been created and shared via the platform
+  - [ ] At least 2 people have contributed to the document
+  - [ ] Multiple users can collaboratively edit the document
+  - [ ] Access to documents can be restricted to certain users or groups
+  - [ ] Documents can optionally be shared with the public so that they can read it without logging in
+- [ ] Sprint retro tool is live with the following conditions satisfied:
+  - [ ] At least 1 sprint retro has been conducted with the tool
+  - [ ] Users can create and assign action items from within the tool
 - [ ] Email listserv is live with the following conditions satisfied
   - [ ] At least one email has been sent out to the listserv
   - [ ] Any member of the listserv can send emails to the entire listserv
   - [ ] Any member of the listserv can reply all to an email
   - [ ] Any member of the listserv can reply directly to an email sender
-- [ ] Shared email inbox is live with the following conditions satisfied
-  - [ ] At least 1 email has been received
+- [ ] Contact us option is live with the following conditions satisfied
+  - [ ] At least 1 inquiry has been received
 
 ### Proposed metrics for measuring goals/value/definition of done
 
@@ -198,12 +227,15 @@ TODO: See if we can reduce the list of metrics to track
    1. Number of monthly active users in wiki, total
    2. Number of monthly active users in wiki, visitors
    3. Weekly volume of wiki edits/contributions
-6. Listserv Metrics
+6. Document sharing metrics
+   1. Number of internal project documents
+   2. Number of publicly accessible project documents
+7. Listserv Metrics
    1. Number of subscribed users in listserv, total
    2. Number of subscribed users in listserv, external
    3. Average number of responses in listserv thread
-7. Shared Inbox Metrics
-   1. Weekly volume of messages to shared inbox
+8. Contact Us Metrics
+   1. Weekly volume of messages/inquiries
    2. Average response time for a message
 
 ### Destination for live updating metrics
