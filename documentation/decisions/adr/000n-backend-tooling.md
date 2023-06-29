@@ -1,10 +1,10 @@
-# {short title of solved problem and solution}
+# Back-end Code Quality Tools
 
-- **Status:** {Draft | Proposed | Rejected | Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
-- **Last Modified:** {YYYY-MM-DD when the decision was last updated} <!-- REQUIRED -->
-- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
-- **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
-- **Tags:** {space and/or comma separated list of tags} <!-- OPTIONAL -->
+- **Status:** Draft
+- **Last Modified:** 2023-06-29
+- **Related Issue:** [#101](https://github.com/HHS/grants-api/issues/101)
+- **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly
+- **Tags:** ADR
 
 ## Context and Problem Statement
 
@@ -17,10 +17,23 @@
 - ...
 
 ## Options Considered
+1. Use default packages integrated into temlate Flask application
+2. Modify or add packages to template to suit our needs
+### Code Linting
+`make lint` runs ALL of the linters!
 
-- {option 1}
-- {option 2}
-- ...
+**flake:** Used to validate the format of our Python code. Configuration options can be found in [setup.cfg](/app/setup.cfg).  
+**mypy:** Used to validate and enforce typechecking in python. Configuration options can be found in [pyproject.toml - tool.mypy](/app/pyproject.toml)  
+**bandit:** Security checks
+
+### Auto-formatting
+`make format` runs ALL formatters!
+
+**isort:** Used to sort our Python imports. Configuration options can be found in [pyproject.toml - tool.isort](/app/pyproject.toml)   
+**black:** Used to format our Python code. Configuration options can be found in [pyproject.toml - tool.black](/app/pyproject.toml)
+
+### Package Manager
+Poetry
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -38,7 +51,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
-### {option 1}
+### Use template defaults
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
@@ -50,7 +63,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
   - Bad, because {argument c}
   - ...
 
-### {option 2}
+### Modify template packages
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
