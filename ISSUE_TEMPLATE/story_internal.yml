@@ -6,6 +6,13 @@ assignees:
   - octocat
 body:
   - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear and concise summary of the task
+    validations:
+      required: true
+  - type: textarea
     id: user-story
     attributes:
       label: User story
