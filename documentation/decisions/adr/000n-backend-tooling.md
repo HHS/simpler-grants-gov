@@ -1,7 +1,7 @@
 # Back-end Code Quality Tools
 
-- **Status:** Draft
-- **Last Modified:** 2023-06-29
+- **Status:** Proposed
+- **Last Modified:** 2023-06-30
 - **Related Issue:** [#101](https://github.com/HHS/grants-api/issues/101)
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly
 - **Tags:** ADR
