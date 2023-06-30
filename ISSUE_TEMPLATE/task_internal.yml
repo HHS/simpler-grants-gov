@@ -1,0 +1,22 @@
+name: Task (Internal Use Only)
+description: Tracking our work through tasks
+title: "[Task]: "
+labels: ["backlog"]
+assignees:
+  - octocat
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the task
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: A clear and concise checklist of expectations including definition of done.
+      placeholder: Explain the steps to success!
+    validations:
+      required: false

@@ -1,6 +1,6 @@
-name: Ticket (Internal Use Only)
-description: Tracking our work through tickets
-title: "[Ticket]: "
+name: Story (Internal Use Only)
+description: Tracking our work through stories
+title: "[Story]: "
 labels: ["backlog"]
 assignees:
   - octocat
