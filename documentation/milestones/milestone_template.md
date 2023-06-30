@@ -61,7 +61,7 @@
 ## Planning
 
 ### Assumptions & dependencies
-<!-- Optional -->
+<!-- Required -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
@@ -119,7 +119,7 @@ Are there any fields being shared publicly that have never been shared in PROD b
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product? 
+Does this milestone expose any new attack vectors or expand the attack surface of the product?
 
 If so, how are we addressing these risks?
 
