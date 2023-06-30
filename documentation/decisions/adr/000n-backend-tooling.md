@@ -8,26 +8,26 @@
 
 ## Context and Problem Statement
 
-{Describe the context and problem statement, e.g., in free form using two to three sentences. You may want to articulate the problem in form of a question.}
+Back-end code quality tools should facilitate and efficiently enforce linting, auto-formatting, type-checking and security concerns. They should be configurable
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- {driver 1, e.g., a constraint, priority, condition, etc.}
-- {driver 2, e.g., a constraint, priority, condition, etc.}
-- ...
+- **ease of use and configurability**:
+- **speed:**
+- **documentation and resources:**
 
 ## Options Considered
-1. Use default packages integrated into temlate Flask application
-2. Modify or add packages to template to suit our needs
+1. Use a curated collection of Python libraries described below
+
+2. Use a different set of Python libraries
+
 ### Code Linting
-`make lint` runs ALL of the linters!
 
 **flake:** Used to validate the format of our Python code. Configuration options can be found in [setup.cfg](/app/setup.cfg).  
 **mypy:** Used to validate and enforce typechecking in python. Configuration options can be found in [pyproject.toml - tool.mypy](/app/pyproject.toml)  
 **bandit:** Security checks
 
 ### Auto-formatting
-`make format` runs ALL formatters!
 
 **isort:** Used to sort our Python imports. Configuration options can be found in [pyproject.toml - tool.isort](/app/pyproject.toml)   
 **black:** Used to format our Python code. Configuration options can be found in [pyproject.toml - tool.black](/app/pyproject.toml)
@@ -39,43 +39,4 @@ Poetry
 
 Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
 
-### Positive Consequences <!-- OPTIONAL -->
-
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
-
-### Negative Consequences <!-- OPTIONAL -->
-
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
-
-## Pros and Cons of the Options <!-- OPTIONAL -->
-
-### Use template defaults
-
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
-
-- **Pro**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
-
-### Modify template packages
-
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
-
-- **Pro**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
-
-## Links <!-- OPTIONAL -->
-
-- [{Link name}](link to external resource)
-- ...
+Other options included adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries. [Ruff](https://github.com/astral-sh/ruff) was also considered as an option for its speed and growing community adoption.
