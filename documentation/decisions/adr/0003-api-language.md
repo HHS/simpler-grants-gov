@@ -26,7 +26,7 @@ In addition to the Nava and HHS teams ability to develop and maintain an API in 
 
 
 ## Decision Outcome <!-- REQUIRED -->
-Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints. 
+Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, Python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints. 
 
 ### Positive Consequences <!-- OPTIONAL -->
 - We're hopeful that this choice will lead to open source contribution and adoption
