@@ -16,6 +16,7 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 - **Speed:** Code quality tools should be able to run in an timely manner, ideally in a pre-commit hook.
 - **Documentation and resources:** Code quality tools should have robust and helpful documentation, specifically around usage and configuration.
 - **Lean:** Selection of code quality tools should cover all use-cases with little overlap for ease of use and to minimize mental surface area required to understand the system. As in, each tool should have a specific, meaningful purpose.
+- **Maintain security:** Tooling should assist us in identifying security concerns and vulnerabilities.
 
 ## Options Considered
 
@@ -31,10 +32,13 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 - [bugbear](https://pypi.org/project/flake8-bugbear/) for finding likely bugs and design problems.
 - [alfred](https://pypi.org/project/flake8-alfred/) for finding unsafe/obsolete symbols.
 
-**Bandit:** Security checking tool used to identify common concerns.  
+### Security
+**Bandit:** Security checking tool used to identify common concerns in Python code.  
 [Bandit documentation](https://bandit.readthedocs.io/en/latest/)  
 [Bandit configuration](https://bandit.readthedocs.io/en/latest/config.html)
 
+**Safety:** Safety first! Safety scans dependencies for vulnerabilities and security concerns.[^*]  
+[Safety documentation](https://docs.pyup.io/docs/getting-started-with-safety-cli)
 ### Type Checking
 
 **Mypy:** Validate and enforce static type checking in Python.  
@@ -47,6 +51,10 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 
 **Black:** Format Python code.
 [Black documentation](https://github.com/psf/black)
+
+### Licensing[^*]
+**pip-licenses:** CLI tool for checking the software license of installed Python packages with `pip`.
+[pip-licenses documentation](https://github.com/raimon49/pip-licenses)
 
 ### Package Manager
 
@@ -64,3 +72,5 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 TBD. Preferred -- Option 1.
 
 Other options included adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries. [Ruff](https://github.com/astral-sh/ruff) was also considered as an option for its speed and growing community adoption.
+
+[^*]: Addition to the existing curated collection
