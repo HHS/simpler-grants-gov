@@ -1,7 +1,7 @@
 # API Language
 
-- **Status:** Draft 
-- **Last Modified:** 2023-06-26
+- **Status:** Accepted 
+- **Last Modified:** 2023-06-30
 - **Related Issue:** [#27](https://github.com/HHS/grants-api/issues/27) 
 - **Deciders:** Lucas Brown, Aaron Couch, Sammy Steiner, Daphne Gold, Billy Daly
 
@@ -26,25 +26,14 @@ In addition to the Nava and HHS teams ability to develop and maintain an API in 
 
 
 ## Decision Outcome <!-- REQUIRED -->
-Pending Discussion and Decision
-
-<!-- Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }. -->
+Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints. 
 
 ### Positive Consequences <!-- OPTIONAL -->
-Pending Discussion and Decision
-
-<!-- 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ... 
--->
+- We're hopeful that this choice will lead to open source contribution and adoption
+- We can make use of python libraries designed for complex data queries to quickly deliver features and analytics
 
 ### Negative Consequences <!-- OPTIONAL -->
-Pending Discussion and Decision
-
-<!-- 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
--->
+- Will require some context switching when going from work on the API to the front-end
 
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
