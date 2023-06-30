@@ -9,13 +9,17 @@
 
 ## Context and Problem Statement
 
-In order to perform necessary testing, linting, other continuous integration tasks, and continous deployment, a task runner needs to be selected and an interface described to initiate tasks.
+A task runner needs to be selected and an interface described to initiate tasks so that the project can perform necessary testing, linting, other continuous integration tasks, and continous deployment.
+
+The task runner should be able to run on commits and pull requests and support both testing of code and deployment to various environments. The task runner should be able to run tasks within its own environment as well as initiate remote tasks.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- {driver 1, e.g., a constraint, priority, condition, etc.}
-- {driver 2, e.g., a constraint, priority, condition, etc.}
-- ...
+- ** speed **
+- ** ease of use **
+- ** available tooling **
+- ** cost **
+- ** security and authorization **
 
 ## Options Considered
 
