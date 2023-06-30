@@ -38,6 +38,7 @@ body:
     id: definition-of-done
     attributes:
       label: Definition of Done
+      description: Leave the following acceptance criteria unchecked when the ticket is created then mark them as completed as you meet each criterion with the ADR
       options:
         - label: The ADR is drafted and stored in `documentation/decisions/adr`
         - label: The ADR is included in the necessary table of contents in the ADR/decision folder
