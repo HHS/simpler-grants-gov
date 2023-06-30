@@ -1,15 +1,15 @@
 # Communication platforms
 
-| Field           | Value          |
-| --------------- | -------------- |
-| Document Status | Final Draft    |
-| Epic Link       | TODO: Add Link |
-| Epic Dashboard  | TODO: Add Link |
-| Target Release  | TODO: Add Date |
-| Product Owner   | Lucas Brown    |
-| Document Owner  | Billy Daly     |
-| Lead Developer  | Aaron Couch    |
-| Lead Designer   | Andy Cochran   |
+| Field           | Value                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Document Status | Final Draft                                                          |
+| Epic Link       | [Issue 47](https://github.com/HHS/grants-api/issues/47)              |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
+| Target Release  | 2023-08-23                                                           |
+| Product Owner   | Lucas Brown                                                          |
+| Document Owner  | Billy Daly                                                           |
+| Lead Developer  | Aaron Couch                                                          |
+| Lead Designer   | Andy Cochran                                                         |
 
 ## Short description
 
@@ -134,13 +134,13 @@ Explore options for a way to host listserves, such as:
 
 ### Contact us
 
-Explore options for solutions that allow membres of of the public to submit questions or comments about the project as an alternative to a public forum like a listserv:
+Explore options for solutions that allow members of of the public to submit questions or comments about the project as an alternative to a public forum like a listserv:
 
 - [Front](https://front.com/)
 - [Loop Email](https://www.intheloop.io/pricing-us/)
 - [Google collaborative inbox](https://support.google.com/a/users/answer/167430?hl=en)
 - Contact us form on the website
-- HHS internal options
+- HHS internal options for shared inbox, such as grants.simplification@hhs.gov
 - Others as suggested by dev team
 
 ### General requirements
@@ -245,7 +245,7 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 ## Planning
 
 ### Assumptions & dependencies
-<!-- Optional -->
+<!-- Required -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
@@ -334,7 +334,10 @@ Yes, we expect there to be some integrations between the following tools in prod
 
 *Does this milestone expose any new attack vectors or expand the attack surface of the product?*
 
+1. **Public Access:** While most of these tools are meant for sharing publicly available content to external stakeholders, some tools we may also want to use for internal collaboration (e.g. document sharing, shared calendar). As a result we must be mindful of configuration changes that may expose internal content (documents, events, etc.) to members of the public who are also on these platforms.
+2. **External Contributions:** If members of the public are able to comment on or contribute content to these communications platforms, certain contributors may contribute content that does not align with the values or perspectives of HHS or the community guidelines established for the open source community.
+
 *If so, how are we addressing these risks?*
 
-1. **Public Access:** While most of these tools are meant for sharing publicly available content to external stakeholders, some tools we may also want to use for internal collaboration (e.g. document sharing, shared calendar). As a result we must be mindful of configuration changes that may expose internal content (documents, events, etc.) to members of the public who are also on these platforms.
-2. **External Contributions:**
+1. **Public Access:** Document expectations around what content can be made public on these platforms and train internal stakeholders (e.g. HHS full-time staff and HHS contractors) on how to appropriately determine whether content can be published on these platforms.
+2. **External Contributions:** Document the community guidelines within the public repository and prioritize tools and platforms that enable content moderation and review, so that internal members can ensure that inappropriate content is either prevented from being published or removed once its identified.
