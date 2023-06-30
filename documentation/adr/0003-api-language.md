@@ -43,18 +43,23 @@ Chosen option: Python, because it is free and open source and designed to be eas
 
 Python as a scripting language is fast and productive. Web-based applications can be created quickly and the code is highly readable. Python syntax is easy to understand, well-defined and extensible. APIs built over python are highly scalable and have an unmatched speed.
 
+Because of it's popularity in the open source community, python makes it easy for open source contributors to support our work. 
+
 - **Pros**
   - Nava and HHS experience with Python and APIs built with Python
   - Number of available libraries and frameworks
+  - Robust data science and algorithmic libraries
   - Free and open source to use
   - Ideal for data computation and complex database queries
 - **Cons**
-  - Single threaded and can be slower than other options
+  - Single threaded locking of GIL can make computationally expensive opersation slower than other options
 
 
 ### Javascript and Node
 
 Node JS is used to build fast, highly scalable network applications based on an event-driven non-blocking input/output model, single-threaded asynchronous programming. It also suits well for microservice-based products. Such Node.js utility is accomplished by such characteristics as support of a non-blocking input-output and a significant number of connections.
+
+Because of it's popularity in the open source community, Javascript and Node makes it easy for open source contributors to support our work.
 
 - **Pros**
   - Nava experience with Javascript language and Node based API servers
@@ -70,6 +75,8 @@ Node JS is used to build fast, highly scalable network applications based on an 
 ### Java
 
 Java is widely used for building enterprise-scale web applications as it is one of the most stable languages on the market. Java’s advantages include platform independence, multi-threaded processing, automatic garbage collection, and security.
+
+Because of it's proprietary nature, Java is not as popular with the open source community, which adds some barriers for open source contributors to support our work.
 
 - **Pros**
   - Multi-threaded processing
