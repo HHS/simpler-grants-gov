@@ -43,7 +43,7 @@ Chosen option: Python, because it is free and open source and designed to be eas
 
 Python as a scripting language is fast and productive. Web-based applications can be created quickly and the code is highly readable. Python syntax is easy to understand, well-defined and extensible. APIs built over Python are highly scalable and have an unmatched speed.
 
-Because of it's popularity in the open source community, python makes it easy for open source contributors to support our work. 
+Because of it's popularity in the open source community, Python makes it easy for open source contributors to support our work. 
 
 - **Pros**
   - Nava and HHS experience with Python and APIs built with Python
