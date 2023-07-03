@@ -1,6 +1,6 @@
 # Use Figma for design prototyping
 
-- **Status:** Draft <!-- REQUIRED -->
+- **Status:** Proposed <!-- REQUIRED -->
 - **Last Modified:** 2023-07-03 <!-- REQUIRED -->
 - **Related Issue:** [#103](https://github.com/HHS/grants-api/issues/103) <!-- RECOMMENDED -->
 - **Deciders:** Andy Cochran, Emily Ianacone, Lucas Brown <!-- REQUIRED -->
