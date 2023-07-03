@@ -1,15 +1,15 @@
-# DB & API Planning
+# DB Planning
 
-| Field           | Value          |
-| --------------- | -------------- |
-| Document Status | Draft          |
-| Epic Link       | TODO: Add Link |
-| Epic Dashboard  | TODO: Add Link |
-| Target Release  | TODO: Add Date |
-| Product Owner   | Lucas Brown    |
-| Document Owner  | Gina Carson    |
-| Lead Developer  | Aaron Couch    |
-| Lead Designer   | Andy Cochran   |
+| Field           | Value                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Document Status | Draft                                                                |
+| Epic Link       | [Issue 48](https://github.com/HHS/grants-api/issues/48)              |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
+| Target Release  | 2023-07-19                                                           |
+| Product Owner   | Lucas Brown                                                          |
+| Document Owner  | Gina Carson                                                          |
+| Lead Developer  | Aaron Couch                                                          |
+| Lead Designer   | Andy Cochran                                                         |
 
 
 ## Short description
