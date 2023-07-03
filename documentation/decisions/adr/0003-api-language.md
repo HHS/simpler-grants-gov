@@ -52,7 +52,7 @@ Because of its popularity in the open source community, Python makes it easy for
   - Free and open source to use
   - Ideal for data computation and complex database queries
 - **Cons**
-  - Single threaded locking of GIL can make computationally expensive opersation slower than other options
+  - Single threaded locking of GIL can make computationally expensive operations slower than other options
 
 
 ### Javascript and Node
