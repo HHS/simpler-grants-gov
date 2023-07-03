@@ -59,7 +59,7 @@ Because of its popularity in the open source community, Python makes it easy for
 
 Node JS is used to build fast, highly scalable network applications based on an event-driven non-blocking input/output model, single-threaded asynchronous programming. It also suits well for microservice-based products. Such Node.js utility is accomplished by such characteristics as support of a non-blocking input-output and a significant number of connections.
 
-Because of it's popularity in the open source community, Javascript and Node makes it easy for open source contributors to support our work.
+Because of its popularity in the open source community, Javascript and Node makes it easy for open source contributors to support our work.
 
 - **Pros**
   - Nava experience with Javascript language and Node based API servers
