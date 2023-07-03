@@ -76,7 +76,7 @@ Because of it's popularity in the open source community, Javascript and Node mak
 
 Java is widely used for building enterprise-scale web applications as it is one of the most stable languages on the market. Java’s advantages include platform independence, multi-threaded processing, automatic garbage collection, and security.
 
-Because of it's proprietary nature, Java is not as popular with the open source community, which adds some barriers for open source contributors to support our work.
+Because of its proprietary nature, Java is not as popular with the open source community, which adds some barriers for open source contributors to support our work.
 
 - **Pros**
   - Multi-threaded processing
