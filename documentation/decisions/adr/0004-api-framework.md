@@ -49,7 +49,7 @@ TBD
 
 ### Flask
 
-Flask is a simple, but extensible, micro web framework for python created in 2010 that is easy to learn and build with. While it is capable on its own, it relies on other libraries to add core functionality. It was written to be pythonic, meaning it leverages Python's unique features and follows python's principles of being readable and maintainable. Flask depends on the Werkzeug WSGI toolkit, the Jinja template engine, and the Click CLI toolkit.
+Flask is a simple, but extensible, micro web framework for python created in 2010 that is easy to learn and build with. While it is capable on its own, it relies on other libraries to add core functionality. It was written to be pythonic, meaning it leverages python's unique features and follows python's principles of being readable and maintainable. Flask depends on the Werkzeug WSGI toolkit, the Jinja template engine, and the Click CLI toolkit.
 
 - **Pros**
   - Shallow learning curve, great documentation, and pythonic style makes it easy for contributors to support
@@ -62,7 +62,7 @@ Flask is a simple, but extensible, micro web framework for python created in 201
 
 ### Flask + Connexion
 
-This deserves its own option because it fundamentally changes the way that we would develop with Python+Flask. With connexion, you first write your API contract, using the Swagger/OpenAPI standard. Then, the endpoints you defined will be mapped to your Python view functions, ensuring that your python code does what your API contract says it does. This makes it rather unique in the landscape of Python web frameworks, as most other tools start from your code instead of the other way around.
+This deserves its own option because it fundamentally changes the way that we would develop with python and flask. With connexion, you first write your API contract, using the Swagger/OpenAPI standard. Then, the endpoints you defined will be mapped to your python view functions, ensuring that your python code does what your API contract says it does. This makes it rather unique in the landscape of python web frameworks, as most other tools start from your code instead of the other way around.
 
 - **Pros**
   - Same as Flask
@@ -73,7 +73,7 @@ This deserves its own option because it fundamentally changes the way that we wo
 
   ### FastApi
 
-FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with Python 3.7+ based on standard Python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks. 
+FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks. 
 
 - **Pros**
   - Designed for speed and can perform asynchronous operations natively (if needed)
