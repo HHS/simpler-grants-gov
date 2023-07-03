@@ -18,7 +18,7 @@ The task runner should be able to run on commits and pull requests and support b
 - **speed:** The task runner should produce fast results compared to other options. Some of the components that produce a speedy result include time to initiate the task, time to prepare environments, speed of running similar types of steps (I.E. spin up docker containers), caching capabilities, and ability to parallelize tasks. The project will not have time to test the speed with different tools.
 - **ease of use:** The task runner and interface should be easy to use for developers. Tasks run in the CI tool should be able to be run on local environments where possible. The tool and interface should be well documented. The task runner should have tools, communities, or patterns that make creating new tests or deployments easier.
 - **cost:** The task runner should be cost-competitive.
-- **security and authorization:** The project should have relevant security credentials like Fedramp authorization and should be authorized specifically for the proejct.
+- **security and authorization:** The project should have relevant security credentials like Fedramp authorization and should be authorized specifically for the project.
 
 ## Options Considered
 
