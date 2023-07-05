@@ -22,6 +22,7 @@ This ADR is to decide what python framework to use for the backend API of grants
 
 - Flask 
 - Flask + Connexion
+- Flask + APIFlask
 - FastAPI
 - Django
 
@@ -72,6 +73,19 @@ This deserves its own option because it fundamentally changes the way that we wo
   - Documentation in OpenAPI or Swagger means it's easier to understand and integrate with other tools
 - **Cons**
   - Same as Flask
+
+
+### Flask + APIFlask
+
+This deserves its own option because it adds a lot of support to Flask for a more traditional code first api approach, in contrast to connexion. APIFlask is a lightweight Python web API framework based on Flask and marshmallow-code projects. It's easy to use, highly customizable, ORM/ODM-agnostic, and 100% compatible with the Flask ecosystem. The Nava Flask template repo has recently replaced connexion with apiflask, documented in [connexion replacement decision record](https://github.com/navapbc/template-application-flask/blob/main/docs/decisions/0001-connexion-replacement.md).
+
+- **Pros**
+  - Same as Flask
+  - Simplifies boilerplate code necessary for a Flask API by pulling the best features of many libraries
+  - Very well documented
+- **Cons**
+  - Same as Flask
+  - Relatively young project
 
 
 ### FastApi
