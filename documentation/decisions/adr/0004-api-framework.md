@@ -47,6 +47,7 @@ TBD
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
+
 ### Flask
 
 Flask is a simple, but extensible, micro web framework for python created in 2010 that is easy to learn and build with. While it is capable on its own, it relies on other libraries to add core functionality. It was written to be pythonic, meaning it leverages python's unique features and follows python's principles of being readable and maintainable. Flask depends on the Werkzeug WSGI toolkit, the Jinja template engine, and the Click CLI toolkit.
@@ -60,6 +61,7 @@ Flask is a simple, but extensible, micro web framework for python created in 201
   - Lack of standardization means more decision making and good code quality is very important
   - Async operation takes additional planning and work
 
+
 ### Flask + Connexion
 
 This deserves its own option because it fundamentally changes the way that we would develop with python and flask. With connexion, you first write your API contract, using the Swagger/OpenAPI standard. Then, the endpoints you defined will be mapped to your python view functions, ensuring that your python code does what your API contract says it does. This makes it rather unique in the landscape of python web frameworks, as most other tools start from your code instead of the other way around.
@@ -71,7 +73,8 @@ This deserves its own option because it fundamentally changes the way that we wo
 - **Cons**
   - Same as Flask
 
-  ### FastApi
+
+### FastApi
 
 FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks. 
 
@@ -85,7 +88,7 @@ FastAPI is a modern, fast (high-performance), web framework created in 2018 for 
   - Can have memory management issues
   
 
-  ### Django
+### Django
 
 Django is a full stack python web framework created in 2005 that follows the model–template–views (MTV) architectural pattern. It is maintained by the Django Software Foundation (DSF), an independent organization established in the US as a 501(c)(3) non-profit. Django is well documented and includes everything you may need in a full stack application already installed.
 
