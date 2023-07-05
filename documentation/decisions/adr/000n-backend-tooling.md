@@ -21,7 +21,7 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 
 ## Options Considered
 
-1. Use a curated collection of Python libraries (described below)
+1. Use a curated collection of Python libraries from Flask template repository (described below)
 2. Use a different or modified set of Python libraries
 
 ### Dependency Management
@@ -29,24 +29,16 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 **[Poetry](https://python-poetry.org/docs/):** Python packaging and dependency management.  
 ### Code Linting
 
-**[Flake8](https://flake8.pycqa.org/en/latest/#):** Format and enforce style in our Python code.  
-
-*Additional Flake Extensions:*
-- [bugbear](https://pypi.org/project/flake8-bugbear/) for finding likely bugs and design problems.
-- [alfred](https://pypi.org/project/flake8-alfred/) for finding unsafe/obsolete symbols.
+**[Ruff](https://beta.ruff.rs/docs/):** An extremely fast Python linter, written in Rust. Preferred for its speed and growing community adoption.[^*]
 
 ### Auto-formatting
 
-**[isort](https://pycqa.github.io/isort/):** Sort Python imports.  
-
-**[Black](https://github.com/psf/black):** Format Python code.  
+**[Black](https://github.com/psf/black):** Format Python code. Compatible with [Ruff](https://beta.ruff.rs/docs/faq/#is-ruff-compatible-with-black) out of the box, however, Ruff *may* replace the need for Black at some point. See this [issue](https://github.com/astral-sh/ruff/issues/1904).
 
 ### Type Checking
 
 **[Mypy](https://mypy-lang.org/):** Validate and enforce static type checking in Python.  
 ### Security
-
-**[Bandit](https://bandit.readthedocs.io/en/latest/):** Security checking tool used to identify common concerns in Python code.  
 
 **[Safety](https://docs.pyup.io/docs/getting-started-with-safety-cli):** Safety first! Safety scans dependencies for vulnerabilities and security concerns.[^*]  
 
@@ -59,9 +51,9 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 **[Make](https://www.gnu.org/software/make/manual/make.html):** Run scripts, linters and formatters.  
 
 ## Decision Outcome <!-- REQUIRED -->
+Option #2 is preferred. We would like to use Ruff for linting and add some additional libraries for security and license checks.
 
-TBD.
-
+As we will be using the Flask template repository for initial project set up which already relies on Flake8 and several additional extensions (bugbear, alfred) that would be redundant with Ruff, some extra work will need to be done to migrate away from Flake8 without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration. There are some additional packages that we desire to use that are not included in the template: safety & pip-licenses.
 ## Other Options
 
 Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries.
@@ -70,7 +62,7 @@ Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with 
 [Pipenv](https://pipenv.pypa.io/en/latest/)
 
 **Code Linting:**  
-[Ruff](https://github.com/astral-sh/ruff) was also considered as an option for its speed and growing community adoption.  
+[Flake8](https://flake8.pycqa.org/en/latest/#): Much slower than Ruff. Requires additional extentions like [bugbear](https://pypi.org/project/flake8-bugbear/) that are built into Ruff.  
 [Pylint](https://pypi.org/project/pylint/)
 
 **Auto-formatting:**  
@@ -81,6 +73,7 @@ Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with 
 [Pyre](https://pyre-check.org/)
 
 **Security:**  
+[Bandit](https://bandit.readthedocs.io/en/latest/): Security checking tool used to identify common concerns in Python code. Redundant because Ruff implements `flake8-bandit`.  
 [dependency-check](https://pypi.org/project/dependency-check/)
 
 **License Checking:**  
