@@ -1,15 +1,15 @@
-# DB & API Planning
+# API Planning
 
-| Field           | Value          |
-| --------------- | -------------- |
-| Document Status | Draft          |
-| Epic Link       | TODO: Add Link |
-| Epic Dashboard  | TODO: Add Link |
-| Target Release  | TODO: Add Date |
-| Product Owner   | Lucas Brown    |
-| Document Owner  | Billy Daly     |
-| Lead Developer  | Aaron Couch    |
-| Lead Designer   | TODO: Add Name |
+| Field           | Value                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Document Status | Completed                                                            |
+| Epic Link       | [Issue 42](https://github.com/HHS/grants-api/issues/42)              |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
+| Target Release  | 2023-07-12                                                           |
+| Product Owner   | Lucas Brown                                                          |
+| Document Owner  | Billy Daly                                                           |
+| Lead Developer  | Aaron Couch                                                          |
+| Lead Designer   | Andy Cochran                                                         |
 
 
 ## Short description
@@ -22,7 +22,9 @@ Formalize a series of architectural decisions about the API, including the techn
 ### Business description & value
 <!-- Required -->
 
-{3-4 sentences that describe why this milestone is critical to the project}
+We want to select a technology stack that will maximize the long-term maintainability and performance of the API that we build.
+
+The prime motivation for the decisions outlined below is to select tools that have a proven track record for API development, are relatively accessible to both internal and external stakeholders, and can support the future needs of the project both in terms of scale and complexity.
 
 ### User Stories
 <!-- Required -->
@@ -156,7 +158,7 @@ Some factors to consider are:
 ## Planning
 
 ### Assumptions & dependencies
-<!-- Optional -->
+<!-- Required -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
