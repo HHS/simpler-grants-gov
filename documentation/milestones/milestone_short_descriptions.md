@@ -98,20 +98,22 @@ Make an analysis of needs and alternatives and try to identify whether any aspec
 
 Write an analysis of alternatives with pros/cons/recommendations.
 
-## DB & API planning
-Diagram short name: `DB-API-Plan`
+## API planning
+Diagram short name: `API-Plan`
 
 Dependencies: `SaaS-Plan`
 
-Make an analysis of needs and alternatives and choose:
+Milestone doc: [API planning](./individual_milestones/api_planning.md)
 
-* Database(s) type(s) (e.g., relational, document store, or alternative)
-* Database(s) language(s) (e.g., MongoDB, Postgres or alternative)
-* Database(s) deployment(s) (e.g., RDS or alternative)
-* Database ORM (e.g., SQLAlchemy or alternative)
-* API types (e.g., RESTful JSON, webhooks, GraphQL, or alternatives)
-* API language (e.g., Python, Node)
-* API deployment (e.g., EC2, serverless, or alternative)
+Formalize a series of architectural decisions about the API, including the technology stack we will use, the type of API we will build, and the services we'll leverage to deploy and host it.
+
+## DB planning
+
+Diagram short name: `DB-Plan`
+
+Dependencies: `None`
+
+Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
 Diagram short name: `Infrastructure-as-Code`
