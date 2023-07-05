@@ -1,7 +1,6 @@
 name: Story (Internal Use Only)
 description: Tracking our work through stories
 title: "[Story]: "
-labels: ["backlog"]
 assignees:
   - octocat
 body:

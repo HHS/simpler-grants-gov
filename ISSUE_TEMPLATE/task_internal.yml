@@ -1,7 +1,6 @@
 name: Task (Internal Use Only)
 description: Tracking our work through tasks
 title: "[Task]: "
-labels: ["backlog"]
 assignees:
   - octocat
 body:
