@@ -132,7 +132,23 @@ Some factors to consider are:
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
-1. {Metric 1}
+1. API language metrics
+   1. Days since last patch or minor release
+   2. Number of GitHub stars on main repository
+   3. TIOBE index ranking
+2. API framework metrics
+   1. Days since last patch or minor release
+   2. Number of GitHub stars on main repository
+   3. Number of downloads from primary package manager
+3. API type metrics
+   1. Percentage of [public APIs](https://github.com/public-apis/public-apis) with the same API type (e.g. GraphQL, REST, etc.)
+   2. Number of repos with tagged with a topic that matches this type (e.g. graphql, rest)
+4. Deployment service metrics
+   1. Estimated monthly cost with the following parameters:
+      - 15 deployments per month, with average build time of 5 minutes
+      - 30 million requests per month
+      - Average request size 16KB
+      - Average response size 64KB
 
 ### Destination for live updating metrics
 <!-- Required -->
@@ -180,21 +196,21 @@ The following work will *not* be completed as part of this milestone:
 
 *This can include services going into PROD behind a feature flag that is not turned on.*
 
-1. No
+1. No, this is just a planning milestone
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
 *Are there multiple services that are being connected for the first time in PROD?*
 
-1. No
+1. No, this is just a planning milestone
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
 *Are there any fields being shared publicly that have never been shared in PROD before?*
 
-1. No
+1. No, this is just a planning milestone
 
 ### Security considerations
 <!-- Required -->
@@ -203,4 +219,4 @@ The following work will *not* be completed as part of this milestone:
 
 *If so, how are we addressing these risks?*
 
-1. No
+1. No, this is just a planning milestone
