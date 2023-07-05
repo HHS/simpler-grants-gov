@@ -116,60 +116,6 @@ Some factors to consider are:
 - How expensive is it to deploy an API with this option, both in terms of direct operating costs and in terms of team resources?
 - How easily does this option scale?
 
-### Type of Database
-
-Evaluate and select the database paradigm we will use to store data.
-
-Some potential options include:
-
-- Relational
-- Document
-- Wide-column
-- Key-value
-- Others recommended by dev team
-
-Some factors to consider are:
-
-- What is the nature of the NOFO and grant data that we're storing? Do certain types of databases this type of data better than others?
-- What are our expected access patterns for this data (i.e. will it be read-heavy or write-heavy, will there be lots of complex joins, will there be lots of grouping or aggregation)? Which type of database best suits these access patterns?
-- What is the volume of data we expect to work with? Do certain types of databases offer performance optimizations tailored to this volume and type of data (e.g. sharding, indexing, micropartitioning)?
-- Will we need multiple database types for different parts of our data or application?
-
-### Database Management System
-
-Evaluate and select a DBMS for the type of database we've chosen.
-
-Some potential options include: (note some of these DBMS blend multiple paradigms)
-
-- PostgreSQL or MySQL for relational
-- MongoDB or DynamoDB for document-oriented
-- Appache Cassandra or HBase for wide-column
-- Redis or BerkleyDB for key-value
-- Others recommended by dev team
-
-Some factors to consider are:
-
-- What hosting options are available for this DBMS?
-- Can we easily mock or run this DBMS for local development and testing?
-- Are there trusted libraries that support interfacing with this database in the language we've chosen for our API?
-
-### Database Hosting Service
-
-Evaluate and select a service to host and manage our database.
-
-Some potential options include: 
-
-- Self hosted on an EC2 instance
-- Managed service from cloud provider (e.g. Amazon RDS)
-- Separate Database as a Service (e.g. Supabase)
-
-Some factors to consider are:
-
-- Is this deployment option FedRAMP compliant?
-- How commonly used is this deployment option? Is it easy for new developers to learn?
-- How expensive is it to host a database with this option, both in terms of direct operating costs and in terms of team resources?
-- Does the service offer features like automatic backups or read replicas?
-
 ### Definition of done
 <!-- Required -->
 
@@ -179,11 +125,8 @@ Some factors to consider are:
   - [ ] API Framework
   - [ ] API Type
   - [ ] API Deployment Service
-  - [ ] Database Type
-  - [ ] Database Management System (DBMS)
-  - [ ] Database Hosting Service
 - [ ] Architecture diagram
-  - [ ] An architecture diagram has been published to the `main` branch of the repository
+  - [ ] An initial architecture diagram for the backend has been published to the `main` branch of the repository
   - [ ] The diagram is stored in a format that supports tracking individual changes with version control
 
 ### Proposed metrics for measuring goals/value/definition of done
