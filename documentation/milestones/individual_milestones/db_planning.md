@@ -22,7 +22,7 @@ Formalize a series of architectural decisions about how data is stored, includin
 ### Business description & value
 <!-- Required -->
 
-{3-4 sentences that describe why this milestone is critical to the project}
+This milestone is critical because it serves as the initial planning for the beta.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
 
 ### User Stories
 <!-- Required -->
@@ -30,7 +30,7 @@ Formalize a series of architectural decisions about how data is stored, includin
 - As an **HHS Staff Member**, I want:
   - TODO
 - As a **project maintainer**, I want to:
-  - TODO
+  - evaluate and select the appropriate database type, database management system, and database hosting service so that I have a plan prior to initiating the replication of the Grants.gov database.
 - As an **open source contributor**, I want:
   - TODO
 
@@ -47,6 +47,7 @@ Some potential options include:
 - Wide-column
 - Key-value
 - Others recommended by dev team
+
 
 Some factors to consider are:
 
@@ -125,7 +126,9 @@ beginning of work on this milestone?
 ### Open questions
 <!-- Optional -->
 
-- [x] None
+- [ ] Will this database serve as an OLTP system, OLAP system, or both? Will this database be used for analytics, and is there a need for a second database to be created with data pipelines?
+- [ ] Is the existing Grants.gov database heavy on read or write transactions?
+- [ ] How many external sources does the existing database have?
 
 ### Not doing
 <!-- Optional -->
