@@ -44,18 +44,23 @@ While enforcing compliance with these standards may increase the time and energy
 
 ### Automated test framework
 
+Evaluate and adopt a framework to build and manage an automated test suite for the codebase. This test framework should include:
+
 - Unit tests
 - Integration tests
 - Test coverage
 
 ### Code quality checks
 
+Evaluate and adopt a set of tools to enforce the following code quality checks:
+
 - Code Linting
 - Auto-formatting
 - Type checking
-- Commit conventions
 
 ### Security checks
+
+Evaluate and adopt a set of tools that enforce the following security checks:
 
 - Secrets scanning
 - Upstream CVE monitoring
@@ -63,13 +68,18 @@ While enforcing compliance with these standards may increase the time and energy
 
 ### Dependency management
 
+Evaluate and adopt a tool for managing project dependencies that also tracks and helps resolve:
+
 - Dependency conflicts
 - Dependency updates
-- Dependency funding
+- Dependency licenses (e.g. if we want to avoid certain licenses)
+- Dependency funding (e.g. which dependencies are requesting funding)
 
 ### Config & secrets management
 
-- Loading config variables
+Evaluate and adopt a set of tools that standardize and enforce best practices around secrets management in the project. This collection of tools should support: 
+
+- Loading configs from environment variables or files (e.g. `secrets.toml`, `.env`, etc.)
 - Secrets storage & sharing
 - Runtime injection
 
