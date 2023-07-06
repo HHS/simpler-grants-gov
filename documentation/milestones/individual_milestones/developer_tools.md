@@ -1,15 +1,15 @@
 # Developer Tools
 
-| Field           | Value          |
-| --------------- | -------------- |
-| Document Status | Draft          |
-| Epic Link       | TODO: Add Link |
-| Epic Dashboard  | TODO: Add Link |
-| Target Release  | TODO: Add Date |
-| Product Owner   | Lucas Brown    |
-| Document Owner  | Billy Daly     |
-| Lead Developer  | TODO: Add Name |
-| Lead Designer   | TODO: Add Name |
+| Field           | Value                                                                 |
+| --------------- | --------------------------------------------------------------------- |
+| Document Status | Completed                                                             |
+| Epic Link       | [Issue 50](https://github.com/HHS/grants-equity/issues/50)            |
+| Epic Dashboard  | [Milestones Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
+| Target Release  | 2023-07-19                                                            |
+| Product Owner   | Lucas Brown                                                           |
+| Document Owner  | Billy Daly                                                            |
+| Lead Developer  | Aaron Couch                                                           |
+| Lead Designer   | Andy Cochran                                                          |
 
 ## Short description
 
