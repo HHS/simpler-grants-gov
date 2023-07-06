@@ -139,7 +139,7 @@ Not yet known
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
 
-- [ ] **DB & API Plan:** Choosing a set of developer tools will be depend heavily on the language selected for the API.
+- [ ] **API Plan & frontend Plan:** Choosing a set of developer tools for will be depend heavily on the language selected for both the backend and the frontend.
 - [ ] **Onboard Dev Team:** The dev team should be involved in the selection and implementation of these tools.
 
 Are there any notable capabilities / milestones do NOT we expect to be in place at the
@@ -150,47 +150,60 @@ beginning of work on this milestone?
 
 ### Open questions
 
-- [ ] [to be added]
+- [x] None
 
 ### Not doing
 
 The following work will *not* be completed as part of this milestone:
 
-1. [to be added]
+1. **Full CI/CD setup:** While we *do* want the code quality and security checks to be run on each push to GitHub, the task runner that orchestrates these checks does not need to be the full CI/CD pipeline that will also manage production deployments of the frontend or backend codebases.
 
 ## Integrations
 
 ### Translations
 
-Does this milestone involve delivering any content that needs translation?
+*Does this milestone involve delivering any content that needs translation?*
 
 - Instructions for adopting and using developer tools
 - Instructions for reporting security vulnerabilities
 
-If so, when will English-language content be locked? Then when will translation be
-started and completed?
+*If so, when will English-language content be locked? Then when will translation be started and completed?*
 
 - Languages to support TBD
 - Translation timeline TBD
 
 ### Services going into PROD for the first time
 
-This can include services going into PROD behind a feature flag that is not turned on.
+*This can include services going into PROD behind a feature flag that is not turned on.*
 
-1. None
+1. **Task Runner:** This milestone involves setting up a task runner for the repository that will execute a series of code quality and security checks for both the backend and frontend parts of the codebase
+2. **Secrets Management:** This milestone includes setting up a service to manage secrets.
 
 ### Services being integrated in PROD for the first time
 
-Are there multiple services that are being connected for the first time in PROD?
+*Are there multiple services that are being connected for the first time in PROD?*
 
-1. None
+1. **Task Runner & Secrets Management:** In addition to deploying these services separately, this milestone should also support a strategy for injecting secrets into the task runner during the CI/CD pipeline for running integration tests.
 
 ### Data being shared publicly for the first time
 
-Are there any fields being shared publicly that have never been shared in PROD before?
+*Are there any fields being shared publicly that have never been shared in PROD before?*
 
 1. None
 
 ### Security considerations
+<!-- Required -->
 
+*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
 
+**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors: 
+
+1. Compromising the access to the secrets manager
+2. Compromising individual secrets when they are injected
+
+*If so, how are we addressing these risks?*
+
+1. **Least Privileged Access:** Access to the secrets manager should follow the [principle of least privilege (POLP)](https://csrc.nist.gov/glossary/term/least_privilege)
+2. **Rotating Keys/Tokens:** All secrets, keys, and tokens stored in the secrets manager should have expiration dates (where possible) and we should prioritize secrets managers that support dynamically rotating keys and secrets
+3. **Runtime Injection:** Secrets should be injected as late as possible in any workflow that requires them, preferably at runtime
+4. **Minimizing Secrets:** We should explore options that allow us to integrate services without relying on internally managed secrets, such as managed integrations between existing cloud services
