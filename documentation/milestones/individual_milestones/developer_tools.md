@@ -35,6 +35,7 @@ While enforcing compliance with these standards may increase the time and energy
   - be able to report security vulnerabilities to project maintainers directly, so that they can quickly create and deploy a fix before the vulnerability is made public
 - As a **maintainer of the project**, I want to:
   - have code quality checks run automatically on each push, so that formatting, linting, or security issues are caught before being deployed to production
+  - see visible metrics and indications of code quality adherence such as badges on documentation and color coded check marks attached to code updates, so that I know all of the important checks are passing
   - ensure that new contributions meet certain thresholds for test coverage, so that code contributions from internal and external developers also include tests which validate the code's behavior
   - be automatically notified when updates are available for project dependencies, so that easily evaluate and adopt these new updates and ensure our dependencies don't become stale
   - be notified when a security vulnerability is detected in our project or in an upstream dependency, so we can work to quickly address the vulnerability and deploy a fix
@@ -91,6 +92,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
   - [ ] At least 5 internal developers/maintainers have adopted and run these tools on a cloned version of the repo
   - [ ] At least 3 open source contributors have adopted and run these tools on a forked version of the repo
   - [ ] ADRs documenting the selection of these tools and standards have been created and approved
+  - [ ] The status of key checks are reflected as badges in a project README
 - [ ] **Automated testing framework** is live and meets the following conditions:
   - [ ] At least 1 unit test has been added to the codebase
   - [ ] At least 1 integration test has been added to the codebase
