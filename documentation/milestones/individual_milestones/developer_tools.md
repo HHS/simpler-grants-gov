@@ -13,13 +13,13 @@
 
 ## Short description
 
-Select and implement a set of developer tools that automate key code quality and security checks within the backend codebase.
+Select and implement a set of developer tools that automate key code quality and security checks within the backend and frontend codebases.
 
 ## Goals
 
 ### Business description & value
 
-We must incorporate an effective set of developer tools into our backend codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and open source contributors meet key standards and do not introduce bugs or security vulnerabilities. 
+We must incorporate an effective set of developer tools into our codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and from open source contributors meet key standards and do not introduce bugs or security vulnerabilities. 
 
 While enforcing compliance with these standards may increase the time and energy required for individual contributions, adopting an effective set of tools can increase the speed of delivery over time by reducing the overhead associated with reviewing new code and identifying potential bugs before they are deployed to production.
 
@@ -126,7 +126,7 @@ While enforcing compliance with these standards may increase the time and energy
 - Dependency management metrics
   - Number of days it takes to update an upstream dependency once a new minor or major version has been released
   - Number of dependencies that received funding through this project
-- Config & secrets management metric: Average age of across all tokens/secrets
+- Config & secrets management metric: Average age across all tokens/secrets
 
 ### Destination for live updating metrics
 
