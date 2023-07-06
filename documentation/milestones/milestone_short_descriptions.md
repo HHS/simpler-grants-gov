@@ -39,15 +39,7 @@ Dependencies: `Onboard-Dev-Team`, `DB-API-Plan`
 
 Milestone definition: [Developer tools milestone](./individual_milestones/developer_tools.md)
 
-Install developer tools for backend, including:
-
-- Automated test framework
-- Linters, code quality checkers, and code autoformatters
-- Automated test coverage analysis
-- API description linter (Spectral or alternative) - this can also be saved until API milestone
-- Security scan of packages (Snyk or alternative)
-- Unified logging including cross-request IDs
-- etc
+Select and implement a set of developer tools that automate key code quality and security checks within the backend and frontend codebases.
 
 ## Incident response
 Diagram short name: `Incident-Response`
