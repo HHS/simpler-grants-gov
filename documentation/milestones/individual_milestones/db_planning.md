@@ -103,7 +103,9 @@ Some factors to consider are:
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
-1. {Metric 1}
+1. DB Planning ADR is created under documentation/decisions/adr
+2. Within the ADR, the database type, database management system, and database hosting service are evaluated and selected and address the key considerations
+3. Open questions are discussed and clarified
 
 ### Destination for live updating metrics
 <!-- Required -->
