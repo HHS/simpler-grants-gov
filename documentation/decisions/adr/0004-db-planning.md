@@ -11,16 +11,12 @@ This ADR is to formalize a series of architectural decisions about how data is s
 
 ## Decision Drivers <!-- RECOMMENDED -->
 Type of Database:
+
 - Nature of the NOFO and grant data that we're storing
 - Volume of data and performance considerations
 
 
 DBMS Selection:
-PostgreSQL or MySQL for relational
-MongoDB or DynamoDB for document-oriented
-Appache Cassandra or HBase for wide-column
-Redis or BerkleyDB for key-value
-Others recommended by dev team
 
 - Hosting options
 - Expected access patterns (i.e. heavy read or write transactions)
@@ -29,9 +25,6 @@ Others recommended by dev team
 
 
 Database Hosting Service:
-Self hosted on an EC2 instance
-Managed service from cloud provider (e.g. Amazon RDS)
-Separate Database as a Service (e.g. Supabase)
 
 - FedRAMP compliant deployment option
 - Ease of use and support
