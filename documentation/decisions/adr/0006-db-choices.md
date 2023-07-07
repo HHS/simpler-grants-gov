@@ -1,4 +1,4 @@
-# DB Planning
+# DB Choices
 
 - **Status:** Approved
 - **Last Modified:** 2023-07-05
