@@ -1,10 +1,9 @@
 # API Framework and Libraries
 
-- **Status:** Draft <!-- REQUIRED -->
-- **Last Modified:** 2023-07-05 <!-- REQUIRED -->
+- **Status:** Accepted on 2023-07-06 <!-- REQUIRED -->
+- **Last Modified:** 2023-07-07 <!-- REQUIRED -->
 - **Related Issue:** [#28](https://github.com/HHS/grants-api/issues/28) <!-- RECOMMENDED -->
-- **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner <!-- REQUIRED -->
-- **Tags:** {space and/or comma separated list of tags} <!-- OPTIONAL -->
+- **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Gina Carson, Sumi Thaiveettil, Eshter Oke <!-- REQUIRED -->
 
 ## Context and Problem Statement
 
@@ -27,24 +26,16 @@ This ADR is to decide what python framework to use for the backend API of grants
 - Django
 
 ## Decision Outcome <!-- REQUIRED -->
-TBD
-<!--
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
--->
+
+Chosen option: Flask + APIFlask, because it is well established with a broad community of developers and provides good tooling to move quickly. It has great documentation to help folks contribute quickly. Additionally the Nava Flask template recently adopted it, so we can leverage the template to get going quickly with a well engineered solution.
 
 ### Positive Consequences <!-- OPTIONAL -->
-TBD
-<!--
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
--->
+- Leverages the Nava open source template
+- OpenAPI specs can be auto generated from models in code
 
 ### Negative Consequences <!-- OPTIONAL -->
-TBD
-<!--
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
--->
+- Code first paradigm, we should auto generate api documentation in the CI/CD pipeline to ensure it stays up to date with the code
+- This is a relatively new library, so we should ensure code modularity in case we need to swap it out in the future
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -113,9 +104,8 @@ Django is a full stack python web framework created in 2005 that follows the mod
   - Monolithic style, steep learning curve, and large codebase make it difficult for collaborators
   - Assumes both front and backend are included in the monolith application
 
-<!--
+
 ## Links <!-- OPTIONAL -\->
 
-- [{Link name}](link to external resource)
-- ...
--->
+- [Nava flask template repository](https://github.com/navapbc/template-application-flask)
+- [Nava decision to switch from Connexion to APIFlask](https://github.com/navapbc/template-application-flask/blob/main/docs/decisions/0001-connexion-replacement.md)
