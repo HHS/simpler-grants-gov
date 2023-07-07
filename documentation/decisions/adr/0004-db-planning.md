@@ -47,6 +47,7 @@ The RDBMS selected for Grants.gov is PostgreSQL. This is due to a variety of fac
 - Improved performance for high-frequency write operations and complex queries as opposed to MySQL
 - PostgreSQL support of most advanced database features such as materialized views
 - PostgreSQL trusted Python libraries (API language of choice)
+- PostgreSQL is open source, in alignment with the Grants.gov strategy
 
 ### Database Hosting Service <!-- OPTIONAL -->
 
