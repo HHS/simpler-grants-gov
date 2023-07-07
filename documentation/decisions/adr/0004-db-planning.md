@@ -22,6 +22,7 @@ DBMS Selection:
 - Expected access patterns (i.e. heavy read or write transactions)
 - Ease of creating mock data
 - Trusted libraries that support interfacing with this database in the language we've chosen for our API
+- An open source version of this DBMS is available for self hosting or running locally
 
 
 Database Hosting Service:
