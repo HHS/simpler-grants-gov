@@ -1,0 +1,33 @@
+name: Milestone 
+description: Draft a new milestone document
+title: "[Milestone]: "
+labels: ["docs: milestone"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Draft a new milestone document
+  - type: markdown
+    attributes:
+      value: |
+        **Example:** [DB & API Planning](https://github.com/HHS/grants-api/issues/21)
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: 1-2 sentence summary with link to short description
+    validations:
+      required: true
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Leave the following acceptance criteria unchecked when the ticket is created then mark them as completed as you meet each criterion with the milestone document
+      options:
+        - label: Milestone document is updated and stored in `documents/milestones/individual_milestones/`
+        - label: The milestone document has been linked under the appropriate section in the short description doc
+        - label: The milestone has node has been updated to "planning" in the dependency diagram
+        - label: Milestone has been reviewed and approved by the internal team
+        - label: A corresponding epic has been created for the milestone  
