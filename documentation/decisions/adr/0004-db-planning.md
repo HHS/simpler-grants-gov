@@ -60,4 +60,4 @@ The database hosting service selected is Amazon RDS. This is due to several fact
 ## Links 
 
 - [Comparison of MySQL and PostgreSQL](https://aws.amazon.com/compare/the-difference-between-mysql-vs-postgresql/#:~:text=Summary%20of%20differences%3A%20PostgreSQL%20vs%20MySQL,-Category&text=MySQL%20is%20a%20purely%20relational%20database%20management%20system.,object%2Drelational%20database%20management%20system.&text=MySQL%20has%20limited%20support%20of,views%2C%20triggers%2C%20and%20procedures.)
-- [{What is Amazon RDS?}](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html)
+- [What is Amazon RDS?](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html)
