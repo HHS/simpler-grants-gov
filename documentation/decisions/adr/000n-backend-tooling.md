@@ -53,7 +53,7 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 ## Decision Outcome <!-- REQUIRED -->
 Option #2 is preferred. We would like to use Ruff for linting and add some additional libraries for security and license checks.
 
-As we will be using the Flask template repository for initial project set up which already relies on Flake8 and several additional extensions (bugbear, alfred) that would be redundant with Ruff, some extra work will need to be done to migrate away from Flake8 without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration. There are some additional packages that we desire to use that are not included in the template: safety & pip-licenses.
+We will be using the Flask template repository for initial project set up, which already relies on Flake8 and several additional extensions (bugbear, alfred, bandit) that would be redundant with Ruff. Some extra work will need to be done to migrate away from Flake8 and to Ruff without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration. There are some additional packages that we desire to use that are not included in the template: safety & pip-licenses.
 ## Other Options
 
 Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries.
@@ -69,7 +69,7 @@ Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with 
 [autopep8](https://pypi.org/project/autopep8/)
 
 **Type Checking:**  
-[Pyright](https://microsoft.github.io/pyright/#/)  
+[Pyright](https://microsoft.github.io/pyright/#/): [Comparison of MyPy and Pyright](https://github.com/microsoft/pyright/blob/main/docs/mypy-comparison.md). Language service through Pylance.
 [Pyre](https://pyre-check.org/)
 
 **Security:**  
