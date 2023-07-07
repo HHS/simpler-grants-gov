@@ -1,6 +1,6 @@
 # {short title of solved problem and solution}
 
-- **Status:** {Draft | Proposed | Rejected | Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
+- **Status:** {Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
 - **Last Modified:** {YYYY-MM-DD when the decision was last updated} <!-- REQUIRED -->
 - **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
 - **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
