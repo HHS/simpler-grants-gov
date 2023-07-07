@@ -1,6 +1,6 @@
 # DB Planning
 
-- **Status:** WIP
+- **Status:** Approved
 - **Last Modified:** 2023-07-05
 - **Related Issue:** [#27](https://github.com/HHS/grants-api/issues/104) 
 - **Deciders:** Lucas Brown, Aaron Couch, Gina Carson, Andy Cochran
