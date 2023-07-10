@@ -59,6 +59,13 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - GitBook is not explicitly covered under the existing Grants.gov ATO, so we will likely need to seek the Authority to Operate it
 - Users who don't have a license to edit and manage content in GitBook (i.e. members of the public) can only make suggested edits or contributions through creating Pull Requests (PRs) in GitHub which can present a high barrier to entry for non-technical users
 
+### Back-up Options
+
+If we can't get coverage for GitBook under the existing ATO, we should pursue one of the following solutions:
+
+- **Confluence** if we want to prioritize usability and low maintenance but are willing to compromise on data access
+- **Wiki.js** if we want to prioritize data access and open source tools but are willing to compromise on maintenance costs and usability
+
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
 ### Confluence
@@ -71,6 +78,7 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - **Pricing:** [$5.75 (standard) or $11 (premium) per user per month](confluence-pricing)
 - **Public Access:** Supported, but limited to individual pages or entire spaces
 - **Content Review:** Partial support, limited to drafts and not enforceable
+- **Version History:** Supported by default
 - **Supported Media**
   - Markdown style text
   - File uploads
@@ -113,6 +121,7 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - **Pricing:** [$8 (pro) or $15(business) per user per month](notion-pricing)
 - **Public Access:** Supported, but limited to individual pages
 - **Content Review:** Not supported
+- **Version History:** Limited support, past 30-90 days
 - **Supported Media**
   - Markdown style text
   - Tabular/structured data
@@ -155,6 +164,7 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - **Pricing:** Free for public repositories
 - **Public Access:** Supported by default
 - **Content Review:** Not supported
+- **Version History:** Supported by default
 - **Supported Media**
   - Markdown style text
   - Image embedding
@@ -187,9 +197,10 @@ Although it is a proprietary tool, it has become a standard platform for managin
 #### Details
 
 - **Hosting:** SaaS
-- **Pricing:** [Free (open source projects)](gitbook-oss) or [$6.70 (plus) per user per month](gitbook-pricing)
+- **Pricing:** [$6.70 (plus) or $12.50 (pro) per user per month](gitbook-pricing)
 - **Public Access:** Supported by default
 - **Content Review:** Supported by default
+- **Version History:** Supported by default
 - **Supported Media**
   - Markdown style text
   - File uploads
@@ -210,8 +221,8 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - Supports a wide variety of media and content types
 - Supports Google Analytics integration as well as limited native analytics
 - Supports external contributions through GitHub PRs
-- Supports beginning of type page history and version comparison
-- Provides native support for itnernationalization across all pages
+- Supports beginning-of-time page history and version comparison
+- Supports itnernationalization across all pages
 - Minimimal ongoing maintenance costs due to SaaS hosting
 - Exposes limited API for content and space management
 - Data can be synced to GitHub repo owned by HHS
@@ -224,6 +235,48 @@ Although it is a proprietary tool, it has become a standard platform for managin
 - External users cannot directly comment or suggest changes in the app
 - Native web analytics are less robust than Confluence or Notion
 - More expensive than Confluence for similar feature set
+- Not currently covered under the Grants.gov ATO
+
+### Wiki.js
+
+[Wiki.js](wiki-js) is an open source wiki platform that seeks to replicate many of the basic features found in SaaS offerings like Confluence or GitBook.
+
+#### Details
+
+- **Hosting:** Self-hosted
+- **Pricing:** Free to use, cost of self-hosting
+- **Public Access:** Supported by default
+- **Content Review:** Limited support, via GitHub PRs
+- **Version History:** Limited support
+- **Supported Media**
+  - Markdown style text
+  - File uploads
+  - Image embedding
+  - Video embedding
+  - Diagrams
+- **I18n:** Native support
+- **Web Analytics:** Google Analytics support available
+- **Open Source Status:** Open Source
+- **External Contributions:** Requires sign up (but no license cost)
+- **Data Access:** Total control over data, Git-sync and API available
+
+#### Pros
+
+- Open source and self-hosted
+- Covered under the existing Grants.gov ATO
+- Robust control over access and permissions
+- Supports Google Analytics integration
+- Supports external contributions through GitHub PRs
+- Supports itnernationalization across all pages
+- Supports for git syncing and API access
+- Full control over data
+
+#### Cons
+
+- *Much* less intuitive than other wiki options
+- Documentation for the tool is lacking
+- Requires *significant* investment of staff time for initial configuration and ongoing maintenance
+- Features are less mature than other SaaS offerings like Confluence or GitBook
 
 ## Comparison Matrix
 
@@ -242,7 +295,7 @@ Although it is a proprietary tool, it has become a standard platform for managin
 | Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
 | I18n                        |    🔄     |  🔄   |     ❌      |   ✅    |   ✅    |
 | Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄   |
-| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    2    |
+| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    1    |
 | Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
 | Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
 | External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   🔄   |
