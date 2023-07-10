@@ -195,53 +195,30 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 - Native web analytics are less robust than Confluence or Notion
 - More expensive than Confluence for similar feature set
 
-### Git-based Headless CMS
+## Comparison Matrix
 
-A "headless" CMS separates the creation and management of web content from the format in which it's displayed for external users. This is in contrast to traditional content management systems like Drupal or WordPress. Some headless CMS tools (e.g. [Decap CMS](git-cms-decap) and [Tina.io](git-cms-tina)) use a git-based version control system like GitHub as the backend for storing content generated within the CMS. This file-based content is then rendered as a static site with a Static Site Generator (SSG) like Next.js or Gatsby
+✅ Feature available, meets requirement
+❌ Feature not available, does not meet requirement
+🔄 Partial feature, limited feature availability, feature in progress or undergoing improvements
+1-3 Strength level
+❓Unknown
 
-#### Details
-
-- **Hosting:** Self-hosted
-- **Pricing:** Cost of self hosting
-- **Public Access:** TODO
-- **Content Review:** TODO
-- **Supported Media:** TODO
-- **I18n:** Depends on static site generator (e.g. [Next.js i18n routing](next-i18n))
-- **Web Analytics:** Google analytics must be manually added to the resulting website
-- **Open Source Status:** Open Source options (e.g. [Decap CMS](git-cms-decap) and [Tina.io](git-cms-tina))
-- **External Contributions:** Supported through GitHub
-
-#### Pros
-
-- TODO
-
-#### Cons
-
-- TODO
-
-### API-based Headless CMS
-
-A "headless" CMS separates the creation and management of web content from the format in which it's displayed for external users. This is in contrast to traditional content management systems like Drupal or WordPress. Some headless CMS tools (e.g. [Strapi](strapi) and [Directus](directus)) use a database as the backend for storing content generated within the CMS and expose this content via an API so that it can be rendered as a static site with a Static Site Generator (SSG) like Next.js or Gatsby.
-
-#### Details
-
-- **Hosting:** Self-hosted or SaaS
-- **Pricing:** Free for self-hosted ([Strapi](strapi-pricing-self)) or $99/mo for SaaS ([Strapi](strapi-pricing-cloud) and [Directus](directus-pricing-cloud))
-- **Public Access:** TODO
-- **Content Review:** TODO
-- **Supported Media:** TODO
-- **I18n:** Depends on static site generator (e.g. [Next.js i18n routing](next-i18n))
-- **Web Analytics:** Google analytics must be manually added to the resulting website
-- **Open Source Status:** Open Source options (e.g. [Strapi](strapi) and [Directus](directus))
-- **External Contributions:** TODO
-
-#### Pros
-
-- TODO
-
-#### Cons
-
-- TODO
+| Factor                      | Confluence | Notion | GitHub Wiki | GitBook | Wiki.js |
+| --------------------------- | :--------: | :----: | :---------: | :-----: | :-----: |
+| Usability                   |     3      |   2    |      1      |    2    |    1    |
+| Public Access               |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
+| Content Review              |    🔄     |   ❌   |     ❌      |   ✅    |   🔄   |
+| Version History             |     ✅     |  🔄   |     ✅      |   ✅    |   🔄   |
+| Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
+| I18n                        |    🔄     |  🔄   |     ❌      |   ✅    |   ✅    |
+| Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄   |
+| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    2    |
+| Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
+| Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
+| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   ✅    |
+| Data Access                 |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
+| Machine Readability         |    🔄     |   ✅   |     ❌      |   🔄   |   ✅    |
+| Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
 
 ## Links <!-- OPTIONAL -->
 
