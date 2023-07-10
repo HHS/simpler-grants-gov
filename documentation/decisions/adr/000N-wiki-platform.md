@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-07-10 <!-- REQUIRED -->
-- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
+- **Related Issue:** [#30](https://github.com/HHS/grants-equity/issues/30) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, wiki
 
