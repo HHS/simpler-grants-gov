@@ -7,7 +7,7 @@
 
 ## Context and Problem Statement
 
-This ADR is to decide what python framework to use for the backend API of grants.gov. Python was chosen as the language for the backend API in [ADR #3](https://github.com/HHS/grants-api/blob/main/documentation/decisions/adr/0003-api-language.md).
+This ADR is to decide what python framework to use for the back-end API of grants.gov. Python was chosen as the language for the back-end API in [ADR #3](https://github.com/HHS/grants-api/blob/main/documentation/decisions/adr/0003-api-language.md).
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -15,7 +15,7 @@ This ADR is to decide what python framework to use for the backend API of grants
 - Does it have good documentation for developers to get up to speed quickly
 - Does this language have a track record for reliability and continued support
 - How familiar is Nava and HHS with the framework
-- How effectively can the chosen framework support the backend needs of grants.gov
+- How effectively can the chosen framework support the back-end needs of grants.gov
 
 ## Options Considered
 
@@ -47,7 +47,7 @@ Flask is a simple, but extensible, micro web framework for python created in 201
 - **Pros**
   - Shallow learning curve, great documentation, and pythonic style makes it easy for contributors to support
   - Flexible and scalable microframework means it can adjust as the needs of the project changes
-  - Designed for backend API services
+  - Designed for back-end API services
 - **Cons**
   - Tech stack can get complicated over time with various libraries
   - Lack of standardization means more decision making and good code quality is very important
@@ -102,7 +102,7 @@ Django is a full stack python web framework created in 2005 that follows the mod
   - Longest running and most popular python framework in consideration
 - **Cons**
   - Monolithic style, steep learning curve, and large codebase make it difficult for collaborators
-  - Assumes both front and backend are included in the monolith application
+  - Assumes both front end and back end are included in the monolith application
 
 
 ## Links <!-- OPTIONAL -\->
