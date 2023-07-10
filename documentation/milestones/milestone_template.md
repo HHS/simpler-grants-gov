@@ -1,12 +1,48 @@
-# Milestone name
+# {Milestone name}
+
+| Field           | Value                                    |
+| --------------- | ---------------------------------------- |
+| Document Status | [One of: Draft, Final Draft, Completed ] |
+| Epic Link       | TODO: Add Link                           |
+| Epic Dashboard  | TODO: Add Link                           |
+| Target Release  | TODO: Add Date                           |
+| Product Owner   | TODO: Add Name                           |
+| Document Owner  | TODO: Add Name                           |
+| Lead Developer  | TODO: Add Name                           |
+| Lead Designer   | TODO: Add Name                           |
+
+
+## Short description
+<!-- Required -->
+
+{1-2 sentences describing milestone at a high-level}
 
 ## Goals
 
 ### Business description & value
+<!-- Required -->
 
-### Technical description
+{3-4 sentences that describe why this milestone is critical to the project}
+
+### User Stories
+<!-- Required -->
+
+- As a **{type of user 1}**, I want to:
+  - {perform action 1}, so that {goal or motivation for action}
+  - {perform action 2}, so that {goal or motivation for action}
+- As a **{type of user 2}**, I want to:
+  - {perform action 1}, so that {goal or motivation for action}
+  - {perform action 2}, so that {goal or motivation for action}
+
+## Technical description
+
+### {Optional Sub-deliverable}
+<!-- Optional -->
+
+{List reqiurements specific to this sub-deliverable, options to consider, etc.}
 
 ### Definition of done
+<!-- Required -->
 
 - [ ] [to be added]
 - [ ] Code is deployed to `main` & PROD
@@ -15,12 +51,17 @@
 - [ ] Translations are live in PROD (if necessary)
 
 ### Proposed metrics for measuring goals/value/definition of done
+<!-- Required -->
+
+1. {Metric 1}
 
 ### Destination for live updating metrics
+<!-- Required -->
 
 ## Planning
 
 ### Assumptions & dependencies
+<!-- Required -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
@@ -33,10 +74,12 @@ beginning of work on this milestone?
 - [ ] [to be added]
 
 ### Open questions
+<!-- Optional -->
 
 - [ ] [to be added]
 
 ### Not doing
+<!-- Optional -->
 
 The following work will *not* be completed as part of this milestone:
 
@@ -45,6 +88,7 @@ The following work will *not* be completed as part of this milestone:
 ## Integrations
 
 ### Translations
+<!-- Required -->
 
 Does this milestone involve delivering any content that needs translation?
 
@@ -52,43 +96,31 @@ If so, when will English-language content be locked? Then when will translation 
 started and completed?
 
 ### Services going into PROD for the first time
+<!-- Required -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
 1. [to be added]
 
 ### Services being integrated in PROD for the first time
+<!-- Required -->
 
 Are there multiple services that are being connected for the first time in PROD?
 
 1. [to be added]
 
 ### Data being shared publicly for the first time
+<!-- Required -->
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
 1. [to be added]
 
 ### Security considerations
+<!-- Required -->
 
-## Delivery
+Does this milestone expose any new attack vectors or expand the attack surface of the product?
 
-### Target release
+If so, how are we addressing these risks?
 
-### Product owner
-
-### Milestone document owner
-
-### Document status
-
-Choose one of: [Draft/Final Draft/Milestone Completed]
-
-### Lead designer
-
-### Lead developer
-
-## Documentation
-
-Epic name for this milestone in Zenhub:
-
-Dashboard for this epic: [link to Zenhub]
+1. [to be added]
