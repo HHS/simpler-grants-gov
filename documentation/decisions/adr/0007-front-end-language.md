@@ -21,14 +21,14 @@ The goal of this ADR is to select a language that we'll use to implement the fro
 ## Options Considered
 
 - JavaScript
-- Typescript
+- TypeScript
 - Python
 - Java
 - Go
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: Typescript, because it is the ideal language for front-end applications because some form of JavaScript is required for client side functionality anyway. This allows us to reduce the amount of context switching between langauges. Additionally, with node and npm TypeScript and JavaScript are fully featured platforms for building and running applications. We chose TypeScript over JavaScript because of the value that strong typing provides with promomting code quality and developer support. 
+Chosen option: TypeScript, because it is the ideal language for front-end applications because some form of JavaScript is required for client side functionality anyway. This allows us to reduce the amount of context switching between langauges. Additionally, with node and npm TypeScript and JavaScript are fully featured platforms for building and running applications. We chose TypeScript over JavaScript because of the value that strong typing provides with promomting code quality and developer support. 
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -37,7 +37,7 @@ Chosen option: Typescript, because it is the ideal language for front-end applic
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- Code should be written in such a way that if TypeScript loses longer supported, we can easily pare it down to regular javascript
+- Code should be written in such a way that if TypeScript loses longer supported, we can easily pare it down to regular JavaScript
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -55,7 +55,7 @@ JavaScript is a lightweight, interpreted programming language with first-class f
 
 ### TypeScript
 
-TypeScript is a syntactic superset of JavaScript which adds static typing and is transpiled down to regular javascript when building the application. While TypeScript is a relatively new "language" it's gaining popularity quickly as it's more of a enhancement to javascript than just another new language. 
+TypeScript is a syntactic superset of JavaScript which adds static typing and is transpiled down to regular JavaScript when building the application. While TypeScript is a relatively new "language" it's gaining popularity quickly as it's more of a enhancement to JavaScript than just another new language. 
 
 - **Pros**
   - Same as JavaScript
@@ -70,7 +70,7 @@ Python is a high-level, dynamically typed general-purpose programming language. 
 - **Pros**
   - Same language as back end reducing context switching
 - **Cons**
-  - Will still require javascript for client side functionality
+  - Will still require JavaScript for client side functionality
   - Python is not as well supported for front-end tasks as it is for back-end tasks
 
 
@@ -80,7 +80,7 @@ Java is widely used for building enterprise-scale web applications as it is one 
 
 - **Pros**
   - Existing HHS website and tools are built with Java
-  - Will still require javascript for client side functionality
+  - Will still require JavaScript for client side functionality
 - **Cons**
   - Commercial use requires expensive licenses and not as open source friendly
   - Compilation and abstraction by the Java Virtual Machine makes performance slower
@@ -93,7 +93,7 @@ Go is an open source programming language supported by Google.
 - **Pros**
   - Rapidly gaining popularity
 - **Cons**
-  - Will still require javascript for client side functionality
+  - Will still require JavaScript for client side functionality
   - Not a lot of front-end support
 
 <!--
