@@ -113,7 +113,7 @@ Some potential options include:
 
 Some factors to consider are:
 
-- Is this deployment option FedRAMP compliant?
+- Is this deployment option FedRAMP compliant and covered under the Grants.gov Authority to Operate (ATO)?
 - How commonly used is this deployment option? Is it easy for new developers to learn?
 - How expensive is it to deploy an API with this option, both in terms of direct operating costs and in terms of team resources?
 - How easily does this option scale?
@@ -134,6 +134,10 @@ Some factors to consider are:
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
+#### One-time metrics
+
+We recommend calculating the following metrics at least once to inform the selection of tools for this milestone:
+
 1. API language metrics
    1. Days since last patch or minor release
    2. Number of GitHub stars on main repository
@@ -151,6 +155,14 @@ Some factors to consider are:
       - 30 million requests per month
       - Average request size 16KB
       - Average response size 64KB
+
+#### Ongoing metrics
+
+The following metrics should be tracked about the tools selected within this metric: 
+
+1. API framework metrics
+   1. Days since last patch or minor release
+   2. Number of GitHub stars on main repository
 
 ### Destination for live updating metrics
 <!-- Required -->
