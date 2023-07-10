@@ -66,6 +66,32 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 - **Confluence** if we want to prioritize usability and low maintenance but are willing to compromise on data access
 - **Wiki.js** if we want to prioritize data access and open source tools but are willing to compromise on maintenance costs and usability
 
+## Comparison Matrix
+
+- ✅ Feature available, meets requirement
+- ❌ Feature not available, does not meet requirement
+- 🔄 Partial feature, limited feature availability, feature in progress or undergoing improvements
+- 1-3 Strength level
+- ❓Unknown
+
+| Factor                      | Confluence | Notion | GitHub Wiki | GitBook | Wiki.js |
+| --------------------------- | :--------: | :----: | :---------: | :-----: | :-----: |
+| Usability                   |     3      |   2    |      1      |    2    |    1    |
+| Public Access               |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
+| Content Review              |    🔄     |   ❌   |     ❌      |   ✅    |   🔄   |
+| Version History             |     ✅     |  🔄   |     ✅      |   ✅    |   🔄   |
+| Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
+| I18n                        |    🔄     |  🔄   |     ❌      |   ✅    |   ✅    |
+| Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄   |
+| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    1    |
+| Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
+| Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
+| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   🔄   |
+| Data Access                 |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
+| Machine Readability         |    🔄     |   ✅   |     ❌      |   🔄   |   ✅    |
+| Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
+
+
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
 ### Confluence
@@ -277,31 +303,6 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 - Documentation for the tool is lacking
 - Requires *significant* investment of staff time for initial configuration and ongoing maintenance
 - Features are less mature than other SaaS offerings like Confluence or GitBook
-
-## Comparison Matrix
-
-✅ Feature available, meets requirement
-❌ Feature not available, does not meet requirement
-🔄 Partial feature, limited feature availability, feature in progress or undergoing improvements
-1-3 Strength level
-❓Unknown
-
-| Factor                      | Confluence | Notion | GitHub Wiki | GitBook | Wiki.js |
-| --------------------------- | :--------: | :----: | :---------: | :-----: | :-----: |
-| Usability                   |     3      |   2    |      1      |    2    |    1    |
-| Public Access               |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
-| Content Review              |    🔄     |   ❌   |     ❌      |   ✅    |   🔄   |
-| Version History             |     ✅     |  🔄   |     ✅      |   ✅    |   🔄   |
-| Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
-| I18n                        |    🔄     |  🔄   |     ❌      |   ✅    |   ✅    |
-| Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄   |
-| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    1    |
-| Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
-| Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
-| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   🔄   |
-| Data Access                 |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
-| Machine Readability         |    🔄     |   ✅   |     ❌      |   🔄   |   ✅    |
-| Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
 
 ## Links <!-- OPTIONAL -->
 
