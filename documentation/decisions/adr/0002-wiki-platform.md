@@ -1,10 +1,10 @@
 # Communications Tooling: Wiki Platform
 
-- **Status:** Draft
-- **Last Modified:** 2023-06-15 <!-- REQUIRED -->
+- **Status:** Accepted
+- **Last Modified:** 2023-07-10 <!-- REQUIRED -->
 - **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
-- **Deciders:** {list everyone involved in the decision} <!-- OPTIONAL -->
-- **Tags:** {space and/or comma separated list of tags} <!-- OPTIONAL -->
+- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
+- **Tags:** communucations, open source, wiki
 
 ## Context and Problem Statement
 
@@ -36,27 +36,28 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 
 ## Options Considered
 
-- [Confluence](confluence)
-- [Notion](notion)
-- [GitHub Wiki](gh-wiki)
-- [GitBook](gitbook)
-- [WikiJS](wiki-js)
-- Git-based Headless CMS (e.g. [Decap CMS](git-cms-decap) and [Tina.io](git-cms-tina))
-- API-based Headless CMS (e.g. [Strapi](strapi) and [Directus](directus))
+- [Confluence](confluence) - *NOT chosen* because of limits around data access and content review
+- [Notion](notion) - *NOT chosen* because of limits on version history and content review
+- [GitHub Wiki](gh-wiki) - *NOT chosen* because of limited feature set and issues with usability
+- [GitBook](gitbook) - *Chosen* because of support for content review and GitHub syncing
+- [WikiJS](wiki-js) - *NOT chosen* because of issues with usability and requirements for ongoing maintenance
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets k.o. criterion decision driver | which satisfies x condition | ... }.
+We have decided to use **GitBook** as our wiki platform because it balances the usability and maintainability of a SaaS offering like Confluence with key features around data access and content review.
+
+Although it is a proprietary tool, it has become a standard platform for managing documentation within open source projects, mainly because it emphasizes version control within the documentation and enables bi-directional syncing of content between GitBook and GitHub.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- Wiki content can be presented in a more usable format for editing and reading, while still being version-controlled alongside our code in GitHub
+- Non-technical users who are not familiar editing content directly in markdown can easily create and modify pages (if they have a GitBook license)
+- Contributions and changes to existing documentation can be reviewed before they are published
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+- GitBook is not explicitly covered under the existing Grants.gov ATO, so we will likely need to seek the Authority to Operate it
+- Users who don't have a license to edit and manage content in GitBook (i.e. members of the public) can only make suggested edits or contributions through creating Pull Requests (PRs) in GitHub which can present a high barrier to entry for non-technical users
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -69,12 +70,18 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 - **Hosting:** SaaS
 - **Pricing:** [$5.75 (standard) or $11 (premium) per user per month](confluence-pricing)
 - **Public Access:** Supported, but limited to individual pages or entire spaces
-- **Content Review:** Supported through drafts, not enforceable
-- **Supported Media:** TODO
+- **Content Review:** Partial support, limited to drafts and not enforceable
+- **Supported Media**
+  - Markdown style text
+  - File uploads
+  - Image embedding
+  - Video embedding
+  - Diagrams
 - **I18n:** Limited third party plugins for automating translation
 - **Web Analytics:** [Google Analytics plugin](confluence-ga) available, also native analytics with premium tier
 - **Open Source Status:** Propietary
 - **External Contributions:** Only supported in public spaces (without review)
+- **Data Access:** Limited access via API
 
 #### Pros
 
@@ -104,13 +111,19 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - **Hosting:** SaaS
 - **Pricing:** [$8 (pro) or $15(business) per user per month](notion-pricing)
-- **Public Access:** Supported, but oriented around individual pages
+- **Public Access:** Supported, but limited to individual pages
 - **Content Review:** Not supported
-- **Supported Media:** TODO
-- **I18n:** Third-party beta plugin for translation
-- **Web Analytics:** TODO
+- **Supported Media**
+  - Markdown style text
+  - Tabular/structured data
+  - Image embedding
+  - Video embedding
+  - Diagrams
+- **I18n:** Partial support, Third-party beta plugin for translation
+- **Web Analytics:** Native page analytics available
 - **Open Source Status:** Propietary
-- **External Contributions:** Supported in app (without review)
+- **External Contributions:** Only supported on public pages (without review)
+- **Data Access:** Access via API
 
 #### Pros
 
@@ -141,20 +154,31 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 - **Hosting:** SaaS
 - **Pricing:** Free for public repositories
 - **Public Access:** Supported by default
-- **Content Review:** TODO
-- **Supported Media:** TODO
-- **I18n:** TODO
-- **Web Analytics:** TODO
+- **Content Review:** Not supported
+- **Supported Media**
+  - Markdown style text
+  - Image embedding
+- **I18n:** No support
+- **Web Analytics:** No support
 - **Open Source Status:** Propietary
-- **Data Access:** TODO
+- **External Contributions:** Supported with GitHub login (without review)
+- **Data Access:** Can be exported or cloned from repo
 
 #### Pros
 
-- TODO
+- Available for free with public repositories
+- Supports public access to view wiki content by default
+- Minimimal ongoing maintenance costs due to SaaS hosting
+- All of the wiki data can be exported with the GitHub repo
+- Supports contributions from anyone with GitHub license (based on wiki settings)
 
 #### Cons
 
-- TODO
+- One of the hardest-to-use tools for non-technical audiences
+- Supports a very limited set of media formats, mainly markdown and images
+- Does not support web analytics
+- Does not support internationalization
+- Closed source proprietary tool
 
 ### GitBook
 
@@ -166,11 +190,17 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 - **Pricing:** [Free (open source projects)](gitbook-oss) or [$6.70 (plus) per user per month](gitbook-pricing)
 - **Public Access:** Supported by default
 - **Content Review:** Supported by default
-- **Supported Media:** TODO
+- **Supported Media**
+  - Markdown style text
+  - File uploads
+  - Image embedding
+  - Video embedding
+  - Diagrams
 - **I18n:** Native support with [page collections and variants](gitbook-i18n)
 - **Web Analytics:** [Google Analytics integration](gitbook-ga) available
 - **Open Source Status:** Propietary
-- **Data Access:** TODO
+- **External Contributions:** Limited support, only through GitHub PRs
+- **Data Access:** Full access with GitHub sync, limited access with API
 
 #### Pros
 
@@ -215,7 +245,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 | Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    2    |
 | Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
 | Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
-| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   ✅    |
+| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   🔄   |
 | Data Access                 |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
 | Machine Readability         |    🔄     |   ✅   |     ❌      |   🔄   |   ✅    |
 | Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
@@ -240,14 +270,6 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
   - [GitBook Open Source Pricing](gitbook-oss)
   - [GitBook Internationalization](gitbook-i18n)
   - [GitBook Google Analytics](gitbook-ga)
-- [Decap CMS](git-cms-decap)
-- [Tina CMS](git-cms-tina)
-- [Next Internatioanlization](next-i18n)
-- [Strapi](strapi)
-  - [Strapi Cloud Pricing](strapi-pricing-cloud)
-  - [Strapi Self Hosted Pricing](strapi-pricing-self)
-- [Directus](directus)
-  - [Directus Cloud Pricing](directus-pricing-cloud)
 
 [milestone]: ../milestones/individual_milestones/communication_platforms.md
 <!-- Confluence links -->
@@ -271,13 +293,3 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 [gitbook-ga]: https://docs.gitbook.com/product-tour/integrations/google-analytics/configure
 <!-- Wiki.js links -->
 [wiki-js]: https://js.wiki/
-<!-- Git-based CMS links -->
-[git-cms-decap]: https://decapcms.org/
-[git-cms-tina]: https://tina.io/
-[next-i18n]: https://nextjs.org/docs/pages/building-your-application/routing/internationalization
-<!-- API-based CMS links -->
-[strapi]: https://strapi.io
-[strapi-pricing-cloud]: https://strapi.io/pricing-cloud
-[strapi-pricing-self]: https://strapi.io/pricing-self-hosted
-[directus]: https://directus.io
-[directus-pricing-cloud]: https://directus.io/pricing/cloud/
