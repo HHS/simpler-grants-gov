@@ -16,7 +16,6 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 #### Must Have
 
-- **Onboarding:** New users can be onboarded to the tool for no cost to the user in a process that takes less than 2 days
 - **Ticket Tracking:** Tickets can be organized into sprints and tracked as part of larger milestones or epics
 - **Public Access:** Without logging in, members of the public can see tickets that are being worked on
 - **Public Requests:** Members of the public can submit bug reports and feature requests and track how that work is being prioritized
@@ -27,15 +26,16 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 - **Level of Effort Estimates:** Tickets can be assigned an estimated level of effort (e.g. story points, t-shirt size, etc.)
 - **Reporting:** Users can report on key metrics like burndown, point allocation, etc. from directly within the tool
-- **Roadmap:** The system provides views that lets users understand how individual tickets rollup into a broader project roadmap as well as the status of milestones within that roadmap
-- **Custom Fields and Views:** Users can create custom fields and views to manage their projects
+- **Custom Views:** Users can create custom views for managing tickets with multiple layouts (e.g. kanban board, tabular, roadmap)
+- **Custom Fields:** Users can create custom fields and views to manage their projects
+- **Automation:** Users can automate basic workflows like adding and moving tickets, linking PRs to their originating PRs, etc.
 - **Open Source:** The tool used to manage and host the wiki content should be open source, if possible
 
 ## Options Considered
 
-- GitHub Issues + Zenhub
-- GitHub Issues + GitHub Projects
-- Jira
+- [GitHub Issues + Zenhub](#github-issues--zenhub)
+- [GitHub Issues + GitHub Projects](#github-issues--github-projects)
+- [Jira](#jira)
 - OpenProject
 
 ## Decision Outcome <!-- REQUIRED -->
@@ -51,6 +51,29 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 - {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
 - ...
+
+## Comparison Matrix
+
+- ✅ Feature available, meets requirement
+- ❌ Feature not available, does not meet requirement
+- 🔄 Partial feature, limited feature availability, feature in progress or undergoing improvements
+- 1-3 Strength level
+- ❓Unknown
+
+| Factor                    |    Zenhub     | GitHub Projects |     Jira      |  OpenProject  |
+| ------------------------- | :-----------: | :-------------: | :-----------: | :-----------: |
+| Cost                      | $8.33/user/mo |      Free       | $7.75/user/mo | $7.25/user/mo |
+| Ticket Tracking           |      ✅       |       ✅        |      ✅       |      ✅       |
+| Public Access             |      🔄      |       ✅        |      ❌       |      ❌       |
+| Public Requests           |      ✅       |       ✅        |      ❌       |      ❌       |
+| Templates                 |      🔄      |       ✅        |      ✅       |      ❌       |
+| Authority to Operate      |      🔄      |       ✅        |      ✅       |      ✅       |
+| Level of Effort Estimates |      ✅       |       ✅        |      ✅       |      ✅       |
+| Reporting                 |      ✅       |       🔄       |      ✅       |      ✅       |
+| Custom Views              |      🔄      |       ✅        |      ✅       |      🔄      |
+| Custom Fields             |      ❌       |       ✅        |      ✅       |      🔄      |
+| Automation                |      🔄      |       ✅        |      ✅       |      ❌       |
+| Open Source               |      ❌       |       ❌        |      ❌       |      ✅       |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -107,12 +130,12 @@ Use Confluence's Jira platform for both ticket management and sprint planning.
   - Supports built-in [workflow automation](jira-automation)
   - Supports custom ticket templates
 - **Cons**
-  - Licenses have a monthly fee
+  - Licenses have a monthly fee (above 10 users)
   - Sprint boards can't be viewed without Zenhub login
+  - Members of the public can't submit requests to a Jira board
   - Requires tracking tickets and planning sprints on a different platform
 
 ## Links <!-- OPTIONAL -->
-
 
 
 
