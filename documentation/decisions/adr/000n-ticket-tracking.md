@@ -3,7 +3,7 @@
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-11 <!-- REQUIRED -->
 - **Related Issue:** [#98](https://github.com/HHS/grants-api/issues/98) <!-- RECOMMENDED -->
-- **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
+- **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly 
 - **Tags:** communications, sprint planning, agile <!-- OPTIONAL -->
 
 ## Context and Problem Statement
