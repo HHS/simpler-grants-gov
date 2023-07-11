@@ -66,7 +66,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 | Ticket Tracking           |      ✅       |       ✅        |      ✅       |      ✅       |
 | Public Access             |      🔄      |       ✅        |      ❌       |      ❌       |
 | Public Requests           |      ✅       |       ✅        |      ❌       |      ❌       |
-| Templates                 |      🔄      |       ✅        |      ✅       |      ❌       |
+| Issue Templates           |      🔄      |       ✅        |      ✅       |      ❌       |
 | Authority to Operate      |      🔄      |       ✅        |      ✅       |      ✅       |
 | Level of Effort Estimates |      ✅       |       ✅        |      ✅       |      ✅       |
 | Reporting                 |      ✅       |       🔄       |      ✅       |      ✅       |
@@ -87,14 +87,14 @@ Use [GitHub Issues](github-issues) to create and manage development tickets and 
   - Supports key planning features like story points and epics
   - Supports issue templates (through GitHub)
   - Chrome extension to view Zenhub attributes in GitHub
-  - Nava team has experience working with Zenhub
+  - Team has experience working with Zenhub
 - **Cons**
   - Licenses have a monthly fee, even for Government-backed open source projects
   - Sprint boards can't be viewed without Zenhub login
   - Moving tickets requires both Zenhub and GitHub logins and write access to the repository
-  - It can be difficult to onboard existing Zenhub users to a new workspace
+  - Can be difficult to onboard existing Zenhub users to a new workspace
   - GitHub form-based templates don't work when creating issues from Zenhub
-  - Most limited set of views for tickets across all ticketing systems
+  - Limited support for custom views (e.g. no tabular layout)
   - No support for custom fields
 
 ### GitHub Issues + GitHub Projects
@@ -115,11 +115,11 @@ Use [GitHub Issues](github-issues) to create and manage development tickets and 
 - **Cons**
   - Reporting is less robust than Zenhub and Jira
   - Requires more initial setup to replicate some of Jira or Zenhub's out-of-the-box features
-  - Nava team and HHS has less experience working with GitHub projects
+  - Team has less experience working with GitHub projects
 
 ### Jira
 
-Use Confluence's Jira platform for both ticket management and sprint planning.
+Use Confluence's [Jira](jira) platform for both ticket management and sprint planning.
 
 - **Pros**
   - Industry standard tool for ticket tracking and sprint planning
@@ -129,11 +129,30 @@ Use Confluence's Jira platform for both ticket management and sprint planning.
   - Supports filters on all standard and custom fields
   - Supports built-in [workflow automation](jira-automation)
   - Supports custom ticket templates
+  - Team has experience working with Jira
 - **Cons**
   - Licenses have a monthly fee (above 10 users)
   - Sprint boards can't be viewed without Zenhub login
   - Members of the public can't submit requests to a Jira board
   - Requires tracking tickets and planning sprints on a different platform
+
+### OpenProject
+
+Use the open source project management tool [OpenProject](open-project) for both ticket management and sprint planning.
+
+- **Pros**
+  - Open source project with self-hosting option
+  - Robust [reporting](jira-reporting) (e.g. burndown charts, velocity, etc.) with enterprise plan
+  - Supports multiple views of tickets (e.g. tabular, kanban board, roadmap)
+  - Supports key planning features like story points and epics out-of-the-box
+- **Cons**
+  - Many basic features require enterprise license which has a per-user cost
+  - Higher investment of time to set up and maintain the project
+  - Sprint boards can't be viewed without logging in
+  - Members of the public can't submit requests to a Jira board
+  - Doesn't seem to support issue or ticket templates
+  - Doesn't seem to support workflow automation
+  - Team has less experience working with OpenProject
 
 ## Links <!-- OPTIONAL -->
 
@@ -147,8 +166,11 @@ Use Confluence's Jira platform for both ticket management and sprint planning.
 [github-project-views]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view
 [github-project-fields]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-text-and-number-fields
 <!-- Zenhub -->
-[zenhub]: 
+[zenhub]: https://www.zenhub.com/
 <!-- Jira -->
+[jira]: https://www.atlassian.com/software/jira
 [jira-reporting]: https://www.atlassian.com/software/jira/features/reports
 [jira-automation]: https://www.atlassian.com/software/jira/features/automation
 [jira-custom-fields]: https://support.atlassian.com/jira-cloud-administration/docs/create-a-custom-field/
+<!-- OpenProject -->
+[open-project]: https://www.openproject.org/
