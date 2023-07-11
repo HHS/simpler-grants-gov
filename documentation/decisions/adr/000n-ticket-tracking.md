@@ -36,21 +36,26 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 - [GitHub Issues + Zenhub](#github-issues--zenhub)
 - [GitHub Issues + GitHub Projects](#github-issues--github-projects)
 - [Jira](#jira)
-- OpenProject
+- [OpenProject](#openproject)
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+We are planning to use **GitHub issues with GitHub projects** because it is the only solution that allows members of the public to submit feature requests and bug reports and then track how those issues are being prioritized within upcoming sprints. Additionally, the use of these tools is free with public repositories and offers other helpful features such as custom fields and views.
+
+**NOTE:** Given some of the constraints around reporting, we may want to continue to explore options that extend the reporting GitHub project. Similarly, team productivity meaningfully affected by the absence of the more robust features that Jira or Zenhub offers, we may want to re-evaluate this decision after an initial trial period.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- We do not need to purchase licenses or seek ATO approval to start begin tracking tickets and planning sprints
+- Members of the public can submit feature requests or bug tickets and track how those requests are being prioritized and worked on
+- We can manage all of our sprint planning and development within the same platform
+- We can extend GitHub project functionality with custom-built automations
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+- We will need to develop custom reports to track some of the same metrics that Jira or Confluence offers out of the box
+- We will need to spend a bit more time setting up the GitHub project to replicate some of the features that Jira or Confluence offers (e.g. story points, sprints, epics, etc.)
+- Team members who are familiar with Jira and Zenhub will need to spend a bit more time becoming familiar with GitHub Projects
 
 ## Comparison Matrix
 
@@ -83,8 +88,8 @@ Use [GitHub Issues](github-issues) to create and manage development tickets and 
 
 - **Pros**
   - Built off of existing GitHub tickets and functionality
-  - Robust reporting (e.g. burndown charts, velocity, etc.) out of the box
-  - Supports key planning features like story points and epics
+  - Robust [reporting](zenhub-reporting) (e.g. burndown charts, velocity, etc.) out of the box
+  - Supports key planning features like [story points](zenhub-story-points) and [epics](zenhub-epics)
   - Supports issue templates (through GitHub)
   - Chrome extension to view Zenhub attributes in GitHub
   - Team has experience working with Zenhub
@@ -142,7 +147,7 @@ Use the open source project management tool [OpenProject](open-project) for both
 
 - **Pros**
   - Open source project with self-hosting option
-  - Robust [reporting](jira-reporting) (e.g. burndown charts, velocity, etc.) with enterprise plan
+  - Robust reporting (e.g. burndown charts, velocity, etc.) with enterprise plan
   - Supports multiple views of tickets (e.g. tabular, kanban board, roadmap)
   - Supports key planning features like story points and epics out-of-the-box
 - **Cons**
@@ -156,7 +161,22 @@ Use the open source project management tool [OpenProject](open-project) for both
 
 ## Links <!-- OPTIONAL -->
 
-
+- [GitHub Issues](github-issues)
+- [GitHub Projects](github-projects)
+  - [GitHub Projects Automation](github-project-automation)
+  - [GitHub Projects Actions](github-actions)
+  - [GitHub Projects Reporting](github-insights)
+  - [GitHub Projects Custom Views](github-project-views)
+  - [GitHub Projects Custom Fields](github-project-fields)
+- [Zenhub](zenhub)
+  - [Zenhub Epics](zenhub-epics)
+  - [Zenhub Story Points](zenhub-story-points)
+  - [Zenhub Reporting](zenhub-reporting)
+- [Jira](jira)
+  - [Jira Reporting](jira-reporting)
+  - [Jira Automation](jira-automation)
+  - [Jira Custom Fields](jira-custom-fields)
+- [Open Project](open-project)
 
 [github-issues]: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues
 [github-projects]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects
@@ -167,6 +187,9 @@ Use the open source project management tool [OpenProject](open-project) for both
 [github-project-fields]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-text-and-number-fields
 <!-- Zenhub -->
 [zenhub]: https://www.zenhub.com/
+[zenhub-epics]: https://help.zenhub.com/support/solutions/articles/43000500733-getting-started-with-epics
+[zenhub-story-points]: https://help.zenhub.com/support/solutions/articles/43000010347-estimate-work-using-story-points
+[zenhub-reporting]: https://www.zenhub.com/reporting
 <!-- Jira -->
 [jira]: https://www.atlassian.com/software/jira
 [jira-reporting]: https://www.atlassian.com/software/jira/features/reports
