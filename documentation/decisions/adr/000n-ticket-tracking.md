@@ -42,7 +42,7 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 We are planning to use **GitHub issues with GitHub projects** because it is the only solution that allows members of the public to submit feature requests and bug reports and then track how those issues are being prioritized within upcoming sprints. Additionally, the use of these tools is free with public repositories and offers other helpful features such as custom fields and views.
 
-**NOTE:** Given some of the constraints around reporting, we may want to continue to explore options that extend the reporting GitHub project. Similarly, if team productivity is meaningfully affected by the absence of the more robust features that Jira or Zenhub offers, we may want to re-evaluate this decision after an initial trial period.
+**NOTE:** Given some of the constraints around reporting, we may want to continue to explore options that extend the reporting capabilities of GitHub projects. Similarly, if team productivity is meaningfully affected by the absence of the more robust features that Jira or Zenhub offers, we may want to re-evaluate this decision after an initial trial period.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
