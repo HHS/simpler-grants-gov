@@ -4,7 +4,7 @@
 
 This is the API layer. It includes a few separate components:
 
-* The REST API
+* The REST AP
 * Backend & utility scripts
 
 ## Project Directory Structure
@@ -15,7 +15,7 @@ root
 │   └── src
 │       └── auth                Authentication code for API
 │       └── db
-│           └── models          DB model definitions            
+│           └── models          DB model definitions
 │           └── migrations      DB migration configs
 │               └── versions    The DB migrations
 │       └── logging
