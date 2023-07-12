@@ -23,17 +23,11 @@ A very simple [docker-compose.yml](/docker-compose.yml) has been included to sup
 
 4. You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-## Setup
-
-```bash
-make setup-local
-```
-
 ## Run the application
 
-1. In your terminal, `cd` to the `app` directory of this repo.
+1. In your terminal, `cd` to the `api` directory of this repo.
 2. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed & running.
-3. Run `make setup-local` to copy over `.env.example` to `.env`
+3. Run `make setup-local` to install dependencies
 4. Run `make init start` to build the image and start the container.
 5. Navigate to `localhost:8080/docs` to access the Swagger UI.
 6. Run `make run-logs` to see the logs of the running API container
