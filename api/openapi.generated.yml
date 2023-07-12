@@ -1,0 +1,334 @@
+info:
+  title: Template Application Flask
+  description: Template API for a Flask Application
+  contact:
+    name: Nava PBC Engineering
+    url: https://www.navapbc.com
+    email: engineering@navapbc.com
+  version: 0.1.0
+tags:
+- name: Health
+- name: User
+paths:
+  /health:
+    get:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/Healthcheck'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+          description: Successful response
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Service Unavailable
+      tags:
+      - Health
+      summary: Health
+  /v1/users:
+    post:
+      parameters: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/User'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Authentication error
+      tags:
+      - User
+      summary: POST /v1/users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      security:
+      - ApiKeyAuth: []
+  /v1/users/{user_id}:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/User'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Not found
+      tags:
+      - User
+      summary: User Get
+      security:
+      - ApiKeyAuth: []
+    patch:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/User'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Not found
+      tags:
+      - User
+      summary: User Patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      security:
+      - ApiKeyAuth: []
+openapi: 3.0.3
+components:
+  schemas:
+    ValidationError:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of error
+        message:
+          type: string
+          description: The message to return
+        rule:
+          type: string
+          description: The rule that failed
+        field:
+          type: string
+          description: The field that failed
+        value:
+          type: string
+          description: The value that failed
+    HTTPError:
+      properties:
+        detail:
+          type: object
+        message:
+          type: string
+      type: object
+    Healthcheck:
+      type: object
+      properties: {}
+    Role:
+      type: object
+      properties:
+        type:
+          description: The name of the role
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        first_name:
+          type: string
+          description: The user's first name
+        middle_name:
+          type: string
+          description: The user's middle name
+        last_name:
+          type: string
+          description: The user's last name
+        phone_number:
+          type: string
+          description: The user's phone number
+          example: 123-456-7890
+          pattern: ^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$
+        date_of_birth:
+          type: string
+          format: date
+          description: The users date of birth
+        is_active:
+          type: boolean
+          description: Whether the user is active
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_of_birth
+      - first_name
+      - is_active
+      - last_name
+      - phone_number
+      - roles
+    UserUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        first_name:
+          type: string
+          description: The user's first name
+        middle_name:
+          type: string
+          description: The user's middle name
+        last_name:
+          type: string
+          description: The user's last name
+        phone_number:
+          type: string
+          description: The user's phone number
+          example: 123-456-7890
+          pattern: ^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$
+        date_of_birth:
+          type: string
+          format: date
+          description: The users date of birth
+        is_active:
+          type: boolean
+          description: Whether the user is active
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Auth
+
