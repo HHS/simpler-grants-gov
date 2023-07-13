@@ -76,4 +76,5 @@ TBD.
 [Flow](https://flow.org/): Static type checker maintained by Facebook, added to project as a dependency. Uses a special type syntax that is removed from code at compile time.
 
 **Dependency Checks:**
+
 [Dependabot](https://github.com/dependabot): Can easily switch to from Renovate at any time.
