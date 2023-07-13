@@ -1,7 +1,7 @@
 # Front-end Code Quality Tools
 
 - **Status:** Proposed <!-- REQUIRED -->
-- **Last Modified:** 2023-07-11 <!-- REQUIRED -->
+- **Last Modified:** 2023-07-13 <!-- REQUIRED -->
 - **Related Issue:** [#102](https://github.com/HHS/grants-api/issues/102) <!-- RECOMMENDED -->
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
@@ -21,7 +21,7 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 
 ## Options Considered
 
-1. Use a curated collection of Python libraries from Next.js template repository (described below)
+1. Use a curated collection of JavaScript libraries from Next.js template repository (described below)
 2. Use a different or modified set of JavaScript libraries
 
 ### Dependency Management
@@ -49,12 +49,17 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 - Identifies problems early at compile time
 - Open source and maintained by Microsoft
 
-### Security
+### Dependency Checks
+
+**[Renovate](https://docs.renovatebot.com/):** Automated dependency updates.
+- Free and open source
+- Can batch, schedule, auto-assign and auto merge updates
+- Multi-language and supports Python as well
+
+*Note: Do we need the Safety package for our Python code as well or is this sufficient?*
 
 ### License Checking
-
-### Interface
-
+**[License Checker](https://www.npmjs.com/package/license-checker):** Very aptly named tool to check licenses for dependencies.
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -62,8 +67,13 @@ TBD.
 
 # Other Options
 
-**Dependency Management:**  
-[Yarn](https://yarnpkg.com/): Functionally similar to npm, however, requiring more steps to integrate into a project.  
+**Dependency Management:**
 
-**Type Checking:**  
-[Flow](https://flow.org/): Static type checker maintained by Facebook, added to project as a dependency. Uses a special type syntax that is removed from code at compile time.  
+[Yarn](https://yarnpkg.com/): Functionally similar to npm, however, requiring more steps to integrate into a project.
+
+**Type Checking:**
+
+[Flow](https://flow.org/): Static type checker maintained by Facebook, added to project as a dependency. Uses a special type syntax that is removed from code at compile time.
+
+**Dependency Checks:**
+[Dependabot](https://github.com/dependabot): Can easily switch to from Renovate at any time.
