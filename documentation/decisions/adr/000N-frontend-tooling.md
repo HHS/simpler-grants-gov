@@ -58,12 +58,12 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 
 *Note: Do we need the Safety package for our Python code as well or is this sufficient?*
 
-### License Checking
+### License Checking[^*]
 **[License Checker](https://www.npmjs.com/package/license-checker):** Very aptly named tool to check licenses for dependencies.
 
 ## Decision Outcome <!-- REQUIRED -->
 
-TBD.
+Option #1 is preferred. The tooling chosen in the template repository suits are needs, with the addition of License Checker.
 
 # Other Options
 
@@ -78,3 +78,5 @@ TBD.
 **Dependency Checks:**
 
 [Dependabot](https://github.com/dependabot): Can easily switch to from Renovate at any time.
+
+[^*]: Addition to the existing curated collection
