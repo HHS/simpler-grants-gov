@@ -63,7 +63,7 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Option #1 is preferred. The tooling chosen in the template repository suits are needs, with the addition of License Checker.
+Option #1 is preferred. The tooling chosen in the template repository suits our needs, with the addition of License Checker.
 
 # Other Options
 
