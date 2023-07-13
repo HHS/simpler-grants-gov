@@ -14,7 +14,7 @@ The project will need a web framework to build and manage the frontend. The goal
 ### Must Haves
 - Active Maintenance: The web framework is actively maintained with patches and minor releases delivered on a regular basis
 - Community of Users: The web framework has an active community of open source users and the framework is commonly used for frontend development
-- Usability: The framework is relatively easy to learn for developers without prior experience and there are plenty of resources and training materials available
+- Usability: The framework is relatively easy to learn for developers without prior experience in the particular framework, and there are plenty of resources and training materials available
 - Static Site Generation: The framework can generate static pages (HTML/CSS + JavaScript) at build time that can be cached in a CDN for faster loading
 - Server-Side Rendering: The framework can render some pages server-side with every request to get up-to-date information when the page loads
 - Client-side Rendering: The framework also supports rendering or modifying content client-side based on user interaction with the page (e.g. filtering, searching, etc.)
