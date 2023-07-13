@@ -33,7 +33,7 @@ The project will need a web framework to build and manage the frontend. The goal
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+Chosen option: Next.js, because of the options that meet our requirements .
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -49,51 +49,52 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ### Create React App
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+Create React App is a lightweight, client side, single page application framework for React, maintained by Facebook. While it is one of the most widely adopted react frameworks, it seems like Facebook has either stopped or will stop supporting it in the near future, as it has been [removed as a suggested framework from the react website](https://github.com/reactjs/react.dev/pull/5487).
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - One of the earliest react frameworks
+  - Widely used and understood
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Either has or will stop recieving support
+  - No longer recommended by react
 
 ### Next.js
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+Next.js is a popular full stack framework for static and server‑rendered applications built with React. It includes styling and routing solutions out of the box, and assumes that you’re using Node.js as the server environment. Next.js is maintained by Vercel, a PaaS for frontend hosting company.
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Popular framework with dedicated support
+  - Supports static site generation, server side rendering, and client side rendering
+  - Easy to learn and use with good documentation
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Very opinionated framework, especially with routing
 
 ### Vue.js or Nuxt.js
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+Vue.js is an open-source, JavaScript framework for building progressive user interfaces that also supports server side rendering. It was created by Evan You in 2014 and has grown in popularity, thanks to its reactive data binding and component-based architecture. Nuxt.js provides a set of conventions and tools for building Vue.js applications, including automatic code splitting, prefetching, and caching.
+
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Static site generation is easy out of the box
+  - Code splitting helps reduce package sizes and makes caching easier
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Small community of support
+  - Scalability 
 
 ### Svelte or Sveltekit
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optomized for for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reduces bundle size. 
+
+
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Fast, performant, and very scalable
+  - Not opinionated and very flexible
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Relatively new framework, with fewer resources and plugins than React
+  - Steeper learning curve, since many JavaScript developers are used to React
+  - Small community
+  - Limited documentation
 
 ## Links <!-- OPTIONAL -->
 
