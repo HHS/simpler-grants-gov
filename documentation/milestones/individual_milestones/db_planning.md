@@ -2,7 +2,7 @@
 
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
-| Document Status | Draft                                                                |
+| Document Status | Completed                                                            |
 | Epic Link       | [Issue 48](https://github.com/HHS/grants-api/issues/48)              |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Target Release  | 2023-07-19                                                           |
@@ -28,11 +28,16 @@ This milestone is critical because it serves as the initial planning for the bet
 <!-- Required -->
 
 - As an **HHS Staff Member**, I want:
-  - TODO
+  - to store data using well-established tools and platforms, so that it will be easier to hire future HHS staff and contractors who are familiar with the technology stack
+  - the deployment services we select to be FedRAMP compliant and covered under our existing ATO (where possible), so that we minimize the amount of time we need to spend seeking approval for new technology
+  - to balance direct operating and hosting costs with staff resources required to maintain these tools, so that we are making intentional investments that minimize maintenance overhead without exceeding our budget
 - As a **project maintainer**, I want to:
   - evaluate and select the appropriate database type, database management system, and database hosting service so that I have a plan prior to initiating the replication of the Grants.gov database.
+  - select tools that satisfy both the current and future needs of the project, so that we can minimize the number of languages and frameworks we support (where possible) and don't need to reimplement existing features at a later point in the time
+  - leverage hosting services that are relatively easy to maintain and scale, so that we can prioritize developing important product features over managing basic infrastructure
 - As an **open source contributor**, I want:
-  - TODO
+  - the API to be built using tools that are popular with a robust open source community, so that I have a lot of resources to reference and learn from if I want to contribute to the project
+  - the API to use services that can be hosted or at least mocked locally, so that I can test all of the required parts of the application on my own machine without signing up for a new platform
 
 ## Technical description
 
@@ -47,7 +52,6 @@ Some potential options include:
 - Wide-column
 - Key-value
 - Others recommended by dev team
-
 
 Some factors to consider are:
 
@@ -103,12 +107,12 @@ Some factors to consider are:
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
-1. DB Planning ADR is created under documentation/decisions/adr
-2. Within the ADR, the database type, database management system, and database hosting service are evaluated and selected and address the key considerations
-3. Open questions are discussed and clarified
+N/A for planning milestone
 
 ### Destination for live updating metrics
 <!-- Required -->
+
+N/A for planning milestone
 
 ## Planning
 
