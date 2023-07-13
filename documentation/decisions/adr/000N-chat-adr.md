@@ -93,12 +93,21 @@ TBD
 | Cost                                        | Free,<br>Pro $7.25, Business $12.50 USD per active user per month billed annually.<br>Or, $15 USD per active user per month, billed monthly.<br>FOSS community users must request access | Free to run, free to use (see https://discord.com/open-source)                     | Part of MS365 subscription plans<br>$12.50/user/month                                                                                                                                                                              | $3.67 per user/month, billed annually;                                                                                             | Free + own hosting costs; paid version available $7<br>/user/month<br>Minimum of 25 users<br>or<br>$35<br>/agent/month<br>Minimum of 5 agents | free + own hosting costs; paid version available $10 per user/month, billed annually; enterprise pricing with requested quote | Free + own hosting costs; paid version available$6.67 per user per month, billed annually |
 
 
-## Cost to add public users
+## Top choices
+
+### Cost to add public users
 
 To understand the cost as we grow and expand chat to become accessible to public users, we want to evaluate costs for our top chat options: Slack and Rocket.chat
 
 **Slack:** 
 
+For free version of Slack:  
+- No limit to channels or users
+- Data retention for 90 days
+- Limitations to message and file visibility limit at 90 days
+- You can add up to 10 third-party or custom apps. 
+  
+For paid versions of Slack:
 - Guest Roles (External users that are not part of a paid workspace). Host pays for the guest roles for mult-channel use. Single channel based off number of members on host workspace. 
 
 - Slack Connect (requires both your workspace and their workspace be on a paid plan or start a trial). There is no additional charge on either workspace. Slack Connect (More for users that already have their own paid workspace). These users can have multi-channel access at no additional charge. 
@@ -109,17 +118,25 @@ To understand the cost as we grow and expand chat to become accessible to public
   - Single-Channel Guests are free and can only access one channel. For every paid active member in your workspace, you can add up to 5 guests. For example, if you have 10 members, you can invite up to 50 Single-Channel Guests.
   - Multi Channel guests would be billed like a regular member of your workspace.
 
-- Sources: 
 
-  - <https://slack.com/resources/slack-for-admins/guests-vs-channels-in-slack-connect> 
-  - <https://slack.com/help/articles/202518103-Understand-guest-roles-in-Slack>  
-  - <https://slack.com/help/articles/115004151203-Slack-Connect-guide--work-with-external-organizations>
 
-**Rocket.chat and Mattermost (need to confirm with respective companies)** 
 
-- Enterprise includes guest users
+**Rocket.chat**  
 
-## Links <!-- OPTIONAL -->
+- Rocket.chat has a couple different pricing models:
+  - Registered users (appropriate for a small number of users)
+  - Omni-channel model: that charges by unique monthly active users  
+  - Model to charge for monthly active users (not unique)  
+- Rocket.chat does not currently have a use case where public users need to access or view channels and interact with channels, but could be willing to work out a solution.
+- Rocket.Chat's self-hosted community edition is free forever.  There are limitations to the free version including high availability and scalability.  - Rocket.chat’s free community edition is limited to a single instance and designed to support 150-200 users.  We have the ability to build the screen reader functionality on our own instance.
 
-- [{Link name}](link to external resource)
-- ...
+ 
+
+## Links 
+
+ - [Enterprise](https://www.rocket.chat/enterprise)
+ - [Community](https://www.rocket.chat/community)
+ - [Slack Admins: guests vs channels in Slack Connect](https://slack.com/resources/slack-for-admins/guests-vs-channels-in-slack-connect)
+ - [Guest roles for paid version](https://slack.com/help/articles/202518103-Understand-guest-roles-in-Slack)
+ - [Slack Connect Guide for external organizations](<https://slack.com/help/articles/115004151203-Slack-Connect-guide--work-with-external-organizations>)
+ - [Slack Free workspace usage limits](https://slack.com/help/articles/115002422943-Usage-limits-for-free-workspaces)
