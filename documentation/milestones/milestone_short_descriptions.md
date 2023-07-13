@@ -113,6 +113,8 @@ Diagram short name: `DB-Plan`
 
 Dependencies: `None`
 
+Milestone doc: [DB planning](./individual_milestones/db_planning.md)
+
 Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
