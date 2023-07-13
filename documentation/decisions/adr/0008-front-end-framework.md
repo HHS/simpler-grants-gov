@@ -1,7 +1,7 @@
 # Front-end Framework
 
 - **Status:** Draft <!-- REQUIRED -->
-- **Last Modified:** 2023-07-11 <!-- REQUIRED -->
+- **Last Modified:** 2023-07-13 <!-- REQUIRED -->
 - **Related Issue:** [#97](https://github.com/HHS/grants-api/issues/97) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner <!-- REQUIRED -->
 
@@ -33,17 +33,15 @@ The project will need a web framework to build and manage the frontend. The goal
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: Next.js, because of the options that meet our requirements .
+Chosen option: Next.js, because this option meets all our technical requirements, has a large community of support, is easy to learn with good documentation, and is well understood by Nava.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- We can use the Nava Next.js template to get started quickly
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+- We'll need to modularize our code so that if Next.js ever loses support, we can swap it out
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -55,7 +53,7 @@ Create React App is a lightweight, client side, single page application framewor
   - One of the earliest react frameworks
   - Widely used and understood
 - **Cons**
-  - Either has or will stop recieving support
+  - Either has or will stop receiving support
   - No longer recommended by react
 
 ### Next.js
@@ -73,7 +71,6 @@ Next.js is a popular full stack framework for static and server‑rendered appli
 
 Vue.js is an open-source, JavaScript framework for building progressive user interfaces that also supports server side rendering. It was created by Evan You in 2014 and has grown in popularity, thanks to its reactive data binding and component-based architecture. Nuxt.js provides a set of conventions and tools for building Vue.js applications, including automatic code splitting, prefetching, and caching.
 
-
 - **Pros**
   - Static site generation is easy out of the box
   - Code splitting helps reduce package sizes and makes caching easier
@@ -83,9 +80,7 @@ Vue.js is an open-source, JavaScript framework for building progressive user int
 
 ### Svelte or Sveltekit
 
-Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optomized for for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reduces bundle size. 
-
-
+Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optimized for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reduces bundle size. 
 
 - **Pros**
   - Fast, performant, and very scalable
@@ -98,5 +93,4 @@ Svelte is a JavaScript, front-end compiler that turns declarative and easy to un
 
 ## Links <!-- OPTIONAL -->
 
-- [{Link name}](link to external resource)
-- ...
+- [React removing create react app from its recommendations](https://github.com/reactjs/react.dev/pull/5487)
