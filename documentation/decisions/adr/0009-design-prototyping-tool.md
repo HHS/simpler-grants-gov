@@ -1,10 +1,10 @@
 # Use Figma for design prototyping
 
-- **Status:** Proposed <!-- REQUIRED -->
-- **Last Modified:** 2023-07-03 <!-- REQUIRED -->
-- **Related Issue:** [#103](https://github.com/HHS/grants-api/issues/103) <!-- RECOMMENDED -->
-- **Deciders:** Andy Cochran, Emily Ianacone, Lucas Brown <!-- REQUIRED -->
-- **Tags:** design <!-- OPTIONAL -->
+- **Status:** Accepted
+- **Last Modified:** 2023-07-03
+- **Related Issue:** [#103](https://github.com/HHS/grants-api/issues/103)
+- **Deciders:** Andy Cochran, Emily Ianacone, Lucas Brown
+- **Tags:** design
 
 ## Context and Problem Statement
 
