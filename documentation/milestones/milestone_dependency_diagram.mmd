@@ -90,6 +90,7 @@ flowchart LR
         FE-CI-CD --> Foundational-UI:::northStar
         Foundational-UI --> Search-UI
         Foundational-UI --> NOFO-Recommendations-UI
+        Design-Tooling --> Static-Site & Foundational-UI & User-Research-Compensation & User-Research-Database
     end
 
     subgraph Expanded-UI
@@ -125,37 +126,36 @@ flowchart LR
     subgraph Initial API deployment
         Onboard-Dev-Team --> SaaS-Plan
         SaaS-Plan
-        SaaS-Plan --> DB-API-Plan
+        API-Plan::planning
         Legacy-Architecture
         Onboard-Dev-Team:::executing
-        Onboard-Dev-Team --> DB-API-Plan
         Onboard-Dev-Team --> Feature-Flags
-        DB-API-Plan --> API-Docs-Plan
+        API-Plan --> API-Docs-Plan
         Onboard-Dev-Team --> DB-Replica
-        Onboard-Dev-Team & DB-API-Plan --> Dev-Tools
+        Onboard-Dev-Team & API-Plan --> Dev-Tools
         Beta-Domain
         Beta-Domain --> Static-Site
-        DB-API-Plan --> Infrastructure-as-Code
-        DB-Replica & DB-API-Plan --> DB-Test-Data
-        DB-API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
-        DB-API-Plan & GET-Opportunities --> Webhooks-Opportunities
+        DB-Plan & API-Plan --> Infrastructure-as-Code
+        DB-Replica & DB-Plan --> DB-Test-Data
+        DB-Plan & API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
+        API-Plan & GET-Opportunities --> Webhooks-Opportunities
         GET-Opportunities --> API-Docs
         GET-Opportunities --> AuthN-API
         GET-Opportunities --> Analytics-API
         API-Docs-Plan & Beta-Domain --> API-Docs
-        DB-API-Plan --> API-Versioning
-        DB-API-Plan --> Performance-Testing
-        DB-API-Plan --> Opportunity-Protocol
-        DB-API-Plan--> AB-Testing-Plan
+        API-Plan --> API-Versioning
+        API-Plan --> Performance-Testing
+        DB-Plan & API-Plan --> Opportunity-Protocol
+        API-Plan--> AB-Testing-Plan
         ATO
         CI-CD
-        DB-API-Plan --> CI-CD
+        API-Plan --> CI-CD
         CI-CD --> CI-CD-Metrics
         CI-CD --> Incident-Response
-        DB-API-Plan --> Dependency-Fundraising-Tracking
+        API-Plan --> Dependency-Fundraising-Tracking
         GET-Opportunities --> Search-API
         GET-Opportunities --> NOFOs-Text
-        DB-API-Plan & GET-Opportunities --> API-Security
+        API-Plan & GET-Opportunities --> API-Security
     end
 
     subgraph Hackathon

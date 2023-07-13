@@ -35,7 +35,7 @@ Have the software development team for this effort start their work and get syst
 ## Developer tools
 Diagram short name: `Dev-Tools`
 
-Dependencies: `Onboard-Dev-Team`, `DB-API-Plan`
+Dependencies: `Onboard-Dev-Team`, `API-Plan`, `FE-Plan`
 
 Install developer tools for backend, including:
 
@@ -98,32 +98,34 @@ Make an analysis of needs and alternatives and try to identify whether any aspec
 
 Write an analysis of alternatives with pros/cons/recommendations.
 
-## DB & API planning
-Diagram short name: `DB-API-Plan`
+## API planning
+Diagram short name: `API-Plan`
 
 Dependencies: `SaaS-Plan`
 
-Make an analysis of needs and alternatives and choose:
+Milestone doc: [API planning](./individual_milestones/api_planning.md)
 
-* Database(s) type(s) (e.g., relational, document store, or alternative)
-* Database(s) language(s) (e.g., MongoDB, Postgres or alternative)
-* Database(s) deployment(s) (e.g., RDS or alternative)
-* Database ORM (e.g., SQLAlchemy or alternative)
-* API types (e.g., RESTful JSON, webhooks, GraphQL, or alternatives)
-* API language (e.g., Python, Node)
-* API deployment (e.g., EC2, serverless, or alternative)
+Formalize a series of architectural decisions about the API, including the technology stack we will use, the type of API we will build, and the services we'll leverage to deploy and host it.
+
+## DB planning
+
+Diagram short name: `DB-Plan`
+
+Dependencies: `None`
+
+Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
 Diagram short name: `Infrastructure-as-Code`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`, `FE-Plan`
 
 Setup and deploy initial infrastructure, with 100% of the deployment managed through an infrastructure-as-code solution.
 
 ## Serialization and API documentation planning
 Diagram short name: `API-Docs-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
 Make an analysis of needs and alternatives and choose:
 
@@ -138,7 +140,7 @@ Otherwise, every time there is a change in schema, it requires a lot of develope
 ## GET opportunities
 Diagram short name: `GET-Opportunities`
 
-Dependencies: `DB-API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
+Dependencies: `DB-Plan`, `API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
 
 Deploy a public endpoint to PROD that allows users to see at least one (but not necessarily more than one!) field of data per listed opportunity in grants.gov. This will probably be a RESTful JSON /GET API endpoint.
 
@@ -168,9 +170,9 @@ Choose and implement framework for having feature flags in production.
 ## API versioning framework
 Diagram short name: `API-Versioning`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
+Based on the plan defined in `API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
 
 Document versioning in API docs.
 
@@ -179,23 +181,23 @@ Also develop and execute release management plan with plan for release cycles, r
 ## Performance testing framework
 Diagram short name: `Performance-Testing`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 Setup and start running performance testing framework for testing systems under load.
 
 ## ATO
 Diagram short name: `ATO`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Review planned public deployment of services with Jacob, our security officer, to confirm that they all fall under our existing ATO for grants.gov
 
 ## CI-CD
 Diagram short name: `CI-CD`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
+Based on the plan defined in `API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
 
 When commits are made to any branch, these should automatically:
 * Run lint suite
@@ -256,11 +258,11 @@ Metrics:
 ## Webhooks for opportunities
 Diagram short name: `Webhooks-Opportunities`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Deploy a public webhook to PROD that allows users to subscribe to receive system-to-system updates when data is updated in the beta.grants.gov database.
 
-The definition of this milestone could change based on planning done in `DB-API-Plan`.
+The definition of this milestone could change based on planning done in `API-Plan`.
 
 Metrics:
 * Number of unique users receiving webhooks calls
@@ -269,7 +271,7 @@ Metrics:
 ## Back-end dependency fundraising tracking
 Diagram short name: `Dependency-Fundraising-Tracking`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 For the front-end, there is a great tool (https://backyourstack.com/) that shows fundraising being conducted by the packages that are used as dependencies in your project. This tool currently only supports fundraising done through OpenCollective, which provides a systematic API that can be used to collect this data.
 
@@ -280,7 +282,7 @@ Based on initial research, the level of effort should be assessed to determine w
 ## Develop opportunity protocol
 Diagram short name: `Opportunity-Protocol`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
 Investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some private-sector grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
 
@@ -293,7 +295,7 @@ For some research on common form fields, please see [this analysis from Technolo
 ## Plan for A/B testing
 Diagram short name: `AB-Testing-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Make a plan for the technological and legal/process aspects of A/B testing experiences in beta.grants.gov.
 
@@ -303,7 +305,7 @@ This plan will need to account for any concerns about fairness that could be bro
 
 Diagram short name: `API-Security`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`.
 
@@ -418,7 +420,6 @@ For each of these meetings, their definition of done is:
 * Recurring agenda set (in our shared comms tools (e.g., our Wiki) and in body of the calendar invite)
 * Roles are set (e.g., an MC or rotating MC schedule is assigned)
 * We've had at least one of these meetings
-
 
 # NOFO milestones
 
@@ -722,10 +723,61 @@ A submission, by the software development modernization team for grants.gov, for
 
 # User interface milestones
 
+## Design tooling
+Diagram short name: `Design-Tooling`
+
+Dependencies: `None`
+
+We must have easy-to-use and effective tools for design. It is crucial that they can be used collboratively as a team. The tools and the assets they generate must be accessible to internal partners (HHS or employed by HHS) as well as external partners (members of the general public).
+
+### Protoptyping
+Make an analysis of needs for wireframing and prototyping tools that facilitate design conversation, can be used in research activities, and provide artifacts for stakeholder review. Platform availability, live collbaration, interactivity, and handoff features should be assessed.
+
+Explore tools such as:
+
+- Figma
+- Adobe XD
+- InVision Studio
+- Sketch
+
+### Diagramming
+Diagrams are a great design tool when figuring out the essentials, the flow of pages, and conditional logic. Diagrams can become the artifact engineers reference in implementation. This is an especially fast way of working when using a robust design system (USDWS). Low-fidelity design artifacts like diagrams prevent engineers from misinterpreting visual design intent. If engineers use the components described in diagrams and follow established design patterns, then they've met the requirements. If a designer needs to communicate styling that differs from established patterns, it's a good signal to step back and align with the engineer.
+
+Diagramming tools aren't used only by designers. As engineers create artifacts like architectural diagrams. Diagrams improve collaboration between disciplines by annotating business requirements, policy requirements, context for why design decisions were made, or how the API should be used. Needs of of all disciplines and collborative use should be assessed.
+
+Explore tools that work for all disciplines, such as:
+
+- Mural (note: existing HHS licenses)
+- Lucidchart
+- Miro
+- Visio
+- Figjam
+- Draw.io
+- ClickUp
+
+_\* A diagramming tool such as MermaidJS or GraphViz may be chosen for creating tecnhical documentation in a machine-readable, version-controled format in addition to a more collaborative tool for design, research, meetings, and general purposes. If multiple tools are chosen, the intended use cases of each should be clearly delineated._
+
+### Research Operation
+As a community and userbase grows, so does the need for moderated and unmoderated usability testing. It's important that participants are screened, identified, provided incentives, and engaged in equitable ways. Tools should be evalutated for how they allow for various testing methodologies (card sorting, tree testing, first-click testing, surveys, screen recording, etc), how they integrate with our prototyping tools, scalability, and how they organize qualitative and quantitative insights.
+
+Explore tools for participant recruitment/incentivization, such as:
+
+- Ethnio
+- User Interviews
+- Respondent
+
+Explore tools for unmoderated usability testing, such as:
+
+- Maze
+- Dovetail
+- UserTesting
+- UsabilityHub
+- Optimal Workshop
+
 ## Static site launch with NOFO content
 Diagram short name: `Static-Site`
 
-Dependencies: `Beta-Domain`, `FE-Plan`
+Dependencies: `Beta-Domain`, `Design-Tooling`, `FE-Plan`
 
 Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort.
 
@@ -835,7 +887,7 @@ Ideally, every release of new content should be followed shortly thereafter by t
 ## Foundational UI
 Diagram short name: `Foundational-UI`
 
-Dependencies: `FE-CI-CD`, `Research-Synthesis`
+Dependencies: `Design-Tooling`, `FE-CI-CD`, `Research-Synthesis`
 
 Build and deploy a basic UI framework for the site, using USWDS, informed by research synthesis.
 
@@ -1007,7 +1059,7 @@ Document which of these tasks can be completed using APIs vs which must go throu
 ## User research compensation
 Diagram short name: `User-Research-Compensation`
 
-Dependencies: `None`
+Dependencies: `Design-Tooling`
 
 Investigate potentially setting up a system for compensation user research participants, modeled after the compensation system developed by USDS at the White House.
 
@@ -1016,7 +1068,7 @@ This will promote fairness, as well as increasing the quality and diversity of o
 ## User research participants database
 Diagram short name: `User-Research-Database`
 
-Dependencies: `None`
+Dependencies: `Design-Tooling`
 
 Create a database that is easy to maintain and update of potential participants for ongoing user research to contact about future user research opportunities.
 
