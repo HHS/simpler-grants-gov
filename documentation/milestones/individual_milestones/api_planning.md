@@ -167,6 +167,8 @@ The following metrics should be tracked about the tools selected within this met
 ### Destination for live updating metrics
 <!-- Required -->
 
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+
 ## Planning
 
 ### Assumptions & dependencies
