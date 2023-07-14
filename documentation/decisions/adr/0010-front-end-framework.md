@@ -65,7 +65,7 @@ Next.js is a popular full stack framework for static and server‑rendered appli
   - Supports static site generation, server side rendering, and client side rendering
   - Easy to learn and use with good documentation
 - **Cons**
-  - Very opinionated framework, especially with routing which can reduce flexibility
+  - Very opinionated with routing which can significantly increase code complexity for non standard routes
 
 ### Vue.js or Nuxt.js
 
