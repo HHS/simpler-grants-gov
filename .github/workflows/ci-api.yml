@@ -39,4 +39,3 @@ jobs:
         run: |
           make test-audit
           make test-coverage
-        

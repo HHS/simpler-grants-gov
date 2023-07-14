@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "template-application-flask"
+name = "grants-equity-api"
 version = "0.1.0"
-description = "A template flask API for building ontop of"
+description = "Back end API for grants.gov"
 packages = [{ include = "src" }]
 authors = ["Nava Engineering <engineering@navapbc.com>"]
 
@@ -19,6 +19,7 @@ pytz = "^2022.2.1"
 APIFlask = "^1.1.3"
 marshmallow-dataclass = {extras = ["enum", "union"], version = "^8.5.8"}
 marshmallow = "^3.18.0"
+pip-licenses = "^4.3.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0.0"
@@ -110,4 +111,3 @@ markers = [
 
 [tool.coverage.run]
 omit = ["src/db/migrations/*.py"]
-
