@@ -1,9 +1,9 @@
 # Front-end Framework
 
-- **Status:** Draft <!-- REQUIRED -->
-- **Last Modified:** 2023-07-13 <!-- REQUIRED -->
+- **Status:** Decided <!-- REQUIRED -->
+- **Last Modified:** 2023-07-14 <!-- REQUIRED -->
 - **Related Issue:** [#97](https://github.com/HHS/grants-api/issues/97) <!-- RECOMMENDED -->
-- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold <!-- REQUIRED -->
+- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
 
 ## Context and Problem Statement
 
