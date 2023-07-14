@@ -1,7 +1,7 @@
 # Infrastructure as Code Tool 
 
-- **Status:** Draft
-- **Last Modified:** 2023-07-03 <!-- REQUIRED -->
+- **Status:** Accepted
+- **Last Modified:** 2023-07-14 <!-- REQUIRED -->
 - **Related Issue:** [#93](https://github.com/HHS/grants-api/issues/93) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly <!-- REQUIRED -->
 - **Tags:** Hosting, Infrastructure <!-- OPTIONAL -->
@@ -28,7 +28,9 @@ IaC tools often have overlapping feature-sets and strategies, however they can b
 
 ## Decision Outcome <!-- REQUIRED -->
 
-The project will use Terraform with Docker for provisioning infrastructure and creating and configuring images. Terraform is interoperable, widely adopted (with [37K stars](https://github.com/hashicorp/terraform/stargazers) as example metric), has excellent documentation, and supports declarative and immutable strategies. Docker images offer a widely adopted and developer-friendly mechanism that captures most aspects of configuration management. 
+The project will use Terraform with Docker for provisioning infrastructure and creating and configuring images. Terraform is interoperable, widely adopted (with [37K stars](https://github.com/hashicorp/terraform/stargazers) as example metric), has excellent documentation, and supports declarative and immutable strategies. Docker images offer a widely adopted and developer-friendly mechanism that captures most aspects of configuration management.
+
+Terraform with Docker better aligns with the decision drivers as Chef with Ansible are procedural and CloudFormation is closed source, not interoperable, is less modular, and is harder to test and use across multiple accounts.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
