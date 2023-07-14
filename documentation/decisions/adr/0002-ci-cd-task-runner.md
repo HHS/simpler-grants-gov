@@ -1,6 +1,6 @@
 # Task Runner for the CI / CD Pipeline
 
-- **Status:** Approved <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-06-29 <!-- REQUIRED -->
 - **Related Issue:** [ADR: Task Runner and CI / CD interface #92
 ](https://github.com/HHS/grants-api/issues/92) <!-- RECOMMENDED -->
