@@ -55,7 +55,11 @@ Evaluate and adopt a framework to build and manage an automated test suite for t
 
 Evaluate and adopt a set of tools to enforce the following code quality checks:
 
-- Code Linting
+- Code Linting, preferably including:
+  - end of file (EOF) fixing
+  - import sorting
+  - unused import cleanup
+  - docstring validation
 - Auto-formatting
 - Type checking
 
@@ -124,25 +128,15 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
 
 ### Proposed metrics for measuring goals/value/definition of done
 
-- Test framework metrics
-  - Percentage of code covered by unit tests
-  - Percentage of code covered by integration tests
-  - Total runtime of all unit tests
-  - Total runtime of all integration tests
-- Code quality checks metric: Total runtime of all code quality checks
-- Security checks metrics
-  - Total runtime of all security checks
-  - Number of security vulnerabilities not caught until production
-  - Number of days it takes to resolve a security vulnerability reported in the grants API project
-  - Number of days it takes to update an upstream dependency once a version which resolves a CVE has been released
-- Dependency management metrics
-  - Number of days it takes to update an upstream dependency once a new minor or major version has been released
-  - Number of dependencies that received funding through this project
-- Config & secrets management metric: Average age across all tokens/secrets
+- Total runtime of all CI/CD checks
+- Number of bug tickets opened in the last 30 days
+- Number of days it takes to close a bug ticket
+- Percentage of code covered by unit tests
+- Percentage of code covered by integration tests
 
 ### Destination for live updating metrics
 
-Not yet known
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
 
 ## Planning
 
@@ -151,7 +145,7 @@ Not yet known
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
 
-- [ ] **API Plan & frontend Plan:** Choosing a set of developer tools for will be depend heavily on the language selected for both the backend and the frontend.
+- [ ] **API & Front-end Planning:** Choosing a set of developer tools will depend heavily on the language selected for both the backend and the frontend.
 - [ ] **Onboard Dev Team:** The dev team should be involved in the selection and implementation of these tools.
 
 Are there any notable capabilities / milestones do NOT we expect to be in place at the
