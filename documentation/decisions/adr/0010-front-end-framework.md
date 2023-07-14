@@ -58,14 +58,14 @@ Create React App is a lightweight, client side, single page application framewor
 
 ### Next.js
 
-Next.js is a popular full stack framework for static and server‑rendered applications built with React. It includes styling and routing solutions out of the box, and assumes that you’re using Node.js as the server environment. Next.js is maintained by Vercel, a PaaS for frontend hosting company.
+Next.js is a popular full stack framework for static and server‑rendered applications built with React and can [prerender pages it determines are static automagically](https://nextjs.org/docs/pages/building-your-application/rendering/automatic-static-optimization) alongside server rendered routes to improve performance. It includes styling and routing solutions out of the box, is optimized for performance and SEO, and provides great developer documentation and support. Next.js is maintained by Vercel, a PaaS for frontend hosting company.
 
 - **Pros**
   - Popular framework with dedicated support
   - Supports static site generation, server side rendering, and client side rendering
   - Easy to learn and use with good documentation
 - **Cons**
-  - Very opinionated framework, especially with routing
+  - Very opinionated framework, especially with routing which can reduce flexibility
 
 ### Vue.js or Nuxt.js
 
@@ -80,7 +80,7 @@ Vue.js is an open-source, JavaScript framework for building progressive user int
 
 ### Svelte or Sveltekit
 
-Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optimized for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reduces bundle size. 
+Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optimized for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reducing bundle size. 
 
 - **Pros**
   - Fast, performant, and very scalable
