@@ -1,6 +1,6 @@
 # Front-end Language
 
-- **Status:** Proposed <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-10 <!-- REQUIRED -->
 - **Related Issue:** [#96](https://github.com/HHS/grants-api/issues/96) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner <!-- REQUIRED -->
