@@ -4,7 +4,7 @@
 
 This is the API layer. It includes a few separate components:
 
-* The REST AP
+* The REST API
 * Backend & utility scripts
 
 ## Project Directory Structure
