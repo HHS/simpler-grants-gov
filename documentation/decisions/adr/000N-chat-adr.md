@@ -10,6 +10,9 @@
 
 We want to explore and evaluate options for group chat in order to facilitate effective cross-team and communication. This chat tool will be utilized by both internal individuals at HHS and the general public, requiring usability and effectiveness across diverse user needs. Additionally, the selected tool should have the capacity to scale and adapt as the project expands. There is currently a lack of a transparent chat tool that meets our requirements. 
 
+**Assumptions** 
+We believe that a chat tool can enhance communication and collaboration in real-time for our open-source community. A chat tool can provide a more immediate and interactive means of communication, allowing community members to discuss ideas, ask questions, and provide feedback in a more dynamic manner. They can facilitate quicker decision-making, foster a sense of community, and enable easier coordination among contributors.
+
 ## Decision Drivers <!-- RECOMMENDED -->
 
 **Functionality:** consider the features and functionalities offered with each chat tool. Consider whether the chat solution provides essential capabilities like direct messaging, public channels for messaging, public and private channels, replying to messages in threads that other users can see, emojis to react to message, file sharing, search functionality, integrations.  
