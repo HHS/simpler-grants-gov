@@ -35,7 +35,7 @@ Have the software development team for this effort start their work and get syst
 ## Developer tools
 Diagram short name: `Dev-Tools`
 
-Dependencies: `Onboard-Dev-Team`, `DB-API-Plan`
+Dependencies: `Onboard-Dev-Team`, `API-Plan`, `FE-Plan`
 
 Milestone definition: [Developer tools milestone](./individual_milestones/developer_tools.md)
 
@@ -92,32 +92,34 @@ Make an analysis of needs and alternatives and try to identify whether any aspec
 
 Write an analysis of alternatives with pros/cons/recommendations.
 
-## DB & API planning
-Diagram short name: `DB-API-Plan`
+## API planning
+Diagram short name: `API-Plan`
 
 Dependencies: `SaaS-Plan`
 
-Make an analysis of needs and alternatives and choose:
+Milestone doc: [API planning](./individual_milestones/api_planning.md)
 
-* Database(s) type(s) (e.g., relational, document store, or alternative)
-* Database(s) language(s) (e.g., MongoDB, Postgres or alternative)
-* Database(s) deployment(s) (e.g., RDS or alternative)
-* Database ORM (e.g., SQLAlchemy or alternative)
-* API types (e.g., RESTful JSON, webhooks, GraphQL, or alternatives)
-* API language (e.g., Python, Node)
-* API deployment (e.g., EC2, serverless, or alternative)
+Formalize a series of architectural decisions about the API, including the technology stack we will use, the type of API we will build, and the services we'll leverage to deploy and host it.
+
+## DB planning
+
+Diagram short name: `DB-Plan`
+
+Dependencies: `None`
+
+Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
 Diagram short name: `Infrastructure-as-Code`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`, `FE-Plan`
 
 Setup and deploy initial infrastructure, with 100% of the deployment managed through an infrastructure-as-code solution.
 
 ## Serialization and API documentation planning
 Diagram short name: `API-Docs-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
 Make an analysis of needs and alternatives and choose:
 
@@ -132,7 +134,7 @@ Otherwise, every time there is a change in schema, it requires a lot of develope
 ## GET opportunities
 Diagram short name: `GET-Opportunities`
 
-Dependencies: `DB-API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
+Dependencies: `DB-Plan`, `API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
 
 Deploy a public endpoint to PROD that allows users to see at least one (but not necessarily more than one!) field of data per listed opportunity in grants.gov. This will probably be a RESTful JSON /GET API endpoint.
 
@@ -162,9 +164,9 @@ Choose and implement framework for having feature flags in production.
 ## API versioning framework
 Diagram short name: `API-Versioning`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
+Based on the plan defined in `API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
 
 Document versioning in API docs.
 
@@ -173,23 +175,23 @@ Also develop and execute release management plan with plan for release cycles, r
 ## Performance testing framework
 Diagram short name: `Performance-Testing`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 Setup and start running performance testing framework for testing systems under load.
 
 ## ATO
 Diagram short name: `ATO`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Review planned public deployment of services with Jacob, our security officer, to confirm that they all fall under our existing ATO for grants.gov
 
 ## CI-CD
 Diagram short name: `CI-CD`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
+Based on the plan defined in `API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
 
 When commits are made to any branch, these should automatically:
 * Run lint suite
@@ -250,11 +252,11 @@ Metrics:
 ## Webhooks for opportunities
 Diagram short name: `Webhooks-Opportunities`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Deploy a public webhook to PROD that allows users to subscribe to receive system-to-system updates when data is updated in the beta.grants.gov database.
 
-The definition of this milestone could change based on planning done in `DB-API-Plan`.
+The definition of this milestone could change based on planning done in `API-Plan`.
 
 Metrics:
 * Number of unique users receiving webhooks calls
@@ -263,7 +265,7 @@ Metrics:
 ## Back-end dependency fundraising tracking
 Diagram short name: `Dependency-Fundraising-Tracking`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 For the front-end, there is a great tool (https://backyourstack.com/) that shows fundraising being conducted by the packages that are used as dependencies in your project. This tool currently only supports fundraising done through OpenCollective, which provides a systematic API that can be used to collect this data.
 
@@ -274,7 +276,7 @@ Based on initial research, the level of effort should be assessed to determine w
 ## Develop opportunity protocol
 Diagram short name: `Opportunity-Protocol`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
 Investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some private-sector grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
 
@@ -287,7 +289,7 @@ For some research on common form fields, please see [this analysis from Technolo
 ## Plan for A/B testing
 Diagram short name: `AB-Testing-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Make a plan for the technological and legal/process aspects of A/B testing experiences in beta.grants.gov.
 
@@ -297,7 +299,7 @@ This plan will need to account for any concerns about fairness that could be bro
 
 Diagram short name: `API-Security`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`.
 

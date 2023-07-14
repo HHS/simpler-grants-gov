@@ -23,7 +23,7 @@ _What is the best way to document key architectural decisions made within the pr
 
 ## Options Considered
 
-- ADRs in the repo `docs/` folder
+- ADRs in the repo `documentation/decisions/adr` folder
 - Comments and docstrings in the code itself
 - Articles in the project's Wiki
 
