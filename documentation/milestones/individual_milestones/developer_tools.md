@@ -60,6 +60,7 @@ Evaluate and adopt a set of tools to enforce the following code quality checks:
   - import sorting
   - unused import cleanup
   - docstring validation
+  - immutability enforcement
 - Auto-formatting
 - Type checking
 
