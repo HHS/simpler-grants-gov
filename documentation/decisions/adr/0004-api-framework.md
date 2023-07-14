@@ -1,6 +1,6 @@
 # API Framework and Libraries
 
-- **Status:** Accepted on 2023-07-06 <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-07 <!-- REQUIRED -->
 - **Related Issue:** [#28](https://github.com/HHS/grants-api/issues/28) <!-- RECOMMENDED -->
 - **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Gina Carson, Sumi Thaiveettil, Eshter Oke <!-- REQUIRED -->
