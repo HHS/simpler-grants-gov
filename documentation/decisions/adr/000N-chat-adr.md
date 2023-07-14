@@ -3,7 +3,7 @@
 - **Status:** Proposed <!-- REQUIRED -->
 - **Last Modified:** 2023-07-05 <!-- REQUIRED -->
 - **Related Issue:** #105 (https://github.com/HHS/grants-equity/issues/105) <!-- RECOMMENDED -->
-- **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
+- **Deciders:** @widal001 @lucasmbrown-usds <!-- REQUIRED -->
 - **Tags:** docs:adr topic:comms <!-- OPTIONAL -->
 
 ## Context and Problem Statement
