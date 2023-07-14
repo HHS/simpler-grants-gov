@@ -1,7 +1,7 @@
 # Cloud Platform to Host the Project
 
-- **Status:** Draft
-- **Last Modified:** 2023-07-03 <!-- REQUIRED -->
+- **Status:** Accepted
+- **Last Modified:** 2023-07-14 <!-- REQUIRED -->
 - **Related Issue:** [#93](https://github.com/HHS/grants-api/issues/93) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly <!-- REQUIRED -->
 - **Tags:** Hosting, Infrastructure, Security <!-- OPTIONAL -->
@@ -24,7 +24,7 @@ The project needs a hosting provider in order to operate. The hosting provider s
 
 ## Decision Outcome <!-- REQUIRED -->
 
-HHS has selected Amazon Web Services to provide hosting services for the project due to HHS' existing relationship with AWS, the fact that AWS is Fedramp Approved, and AWS offers a competitive set of tools
+HHS has selected Amazon Web Services to provide hosting services for the project due to HHS' existing relationship with AWS, the fact that AWS is Fedramp Approved, and AWS offers a competitive set of tools.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
