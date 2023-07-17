@@ -1,7 +1,7 @@
 # Front-end Code Quality Tools
 
-- **Status:** Proposed <!-- REQUIRED -->
-- **Last Modified:** 2023-07-13 <!-- REQUIRED -->
+- **Status:** Approved <!-- REQUIRED -->
+- **Last Modified:** 2023-07-17 <!-- REQUIRED -->
 - **Related Issue:** [#102](https://github.com/HHS/grants-equity/issues/102) <!-- RECOMMENDED -->
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
@@ -59,7 +59,7 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 *Note: Do we need the Safety package for our Python code as well or is this sufficient?*
 
 ### License Checking[^*]
-**[License Checker](https://www.npmjs.com/package/license-checker):** Very aptly named tool to check licenses for dependencies.
+**[License Checker](https://www.npmjs.com/package/license-checker):** Very aptly named tool to check licenses for dependencies. Can fail on specified input, a semicolon separated list.
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -74,6 +74,8 @@ Option #1 is preferred. The tooling chosen in the template repository suits our 
 **Type Checking:**
 
 [Flow](https://flow.org/): Static type checker maintained by Facebook, added to project as a dependency. Uses a special type syntax that is removed from code at compile time.
+
+[Immutible](https://immutable-js.com/): Provides a set of persistent, immutible data structures. Preferred to start with TypeScript and see if that suits our needs as it comes with immutible functionality out of the box.
 
 **Dependency Checks:**
 
