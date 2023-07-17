@@ -3,7 +3,7 @@
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-06-29 <!-- REQUIRED -->
 - **Related Issue:** [ADR: Task Runner and CI / CD interface #92
-](https://github.com/HHS/grants-api/issues/92) <!-- RECOMMENDED -->
+](https://github.com/HHS/grants-equity/issues/92) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly <!-- REQUIRED -->
 - **Tags:** Continuous Integration, Continuous Deployment <!-- OPTIONAL -->
 
