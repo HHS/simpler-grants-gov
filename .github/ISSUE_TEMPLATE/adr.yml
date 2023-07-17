@@ -12,7 +12,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Example** [Wiki ADR](https://github.com/HHS/grants-api/issues/30)
+        **Example** [Wiki ADR](https://github.com/HHS/grants-equity/issues/30)
   - type: textarea
     id: description
     attributes:

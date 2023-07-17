@@ -34,9 +34,9 @@ We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow
 1.  Check out the `main` branch
 1.  Create a feature branch
 1.  Write code and tests for your change
-1.  From your branch, make a pull request against `hhsgov/grants-api/main`
+1.  From your branch, make a pull request against `hhsgov/grants-equity/main`
 1.  Work with repo maintainers to get your change reviewed
-1.  Wait for your change to be pulled into `hhsgov/grants-api/main`
+1.  Wait for your change to be pulled into `hhsgov/grants-equity/main`
 1.  Delete your feature branch
 -->
 
@@ -129,7 +129,7 @@ Some important notes regarding the summary line:
 ### TODO: Documentation Example
 
 We also welcome improvements to the project documentation or to the existing
-docs. Please file an [issue](https://github.com/hhsgov/grants-api/issues).
+docs. Please file an [issue](https://github.com/hhsgov/grants-equity/issues).
 -->
 
 ## Policies
