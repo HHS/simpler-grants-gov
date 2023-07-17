@@ -3,7 +3,7 @@
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
 | Document Status | Completed                                                            |
-| Epic Link       | [Issue 48](https://github.com/HHS/grants-equity/issues/48)              |
+| Epic Link       | [Issue 48](https://github.com/HHS/grants-equity/issues/48)           |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Target Release  | 2023-07-19                                                           |
 | Product Owner   | Lucas Brown                                                          |
@@ -98,8 +98,8 @@ Some factors to consider are:
 ### Definition of done
 <!-- Required -->
 
-- [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate)
-- [ ] An ADR has been recorded and published to `main` for each of the following choices:
+- [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate) and/or are FedRAMP approved
+- [ ] An ADR has been recorded and published to `main` for the following choices:
   - [ ] Database Type
   - [ ] Database Management System (DBMS)
   - [ ] Database Hosting Service
@@ -133,6 +133,10 @@ beginning of work on this milestone?
 <!-- Optional -->
 
 - [ ] Will this database serve as an OLTP system, OLAP system, or both? Will this database be used for analytics, and is there a need for a second database to be created with data pipelines?
+- [ ] What are the current datastores that support the legacy Grants.gov system?
+      - Oracle on RDS (used for opportunity data, etc)
+      - MongoDB (I'm not sure exactly what data is in the document store)
+      - Flat file storage with application data
 - [ ] Is the existing Grants.gov database heavy on read or write transactions?
 - [ ] How many external sources does the existing database have?
 
