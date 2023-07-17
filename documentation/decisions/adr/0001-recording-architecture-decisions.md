@@ -1,8 +1,8 @@
 # Recording Architecture Decisions
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Last Modified:** 2023-06-26
-- **Related Issue:** [#34](https://github.com/HHS/grants-api/issues/34)
+- **Related Issue:** [#34](https://github.com/HHS/grants-equity/issues/34)
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly
 - **Tags:** ADRs
 

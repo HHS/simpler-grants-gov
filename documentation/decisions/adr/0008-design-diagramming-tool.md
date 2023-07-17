@@ -1,10 +1,10 @@
 # Use Mural for design diagrams and whiteboarding
 
-- **Status:** Proposed <!-- REQUIRED -->
-- **Last Modified:** {YYYY-MM-DD when the decision was last updated} <!-- REQUIRED -->
-- **Related Issue:** [#116](https://github.com/HHS/grants-api/issues/116) <!-- RECOMMENDED -->
-- **Deciders:** Andy Cochran, Emily Ianacone, Sumi Thaiveettil, Aaron Couch, Billy Daly, Lucan Brown <!-- REQUIRED -->
-- **Tags:** design <!-- OPTIONAL -->
+- **Status:** Accepted
+- **Last Modified:** 2023-07-11 
+- **Related Issue:** [#116](https://github.com/HHS/grants-equity/issues/116)
+- **Deciders:** Andy Cochran, Emily Ianacone, Sumi Thaiveettil, Aaron Couch, Billy Daly, Lucan Brown
+- **Tags:** design
 
 ## Context and Problem Statement
 

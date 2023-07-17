@@ -2,7 +2,7 @@
 
 - **Status:** {Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
 - **Last Modified:** {YYYY-MM-DD when the decision was last updated} <!-- REQUIRED -->
-- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
+- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-equity/issues) <!-- RECOMMENDED -->
 - **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
 - **Tags:** {space and/or comma separated list of tags} <!-- OPTIONAL -->
 
