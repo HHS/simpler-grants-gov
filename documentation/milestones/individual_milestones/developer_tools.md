@@ -111,7 +111,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
   - [ ] All checks are run on every push to the remote GitHub repository
   - [ ] The most important checks are run on every local commit
   - [ ] Code which fails any of these checks will be blocked from merging into `main`
-  - [ ] 1 quantitative code quality metric from our code quality scoring tool
+  - [ ] At least 1 quantitative code quality metric is calculated by a code quality scoring tool
 - [ ] **Security checks** are live and meet the following conditions:
   - [ ] At least 1 (test) security vulnerability report has been submitted
   - [ ] Maintainers are notified within 1 hour of a vulnerability being reported within the grants API codebase
