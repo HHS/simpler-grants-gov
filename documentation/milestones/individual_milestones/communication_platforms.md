@@ -2,8 +2,8 @@
 
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
-| Document Status | Final Draft                                                          |
-| Epic Link       | [Issue 47](https://github.com/HHS/grants-equity/issues/47)              |
+| Document Status | Completed.                                                           |
+| Epic Link       | [Issue 47](https://github.com/HHS/grants-equity/issues/47)           |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Target Release  | 2023-08-23                                                           |
 | Product Owner   | Lucas Brown                                                          |
