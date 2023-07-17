@@ -2,7 +2,7 @@
 
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
-| Document Status | Final Draft                                                          |
+| Document Status | Accepted                                                             |
 | Epic Link       | [Issue 70](https://github.com/HHS/grants-equity/issues/70)           |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Target Release  | 2023-08-23                                                           |
@@ -14,14 +14,20 @@
 ## Short description
 <!-- Required -->
 
-{1-2 sentences describing milestone at a high-level}
+Deploy a public API endpoint to PROD that allows users to see at least one field per grant opportunity listed in grants.gov
 
 ## Goals
 
 ### Business description & value
 <!-- Required -->
 
-{3-4 sentences that describe why this milestone is critical to the project}
+The launch of a public API endpoint which provides information about every grant opportunity in grants.gov represents the culmination of multiple internally focused deliverables and serves as the foundation for future development that relies on the API.
+
+By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this milestone aims to demonstrate the following value propositions:
+
+- Exposes `beta.grants.gov/api/` as the public API for the project that technical stakeholders can access and where future endpoints will be released
+- Proves the succesful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
+- Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
 ### User Stories
 <!-- Required -->
