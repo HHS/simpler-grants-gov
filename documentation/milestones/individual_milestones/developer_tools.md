@@ -63,6 +63,7 @@ Evaluate and adopt a set of tools to enforce the following code quality checks:
   - immutability enforcement
 - Auto-formatting
 - Type checking
+- Code quality scoring tool (e.g. [CodeClimate](https://codeclimate.com/quality)) 
 
 ### Security checks
 
@@ -110,6 +111,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
   - [ ] All checks are run on every push to the remote GitHub repository
   - [ ] The most important checks are run on every local commit
   - [ ] Code which fails any of these checks will be blocked from merging into `main`
+  - [ ] 1 quantitative code quality metric from our code quality scoring tool
 - [ ] **Security checks** are live and meet the following conditions:
   - [ ] At least 1 (test) security vulnerability report has been submitted
   - [ ] Maintainers are notified within 1 hour of a vulnerability being reported within the grants API codebase
@@ -134,6 +136,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
 - Number of days it takes to close a bug ticket
 - Percentage of code covered by unit tests
 - Percentage of code covered by integration tests
+- 1 quantitative code quality metric from our code quality scoring tool
 
 ### Destination for live updating metrics
 
