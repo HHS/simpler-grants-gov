@@ -104,7 +104,7 @@ Some factors to consider are:
 ### Definition of done
 <!-- Required -->
 
-- [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate)
+- [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate) and/or are FedRAMP approved
 - [ ] An ADR has been recorded and published to `main` for each of the following choices:
   - [ ] Front-end Language
   - [ ] Front-end framework
