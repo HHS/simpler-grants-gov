@@ -91,7 +91,7 @@ Disclosure Policies, see [SECURITY.md](SECURITY.md).
 ## Authors and Maintainers
 
 For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
-A full list of [contributors](https://github.com/HHS/grants-api/graphs/contributors?type=a) can be found on GitHub.
+A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors?type=a) can be found on GitHub.
 
 ## Public domain
 

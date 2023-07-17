@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-07-03
-- **Related Issue:** [#103](https://github.com/HHS/grants-api/issues/103)
+- **Related Issue:** [#103](https://github.com/HHS/grants-equity/issues/103)
 - **Deciders:** Andy Cochran, Emily Ianacone, Lucas Brown
 - **Tags:** design
 

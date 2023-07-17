@@ -2,7 +2,7 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-14 <!-- REQUIRED -->
-- **Related Issue:** [#97](https://github.com/HHS/grants-api/issues/97) <!-- RECOMMENDED -->
+- **Related Issue:** [#97](https://github.com/HHS/grants-equity/issues/97) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
 
 ## Context and Problem Statement
