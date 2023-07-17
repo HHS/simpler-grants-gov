@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+
+  main-db:
+    image: postgres:14-alpine
+    container_name: main-db
+    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
+    environment:
+      POSTGRES_PASSWORD: secret123
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  main-api:
+    build:
+      context: ./api
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-api}
+    container_name: main-api
+    env_file: ./api/local.env
+    ports:
+      - 8080:8080
+    volumes:
+      - ./api:/api
+    depends_on:
+      - main-db
+
+volumes:
+  dbdata:
+
+
