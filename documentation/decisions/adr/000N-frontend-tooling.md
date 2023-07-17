@@ -2,7 +2,7 @@
 
 - **Status:** Proposed <!-- REQUIRED -->
 - **Last Modified:** 2023-07-13 <!-- REQUIRED -->
-- **Related Issue:** [#102](https://github.com/HHS/grants-api/issues/102) <!-- RECOMMENDED -->
+- **Related Issue:** [#102](https://github.com/HHS/grants-equity/issues/102) <!-- RECOMMENDED -->
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
