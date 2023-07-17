@@ -113,6 +113,8 @@ Diagram short name: `DB-Plan`
 
 Dependencies: `None`
 
+Milestone doc: [DB planning](./individual_milestones/db_planning.md)
+
 Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
@@ -803,7 +805,9 @@ Diagram short name: `FE-Plan`
 
 Dependencies: `None`
 
-Choose language (e.g., TypeScript), framework (e.g., React) and testing framework (e.g., Jest) for front-end.
+Milestone doc: [Front-end planning](./individual_milestones/frontend_planning.md)
+
+Formalize a series of architectural decisions about the front-end, including the technology stack we will use and the services we'll leverage to deploy and host it.
 
 ## Front-end CI-CD
 Diagram short name: `FE-CI-CD`
