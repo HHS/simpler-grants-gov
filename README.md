@@ -70,7 +70,7 @@ Pre-commit hooks are defined in the file [`.pre-commit-config.yaml`](../.pre-com
 
         $ brew install pre-commit
 
-2.  While in the root `grants-api` directory, run `pre-commit install` to install
+2.  While in the root `grants-equity` directory, run `pre-commit install` to install
     the specific git hooks used in this repository.
 
 Now, any time you commit code to the repository, the hooks will run on all modified files automatically. If you wish, you can force a re-run on all files with `pre-commit run --all-files`.
