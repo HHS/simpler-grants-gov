@@ -34,23 +34,23 @@ const config = {
         fsCache: true,
         // lazyCompilation breaks Storybook when running from within Docker
         // Google Translate this page for context: https://zenn.dev/yutaosawa/scraps/7764e5f17173d1
-        lazyCompilation: false
-      }
-    }
+        lazyCompilation: false,
+      },
+    },
   },
   core: {
-    disableTelemetry: true
+    disableTelemetry: true,
   },
   staticDirs: ["../public"],
   // Support deploying Storybook to a subdirectory (like GitHub Pages).
   // This makes `process.env.NEXT_PUBLIC_BASE_PATH` available to our source code.
-  env: config => ({
+  env: (config) => ({
     ...config,
-    NEXT_PUBLIC_BASE_PATH
+    NEXT_PUBLIC_BASE_PATH,
   }),
   managerHead: blockSearchEnginesInHead,
   docs: {
-    autodocs: true
-  }
+    autodocs: true,
+  },
 };
 export default config;
