@@ -42,7 +42,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
-- **Pro**
+- **Pros**
   - Good, because {argument a}
   - Good, because {argument b}
   - ...
@@ -54,7 +54,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
-- **Pro**
+- **Pros**
   - Good, because {argument a}
   - Good, because {argument b}
   - ...
