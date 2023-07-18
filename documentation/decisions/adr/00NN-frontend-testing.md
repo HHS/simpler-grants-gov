@@ -19,27 +19,14 @@ Testing is essential in maintaining a stable and healthy codebase and an importa
 
 ## Options Considered
 
-### Unit Testing
+## Unit Testing
 - Jest
 - Mocha
 
-### Visual, Interactive & Component Testing
-- Storybook
-- Cypress
-
-## Decision Outcome <!-- REQUIRED -->
-
-Chosen option for Unit Testing: Jest, because it is integrated into the Next.js template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
-
-Chosen option Visual, Interactive & Component Testing: Storybook, because it provides an effective methodology for developing robust front-ends quickly. Integration allows multiple ways to test applications, including compatibility with Jest.
-
-In the future, if we find that Storybook doesn't meet our testing needs, we can look into integration with Cypress. However, not recommended from the start because our use-cases are covered by Storybook and there's a strong preference to not have to integrate another tool or learn another syntax.
-
-## Pros and Cons of the Options <!-- OPTIONAL -->
-
+### Pros and Cons of the Options <!-- OPTIONAL -->
 ### [Jest](https://jestjs.io/)
 
-- **Pro**
+- **Pros**
   - Lightweight, well-supported and documented testing solution
   - Compatible with TypeScript, Node, React
   - Snapshot capabilities to track UI changes
@@ -52,7 +39,7 @@ In the future, if we find that Storybook doesn't meet our testing needs, we can 
 
 ### [Mocha](https://mochajs.org/)
 
-- **Pro**
+- **Pros**
   - Has integration and end-to-end testing capabilities
   - More robust in functionality, offering a wider array of capabilities and helpers
   - Test coverage reporting available
@@ -62,6 +49,11 @@ In the future, if we find that Storybook doesn't meet our testing needs, we can 
   - Does not support snapshot testing
   - Slower than Jest
 
+## Visual, Interactive & Component Testing
+- Storybook
+- Cypress
+
+### Pros and Cons of the Options <!-- OPTIONAL -->
 ### [Storybook](https://storybook.js.org)
 
 - **Pro**
@@ -94,3 +86,11 @@ In the future, if we find that Storybook doesn't meet our testing needs, we can 
   - Might easily get out of date as another tool and testing interface
   - Uses command queuing instead of familiar async await syntax like Storybook
   - Bundles many other third-party libraries
+
+## Decision Outcome <!-- REQUIRED -->
+
+Chosen option for Unit Testing: Jest, because it is integrated into the Next.js template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
+
+Chosen option Visual, Interactive & Component Testing: Storybook, because it provides an effective methodology for developing robust front-ends quickly. Integration allows multiple ways to test applications, including compatibility with Jest.
+
+In the future, if we find that Storybook doesn't meet our testing needs, we can look into integration with Cypress. However, not recommended from the start because our use-cases are covered by Storybook and there's a strong preference to not have to integrate another tool or learn another syntax.
