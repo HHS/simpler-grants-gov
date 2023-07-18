@@ -37,7 +37,7 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
   - Reports that snapshot capabilities are not for complicated UIs
   - Auto-mocking reduces performance
 
-### [Mocha](https://mochajs.org/)
+#### [Mocha](https://mochajs.org/)
 
 - **Pros**
   - Has integration and end-to-end testing capabilities
