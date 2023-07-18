@@ -78,7 +78,7 @@ flowchart LR
 
     subgraph User interface
         Web-Analytics-Legacy
-        FE-Plan
+        FE-Plan::executing
         FE-Plan --> Static-Site:::northStar
         FE-CI-CD
         FE-Plan --> FE-CI-CD
@@ -135,7 +135,7 @@ flowchart LR
         Onboard-Dev-Team & API-Plan --> Dev-Tools
         Beta-Domain
         Beta-Domain --> Static-Site
-        DB-Plan & API-Plan --> Infrastructure-as-Code
+        DB-Plan::executing & API-Plan --> Infrastructure-as-Code
         DB-Replica & DB-Plan --> DB-Test-Data
         DB-Plan & API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
         API-Plan & GET-Opportunities --> Webhooks-Opportunities
