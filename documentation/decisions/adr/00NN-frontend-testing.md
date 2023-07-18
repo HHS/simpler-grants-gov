@@ -24,7 +24,7 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 - Mocha
 
 ### Pros and Cons of the Options <!-- OPTIONAL -->
-### [Jest](https://jestjs.io/)
+#### [Jest](https://jestjs.io/)
 
 - **Pros**
   - Lightweight, well-supported and documented testing solution
