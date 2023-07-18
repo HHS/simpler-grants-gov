@@ -91,6 +91,6 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 
 Chosen option for Unit Testing: **Jest**, because it is integrated into the Next.js template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
 
-Chosen option for Visual, Interactive & Component Testing: **Storybook**, because it provides an effective methodology for developing robust front-ends quickly. Integration allows multiple ways to test applications, including compatibility with Jest.
+Chosen option for Visual, Interactive & Component Testing: **Storybook**, because it provides an effective methodology for developing robust front-ends quickly. It is already implemented in the Next.js template application. Integration allows multiple ways to test applications, including compatibility with Jest.
 
 In the future, if we find that Storybook doesn't meet our testing needs, we can look into integration with Cypress. However, not recommended from the start because our use-cases are covered by Storybook and there's a strong preference to not have to integrate another tool or learn another syntax.
