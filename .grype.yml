@@ -1,0 +1,45 @@
+# List of vulnerabilities to ignore for the anchore scan
+# https://github.com/anchore/grype#specifying-matches-to-ignore
+# More info can be found in the docs/infra/vulnerability-management.md file
+
+# Please add safelists in the following format to make it easier when checking
+# Package/module name: URL to vulnerability for checking updates
+#  Versions:     URL to the version history
+#  Dependencies: Name of any other packages or modules that are dependent on this version
+#                 Link to the dependencies for ease of checking for updates
+#  Issue:         Why there is a finding and why this is here or not been removed
+#  Last checked:  Date last checked in scans
+# - vulnerability: The-CVE-or-vuln-id # Remove comment at start of line
+
+ignore:
+  # These settings ignore any findings that fall into these categories
+  - fix-state: not-fixed
+  - fix-state: wont-fix
+  - fix-state: unknown
+
+  # glob-parent before 5.1.2 vulnerable to Regular Expression Denial of Service in enclosure regex
+  # https://github.com/advisories/GHSA-ww39-953v-wcq6
+  # High severity
+  # Ignoring since this is only a dependency of dev tools: storybook (for storybook docs site),
+  # eslint (for Linting in CI), and sass (for compiling CSS during CI build phase)
+  - vulnerability: GHSA-ww39-953v-wcq6
+
+  # Regular Expression Denial of Service in trim
+  # https://github.com/advisories/GHSA-w5p7-h5w8-2hfq
+  # High severity
+  # Ignoring since this is only used in storybook which is a dev tool
+  - vulnerability: GHSA-w5p7-h5w8-2hfq
+
+  # Uncontrolled Resource Consumption in trim-newlines
+  # https://github.com/advisories/GHSA-7p7h-4mm5-852v
+  # Ignoring since this is only used in storybook which is a dev tool
+  - vulnerability: GHSA-7p7h-4mm5-852v
+
+  #####################
+  ## False positives ##
+  #####################
+
+  # http-cache-semantics vulnerable to Regular Expression Denial of Service
+  # https://github.com/advisories/GHSA-rc47-6667-2j5j
+  # http-cache-semantics does not exist as a dependency in this app
+  - vulnerability: GHSA-rc47-6667-2j5j
