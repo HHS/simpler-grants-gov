@@ -54,7 +54,7 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 - Cypress
 
 ### Pros and Cons of the Options <!-- OPTIONAL -->
-### [Storybook](https://storybook.js.org)
+#### [Storybook](https://storybook.js.org)
 
 - **Pro**
   - Build reusable UI components and pages in isolation, mocking external dependencies and business logic
