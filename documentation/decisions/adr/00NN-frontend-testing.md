@@ -71,7 +71,7 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
   - Initial ramp up for a conceptually new way of developing front-ends that ICs may not be accustomed with
   - Hasn't been around as long as other testing tools
 
-### [Cypress](https://www.cypress.io/)
+#### [Cypress](https://www.cypress.io/)
 
 - **Pro**
   - Stubbing and mocking is simple comparatively
