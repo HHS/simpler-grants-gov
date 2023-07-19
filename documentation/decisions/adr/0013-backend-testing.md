@@ -34,7 +34,7 @@ The pytest framework makes it easy to write small, readable tests, and can scale
   - Lightweight, well-supported and documented testing solution
   - Already integrated in Flask back-end template
   - Modular fixtures for managing small or parametrized long-lived test resources
-  - Can run unittest (including trial) and nose test suites out of the box
+  - Can run [unittest](https://docs.python.org/3/library/unittest.html) (including trial) and nose test suites out of the box
   - Rich plugin architecture, with over 800+ external plugins and thriving community
 - **Cons**
   - Compatibility issues with other testing frameworks means it's difficult to swap out for other frameworks
