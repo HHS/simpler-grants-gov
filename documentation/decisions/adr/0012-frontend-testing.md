@@ -1,7 +1,7 @@
 # Front-end Testing & Coverage
 
-- **Status:** Proposed <!-- REQUIRED -->
-- **Last Modified:** 2023-07-17 <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
+- **Last Modified:** 2023-07-18 <!-- REQUIRED -->
 - **Related Issue:** [183](https://github.com/HHS/grants-equity/issues/183) <!-- RECOMMENDED -->
 - **Deciders:** Sammy Steiner, Lucas Brown, Billy Daly, Andy Cochran <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
