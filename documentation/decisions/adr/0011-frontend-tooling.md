@@ -45,7 +45,7 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 
 **[TypeScript](https://www.typescriptlang.org/):** Strongly typed programming language that builds on JavaScript
 - Converts to JavaScript, therefore works everywhere JavaScript is compatible
-- Static-type checking build into language
+- Static-type checking built into language
 - Identifies problems early at compile time
 - Open source and maintained by Microsoft
 
