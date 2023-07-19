@@ -1,6 +1,6 @@
 # ADR: Chat
 
-- **Status:** Proposed <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-05 <!-- REQUIRED -->
 - **Related Issue:** #105 (https://github.com/HHS/grants-equity/issues/105) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown and Billy Daly <!-- REQUIRED -->
