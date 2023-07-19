@@ -26,7 +26,7 @@ The project will require a backend API. The goal of this ADR is to evaluate and 
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: REST, because this option is widely opted, is highly scalable and can meet the demands of a large and active user base, and is flexible.
+Chosen protocol: REST, because this option is widely opted, is highly scalable and can meet the demands of a large and active user base, and is flexible.
 
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
