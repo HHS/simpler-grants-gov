@@ -15,15 +15,16 @@ We believe that a chat tool can enhance communication and collaboration in real-
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-**Functionality:** consider the features and functionalities offered with each chat tool. Consider whether the chat solution provides essential capabilities like direct messaging, public channels for messaging, public and private channels, replying to messages in threads that other users can see, emojis to react to message, file sharing, search functionality, integrations.  
-**Usability:** chat solution should be user-friendly and intuitive. IT should be easy for team members, including both technical and non-technical individuals, to navigate and utilize effectively.  
-**Scalability:** solution should be able to accommodate the projected growth in the number of users, conversations, and data as the project expands. Ensure that the tool can handle demand without compromising performance  
-**Integration capabilities:** solution is able to integrate with other tools and platforms that the project relies on. Integration with project management tools, issue trackers, wiki, document sharing, sprint retro.  
-**Accessibility:** solution should be accessible for all individuals, including but not limited to individuals with visual, hearing or motor impairments. A chat solution should support keyboard navigation, screen reader compatibility, color contrast options, and support assistive technologies.  
-**Community and support:** consider the size and activity of the user community. An active community, similarly to an FOSS community, can provide valuable support, resources, and community-developed plugins or integrations.  
-**Cost:** evaluate the pricing structure, considering growth of users and additional features in the future.  
-**Self-hosting vs. cloud-based:** evaluate whether the solutions are self-hosted where we have complete control over data and infrastructure or cloud-based that handles hosting and maintenance.  
-**Open-source:** a solution that offers open-source is more likely to align with HHS values and provide transparency, customizability, community collaboration, longevity and continuity, cost effectiveness, and overall autonomy for our project.  
+- **Functionality:** consider the features and functionalities offered with each chat tool. Consider whether the chat solution provides essential capabilities like direct messaging, public channels for messaging, public and private channels, replying to messages in threads that other users can see, emojis to react to message, file sharing, search functionality, integrations.  
+- **Usability:** chat solution should be user-friendly and intuitive. IT should be easy for team members, including both technical and non-technical individuals, to navigate and utilize effectively.  
+- **Scalability:** solution should be able to accommodate the projected growth in the number of users, conversations, and data as the project expands. Ensure that the tool can handle demand without compromising performance  
+- **Integration capabilities:** solution is able to integrate with other tools and platforms that the project relies on. Integration with project management tools, issue trackers, wiki, document sharing, sprint retro.  
+- **Accessibility:** solution should be accessible for all individuals, including but not limited to individuals with visual, hearing or motor impairments. A chat solution should support keyboard navigation, screen reader compatibility, color contrast options, and support assistive technologies.  
+- **Community and support:** consider the size and activity of the user community. An active community, similarly to an FOSS community, can provide valuable support, resources, and community-developed plugins or integrations.  
+- **Cost:** evaluate the pricing structure, considering growth of users and additional features in the future.  
+- **Self-hosting vs. cloud-based:** evaluate whether the solutions are self-hosted where we have complete control over data and infrastructure or cloud-based that handles hosting and maintenance.  
+- **Open-source:** a solution that offers open-source is more likely to align with HHS values and provide transparency, customizability, community collaboration, longevity and continuity, cost effectiveness, and overall autonomy for our project.  
+
 
 
 ## Options Considered
