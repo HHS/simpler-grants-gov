@@ -1,6 +1,6 @@
 # Back-end Code Quality Tools
 
-- **Status:** Accepted
+- **Status:** Active
 - **Last Modified:** 2023-07-07
 - **Related Issue:** [#101](https://github.com/HHS/grants-equity/issues/101)
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly
@@ -26,7 +26,7 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 
 ### Dependency Management
 
-**[Poetry](https://python-poetry.org/docs/):** Python packaging and dependency management.  
+**[Poetry](https://python-poetry.org/docs/):** Python packaging and dependency management.
 ### Code Linting
 
 **[Ruff](https://beta.ruff.rs/docs/):** An extremely fast Python linter, written in Rust. Preferred for its speed and growing community adoption.[^*]
@@ -37,53 +37,53 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 
 ### Type Checking
 
-**[Mypy](https://mypy-lang.org/):** Validate and enforce static type checking in Python.  
+**[Mypy](https://mypy-lang.org/):** Validate and enforce static type checking in Python.
 ### Security
 
-**[Safety](https://docs.pyup.io/docs/getting-started-with-safety-cli):** Safety first! Safety scans dependencies for vulnerabilities and security concerns.[^*]  
+**[Safety](https://docs.pyup.io/docs/getting-started-with-safety-cli):** Safety first! Safety scans dependencies for vulnerabilities and security concerns.[^*]
 
 ### License Checking[^*]
 
-**[pip-licenses](https://github.com/raimon49/pip-licenses):** CLI tool for checking the software license of installed Python packages with `pip`.  
+**[pip-licenses](https://github.com/raimon49/pip-licenses):** CLI tool for checking the software license of installed Python packages with `pip`.
 
 ### Interface
 
-**[Make](https://www.gnu.org/software/make/manual/make.html):** Run scripts, linters and formatters.  
+**[Make](https://www.gnu.org/software/make/manual/make.html):** Run scripts, linters and formatters.
 
 ## Decision Outcome <!-- REQUIRED -->
 Option #2 is preferred. We would like to use Ruff for linting and add some additional libraries for security and license checks.
 
-We will be using the Flask template repository for initial project set up, which already relies on Flake8 and several additional extensions (bugbear, alfred, bandit) that would be redundant with Ruff. Some extra work will need to be done to migrate away from Flake8 and to Ruff without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration. 
+We will be using the Flask template repository for initial project set up, which already relies on Flake8 and several additional extensions (bugbear, alfred, bandit) that would be redundant with Ruff. Some extra work will need to be done to migrate away from Flake8 and to Ruff without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration.
 
-There are some additional packages that we desire to use that are not included in the Flask template: safety & pip-licenses. 
+There are some additional packages that we desire to use that are not included in the Flask template: safety & pip-licenses.
 
 As we iterate on the tools that work for us, we would like to investigate a possible switch to Pyright in the future as well.
 ## Other Options
 
 Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries.
 
-**Dependency Management:**  
+**Dependency Management:**
 [Pipenv](https://pipenv.pypa.io/en/latest/)
 
-**Code Linting:**  
-[Flake8](https://flake8.pycqa.org/en/latest/#): Much slower than Ruff. Requires additional extentions like [bugbear](https://pypi.org/project/flake8-bugbear/) that are built into Ruff.  
+**Code Linting:**
+[Flake8](https://flake8.pycqa.org/en/latest/#): Much slower than Ruff. Requires additional extentions like [bugbear](https://pypi.org/project/flake8-bugbear/) that are built into Ruff.
 [Pylint](https://pypi.org/project/pylint/)
 
-**Auto-formatting:**  
+**Auto-formatting:**
 [autopep8](https://pypi.org/project/autopep8/)
 
-**Type Checking:**  
-[Pyright](https://microsoft.github.io/pyright/#/): [Comparison of MyPy and Pyright](https://github.com/microsoft/pyright/blob/main/docs/mypy-comparison.md). Language service through Pylance.  
+**Type Checking:**
+[Pyright](https://microsoft.github.io/pyright/#/): [Comparison of MyPy and Pyright](https://github.com/microsoft/pyright/blob/main/docs/mypy-comparison.md). Language service through Pylance.
 [Pyre](https://pyre-check.org/)
 
-**Security:**  
-[Bandit](https://bandit.readthedocs.io/en/latest/): Security checking tool used to identify common concerns in Python code. Redundant because Ruff implements `flake8-bandit`.  
+**Security:**
+[Bandit](https://bandit.readthedocs.io/en/latest/): Security checking tool used to identify common concerns in Python code. Redundant because Ruff implements `flake8-bandit`.
 [dependency-check](https://pypi.org/project/dependency-check/)
 
-**License Checking:**  
+**License Checking:**
 [licensecheck](https://pypi.org/project/licensecheck/)
 
-**Interface:**  
+**Interface:**
 Bash, Poetry
 
 [^*]: Addition to the existing curated collection
