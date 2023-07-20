@@ -43,7 +43,7 @@ Fargate is an AWS serverless compute tool for containers.
   - Secure, running in dedicated runtime environments
   - Scalable means pay for usage, not for reserved or wasted space
 - **Cons**
-  - Offers less granular flexibility, favoring of less DevOps overhead
+  - Offers less granular flexibility, favoring less DevOps overhead
   - Possible that cost is higher than EC2 launch type ([Theoretical cost optimization by Amazon ECS launch type: Fargate vs EC2](https://aws.amazon.com/blogs/containers/theoretical-cost-optimization-by-amazon-ecs-launch-type-fargate-vs-ec2/))
   - Nontrivial to gain direct access to a particular Fargate task
 
@@ -68,7 +68,7 @@ Secure and resizable compute capacity for virtually any workload.
 Object storage built to retrieve any amount of data from anywhere.
 
 - **Pros**
-  - Suitable to host static websites, our use current use-case
+  - Suitable to host static websites, our current use-case
   - Highly scalable with unlimited storage space
   - Extremely cost-effective with pay-as-needed pricing model
   - Highly durable with storage redundancy in multiple locations
