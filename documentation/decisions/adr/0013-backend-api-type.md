@@ -1,6 +1,6 @@
 # Backend API Type
 
-- **Status:** In-Progress <!-- REQUIRED -->
+- **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-19 <!-- REQUIRED -->
 - **Related Issue:** [#186](https://github.com/HHS/grants-equity/issues/186) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
