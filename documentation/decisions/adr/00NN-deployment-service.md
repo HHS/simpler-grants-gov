@@ -26,7 +26,7 @@ We need to choose a deployment strategy for the Grants.gov modernization effort 
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: **ECS with Fargate launch type**, because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+Chosen option: **ECS with Fargate launch type**, because it offers the most consistent and easy to use deployment strategy to host both the front-end and API layers of the Grants.gov modernization. Current template infrastructure integrates with ECS and the Fargate launch type.
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -45,20 +45,48 @@ Fargate is an AWS serverless compute tool for containers.
 - **Cons**
   - Offers less granular flexibility, favoring of less DevOps overhead
   - Possible that cost is higher than EC2 launch type ([Theoretical cost optimization by Amazon ECS launch type: Fargate vs EC2](https://aws.amazon.com/blogs/containers/theoretical-cost-optimization-by-amazon-ecs-launch-type-fargate-vs-ec2/))
+  - Nontrivial to gain direct access to a particular Fargate task
 
 #### EC2
 - **Pros**
-  -
+  - Ability to granularly manage and provision resources of environment
+  - Can connect to an EC2 instance easily via SSH if necessary
+  - Many instance types to choose from to meet our needs
+  - Reliable, scalable and on-demand
+  - Compatible with many other tools in the AWS arsenal
 - **Cons**
-  -
+  - Requires detailed management and provisioning of environment
+  - Mismanagement of environment can greatly increased costs
+  - Less friendly for engineering teams that are not DevOps dedicated
 
 **A note on ECS:** It is possible to run EC2 instances to host our Docker containers without using ECS orchestration. However, since ECS is a free service provided by AWS and we would only pay for the underlying resources, forgoing ECS and an orchestration tool isn't an appealing strategy.
 ### S3
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Suitable to host static websites, our use current use-case
+  - Highly scalable with unlimited storage space
+  - Extremely cost-effective with pay-as-needed pricing model
+  - Highly durable with storage redundancy in multiple locations
+  - Easy to use interface with static website hosting options
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Only suitable to host static websites, making it a difficult choice for a rapidly growing front-end in development
+  - Limited customization options
+
+### Lambda
+
+- **Pros**
+  - Auto-scaling has limitations, and pay-per-request methodology is ultra lean
+  - No need for redundancy in multiple Availability Zones
+  - Run code without provisioning or managing any infrastructure
+  - Scalable to meet high demand
+- **Cons**
+  - Ineffective for long-running processes, maximum duration of 15 minutes
+  - Deployment package maximum size is 250 MB
+  - Max Docker image size is 10 GB
+  - Deploying serverless applications might require project restructuring or additional tools and ramp up
+  - Less performant than alternatives with lack of dedicated resources
+
+## Links <!-- OPTIONAL -->
+
+Interesting read on building a static React front-end hosted in S3 with Lambda back-end:
+[Server-side rendering for React in AWS Lambda](https://aws.amazon.com/blogs/compute/building-server-side-rendering-for-react-in-aws-lambda/)
