@@ -2,7 +2,7 @@
 
 - [I18next](https://www.i18next.com/) is used for internationalization.
 - Next.js's [internationalized routing](https://nextjs.org/docs/advanced-features/i18n-routing) feature is enabled. Toggling between languages is done by changing the URL's path prefix (e.g. `/about` ➡️ `/es/about`).
-- Configuration for the i18n routing and i18next libraries are located in [`next-i18next.config.js`](../app/next-i18next.config.js).
+- Configuration for the i18n routing and i18next libraries are located in [`next-i18next.config.js`](../../frontend/next-i18next.config.js).
 - [storybook-react-i18next](https://storybook.js.org/addons/storybook-react-i18next) adds a globe icon to Storybook's toolbar for toggling languages.
 
 ## Managing translations
@@ -53,4 +53,4 @@ Refer to the [i18next](https://www.i18next.com/) and [react-i18next](https://rea
 1. Edit `next-i18next.config.js` and add the language to `locales`, using the BCP47 language tag (e.g. `en` or `es`).
 1. Add a language folder, using the same BCP47 language tag: `mkdir -p public/locales/<lang>`
 1. Add a language file: `touch public/locales/<lang>/common.json` and add the translated content. The JSON structure should be the same across languages. However, non-default languages can omit keys, in which case the default language will be used as a fallback.
-1. Optionally, add a label for the language to the `locales` object in [`.storybook/preview.js`](../app/.storybook/preview.js)
+1. Optionally, add a label for the language to the `locales` object in [`.storybook/preview.js`](../../frontend/.storybook/preview.js)
