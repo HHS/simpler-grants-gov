@@ -48,6 +48,9 @@ Fargate is an AWS serverless compute tool for containers.
   - Nontrivial to gain direct access to a particular Fargate task
 
 #### EC2
+
+Secure and resizable compute capacity for virtually any workload.
+
 - **Pros**
   - Ability to granularly manage and provision resources of environment
   - Can connect to an EC2 instance easily via SSH if necessary
@@ -62,6 +65,8 @@ Fargate is an AWS serverless compute tool for containers.
 **A note on ECS:** It is possible to run EC2 instances to host our Docker containers without using ECS orchestration. However, since ECS is a free service provided by AWS and we would only pay for the underlying resources, forgoing ECS and an orchestration tool isn't an appealing strategy.
 ### S3
 
+Object storage built to retrieve any amount of data from anywhere.
+
 - **Pros**
   - Suitable to host static websites, our use current use-case
   - Highly scalable with unlimited storage space
@@ -73,6 +78,8 @@ Fargate is an AWS serverless compute tool for containers.
   - Limited customization options
 
 ### Lambda
+
+Run code without thinking about servers or clusters
 
 - **Pros**
   - Auto-scaling has limitations, and pay-per-request methodology is ultra lean
