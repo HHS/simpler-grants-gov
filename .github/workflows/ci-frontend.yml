@@ -1,0 +1,123 @@
+name: CI - Front End
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/ci-frontend.yml
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+env:
+  NODE_VERSION: 18
+  LOCKFILE_PATH: ./frontend/package-lock.json # or yarn.lock
+  PACKAGE_MANAGER: npm # or yarn
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      - run: npm ci
+      - run: npm run test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      - run: npm ci
+      - run: npm run lint
+
+  types:
+    name: Type check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      - run: npm ci
+      - run: npm run ts:check
+
+  formatting:
+    name: Format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      - run: npm ci
+      - run: npm run format-check
+
+  # Confirms the front end still builds successfully
+  check-frontend-builds:
+    name: Build check - Front End
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+
+      # https://nextjs.org/docs/advanced-features/ci-build-caching
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/frontend/.next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - run: npm ci
+      - run: npm run build -- --no-lint
+
+  # Confirms Storybook still builds successfully
+  check-storybook-builds:
+    name: Build check - Storybook
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+      - run: npm ci
+      - run: npm run storybook-build
