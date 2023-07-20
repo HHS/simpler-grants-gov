@@ -12,10 +12,10 @@ We need to choose a deployment strategy for the Grants.gov modernization effort 
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- **Reliable:** The chosen deployment strategy should be able to offer reliable application uptime with consistent results.
+- **Reliable:** The chosen deployment strategy should be able to offer uninterrupted application uptime with consistent results.
 - **Scalable:** We should be able to scale our deployment to meet the demands of our containers while remaining lean.
-- **Compatible with IaC:** The strategy should be compatible with Terraform as our chosen Infrastructure as Code solution
-- **Ease of use:** We prioritize ease of use as well as cost-efficiency. We understand the trade-off that engineer time spent managing details of infrastructure is a trade off to less prescriptive strategies.
+- **Compatible with IaC:** The strategy should be compatible with Terraform as our chosen Infrastructure as Code solution.
+- **Ease of use:** We prioritize ease of use as well as cost-efficiency. We understand that engineering time spent managing details of infrastructure is a trade off to less prescriptive strategies.
 - **Growth oriented:** As our applications evolve, we need our chosen deployment strategy to grow with us or be easily swapped.
 
 ## Options Considered
