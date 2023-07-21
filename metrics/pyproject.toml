@@ -1,0 +1,20 @@
+[tool.poetry]
+authors = ["widal001 <billy.daly@agile6.com>"]
+description = "Python package for calculating metrics related to the Grants Equity Project"
+name = "metrics"
+packages = [{include = "metrics", from = "src"}]
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+ruff = "^0.0.278"
+pyright = "^1.1.317"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
