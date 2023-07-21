@@ -12,7 +12,7 @@ We need to choose a deployment strategy for the Grants.gov modernization effort 
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- **Reliable:** The chosen deployment strategy should be able to offer uninterrupted application uptime with consistent results.
+- **Reliable:** The chosen deployment strategy should be able to offer at least 99.99% monthly application uptime with consistent results.
 - **Scalable:** We should be able to scale our deployment to meet the demands of our containers while remaining lean.
 - **Compatible with IaC:** The strategy should be compatible with Terraform as our chosen Infrastructure as Code solution.
 - **Ease of use:** We prioritize ease of use as well as cost-efficiency. We understand that engineering time spent managing details of infrastructure is a trade off to less prescriptive strategies.
@@ -42,6 +42,7 @@ Fargate is an AWS serverless compute tool for containers.
   - Integrates with AWS Cloudwatch or other third party metrics tools
   - Secure, running in dedicated runtime environments
   - Scalable means pay for usage, not for reserved or wasted space
+  - Fargate Spot instances further reduce costs and are viable for our use-case
 - **Cons**
   - Offers less granular flexibility, favoring less DevOps overhead
   - Possible that cost is higher than EC2 launch type ([Theoretical cost optimization by Amazon ECS launch type: Fargate vs EC2](https://aws.amazon.com/blogs/containers/theoretical-cost-optimization-by-amazon-ecs-launch-type-fargate-vs-ec2/))
