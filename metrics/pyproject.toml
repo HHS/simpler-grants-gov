@@ -7,13 +7,18 @@ readme = "README.md"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+notebook = "^7.0.0" # Goal is to replace this with another method of presenting charts
+pandas = "^2.0.3" 
+plotly = "^5.15.0" 
+pydantic = "^2.0.3" 
+python = "^3.10" 
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
+mypy = "^1.4.1"
 pytest = "^7.4.0"
 ruff = "^0.0.278"
-pyright = "^1.1.317"
+safety = "^2.3.5"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
