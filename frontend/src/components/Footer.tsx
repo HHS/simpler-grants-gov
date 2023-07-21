@@ -12,6 +12,8 @@ const Footer = () => {
     keyPrefix: "Footer",
   });
 
+  const test = 'applesauce'
+
   return (
     <USWDSFooter
       size="slim"
