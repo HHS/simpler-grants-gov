@@ -1,0 +1,28 @@
+# Python compiled/optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python packaging stuff
+dist/
+*.egg-info
+
+# Python testing stuff
+.coverage*
+coverage.*
+.testmondata
+.pytest_cache/
+
+# Python virtual environments
+.venv
+
+# Environment variables
+.env
+.envrc
+
+# mypy
+.mypy_cache
+
+# VSCode Workspace
+*.code-workspace
+.vscode

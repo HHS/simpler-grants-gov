@@ -35,17 +35,11 @@ Have the software development team for this effort start their work and get syst
 ## Developer tools
 Diagram short name: `Dev-Tools`
 
-Dependencies: `Onboard-Dev-Team`, `DB-API-Plan`
+Dependencies: `Onboard-Dev-Team`, `API-Plan`, `FE-Plan`
 
-Install developer tools for backend, including:
+Milestone definition: [Developer tools milestone](./individual_milestones/developer_tools.md)
 
-- Automated test framework
-- Linters, code quality checkers, and code autoformatters
-- Automated test coverage analysis
-- API description linter (Spectral or alternative) - this can also be saved until API milestone
-- Security scan of packages (Snyk or alternative)
-- Unified logging including cross-request IDs
-- etc
+Select and implement a set of developer tools that automate key code quality and security checks within the backend and frontend codebases.
 
 ## Incident response
 Diagram short name: `Incident-Response`
@@ -98,32 +92,36 @@ Make an analysis of needs and alternatives and try to identify whether any aspec
 
 Write an analysis of alternatives with pros/cons/recommendations.
 
-## DB & API planning
-Diagram short name: `DB-API-Plan`
+## API planning
+Diagram short name: `API-Plan`
 
 Dependencies: `SaaS-Plan`
 
-Make an analysis of needs and alternatives and choose:
+Milestone doc: [API planning](./individual_milestones/api_planning.md)
 
-* Database(s) type(s) (e.g., relational, document store, or alternative)
-* Database(s) language(s) (e.g., MongoDB, Postgres or alternative)
-* Database(s) deployment(s) (e.g., RDS or alternative)
-* Database ORM (e.g., SQLAlchemy or alternative)
-* API types (e.g., RESTful JSON, webhooks, GraphQL, or alternatives)
-* API language (e.g., Python, Node)
-* API deployment (e.g., EC2, serverless, or alternative)
+Formalize a series of architectural decisions about the API, including the technology stack we will use, the type of API we will build, and the services we'll leverage to deploy and host it.
+
+## DB planning
+
+Diagram short name: `DB-Plan`
+
+Dependencies: `None`
+
+Milestone doc: [DB planning](./individual_milestones/db_planning.md)
+
+Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use to host it.
 
 ## Infrastructure-as-code
 Diagram short name: `Infrastructure-as-Code`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`, `FE-Plan`
 
 Setup and deploy initial infrastructure, with 100% of the deployment managed through an infrastructure-as-code solution.
 
 ## Serialization and API documentation planning
 Diagram short name: `API-Docs-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
 Make an analysis of needs and alternatives and choose:
 
@@ -138,7 +136,7 @@ Otherwise, every time there is a change in schema, it requires a lot of develope
 ## GET opportunities
 Diagram short name: `GET-Opportunities`
 
-Dependencies: `DB-API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
+Dependencies: `DB-Plan`, `API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
 
 Deploy a public endpoint to PROD that allows users to see at least one (but not necessarily more than one!) field of data per listed opportunity in grants.gov. This will probably be a RESTful JSON /GET API endpoint.
 
@@ -168,9 +166,9 @@ Choose and implement framework for having feature flags in production.
 ## API versioning framework
 Diagram short name: `API-Versioning`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
+Based on the plan defined in `API-Plan`, choose and implement a framework for versioning the API using semantic versioning and being able to easily issue minor and major changes to the API.
 
 Document versioning in API docs.
 
@@ -179,23 +177,23 @@ Also develop and execute release management plan with plan for release cycles, r
 ## Performance testing framework
 Diagram short name: `Performance-Testing`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 Setup and start running performance testing framework for testing systems under load.
 
 ## ATO
 Diagram short name: `ATO`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Review planned public deployment of services with Jacob, our security officer, to confirm that they all fall under our existing ATO for grants.gov
 
 ## CI-CD
 Diagram short name: `CI-CD`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
-Based on the plan defined in `DB-API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
+Based on the plan defined in `API-Plan`, choose and implement a framework for continuous integration and continuous deployment.
 
 When commits are made to any branch, these should automatically:
 * Run lint suite
@@ -256,11 +254,11 @@ Metrics:
 ## Webhooks for opportunities
 Diagram short name: `Webhooks-Opportunities`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Deploy a public webhook to PROD that allows users to subscribe to receive system-to-system updates when data is updated in the beta.grants.gov database.
 
-The definition of this milestone could change based on planning done in `DB-API-Plan`.
+The definition of this milestone could change based on planning done in `API-Plan`.
 
 Metrics:
 * Number of unique users receiving webhooks calls
@@ -269,7 +267,7 @@ Metrics:
 ## Back-end dependency fundraising tracking
 Diagram short name: `Dependency-Fundraising-Tracking`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`
 
 For the front-end, there is a great tool (https://backyourstack.com/) that shows fundraising being conducted by the packages that are used as dependencies in your project. This tool currently only supports fundraising done through OpenCollective, which provides a systematic API that can be used to collect this data.
 
@@ -277,23 +275,31 @@ This milestone is to add to that tool support for backend packages such as Pytho
 
 Based on initial research, the level of effort should be assessed to determine whether the time it would take to implement this milestone is worth the result. If it's longer than 2 weeks time of one developer, it may not be worth it.
 
-## Develop opportunity protocol
-Diagram short name: `Opportunity-Protocol`
+## Plan grants-as-a-platform
+Diagram short name: `Plan-Grants-as-a-Platform`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `DB-Plan`, `API-Plan`
 
-Investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some private-sector grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
+Many of the most successful modern web ecosystems are design as platforms or platforms-as-a-service.
 
-The protocol would be implemented by our particular API ecosystem, but other platforms could implement the same protocol as well.
+This milestone is to design a plan for (1) considering whether that model makes sense for grants.gov, and if the answer is yes, then (2) developing a well-documented but agile-oriented plan for implementing grants.gov modernization as a platform.
+
+If grants.gov is implemented as a platform, then the open source framework would be something any organization or individual could use for grantmaking and/or financial decisionmaking and allocation. This provides obvious benefits to the ecosystem of grantmaking outside of just grants.gov.
+
+But selfishly, for the sake of grants.gov's core mission, designing its system as a platform would very likely make the service a more effective product, with better API boundaries and cleaner "separation of concerns" between services and processes. This approach would also likely make it easier for agencies who use grants.gov to make grants for themselves to customize their software and processes for their own needs. (For instance, while all federal agencies list all of their opportunities on grants.gov, roughly half of federal agencies use grants.gov to host the applications for their grants, and half use their own software systems. A design of grants-as-a-platform could make it easier for those external systems to integrate with grants.gov.)
+
+As part of this design and planning to complete this milestone, we should investigate whether it is appropriate to develop a protocol that is system-agnostic that describes the core components of what's contained in an opportunity. This could be shared across both federal grantmaking as well as some state, local, and philanthropic grantmaking to facilitate standardization and simplification. This could help bring us closer to the goal of having, for grantmaking, a version of what US colleges and universities share in their [Common App](https://www.commonapp.org/).
+
+The protocol would be implemented by our particular platform, but other platforms could implement the same protocol as well.
+
+For some research on common form fields that could be relevant to the protocol, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
 
 Much more investigation is needed to define this milestone.
-
-For some research on common form fields, please see [this analysis from Technology Association for Grantmakers](https://www.tagtech.org/news/586811/TAG-Publishes-List-of-Common-Grant-Fields-from-FixtheForm-Analysis-.htm).
 
 ## Plan for A/B testing
 Diagram short name: `AB-Testing-Plan`
 
-Dependencies: `DB-API-Plan`
+Dependencies: `API-Plan`, `FE-Plan`
 
 Make a plan for the technological and legal/process aspects of A/B testing experiences in beta.grants.gov.
 
@@ -303,7 +309,7 @@ This plan will need to account for any concerns about fairness that could be bro
 
 Diagram short name: `API-Security`
 
-Dependencies: `DB-API-Plan`, `GET-Opportunities`
+Dependencies: `API-Plan`, `GET-Opportunities`
 
 Develop a plan for securing the public API. While the broader AuthN and AuthZ framework will be designed and implemented in a different set of milestones, this plan should account for applying basic security measures to the initial set of endpoints we will be deploying, namely `GET /opportunities`.
 
@@ -323,6 +329,15 @@ Diagram short name: `Comms-Platforms`
 Diagram short name: `Milestone-Template`
 
 [Link](./individual_milestones/milestone_template_published.md)
+
+## HHS NOFO transformation internal site
+Diagram short name: `HHS-Internal-Site`
+
+Dependencies: `Comms-Platforms`
+
+Create a site where HHS staff can work privately on the NOFO transformation effort, sharing resources, training, Q&As, legal questions, etc.
+
+Ideally, this would use the same communication platforms as implemented in the milestone `Comms-Platforms`. For instance, it could be a wiki directory with access restricted to HHS employees.
 
 ## Open source tools
 Diagram short name: `Open-Source-Tools`
@@ -611,6 +626,25 @@ Make a plan for the overall approach to participatory processes for the grants.g
 * "Hackathon" with challenge budget
 * Ongoing sprint/quarterly planning for "budgeting" software delivery based on story points
 
+## Participant advisory councils
+Diagram short name: `Participant-Advisory-Councils`
+
+Dependencies: `Participatory-Plan`
+
+Setup multiple participant advisory councils representing key stakeholders for grants.gov modernization as well as NOFO simplification.
+
+Details of this plan to be developed during `Participatory-Plan`.
+
+
+## Participatory tooling
+Diagram short name: `Participatory-Tooling`
+
+Dependencies: `Participatory-Plan`
+
+Setup and configure tooling that supports participant engagement processes, such as participatory budgeting software and processes. These processes can be used in the hackathon processes as well as potentially for stakeholder input during ongoing sprint/quarterly planning.
+
+Details of this plan to be developed during `Participatory-Plan`.
+
 ## Hackathon informational page
 Diagram short name: `Hackathon-Page`
 
@@ -801,7 +835,9 @@ Diagram short name: `FE-Plan`
 
 Dependencies: `None`
 
-Choose language (e.g., TypeScript), framework (e.g., React) and testing framework (e.g., Jest) for front-end.
+Milestone doc: [Front-end planning](./individual_milestones/frontend_planning.md)
+
+Formalize a series of architectural decisions about the front-end, including the technology stack we will use and the services we'll leverage to deploy and host it.
 
 ## Front-end CI-CD
 Diagram short name: `FE-CI-CD`
@@ -1054,12 +1090,12 @@ Document all tasks that need to be completed on GrantSolutions to enable functio
 
 Document which of these tasks can be completed using APIs vs which must go through the GrantSolutions.gov user interface.
 
-## User research compensation
-Diagram short name: `User-Research-Compensation`
+## User research incentives
+Diagram short name: `User-Research-Incentives`
 
 Dependencies: `Design-Tooling`
 
-Investigate potentially setting up a system for compensation user research participants, modeled after the compensation system developed by USDS at the White House.
+Investigate potentially setting up a system for incentives user research participants, modeled after the incentives system developed by USDS at the White House.
 
 This will promote fairness, as well as increasing the quality and diversity of our pool of user research participants, by compensating participants for sharing their lived experience and expertise.
 

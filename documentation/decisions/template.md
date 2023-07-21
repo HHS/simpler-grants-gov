@@ -1,8 +1,8 @@
 # {short title of solved problem and solution}
 
-- **Status:** {Draft | Proposed | Rejected | Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
+- **Status:** {Accepted | Deprecated | ... | Superseded By [xxx](yyyymmdd-xxx.md)} <!-- REQUIRED -->
 - **Last Modified:** {YYYY-MM-DD when the decision was last updated} <!-- REQUIRED -->
-- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-api/issues) <!-- RECOMMENDED -->
+- **Related Issue:** [#{issue number}](https://github.com/HHS/grants-equity/issues/{issue number}) <!-- RECOMMENDED -->
 - **Deciders:** {list everyone involved in the decision} <!-- REQUIRED -->
 - **Tags:** {space and/or comma separated list of tags} <!-- OPTIONAL -->
 
@@ -42,7 +42,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
-- **Pro**
+- **Pros**
   - Good, because {argument a}
   - Good, because {argument b}
   - ...
@@ -54,7 +54,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
-- **Pro**
+- **Pros**
   - Good, because {argument a}
   - Good, because {argument b}
   - ...

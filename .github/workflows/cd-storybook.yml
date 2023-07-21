@@ -1,0 +1,60 @@
+name: Deploy Storybook
+
+on:
+  # Runs on pushes targeting the default branch
+  # !! Uncomment the lines below to enable this workflow
+  # push:
+  #   branches: ["main"]
+  #   paths:
+  #     - frontend/**
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow access to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Cancel any older in-progress runs of this workflow
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache-dependency-path: ./frontend/package-lock.json # or yarn.lock
+          cache: npm # or yarn
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+        id: pages_config
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./frontend
+      - name: Build
+        run: NEXT_PUBLIC_BASE_PATH=${{ steps.pages_config.outputs.base_path }} npm run storybook-build
+        working-directory: ./frontend
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./frontend/storybook-static
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.hosting.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: hosting
+        uses: actions/deploy-pages@v1
