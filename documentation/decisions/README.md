@@ -46,7 +46,7 @@ When an architectural decision needs to be recorded, please use the following st
 1. [Create a new ADR ticket in GitHub](https://github.com/HHS/grants-equity/issues/new/choose)
 2. Identify the approvers for this decision, i.e. individuals or groups who must sign off on the decision before the ADR can be merged (ideally this happens before work starts on the ADR)
 3. Draft an ADR in a branch named after the ticket, then open a Pull Request (PR)
-  - Using the `{YYYYMMDD}-{description}.md` naming convention, copy the [template](./template.md) into the [adr](./adr/) directory
+  - Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](./template.md) into the [adr](./adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
   - The ADR should use the status "Active"
   - If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](./deprecated/) directory
 4. Invite the approvers to review the PR and provide feedback or approve the decision
