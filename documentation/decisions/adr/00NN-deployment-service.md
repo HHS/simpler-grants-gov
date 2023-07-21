@@ -3,7 +3,7 @@
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-20 <!-- REQUIRED -->
 - **Related Issue:** [187](https://github.com/HHS/grants-equity/issues/187) <!-- RECOMMENDED -->
-- **Deciders:** Lucas Brown, Sammy Steiner, Billy Daly <!-- REQUIRED -->
+- **Deciders:** Lucas Brown, Daphne Gold, Sammy Steiner, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
 ## Context and Problem Statement
