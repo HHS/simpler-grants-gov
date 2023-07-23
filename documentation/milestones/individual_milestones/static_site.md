@@ -3,7 +3,7 @@
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
 | Document Status | Accepted                                                             |
-| Epic Link       | [Issue 62](https://github.com/HHS/grants-api/issues/62)              |
+| Epic Link       | [Issue 62](https://github.com/HHS/grants-equity/issues/62)           |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Target Release  | 2023-09-20                                                           |
 | Product Owner   | Lucas Brown                                                          |
@@ -31,21 +31,45 @@ By sharing this information in a publicly accessible format and investing early 
 ### User stories
 
 - As a **full-time HHS staff member**, I want:
-  - TODO
+  - the site to be accessible to members of the public and the Federal government, so we can use it to share information about the project with both internal and external stakeholders.
+  - the site to adopt modern branding and user interface (UI), so that stakeholders are excited to visit the page and can find the information they need more easily.
 - As a **grantor**, I want:
-  - TODO
-- As a **member of an HHS contractor team**, I want:
-  - TODO
-- As an **open source contributor**, I want:
-  - TODO
+  - to be able to access information about the NOFO Transformation project in a central location, so that I don't have to rely exclusively on email for updates about the project.
+  - the site to be user friendly and easy to navigate, so that I don't have to spend a lot of time looking for information that is relevant to me.
 - As a **prospective grant applicant**, I want:
-  - TODO
+  - the site to be user friendly and easy to navigate, so that I don't have to spend a lot of time looking for information that is relevant to me.
+  - an opportunity to provide feedback or ask questions about the project, so that I can voice my concerns and help shape the direction of the project.
+- As **maintainer of the project** I want:
+  - most of the critical development infrastructure to be in place when we officially launch the site, so that we can deploy bug fixes or new features quickly once the site is live.
+- As an **open source contributor**, I want:
+  - the site to link to resources like the repository, chat, etc., so that I can easily learn where and how to participate in the project.
 
 ## Technical description
 
-### {Sub-deliverable}
+### Infrastructure Requirements
 
-TODO
+The infrastructure developed to deploy and host the site should balance:
+
+- Code quality
+- Security
+- Delivery velocity
+- Cost & maintenance
+
+### User Experience Requirements
+
+The design and structure of the site should balance:
+
+- Usability
+- Accessibility
+- Site performance
+- Brand identity
+
+### Content Requirements
+
+Process for drafting and updating the content of the site should balance:
+
+- Speed & ease of content management
+- Need for review and approval
 
 ### Definition of done
 
@@ -67,7 +91,7 @@ TODO
     - [ ] The open source repository
     - [ ] The open source wiki
     - [ ] The open source chat
-  - [ ] Stretch goal:The site provides a mechanism to collect stakeholder feedback or questions
+  - [ ] Stretch goal: The site provides a mechanism to collect stakeholder feedback or questions
 
 ### Proposed metrics for measuring goals/value/definition of done
 
@@ -77,6 +101,7 @@ TODO
 4. Uptime service
 5. [Lighthouse score](lighthouse) for the site
 6. Deployment build time
+7. Deployment/hosting costs
 
 ### Destination for live updating metrics
 
@@ -90,7 +115,7 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 *What capabilities / milestones do we expect to be in place at the beginning of work on this milestone?*
 
 - [ ] **Front-end Planning:** Determines the language, framework, and deployment service used to build and host the site.
-- [ ] **Developer Tools:** Establishes a suite of tools used to ensure the quality and security of the API codebase.
+- [ ] **Developer Tools:** Establishes a suite of tools used to ensure the quality and security of the site codebase.
 - [ ] **beta.grants.gov Domain:** Secures access to the `beta.grants.gov` domain which is where the site will be hosted.
 - [ ] **Authority to Operate (ATO):** Ensures that the site and the infrastructure that hosts it are comply with the Software Security Plan for the legacy grants.gov site.
 - [ ] **Infrastructure-as-Code:** Programmatically provisions the resources needed to deploy and host this site.
