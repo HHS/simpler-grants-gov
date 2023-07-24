@@ -22,7 +22,6 @@ concurrency:
 
 jobs:
   update-openapi-docs:
-    name: Update OpenAPI Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
