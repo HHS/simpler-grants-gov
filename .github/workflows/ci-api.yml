@@ -22,6 +22,7 @@ jobs:
     # if we built the docker image and shared
     # it across jobs as described in:
     # https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow
+    name: API Lint & Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
