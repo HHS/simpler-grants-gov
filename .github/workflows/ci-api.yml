@@ -1,4 +1,4 @@
-name: Template API Checks
+name: API Checks
 
 on:
   push:

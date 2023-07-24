@@ -111,3 +111,6 @@ markers = [
 
 [tool.coverage.run]
 omit = ["src/db/migrations/*.py"]
+
+[tool.coverage.report]
+fail_under = 80
