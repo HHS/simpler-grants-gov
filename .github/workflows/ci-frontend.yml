@@ -1,4 +1,4 @@
-name: CI - Front End
+name: Front-end Checks
 
 on:
   push:
@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   tests:
-    name: Tests
+    name: Front-end Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
       - run: npm run test
 
   lint:
-    name: Lint
+    name: Front-end Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +52,7 @@ jobs:
       - run: npm run lint
 
   types:
-    name: Type check
+    name: Front-end Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -66,7 +66,7 @@ jobs:
       - run: npm run ts:check
 
   formatting:
-    name: Format check
+    name: Front-end Format Check
     runs-on: ubuntu-latest
 
     steps:
@@ -81,7 +81,7 @@ jobs:
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
-    name: Build check - Front End
+    name: Front-end Build Check
     runs-on: ubuntu-latest
 
     steps:
@@ -109,7 +109,7 @@ jobs:
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
-    name: Build check - Storybook
+    name: Front-end Storybook Build Check
     runs-on: ubuntu-latest
 
     steps:
