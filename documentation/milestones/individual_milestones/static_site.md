@@ -86,7 +86,7 @@ Process for drafting and updating the content of the site should balance:
 - [ ] The following content requirements are satisfied:
   - [ ] The site contains information about both the NOFO Transformation and Grants.gov Modernization workstreams
   - [ ] The content on the site has been been reviewed and approved by the relevant stakeholders within each workstream
-  - [ ] The site also links to external resources related to the project, including:
+  - [ ] The site also links to external resources related to the project (if they are available), including:
     - [ ] The legacy grants.gov site
     - [ ] The open source repository
     - [ ] The open source wiki
@@ -138,7 +138,7 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 *The following work will* not *be completed as part of this milestone:*
 
-1. **Translating onboarding documents:** Translation of key documents will be covered in an upcoming milestone
+1. **Translating site contents:** Translation of key documents will be covered in an upcoming milestone
 2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `beta.grants.gov` will happen in a later milestone
 
 ## Integrations
