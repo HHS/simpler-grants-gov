@@ -19,13 +19,13 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 - **Usability:** Non-technical users should be able to access and create content with minimal training or guidance.
 - **Public Access:** Members of the public should be able to read public documentation in the wiki without needing to sign up or login to a service.
 - **Content Review:** Collaborators should be able to review and edit draft content before those changes are published.
+- **Comments:** Reviewers should be able to leave in-line comments on content that they are reviewing.
 - **Version History:** Editors should be able to see and restore previous versions of a given page.
 - **Multi-Media:** The platform should support multiple types of media (e.g. videos, images, file uploads, tables, diagrams) with minimal configuration.
 - **Internationalization (i18n):** The platform should provide support for displaying content in multiple languages.
 - **Web Analytics:** The platform should provide support for tracking site usage and other web analytics.
 - **Onboarding Costs:** Onboarding new members to the platform should be relatively inexpensive, both in terms of staff time/resources and direct costs (e.g. licensing fees).
 - **Maintenance Costs:** It should not be prohibitively expensive to maintain the wiki, both in terms of staff time/resources and direct costs (e.g. hosting fees).
-- **Authority to Operate (ATO):** The platform already must be authorized under the Grants.gov ATO (Authority to Operate) or ATO coverage must be requested.
 
 #### Nice to Have
 
@@ -33,6 +33,7 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 - **Data Access:** Content generated and stored in the wiki should be accessible outside of the wiki platform, either through syncing content to an HHS owned repository or through an official API.
 - **Machine Readability:** The wiki platform should also support storing and exposing content in a machine-readable format so that certain types structured data can be managed within and accessed from the wiki without parsing.
 - **Open Source:** The tool used to manage and host the wiki content should be open source, if possible.
+- **Authority to Operate (ATO):** Because the wiki is a support tool rather than a production service, it doesn't *need* to be covered under the Grants.gov ATO. However, being covered under the existing ATO is an advantage if, in the future, we want to use it to support our production service (e.g. hosting training materials for grant applicants or grantors)
 
 ## Options Considered
 
@@ -56,14 +57,13 @@ Although it is a proprietary tool, it has become a standard platform for managin
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- GitBook is not explicitly covered under the existing Grants.gov ATO, so we will likely need to seek the Authority to Operate it
 - Users who don't have a license to edit and manage content in GitBook (i.e. members of the public) can only make suggested edits or contributions through creating Pull Requests (PRs) in GitHub which can present a high barrier to entry for non-technical users
+- Because GitBook isn't covered under the existing Grants.gov ATO, we will not be able to use it for production services. If in the future we want to use GitBook as part of our production service, we'll need to seek ATO approval.
 
 ### Back-up Options
 
 If we can't get coverage for GitBook under the existing ATO, we should pursue one of the following solutions:
 
-- **Confluence** if we want to prioritize usability and low maintenance but are willing to compromise on data access
 - **Wiki.js** if we want to prioritize data access and open source tools but are willing to compromise on maintenance costs and usability
 
 ## Comparison Matrix
@@ -76,21 +76,21 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 | Factor                      | Confluence | Notion | GitHub Wiki | GitBook | Wiki.js |
 | --------------------------- | :--------: | :----: | :---------: | :-----: | :-----: |
-| Usability                   |     3      |   2    |      1      |    2    |    1    |
-| Public Access               |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
-| Content Review              |    🔄     |   ❌   |     ❌      |   ✅    |   🔄   |
-| Version History             |     ✅     |  🔄   |     ✅      |   ✅    |   🔄   |
-| Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
-| I18n                        |    🔄     |  🔄   |     ❌      |   ✅    |   ✅    |
-| Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄   |
-| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    1    |
-| Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
-| Authority to Operate        |     ✅     |   ❌   |     ✅      |   ❌    |   ✅    |
-| External Contributions      |     ✅     |   ✅   |     🔄     |   🔄   |   🔄   |
-| Data Access                 |    🔄     |  🔄   |     ✅      |   ✅    |   ✅    |
-| Machine Readability         |    🔄     |   ✅   |     ❌      |   🔄   |   ✅    |
-| Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
-
+| Usability                   |     3      |   2    |     1      |    2     |    1    |
+| Public Access               |     🔄     |   🔄   |     ✅      |    ✅    |    ✅    |
+| Content Review              |     🔄     |   ❌   |     ❌      |    ✅    |    🔄    |
+| Comments                    |     ✅     |   ✅   |     ❌      |    ✅    |    🔄    |
+| Version History             |     ✅     |   🔄   |     ✅      |    ✅    |    🔄    |
+| Multi-Media                 |     ✅     |   ✅   |     ❌      |    ✅    |    ✅    |
+| I18n                        |     🔄     |   🔄   |     ❌      |    ✅    |    ✅    |
+| Web Analytics               |     ✅     |   ✅   |     ❌      |    ✅    |    🔄    |
+| Onboarding Cost Efficiency  |     2      |   2   |      3      |    2     |    1    |
+| Maintenance Cost Efficiency |     2      |   2   |      3      |    2     |    1    |
+| External Contributions      |     ✅     |   ✅   |     🔄      |    🔄    |    🔄    |
+| Data Access                 |     🔄     |   🔄   |     ✅      |    ✅    |    ✅    |
+| Machine Readability         |     🔄     |   ✅   |     ❌      |    🔄    |    ✅    |
+| Open Source                 |     ❌     |   ❌   |     ❌      |    ❌    |    ✅    |
+| Authority to Operate        |     ❌     |   ❌   |     ✅      |    ❌    |    ✅    |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
