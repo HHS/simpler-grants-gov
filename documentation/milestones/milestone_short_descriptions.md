@@ -138,6 +138,8 @@ Diagram short name: `GET-Opportunities`
 
 Dependencies: `DB-Plan`, `API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
 
+Milestone doc: [GET Opportunities](./individual_milestones/get_opportunities.md)
+
 Deploy a public endpoint to PROD that allows users to see at least one (but not necessarily more than one!) field of data per listed opportunity in grants.gov. This will probably be a RESTful JSON /GET API endpoint.
 
 This API should be accessible even when legacy grants.gov is experiencing planned or unplanned outages.
