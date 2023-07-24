@@ -6,11 +6,11 @@ on:
       - main
     paths:
       - api/**
-      - .github/workflows/api-checks.yml
+      - .github/workflows/ci-api.yml
   pull_request:
     paths:
       - api/**
-      - .github/workflows/api-checks.yml
+      - .github/workflows/ci-api.yml
 
 defaults:
   run:
