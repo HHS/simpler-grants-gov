@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   tests:
-    name: FE Tests
+    name: FE Lint, Type Check, Format & Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -35,49 +35,18 @@ jobs:
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
-      - run: npm run test
 
-  lint:
-    name: FE Lint
-    runs-on: ubuntu-latest
+      - name: Run lint
+        run: npm run lint
 
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-          cache: ${{ env.PACKAGE_MANAGER }}
-      - run: npm ci
-      - run: npm run lint
+      - name: Run type check
+        run: npm run ts:check
 
-  types:
-    name: FE Type Check
-    runs-on: ubuntu-latest
+      - name: Run format
+        run: npm run format-check
 
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-          cache: ${{ env.PACKAGE_MANAGER }}
-      - run: npm ci
-      - run: npm run ts:check
-
-  formatting:
-    name: FE Format Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-          cache: ${{ env.PACKAGE_MANAGER }}
-      - run: npm ci
-      - run: npm run format-check
+      - name: Run tests
+        run: npm run test
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
