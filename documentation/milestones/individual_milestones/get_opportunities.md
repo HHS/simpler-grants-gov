@@ -41,10 +41,30 @@ By delivering this public endpoint and ensuring it remains available even when t
 
 ## Technical description
 
-### {Optional Sub-deliverable}
-<!-- Optional -->
+### Infrastructural Requirements
 
-{List reqiurements specific to this sub-deliverable, options to consider, etc.}
+The infrastructure developed to deploy and host the API should balance:
+
+- Code quality
+- Security
+- Delivery velocity
+- Cost & maintenance
+
+### Developer Experience Requirements
+
+The API should be developed and versioned in a way that balances:
+
+- Discoverability
+- Ease of adoption
+- Backwards compatibility
+
+### Data Requirements
+
+The way that data is stored and delivered through the API should balance:
+
+- Eventual consistency with legacy Grants.gov
+- Improvements to the existing data model
+- Ease of managing schema changes
 
 ### Definition of done
 <!-- Required -->
@@ -56,15 +76,24 @@ By delivering this public endpoint and ensuring it remains available even when t
   - [ ] The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code milestone](https://github.com/HHS/grants-equity/issues/123) framework
   - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD milestone](https://github.com/HHS/grants-equity/issues/57)
 - [ ] The following developer experience (DX) requirements are satisfied:
-  - [ ] TODO
+  - [ ] The API is live at `beta.grants.gov/api/`
+  - [ ] Developers can learn how to interact with the API by referencing the API documentation
+  - [ ] The endpoint path indicates which major version of the API the developer is consuming
+  - [ ] Breaking changes are reflected in predictable changes to the endpoint path
+  - [ ] The endpoint is available when legacy grants.gov experiences planned or unplanned downtime, maintenance, and upgrades
+- [ ] The following data requirements are satisfied:
+  - [ ] The endpoint returns all of the grant opportunities that are available on grants.gov
+  - [ ] The endpoint returns at least one (1) field per opportunity
+  - [ ] Updates to the data in legacy Grants.gov are propagated to the new endpoint within 24 hours
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
 1. Number of unique users accessing API
-2. Number of total API calls made
+2. Total number of API calls made
 3. Error rate of API calls
 4. Uptime of service
+5. Deployment/hosting costs
 
 ### Destination for live updating metrics
 <!-- Required -->
@@ -86,60 +115,69 @@ By delivering this public endpoint and ensuring it remains available even when t
 - [ ] **[Database (DB) replica](https://github.com/HHS/grants-equity/issues/):** Ensures parity between the set of opportunities returned by the new GET Opportunities endpoint and the legacy system. It also allows users to access the endpoint when there are outages on the legacy system.
 - [ ] **[Feature flag framework](https://github.com/HHS/grants-equity/issues/):** Enables us to deploy new features or changes without immediately exposing them to the public. 
 - [ ] **[API documentation](https://github.com/HHS/grants-equity/issues/):** Establishes a location and strategy for publishing information about the GET Opportunities endpoint (and future API endpoints) that users can reference when learning how to interact with the API.
+- [ ] **[API Versioning](https://github.com/HHS/grants-equity/issues/68):** Establishes a protocol for publishing breaking and non-breaking changes to the API.
 - [ ] **[API Security Planning](https://github.com/HHS/grants-equity/issues/):** Sets up minimum security standards to protect the API endpoint, such as API keys, rate limits, and security incident response protocols.
 
 *Are there any notable capabilities / milestones do NOT we expect to be in place at the beginning of work on this milestone?*
 
-- [ ] [to be added]
+- [ ] **Performance Testing Framework:** While performance should be an important consideration during the development of this initial API endpoint. 
+- [ ] **AuthN/AuthZ:** While the implementation of rate limiting or other API security measures may require some basic authentication, the full AuthN/AuthZ framework will be developed in a later milestone.
 
 ### Open questions
 <!-- Optional -->
 
-- [ ] [to be added]
+- [x] None
 
 ### Not doing
 <!-- Optional -->
 
 The following work will *not* be completed as part of this milestone:
 
-1. [to be added]
+1. **User Interface:** Because this milestone is focused on the API endpoint, it will not include delivering a user interface for non-technical users to access a list of opportunities. That work will be incorporated in the Search UI milestone instead.
 
 ## Integrations
 
 ### Translations
 <!-- Required -->
 
-Does this milestone involve delivering any content that needs translation?
+*Does this milestone involve delivering any content that needs translation?*
 
-If so, when will English-language content be locked? Then when will translation be
-started and completed?
+*If so, when will English-language content be locked? Then when will translation be started and completed?*
 
 ### Services going into PROD for the first time
 <!-- Required -->
 
-This can include services going into PROD behind a feature flag that is not turned on.
+*This can include services going into PROD behind a feature flag that is not turned on.*
 
-1. [to be added]
+1. **API:** This milestone is the official release of the `beta.grants.gov/api`
+2. **Replica Database:** A replica of relevant tables from the legacy database, which also contains the new `beta.grants.gov` data model
+3. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `beta.grants.gov` data model
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
-Are there multiple services that are being connected for the first time in PROD?
+*Are there multiple services that are being connected for the first time in PROD?*
 
-1. [to be added]
+1. **API + Static Site:** 
+2. **API + Wiki Platform:**
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
-Are there any fields being shared publicly that have never been shared in PROD before?
+*Are there any fields being shared publicly that have never been shared in PROD before?*
 
-1. [to be added]
+1. **Opportunity Field(s):** This milestone will expose 
 
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product?
+*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
 
-If so, how are we addressing these risks?
+1. **Legacy DB Access:**
+2. **Replica Database Access:**
+3. **API:** 
 
-1. [to be added]
+*If so, how are we addressing these risks?*
+
+1. **ATO:**
+2. **API Security Planning:**
