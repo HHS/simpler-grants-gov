@@ -13,7 +13,7 @@ flowchart LR
 
     subgraph NOFO
         NOFO-Milestone-Planning:::executing
-        NOFO-Prototypes:::executing
+        NOFO-Prototypes:::finished
         Start-PRA-Comment:::executing
         NOFO-Prototypes-Metrics:::executing
         NOFO-Prototypes-Metrics & NOFO-Prototypes -->
@@ -32,7 +32,7 @@ flowchart LR
         NOFO-Recommendations-API --> NOFO-Recommendations-UI:::northStar
     end
 
-    subgraph User-Research
+    subgraph User Research
         Research-Synthesis
         Generative-User-Research:::finished --> Research-Synthesis:::finished
         Research-Synthesis --> ev1[Research Synthesis informs *everything*\n related to UI/UX.\nLines not shown here for simplicity.]
@@ -40,7 +40,7 @@ flowchart LR
         Research-Synthesis --> Unified-Brand
         Research-Synthesis --> User-Research-NOFO-Writing
         Document-GrantSolutions
-        User-Research-Compensation
+        User-Research-Incentives
         User-Research-Database
     end
 
@@ -110,7 +110,7 @@ flowchart LR
     subgraph Define goals
         Define-Goals:::northStar
         Define-Goals --> Measurement-Strategy
-        Measurement-Strategy --> Measurement-Dashboard
+        Measurement-Strategy --> Measurement-Dashboard:::northStar
     end
 
     subgraph Analytics
@@ -143,10 +143,10 @@ flowchart LR
         GET-Opportunities --> AuthN-API
         GET-Opportunities --> Analytics-API
         API-Docs-Plan & Beta-Domain --> API-Docs
-        API-Plan --> API-Versioning
-        API-Plan --> Performance-Testing
-        DB-Plan & API-Plan --> Opportunity-Protocol
-        API-Plan--> AB-Testing-Plan
+        DB-API-Plan --> API-Versioning
+        DB-API-Plan --> Performance-Testing
+        DB-API-Plan & API-Plan --> Plan-Grants-as-a-Platform
+        DB-API-Plan--> AB-Testing-Plan
         ATO
         CI-CD
         API-Plan --> CI-CD
@@ -161,13 +161,15 @@ flowchart LR
     subgraph Hackathon
         Participatory-Plan
         Participatory-Plan --> Hacakthon-Page
+        Participatory-Plan --> Participant-Advisory-Councils
+        Participatory-Plan --> Participatory-Tooling
         Hackathon-Data
         Hackathon-Listing:::northStar
         Participatory-Plan --> Recruit-Hackathon-Workgroups
         Participatory-Plan --> Recruit-Hackathon-Participants
         RFI
         RFI-Tools
-        Hacakthon-Page & NOFO-Prototypes --> Hackathon-Listing
+        Hacakthon-Page & NOFO-Prototypes & Participatory-Tooling --> Hackathon-Listing
         Recruit-Hackathon-Workgroups & Recruit-Hackathon-Participants --> Hackathon-Listing
         Hackathon-Listing --> Hackathon-Apply
         Hackathon-Listing --> Hackathon-Listing-Internal-Entry
@@ -179,8 +181,9 @@ flowchart LR
 
     subgraph Communications Tooling
         Setup-Meetings
-        Comms-Platforms:::planning --> Milestone-Template:::executing
+        Comms-Platforms:::executing --> Milestone-Template:::executing
         Comms-Platforms --> Open-Source-Tools
+        Comms-Platforms --> HHS-Internal-Site
         Open-Source-Tools & Comms-Platforms --> Open-Source-Group:::northStar
         Open-Source-Group --> Hackathon-Listing
         Bug-Bounty

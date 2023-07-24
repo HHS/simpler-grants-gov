@@ -1,0 +1,5 @@
+# The docker container should install its own packages.
+node_modules
+
+# The docker container should ignore next builds.
+.next
