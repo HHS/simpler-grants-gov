@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   tests:
-    name: Front-end Tests
+    name: FE Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
       - run: npm run test
 
   lint:
-    name: Front-end Lint
+    name: FE Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +52,7 @@ jobs:
       - run: npm run lint
 
   types:
-    name: Front-end Type Check
+    name: FE Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -66,7 +66,7 @@ jobs:
       - run: npm run ts:check
 
   formatting:
-    name: Front-end Format Check
+    name: FE Format Check
     runs-on: ubuntu-latest
 
     steps:
@@ -81,7 +81,7 @@ jobs:
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
-    name: Front-end Build Check
+    name: FE Build Check
     runs-on: ubuntu-latest
 
     steps:
@@ -109,7 +109,7 @@ jobs:
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
-    name: Front-end Storybook Build Check
+    name: FE Storybook Build Check
     runs-on: ubuntu-latest
 
     steps:
