@@ -1,0 +1,10 @@
+# Ignoring generated files
+.next/
+node_modules/
+storybook-static/
+
+# Ignore USWDS static assets
+public/uswds
+
+# Test artifacts
+coverage/

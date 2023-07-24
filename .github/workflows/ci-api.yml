@@ -1,0 +1,41 @@
+name: API Checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - api/**
+      - .github/workflows/api-checks.yml
+  pull_request:
+    paths:
+      - api/**
+      - .github/workflows/api-checks.yml
+
+defaults:
+  run:
+    working-directory: ./api
+
+jobs:
+  lint-test:
+    # We could run these steps in parallel
+    # if we built the docker image and shared
+    # it across jobs as described in:
+    # https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run format check
+        run: make format-check
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run security linting
+        run: make lint-security
+
+      - name: Start tests
+        run: |
+          make test-audit
+          make test-coverage
