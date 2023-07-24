@@ -6,11 +6,11 @@ on:
       - main
     paths:
       - api/**
-      - .github/workflows/api-checks.yml
+      - .github/workflows/ci-api.yml
   pull_request:
     paths:
       - api/**
-      - .github/workflows/api-checks.yml
+      - .github/workflows/ci-api.yml
 
 defaults:
   run:
@@ -22,6 +22,7 @@ jobs:
     # if we built the docker image and shared
     # it across jobs as described in:
     # https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow
+    name: API Lint, Format & Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
