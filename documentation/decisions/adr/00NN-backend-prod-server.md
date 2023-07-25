@@ -28,47 +28,62 @@ The Flask development server is not meant for production use and only intended f
 
 Note: In all instances above it is preferable that the production server configuration live in code, rather than as a command directly in the Dockerfile. The reasoning is that this gives us a chance to scale our workers and threads appropriately using information like CPU count.
 
+Because of this, options #2 and #3, local development will always bypass `main()` and directly start the app. This is because `main()` will be configured for the production server implementation.
+
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+### Production Server
 
-### Positive Consequences <!-- OPTIONAL -->
+Chosen option: Gunicorn, because it is the industry standard, well-supported and documented.
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+### Implementation
 
-### Negative Consequences <!-- OPTIONAL -->
-
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+Chosen option: #3 Dockerfile executable command for the dev server is overridden in `docker-compose.yml`, API by default starts prod server. This is because it makes the most sense in our current development ecosystem and abstracts away the concept of environment in the API layer.
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
-### {option 1}
-
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
-
-- **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
-
-### {option 2}
-
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+### Production Server
+#### [Gunicorn](https://gunicorn.org/)
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Widely used, industry standard Python server
+  - Excellent ability to manage workers
+  - Simple and light on resources, written in C
+  - Highly compatible with most Python tooling
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Does not run on Windows 🧐
 
-## Links <!-- OPTIONAL -->
+#### [Waitress](https://github.com/Pylons/waitress)
 
-- [{Link name}](link to external resource)
-- ...
+- **Pros**
+  - Simple, lightweight
+  - Can run on Windows as well as UNIX systems
+  - No dependencies that aren't part of the standard Python library
+  - Purely Python
+- **Cons**
+  - Runs on CPython and has "very acceptable performance"
+
+### Implementation
+#### #1
+
+- **Pros**
+  - This is how the Flask app is already configured (small lift to modify)
+- **Cons**
+  - Poor separation of concerns: apps remaining environment agnostic keeps them much simpler overall
+  - Can lead to confusing environment conditional logic
+
+#### #2
+
+- **Pros**
+  - Terraform handles our infrastructure and deployments, therefore conceptually makes sense to define Docker run commands in the task definition
+- **Cons**
+  - Ignores `docker-compose.yml` for local development as a tool we have at our disposal
+  - Obscures prod server run command outside app ecosystem in IaC
+  - Requires separate entrypoint to application for development mode
+
+#### #3
+
+- **Pros**
+  - Local development is done via `docker-compose.yml` config, so it makes a ton of conceptual sense to pass a local Docker run command here
+- **Cons**
+  - Requires separate entrypoint to application for development mode
