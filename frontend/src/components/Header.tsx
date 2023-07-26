@@ -9,7 +9,9 @@ import {
 } from "@trussworks/react-uswds";
 
 type Props = {
+  logoPath?: string
   primaryLinks?: PrimaryLinks
+  showMenu?: boolean
 };
 
 type PrimaryLinks = {
@@ -17,7 +19,7 @@ type PrimaryLinks = {
   href: string;
 }[]
 
-const Header = ({ primaryLinks }: Props) => {
+const Header = ({ logoPath, primaryLinks, showMenu = false }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -32,7 +34,6 @@ const Header = ({ primaryLinks }: Props) => {
       {t(link.i18nKey)}
     </a>
   ));
-  console.log(navItems)
 
   return (
     <>
@@ -47,23 +48,23 @@ const Header = ({ primaryLinks }: Props) => {
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
-                <span className="margin-right-1">
+                {logoPath && <span className="margin-right-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     className="width-3 desktop:width-5 text-bottom margin-right-05"
                     src={`${
                       process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-                    }/img/logo.svg`}
+                    }${logoPath}`}
                     alt="Site logo"
                   />
-                </span>
+                </span>}
                 <span className="font-sans-lg flex-fill">{t("title")}</span>
               </div>
             </Title>
-            <NavMenuButton
+           {showMenu && <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
-            />
+            />}
           </div>
           {navItems && <PrimaryNav
             items={navItems}
