@@ -8,21 +8,16 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-const primaryLinks: {
+type Props = {
+  primaryLinks?: PrimaryLinks
+};
+
+type PrimaryLinks = {
   i18nKey: string;
   href: string;
-}[] = [
-  {
-    i18nKey: "nav_link_home",
-    href: "/",
-  },
-  {
-    i18nKey: "nav_link_health",
-    href: "/health",
-  },
-];
+}[]
 
-const Header = () => {
+const Header = ({ primaryLinks }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -32,11 +27,12 @@ const Header = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const navItems = primaryLinks.map((link) => (
+  const navItems = primaryLinks?.map((link) => (
     <a href={link.href} key={link.href}>
       {t(link.i18nKey)}
     </a>
   ));
+  console.log(navItems)
 
   return (
     <>
@@ -69,11 +65,11 @@ const Header = () => {
               label={t("nav_menu_toggle")}
             />
           </div>
-          <PrimaryNav
+          {navItems && <PrimaryNav
             items={navItems}
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
-          ></PrimaryNav>
+          ></PrimaryNav>}
         </div>
       </USWDSHeader>
     </>
