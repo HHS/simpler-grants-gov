@@ -26,7 +26,7 @@ The Flask development server is not meant for production use and only intended f
 2. Dockerfile executable command for the prod server is overridden in the IaC [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html), API by default starts dev server
 3. Dockerfile executable command for the dev server is overridden in `docker-compose.yml`, API by default starts prod server
 
-Note: Gunicorn can be set up either using their unique configuration file or in our code using separate app entry points for dev and prod. We want to make sure we are scaling the appropriate number of workers based on CPU.
+Note: Gunicorn can be set up either using their unique [configuration file](https://docs.gunicorn.org/en/latest/configure.html) or in our code using separate app entry points for dev and prod. We want to make sure we are scaling the appropriate number of workers based on CPU.
 
 ## Decision Outcome <!-- REQUIRED -->
 
