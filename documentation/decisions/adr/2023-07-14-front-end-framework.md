@@ -1,6 +1,6 @@
 # Front-end Framework
 
-- **Status:** Accepted <!-- REQUIRED -->
+- **Status:** Active
 - **Last Modified:** 2023-07-14 <!-- REQUIRED -->
 - **Related Issue:** [#97](https://github.com/HHS/grants-equity/issues/97) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
@@ -76,11 +76,11 @@ Vue.js is an open-source, JavaScript framework for building progressive user int
   - Code splitting helps reduce package sizes and makes caching easier
 - **Cons**
   - Small community of support
-  - Scalability 
+  - Scalability
 
 ### Svelte or Sveltekit
 
-Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optimized for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reducing bundle size. 
+Svelte is a JavaScript, front-end compiler that turns declarative and easy to understand JavaScript code into highly efficient JavaScript code optimized for the browser. In contrast to the React framework, SvelteKit, uses a "compiler-first" approach to add server side rendering capabilities to Svelte, eliminating the need for a virtual DOM, improving performance, and reducing bundle size.
 
 - **Pros**
   - Fast, performant, and very scalable

@@ -1,6 +1,6 @@
 # Front-end Language
 
-- **Status:** Accepted <!-- REQUIRED -->
+- **Status:** Active
 - **Last Modified:** 2023-07-10 <!-- REQUIRED -->
 - **Related Issue:** [#96](https://github.com/HHS/grants-equity/issues/96) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner <!-- REQUIRED -->
@@ -28,7 +28,7 @@ The goal of this ADR is to select a language that we'll use to implement the fro
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: TypeScript, because it is the ideal language for front-end applications because some form of JavaScript is required for client side functionality anyway. This allows us to reduce the amount of context switching between langauges. Additionally, with node and npm TypeScript and JavaScript are fully featured platforms for building and running applications. We chose TypeScript over JavaScript because of the value that strong typing provides with promomting code quality and developer support. 
+Chosen option: TypeScript, because it is the ideal language for front-end applications because some form of JavaScript is required for client side functionality anyway. This allows us to reduce the amount of context switching between langauges. Additionally, with node and npm TypeScript and JavaScript are fully featured platforms for building and running applications. We chose TypeScript over JavaScript because of the value that strong typing provides with promomting code quality and developer support.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -55,7 +55,7 @@ JavaScript is a lightweight, interpreted programming language with first-class f
 
 ### TypeScript
 
-TypeScript is a syntactic superset of JavaScript which adds static typing and is transpiled down to regular JavaScript when building the application. While TypeScript is a relatively new "language" it's gaining popularity quickly as it's more of a enhancement to JavaScript than just another new language. 
+TypeScript is a syntactic superset of JavaScript which adds static typing and is transpiled down to regular JavaScript when building the application. While TypeScript is a relatively new "language" it's gaining popularity quickly as it's more of a enhancement to JavaScript than just another new language.
 
 - **Pros**
   - Same as JavaScript
@@ -65,7 +65,7 @@ TypeScript is a syntactic superset of JavaScript which adds static typing and is
 
 ### Python
 
-Python is a high-level, dynamically typed general-purpose programming language. Its design philosophy emphasizes code readability but supports multiple programming paradigms. 
+Python is a high-level, dynamically typed general-purpose programming language. Its design philosophy emphasizes code readability but supports multiple programming paradigms.
 
 - **Pros**
   - Same language as back end reducing context switching
@@ -97,7 +97,7 @@ Go is an open source programming language supported by Google.
   - Not a lot of front-end support
 
 <!--
-## Links OPTIONAL 
+## Links OPTIONAL
 
 - [{Link name}](link to external resource)
 - ...

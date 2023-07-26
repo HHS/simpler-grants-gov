@@ -1,6 +1,6 @@
 # Task Runner for the CI / CD Pipeline
 
-- **Status:** Accepted <!-- REQUIRED -->
+- **Status:** Active
 - **Last Modified:** 2023-06-29 <!-- REQUIRED -->
 - **Related Issue:** [ADR: Task Runner and CI / CD interface #92
 ](https://github.com/HHS/grants-equity/issues/92) <!-- RECOMMENDED -->
@@ -22,11 +22,11 @@ The task runner should be able to run on commits and pull requests and support b
 
 ## Options Considered
 
-- [Github Actions](https://github.com/features/actions) 
+- [Github Actions](https://github.com/features/actions)
 - [Travis CI](https://www.travis-ci.com/)
 - [Circle CI](https://circleci.com/)
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Github Actions offers competitive speed, developer support, shared / resusable actions, is part of Github which is already approved on the project and part of the [Fedramp marketplace](https://marketplace.fedramp.gov/products/FR1812058188), and is free. 
+Github Actions offers competitive speed, developer support, shared / resusable actions, is part of Github which is already approved on the project and part of the [Fedramp marketplace](https://marketplace.fedramp.gov/products/FR1812058188), and is free.
 

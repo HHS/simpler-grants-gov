@@ -1,8 +1,8 @@
 # API Language
 
-- **Status:** Accepted 
+- **Status:** Active
 - **Last Modified:** 2023-06-30
-- **Related Issue:** [#27](https://github.com/HHS/grants-equity/issues/27) 
+- **Related Issue:** [#27](https://github.com/HHS/grants-equity/issues/27)
 - **Deciders:** Lucas Brown, Aaron Couch, Sammy Steiner, Daphne Gold, Billy Daly
 
 ## Context and Problem Statement
@@ -26,7 +26,7 @@ In addition to the Nava and HHS teams ability to develop and maintain an API in 
 
 
 ## Decision Outcome <!-- REQUIRED -->
-Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, Python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints. 
+Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, Python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints.
 
 ### Positive Consequences <!-- OPTIONAL -->
 - We're hopeful that this choice will lead to open source contribution and adoption
@@ -43,7 +43,7 @@ Chosen option: Python, because it is free and open source and designed to be eas
 
 Python as a scripting language is fast and productive. Web-based applications can be created quickly and the code is highly readable. Python syntax is easy to understand, well-defined and extensible. APIs built over Python are highly scalable, reliable, and fast.
 
-Because of its popularity in the open source community, Python makes it easy for open source contributors to support our work. 
+Because of its popularity in the open source community, Python makes it easy for open source contributors to support our work.
 
 - **Pros**
   - Nava and HHS experience with Python and APIs built with Python
@@ -88,7 +88,7 @@ Because of its proprietary nature, Java is not as popular with the open source c
 
 
 <!--
-## Links 
+## Links
 
 - [{Link name}](link to external resource)
 - ...
