@@ -22,13 +22,11 @@ The Flask development server is not meant for production use and only intended f
 - Waitress
 
 ### Implementation
-1. API entrypoint (`main()`) responsible for determining dev vs prod environment and starting corresponding server
+1. API entrypoint responsible for conditional logic determining dev vs prod environment and starting corresponding server
 2. Dockerfile executable command for the prod server is overridden in the IaC [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html), API by default starts dev server
 3. Dockerfile executable command for the dev server is overridden in `docker-compose.yml`, API by default starts prod server
 
-Note: In all instances above it is preferable that the production server is started and configured in code, rather than as a start server command directly in the Dockerfile. The reasoning is that this gives us a chance to scale our workers and threads appropriately using information like CPU count.
-
-Because of this, for options #2 and #3, local development will always bypass `main()` and directly start the app via `create_app()`. This is because `main()` will be configured for the production server implementation.
+Note: Gunicorn can be set up either using their unique configuration file or in our code using separate app entry points for dev and prod. We want to make sure we are scaling the appropriate number of workers based on CPU.
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -79,11 +77,11 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
 - **Cons**
   - Ignores `docker-compose.yml` for local development as a tool we have at our disposal
   - Obscures prod server run command outside app ecosystem in IaC
-  - Requires separate entrypoint to application for development mode
+  - Implementation could potentially use separate app entry points for dev and prod
 
 #### #3
 
 - **Pros**
   - Local development is done via `docker-compose.yml` config, so it makes a ton of conceptual sense to pass a local Docker run command here
 - **Cons**
-  - Requires separate entrypoint to application for development mode
+  - Implementation could potentially use separate app entry points for dev and prod
