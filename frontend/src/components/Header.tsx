@@ -8,16 +8,16 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+type PrimaryLinks = {
+  i18nKey: string;
+  href: string;
+}[]
+
 type Props = {
   logoPath?: string
   primaryLinks?: PrimaryLinks
   showMenu?: boolean
 };
-
-type PrimaryLinks = {
-  i18nKey: string;
-  href: string;
-}[]
 
 const Header = ({ logoPath, primaryLinks, showMenu = false }: Props) => {
   const { t, i18n } = useTranslation("common", {
