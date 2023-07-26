@@ -49,7 +49,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
   - Simple and light on resources, written in C
   - Highly compatible with most Python tooling
 - **Cons**
-  - Does not run on Windows 🧐
+  - Does not run on Windows without WSL 🧐
 
 #### [Waitress](https://github.com/Pylons/waitress)
 
