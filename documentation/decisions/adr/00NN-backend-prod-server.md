@@ -62,7 +62,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
   - Runs on CPython and has "very acceptable performance"
 
 ### Implementation
-#### #1
+#### #1 API entrypoint responsible for conditional logic determining dev vs prod environment and starting corresponding server
 
 - **Pros**
   - This is how the Flask app is already configured (small lift to modify)
@@ -70,7 +70,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
   - Poor separation of concerns: apps remaining environment agnostic keeps them much simpler overall
   - Can lead to confusing environment conditional logic
 
-#### #2
+#### #2 Dockerfile executable command for the prod server is overridden in the IaC [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html), API by default starts dev server
 
 - **Pros**
   - Terraform handles our infrastructure and deployments, therefore conceptually makes sense to define Docker run commands in the task definition
@@ -79,7 +79,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
   - Obscures prod server run command outside app ecosystem in IaC
   - Implementation could potentially use separate app entry points for dev and prod
 
-#### #3
+#### #3 Dockerfile executable command for the dev server is overridden in `docker-compose.yml`, API by default starts prod server
 
 - **Pros**
   - Local development is done via `docker-compose.yml` config, so it makes a ton of conceptual sense to pass a local Docker run command here
