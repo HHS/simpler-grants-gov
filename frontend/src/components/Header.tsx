@@ -16,10 +16,9 @@ type PrimaryLinks = {
 type Props = {
   logoPath?: string;
   primaryLinks?: PrimaryLinks;
-  showMenu?: boolean;
 };
 
-const Header = ({ logoPath, primaryLinks, showMenu = false }: Props) => {
+const Header = ({ logoPath, primaryLinks }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -34,6 +33,7 @@ const Header = ({ logoPath, primaryLinks, showMenu = false }: Props) => {
       {t(link.i18nKey)}
     </a>
   ));
+  const showMenu = !!navItems
 
   return (
     <>
