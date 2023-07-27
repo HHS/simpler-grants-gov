@@ -255,9 +255,9 @@ This is a diagram focusing on the CI/CD pipeline
 ```
 
 ## Relevant ADRs
-- [CI/CD Task Runner](../decisions/adr/0002-ci-cd-task-runner.md)
-- [Database Choices](../decisions/adr/0006-db-choices.md)
-- [Front-End Language](../decisions/adr/0007-front-end-language.md)
-- [Front-end Framework](../decisions/adr/0010-front-end-framework.md)
-- [Back-end Language](../decisions/adr/0003-api-language.md)
-- [Back-End Framework](../decisions/adr/0004-api-framework.md)
+- [CI/CD Task Runner](../decisions/adr/2023-06-29-ci-cd-task-runner.md)
+- [Database Choices](../decisions/adr/2023-07-05-db-choices.md)
+- [Front-End Language](../decisions/adr/2023-07-10-front-end-language.md)
+- [Front-end Framework](../decisions/adr/2023-07-14-front-end-framework.md)
+- [Back-end Language](../decisions/adr/2023-06-30-api-language.md)
+- [Back-End Framework](../decisions/adr/2023-07-07-api-framework.md)
