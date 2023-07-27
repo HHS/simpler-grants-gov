@@ -112,7 +112,7 @@ flowchart TB
     eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
     subgraph GH ["Github fab:fa-github"]
         repo[Grants Equity Repo]
-        click repo "https://github.com/HHS/grants-equity" _blank
+        click repo href "https://github.com/HHS/grants-equity" _blank
     end
     GH --Build and Deploys Image--> ECR
     GH --Restarts task with new Image--> ECSS
@@ -239,7 +239,7 @@ This is a diagram focusing on the CI/CD pipeline
         eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
         subgraph GH ["Github fab:fa-github"]
             repo[Grants Equity Repo]
-            click repo "https://github.com/HHS/grants-equity" _blank
+            click repo href "https://github.com/HHS/grants-equity" _blank
         end
         subgraph AWS[HHS AWS Tenant]
             ECR["AWS
