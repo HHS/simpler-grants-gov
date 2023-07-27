@@ -8,9 +8,19 @@ const meta: Meta<typeof Header> = {
 };
 export default meta;
 
-export const Default = {};
+export const Default = {
+  parameters: {
+    design: {
+       type: 'figma',
+       url: 'https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov'
+    }
+ }
+};
 
 export const WithProps = {
+  parameters: {
+    ...Default.parameters
+  },
   args: {
     logoPath: "/img/logo.svg",
     primaryLinks: [
