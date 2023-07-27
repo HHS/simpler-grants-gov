@@ -109,7 +109,7 @@ flowchart TB
     public[Public Internet Users] --> ALB
 
     %% CI/CD Pipeline
-    eng["Developers fa:fa-laptop-code"] --"Push to main branch fa:fa-code-branch"--> GH
+    eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
     subgraph GH ["Github fab:fa-github"]
         repo[Grants Equity Repo]
         click repo "https://github.com/HHS/grants-equity"
@@ -236,7 +236,7 @@ This is a diagram focusing on the CI/CD pipeline
 %%{init: {'theme': 'neutral' } }%%
     flowchart TD
         %% CI/CD Pipeline
-        eng["Developers fa:fa-laptop-code"] --"Push to main branch fa:fa-code-branch"--> GH
+        eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
         subgraph GH ["Github fab:fa-github"]
             repo[Grants Equity Repo]
             click repo "https://github.com/HHS/grants-equity"
