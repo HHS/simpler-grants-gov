@@ -23,6 +23,5 @@ export const WithProps = {
         href: "/health",
       },
     ],
-    showMenu: true,
   },
 };

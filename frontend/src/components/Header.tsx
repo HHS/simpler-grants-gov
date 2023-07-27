@@ -33,7 +33,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
       {t(link.i18nKey)}
     </a>
   ));
-  const showMenu = !!navItems
+  const showMenu = !!navItems;
 
   return (
     <>
