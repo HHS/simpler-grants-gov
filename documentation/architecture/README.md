@@ -27,8 +27,8 @@ flowchart TB
     end
 
     subgraph ECSC [ECS Cluster]
-        ECSS["`ECS Service
-        Fargate Launch Type`"]:::ecs
+        ECSS["ECS Service
+        Fargate Launch Type"]:::ecs
     end
     style ECSC stroke:#FF9900
 
@@ -65,28 +65,28 @@ flowchart TB
 
     end
     subgraph ECS1 ["ECS Front-End Task (Next.js)"]
-        c1["` Docker
-        Container 1`"]
-        c2["` Docker
-        Container n`"]
+        c1[" Docker
+        Container 1"]
+        c2[" Docker
+        Container n"]
     end
     subgraph ECS2 ["ECS Back-End Task (Flask)"]
-        c3["` Docker
-        Container 1`"]
-        c4["` Docker
-        Container n`"]
+        c3[" Docker
+        Container 1"]
+        c4[" Docker
+        Container n"]
     end
     subgraph ECS3["ECS Front-End Task (Next.js)"]
-        c5["` Docker
-        Container 1`"]
-        c6["` Docker
-        Container n`"]
+        c5[" Docker
+        Container 1"]
+        c6[" Docker
+        Container n"]
     end
     subgraph ECS4 ["ECS Back-End Task (Flask)"]
-        c7["` Docker
-        Container 1`"]
-        c8["` Docker
-        Container n`"]
+        c7[" Docker
+        Container 1"]
+        c8[" Docker
+        Container n"]
     end
 
     subgraph RDS
@@ -172,28 +172,28 @@ flowchart TD
 
     end
     subgraph ECS1 ["ECS Front-End Task (Next.js)"]
-        c1["` Docker
-        Container 1`"]
-        c2["` Docker
-        Container n`"]
+        c1[" Docker
+        Container 1"]
+        c2[" Docker
+        Container n"]
     end
     subgraph ECS2 ["ECS Back-End Task (Flask)"]
-        c3["` Docker
-        Container 1`"]
-        c4["` Docker
-        Container n`"]
+        c3[" Docker
+        Container 1"]
+        c4[" Docker
+        Container n"]
     end
     subgraph ECS3["ECS Front-End Task (Next.js)"]
-        c5["` Docker
-        Container 1`"]
-        c6["` Docker
-        Container n`"]
+        c5[" Docker
+        Container 1"]
+        c6[" Docker
+        Container n"]
     end
     subgraph ECS4 ["ECS Back-End Task (Flask)"]
-        c7["` Docker
-        Container 1`"]
-        c8["` Docker
-        Container n`"]
+        c7[" Docker
+        Container 1"]
+        c8[" Docker
+        Container n"]
     end
 
     subgraph RDS
