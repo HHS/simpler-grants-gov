@@ -4,7 +4,7 @@ import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 
-import Alert from "../components/Alert"
+import Alert from "../components/Alert";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -20,12 +20,12 @@ const Home: NextPage = () => {
       </h1>
       <Alert type="info">
         <Trans
-            t={t}
-            i18nKey="alert"
-            components={{
-              LinkToGrants: <a href="www.grants.gov" />,
-            }}
-          />
+          t={t}
+          i18nKey="alert"
+          components={{
+            LinkToGrants: <a href="www.grants.gov" />,
+          }}
+        />
       </Alert>
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}

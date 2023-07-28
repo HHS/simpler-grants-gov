@@ -22,7 +22,6 @@ describe("Index", () => {
 
     expect(alert).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "www.grants.gov");
-
   });
 
   it("passes accessibility scan", async () => {
