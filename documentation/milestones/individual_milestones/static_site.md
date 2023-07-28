@@ -25,7 +25,7 @@ By sharing this information in a publicly accessible format and investing early 
 
 - Raises awareness about the Grants Equity project, its priorities, and ongoing workstreams
 - Establishes beta.grants.gov as the primary location that stakeholders can visit for project updates and previews of deliverables from each of the workstreams
-- Proves the succesful completion of technical milestones that enable faster development without sacrificing code quality or security
+- Proves the successful completion of technical milestones that enable faster development without sacrificing code quality or security
 - Delivers an early win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
 ### User stories
@@ -97,7 +97,7 @@ Process for drafting and updating the content of the site should balance:
 
 1. Number of unique site visitors
 2. Total number of site visits
-3. Number of form responses
+3. Stretch: Number of form responses
 4. Uptime service
 5. [Lighthouse score](lighthouse) for the site
 6. Deployment build time
