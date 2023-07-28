@@ -26,7 +26,7 @@ The launch of a public API endpoint which provides information about every grant
 By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this milestone aims to demonstrate the following value propositions:
 
 - Exposes `beta.grants.gov/api/` as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
-- Proves the succesful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
+- Proves the successful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
 - Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
 ### User Stories
