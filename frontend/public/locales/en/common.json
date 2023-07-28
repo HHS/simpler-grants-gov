@@ -2,7 +2,9 @@
   "Index": {
     "title": "Home",
     "intro": "This is a template for a React web application using the <LinkToNextJs>Next.js framework</LinkToNextJs>.",
-    "body": "This is template includes:<ul><li>Framework for server-side rendered, static, or hybrid React applications</li><li>TypeScript and React testing tools</li><li>U.S. Web Design System for themeable styling and a set of common components</li><li>Type checking, linting, and code formatting tools</li><li>Storybook for a frontend workshop environment</li></ul>"
+    "body": "This is template includes:<ul><li>Framework for server-side rendered, static, or hybrid React applications</li><li>TypeScript and React testing tools</li><li>U.S. Web Design System for themeable styling and a set of common components</li><li>Type checking, linting, and code formatting tools</li><li>Storybook for a frontend workshop environment</li></ul>",
+    "alert": "This website is a work in progress. To search for funding opportunities and apply, <LinkToGrants>visit www.grants.gov</LinkToGrants>."
+
   },
   "Header": {
     "nav_link_home": "Home",
