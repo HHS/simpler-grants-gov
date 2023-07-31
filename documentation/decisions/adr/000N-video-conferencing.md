@@ -142,7 +142,7 @@ Google Meet is part of Google Workspace (formerly G Suite) and is well-suited fo
 
 ### Jitsu
 
-Jitsi is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup. 
+Jitsu is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup. 
 
 #### Additional details and pricing
 
