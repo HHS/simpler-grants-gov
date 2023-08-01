@@ -21,7 +21,7 @@ describe("Index", () => {
     const link = screen.getByRole("link", { name: /grants\.gov/i });
 
     expect(alert).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "www.grants.gov");
+    expect(link).toHaveAttribute("href", "https://www.grants.gov");
   });
 
   it("renders the goals section", () => {

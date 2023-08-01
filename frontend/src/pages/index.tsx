@@ -7,6 +7,8 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Alert from "../components/Alert";
 
+import Alert from "../components/Alert";
+
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
