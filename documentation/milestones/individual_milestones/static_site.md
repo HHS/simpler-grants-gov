@@ -27,6 +27,7 @@ By sharing this information in a publicly accessible format and investing early 
 - Establishes beta.grants.gov as the primary location that stakeholders can visit for project updates and previews of deliverables from each of the workstreams
 - Proves the successful completion of technical milestones that enable faster development without sacrificing code quality or security
 - Delivers an early win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
+- Facilitates a parallel approach to development, in which new features can be built and tested on `beta.grants.gov` without risking or disrupting the existing functionality of legacy grants.gov
 
 ### User stories
 
