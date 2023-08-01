@@ -21,12 +21,7 @@ export const Success = {
 };
 
 export const Warning = {
-  parameters: {
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design&node-id=14-898&mode=design&t=TBiGeE1zwkTfNzxB-4",
-    },
-  },
+  parameters: Success.parameters,
   args: {
     type: "warning",
     children: "This is a warning Alert",
@@ -34,12 +29,7 @@ export const Warning = {
 };
 
 export const Error = {
-  parameters: {
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design&node-id=14-898&mode=design&t=TBiGeE1zwkTfNzxB-4",
-    },
-  },
+  parameters: Success.parameters,
   args: {
     type: "error",
     children: "This is an error Alert",
@@ -47,12 +37,7 @@ export const Error = {
 };
 
 export const Info = {
-  parameters: {
-    design: {
-      type: "figma",
-      url: "https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design&node-id=14-898&mode=design&t=TBiGeE1zwkTfNzxB-4",
-    },
-  },
+  parameters: Success.parameters,
   args: {
     type: "info",
     children: "This is an info Alert",
