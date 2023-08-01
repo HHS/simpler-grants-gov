@@ -23,7 +23,7 @@ const Home: NextPage = () => {
           t={t}
           i18nKey="alert"
           components={{
-            LinkToGrants: <a href="www.grants.gov" />,
+            LinkToGrants: <a href="https://www.grants.gov" />,
           }}
         />
       </Alert>
