@@ -1,6 +1,6 @@
 # Front-end Code Quality Tools
 
-- **Status:** Approved <!-- REQUIRED -->
+- **Status:** Active
 - **Last Modified:** 2023-07-17 <!-- REQUIRED -->
 - **Related Issue:** [#102](https://github.com/HHS/grants-equity/issues/102) <!-- RECOMMENDED -->
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly <!-- REQUIRED -->

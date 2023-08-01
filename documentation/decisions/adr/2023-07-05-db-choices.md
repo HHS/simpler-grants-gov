@@ -1,13 +1,13 @@
 # DB Choices
 
-- **Status:** Accepted
+- **Status:** Active
 - **Last Modified:** 2023-07-05
-- **Related Issue:** [#27](https://github.com/HHS/grants-equity/issues/104) 
+- **Related Issue:** [#27](https://github.com/HHS/grants-equity/issues/104)
 - **Deciders:** Lucas Brown, Aaron Couch, Gina Carson, Andy Cochran
 
 ## Context and Problem Statement
 
-This ADR is to formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use host it. This ADR will contain the evaluation and selection of the type of the database, the database management system (DBMS), and database hosting service. 
+This ADR is to formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use host it. This ADR will contain the evaluation and selection of the type of the database, the database management system (DBMS), and database hosting service.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 Type of Database:
@@ -58,7 +58,7 @@ The database hosting service selected is Amazon RDS. This is due to several fact
 
 
 
-## Links 
+## Links
 
 - [Comparison of MySQL and PostgreSQL](https://aws.amazon.com/compare/the-difference-between-mysql-vs-postgresql/#:~:text=Summary%20of%20differences%3A%20PostgreSQL%20vs%20MySQL,-Category&text=MySQL%20is%20a%20purely%20relational%20database%20management%20system.,object%2Drelational%20database%20management%20system.&text=MySQL%20has%20limited%20support%20of,views%2C%20triggers%2C%20and%20procedures.)
 - [What is Amazon RDS?](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html)

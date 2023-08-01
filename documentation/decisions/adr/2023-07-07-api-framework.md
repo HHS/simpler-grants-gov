@@ -1,6 +1,6 @@
 # API Framework and Libraries
 
-- **Status:** Accepted <!-- REQUIRED -->
+- **Status:** Active
 - **Last Modified:** 2023-07-07 <!-- REQUIRED -->
 - **Related Issue:** [#28](https://github.com/HHS/grants-equity/issues/28) <!-- RECOMMENDED -->
 - **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Gina Carson, Sumi Thaiveettil, Eshter Oke <!-- REQUIRED -->
@@ -19,7 +19,7 @@ This ADR is to decide what python framework to use for the back-end API of grant
 
 ## Options Considered
 
-- Flask 
+- Flask
 - Flask + Connexion
 - Flask + APIFlask
 - FastAPI
@@ -81,7 +81,7 @@ This deserves its own option because it adds a lot of support to Flask for a mor
 
 ### FastApi
 
-FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks. 
+FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks.
 
 - **Pros**
   - Designed for speed and can perform asynchronous operations natively (if needed)
@@ -91,7 +91,7 @@ FastAPI is a modern, fast (high-performance), web framework created in 2018 for 
   - Documentation for more advanced cases is lacking
   - As the newest of the frameworks, it has the smallest community of support
   - Can have memory management issues
-  
+
 
 ### Django
 
