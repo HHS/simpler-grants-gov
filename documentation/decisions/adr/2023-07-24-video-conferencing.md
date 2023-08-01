@@ -35,14 +35,14 @@ Waiting Room: Meeting organizers can configure their meetings to require that at
 
 ## Options Considered
 
-- [Zoom](https://zoom.us/) - *decision* because of  
-- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) - *decision* because of  
-- [Google Meet](https://meet.google.com/) - *decision* because of  
-- [Jitsu](https://meet.jit.si/) - *decision* because of  
+- [Zoom](https://zoom.us/)
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) 
+- [Google Meet](https://meet.google.com/)   
+- [Jitsu](https://meet.jit.si/) 
 
 ## Decision Outcome <!-- REQUIRED -->
 
-TBD 
+Zoom stands out as the optimal choice for our video conference tool. It fulfills all the key decision drivers we have outlined, including public access, waiting room feature, video recording capability, screen sharing, and interactive chat. Moreover, Zoom provides phone support, live transcription for closed captioning, and is FedRAMP approved. Its robust features and ease of use make it a reliable platform for both internal and external meetings, ensuring a seamless and inclusive communication experience for all stakeholders involved. 
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -63,7 +63,7 @@ TBD
 
 ### Back-up Options
 
-
+Jitsi serves as a strong backup option for our video conferencing needs. Jitsi aligns with several essential decision drivers, such as public access, waiting room functionality, and screen sharing capabilities. Additionally, its open-source nature allows for self-hosting, offering an added level of control and privacy. Our project could contribute code to functionality that may fall short. Jitsi could be a reliable and accessible alternative for hosting our meetings with both internal and external stakeholders.
 
 ## Comparison Matrix
 
@@ -101,13 +101,24 @@ Zoom is a widely used video conferencing platform known for its ease of use and 
 
 #### Additional details and pricing
 
-- **Pricing**: 
+**Pricing**: 
+- Free with limitations like 40 minutes per meeting, 100 attendees per meeting, whiteboard basic, team chat, mail & calendar
+- Pricing starts at $149.90/year/user and goes up from there.
+- The Enterprise plan offers rooms and webinars but no pricing is available on the site. We would need to contact Zoom for specific pricing for our project. 
+- We do not need each every user to have access to our paid instance since anyone can join a Zoom session with the invite link.
+- We would need around 15-30 users with access to the paid instance. 
 
 #### Pros
-
+- User-friendly interface and easy to set up for both organizers and participants.
+- Robust features like breakout rooms, screen sharing, and virtual backgrounds enhance collaboration.
+- Offers a wide range of integrations with other apps and platforms.
+- Availability of a free plan with limited meeting duration.
 
 
 #### Cons
+- Security concerns in the past, but the platform has made significant improvements.
+- Free plan has limitations on meeting duration and participant count.
+- Frequent updates may require users to adapt to changes.
 
 ### Microsoft Teams
 
@@ -115,14 +126,26 @@ Microsoft Teams is a collaboration platform integrated with Microsoft 365. It of
 
 #### Additional details and pricing
 
-- **Pricing**: 
-
-
+**Pricing**: 
+- Prices starting at $4 user / month
+- Webinar hosting is only available in the Business Standard package which is $12.50/user / month
+  
 #### Pros
 
-
+- Part of the Microsoft 365 suite, providing seamless integration with Office apps.
+- Allows for large meeting participants and live event hosting.
+- Extensive collaboration features, including document sharing and real-time editing.
+- Supports third-party app integrations for enhanced functionality.
+- Strong security features, making it suitable for enterprises.
 
 #### Cons
+
+- Initial setup and learning curve can be overwhelming for new users.
+- Resource-intensive, leading to occasional performance issues on lower-end devices.
+- Limited to Microsoft 365 users, which may restrict external collaboration.
+- Frequent updates can lead to occasional disruptions.
+- Potentially paying a premium for the Microsoft 365 suite when the video conferencing is all that is needed for the project. 
+
 
 ### Google Meet
 
@@ -131,22 +154,35 @@ Google Meet is part of Google Workspace (formerly G Suite) and is well-suited fo
 #### Additional details and pricing
 
 - **Pricing**:
+- Google Workspace pricing is for the whole suite, starting at $6 per user/ month. The Enterprise has more advanced options and features.
+- We do not need each every user to have access to our paid instance since anyone can join a Google Meet session with the invite link.
+- We would need around 15-30 users with access to the paid instance. 
 - **Live Transcription**: Yes but in English only
 
 
 #### Pros
 
-
-
+- Seamless integration with Google Workspace (formerly G Suite) apps for streamlined collaboration.
+- High-quality video and audio, even in low-bandwidth conditions.
+- No additional software installation required for users with Google accounts. Users can access simply through a browser.
+- Good performance on various devices, including smartphones and tablets.
+- Provides live captions for improved accessibility.
+  
 #### Cons
+
+- Advanced features are limited compared to some other platforms.
+- Some features may require a paid G Suite subscription.
+- Limited customization options for meeting settings.
+- Live transcription is in English only.
+- Potentially paying a premium for the suite of Google products when the video conferencing is all that is needed for the project. 
 
 ### Jitsu
 
-Jitsu is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup. 
+Jitsi is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup. 
 
 #### Additional details and pricing
 
-- **Pricing**: 
+- **Pricing**: Free 
 - **Webinar**: Not a built-in feature (third-party integrations available)
 - **Breakout Rooms**: Not a built-in feature (third-party integrations available)
 - **Open Source**: Yes
@@ -154,9 +190,18 @@ Jitsu is an open-source video conferencing solution that stands out for its simp
 
 #### Pros
 
-
+- Open-source platform with a self-hosting option, providing greater control and privacy.
+- Simple and lightweight, making it quick to set up and easy to use.
+- No account creation required for participants, enhancing public access.
+- Strong focus on security and privacy, allowing for end-to-end encryption.
+- Availability of web-based access without software downloads.
 
 #### Cons
+
+- Fewer advanced features compared to more established platforms.
+- Limited support and community compared to larger video conferencing tools.
+- Self-hosting may require technical expertise and maintenance efforts.
+- Video and audio quality may vary depending on server capacity and network conditions.
 
 
 
@@ -164,3 +209,7 @@ Jitsu is an open-source video conferencing solution that stands out for its simp
 
 ## Links <!-- OPTIONAL -->
 
+- [Zoom pricing](https://zoom.us/pricing)
+- [Google Meet pricing](https://workspace.google.com/pricing.html)
+- [Microsoft Teams pricing](https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-options)
+- [Jitsu](https://jitsi.org/jitsi-meet/)
