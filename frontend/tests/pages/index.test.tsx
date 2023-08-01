@@ -24,6 +24,14 @@ describe("Index", () => {
     expect(link).toHaveAttribute("href", "www.grants.gov");
   });
 
+  it("renders the goals section", () => {
+    render(<Index />);
+
+    const goalH2 = screen.getByRole("heading", {level: 2, name: /What's the goal?/i});
+
+    expect(goalH2).toBeInTheDocument();
+  })
+
   it("passes accessibility scan", async () => {
     const { container } = render(<Index />);
     const results = await axe(container);

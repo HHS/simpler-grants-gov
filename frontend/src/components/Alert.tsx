@@ -7,7 +7,7 @@ type Props = {
 
 const Alert = ({ type, children }: Props) => {
   return (
-    <USWDSAlert type={type} headingLevel="h4" slim>
+    <USWDSAlert className="margin-bottom-1" type={type} headingLevel="h4" slim>
       {children}
     </USWDSAlert>
   );
