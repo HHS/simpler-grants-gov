@@ -5,7 +5,7 @@
 | Document Status | Accepted                                                             |
 | Epic Link       | [Issue 70](https://github.com/HHS/grants-equity/issues/70)           |
 | Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-08-23                                                           |
+| Target Release  | 2023-10-11                                                           |
 | Product Owner   | Lucas Brown                                                          |
 | Document Owner  | Billy Daly                                                           |
 | Lead Developer  | Aaron Couch                                                          |
@@ -79,6 +79,7 @@ The way that data is stored and delivered through the API should balance:
   - [ ] All code quality checks set up in the [Developer Tools milestone](https://github.com/HHS/grants-equity/issues/50) are passing
   - [ ] The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code milestone](https://github.com/HHS/grants-equity/issues/123) framework
   - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD milestone](https://github.com/HHS/grants-equity/issues/57)
+  - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down
 - [ ] The following developer experience (DX) requirements are satisfied:
   - [ ] The API is live at `beta.grants.gov/api/`
   - [ ] Developers can learn how to interact with the API by referencing the API documentation
@@ -98,9 +99,12 @@ The way that data is stored and delivered through the API should balance:
 3. Error rate of API calls
 4. Uptime of service
 5. Deployment/hosting costs
+6. Average response time
 
 ### Destination for live updating metrics
 <!-- Required -->
+
+Page on the public wiki that is updated at the end of each sprint. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
 
 ## Planning
 
@@ -124,7 +128,7 @@ The way that data is stored and delivered through the API should balance:
 
 *Are there any notable capabilities / milestones do NOT we expect to be in place at the beginning of work on this milestone?*
 
-- [ ] **Performance Testing Framework:** While performance should be an important consideration during the development of this initial API endpoint. 
+- [ ] **Performance Testing Framework:** While performance should be an important consideration during the development of this initial API endpoint, a fully implemented performance and load testing framework is scoped for a later milestone.
 - [ ] **AuthN/AuthZ:** While the implementation of rate limiting or other API security measures may require some basic authentication, the full AuthN/AuthZ framework will be developed in a later milestone.
 
 ### Open questions
