@@ -14,6 +14,16 @@ describe("Index", () => {
     expect(link).toHaveAttribute("href", "https://nextjs.org/docs");
   });
 
+  it("renders alert with grants.gov link", () => {
+    render(<Index />);
+
+    const alert = screen.getByTestId("alert");
+    const link = screen.getByRole("link", { name: /grants\.gov/i });
+
+    expect(alert).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "https://www.grants.gov");
+  });
+
   it("passes accessibility scan", async () => {
     const { container } = render(<Index />);
     const results = await axe(container);
