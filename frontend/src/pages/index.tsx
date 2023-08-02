@@ -7,8 +7,6 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Alert from "../components/Alert";
 
-import Alert from "../components/Alert";
-
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
@@ -26,7 +24,7 @@ const Home: NextPage = () => {
           t={t}
           i18nKey="alert"
           components={{
-            LinkToGrants: <a href="www.grants.gov" />,
+            LinkToGrants: <a href="https://www.grants.gov" />,
           }}
         />
       </Alert>
