@@ -92,11 +92,9 @@ flowchart TB
     subgraph RDS
         subgraph private-subnet3 [Private Subnet]
             DB[("Multi-AZ Grants.gov
-            Replica Database
-            IP:1521")]:::db
+            Replica Database")]:::db
             PDB[("Multi-AZ Postgres DB
-            for Back End
-            IP:5432")]:::db
+            for Back End")]:::db
         end
     end
     style RDS stroke:blue,color:blue
@@ -197,11 +195,9 @@ flowchart TD
     subgraph RDS
         subgraph private-subnet3 [Private Subnet]
             DB[("Multi-AZ Grants.gov
-            Replica Database
-            IP:1521")]:::db
+            Replica Database")]:::db
             PDB[("Multi-AZ Postgres DB
-            for Back End
-            IP:5432")]:::db
+            for Back End")]:::db
         end
     end
     style RDS stroke:blue,color:blue
