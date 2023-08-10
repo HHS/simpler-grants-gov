@@ -15,7 +15,6 @@ flowchart TB
     subgraph AWS [HHS AWS Tenant]
         shared
         vpc:::az
-        vpc --> test
     end
 
     %% AWS Shared Services
@@ -52,16 +51,21 @@ flowchart TB
         ECSS["ECS Service
         Fargate Launch Type"]:::ecs
     end
+    ECSS --attach parameters to service--> ssm
+    ecr --encrypt and decrypt images--> kms
     style ECSC stroke:#FF9900
 
     %% AWS Services Within VPC
     subgraph vpc ["AWS Virtual Private Cloud (VPC)"]
-        AZ1:::az
-        AZ2:::az
+        direction TB
         public-subnet1:::subnet
         RDS
         AZ1 & AZ2 --> RDS
     end
+
+    class AZ1 az
+    class AZ2 az
+    vpc --> cloudwatch
 
     subgraph public-subnet1 [Public Subnet]
         ALB["Application Load Balancer (ALB)"]:::lb --> AZ1 & AZ2
@@ -131,8 +135,8 @@ flowchart TB
         repo[Grants Equity Repo]
         click repo href "https://github.com/HHS/grants-equity" _blank
     end
-    GH --Build and Deploys Image--> ecr
-    GH --Restarts task with new Image--> ECSS
+    GH --Build and Deploys Image--> iam --> ecr
+    GH --Restarts task with new Image--> iam --> ECSS
 
 
     %% Styles
