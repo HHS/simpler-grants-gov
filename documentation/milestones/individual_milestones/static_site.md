@@ -84,7 +84,10 @@ Process for drafting and updating the content of the site should balance:
   - [ ] Anyone can access a live version of the site at beta.grants.gov
   - [ ] The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/grants-equity/issues/60)
   - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning milestone
+  - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics milestone](https://github.com/HHS/grants-equity/issues/63)
+  - [ ] Additional development tickets have been created for collecting other data needed to calculate the metrics below
 - [ ] The following content requirements are satisfied:
+  - [ ] All content is deployed to beta.grants.gov
   - [ ] The site contains information about both the NOFO Transformation and Grants.gov Modernization workstreams
   - [ ] The content on the site has been been reviewed and approved by the relevant stakeholders within each workstream
   - [ ] The site also links to external resources related to the project (if they are available), including:
@@ -98,11 +101,16 @@ Process for drafting and updating the content of the site should balance:
 
 1. Number of unique site visitors
 2. Total number of site visits
-3. Stretch: Number of form responses
 4. Uptime service
 5. [Lighthouse score](lighthouse) for the site
 6. Deployment build time
 7. Deployment/hosting costs
+8. Number of PDF downloads per NOFO prototype
+9. Number of outbound links to the following external resources (once added to the site)
+   - Open source repository
+   - Open source wiki
+   - Open source chat
+10. Stretch: Number of form responses
 
 ### Destination for live updating metrics
 
@@ -139,7 +147,7 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 *The following work will* not *be completed as part of this milestone:*
 
-1. **Translating site contents:** Translation of key documents will be covered in an upcoming milestone
+1. **Translating site contents:** Translation of key documents will be covered in an upcoming milestone slotted for FY24 Q1 (Oct - Dec 2023)
 2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `beta.grants.gov` will happen in a later milestone
 
 ## Integrations
@@ -153,7 +161,7 @@ Yes, the site contents will need to be translated.
 
 *If so, when will English-language content be locked? Then when will translation be started and completed?*
 
-Timeline and strategy for translation is still TBD.
+The initial process for translation is slotted for release sometime in FY24 Q1 (Oct - Dec 2023).
 
 ### Services going into PROD for the first time
 <!-- Required -->
@@ -179,7 +187,7 @@ Timeline and strategy for translation is still TBD.
 
 *Are there any fields being shared publicly that have never been shared in PROD before?*
 
-- No, the content of the static site in this milestone will be limited to informational about the project or about the NOFO prototypes that have already been published on legacy grants.gov. It does not include exposing any production data from the new NOFO data model.
+- No, the content of the static site in this milestone will be limited to information about the project or about the NOFO prototypes that have already been published on legacy grants.gov. It does not include exposing any production data from the new Grants.gov data model.
 
 ### Security considerations
 <!-- Required -->
