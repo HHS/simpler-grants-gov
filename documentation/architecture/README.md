@@ -93,12 +93,10 @@ flowchart TB
         subgraph private-subnet3 [Private Subnet]
             DB[("Multi-AZ Grants.gov
             Replica Database
-            tstgrntsee1.cshqswcusbcd.
-            us-east-1.rds.amazonaws.com
-            :1521")]:::db
+            IP:1521")]:::db
             PDB[("Multi-AZ Postgres DB
             for Back End
-            IP.TBD:5432")]:::db
+            IP:5432")]:::db
         end
     end
     style RDS stroke:blue,color:blue
@@ -200,12 +198,10 @@ flowchart TD
         subgraph private-subnet3 [Private Subnet]
             DB[("Multi-AZ Grants.gov
             Replica Database
-            tstgrntsee1.cshqswcusbcd.
-            us-east-1.rds.amazonaws.com
-            :1521")]:::db
+            IP:1521")]:::db
             PDB[("Multi-AZ Postgres DB
             for Back End
-            IP.TBD:5432")]:::db
+            IP:5432")]:::db
         end
     end
     style RDS stroke:blue,color:blue
