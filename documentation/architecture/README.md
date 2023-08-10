@@ -14,15 +14,37 @@ flowchart TB
     %% AWS Tenant
     subgraph AWS [HHS AWS Tenant]
         shared
-        VPC:::az
+        vpc:::az
+        vpc --> test
     end
 
     %% AWS Shared Services
     subgraph shared [AWS Shared Services]
         ECSC
+        iam
+        kms
+        ssm
+        cloudwatch
+        ecr
+    end
+
+    subgraph iam [Identity Access Managment]
         IAM:::sec
+    end
+
+    subgraph kms [Key Management Service]
+        KMS:::sec
+    end
+
+    subgraph ssm [System Manager]
         SSM:::sec
+    end
+
+    subgraph cloudwatch [Logging and Metrics]
         CloudWatch:::sec
+    end
+
+    subgraph ecr [Elastic Container Registry]
         ECR:::ecs
     end
 
@@ -33,8 +55,7 @@ flowchart TB
     style ECSC stroke:#FF9900
 
     %% AWS Services Within VPC
-    subgraph VPC ["AWS Virtual Private Cloud (VPC)"]
-        direction LR
+    subgraph vpc ["AWS Virtual Private Cloud (VPC)"]
         AZ1:::az
         AZ2:::az
         public-subnet1:::subnet
@@ -100,7 +121,7 @@ flowchart TB
     style RDS stroke:blue,color:blue
     private-subnet3:::subnet
 
-    ECR --> ECSC
+    ecr --> ECSC
     ECSS --> AZ1 & AZ2
     public[Public Internet Users] --> ALB
 
@@ -110,7 +131,7 @@ flowchart TB
         repo[Grants Equity Repo]
         click repo href "https://github.com/HHS/grants-equity" _blank
     end
-    GH --Build and Deploys Image--> ECR
+    GH --Build and Deploys Image--> ecr
     GH --Restarts task with new Image--> ECSS
 
 
@@ -132,11 +153,11 @@ This is an architecture diagram focusing on the AWS shared infrastructure manage
 flowchart TD
         %% AWS Tenant
     subgraph AWS [HHS AWS Tenant]
-        VPC:::az
+        VPC2:::az
     end
 
     %% AWS Services Within VPC
-    subgraph VPC ["AWS Virtual Private Cloud (VPC)"]
+    subgraph VPC2 ["AWS Virtual Private Cloud (VPC)"]
         direction LR
         AZ1:::az
         AZ2:::az
