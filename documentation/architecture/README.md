@@ -245,6 +245,7 @@ The beta.grants.gov is using the following non infrastructure shared services in
 - [SSM: System Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html)
 - [IAM: Identity and Access Management](https://aws.amazon.com/iam/)
 - [Cloudwatch](https://aws.amazon.com/cloudwatch/)
+- [Key Management Service](https://aws.amazon.com/kms/)
 
 ## CI/CD Pipeline
 This is a diagram focusing on the CI/CD pipeline
@@ -278,3 +279,4 @@ This is a diagram focusing on the CI/CD pipeline
 - [Front-end Framework](../decisions/adr/2023-07-14-front-end-framework.md)
 - [Back-end Language](../decisions/adr/2023-06-30-api-language.md)
 - [Back-End Framework](../decisions/adr/2023-07-07-api-framework.md)
+- [Application Infrastructure Service](../decisions//adr/2023-07-20-deployment-strategy.md)
