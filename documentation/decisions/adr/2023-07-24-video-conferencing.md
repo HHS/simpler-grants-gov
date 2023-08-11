@@ -38,7 +38,8 @@ Waiting Room: Meeting organizers can configure their meetings to require that at
 - [Zoom](https://zoom.us/)
 - [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) 
 - [Google Meet](https://meet.google.com/)   
-- [Jitsu](https://meet.jit.si/) 
+- [Jitsu](https://meet.jit.si/)
+- [meet.coop](https://www.meet.coop/)
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -73,22 +74,22 @@ Jitsi serves as a strong backup option for our video conferencing needs. Jitsi a
 - 1-3 Strength level
 - ❓Unknown
 
-| Factor                      | Zoom | Microsoft Teams | Google Meet | Jitsu |
-| --------------------------- | :--------: | :--------: | :---------: | :-----: | 
-| Public Access                   |     ✅      |   ✅    |      ✅      |    ✅    |  
-| Waiting Room               |    ✅     |  ✅   |     ✅      |   ✅    |   
-| Video Recording              |    ✅     |   ✅   |     ✅      |   ✅    |  
-| Screen Sharing             |     ✅     |  ✅   |     ✅      |   ✅    |  
-| Chat                |     ✅     |   ✅   |     ✅      |   ✅    |  
-| Phone Support                        |    ✅     |  ✅   |     ✅      |   ✅    |   
-| Live Transcription               |     ✅     |   ✅   |     ✅      |    ❌   |   
-| Authority to Operate  |     x      |   ✅    |      ?      |    ?    |  
-| Webinar* |     ✅      |   ✅    |      3      |    🔄    |  
-| Breakout Rooms*        |     ✅     |   ✅   |     ✅      |   🔄    |  
-| Open Source*      |    ❌     |   ❌   |     ❌     |   ✅   |  
-| Attendance Tracking*                 |    ✅     |  ✅   |     🔄      |   ❓    |  
-| Community & Support*         |    3     |   3   |     3      |   3   |  
-| Scalability*                 |     ✅     |   ✅   |     ✅      |   ✅    |  
+| Factor                      | Zoom       | Microsoft Teams | Google Meet  | Jitsu    | Meet.coop |
+| --------------------------- | :--------: | :--------:      | :---------:  | :-----:  |  :-----:  | 
+| Public Access               |     ✅     |   ✅            |      ✅      |    ✅    |      ✅   |  
+| Waiting Room                |    ✅      |  ✅             |     ✅       |   ✅     |         |   
+| Video Recording              |    ✅     |   ✅   |     ✅      |   ✅    |         | 
+| Screen Sharing             |     ✅     |  ✅   |     ✅      |   ✅    |         |  
+| Chat                |     ✅     |   ✅   |     ✅      |   ✅    |         |  
+| Phone Support                        |    ✅     |  ✅   |     ✅      |   ✅    |         |   
+| Live Transcription               |     ✅     |   ✅   |     ✅      |    ❌   |         |   
+| Authority to Operate  |     x      |   ✅    |      ?      |    ?    |         |  
+| Webinar* |     ✅      |   ✅    |      3      |    🔄    |          | 
+| Breakout Rooms*        |     ✅     |   ✅   |     ✅      |   🔄    |          | 
+| Open Source*      |    ❌     |   ❌   |     ❌     |   ✅   |          | 
+| Attendance Tracking*                 |    ✅     |  ✅   |     🔄      |   ❓    |          | 
+| Community & Support*         |    3     |   3   |     3      |   3   |         |  
+| Scalability*                 |     ✅     |   ✅   |     ✅      |   ✅    |           |
 
 
 * Nice to have
