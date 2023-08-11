@@ -3,8 +3,8 @@ import type { GetServerSideProps, NextPage } from "next";
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
 
+import GoalContent from "src/components/GoalContent";
 import Alert from "../components/Alert";
 
 const Home: NextPage = () => {
@@ -28,22 +28,7 @@ const Home: NextPage = () => {
           }}
         />
       </Alert>
-      <GridContainer>
-        <Grid row>
-          <h2 className="margin-bottom-0">{t("goal_title")}</h2>
-        </Grid>
-        <Grid row gap="md">
-          <Grid col={6}>
-            <p className="usa-intro">{t("goal_paragraph_1")}</p>
-          </Grid>
-          <Grid col={6}>
-            <h3>{t("goal_title_2")}</h3>
-            <p>{t("goal_paragraph_2")}</p>
-            <h3>{t("goal_title_3")}</h3>
-            <p>{t("goal_paragraph_3")}</p>
-          </Grid>
-        </Grid>
-      </GridContainer>
+      <GoalContent />
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
       <p className="usa-intro">
