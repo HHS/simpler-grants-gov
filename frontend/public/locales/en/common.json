@@ -9,7 +9,12 @@
     "goal_title_2": "For applicants",
     "goal_paragraph_2": "We’re building a one-stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities that meet your needs.",
     "goal_title_3": "For grantmakers",
-    "goal_paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for you to write, post, announce, and manage funding opportunities that reach underserved communities."
+    "goal_paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for you to write, post, announce, and manage funding opportunities that reach underserved communities.",
+    "fo_title": "Improvements to funding opportunity announcements",
+    "fo_paragraph_1": "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize the content of funding opportunities announcements.",
+    "fo_paragraph_2": "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to applicants from underserved communities.",
+    "fo_title_2": "View our grant announcement prototypes",
+    "fo_paragraph_3": "We recently simplified the language of four grant announcements and applied visual and user-centered design principles to increase their readability and usability."
   },
   "Header": {
     "nav_link_home": "Home",

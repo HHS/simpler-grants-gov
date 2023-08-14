@@ -4,6 +4,7 @@ import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 
+import FundingContent from "src/components/FundingContent";
 import GoalContent from "src/components/GoalContent";
 import FullWidthAlert from "../components/FullWidthAlert";
 
@@ -29,6 +30,7 @@ const Home: NextPage = () => {
         />
       </FullWidthAlert>
       <GoalContent />
+      <FundingContent />
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
       <p className="usa-intro">
