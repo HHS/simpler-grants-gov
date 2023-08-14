@@ -10,10 +10,10 @@ const FundingContent = () => {
         <h2 className="margin-bottom-0">{t("fo_title")}</h2>
       </Grid>
       <Grid row gap="md">
-        <Grid col={6}>
+        <Grid tablet={{ col: 6 }}>
           <p>{t("fo_paragraph_1")}</p>
         </Grid>
-        <Grid col={6}>
+        <Grid tablet={{ col: 6 }}>
           <p>{t("fo_paragraph_2")}</p>
         </Grid>
       </Grid>
@@ -23,7 +23,28 @@ const FundingContent = () => {
       <Grid>
         <p className="usa-intro">{t("fo_paragraph_3")}</p>
       </Grid>
-      <Grid></Grid>
+      <Grid row>
+        <Grid tablet={{ col: 3 }}>
+          <a href="/docs/acl_prototype.pdf" download>
+            <img src="/img/acl_prototype.png" height="285px" />
+          </a>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <a href="/docs/acf_prototype.pdf" download>
+            <img src="/img/acf_prototype.png" height="285px" />
+          </a>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <a href="/docs/cdc_prototype.pdf" download>
+            <img src="/img/cdc_prototype.png" height="285px" />
+          </a>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <a href="/docs/samhsa_prototype.png" download>
+            <img src="/img/samhsa_prototype.png" height="285px" />
+          </a>
+        </Grid>
+      </Grid>
     </GridContainer>
   );
 };
