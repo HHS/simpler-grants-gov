@@ -106,7 +106,7 @@ Process for drafting and updating the content of the site should balance:
 6. Deployment build time
 7. Deployment/hosting costs
 8. Number of PDF views per NOFO prototype
-9. Number of outbound links to the following external resources (once added to the site)
+9. Number of visits to outbound links to the following external resources (once added to the site)
    - Open source repository
    - Open source wiki
    - Open source chat
