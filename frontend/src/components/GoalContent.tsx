@@ -10,10 +10,10 @@ const GoalContent = () => {
         <h2 className="margin-bottom-0">{t("goal_title")}</h2>
       </Grid>
       <Grid row gap="md">
-        <Grid col={6}>
+        <Grid tablet={{ col: 6 }}>
           <p className="usa-intro">{t("goal_paragraph_1")}</p>
         </Grid>
-        <Grid col={6}>
+        <Grid tablet={{ col: 6 }}>
           <h3>{t("goal_title_2")}</h3>
           <p>{t("goal_paragraph_2")}</p>
           <h3>{t("goal_title_3")}</h3>
