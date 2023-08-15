@@ -76,23 +76,23 @@ Jitsi serves as a strong backup option for our video conferencing needs. Jitsi a
 
 | Factor                      | Zoom       | Microsoft Teams | Google Meet  | Jitsu    | Meet.coop |
 | --------------------------- | :--------: | :--------:      | :---------:  | :-----:  |  :-----:  | 
-| Public Access               |     ✅     |   ✅            |      ✅      |    ✅    |      ✅   |  
-| Waiting Room                |    ✅      |  ✅             |     ✅       |   ✅     |         |   
-| Video Recording              |    ✅     |   ✅   |     ✅      |   ✅    |         | 
-| Screen Sharing             |     ✅     |  ✅   |     ✅      |   ✅    |         |  
-| Chat                |     ✅     |   ✅   |     ✅      |   ✅    |         |  
-| Phone Support                        |    ✅     |  ✅   |     ✅      |   ✅    |         |   
-| Live Transcription               |     ✅     |   ✅   |     ✅      |    ❌   |         |   
-| Authority to Operate  |     x      |   ✅    |      ?      |    ?    |         |  
-| Webinar* |     ✅      |   ✅    |      3      |    🔄    |          | 
-| Breakout Rooms*        |     ✅     |   ✅   |     ✅      |   🔄    |          | 
-| Open Source*      |    ❌     |   ❌   |     ❌     |   ✅   |          | 
-| Attendance Tracking*                 |    ✅     |  ✅   |     🔄      |   ❓    |          | 
-| Community & Support*         |    3     |   3   |     3      |   3   |         |  
-| Scalability*                 |     ✅     |   ✅   |     ✅      |   ✅    |           |
+| Public Access               |     ✅     |   ✅            |      ✅      |    ✅     |      ✅   |  
+| Waiting Room                |    ✅      |  ✅             |     ✅       |   ✅      |     ❓    |   
+| Video Recording             |    ✅      |   ✅            |     ✅       |   ✅      |    ✅     | 
+| Screen Sharing              |     ✅     |  ✅             |     ✅       |   ✅      |    ✅     |  
+| Chat                        |     ✅     |   ✅            |     ✅       |   ✅      |     ✅    |  
+| Phone Support               |    ✅      |  ✅             |     ✅       |   ✅      |     ✅    |   
+| Live Transcription          |     ✅     |   ✅            |     ✅       |     ❌    |    ❓     |   
+| Authority to Operate        |     ❓     |   ✅            |      ❓      |    ❓     |    ❓     |  
+| Webinar*                    |     ✅     |   ✅            |      3       |    🔄     |     ❓    |
+| Breakout Rooms*             |     ✅     |   ✅            |     ✅       |   🔄      |     ✅    | 
+| Open Source*                |    ❌      |   ❌            |     ❌       |   ✅      |    ✅     | 
+| Attendance Tracking*        |    ✅      |  ✅             |     🔄       |   ❓      |     ❓    | 
+| Community & Support*        |    3       |   3             |     3       |   3       |     2    |  
+| Scalability*                |     ✅     |   ✅             |     ✅      |   ✅      |      🔄   |
 
 
-* Nice to have
+  *Nice to have
 
 ## Pros and cons of each option <!-- OPTIONAL -->
 
@@ -103,6 +103,7 @@ Zoom is a widely used video conferencing platform known for its ease of use and 
 #### Additional details and pricing
 
 **Pricing**: 
+
 - Free with limitations like 40 minutes per meeting, 100 attendees per meeting, whiteboard basic, team chat, mail & calendar
 - Pricing starts at $149.90/year/user and goes up from there.
 - The Enterprise plan offers rooms and webinars but no pricing is available on the site. We would need to contact Zoom for specific pricing for our project. 
@@ -128,6 +129,7 @@ Microsoft Teams is a collaboration platform integrated with Microsoft 365. It of
 #### Additional details and pricing
 
 **Pricing**: 
+
 - Prices starting at $4 user / month
 - Webinar hosting is only available in the Business Standard package which is $12.50/user / month
   
@@ -154,7 +156,8 @@ Google Meet is part of Google Workspace (formerly G Suite) and is well-suited fo
 
 #### Additional details and pricing
 
-- **Pricing**:
+**Pricing**:
+
 - Google Workspace pricing is for the whole suite, starting at $6 per user/ month. The Enterprise has more advanced options and features.
 - We do not need each every user to have access to our paid instance since anyone can join a Google Meet session with the invite link.
 - We would need around 15-30 users with access to the paid instance. 
@@ -204,7 +207,26 @@ Jitsi is an open-source video conferencing solution that stands out for its simp
 - Self-hosting may require technical expertise and maintenance efforts.
 - Video and audio quality may vary depending on server capacity and network conditions.
 
+### Meet.coop
 
+Meet.coop is a European based solution that provides online meeting and conferencing tools, powered by renewable energy, running on cooperatively owned infrastructure. Meet.coop emphasizes cooperative values, democratic governance, and shared decision-making. The platform's cooperative principles guide its development and operations. The community-driven project encourages open collaboration, knowledge sharing, and the creation of decentralized architecture
+
+#### Additional details and pricing
+
+**Pricing**: 
+- Prices starting at $12 / month for 10 participants and goes up to $115 / monthe for more users. 
+
+#### Pros
+- Prides themselves as an ethical, sustainable, and community-driven solution which aligns with Grants Equity values
+- Data ownership is with the users
+- Fosters a strong sense of community engagement and collaboration amongst its users, providing a platform for shared learning and support
+ 
+
+#### Cons
+- Users may not be as familiar with the Meet.coop and how to use the tool, however the tool does seem user-friendly
+- Features and capabilities are not as mature as the alternatives
+- Meet.coop may lack immediate and direct support options that come with commercial platforms
+- There may be some risks in scalability to accommodate a larger number of users and meetings. 
 
 
 
@@ -214,3 +236,5 @@ Jitsi is an open-source video conferencing solution that stands out for its simp
 - [Google Meet pricing](https://workspace.google.com/pricing.html)
 - [Microsoft Teams pricing](https://www.microsoft.com/en-us/microsoft-teams/compare-microsoft-teams-options)
 - [Jitsu](https://jitsi.org/jitsi-meet/)
+- [Meet.coop](https://www.meet.coop/about/)
+- [Meet.coop forum](https://forum.meet.coop/)
