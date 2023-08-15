@@ -21,8 +21,7 @@ marshmallow-dataclass = {extras = ["enum", "union"], version = "^8.5.8"}
 marshmallow = "^3.18.0"
 pip-licenses = "^4.3.2"
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.0.0"
+[tool.poetry.group.dev.dependencies]
 black = "^22.6.0"
 flake8 = "^5.0.4"
 flake8-bugbear = "^22.8.23"
@@ -35,8 +34,7 @@ coverage = "^6.4.4"
 Faker = "^14.2.0"
 factory-boy = "^3.2.1"
 bandit = "^1.7.4"
-
-[tool.poetry.group.dev.dependencies]
+pytest = "^6.0.0"
 pytest-watch = "^4.2.0"
 pytest-lazy-fixture = "^0.6.3"
 
