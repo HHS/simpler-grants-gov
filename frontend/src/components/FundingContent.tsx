@@ -16,7 +16,8 @@ const FundingContent = () => {
   };
 
   return (
-    <GridContainer className="bg-base-lightest">
+    <div className="bg-base-lightest">
+    <GridContainer>
       <Grid row>
         <h2 className="margin-bottom-0">{t("fo_title")}</h2>
       </Grid>
@@ -61,6 +62,7 @@ const FundingContent = () => {
         <Thumbnail pageIndex={0} />
       </Document> */}
     </GridContainer>
+    </div>
   );
 };
 
