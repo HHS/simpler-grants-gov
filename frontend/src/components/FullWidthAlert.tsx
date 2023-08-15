@@ -28,7 +28,7 @@ const FullWidthAlert = ({ type, children }: Props) => {
       <GridContainer>
         <Grid>
           <USWDSAlert
-            className="border-left-0 bg-transparent padding-left-0"
+            className="border-left-0 bg-transparent padding-left-0 margin-x-neg-2"
             type={type}
             headingLevel="h4"
             slim

@@ -21,11 +21,3 @@ i.e.
 */
 
 @use "uswds-core" as *;
-
-.usa-alert--info:before {
-  left: 0;
-}
-
-.usa-alert--slim .usa-alert__body {
-  padding-left: 2rem;
-}
