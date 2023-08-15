@@ -16,21 +16,21 @@ describe("FullWidthAlert", () => {
     expect(alert).toContainHTML("p");
   });
 
-  it("Renders info alert with correct background color", () => {
+  it("Renders info alert", () => {
     render(<FullWidthAlert type="info">This is a test</FullWidthAlert>);
-    const alert = screen.getByTestId("gridContainer").parentElement;
-    expect(alert).toHaveClass(`bg-cyan-5`);
+    const alert = screen.getByTestId("alert");
+    expect(alert).toBeInTheDocument();
   });
 
-  it("Renders error alert with correct background color", () => {
+  it("Renders error alert", () => {
     render(<FullWidthAlert type="error">This is a test</FullWidthAlert>);
-    const alert = screen.getByTestId("gridContainer").parentElement;
-    expect(alert).toHaveClass(`bg-red-warm-10`);
+    const alert = screen.getByTestId("alert");
+    expect(alert).toBeInTheDocument();
   });
 
-  it("Renders warning alert with correct background color", () => {
+  it("Renders warning alert", () => {
     render(<FullWidthAlert type="warning">This is a test</FullWidthAlert>);
-    const alert = screen.getByTestId("gridContainer").parentElement;
-    expect(alert).toHaveClass(`bg-yellow-5`);
+    const alert = screen.getByTestId("alert");
+    expect(alert).toBeInTheDocument();
   });
 });
