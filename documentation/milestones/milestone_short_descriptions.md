@@ -806,10 +806,12 @@ Explore tools for unmoderated usability testing, such as:
 - UsabilityHub
 - Optimal Workshop
 
-## Static site launch with NOFO content
+## Static site launch for Grants Equity project
 Diagram short name: `Static-Site`
 
 Dependencies: `Beta-Domain`, `Design-Tooling`, `FE-Plan`
+
+Milestone doc: [Static Site](./individual_milestones/static_site.md)
 
 Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort.
 
