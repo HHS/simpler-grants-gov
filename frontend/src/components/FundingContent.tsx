@@ -1,8 +1,19 @@
+import { Document, Page, pdfjs, Thumbnail } from "react-pdf";
+
 import { useTranslation } from "next-i18next";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
+).toString();
+
 const FundingContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
+
+  const openPdf = (url: string) => {
+    console.log(url);
+  };
 
   return (
     <GridContainer className="bg-base-lightest">
@@ -25,26 +36,30 @@ const FundingContent = () => {
       </Grid>
       <Grid row>
         <Grid tablet={{ col: 3 }}>
-          <a href="/docs/acl_prototype.pdf" download>
+          <a href="/docs/acl_prototype.pdf" target="_blank">
             <img src="/img/acl_prototype.png" height="285px" />
           </a>
         </Grid>
         <Grid tablet={{ col: 3 }}>
-          <a href="/docs/acf_prototype.pdf" download>
+          <a href="/docs/acf_prototype.pdf" target="_blank">
             <img src="/img/acf_prototype.png" height="285px" />
           </a>
         </Grid>
         <Grid tablet={{ col: 3 }}>
-          <a href="/docs/cdc_prototype.pdf" download>
+          <a href="/docs/cdc_prototype.pdf" target="_blank">
             <img src="/img/cdc_prototype.png" height="285px" />
           </a>
         </Grid>
         <Grid tablet={{ col: 3 }}>
-          <a href="/docs/samhsa_prototype.png" download>
+          <a href="/docs/samhsa_prototype.pdf" target="_blank">
             <img src="/img/samhsa_prototype.png" height="285px" />
           </a>
         </Grid>
       </Grid>
+
+      {/* <Document onItemClick={() => openPdf("/docs/acf_prototype.pdf")} file={"/docs/acf_prototype.pdf"} >
+        <Thumbnail pageIndex={0} />
+      </Document> */}
     </GridContainer>
   );
 };

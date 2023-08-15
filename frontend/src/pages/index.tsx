@@ -2,11 +2,15 @@ import type { GetServerSideProps, NextPage } from "next";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 
-import FundingContent from "src/components/FundingContent";
 import GoalContent from "src/components/GoalContent";
 import FullWidthAlert from "../components/FullWidthAlert";
+
+const FundingContent = dynamic(() => import("src/components/FundingContent"), {
+  ssr: false,
+});
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
