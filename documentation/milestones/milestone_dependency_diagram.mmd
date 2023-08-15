@@ -137,7 +137,7 @@ flowchart LR
         Beta-Domain --> Static-Site
         DB-Plan::executing & API-Plan --> Infrastructure-as-Code
         DB-Replica & DB-Plan --> DB-Test-Data
-        DB-Plan & API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::northStar
+        DB-Plan & API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::executing
         API-Plan & GET-Opportunities --> Webhooks-Opportunities
         GET-Opportunities --> API-Docs
         GET-Opportunities --> AuthN-API
