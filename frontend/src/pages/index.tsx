@@ -5,7 +5,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 
 import GoalContent from "src/components/GoalContent";
-import Alert from "../components/Alert";
+import FullWidthAlert from "../components/FullWidthAlert";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -19,7 +19,7 @@ const Home: NextPage = () => {
       <h1 className="font-sans-2xl tablet:font-sans-3xl margin-y-3 tablet:margin-top-6">
         {t("title")}
       </h1>
-      <Alert type="info">
+      <FullWidthAlert type="info">
         <Trans
           t={t}
           i18nKey="alert"
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
             LinkToGrants: <a href="https://www.grants.gov" />,
           }}
         />
-      </Alert>
+      </FullWidthAlert>
       <GoalContent />
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
