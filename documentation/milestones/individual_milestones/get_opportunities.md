@@ -88,7 +88,7 @@ The way that data is stored and delivered through the API should balance:
   - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD milestone](https://github.com/HHS/grants-equity/issues/57)
   - [ ] DB migrations are automatically configured through scripts that enable upgrading/downgrading database quickly and easily (e.g., by using Alembic https://github.com/sqlalchemy/alembic)
   - [ ] The API has been load tested using the framework established in the [Peformance Testing Framework milestone](https://github.com/HHS/grants-equity/issues/69) to ensure that it remains performant under heavy user traffic
-  - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down per the [API Logging & Monitoring milestone](https://github.com/HHS/grants-equity/issues/370)
+  - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring milestone](https://github.com/HHS/grants-equity/issues/370)
   - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response milestone](https://github.com/HHS/grants-equity/issues/373)
   - [ ] The `api.grants.gov` sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
 - [ ] The following developer experience (DX) requirements are satisfied:
@@ -125,7 +125,7 @@ Page on the public wiki that is updated at the end of each sprint. **Note:** Thi
 ### Assumptions & dependencies
 <!-- Required -->
 
-*What capabilities / milestones do we expect to be in place at the beginning of work on this milestone?*
+*What capabilities / milestones do we expect to be in place by the completion of work on this milestone?*
 
 - [ ] **[API Planning](https://github.com/HHS/grants-equity/issues/):** Determines the language, framework, and deployment service used to build and host the API.
 - [ ] **[DB planning](https://github.com/HHS/grants-equity/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
@@ -143,7 +143,7 @@ Page on the public wiki that is updated at the end of each sprint. **Note:** Thi
 - [ ] **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Documents and trains staff on the incident response plan.
 - [ ] **[Performance Testing Framework](https://github.com/HHS/grants-equity/issues/69):** Configures a framework for conducting performance and load testing of the API.
 
-*Are there any notable capabilities / milestones do NOT we expect to be in place at the beginning of work on this milestone?*
+*Are there any notable capabilities / milestones do NOT we expect to be in place by the completion of work on this milestone?*
 
 - [ ] **AuthN/AuthZ:** While the implementation of rate limiting or other API security measures may require some basic authentication, the full AuthN/AuthZ framework will be developed in a later milestone.
 
@@ -179,8 +179,9 @@ Timeline and strategy for translation is still TBD.
 *This can include services going into PROD behind a feature flag that is not turned on.*
 
 1. **API:** This milestone is the official release of the `beta.grants.gov/api`
-2. **Replica Database:** A replica of relevant tables from the legacy database, which also contains the new `beta.grants.gov` data model
-3. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `beta.grants.gov` data model
+2. **Replica Database:** A replica of relevant tables from the legacy database
+3. **Updated Data Model:** An updated data model that will provide the data for the GET Opportunities endpoint
+4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `beta.grants.gov` data model
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
@@ -207,6 +208,6 @@ Timeline and strategy for translation is still TBD.
 
 *If so, how are we addressing these risks?*
 
-1. **Authority to Operate (ATO):** Before the official launch of the API to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to the Software Security Plan (SSP) for legacy grants.gov and are covered by the existing ATO.
+1. **Security Approval:** Before the official launch of the API to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
 2. **Developer Tools:** As part of the Developer Tools milestone, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
 3. **API Security Planning:** As part of the API Security Planning milestone, we will specifically be identifying and evaluating strategies to mitigate security risks for the API, such as the use of API tokens and/or rate limiting API requests.
