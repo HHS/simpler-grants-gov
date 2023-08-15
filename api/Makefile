@@ -116,7 +116,7 @@ check: format-check lint test
 # Docker starts the image for the DB but it's not quite
 # fully ready, so add a 5 second sleep so upgrade doesn't
 # fail because the DB hasn't started yet.
-init-db: start-db sleep-5 db-upgrade
+init-db: start-db sleep-5 db-migrate
 
 start-db:
 	docker-compose up --detach main-db
@@ -131,13 +131,13 @@ db-recreate: clean-volumes init-db
 alembic_config := ./src/db/migrations/alembic.ini
 alembic_cmd := $(PY_RUN_CMD) alembic --config $(alembic_config)
 
-db-upgrade: ## Apply pending migrations to db
+db-migrate: ## Apply pending migrations to db
 	$(PY_RUN_CMD) db-migrate
 
-db-downgrade: ## Rollback last migration in db
+db-migrate-down: ## Rollback last migration in db
 	$(PY_RUN_CMD) db-migrate-down
 
-db-downgrade-all: ## Rollback all migrations
+db-migrate-down-all: ## Rollback all migrations
 	$(PY_RUN_CMD) db-migrate-down-all
 
 check-migrate-msg:
