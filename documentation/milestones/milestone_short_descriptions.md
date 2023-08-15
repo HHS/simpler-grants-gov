@@ -138,6 +138,8 @@ Diagram short name: `GET-Opportunities`
 
 Dependencies: `DB-Plan`, `API-Plan`, `DB-Test-Data`, `DB-Replica`, `Dev-Tools`, `Beta-Domain`
 
+Milestone doc: [GET Opportunities](./individual_milestones/get_opportunities.md)
+
 Deploy a public endpoint to PROD that allows users to see at least one (but not necessarily more than one!) field of data per listed opportunity in grants.gov. This will probably be a RESTful JSON /GET API endpoint.
 
 This API should be accessible even when legacy grants.gov is experiencing planned or unplanned outages.
@@ -806,10 +808,12 @@ Explore tools for unmoderated usability testing, such as:
 - UsabilityHub
 - Optimal Workshop
 
-## Static site launch with NOFO content
+## Static site launch for Grants Equity project
 Diagram short name: `Static-Site`
 
 Dependencies: `Beta-Domain`, `Design-Tooling`, `FE-Plan`
+
+Milestone doc: [Static Site](./individual_milestones/static_site.md)
 
 Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort.
 
