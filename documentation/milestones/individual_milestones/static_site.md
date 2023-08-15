@@ -121,18 +121,18 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 ### Assumptions & dependencies
 <!-- Required -->
 
-*What capabilities / milestones do we expect to be in place at the beginning of work on this milestone?*
+*What capabilities / milestones do we expect to be in place by the completion of work on this milestone?*
 
-- [ ] **Front-end Planning:** Determines the language, framework, and deployment service used to build and host the site.
-- [ ] **Developer Tools:** Establishes a suite of tools used to ensure the quality and security of the site codebase.
-- [ ] **beta.grants.gov Domain:** Secures access to the `beta.grants.gov` domain which is where the site will be hosted.
-- [ ] **Authority to Operate (ATO):** Ensures that the site and the infrastructure that hosts it are comply with the Software Security Plan for the legacy grants.gov site.
-- [ ] **Infrastructure-as-Code:** Programmatically provisions the resources needed to deploy and host this site.
-- [ ] **Front-end CI/CD:** Sets up a CI/CD pipeline that will be used to test and publish code changes to the site.
-- [ ] **Foundational UI:** Determines the UI framework that the site will adopt before launch.
-- [ ] **Web Analytics:** Enables tracking key success metrics for this milestone, e.g. site traffic and number of unique visitors.
+- [ ] **[Front-end Planning](https://github.com/HHS/grants-equity/issues/49):** Determines the language, framework, and deployment service used to build and host the site.
+- [ ] **[Developer Tools](https://github.com/HHS/grants-equity/issues/50):** Establishes a suite of tools used to ensure the quality and security of the site codebase.
+- [ ] **[beta.grants.gov Domain](https://github.com/HHS/grants-equity/issues/51):** Secures access to the `beta.grants.gov` domain which is where the site will be hosted.
+- [ ] **[Security Approval](https://github.com/HHS/grants-equity/issues/53):** Ensures that the site and the infrastructure that hosts it are comply with HHS security standards and practices.
+- [ ] **[Infrastructure-as-Code](https://github.com/HHS/grants-equity/issues/123):** Programmatically provisions the resources needed to deploy and host this site.
+- [ ] **[Front-end CI/CD](https://github.com/orgs/HHS/projects/12/views/3?pane=issue&itemId=31950276):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the site.
+- [ ] **[Foundational UI](https://github.com/HHS/grants-equity/issues/60):** Determines the UI framework that the site will adopt before launch.
+- [ ] **[Web Analytics](https://github.com/HHS/grants-equity/issues/63):** Enables tracking key success metrics for this milestone, e.g. site traffic and number of unique visitors.
 
-*Are there any notable capabilities / milestones do NOT we expect to be in place at the beginning of work on this milestone?*
+*Are there any notable capabilities / milestones do NOT we expect to be in place by the completion of work on this milestone?*
 
 - [x] **Internationalization:** While there will be content delivered within this milestone that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this milestone is delivered.
 - [x] **CMS:** While in the long-term we may want to support a Content Management Service (CMS) that allows non-technical users to update and manage copy for the website, we do not expect a CMS to be selected and implemented when we launch this site.
@@ -199,7 +199,7 @@ The initial process for translation is slotted for release sometime in FY24 Q1 (
 
 *If so, how are we addressing these risks?*
 
-- **Authority to Operate (ATO):** Before the official launch of the static site to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to the Software Security Plan (SSP) for legacy grants.gov and are covered by the existing ATO.
+- **Security Approval:** Before the official launch of the static site to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
 - **Developer Tools:** As part of the Developer Tools milestone, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
 - **Form Submissions:** The implementation plan for form submissions will evaluate and consider common security practices for validating and sanitizing user input. Form submissions will also likely be stored in a system that is separate from the production database with grant data.
 
