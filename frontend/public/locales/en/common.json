@@ -11,6 +11,11 @@
     "nav_menu_toggle": "Menu",
     "title": "Grants.gov"
   },
+  "Hero": {
+    "title": "We're building a new Grants.gov!",
+    "beta": "BETA!",
+    "content": "This new website will be your go-to resource to follow our progress on improving funding opportunity announcements and the application experience."
+  },
   "Footer": {
     "agency_name": "Agency name",
     "return_to_top": "Return to top"
