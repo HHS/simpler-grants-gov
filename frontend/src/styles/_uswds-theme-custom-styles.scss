@@ -21,3 +21,9 @@ i.e.
 */
 
 @use "uswds-core" as *;
+
+.pdf-card {
+  &:hover {
+    transform: scale(1.04);
+  }
+}
