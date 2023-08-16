@@ -1,5 +1,4 @@
 import { useTranslation } from "next-i18next";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Footer from "./Footer";
 import Header from "./Header";
@@ -20,13 +19,7 @@ const Layout = ({ children }: Props) => {
         {t("skip_to_main")}
       </a>
       <Header />
-      <main id="main-content" className="grid-col-fill">
-        <GridContainer>
-          <Grid row>
-            <Grid col>{children}</Grid>
-          </Grid>
-        </GridContainer>
-      </main>
+      <main id="main-content">{children}</main>
       <Footer />
     </div>
   );
