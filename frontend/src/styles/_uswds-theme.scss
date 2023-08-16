@@ -18,7 +18,10 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
-  // Prettier defaults for typography
-  $theme-font-type-sans: "public-sans",
-  $theme-global-link-styles: true
+  $background-color-palettes: (
+    "palette-color-system-cyan-light",
+    "palette-color-system-yellow-light",
+    "palette-color-system-green-cool",
+    "palette-color-system-red-warm"
+  )
 );
