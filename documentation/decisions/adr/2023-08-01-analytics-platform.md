@@ -70,7 +70,7 @@ We recommend moving forward with analytics.usa.gov through the Digital Analytics
 | Data tracking capabilities        |       ✅          |        3         |    3     |    3            |    3   |
 | Data visualization and reporting  |      1            |        3         |    2     |   3             |   1    |
 | Integration with existing systems |      ❓           |        3         |    2     |   1             |   2    |
-| Real-time data processing         |     ❓            |        🔄        |    ✅    |   🔄            |   🔄   |
+| Real-time data processing         |     ✅            |        🔄        |    ✅    |   🔄            |   🔄   |
 | Data privacy and security         |     3             |        3         |     3    |   3             |   4    |
 | Scalability                       |      2            |        4         |     3    |   3             |   3    |
 | Cost                              |     Free (gov use)|   Free + Premium |     $    |   $$            |   Free |
@@ -78,7 +78,7 @@ We recommend moving forward with analytics.usa.gov through the Digital Analytics
 | Support and documentation         |     2             |        4         |     3    |    4            |    3   |
 | User-friendly interface           |     ✅            |   ✅             |     ✅   |   ✅            |   🔄   |
 | Authority to Operate              |     ✅            |   ❓             |     ❓   |   ❓            |   ❓   |
-| Open Source*                       |    ❌             |  ❌              |     ❌   |   ❌            |   ✅   |
+| Open Source*                      |    ❌             |  ❌              |     ❌   |   ❌            |   ✅   |
 
  *Nice to have
 
@@ -99,8 +99,10 @@ DAP provides federal agencies with:
 
 #### Details
 
-- Currently powered by Universal Analytics (UA). On July 1, 2024, the Digital Analytics Program (DAP) will replace Universal Analytics (UA) with Google Analytics 4 (GA4).
+- The public reporting page, analytics.usa.gov, is powered from the Google Analytics account that DAP manages. Currently, the DAP code snippet is implemented at grants.gov.
+- Currently powered by Universal Analytics (UA), but we will have access to both UA and GA4. On July 1, 2024, the Digital Analytics Program (DAP) will replace Universal Analytics (UA) with Google Analytics 4 (GA4).
 - DAP is required: On November 8, 2016, the Office of Management and Budget (OMB) released a memorandum on [Policies for Federal Agency Public Websites and Digital Services](https://www.whitehouse.gov/wp-content/uploads/legacy_drupal_files/omb/memoranda/2017/m-17-06.pdf) (PDF, 1.2 MB, 18 pages), which requires executive branch federal agencies to implement the DAP JavaScript code on all public facing federal websites.
+- Details on the code are available at the [DAP Github Repo](https://github.com/digital-analytics-program/gov-wide-code). Under the Code Capabilities Summary there are details on the types of data that are collected. 
 
 
 #### Pros
