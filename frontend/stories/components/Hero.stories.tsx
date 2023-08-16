@@ -16,11 +16,3 @@ export const Default = {
     },
   },
 };
-
-export const WithProps = {
-  parameters: {
-    ...Default.parameters,
-  },
-  args: {
-  },
-};

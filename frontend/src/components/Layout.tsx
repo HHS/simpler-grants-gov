@@ -3,6 +3,7 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Footer from "./Footer";
 import Header from "./Header";
+import Hero from "./Hero";
 
 type Props = {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const Layout = ({ children }: Props) => {
         {t("skip_to_main")}
       </a>
       <Header />
+      <Hero />
       <main id="main-content" className="grid-col-fill">
         <GridContainer>
           <Grid row>
