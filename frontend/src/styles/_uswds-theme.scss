@@ -39,6 +39,10 @@ in the form $setting: value,
     // 1400px
   ),
 
+  // Prettier defaults for typography
+  $theme-font-type-sans: "public-sans",
+  $theme-global-link-styles: true,
+
   $background-color-palettes: (
     "palette-color-system-cyan-light",
     "palette-color-system-yellow-light",
