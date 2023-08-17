@@ -2,8 +2,8 @@ import { useTranslation } from "next-i18next";
 import {
   Address,
   FooterNav,
-  Grid,
-  GridContainer,
+  Logo,
+  SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
 
@@ -14,58 +14,40 @@ const Footer = () => {
 
   return (
     <USWDSFooter
-      size="slim"
-      returnToTop={
-        <GridContainer className="usa-footer__return-to-top">
-          <a href="#">{t("return_to_top")}</a>
-        </GridContainer>
-      }
+      size="medium"
       primary={
-        <GridContainer className="usa-footer__primary-container">
-          <Grid row>
-            <Grid
-              mobileLg={{
-                col: 8,
-              }}
-            >
-              <FooterNav
-                aria-label="Footer navigation"
-                size="medium"
-                links={[
-                  <a
-                    key="nav_link_1"
-                    href="#"
-                    className="usa-footer__primary-link"
-                  >
-                    Nav link 1
-                  </a>,
-                  <a
-                    key="nav_link_2"
-                    href="#"
-                    className="usa-footer__primary-link"
-                  >
-                    Nav link 2
-                  </a>,
-                ]}
+        <div className="grid-row grid-gap">
+          <Logo
+            size="medium"
+            image={
+              <img
+                className="usa-footer__logo-img"
+                alt="img alt text"
+                src={""}
               />
-            </Grid>
-            <Grid mobileLg={{ col: 4 }}>
-              <Address
-                size="slim"
-                items={[
-                  <a key="telephone" href="tel:1-800-555-5555">
-                    (800) CALL-GOVT
-                  </a>,
-                  <a key="email" href="mailto:info@agency.gov">
-                    info@agency.gov
-                  </a>,
-                ]}
-              />
-            </Grid>
-          </Grid>
-        </GridContainer>
+            }
+            heading={<p className="usa-footer__logo-heading">Name of Agency</p>}
+          />
+          <div className="usa-footer__contact-links mobile-lg:grid-col-6">
+            <SocialLinks links={[]} />
+            <h3 className="usa-footer__contact-heading">
+              Agency Contact Center
+            </h3>
+            <Address
+              size="medium"
+              items={[
+                <a key="telephone" href="tel:1-800-555-5555">
+                  (800) CALL-GOVT
+                </a>,
+                <a key="email" href="mailto:info@agency.gov">
+                  info@agency.gov
+                </a>,
+              ]}
+            />
+          </div>
+        </div>
       }
-      secondary={<p className="usa-footer__logo-heading">{t("agency_name")}</p>}
+      secondary={[]}
     />
   );
 };
