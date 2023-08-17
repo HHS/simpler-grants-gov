@@ -1,0 +1,58 @@
+name: 'Configure AWS Credentials'
+description: 'Configure AWS Credentials for a given application and |
+  environment so that the GitHub Actions workflow can access AWS resources. |
+  This is a wrapper around https://github.com/aws-actions/configure-aws-credentials |
+  that first determines the account, role, and region based on the |
+  account_names_by_environment configuration in app-config'
+inputs:
+  app_name:
+    description: 'Name of application folder under /infra'
+    required: true
+  environment:
+    description: 'Name of environment (dev, staging, prod) that AWS resources live in, or "shared" for resources that are shared across environments'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
+      run: |
+        # Get AWS account authentication details (AWS account, IAM role, AWS region)
+        # associated with the application environment to figure out which AWS
+        # account to log into, which IAM role to assume, and which AWS region to use
+
+        echo "::group::AWS account authentication details"
+
+        terraform -chdir=infra/project-config init > /dev/null
+        terraform -chdir=infra/project-config refresh > /dev/null
+        AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
+        echo "AWS_REGION=$AWS_REGION"
+        GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
+        echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
+
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh > /dev/null
+        ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names_by_environment | jq -r .${{ inputs.environment }})
+        echo "ACCOUNT_NAME=$ACCOUNT_NAME"
+
+        # Get the account id associated with the account name extracting the
+        # ACCOUNT_ID part of the tfbackend file name which looks like
+        # <ACCOUNT_NAME>.<ACCOUNT_ID>.s3.tfbackend.
+        # The cut command splits the string with period as the delimeter and
+        # extracts the second field.
+        ACCOUNT_ID=$(ls infra/accounts/$ACCOUNT_NAME.*.s3.tfbackend | cut -d. -f2)
+        echo "ACCOUNT_ID=$ACCOUNT_ID"
+
+        AWS_ROLE_TO_ASSUME=arn:aws:iam::$ACCOUNT_ID:role/$GITHUB_ACTIONS_ROLE_NAME
+        echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME"
+
+        echo "::endgroup::"
+
+        echo "Setting env vars AWS_ROLE_TO_ASSUME and AWS_REGION..."
+        echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME" >> "$GITHUB_ENV"
+        echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
+      shell: bash
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ env.AWS_REGION }}
