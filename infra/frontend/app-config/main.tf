@@ -1,6 +1,6 @@
 locals {
-  app_name                        = "app"
-  environments                    = ["dev", "staging", "prod"]
+  app_name                        = "frontend"
+  environments                    = ["dev", "prod"]
   project_name                    = module.project_config.project_name
   image_repository_name           = "${local.project_name}-${local.app_name}"
   has_database                    = false
@@ -37,10 +37,9 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared  = "dev"
-    dev     = "dev"
-    staging = "staging"
-    prod    = "prod"
+    shared  = "grants-equity"
+    dev     = "grants-equity"
+    prod    = "grants-equity"
   }
 }
 
