@@ -6,6 +6,7 @@ import Head from "next/head";
 
 import GoalContent from "src/components/GoalContent";
 import FullWidthAlert from "../components/FullWidthAlert";
+import FundingContent from "../components/FundingContent";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -29,6 +30,7 @@ const Home: NextPage = () => {
         />
       </FullWidthAlert>
       <GoalContent />
+      <FundingContent />
 
       {/* Demonstration of more complex translated strings, with safe-listed links HTML elements */}
       <p className="usa-intro">

@@ -3,7 +3,7 @@ import { Meta } from "@storybook/react";
 import GoalContent from "src/components/GoalContent";
 
 const meta: Meta<typeof GoalContent> = {
-  title: "Goal Content",
+  title: "Components/Content/Goal Content",
   component: GoalContent,
 };
 export default meta;

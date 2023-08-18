@@ -5,7 +5,7 @@ const GoalContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
-    <GridContainer>
+    <GridContainer className="desktop:padding-y-4 tablet:padding-y-2 padding-y-1">
       <Grid row>
         <h2 className="margin-bottom-0">{t("goal_title")}</h2>
       </Grid>
