@@ -20,6 +20,7 @@ services:
       args:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-api}
+    command: ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
     container_name: main-api
     env_file: ./api/local.env
     ports:
