@@ -40,7 +40,10 @@ The [communications platform milestone](milestone) identifies a series of platfo
 
 ## Decision Outcome <!-- REQUIRED -->
 
-We recommend moving forward with analytics.usa.gov through the Digital Analytics Program. The platform aligns well with our goals due to its robust data tracking capabilities, allowing us to monitor essential metrics and custom events critical to our project's success. Its comprehensive data visualization and reporting features ensure that data can be presented in an easily understandable format for various audiences, including the general public and internal stakeholders at HHS. Since it is run by the Digital Analytics Program, we have greater confidence in the data and security standards. It is free for government agencies. Additionally, it allows us to align with other government agencies and ensure transparency to public. 
+We recommend moving forward with analytics.usa.gov through the Digital Analytics Program for the public facing analytics. The platform aligns well with our goals due to its robust data tracking capabilities, allowing us to monitor essential metrics and custom events critical to our project's success. Its comprehensive data visualization and reporting features ensure that data can be presented in an easily understandable format for various audiences, including the general public and internal stakeholders at HHS. Since it is run by the Digital Analytics Program, we have greater confidence in the data and security standards. It is free for government agencies. Additionally, it allows us to align with other government agencies and ensure transparency to public. 
+
+We recommend Google Analytics with any logged in pages. Since DAP is powered by Google Analytics, it makes sense to have the same Analytics platform on those pages. 
+
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -102,8 +105,9 @@ DAP provides federal agencies with:
 - The public reporting page, analytics.usa.gov, is powered from the Google Analytics account that DAP manages. Currently, the DAP code snippet is implemented at grants.gov.
 - Currently powered by Universal Analytics (UA), but we will have access to both UA and GA4. On July 1, 2024, the Digital Analytics Program (DAP) will replace Universal Analytics (UA) with Google Analytics 4 (GA4).
 - DAP is required: On November 8, 2016, the Office of Management and Budget (OMB) released a memorandum on [Policies for Federal Agency Public Websites and Digital Services](https://www.whitehouse.gov/wp-content/uploads/legacy_drupal_files/omb/memoranda/2017/m-17-06.pdf) (PDF, 1.2 MB, 18 pages), which requires executive branch federal agencies to implement the DAP JavaScript code on all public facing federal websites.
-- Details on the code are available at the [DAP Github Repo](https://github.com/digital-analytics-program/gov-wide-code). Under the Code Capabilities Summary there are details on the types of data that are collected. 
-
+- Details on the code are available at the [DAP Github Repo](https://github.com/digital-analytics-program/gov-wide-code). Under the Code Capabilities Summary there are details on the types of data that are collected.
+- The DAP script should only be applied to public-facing pages. Public-facing web pages are defined as those that can be accessed without any authentication or login, and are not part of an otherwise “privileged session.”
+- The DAP script tag should not be placed on pages visited during logged-in sessions. Notably, other seemingly “public” pages that can be accessed without authentication may also be part of privileged sessions; for example, a password reset page that is accessed by clicking a link in an email is not appropriate for DAP code because it assumes the visitor has the privilege of control over the email account used to provide the link. 
 
 #### Pros
 
@@ -115,6 +119,7 @@ DAP provides federal agencies with:
 - The insights derived from Analytics.usa.gov can contribute to the optimization of government websites and services especially by our users and community as they will have a direct view, resulting in a more efficient and effective delivery of information and services to the public.
 
 #### Cons
+- DAP can only be on public facing systems, no logged in states should have DAP
 
 ### Google Analytics
 
@@ -131,7 +136,7 @@ Google Analytics is a widely used web and app analytics platform that provides i
 - The collection of user data by Google Analytics raises privacy concerns, especially with stricter data protection regulations.
 - Using Google Analytics means sharing data with Google, which can raise questions about data ownership and control.
 - While Google Analytics offers real-time data, it's not as robust as some other real-time analytics tools.
-- 
+- Will need to get ATO or FedRAMP approval
 
 ### Mixpanel
 
@@ -149,6 +154,8 @@ Mixpanel is a user-centric analytics tool primarily focused on app analytics. It
 - The extensive features can make Mixpanel more complex to set up and use, requiring a learning curve.
 - While Mixpanel is strong for app analytics, its web tracking capabilities might not be as comprehensive as other platforms.
 - Mixpanel's pricing can be higher compared to some other analytics tools, particularly as usage scales.
+- Will need to get ATO or FedRAMP approval
+
 
 ### Adobe Analytics
 
@@ -162,11 +169,14 @@ Adobe Analytics is an enterprise-grade solution suitable for large organizations
 - Adobe Analytics allows extensive customization and flexibility in creating reports, segments, and dashboards.
 - Real-time data reporting is available, allowing for immediate insights into user behavior.
 
+
 #### Cons
 
 - Adobe Analytics can be complex to set up and manage, requiring expertise and dedicated resources.
 - The enterprise-level features are more costly.
 - Due to its advanced capabilities, Adobe Analytics might have a steeper learning curve for new users and the general public.
+- Will need to get ATO or FedRAMP approval
+
   
 ### Matomo
 
@@ -184,6 +194,8 @@ Matomo, an open-source alternative, offers data ownership and control, making it
 
 - There are downsides and costs to self-hosting
 - The support ecosystem might not be as extensive as that of larger, commercial analytics platforms.
+- Will need to get ATO or FedRAMP approval
+
 
 
 ## Links <!-- OPTIONAL -->
