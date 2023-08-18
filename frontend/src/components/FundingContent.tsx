@@ -3,7 +3,7 @@ import { nofoPdfs } from "src/constants/nofoPdfs";
 import { useTranslation } from "next-i18next";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import PdfContainer from "./PdfContainer";
+import NofoImageLink from "./NofoImageLink";
 
 const FundingContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -30,7 +30,7 @@ const FundingContent = () => {
         </Grid>
         <Grid row gap>
           {nofoPdfs.map((pdf) => (
-            <PdfContainer
+            <NofoImageLink
               key={pdf.file}
               file={pdf.file}
               image={pdf.image}

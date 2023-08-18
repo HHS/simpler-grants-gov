@@ -1,13 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react";
 
-import PdfContainer from "src/components/PdfContainer";
+import NofoImageLink from "src/components/NofoImageLink";
 
-const meta: Meta<typeof PdfContainer> = {
-  title: "Components/Pdf Container",
-  component: PdfContainer,
+const meta: Meta<typeof NofoImageLink> = {
+  title: "Components/Nofo Image Link",
+  component: NofoImageLink,
 };
 export default meta;
-type Story = StoryObj<typeof PdfContainer>;
+type Story = StoryObj<typeof NofoImageLink>;
 
 export const Primary: Story = {
   parameters: {
