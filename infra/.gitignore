@@ -1,6 +1,14 @@
 # Local .terraform metadata
 **/.terraform/*
 
+# Ignore Terraform lock files
+# As of Feb 2023, Terraform lock files, while well intentioned, have a tendency
+# to get into a confusing state that requires recreating the lock file, which
+# defeats the purpose. Moreover, lock files are per environment, which can make
+# it difficult for people to upgrade dependencies (e.g. upgrade an AWS provider)
+# across environments if certain environments are locked down (e.g. production).
+.terraform.lock.hcl
+
 # .tfstate files
 *.tfstate
 *.tfstate.*
