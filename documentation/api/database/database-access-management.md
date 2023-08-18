@@ -4,7 +4,7 @@ This document describes the best practices and patterns for how the application 
 
 ## Client Initialization and Configuration
 
-The database client is initialized when the application starts (see [src/\_\_main\_\_.py](../../../api/src/__main__.py). As the database engine that is used to create acquire connections to the database is initialized using the database configuration defined in [db_config.py](../../../api/src/db/db_config.py), which is configured through environment variables. The initialized database client is then stored on the Flask app's [\`extensions\` dictionary](https://flask.palletsprojects.com/en/2.2.x/src/#flask.Flask.extensions) to be used throughout the lifetime of the application.
+The database client is initialized when the application starts (see [src/app.py](../../../api/src/app.py). The database engine that is used to create acquire connections to the database is initialized using the database configuration defined in [db_config.py](../../../app/src/db/db_config.py), which is configured through environment variables. The initialized database client is then stored on the Flask app's [\`extensions\` dictionary](https://flask.palletsprojects.com/en/2.2.x/src/#flask.Flask.extensions) to be used throughout the lifetime of the application.
 
 ## Session Management
 

@@ -37,7 +37,7 @@ class PostgresDBClient(DBClient):
         def get_conn() -> Any:
             return psycopg2.connect(**get_connection_parameters(db_config))
 
-        conn_pool = pool.QueuePool(get_conn, max_overflow=10, pool_size=20, timeout=3)
+        conn_pool = pool.QueuePool(get_conn, max_overflow=10, pool_size=20)
 
         # The URL only needs to specify the dialect, since the connection pool
         # handles the actual connections.
@@ -98,7 +98,7 @@ def get_connection_parameters(db_config: PostgresDBConfig) -> dict[str, Any]:
         password=password,
         port=db_config.port,
         options=f"-c search_path={db_config.db_schema}",
-        connect_timeout=3,
+        connect_timeout=10,
         sslmode=db_config.ssl_mode,
         **connect_args,
     )
