@@ -9,7 +9,7 @@ const FundingContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
-    <div className="bg-base-lightest">
+    <div className="bg-base-lightest desktop:padding-y-4 tablet:padding-y-2 padding-y-1">
       <GridContainer>
         <Grid row>
           <h2 className="margin-bottom-0">{t("fo_title")}</h2>
