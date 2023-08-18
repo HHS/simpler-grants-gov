@@ -9,7 +9,7 @@ const Hero = () => {
   return (
     <div
       data-testid="hero"
-      className="bg-primary desktop:padding-y-15 tablet:padding-y-2 padding-y-1"
+      className="bg-primary desktop:padding-y-15 tablet-lg:padding-y-10 tablet:padding-y-3 padding-y-1"
     >
       <GridContainer>
         <h1 className="text-white desktop:font-sans-3xl tablet:font-sans-2xl font-sans-xl">
