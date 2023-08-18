@@ -12,7 +12,9 @@ const FundingContent = () => {
     <div className="bg-base-lightest desktop:padding-y-4 tablet:padding-y-2 padding-y-1">
       <GridContainer>
         <Grid row>
-          <h2 className="margin-bottom-0 desktop:font-sans-xl">{t("fo_title")}</h2>
+          <h2 className="margin-bottom-0 desktop:font-sans-xl">
+            {t("fo_title")}
+          </h2>
         </Grid>
         <Grid row gap="lg">
           <Grid tablet={{ col: 6 }}>
@@ -23,7 +25,9 @@ const FundingContent = () => {
           </Grid>
         </Grid>
         <Grid>
-          <h3 className="margin-top-4 desktop:margin-top-6 desktop:font-sans-lg">{t("fo_title_2")}</h3>
+          <h3 className="margin-top-4 desktop:margin-top-6 desktop:font-sans-lg">
+            {t("fo_title_2")}
+          </h3>
         </Grid>
         <Grid>
           <p className="usa-intro">{t("fo_paragraph_3")}</p>
