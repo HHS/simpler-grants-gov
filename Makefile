@@ -1,10 +1,5 @@
 PROJECT_ROOT ?= $(notdir $(PWD))
 
-# For now only support a single app in the folder `app/` within the repo
-# In the future, support multiple apps, and which app is being operated
-# on will be determined by the APP_NAME Makefile argument
-APP_NAME ?= app
-
 # Use `=` instead of `:=` so that we only execute `./bin/current-account-alias.sh` when needed
 # See https://www.gnu.org/software/make/manual/html_node/Flavors.html#Flavors
 CURRENT_ACCOUNT_ALIAS = `./bin/current-account-alias.sh`
