@@ -137,21 +137,21 @@ It's recommended that developers configure their code editor to auto run these t
 1. Install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extensions.
 2. Add the following to a `.vscode/settings.json` Worspace Settings file:
 
-   ```json
-   {
-     "editor.codeActionsOnSave": {
-       "source.fixAll.eslint": true
-     },
-     "editor.formatOnSave": true,
-     "editor.defaultFormatter": "esbenp.prettier-vscode",
-     "eslint.workingDirectories": ["./frontend"],
-     "typescript.validate.enable": true
-   }
-   ```
+    ```json
+    {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "eslint.workingDirectories": ["./frontend"],
+      "typescript.validate.enable": true
+    }
+    ```
 
-   For these tools to auto run, the settings must be located in the root of your current VSCode workspace. For example, if you open the `frontend/` directory in VSCode, the settings should be located at `frontend/.vscode/settings.json`. If you then open then root repository directory in VSCode as your workspace, these tools will not auto run. (Note that adding the settings to the root repository directory may affect other parts of a monorepo.)
+    For these tools to auto run, the settings must be located in the root of your current VSCode workspace. For example, if you open the `frontend/` directory in VSCode, the settings should be located at `frontend/.vscode/settings.json`. If you then open then root repository directory in VSCode as your workspace, these tools will not auto run. (Note that adding the settings to the root repository directory may affect other parts of a monorepo.)
 
-   You can alternatively add the settings to your User Settings, however they will apply globally to any workspace you open. See [User and Workspace Settings](https://code.visualstudio.com/docs/getstarted/settings) for more guidance.
+    You can alternatively add the settings to your User Settings, however they will apply globally to any workspace you open. See [User and Workspace Settings](https://code.visualstudio.com/docs/getstarted/settings) for more guidance.
 
 </details>
 
