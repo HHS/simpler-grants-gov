@@ -59,6 +59,9 @@ RUN npm run build -- --no-lint
 FROM node:18-bullseye-slim AS release
 WORKDIR /frontend
 
+RUN mkdir -p /frontend/.next/cache/images/
+VOLUME ["/frontend/.next/cache/images/"]
+
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
 RUN npm uninstall -g npm
@@ -68,6 +71,7 @@ RUN rm -rf /opt/yarn-v*
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
 
 COPY --from=builder /frontend/public ./public
