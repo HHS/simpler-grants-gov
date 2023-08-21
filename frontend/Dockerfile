@@ -59,6 +59,9 @@ RUN npm run build -- --no-lint
 FROM node:18-bullseye-slim AS release
 WORKDIR /frontend
 
+RUN mkdir -p /frontend/.next/cache/images/
+VOLUME ["/frontend/.next/cache/images/"]
+
 RUN apt-get update \
     # Install security updates
     # https://pythonspeed.com/articles/security-updates-in-docker/
