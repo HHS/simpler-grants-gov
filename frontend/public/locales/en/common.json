@@ -22,7 +22,10 @@
     "fo_title_3": "We want to hear from you!",
     "fo_paragraph_4": "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
     "fo_title_4": "Are you a first-time applicant? Created a workspace but haven't applied yet?",
-    "fo_paragraph_5": "We're especially interested in hearing from first-time applicants and organizations that have never applied for funding opportunities. We encourage you to review the above opportunity announcements and share your feedback, regardless of your experience with federal grants."
+    "fo_paragraph_5": "We're especially interested in hearing from first-time applicants and organizations that have never applied for funding opportunities. We encourage you to review the above opportunity announcements and share your feedback, regardless of your experience with federal grants.",
+    "wtgi_title": "Ways to get involved",
+    "wtgi_paragraph_1": "Follow our progress as we make improvements to funding opportunity announcements and build an improved API and opportunity search on beta.grants.gov.",
+    "wtgi_list": "<ul><li><LinkToGoals>Read our project goals and milestones</LinkToGoals></li><li>Join our open-source community on <github>GitHub</github></li><li>Contact us at <email>tbd@tbd.gov</email></li></ul>"
   },
   "Header": {
     "nav_link_home": "Home",
