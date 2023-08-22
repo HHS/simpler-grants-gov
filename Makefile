@@ -155,13 +155,15 @@ release-build: ## Build release for $APP_NAME and tag it with current git hash
 		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG)"
 
 release-publish: ## Publish release to $APP_NAME's build repository
+	@:$(call check_defined, APP_NAME)
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
 
 release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVIRONMENT
+	@:$(call check_defined, APP_NAME)
 	./bin/run-database-migrations.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
+	@:$(call check_defined, APP_NAME, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
