@@ -62,6 +62,15 @@ WORKDIR /frontend
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 
+RUN apt-get update \
+    # Install security updates
+    # https://pythonspeed.com/articles/security-updates-in-docker/
+    && apt-get upgrade --yes \
+    # Install wget, required for health checks
+    wget \
+    # Reduce the image size by clearing apt cached lists
+    && rm -fr /var/lib/apt/lists/*
+
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
 RUN npm uninstall -g npm

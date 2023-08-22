@@ -46,4 +46,4 @@ storybook: # Run the Storybook local dev server in Docker
 	docker compose logs --follow storybook
 
 stop:
-	docker-compose down
+	docker compose down
