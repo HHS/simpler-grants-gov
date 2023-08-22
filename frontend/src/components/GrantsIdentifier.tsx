@@ -10,7 +10,6 @@ import {
   IdentifierLogo,
   IdentifierLogos,
   IdentifierMasthead,
-  Link,
 } from "@trussworks/react-uswds";
 
 import logo from "../../public/img/logo-white-lg.webp";
@@ -28,8 +27,8 @@ const GrantsIdentifier = () => {
         height={48}
         width={48}
         style={{
-          width: "100%",
-          height: "auto",
+          width: "48px",
+          height: "48px",
         }}
       />
     );
