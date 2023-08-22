@@ -1,12 +1,12 @@
-name: 'Configure AWS Credentials'
-description: 'Configure AWS Credentials for a given application and |
+name: "Configure AWS Credentials"
+description: "Configure AWS Credentials for a given application and |
   environment so that the GitHub Actions workflow can access AWS resources. |
   This is a wrapper around https://github.com/aws-actions/configure-aws-credentials |
   that first determines the account, role, and region based on the |
-  account_names_by_environment configuration in app-config'
+  account_names_by_environment configuration in app-config"
 inputs:
   app_name:
-    description: 'Name of application folder under /infra'
+    description: "Name of application folder under /infra"
     required: true
   environment:
     description: 'Name of environment (dev, staging, prod) that AWS resources live in, or "shared" for resources that are shared across environments'

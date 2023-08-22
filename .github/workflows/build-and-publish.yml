@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: app
+          app_name: frontend
           environment: shared
 
       - name: Publish release

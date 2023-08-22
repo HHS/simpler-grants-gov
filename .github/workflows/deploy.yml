@@ -10,7 +10,7 @@ on:
   #   branches:
   #     - 'main'
   #   paths:
-  #     - 'app/**'
+  #     - 'frontend/**'
   #     - 'bin/**'
   #     - 'infra/**'
   workflow_dispatch:
@@ -22,11 +22,10 @@ on:
         type: choice
         options:
           - dev
-          - staging
           - prod
 
 env:
-  APP_NAME: app
+  APP_NAME: frontend
   # Need to set a default value for when the workflow is triggered from a git push,
   # which bypasses the default configuration for inputs
   ENVIRONMENT: ${{ inputs.environment || 'dev' }}
