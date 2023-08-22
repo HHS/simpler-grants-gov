@@ -150,6 +150,7 @@ DATE := $(shell date -u '+%Y%m%d.%H%M%S')
 INFO_TAG := $(DATE).$(USER)
 
 release-build: ## Build release for $APP_NAME and tag it with current git hash
+	@:$(call check_defined, APP_NAME)
 	cd $(APP_NAME) && $(MAKE) release-build \
 		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG)"
 
