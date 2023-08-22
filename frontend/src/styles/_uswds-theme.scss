@@ -18,6 +18,25 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
+  /* Override default breakpoints,
+    see https://designsystem.digital.gov/utilities/layout-grid/#utilities-settings */
+    $theme-utility-breakpoints:
+    (
+      "card": false,
+      "card-lg": false,
+      "mobile": false,
+      "mobile-lg": true,
+      "tablet": true,
+      "tablet-lg": true,
+      "desktop": true,
+      "desktop-lg": false,
+      "widescreen": false
+    ),
+
+  // Prettier defaults for typography
+  $theme-font-type-sans: "public-sans",
+  $theme-global-link-styles: true,
+
   $background-color-palettes: (
     "palette-color-system-cyan-light",
     "palette-color-system-yellow-light",

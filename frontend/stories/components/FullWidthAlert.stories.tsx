@@ -3,7 +3,7 @@ import { Meta } from "@storybook/react";
 import FullWidthAlert from "src/components/FullWidthAlert";
 
 const meta: Meta<typeof FullWidthAlert> = {
-  title: "Full Width Alert",
+  title: "Components/Full Width Alert",
   component: FullWidthAlert,
 };
 export default meta;

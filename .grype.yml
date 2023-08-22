@@ -16,3 +16,30 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
+
+  # glob-parent before 5.1.2 vulnerable to Regular Expression Denial of Service in enclosure regex
+  # https://github.com/advisories/GHSA-ww39-953v-wcq6
+  # High severity
+  # Ignoring since this is only a dependency of dev tools: storybook (for storybook docs site),
+  # eslint (for Linting in CI), and sass (for compiling CSS during CI build phase)
+  - vulnerability: GHSA-ww39-953v-wcq6
+
+  # Regular Expression Denial of Service in trim
+  # https://github.com/advisories/GHSA-w5p7-h5w8-2hfq
+  # High severity
+  # Ignoring since this is only used in storybook which is a dev tool
+  - vulnerability: GHSA-w5p7-h5w8-2hfq
+
+  # Uncontrolled Resource Consumption in trim-newlines
+  # https://github.com/advisories/GHSA-7p7h-4mm5-852v
+  # Ignoring since this is only used in storybook which is a dev tool
+  - vulnerability: GHSA-7p7h-4mm5-852v
+
+  #####################
+  ## False positives ##
+  #####################
+
+  # http-cache-semantics vulnerable to Regular Expression Denial of Service
+  # https://github.com/advisories/GHSA-rc47-6667-2j5j
+  # http-cache-semantics does not exist as a dependency in this app
+  - vulnerability: GHSA-rc47-6667-2j5j
