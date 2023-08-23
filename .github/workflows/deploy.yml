@@ -1,40 +1,18 @@
 name: Deploy
-# Need to set a default value for when the workflow is triggered from a git push,
-# which bypasses the default configuration for inputs and cannot use env.ENVIRONMENT
-# since env context is not accessible in this context
-run-name: Deploy ${{ github.ref_name }} to ${{ inputs.environment || 'dev' }}
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - "frontend/**"
-      - "bin/**"
-      - "infra/**"
-  workflow_dispatch:
+  workflow_call:
     inputs:
       app_name:
         description: "name of application folder under infra directory"
-        default: frontend
+        required: true
         type: string
       environment:
-        description: "target environment"
+        description: "the name of the application environment (e.g. dev, staging, prod)"
         required: true
-        default: "dev"
-        type: choice
-        options:
-          - dev
-          - prod
+        type: string
 
-env:
-  # Need to set a default value for when the workflow is triggered from a git push,
-  # which bypasses the default configuration for inputs
-  APP_NAME: ${{ inputs.app_name || 'frontend' }}
-  ENVIRONMENT: ${{ inputs.environment || 'dev' }}
-
-# Need to repeat the expression since env.ENVIRONMENT is not accessible in this context
-concurrency: cd-${{ inputs.environment || 'dev' }}
+concurrency: cd-${{ inputs.environment }}
 
 jobs:
   # Don't need to call the build-and-publish workflow since the database-migrations
@@ -43,8 +21,8 @@ jobs:
     name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
     with:
-      app_name: ${{ inputs.app_name || 'frontend' }}
-      environment: ${{ inputs.environment || 'dev' }}
+      app_name: ${{ inputs.app_name }}
+      environment: ${{ inputs.environment }}
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -58,8 +36,8 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: ${{ env.APP_NAME }}
-          environment: ${{ env.ENVIRONMENT }}
+          app_name: ${{ inputs.app_name }}
+          environment: ${{ inputs.environment }}
 
       - name: Deploy release
-        run: make release-deploy APP_NAME=$APP_NAME ENVIRONMENT="$ENVIRONMENT"
+        run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }}
