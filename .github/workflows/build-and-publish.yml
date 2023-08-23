@@ -3,12 +3,20 @@ name: Build and Publish
 on:
   workflow_call:
     inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        default: frontend
+        type: string
       ref:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
   workflow_dispatch:
     inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        default: frontend
+        type: string
       ref:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
@@ -29,13 +37,13 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Build release
-        run: make release-build
+        run: make APP_NAME=${{ inputs.app_name }} release-build
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: frontend
+          app_name: ${{ inputs.app_name }}
           environment: shared
 
       - name: Publish release
-        run: make release-publish
+        run: make APP_NAME=${{ inputs.app_name }} release-publish

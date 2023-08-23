@@ -19,6 +19,7 @@ jobs:
     name: Build
     uses: ./.github/workflows/build-and-publish.yml
     with:
+      app_name: ${{ inputs.app_name }}
       ref: ${{ github.ref }}
   run-migrations:
     name: Run migrations
