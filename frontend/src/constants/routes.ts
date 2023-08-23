@@ -3,7 +3,7 @@ export const ExternalRoutes = {
   ACCESSIBILITY_COMPLIANCE:
     "https://www.grants.gov/web/grants/accessibility-compliance.html",
   FOIA: "https://www.hhs.gov/foia/index.html",
-  NO_FEAR: "https://www.energy.gov/diversity/no-fear-act-data",
+  NO_FEAR: "https://www.hhs.gov/about/agencies/asa/eeo/no-fear-act/index.html",
   INSPECTOR_GENERAL: "https://oig.hhs.gov/",
   PERFORMANCE_REPORTS: "https://www.hhs.gov/about/budget/index.html",
   PRIVACY_POLICY: "https://www.grants.gov/web/grants/privacy.html",
