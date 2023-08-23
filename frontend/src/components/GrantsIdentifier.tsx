@@ -24,10 +24,7 @@ const GrantsIdentifier = () => {
       <Image
         alt={t("logo_alt")}
         src={logo}
-        style={{
-          width: "48px",
-          height: "48px",
-        }}
+        className="usa-identifier__logo-img"
       />
     );
   };
