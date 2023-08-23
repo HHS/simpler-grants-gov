@@ -1,4 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
+import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -20,7 +21,7 @@ const Home: NextPage = () => {
           t={t}
           i18nKey="alert"
           components={{
-            LinkToGrants: <a href="https://www.grants.gov" />,
+            LinkToGrants: <a href={ExternalRoutes.GRANTS_HOME} />,
           }}
         />
       </FullWidthAlert>

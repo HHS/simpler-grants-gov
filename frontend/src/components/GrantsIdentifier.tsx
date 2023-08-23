@@ -1,3 +1,5 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { Trans, useTranslation } from "next-i18next";
 import Image from "next/image";
 import {
@@ -24,7 +26,12 @@ const GrantsIdentifier = () => {
       <Image
         alt={t("logo_alt")}
         src={logo}
-        className="usa-identifier__logo-img"
+        height={48}
+        width={48}
+        style={{
+          width: "48px",
+          height: "48px",
+        }}
       />
     );
   };
@@ -40,47 +47,44 @@ const GrantsIdentifier = () => {
             t={t}
             i18nKey="identity"
             components={{
-              hhsLink: <a href="https://www.hhs.gov" />,
+              hhsLink: <a href={ExternalRoutes.HHS} />,
             }}
           />
         </IdentifierIdentity>
       </IdentifierMasthead>
       <IdentifierLinks navProps={{ "aria-label": "Important links" }}>
         <IdentifierLinkItem key="one">
-          <IdentifierLink href="https://www.hhs.gov/about/index.html">
+          <IdentifierLink href={ExternalRoutes.ABOUT_HHS}>
             {t("link_about")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="two">
-          <IdentifierLink
-            href="https://www.grants.gov/web/grants/accessibility-compliance.html
-"
-          >
+          <IdentifierLink href={ExternalRoutes.ACCESSIBILITY_COMPLIANCE}>
             {t("link_accessibility")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="three">
-          <IdentifierLink href="https://www.hhs.gov/foia/index.html">
+          <IdentifierLink href={ExternalRoutes.FOIA}>
             {t("link_foia")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="four">
-          <IdentifierLink href="https://www.eeoc.gov/">
+          <IdentifierLink href={ExternalRoutes.NO_FEAR}>
             {t("link_fear")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="five">
-          <IdentifierLink href="https://oig.hhs.gov/">
+          <IdentifierLink href={ExternalRoutes.INSPECTOR_GENERAL}>
             {t("link_ig")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="six">
-          <IdentifierLink href="https://www.hhs.gov/about/budget/index.html">
+          <IdentifierLink href={ExternalRoutes.PERFORMANCE_REPORTS}>
             {t("link_performance")}
           </IdentifierLink>
         </IdentifierLinkItem>
         <IdentifierLinkItem key="seven">
-          <IdentifierLink href="https://www.grants.gov/web/grants/privacy.html">
+          <IdentifierLink href={ExternalRoutes.PRIVACY_POLICY}>
             {t("link_privacy")}
           </IdentifierLink>
         </IdentifierLinkItem>
@@ -90,7 +94,7 @@ const GrantsIdentifier = () => {
           t={t}
           i18nKey="gov_content"
           components={{
-            usaLink: <a href="https://www.usa.gov" />,
+            usaLink: <a href={ExternalRoutes.USA} />,
           }}
         />
       </IdentifierGov>
