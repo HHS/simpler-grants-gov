@@ -1,3 +1,5 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { Trans, useTranslation } from "next-i18next";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
@@ -26,10 +28,20 @@ const WtGIContent = () => {
               ul: <ul className="usa-list" />,
               li: <li className="line-height-sans-4" />,
               LinkToGoals: (
-                <a href="https://github.com/HHS/grants-equity/blob/main/documentation/milestones/milestone_short_descriptions.md" />
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.MILESTONES}
+                />
               ),
-              github: <a href="https://github.com/HHS/grants-equity" />,
-              email: <a href="mailto: tbd@tbd.com" />,
+              github: (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.GITHUB_REPO}
+                />
+              ),
+              email: <a href={ExternalRoutes.CONTACT_EMAIL} />,
             }}
           />
         </Grid>
