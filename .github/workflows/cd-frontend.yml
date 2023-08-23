@@ -5,6 +5,7 @@ name: Continuous Deployment - Frontend
 run-name: Deploy ${{ github.ref_name }} to ${{ inputs.environment || 'dev' }}
 
 on:
+  pull_request:
   push:
     branches:
       - "main"
