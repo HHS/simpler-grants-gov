@@ -21,7 +21,13 @@ const Home: NextPage = () => {
           t={t}
           i18nKey="alert"
           components={{
-            LinkToGrants: <a href={ExternalRoutes.GRANTS_HOME} />,
+            LinkToGrants: (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={ExternalRoutes.GRANTS_HOME}
+              />
+            ),
           }}
         />
       </FullWidthAlert>

@@ -27,8 +27,20 @@ const WtGIContent = () => {
             components={{
               ul: <ul className="usa-list" />,
               li: <li className="line-height-sans-4" />,
-              LinkToGoals: <a href={ExternalRoutes.MILESTONES} />,
-              github: <a href={ExternalRoutes.GITHUB_REPO} />,
+              LinkToGoals: (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.MILESTONES}
+                />
+              ),
+              github: (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.GITHUB_REPO}
+                />
+              ),
               email: <a href={ExternalRoutes.CONTACT_EMAIL} />,
             }}
           />
