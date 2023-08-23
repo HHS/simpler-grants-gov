@@ -24,8 +24,6 @@ const GrantsIdentifier = () => {
       <Image
         alt={t("logo_alt")}
         src={logo}
-        height={48}
-        width={48}
         style={{
           width: "48px",
           height: "48px",
