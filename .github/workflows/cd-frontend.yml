@@ -15,6 +15,7 @@ on:
     inputs:
       app_name:
         description: "name of application folder under infra directory"
+        default: frontend
         required: true
         type: string
       environment:
