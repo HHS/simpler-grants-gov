@@ -1,7 +1,6 @@
 name: Continuous Deployment - Frontend
-# Need to set a default value for when the workflow is triggered from a git push,
-# which bypasses the default configuration for inputs and cannot use env.ENVIRONMENT
-# since env context is not accessible in this context
+# Need to set a default value for when the workflow is triggered from a git push
+# which bypasses the default configuration for inputs
 run-name: Deploy ${{ github.ref_name }} to ${{ inputs.environment || 'dev' }}
 
 on:
