@@ -5,7 +5,7 @@ on:
     inputs:
       app_name:
         description: "name of application folder under infra directory"
-        default: frontend
+        required: true
         type: string
       environment:
         description: "the name of the application environment (e.g. dev, staging, prod)"
