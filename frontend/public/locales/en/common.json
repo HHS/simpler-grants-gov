@@ -1,8 +1,7 @@
 {
   "Index": {
-    "title": "Home",
-    "intro": "This is a template for a React web application using the <LinkToNextJs>Next.js framework</LinkToNextJs>.",
-    "body": "This is template includes:<ul><li>Framework for server-side rendered, static, or hybrid React applications</li><li>TypeScript and React testing tools</li><li>U.S. Web Design System for themeable styling and a set of common components</li><li>Type checking, linting, and code formatting tools</li><li>Storybook for a frontend workshop environment</li></ul>",
+    "page_title": "Home | Beta.grants.gov",
+    "meta_description": "The beta version of a government website where federal agencies post discretionary funding opportunities and grantees find and apply for them",
     "alert": "This website is a work in progress. To search for funding opportunities and apply, visit <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "goal_title": "What's the goal?",
     "goal_paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",

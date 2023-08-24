@@ -9,12 +9,17 @@ import FullWidthAlert from "../components/FullWidthAlert";
 import FundingContent from "../components/FundingContent";
 import GoalContent from "../components/GoalContent";
 import Hero from "../components/Hero";
+import Head from "next/head";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
     <>
+      <Head>
+        <title>{t("page_title")}</title>
+        <meta name="description" content={t("meta_description")} key="Index"/>
+      </Head>
       <Hero />
       <FullWidthAlert type="info">
         <Trans
