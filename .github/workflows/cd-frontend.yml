@@ -1,7 +1,7 @@
-name: Continuous Deployment - Frontend
+name: Deploy Frontend
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to ${{ inputs.environment || 'dev' }}
+run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'dev' }}
 
 on:
   push:
