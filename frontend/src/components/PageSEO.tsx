@@ -10,7 +10,12 @@ const PageSEO = ({ title, description }: Props) => {
     <Head>
       <title>{title}</title>
       <meta property="og:title" content={title} key="title" />
-      <meta name="description" content={description} key="description" />
+      <meta
+        data-testid="meta-description"
+        name="description"
+        content={description}
+        key="description"
+      />
     </Head>
   );
 };

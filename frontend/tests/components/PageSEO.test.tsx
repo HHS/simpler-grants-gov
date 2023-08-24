@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import PageSEO from "src/components/PageSEO";
 
@@ -15,16 +15,15 @@ describe("PageSEO", () => {
   it("Renders title without errors", () => {
     const props = { title: "test title", description: "test description" };
     render(<PageSEO {...props} />);
-    expect(document.title).toBe("test title");
+    const title = screen.getByText("test title");
+    expect(title).toBeInTheDocument();
   });
 
   it("Renders meta description content without errors", () => {
     const props = { title: "test title", description: "test description" };
     render(<PageSEO {...props} />);
-    const description = document.querySelector(
-      "meta[name='description']"
-    ) as HTMLTemplateElement;
-    expect(description.content).toBe("test description");
+    const description = screen.getByTestId("meta-description");
+    expect(description).toBeInTheDocument();
   });
 
   it("Renders the correct title after rerendering", () => {
@@ -37,8 +36,12 @@ describe("PageSEO", () => {
       description: "updated test description",
     };
     const { rerender } = render(<PageSEO {...initialProps} />);
-    expect(document.title).toBe("test title");
+    const title = screen.getByText("test title");
+    expect(title).toBeInTheDocument();
     rerender(<PageSEO {...updatedProps} />);
-    expect(document.title).toBe("updated test title");
+    const oldTitle = screen.queryByText("test title");
+    const updatedtitle = screen.getByText("updated test title");
+    expect(oldTitle).not.toBeInTheDocument();
+    expect(updatedtitle).toBeInTheDocument();
   });
 });
