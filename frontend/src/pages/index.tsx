@@ -3,13 +3,13 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import Head from "next/head";
 
 import WtGIContent from "src/components/WtGIContent";
 import FullWidthAlert from "../components/FullWidthAlert";
 import FundingContent from "../components/FundingContent";
 import GoalContent from "../components/GoalContent";
 import Hero from "../components/Hero";
-import Head from "next/head";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -18,7 +18,7 @@ const Home: NextPage = () => {
     <>
       <Head>
         <title>{t("page_title")}</title>
-        <meta name="description" content={t("meta_description")} key="Index"/>
+        <meta name="description" content={t("meta_description")} key="Index" />
       </Head>
       <Hero />
       <FullWidthAlert type="info">
