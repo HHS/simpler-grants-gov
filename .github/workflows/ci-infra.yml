@@ -71,33 +71,33 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
-  # !! Uncomment to trigger automated infra tests once dev environment is set up
-  # infra-test-e2e:
-  #   name: End-to-end tests
-  #   runs-on: ubuntu-latest
-  #
-  #   permissions:
-  #     contents: read
-  #     id-token: write
-  #
-  #   steps:
-  #     - uses: actions/checkout@v3
 
-  #     - uses: hashicorp/setup-terraform@v2
-  #       with:
-  #         terraform_version: 1.2.1
-  #         terraform_wrapper: false
+  infra-test-e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
 
-  #     - uses: actions/setup-go@v3
-  #       with:
-  #         go-version: ">=1.19.0"
+    permissions:
+      contents: read
+      id-token: write
 
-  #     - name: Configure AWS credentials
-  #       uses: ./.github/actions/configure-aws-credentials
-  #       with:
-  #         app_name: frontend
-  #         # Run infra CI on dev environment
-  #         environment: dev
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Run Terratest
-  #       run: make infra-test
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.1
+          terraform_wrapper: false
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.19.0"
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: frontend
+          # Run infra CI on dev environment
+          environment: dev
+
+      - name: Run Terratest
+        run: make infra-test

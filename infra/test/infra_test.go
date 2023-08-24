@@ -50,13 +50,13 @@ func BuildAndPublish(t *testing.T) {
 
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-build"},
+		Args:       []string{"release-build", "APP_NAME=app"},
 		WorkingDir: "../../",
 	})
 
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-publish"},
+		Args:       []string{"release-publish", "APP_NAME=app"},
 		WorkingDir: "../../",
 	})
 }
