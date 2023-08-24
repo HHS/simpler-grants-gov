@@ -27,7 +27,7 @@ describe("PageSEO", () => {
     expect(description.content).toBe("test description");
   });
 
-  it("Renders the correct title after rerendering", async () => {
+  it("Renders the correct title after rerendering", () => {
     const initialProps = {
       title: "test title",
       description: "test description",
