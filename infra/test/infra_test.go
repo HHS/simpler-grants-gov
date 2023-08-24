@@ -1,6 +1,7 @@
 package test
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 	"testing"
@@ -11,6 +12,8 @@ import (
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
+
+var appName = flag.String("app_name", "", "name of subdirectory that holds the app's infrastructure code")
 
 func TestDev(t *testing.T) {
 	BuildAndPublish(t)
@@ -24,7 +27,7 @@ func TestDev(t *testing.T) {
 	})
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		Reconfigure:  true,
-		TerraformDir: "../app/service/",
+		TerraformDir: fmt.Sprintf("../%s/service/", *appName),
 		VarFiles:     []string{"dev.tfvars"},
 		Vars: map[string]interface{}{
 			"image_tag": imageTag,
@@ -45,18 +48,18 @@ func BuildAndPublish(t *testing.T) {
 	// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
 	// and replace the call to terraform.RunTerraformCommand with terraform.Init
 	terraform.RunTerraformCommand(t, &terraform.Options{
-		TerraformDir: "../app/build-repository/",
+		TerraformDir: fmt.Sprintf("../%s/build-repository/", *appName),
 	}, "init", "-backend-config=shared.s3.tfbackend")
 
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-build", "APP_NAME=app"},
+		Args:       []string{"release-build", fmt.Sprintf("APP_NAME=%s", *appName)},
 		WorkingDir: "../../",
 	})
 
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-publish", "APP_NAME=app"},
+		Args:       []string{"release-publish", fmt.Sprintf("APP_NAME=%s", *appName)},
 		WorkingDir: "../../",
 	})
 }
@@ -78,9 +81,8 @@ func CreateDevEnvironmentInWorkspace(t *testing.T, terraformOptions *terraform.O
 
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	fmt.Println("::group::Wait for service to be stable")
-	appName := "app"
 	environmentName := "dev"
-	serviceName := fmt.Sprintf("%s-%s-%s", workspaceName, appName, environmentName)
+	serviceName := fmt.Sprintf("%s-%s-%s", workspaceName, *appName, environmentName)
 	shell.RunCommand(t, shell.Command{
 		Command:    "aws",
 		Args:       []string{"ecs", "wait", "services-stable", "--cluster", serviceName, "--services", serviceName},

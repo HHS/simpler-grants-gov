@@ -127,7 +127,8 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test: ## Run end-to-end infra Terratest test suite
-	cd infra/test && go test -v -timeout 30m
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	cd infra/test && go test -v -timeout 30m -app_name=$(APP_NAME)
 
 ########################
 ## Release Management ##

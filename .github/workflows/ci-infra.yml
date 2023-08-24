@@ -13,6 +13,9 @@ on:
       - test/**
       - .github/workflows/ci-infra.yml
 
+env:
+  APP_NAME: frontend
+
 jobs:
   check-terraform-format:
     name: Check Terraform format
@@ -100,4 +103,4 @@ jobs:
           environment: dev
 
       - name: Run Terratest
-        run: make infra-test
+        run: make APP_NAME=${{ env.APP_NAME }} infra-test
