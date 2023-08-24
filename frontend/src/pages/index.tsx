@@ -3,8 +3,8 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import Head from "next/head";
 
+import PageSEO from "src/components/PageSEO";
 import WtGIContent from "src/components/WtGIContent";
 import FullWidthAlert from "../components/FullWidthAlert";
 import FundingContent from "../components/FundingContent";
@@ -16,10 +16,7 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <Head>
-        <title>{t("page_title")}</title>
-        <meta name="description" content={t("meta_description")} key="Index" />
-      </Head>
+      <PageSEO title={t("page_title")} description={t("meta_description")} />
       <Hero />
       <FullWidthAlert type="info">
         <Trans
