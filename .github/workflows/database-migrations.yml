@@ -5,7 +5,7 @@ on:
     inputs:
       app_name:
         description: "name of application folder under infra directory"
-        default: frontend
+        required: true
         type: string
       environment:
         description: "the name of the application environment (e.g. dev, staging, prod)"
@@ -19,6 +19,7 @@ jobs:
     name: Build
     uses: ./.github/workflows/build-and-publish.yml
     with:
+      app_name: ${{ inputs.app_name }}
       ref: ${{ github.ref }}
   run-migrations:
     name: Run migrations

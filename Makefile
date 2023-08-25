@@ -47,6 +47,7 @@ infra-set-up-account: ## Configure and create resources for current AWS profile 
 	./bin/set-up-current-account.sh $(ACCOUNT_NAME)
 
 infra-configure-app-build-repository: ## Configure infra/$APP_NAME/build-repository tfbackend and tfvars files
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	./bin/configure-app-build-repository.sh $(APP_NAME)
 
 infra-configure-app-database: ## Configure infra/$APP_NAME/database module's tfbackend and tfvars files for $ENVIRONMENT
@@ -55,6 +56,7 @@ infra-configure-app-database: ## Configure infra/$APP_NAME/database module's tfb
 	./bin/configure-app-database.sh $(APP_NAME) $(ENVIRONMENT)
 
 infra-configure-monitoring-secrets: ## Set $APP_NAME's incident management service integration URL for $ENVIRONMENT
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	@:$(call check_defined, URL, incident management service (PagerDuty or VictorOps) integration URL)
 	./bin/configure-monitoring-secret.sh $(APP_NAME) $(ENVIRONMENT) $(URL)
@@ -125,7 +127,8 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test: ## Run end-to-end infra Terratest test suite
-	cd infra/test && go test -v -timeout 30m
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	cd infra/test && go test -v -timeout 30m -app_name=$(APP_NAME)
 
 ########################
 ## Release Management ##
@@ -150,23 +153,26 @@ DATE := $(shell date -u '+%Y%m%d.%H%M%S')
 INFO_TAG := $(DATE).$(USER)
 
 release-build: ## Build release for $APP_NAME and tag it with current git hash
-	@:$(call check_defined, APP_NAME)
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	cd $(APP_NAME) && $(MAKE) release-build \
 		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG)"
 
 release-publish: ## Publish release to $APP_NAME's build repository
-	@:$(call check_defined, APP_NAME)
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
 
 release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVIRONMENT
-	@:$(call check_defined, APP_NAME)
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/run-database-migrations.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
-	@:$(call check_defined, APP_NAME, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@echo $(IMAGE_NAME)
 
 release-image-tag: ## Prints the image tag of the release image
