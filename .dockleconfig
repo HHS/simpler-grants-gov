@@ -1,0 +1,4 @@
+# This file is allows you to specify a list of files that is acceptable to Dockle
+# To allow multiple files, use a list of names, example below. Make sure to remove the leading #
+# DOCKLE_ACCEPT_FILES="file1,path/to/file2,file3/path,etc"
+# https://github.com/goodwithtech/dockle#accept-suspicious-environment-variables--files--file-extensions

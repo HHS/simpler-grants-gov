@@ -1,0 +1,6 @@
+# List of settings and ignore or safelist findings for the hadolint scanner
+
+# For more information on any settings you can specify, see the actions' documentation here
+# https://github.com/hadolint/hadolint#configure
+failure-threshold: warning
+ignored: []
