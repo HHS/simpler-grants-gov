@@ -157,5 +157,5 @@ It's recommended that developers configure their code editor to auto run these t
 
 ## Other topics
 
-- [Internationalization](../docs/internationalization.md)
-- Refer to the [architecture decision records](../docs/decisions) for more context on technical decisions.
+- [Internationalization](../documentation/frontend/internationalization.md)
+- Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.
