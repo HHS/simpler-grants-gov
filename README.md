@@ -16,7 +16,7 @@ See [goals.md](./documentation/goals.md) for more information about the vision a
 
 The core team on the project is a small group of designers, developers, product managers, and more  working for an with the Department of Health and Human Services and other federal agencies.
 
-An up-to-date list of core team members can be found in MAINTAINERS.md. At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles. 
+An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles. 
 
 ## Repository Structure
 
