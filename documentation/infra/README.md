@@ -11,6 +11,7 @@
 ## Technical Design
 
 - [Module architecture](./module-architecture.md)
+- [System architecture](../architecture/README.md)
 
 ## Learning
 
