@@ -11,7 +11,9 @@ const WtGIContent = () => {
       className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
       data-testid="wtgi-content"
     >
-      <h2 className="margin-bottom-0 tablet:font-sans-xl">{t("wtgi_title")}</h2>
+      <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+        {t("wtgi_title")}
+      </h2>
       <Grid row gap>
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("wtgi_paragraph_1")}</p>
