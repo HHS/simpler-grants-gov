@@ -7,17 +7,14 @@ const Hero = () => {
   });
 
   return (
-    <div
-      data-testid="hero"
-      className="bg-primary desktop:padding-y-15 tablet-lg:padding-y-10 tablet:padding-y-3 padding-y-1"
-    >
-      <GridContainer>
-        <h1 className="text-white desktop:font-sans-3xl tablet:font-sans-2xl font-sans-xl">
-          {t("title")}
+    <div data-testid="hero" className="usa-dark-background bg-primary">
+      <GridContainer className="padding-y-1 tablet:padding-y-3 tablet-lg:padding-y-10 desktop-lg:padding-y-15">
+        <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl text-ls-neg-2">
+          <span>{t("title")}</span>
         </h1>
-        <p className="usa-intro desktop:font-sans-xl tablet:font-sans-lg font-sans-md">
+        <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl">
           <span className="text-yellow text-bold">{t("beta")}</span>&nbsp;
-          <span className="text-white">{t("content")}</span>
+          <span>{t("content")}</span>
         </p>
       </GridContainer>
     </div>
