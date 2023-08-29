@@ -1,7 +1,7 @@
-name: Milestone
+name: Internal - Milestone Doc
 description: Draft a new milestone document
-title: "[Milestone]: "
-labels: ["docs: milestone"]
+title: "[Milestone Doc]: "
+labels: ["docs: milestone", "level: task"]
 assignees:
   - octocat
 body:

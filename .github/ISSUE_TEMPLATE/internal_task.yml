@@ -1,6 +1,7 @@
-name: Task (Internal Use Only)
-description: Tracking our work through tasks
+name: Internal - Task
+description: Work items, user stories, or user needs that must be met that roll up to an epic
 title: "[Task]: "
+labels: ["project: grants.gov", "level: task"]
 assignees:
   - octocat
 body:

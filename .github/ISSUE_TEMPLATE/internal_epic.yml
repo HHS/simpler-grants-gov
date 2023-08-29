@@ -1,6 +1,7 @@
-name: Story (Internal Use Only)
-description: Tracking our work through stories
-title: "[Story]: "
+name: Internal - Epic
+description: Track a set of related tasks that roll up to a milestone
+title: "[Epic]: "
+labels: ["project: grants.gov", "level: epic"]
 assignees:
   - octocat
 body:

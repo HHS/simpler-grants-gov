@@ -1,14 +1,14 @@
-name: ADR
-description: Record an architectural decision about the project
+name: Internal - ADR
+description: Outline an architectural decision that needs to be recorded
 title: "[ADR]: "
-labels: ["docs: adr"]
+labels: ["project: grants.gov", "docs: adr"]
 assignees:
   - octocat
 body:
   - type: markdown
     attributes:
       value: |
-        Record an architectural decision about the project
+        Describe an architectural decision that needs to be recorded
   - type: markdown
     attributes:
       value: |
