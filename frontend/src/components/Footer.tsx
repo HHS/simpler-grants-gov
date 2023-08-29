@@ -24,14 +24,16 @@ const Footer = () => {
               <img
                 className="usa-footer__logo-img"
                 alt="img alt text"
-                src={''}
+                src={""}
               />
             }
             heading={<p className="usa-footer__logo-heading">Name of Agency</p>}
           />
           <div className="usa-footer__contact-links mobile-lg:grid-col-6">
             <SocialLinks links={[]} />
-            <h3 className="usa-footer__contact-heading">Agency Contact Center</h3>
+            <h3 className="usa-footer__contact-heading">
+              Agency Contact Center
+            </h3>
             <Address
               size="medium"
               items={[
