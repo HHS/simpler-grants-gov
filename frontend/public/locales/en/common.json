@@ -48,7 +48,8 @@
     "link_youtube": "YouTube",
     "link_rss": "RSS",
     "link_newsletter": "Newsletter",
-    "link_blog": "Blog"
+    "link_blog": "Blog",
+    "logo_alt": "Grants.gov logo"
   },
   "Identifier": {
     "identity": "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
@@ -59,7 +60,8 @@
     "link_fear": "EEO/No Fear Act",
     "link_ig": "Office of the Inspector General",
     "link_performance": "Performance reports",
-    "link_privacy": "Privacy Policy"
+    "link_privacy": "Privacy Policy",
+    "logo_alt": "HHS logo"
   },
   "Layout": {
     "skip_to_main": "Skip to main content"
