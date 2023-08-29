@@ -31,7 +31,7 @@ const FullWidthAlert = ({ type, heading, children }: Props) => {
           <USWDSAlert
             className="border-left-0 bg-transparent padding-left-0 margin-x-neg-2"
             type={type}
-            headingLevel="h5"
+            headingLevel="h2"
             heading={heading}
             slim
           >
