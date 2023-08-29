@@ -23,7 +23,7 @@ const Footer = () => {
               <img
                 className="usa-footer__logo-img"
                 alt="img alt text"
-                src={""}
+                src={"/img/grants-gov-logo.png"}
               />
             }
             heading={
