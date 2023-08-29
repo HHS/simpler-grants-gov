@@ -17,7 +17,7 @@ class SprintBoard(BaseDataset):
         """"""
         # set named columns
         self.opened_col = "created_date"
-        self.closed_col = "created_date"
+        self.closed_col = "closed_date"
         self.sprint_col = "sprint"
         self.sprint_start_col = "sprint_start_date"
         self.sprint_end_col = "sprint_end_date"
@@ -29,12 +29,16 @@ class SprintBoard(BaseDataset):
     def sprint_start(self, sprint: str) -> datetime64:
         """Return the date on which a given sprint started"""
         sprint_mask = self.df[self.sprint_col] == sprint
-        return self.df.loc[sprint_mask, self.sprint_start_col].min()
+        sprint_start = self.df.loc[sprint_mask, self.sprint_start_col].min()
+        sprint_start = sprint_start.tz_localize("UTC")
+        return sprint_start
 
     def sprint_end(self, sprint: str) -> datetime64:
         """Return the date on which a given sprint ended"""
         sprint_mask = self.df[self.sprint_col] == sprint
-        return self.df.loc[sprint_mask, self.sprint_end_col].max()
+        sprint_end = self.df.loc[sprint_mask, self.sprint_end_col].max()
+        sprint_end = sprint_end.tz_localize("UTC")
+        return sprint_end
 
     def load_data(self, project_file: str, issue_file: str) -> pd.DataFrame:
         """Load the input datasets and generate the final dataframe"""
