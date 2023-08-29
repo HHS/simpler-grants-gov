@@ -1,7 +1,6 @@
 import { useTranslation } from "next-i18next";
 import {
   Address,
-  FooterNav,
   Logo,
   SocialLinks,
   Footer as USWDSFooter,
@@ -27,21 +26,23 @@ const Footer = () => {
                 src={""}
               />
             }
-            heading={<p className="usa-footer__logo-heading">Name of Agency</p>}
+            heading={
+              <p className="usa-footer__logo-heading">{t("agency_name")}</p>
+            }
           />
           <div className="usa-footer__contact-links mobile-lg:grid-col-6">
             <SocialLinks links={[]} />
             <h3 className="usa-footer__contact-heading">
-              Agency Contact Center
+              {t("agency_contact_center")}
             </h3>
             <Address
               size="medium"
               items={[
-                <a key="telephone" href="tel:1-800-555-5555">
-                  (800) CALL-GOVT
+                <a key="telephone" href={`tel:${t("telephone")}`}>
+                  {t("telephone")}
                 </a>,
-                <a key="email" href="mailto:info@agency.gov">
-                  info@agency.gov
+                <a key="email" href={`mailto:${t("email")}`}>
+                  {t("email")}
                 </a>,
               ]}
             />

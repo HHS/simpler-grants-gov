@@ -39,7 +39,10 @@
     "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience."
   },
   "Footer": {
-    "agency_name": "Agency name",
+    "agency_name": "Grants.gov",
+    "agency_contact_center": "Grants.gov Program Management Office",
+    "telephone": "1-877-696-6775",
+    "email": "support@grants.gov",
     "return_to_top": "Return to top"
   },
   "Identifier": {
