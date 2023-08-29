@@ -1,6 +1,7 @@
 import { useTranslation } from "next-i18next";
 import {
   Address,
+  Icon,
   Logo,
   SocialLink,
   SocialLinks,
@@ -28,6 +29,22 @@ const Footer = () => {
       name="RSS"
       href="https://www.grants.gov/web/grants/rss.html"
     />,
+    <a
+      className="usa-social-link"
+      href="https://www.grants.gov/web/grants/connect/newsletter-archive.html"
+      key="newsletter"
+      title={"Newsletter"}
+    >
+      <Icon.Mail className="usa-social-link__icon" name={"Newsletter"} />
+    </a>,
+    <a
+      className="usa-social-link"
+      href="https://grantsgovprod.wordpress.com/"
+      key="test"
+      title={"Blog"}
+    >
+      <Icon.LocalLibrary className="usa-social-link__icon" name={"Blog"} />
+    </a>,
   ];
 
   return (
