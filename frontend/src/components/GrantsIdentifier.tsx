@@ -21,15 +21,13 @@ const GrantsIdentifier = () => {
     keyPrefix: "Identifier",
   });
 
-  const logoImage = () => {
-    return (
-      <Image
-        alt={t("logo_alt")}
-        src={logo}
-        className="usa-identifier__logo-img"
-      />
-    );
-  };
+  const logoImage = (
+    <Image
+      alt={t("logo_alt")}
+      src={logo}
+      className="usa-identifier__logo-img"
+    />
+  );
 
   const IdentifierLinkList = [
     {
@@ -78,7 +76,7 @@ const GrantsIdentifier = () => {
     <Identifier data-testid="identifier">
       <IdentifierMasthead aria-label="Agency identifier">
         <IdentifierLogos>
-          <IdentifierLogo href="#">{logoImage()}</IdentifierLogo>
+          <IdentifierLogo href="#">{logoImage}</IdentifierLogo>
         </IdentifierLogos>
         <IdentifierIdentity domain="HHS.gov">
           <Trans
