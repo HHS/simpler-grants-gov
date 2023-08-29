@@ -2,6 +2,7 @@ import { useTranslation } from "next-i18next";
 import {
   Address,
   Logo,
+  SocialLink,
   SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
@@ -10,6 +11,24 @@ const Footer = () => {
   const { t } = useTranslation("common", {
     keyPrefix: "Footer",
   });
+
+  const links = [
+    <SocialLink
+      key="twitter"
+      name="Twitter"
+      href="https://twitter.com/grantsdotgov"
+    />,
+    <SocialLink
+      key="youtube"
+      name="YouTube"
+      href="https://www.youtube.com/user/GrantsGovUS"
+    />,
+    <SocialLink
+      key="rss"
+      name="RSS"
+      href="https://www.grants.gov/web/grants/rss.html"
+    />,
+  ];
 
   return (
     <USWDSFooter
@@ -31,7 +50,7 @@ const Footer = () => {
             }
           />
           <div className="usa-footer__contact-links mobile-lg:grid-col-6">
-            <SocialLinks links={[]} />
+            <SocialLinks links={links} />
             <h3 className="usa-footer__contact-heading">
               {t("agency_contact_center")}
             </h3>
