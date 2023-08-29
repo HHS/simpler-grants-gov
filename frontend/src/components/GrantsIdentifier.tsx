@@ -58,19 +58,13 @@ const GrantsIdentifier = () => {
       href: ExternalRoutes.PRIVACY_POLICY,
       text: t("link_privacy"),
     },
-  ].map((link) => {
-    return (
-      <IdentifierLinkItem key={link.text}>
-        <IdentifierLink
-          target="_blank"
-          rel="noopener noreferrer"
-          href={link.href}
-        >
-          {link.text}
-        </IdentifierLink>
-      </IdentifierLinkItem>
-    );
-  });
+  ].map(({ text, href }) => (
+    <IdentifierLinkItem key={text}>
+      <IdentifierLink target="_blank" rel="noopener noreferrer" href={href}>
+        {text}
+      </IdentifierLink>
+    </IdentifierLinkItem>
+  ));
 
   return (
     <Identifier data-testid="identifier">
