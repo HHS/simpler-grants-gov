@@ -37,24 +37,6 @@ Documentation for the API is linked to from the [API README.md](./api/README.md)
 
 Documentation and development instructions for the front-end are provided in the [Front-end README.md](./frontend/README.md).
 
-### Testing
-
-#### Configuring pre-commit hooks
-
-To promote consistent code style and quality, we use git pre-commit hooks to
-automatically lint and reformat our code before every commit we make to the codebase.
-
-Pre-commit hooks are defined in the file [`.pre-commit-config.yaml`](./.pre-commit-config.yaml).
-
-1.  First, install [`pre-commit`](https://pre-commit.com/) globally:
-
-        $ brew install pre-commit
-
-2.  While in the root `grants-equity` directory, run `pre-commit install` to install
-    the specific git hooks used in this repository.
-
-Now, any time you commit code to the repository, the hooks will run on all modified files automatically. If you wish, you can force a re-run on all files with `pre-commit run --all-files`.
-
 ## Contributing
 
 Thank you for considering contributing to an Open Source project of the US
