@@ -5,23 +5,27 @@ const GoalContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
-    <GridContainer className="desktop:padding-y-4 tablet:padding-y-2 padding-y-1">
-      <Grid row>
-        <h2 className="margin-bottom-0 tablet:font-sans-xl">
-          {t("goal_title")}
-        </h2>
-      </Grid>
-      <Grid row gap="lg">
-        <Grid tablet={{ col: 6 }}>
+    <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
+      <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+        {t("goal_title")}
+      </h2>
+      <Grid row gap>
+        <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
           <p className="usa-intro">{t("goal_paragraph_1")}</p>
         </Grid>
-        <Grid tablet={{ col: 6 }}>
-          <h3 className="tablet:font-sans-lg">{t("goal_title_2")}</h3>
-          <p className="tablet:margin-bottom-3 line-height-sans-4">
+        <Grid tabletLg={{ col: 6 }} desktop={{ col: 7 }} desktopLg={{ col: 6 }}>
+          <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+            {t("goal_title_2")}
+          </h3>
+          <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
             {t("goal_paragraph_2")}
           </p>
-          <h3 className="tablet:font-sans-lg">{t("goal_title_3")}</h3>
-          <p className="line-height-sans-4">{t("goal_paragraph_3")}</p>
+          <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+            {t("goal_title_3")}
+          </h3>
+          <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+            {t("goal_paragraph_3")}
+          </p>
         </Grid>
       </Grid>
     </GridContainer>

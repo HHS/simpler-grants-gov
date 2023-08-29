@@ -18,7 +18,7 @@ const Home: NextPage = () => {
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
       <Hero />
-      <FullWidthAlert type="info">
+      <FullWidthAlert type="info" heading={t("alert_title")}>
         <Trans
           t={t}
           i18nKey="alert"
