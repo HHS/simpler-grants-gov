@@ -11,8 +11,8 @@ class SprintBoard(BaseDataset):
 
     def __init__(
         self,
-        project_file: str = "sprint-data.json",
-        issue_file: str = "issue-data.json",
+        project_file: str = "data/sprint-data.json",
+        issue_file: str = "data/issue-data.json",
     ) -> None:
         """"""
         # set named columns
