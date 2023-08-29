@@ -1,0 +1,106 @@
+name: CI Infra Checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - infra/**
+      - .github/workflows/ci-infra.yml
+  pull_request:
+    paths:
+      - infra/**
+      - test/**
+      - .github/workflows/ci-infra.yml
+
+env:
+  APP_NAME: frontend
+
+jobs:
+  check-terraform-format:
+    name: Check Terraform format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.6
+          terraform_wrapper: false
+      - name: Run infra-lint
+        run: |
+          echo "If this fails, run 'make infra-format'"
+          make infra-lint
+  validate-terraform:
+    name: Validate Terraform modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.6
+          terraform_wrapper: false
+      - name: Run infra-validate
+        run: make infra-validate
+  check-compliance-with-checkov:
+    name: Check compliance with checkov
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Run Checkov check
+        # Pin to specific checkov version rather than running from checkov@master
+        # since checkov frequently adds new checks that can cause CI checks to fail unpredictably.
+        # There is currently no way to specify the checkov version to pin to (See https://github.com/bridgecrewio/checkov-action/issues/41)
+        # so we need to pin the version of the checkov-action, which indirectly pins the checkov version.
+        # In this case, checkov-action v12.2296.0 is mapped to checkov v2.3.194.
+        uses: bridgecrewio/checkov-action@v12.2296.0
+        with:
+          directory: infra
+          framework: terraform
+          quiet: true # only displays failed checks
+  check-compliance-with-tfsec:
+    name: Check compliance with tfsec
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tfsec check
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ github.token }}
+
+  infra-test-e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.1
+          terraform_wrapper: false
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.19.0"
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: frontend
+          # Run infra CI on dev environment
+          environment: dev
+
+      - name: Run Terratest
+        run: make APP_NAME=${{ env.APP_NAME }} infra-test

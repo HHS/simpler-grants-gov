@@ -1,0 +1,49 @@
+name: Build and Publish
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
+      ref:
+        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
+      ref:
+        description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
+        required: true
+        type: string
+
+jobs:
+  build-and-publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Build release
+        run: make APP_NAME=${{ inputs.app_name }} release-build
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: shared
+
+      - name: Publish release
+        run: make APP_NAME=${{ inputs.app_name }} release-publish

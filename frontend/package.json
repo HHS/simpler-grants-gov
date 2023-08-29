@@ -26,10 +26,12 @@
     "next-i18next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.0.0"
+    "react-i18next": "^13.0.0",
+    "sharp": "^0.32.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
+    "@storybook/addon-designs": "^7.0.1",
     "@storybook/addon-essentials": "^7.1.0",
     "@storybook/nextjs": "^7.1.0",
     "@storybook/react": "^7.1.0",

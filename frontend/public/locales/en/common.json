@@ -1,18 +1,57 @@
 {
   "Index": {
-    "title": "Home",
-    "intro": "This is a template for a React web application using the <LinkToNextJs>Next.js framework</LinkToNextJs>.",
-    "body": "This is template includes:<ul><li>Framework for server-side rendered, static, or hybrid React applications</li><li>TypeScript and React testing tools</li><li>U.S. Web Design System for themeable styling and a set of common components</li><li>Type checking, linting, and code formatting tools</li><li>Storybook for a frontend workshop environment</li></ul>"
+    "page_title": "Home | Beta.grants.gov",
+    "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+    "alert_title": "This website is a work in progress.",
+    "alert": "To search for funding opportunities and apply, visit <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "goal_title": "What's the goal?",
+    "goal_paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
+    "goal_title_2": "For applicants",
+    "goal_paragraph_2": "We’re building a one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+    "goal_title_3": "For grantmakers",
+    "goal_paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for you to write, post, announce, and manage funding opportunities that reach your communities, including underserved communities.",
+    "fo_title": "Improvements to funding opportunity announcements",
+    "fo_paragraph_1": "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
+    "fo_paragraph_2": "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
+    "fo_title_2": "View our grant announcement prototypes",
+    "fo_paragraph_3": "We recently simplified the language of four grant announcements and applied visual and user‑centered design principles to increase their readability and usability.",
+    "acl_prototype": "Link to ACL Notice of Funding Opportunity example pdf",
+    "acf_prototype": "Link to ACF Notice of Funding Opportunity example pdf",
+    "cdc_prototype": "Link to CDC Notice of Funding Opportunity example pdf",
+    "samhsa_prototype": "Link to SAMHSA Notice of Funding Opportunity example pdf",
+    "fo_title_3": "We want to hear from you!",
+    "fo_paragraph_4": "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
+    "fo_title_4": "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
+    "fo_paragraph_5": "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
+    "wtgi_title": "Ways to get involved",
+    "wtgi_paragraph_1": "Follow our progress as we improve grant announcements and build a better API and opportunity search on beta.grants.gov.",
+    "wtgi_list": "<ul><li><LinkToGoals>Read our project goals and milestones</LinkToGoals></li><li>Join our open‑source community on <github>GitHub</github></li><li>Contact us at <email>tbd@tbd.gov</email></li></ul>"
   },
   "Header": {
     "nav_link_home": "Home",
     "nav_link_health": "Health",
     "nav_menu_toggle": "Menu",
-    "title": "Site title"
+    "title": "Grants.gov"
+  },
+  "Hero": {
+    "title": "We're building a new Grants.gov!",
+    "beta": "BETA!",
+    "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience."
   },
   "Footer": {
     "agency_name": "Agency name",
     "return_to_top": "Return to top"
+  },
+  "Identifier": {
+    "identity": "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
+    "gov_content": "Looking for U.S. government information and services? Visit <usaLink>USA.gov</usaLink>",
+    "link_about": "About HHS",
+    "link_accessibility": "Accessibility support",
+    "link_foia": "FOIA requests",
+    "link_fear": "EEO/No Fear Act",
+    "link_ig": "Office of the Inspector General",
+    "link_performance": "Performance reports",
+    "link_privacy": "Privacy Policy"
   },
   "Layout": {
     "skip_to_main": "Skip to main content"

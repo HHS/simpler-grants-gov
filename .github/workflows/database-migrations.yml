@@ -1,0 +1,44 @@
+name: Database migrations
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
+      environment:
+        description: "the name of the application environment (e.g. dev, staging, prod)"
+        required: true
+        type: string
+
+concurrency: database-migrations-${{ inputs.environment }}
+
+jobs:
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: ${{ inputs.app_name }}
+      ref: ${{ github.ref }}
+  run-migrations:
+    name: Run migrations
+    runs-on: ubuntu-latest
+    needs: [build-and-publish]
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: ${{ inputs.environment }}
+
+      - name: Run migrations
+        run: |
+          make release-run-database-migrations APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }}

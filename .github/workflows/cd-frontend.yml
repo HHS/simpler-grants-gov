@@ -1,0 +1,36 @@
+name: Deploy Frontend
+# Need to set a default value for when the workflow is triggered from a git push
+# which bypasses the default configuration for inputs
+run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'dev' }}
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "frontend/**"
+      - "bin/**"
+      - "infra/**"
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        default: frontend
+        required: true
+        type: string
+      environment:
+        description: "target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: ${{ inputs.app_name || 'frontend' }}
+      environment: ${{ inputs.environment || 'dev' }}

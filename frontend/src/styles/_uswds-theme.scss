@@ -18,7 +18,47 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
-  // Prettier defaults for typography
-  $theme-font-type-sans: "public-sans",
-  $theme-global-link-styles: true
+  // Layout & grid settings
+  $theme-utility-breakpoints:
+    (
+      "card": false,
+      "card-lg": false,
+      "mobile": false,
+      "mobile-lg": true,
+      "tablet": true,
+      "tablet-lg": true,
+      "desktop": true,
+      "desktop-lg": true,
+      "widescreen": false
+    ),
+  $theme-banner-max-width: "desktop-lg",
+  $theme-header-max-width: "desktop-lg",
+  $theme-grid-container-max-width: "desktop-lg",
+  $theme-footer-max-width: "desktop-lg",
+  $theme-identifier-max-width: "desktop-lg",
+  $theme-column-gap-desktop: 6,
+  $theme-column-gap-md: 4,
+  $theme-column-gap-lg: 6,
+
+  // Typography settings
+  $theme-global-link-styles: true,
+  $theme-body-font-size: "md",
+  $theme-type-scale-3xs: 2,
+  $theme-type-scale-2xs: 3,
+  $theme-type-scale-xs: 4,
+  $theme-type-scale-sm: 5,
+  $theme-type-scale-md: 6,
+  $theme-type-scale-lg: 9,
+  $theme-type-scale-xl: 12,
+  $theme-type-scale-2xl: 15,
+  $theme-type-scale-3xl: 17,
+
+  // Color settings
+  $background-color-palettes:
+    (
+      "palette-color-system-cyan-light",
+      "palette-color-system-yellow-light",
+      "palette-color-system-green-cool",
+      "palette-color-system-red-warm"
+    )
 );

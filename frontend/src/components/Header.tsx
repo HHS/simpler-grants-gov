@@ -8,21 +8,17 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-const primaryLinks: {
+type PrimaryLinks = {
   i18nKey: string;
   href: string;
-}[] = [
-  {
-    i18nKey: "nav_link_home",
-    href: "/",
-  },
-  {
-    i18nKey: "nav_link_health",
-    href: "/health",
-  },
-];
+}[];
 
-const Header = () => {
+type Props = {
+  logoPath?: string;
+  primaryLinks?: PrimaryLinks;
+};
+
+const Header = ({ logoPath, primaryLinks }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -32,11 +28,12 @@ const Header = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const navItems = primaryLinks.map((link) => (
+  const navItems = primaryLinks?.map((link) => (
     <a href={link.href} key={link.href}>
       {t(link.i18nKey)}
     </a>
   ));
+  const showMenu = !!navItems;
 
   return (
     <>
@@ -51,29 +48,35 @@ const Header = () => {
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
-                <span className="margin-right-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    className="width-3 desktop:width-5 text-bottom margin-right-05"
-                    src={`${
-                      process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-                    }/img/logo.svg`}
-                    alt="Site logo"
-                  />
-                </span>
+                {logoPath && (
+                  <span className="margin-right-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className="width-3 desktop:width-5 text-bottom margin-right-05"
+                      src={`${
+                        process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+                      }${logoPath}`}
+                      alt="Site logo"
+                    />
+                  </span>
+                )}
                 <span className="font-sans-lg flex-fill">{t("title")}</span>
               </div>
             </Title>
-            <NavMenuButton
-              onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
-            />
+            {showMenu && (
+              <NavMenuButton
+                onClick={handleMobileNavToggle}
+                label={t("nav_menu_toggle")}
+              />
+            )}
           </div>
-          <PrimaryNav
-            items={navItems}
-            mobileExpanded={isMobileNavExpanded}
-            onToggleMobileNav={handleMobileNavToggle}
-          ></PrimaryNav>
+          {navItems && (
+            <PrimaryNav
+              items={navItems}
+              mobileExpanded={isMobileNavExpanded}
+              onToggleMobileNav={handleMobileNavToggle}
+            ></PrimaryNav>
+          )}
         </div>
       </USWDSHeader>
     </>

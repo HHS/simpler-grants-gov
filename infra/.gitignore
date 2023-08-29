@@ -1,0 +1,36 @@
+# Local .terraform metadata
+**/.terraform/*
+
+# Ignore Terraform lock files
+# As of Feb 2023, Terraform lock files, while well intentioned, have a tendency
+# to get into a confusing state that requires recreating the lock file, which
+# defeats the purpose. Moreover, lock files are per environment, which can make
+# it difficult for people to upgrade dependencies (e.g. upgrade an AWS provider)
+# across environments if certain environments are locked down (e.g. production).
+.terraform.lock.hcl
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+#
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+*.plan
+*.tfstate
+
+# Ignore archives used for deploying lambdas
+*.zip
