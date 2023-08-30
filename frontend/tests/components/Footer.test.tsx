@@ -14,12 +14,14 @@ describe("Footer", () => {
 
     const twitter = screen.getByTitle("Twitter");
     const youtube = screen.getByTitle("YouTube");
+    const github = screen.getByTitle("Github");
     const rss = screen.getByTitle("RSS");
     const newsletter = screen.getByTitle("Newsletter");
     const blog = screen.getByTitle("Blog");
 
     expect(twitter).toBeInTheDocument();
     expect(youtube).toBeInTheDocument();
+    expect(github).toBeInTheDocument();
     expect(rss).toBeInTheDocument();
     expect(newsletter).toBeInTheDocument();
     expect(blog).toBeInTheDocument();

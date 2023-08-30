@@ -19,7 +19,7 @@ type SocialLinkProps = {
 };
 
 const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
-  <a className="usa-social-link" href={href} title={name}>
+  <a className="usa-social-link" href={href} title={name} target="_blank">
     <Tag className="usa-social-link__icon" name={name} aria-label={name} />
   </a>
 );
@@ -39,6 +39,11 @@ const Footer = () => {
       href: ExternalRoutes.GRANTS_YOUTUBE,
       name: t("link_youtube"),
       Tag: Icon.Youtube,
+    },
+    {
+      href: ExternalRoutes.GRANTS_GITHUB,
+      name: t("link_github"),
+      Tag: Icon.Github,
     },
     {
       href: ExternalRoutes.GRANTS_RSS,
