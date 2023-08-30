@@ -1,71 +1,115 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useTranslation } from "next-i18next";
+import { ComponentType } from "react";
 import {
   Address,
-  FooterNav,
   Grid,
-  GridContainer,
+  Icon,
+  Logo,
+  SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
+import { IconProps } from "@trussworks/react-uswds/lib/components/Icon/Icon";
+
+// Recreate @trussworks/react-uswds SocialLink component to accept any Icon
+// https://github.com/trussworks/react-uswds/blob/cf5b4555e25f0e52fc8af66afe29253922bed2a5/src/components/Footer/SocialLinks/SocialLinks.tsx#L33
+type SocialLinkProps = {
+  href: string;
+  name: string;
+  Tag: ComponentType<IconProps>;
+};
+
+const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
+  <a className="usa-social-link" href={href} title={name} target="_blank">
+    <Tag className="usa-social-link__icon" name={name} aria-label={name} />
+  </a>
+);
 
 const Footer = () => {
   const { t } = useTranslation("common", {
     keyPrefix: "Footer",
   });
 
+  const links = [
+    {
+      href: ExternalRoutes.GRANTS_TWITTER,
+      name: t("link_twitter"),
+      Tag: Icon.Twitter,
+    },
+    {
+      href: ExternalRoutes.GRANTS_YOUTUBE,
+      name: t("link_youtube"),
+      Tag: Icon.Youtube,
+    },
+    {
+      href: ExternalRoutes.GITHUB_REPO,
+      name: t("link_github"),
+      Tag: Icon.Github,
+    },
+    {
+      href: ExternalRoutes.GRANTS_RSS,
+      name: t("link_rss"),
+      Tag: Icon.RssFeed,
+    },
+    {
+      href: ExternalRoutes.GRANTS_NEWSLETTER,
+      name: t("link_newsletter"),
+      Tag: Icon.Mail,
+    },
+    {
+      href: ExternalRoutes.GRANTS_BLOG,
+      name: t("link_blog"),
+      Tag: Icon.LocalLibrary,
+    },
+  ].map(({ href, name, Tag }) => (
+    <SocialLink
+      href={href}
+      key={name.toLocaleLowerCase()}
+      name={name}
+      Tag={Tag}
+    />
+  ));
+
   return (
     <USWDSFooter
-      size="slim"
-      returnToTop={
-        <GridContainer className="usa-footer__return-to-top">
-          <a href="#">{t("return_to_top")}</a>
-        </GridContainer>
-      }
-      primary={
-        <GridContainer className="usa-footer__primary-container">
-          <Grid row>
-            <Grid
-              mobileLg={{
-                col: 8,
-              }}
-            >
-              <FooterNav
-                aria-label="Footer navigation"
-                size="medium"
-                links={[
-                  <a
-                    key="nav_link_1"
-                    href="#"
-                    className="usa-footer__primary-link"
-                  >
-                    Nav link 1
-                  </a>,
-                  <a
-                    key="nav_link_2"
-                    href="#"
-                    className="usa-footer__primary-link"
-                  >
-                    Nav link 2
-                  </a>,
-                ]}
+      data-testid="footer"
+      size="medium"
+      primary={<div />}
+      secondary={
+        <Grid row>
+          <Logo
+            size="medium"
+            image={
+              <img
+                className="usa-footer__logo-img"
+                alt={t("logo_alt")}
+                src={"/img/grants-gov-logo.png"}
               />
-            </Grid>
-            <Grid mobileLg={{ col: 4 }}>
-              <Address
-                size="slim"
-                items={[
-                  <a key="telephone" href="tel:1-800-555-5555">
-                    (800) CALL-GOVT
-                  </a>,
-                  <a key="email" href="mailto:info@agency.gov">
-                    info@agency.gov
-                  </a>,
-                ]}
-              />
-            </Grid>
+            }
+            heading={
+              <p className="usa-footer__logo-heading">{t("agency_name")}</p>
+            }
+          />
+          <Grid className="usa-footer__contact-links" mobileLg={{ col: 6 }}>
+            <SocialLinks links={links} />
+            <h2 className="usa-footer__contact-heading">
+              {t("agency_contact_center")}
+            </h2>
+            <Address
+              size="medium"
+              items={[
+                <a key="telephone" href={`tel:${t("telephone")}`}>
+                  {t("telephone")}
+                </a>,
+                <a key="email" href={ExternalRoutes.CONTACT_EMAIL}>
+                  {t("email")}
+                </a>,
+              ]}
+            />
           </Grid>
-        </GridContainer>
+        </Grid>
       }
-      secondary={<p className="usa-footer__logo-heading">{t("agency_name")}</p>}
     />
   );
 };
