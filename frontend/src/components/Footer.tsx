@@ -12,7 +12,8 @@ import {
 } from "@trussworks/react-uswds";
 import { IconProps } from "@trussworks/react-uswds/lib/components/Icon/Icon";
 
-// Recreate @trussworks/react-uswds SocialLinks component to accept any Icon
+// Recreate @trussworks/react-uswds SocialLink component to accept any Icon
+// https://github.com/trussworks/react-uswds/blob/cf5b4555e25f0e52fc8af66afe29253922bed2a5/src/components/Footer/SocialLinks/SocialLinks.tsx#L33
 type SocialLinkProps = {
   href: string;
   name: string;
