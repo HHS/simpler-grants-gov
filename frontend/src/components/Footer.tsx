@@ -20,7 +20,7 @@ type SocialLinkProps = {
 
 const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
   <a className="usa-social-link" href={href} title={name}>
-    <Tag className="usa-social-link__icon" name={name} />
+    <Tag className="usa-social-link__icon" name={name} aria-label={name} />
   </a>
 );
 
@@ -85,9 +85,9 @@ const Footer = () => {
           />
           <div className="usa-footer__contact-links mobile-lg:grid-col-6">
             <SocialLinks links={links} />
-            <h3 className="usa-footer__contact-heading">
+            <h2 className="usa-footer__contact-heading">
               {t("agency_contact_center")}
-            </h3>
+            </h2>
             <Address
               size="medium"
               items={[
