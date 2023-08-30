@@ -24,7 +24,10 @@ const Hero = () => {
           href={ExternalRoutes.GITHUB_REPO}
           target="_blank"
         >
-          <Icon.Github className="usa-icon usa-icon--size-3 margin-right-1 text-middle tablet:margin-top-neg-2px" />
+          <Icon.Github
+            className="usa-icon usa-icon--size-3 margin-right-1 text-middle tablet:margin-top-neg-2px"
+            aria-label="Github"
+          />
           {t("github_link")}
         </Link>
       </GridContainer>
