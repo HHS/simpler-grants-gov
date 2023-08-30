@@ -39,6 +39,14 @@ in the form $setting: value,
   $theme-column-gap-desktop: 6,
   $theme-column-gap-md: 4,
   $theme-column-gap-lg: 6,
+  $position-settings: (
+    output: true,
+    responsive: true,
+    active: false,
+    focus: false,
+    hover: false,
+    visited: false
+  ),
 
   // Typography settings
   $theme-global-link-styles: true,

@@ -36,7 +36,8 @@
   "Hero": {
     "title": "We're building a new Grants.gov!",
     "beta": "BETA!",
-    "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience."
+    "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience.",
+    "github_link": "Follow on GitHub"
   },
   "Footer": {
     "agency_name": "Agency name",
