@@ -12,7 +12,7 @@ export const ExternalRoutes = {
   MILESTONES:
     "https://github.com/HHS/grants-equity/blob/main/documentation/milestones/milestone_short_descriptions.md",
   GITHUB_REPO: "https://github.com/HHS/grants-equity",
-  CONTACT_EMAIL: "mailto: support@grants.gov",
+  CONTACT_EMAIL: "mailto:support@grants.gov",
   GRANTS_HOME: "https://www.grants.gov",
   GRANTS_TWITTER: "https://twitter.com/grantsdotgov",
   GRANTS_YOUTUBE: "https://www.youtube.com/user/GrantsGovUS",

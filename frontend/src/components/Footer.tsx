@@ -66,6 +66,7 @@ const Footer = () => {
 
   return (
     <USWDSFooter
+      data-testid="footer"
       size="medium"
       primary={<div />}
       secondary={
