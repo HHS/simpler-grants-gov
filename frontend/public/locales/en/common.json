@@ -36,11 +36,22 @@
   "Hero": {
     "title": "We're building a new Grants.gov!",
     "beta": "BETA!",
-    "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience."
+    "content": "This new website will be your go‑to resource to follow our progress on improving funding opportunity announcements and the application experience.",
+    "github_link": "Follow on GitHub"
   },
   "Footer": {
-    "agency_name": "Agency name",
-    "return_to_top": "Return to top"
+    "agency_name": "Grants.gov",
+    "agency_contact_center": "Grants.gov Program Management Office",
+    "telephone": "1-877-696-6775",
+    "email": "support@grants.gov",
+    "return_to_top": "Return to top",
+    "link_twitter": "Twitter",
+    "link_youtube": "YouTube",
+    "link_github": "Github",
+    "link_rss": "RSS",
+    "link_newsletter": "Newsletter",
+    "link_blog": "Blog",
+    "logo_alt": "Grants.gov logo"
   },
   "Identifier": {
     "identity": "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
@@ -51,7 +62,8 @@
     "link_fear": "EEO/No Fear Act",
     "link_ig": "Office of the Inspector General",
     "link_performance": "Performance reports",
-    "link_privacy": "Privacy Policy"
+    "link_privacy": "Privacy Policy",
+    "logo_alt": "HHS logo"
   },
   "Layout": {
     "skip_to_main": "Skip to main content"
