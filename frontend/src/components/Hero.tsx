@@ -26,6 +26,7 @@ const Hero = () => {
         >
           <Icon.Github
             className="usa-icon usa-icon--size-3 margin-right-1 text-middle tablet:margin-top-neg-2px"
+            size={3}
             aria-label="Github"
           />
           {t("github_link")}
