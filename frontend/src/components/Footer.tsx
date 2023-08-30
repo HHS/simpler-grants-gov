@@ -4,6 +4,7 @@ import { useTranslation } from "next-i18next";
 import { ComponentType } from "react";
 import {
   Address,
+  Grid,
   Icon,
   Logo,
   SocialLinks,
@@ -75,7 +76,7 @@ const Footer = () => {
       size="medium"
       primary={<div />}
       secondary={
-        <div className="grid-row grid-gap">
+        <Grid row>
           <Logo
             size="medium"
             image={
@@ -89,7 +90,7 @@ const Footer = () => {
               <p className="usa-footer__logo-heading">{t("agency_name")}</p>
             }
           />
-          <div className="usa-footer__contact-links mobile-lg:grid-col-6">
+          <Grid className="usa-footer__contact-links" mobileLg={{ col: 6 }}>
             <SocialLinks links={links} />
             <h2 className="usa-footer__contact-heading">
               {t("agency_contact_center")}
@@ -105,8 +106,8 @@ const Footer = () => {
                 </a>,
               ]}
             />
-          </div>
-        </div>
+          </Grid>
+        </Grid>
       }
     />
   );
