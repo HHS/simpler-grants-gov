@@ -41,7 +41,7 @@ const Footer = () => {
       Tag: Icon.Youtube,
     },
     {
-      href: ExternalRoutes.GRANTS_GITHUB,
+      href: ExternalRoutes.GITHUB_REPO,
       name: t("link_github"),
       Tag: Icon.Github,
     },
