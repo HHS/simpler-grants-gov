@@ -6,7 +6,6 @@ import {
   Address,
   Grid,
   Icon,
-  Logo,
   SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
@@ -43,14 +42,9 @@ const Footer = () => {
       Tag: Icon.Youtube,
     },
     {
-      href: ExternalRoutes.GITHUB_REPO,
-      name: t("link_github"),
-      Tag: Icon.Github,
-    },
-    {
-      href: ExternalRoutes.GRANTS_RSS,
-      name: t("link_rss"),
-      Tag: Icon.RssFeed,
+      href: ExternalRoutes.GRANTS_BLOG,
+      name: t("link_blog"),
+      Tag: Icon.LocalLibrary,
     },
     {
       href: ExternalRoutes.GRANTS_NEWSLETTER,
@@ -58,9 +52,14 @@ const Footer = () => {
       Tag: Icon.Mail,
     },
     {
-      href: ExternalRoutes.GRANTS_BLOG,
-      name: t("link_blog"),
-      Tag: Icon.LocalLibrary,
+      href: ExternalRoutes.GRANTS_RSS,
+      name: t("link_rss"),
+      Tag: Icon.RssFeed,
+    },
+    {
+      href: ExternalRoutes.GITHUB_REPO,
+      name: t("link_github"),
+      Tag: Icon.Github,
     },
   ].map(({ href, name, Tag }) => (
     <SocialLink
@@ -75,23 +74,26 @@ const Footer = () => {
     <USWDSFooter
       data-testid="footer"
       size="medium"
-      primary={<div />}
+      returnToTop={
+        <div className="grid-container usa-footer__return-to-top">
+          <a href="#">{t("return_to_top")}</a>
+        </div>
+      }
+      primary={null}
       secondary={
-        <Grid row>
-          <Logo
-            size="medium"
-            image={
-              <img
-                className="usa-footer__logo-img"
-                alt={t("logo_alt")}
-                src={"/img/grants-gov-logo.png"}
-              />
-            }
-            heading={
-              <p className="usa-footer__logo-heading">{t("agency_name")}</p>
-            }
-          />
-          <Grid className="usa-footer__contact-links" mobileLg={{ col: 6 }}>
+        <Grid row gap>
+          <Grid tablet={{ col: 4 }} desktop={{ col: 6 }}>
+            <img
+              className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
+              alt={t("logo_alt")}
+              src={"/img/grants-gov-logo.png"}
+            />
+          </Grid>
+          <Grid
+            className="usa-footer__contact-links"
+            tablet={{ col: 8 }}
+            desktop={{ col: 6 }}
+          >
             <SocialLinks links={links} />
             <h2 className="usa-footer__contact-heading">
               {t("agency_contact_center")}
