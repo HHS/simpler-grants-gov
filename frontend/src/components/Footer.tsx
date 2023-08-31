@@ -5,6 +5,7 @@ import { ComponentType } from "react";
 import {
   Address,
   Grid,
+  GridContainer,
   Icon,
   SocialLinks,
   Footer as USWDSFooter,
@@ -75,9 +76,9 @@ const Footer = () => {
       data-testid="footer"
       size="medium"
       returnToTop={
-        <div className="grid-container usa-footer__return-to-top">
+        <GridContainer className="usa-footer__return-to-top">
           <a href="#">{t("return_to_top")}</a>
-        </div>
+        </GridContainer>
       }
       primary={null}
       secondary={
