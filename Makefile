@@ -36,6 +36,7 @@ __check_defined = \
 	infra-format \
 	release-build \
 	release-publish \
+	release-pull \
 	release-deploy \
 	image-registry-login \
 	db-migrate \
@@ -160,6 +161,10 @@ release-build: ## Build release for $APP_NAME and tag it with current git hash
 release-publish: ## Publish release to $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	./bin/publish-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
+
+release-pull: ## Pull release from $APP_NAME's build repository
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	./bin/pull-release.sh $(APP_NAME) $(IMAGE_NAME) $(IMAGE_TAG)
 
 release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
