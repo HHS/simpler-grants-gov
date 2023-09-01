@@ -4,13 +4,13 @@
  */
 const PUBLIC_ENV_VARS_BY_ENV = {
   development: {
-    GOOGLE_ANALYTICS_ID: "thisneedstobereplaced",
+    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
   },
   test: {
-    GOOGLE_ANALYTICS_ID: "thisneedstobereplaced",
+    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
   },
   production: {
-    GOOGLE_ANALYTICS_ID: "thisneedstobereplaced",
+    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
   },
 } as const;
 
