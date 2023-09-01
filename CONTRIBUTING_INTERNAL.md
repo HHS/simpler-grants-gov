@@ -72,7 +72,7 @@ This project takes a very collaborative and [agile](https://agilemanifesto.org/)
 * **Be prompt**. Aim to respond to a review within 24 hours (although sooner is preferable), and if you cannot do so, be sure to communicate delays to the code author.
 * **Be kind and respectful** when leaving comments and maintain a collaborative tone. Don’t use language that disparages or embarrasses the author (name calling, insults to intelligence, etc). Direct any negative feedback towards the code rather than towards the author.
 * **Present suggestions as requests rather than demands**; instead of “Move this function to file B” try “Would this function fit better in file B?” This allows the author to push back on the suggestion by answering a question rather than rejecting a demand, which helps keep things from getting combative.
-* Praise and compliment the good parts!
+* **Praise and compliment** the good parts!
 * **Explain suggestions and recommendations**. These should be opportunities for learning/mentoring, not for criticism or giving orders.
 * **Offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
 * **Review the testing** as well as the code. You may think of edge cases or other things that the author’s testing plan might have missed.
