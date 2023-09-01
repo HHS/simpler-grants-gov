@@ -1,1 +1,5 @@
-@daphnegold @widal001 @lucasmbrown-usds @andycochran @sumiat @acouch
+# We are limiting this to 3 engineers and choosing not to select "Require review from Code Owners."
+@daphnegold @SammySteiner @acouch
+
+documentation/* @sumiat @widal001 @lucasmbrown-usds @daphnegold @andycochran @acouch @SammySteiner
+frontend/* @daphnegold @andycochran @acouch @SammySteiner
