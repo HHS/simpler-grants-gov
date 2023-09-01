@@ -65,7 +65,11 @@ CMD ["poetry", "run", "python", "-m", "src"]
 
 FROM base AS release
 ARG RUN_USER
-WORKDIR /api
+
+# Gunicorn requires this workaround to create writable temporary directory in
+# our readonly root file system. https://github.com/aws/containers-roadmap/issues/736
+RUN mkdir -p /tmp
+VOLUME ["/tmp"]
 
 # TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
 
@@ -105,4 +109,4 @@ ENV HOST=0.0.0.0
 USER ${RUN_USER}
 
 # Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
+CMD ["poetry", "run", "gunicorn", "src.app:create_app()"]

@@ -1,0 +1,4 @@
+bucket         = "<TF_STATE_BUCKET_NAME>"
+key            = "<TF_STATE_KEY>"
+dynamodb_table = "<TF_LOCKS_TABLE_NAME>"
+region         = "<REGION>"
