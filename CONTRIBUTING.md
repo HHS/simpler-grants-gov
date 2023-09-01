@@ -2,7 +2,7 @@
 
 # How to Contribute (Intnernal)
 
-The following guide is for members of the project team who have access to the repository.
+The following guide is for members of the project team who have access to the repository. For external contributors, see: [CONTRIBUTORS_EXTERNAL.md](./CONTRIBUTORS_EXTERNAL.md).
 
 ## Local Development
 
