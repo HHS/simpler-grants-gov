@@ -9,30 +9,31 @@ const FundingContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
-    <div className="bg-base-lightest desktop:padding-y-4 tablet:padding-y-2 padding-y-1">
+    <div className="bg-base-lightest padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
       <GridContainer>
-        <Grid row>
-          <h2 className="margin-bottom-0 desktop:font-sans-xl">
-            {t("fo_title")}
-          </h2>
-        </Grid>
-        <Grid row gap="lg">
-          <Grid tablet={{ col: 6 }}>
-            <p className="line-height-sans-4">{t("fo_paragraph_1")}</p>
-          </Grid>
-          <Grid tablet={{ col: 6 }}>
-            <p className="line-height-sans-4">{t("fo_paragraph_2")}</p>
-          </Grid>
-        </Grid>
-        <Grid>
-          <h3 className="margin-top-4 desktop:margin-top-6 desktop:font-sans-lg">
-            {t("fo_title_2")}
-          </h3>
-        </Grid>
-        <Grid>
-          <p className="usa-intro">{t("fo_paragraph_3")}</p>
-        </Grid>
+        <h2 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+          {t("fo_title")}
+        </h2>
         <Grid row gap>
+          <Grid tabletLg={{ col: 6 }}>
+            <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+              {t("fo_paragraph_1")}
+            </p>
+          </Grid>
+          <Grid tabletLg={{ col: 6 }}>
+            <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+              {t("fo_paragraph_2")}
+            </p>
+          </Grid>
+        </Grid>
+
+        <h3 className="margin-top-4 tablet-lg:font-sans-xl desktop:margin-top-6">
+          {t("fo_title_2")}
+        </h3>
+
+        <p className="usa-intro">{t("fo_paragraph_3")}</p>
+
+        <Grid row gap="md" className="margin-y-3 desktop:margin-y-6">
           {nofoPdfs.map((pdf) => (
             <NofoImageLink
               key={pdf.file}
@@ -42,14 +43,21 @@ const FundingContent = () => {
             />
           ))}
         </Grid>
-        <Grid row gap="lg" className="margin-top-2 desktop:margin-top-4">
-          <Grid tablet={{ col: 6 }}>
-            <h2 className="desktop:font-sans-xl">{t("fo_title_3")}</h2>
+
+        <Grid row gap>
+          <Grid tabletLg={{ col: 6 }}>
+            <h2 className="margin-top-0 tablet-lg:font-sans-xl">
+              {t("fo_title_3")}
+            </h2>
             <p className="usa-intro">{t("fo_paragraph_4")}</p>
           </Grid>
-          <Grid tablet={{ col: 6 }}>
-            <h3 className="desktop:font-sans-lg">{t("fo_title_4")}</h3>
-            <p className="line-height-sans-4">{t("fo_paragraph_5")}</p>
+          <Grid tabletLg={{ col: 6 }}>
+            <h3 className="margin-top-0 desktop:font-sans-lg">
+              {t("fo_title_4")}
+            </h3>
+            <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+              {t("fo_paragraph_5")}
+            </p>
           </Grid>
         </Grid>
       </GridContainer>

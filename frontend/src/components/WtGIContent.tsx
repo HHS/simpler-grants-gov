@@ -8,25 +8,25 @@ const WtGIContent = () => {
 
   return (
     <GridContainer
-      className="desktop:padding-y-4 tablet:padding-y-2 padding-y-1"
+      className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
       data-testid="wtgi-content"
     >
-      <Grid row>
-        <h2 className="margin-bottom-0 tablet:font-sans-xl">
-          {t("wtgi_title")}
-        </h2>
-      </Grid>
-      <Grid row gap="lg">
-        <Grid tablet={{ col: 6 }}>
+      <h2 className="margin-bottom-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+        {t("wtgi_title")}
+      </h2>
+      <Grid row gap>
+        <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("wtgi_paragraph_1")}</p>
         </Grid>
-        <Grid tablet={{ col: 6 }}>
+        <Grid tabletLg={{ col: 6 }}>
           <Trans
             t={t}
             i18nKey="wtgi_list"
             components={{
-              ul: <ul className="usa-list" />,
-              li: <li className="line-height-sans-4" />,
+              ul: (
+                <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4" />
+              ),
+              li: <li />,
               LinkToGoals: (
                 <a
                   target="_blank"

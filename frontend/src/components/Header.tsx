@@ -50,7 +50,6 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
               <div className="display-flex flex-align-center">
                 {logoPath && (
                   <span className="margin-right-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       className="width-3 desktop:width-5 text-bottom margin-right-05"
                       src={`${

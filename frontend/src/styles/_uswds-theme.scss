@@ -18,9 +18,8 @@ in the form $setting: value,
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
-  /* Override default breakpoints,
-    see https://designsystem.digital.gov/utilities/layout-grid/#utilities-settings */
-    $theme-utility-breakpoints:
+  // Layout & grid settings
+  $theme-utility-breakpoints:
     (
       "card": false,
       "card-lg": false,
@@ -29,18 +28,45 @@ in the form $setting: value,
       "tablet": true,
       "tablet-lg": true,
       "desktop": true,
-      "desktop-lg": false,
+      "desktop-lg": true,
       "widescreen": false
     ),
+  $theme-banner-max-width: "desktop-lg",
+  $theme-header-max-width: "desktop-lg",
+  $theme-grid-container-max-width: "desktop-lg",
+  $theme-footer-max-width: "desktop-lg",
+  $theme-identifier-max-width: "desktop-lg",
+  $theme-column-gap-desktop: 6,
+  $theme-column-gap-md: 4,
+  $theme-column-gap-lg: 6,
+  $position-settings: (
+    output: true,
+    responsive: true,
+    active: false,
+    focus: false,
+    hover: false,
+    visited: false
+  ),
 
-  // Prettier defaults for typography
-  $theme-font-type-sans: "public-sans",
+  // Typography settings
   $theme-global-link-styles: true,
+  $theme-body-font-size: "md",
+  $theme-type-scale-3xs: 2,
+  $theme-type-scale-2xs: 3,
+  $theme-type-scale-xs: 4,
+  $theme-type-scale-sm: 5,
+  $theme-type-scale-md: 6,
+  $theme-type-scale-lg: 9,
+  $theme-type-scale-xl: 12,
+  $theme-type-scale-2xl: 15,
+  $theme-type-scale-3xl: 17,
 
-  $background-color-palettes: (
-    "palette-color-system-cyan-light",
-    "palette-color-system-yellow-light",
-    "palette-color-system-green-cool",
-    "palette-color-system-red-warm"
-  )
+  // Color settings
+  $background-color-palettes:
+    (
+      "palette-color-system-cyan-light",
+      "palette-color-system-yellow-light",
+      "palette-color-system-green-cool",
+      "palette-color-system-red-warm"
+    )
 );
