@@ -53,7 +53,7 @@ If any manual testing was performed, document it in enough detail in the PR desc
 
 ### Reviewers
 
-Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS.md](./CODEOWNERS.md) for more details.
+Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS](./github/CODEOWNERS) for more details.
 
 ### Pull in Own Requests
 
@@ -74,10 +74,14 @@ This project takes a very collaborative and [agile](https://agilemanifesto.org/)
 * **Present suggestions as requests rather than demands**; instead of “Move this function to file B” try “Would this function fit better in file B?” This allows the author to push back on the suggestion by answering a question rather than rejecting a demand, which helps keep things from getting combative.
 * Praise and compliment the good parts!
 * **Explain suggestions and recommendations**. These should be opportunities for learning/mentoring, not for criticism or giving orders.
-* **offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
+* **Offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
 * **Review the testing** as well as the code. You may think of edge cases or other things that the author’s testing plan might have missed.
 * **Clearly designate between required and optional changes**. This can take many forms, but as examples: “(optional) We might want to rename this variable to avoid confusion” and “(blocking) We don’t properly handle deadlocks here, so we’ll need to fix that.” It may also be helpful to clearly designate praises, questions, nits, etc to make a comment’s intention very clear.
-* Consider using [conventional comments](https://conventionalcomments.org/) for messages.
+* Consider using **[conventional comments](https://conventionalcomments.org/)** for messages.
+* Use the **"Add a suggestion"** feature to suggest small changes in PRs.
+  
+![add a suggestion pop-up](https://github.com/HHS/grants-equity/assets/512243/e08efbd3-91de-43ce-a0d5-4529ccb1ac13)
+
 * **The "Request Changes"** feature *requires* the reviewer approve changes. This takes autonomy from the engineer, and should only be used if there is an urgent need.
 
 ## Releases
