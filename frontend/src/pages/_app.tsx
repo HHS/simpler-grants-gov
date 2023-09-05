@@ -15,7 +15,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Head>
         <link
           rel="icon"
-          href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`}
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/favicon.ico`}
+          sizes="any"
         />
       </Head>
       <Script id="google-tag-manager">
