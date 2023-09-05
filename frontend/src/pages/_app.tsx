@@ -18,19 +18,23 @@ function MyApp({ Component, pageProps }: AppProps) {
           href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`}
         />
       </Head>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${PUBLIC_ENV.GOOGLE_ANALYTICS_ID}`}
-      />
-      <Script id="google-analytics">
+      <Script id="google-tag-manager">
         {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', '${PUBLIC_ENV.GOOGLE_ANALYTICS_ID}');
-        `}
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl+ '&gtm_auth=${PUBLIC_ENV.GTM_AUTH}&gtm_preview=${PUBLIC_ENV.GTM_PREVIEW}&gtm_cookies_win=x';f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${PUBLIC_ENV.GOOGLE_ANALYTICS_ID}');
+      `}
       </Script>
+
       <Layout>
+        <noscript id="gtm-iframe"
+          dangerouslySetInnerHTML={{
+            __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${PUBLIC_ENV.GOOGLE_ANALYTICS_ID}&gtm_auth=${PUBLIC_ENV.GTM_AUTH}&gtm_preview=${PUBLIC_ENV.GTM_PREVIEW}&gtm_cookies_win=x"
+            height="0" width="0" style="display:none;visibility:hidden" />`,
+          }}
+        />
         <Component {...pageProps} />
       </Layout>
     </>

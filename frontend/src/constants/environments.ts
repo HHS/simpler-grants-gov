@@ -4,13 +4,19 @@
  */
 const PUBLIC_ENV_VARS_BY_ENV = {
   development: {
-    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
+    GOOGLE_ANALYTICS_ID: "GTM-MV57HMHS",
+    GTM_AUTH: "Xf-LmsD6dhZRJXZz21rZVA",
+    GTM_PREVIEW: "env-8",
   },
   test: {
-    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
+    GOOGLE_ANALYTICS_ID: "GTM-MV57HMHS",
+    GTM_AUTH: "73_zp32T8ExOVz-f_X56dQ",
+    GTM_PREVIEW: "env-9",
   },
   production: {
-    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
+    GOOGLE_ANALYTICS_ID: "GTM-MV57HMHS",
+    GTM_AUTH: "hqnD044nMRMTQ0C3XBpbfQ",
+    GTM_PREVIEW: "env-1",
   },
 } as const;
 
