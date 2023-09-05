@@ -1,6 +1,6 @@
 <!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
-# How to Contribute (Intnernal)
+# How to Contribute (Internal)
 
 The following guide is for members of the project team who have access to the repository. For external contributors, see: [CONTRIBUTING_EXTERNAL.md](./CONTRIBUTING_EXTERNAL.md).
 
