@@ -56,7 +56,7 @@ Sharing how you or your organization have used the Grants Equity project is an i
 
 ## Code Contributions
 
-The following guidelines are for code contributions. Please see [CONTRIBUTING-INTERNAL.md](./CONTRIBUTING-INTERNAL.md) for more information about the software development lifecylce on the project.
+The following guidelines are for code contributions. Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for more information about the software development lifecylce on the project.
 
 ### Getting Started
 
