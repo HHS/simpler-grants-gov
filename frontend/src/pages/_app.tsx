@@ -29,7 +29,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Script>
 
       <Layout>
-        <noscript id="gtm-iframe"
+        <noscript
+          id="gtm-iframe"
           dangerouslySetInnerHTML={{
             __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${PUBLIC_ENV.GOOGLE_ANALYTICS_ID}&gtm_auth=${PUBLIC_ENV.GTM_AUTH}&gtm_preview=${PUBLIC_ENV.GTM_PREVIEW}&gtm_cookies_win=x"
             height="0" width="0" style="display:none;visibility:hidden" />`,
