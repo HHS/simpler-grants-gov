@@ -59,6 +59,10 @@ This encompasses the commit messages pushed to branches. This is tied to the dec
 
 - **Pros**
   - Developers don't need to worry about the format of a commit while working on features
+  - Lower overhead for each commit for some contributors, promoting more frequent commits during development
+  - Less to read through when composing the "squash and merge" commit message if commits are shorter
+  - No tools or learning curve necessary
+  - Encourages necessary context be given in code comments or documentation instead of commit history
 - **Cons**
   - Individual messages in pull requests are harder to read as every developer might use a different format
   - It is easier to accidentally include poorly worded or formatted messages using the "squash and merge" tool
