@@ -112,7 +112,7 @@ This project will use `[github-username]/issue-[issue-number]-[feature-name]` co
   - Facilitates lean experiments
   - Simpler and more efficient than some other models
 - **Cons**
-  - Doesn't support releasing multiple versions of software, which is necessary in some cases (but not envisioned on this project)
+  - Doesn't facilitate releasing multiple versions of software, which is necessary in some cases (but not envisioned on this project)
 
 #### Gitflow
 
