@@ -28,8 +28,8 @@ export RUN_UID
 release-build:
 	docker buildx build \
 	  --target release \
-		--cache-from=type=local,src=/tmp/.buildx-cache \
-		--cache-to=type=local,dest=/tmp/.buildx-cache \
+		--cache-to type=gha,mode=max \
+		--cache-from type=gha \
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
 		--build-arg RUN_UID=$(RUN_UID) \
