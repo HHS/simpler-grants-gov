@@ -14,7 +14,7 @@ See [goals.md](./goals.md) for more information about the vision and goals for t
 
 The [milestones](./milestones) directory contains information about our milestones for the modernization project.
 
-[The milestone short descriptions file](./milestone_short_descriptions.md) contains brief descriptions of upcoming milestones. The [individual milestones](./milestones/individual_milestones) directory contains detailed descriptions of the project milestones.
+[The milestone short descriptions file](./milestones/milestone_short_descriptions.md) contains brief descriptions of upcoming milestones. The [individual milestones](./milestones/individual_milestones) directory contains detailed descriptions of the project milestones.
 
 ## Decisions
 
