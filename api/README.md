@@ -37,7 +37,7 @@ root
 
 ## Local Development
 
-See [development.md](./development.md) for installation and development instructions.
+See [development.md](../documentation/api/development.md) for installation and development instructions.
 
 ## Technical Information
 
