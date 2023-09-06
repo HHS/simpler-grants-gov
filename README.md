@@ -20,7 +20,7 @@ An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINT
 
 ## Repository Structure
 
-- [./github](./github) contains Github specific settings files and testing, linting, and CI/CD workflows
+- [./.github](./.github) contains Github specific settings files and testing, linting, and CI/CD workflows
 - [./api](./api) contains an API built in Python using the Flask library
 - [./bin](./bin) contains scripts for managing infrastructure
 - [./documentation](./documentation) contains project guides, documentation, and decision records
