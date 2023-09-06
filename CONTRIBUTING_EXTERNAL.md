@@ -64,7 +64,7 @@ This project is monorepo with several apps. Please see the [api](./api/README.md
 
 ### Workflow and Branching
 
-This project follows [trunk-based development](./CONTRIBUTING-INTERNAL.md#branching-model), so all contributions are directed toward the `main` branch.
+This project follows [trunk-based development](./CONTRIBUTING.md#branching-model), so all contributions are directed toward the `main` branch.
 
 1.  Fork the project
 1.  Check out the `main` branch
@@ -85,7 +85,7 @@ External contributors should use the *Bug Report* or *Feature Request* [issue te
 
 ### Pull Requests
 
-Pull requests should follow the conventions in [CONTRIBUTING-INTERNAL.md](./CONTRIBUTING-INTERNAL.md) with the following changes:
+Pull requests should follow the conventions in [CONTRIBUTING.md](./CONTRIBUTING.md) with the following changes:
 
 1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External]` format.
 1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
