@@ -21,6 +21,14 @@ body:
     validations:
       required: false
   - type: textarea
+    id: sub-tasks
+    attributes:
+      label: Sub-Tasks
+      description: A list of tasks that need to be completed as part of this epic
+      placeholder: Use a task list to make it easier to convert these items into tickets
+    validations:
+      required: false
+  - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance criteria

@@ -1,0 +1,51 @@
+name: Internal - Milestone
+description: Describe the features and acceptance criteria for a public facing deliverable
+title: "[Epic]: "
+labels: ["project: grants.gov", "level: epic"]
+assignees:
+  - octocat
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear and concise summary of the milestone
+    validations:
+      required: true
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: 2-3 sentences describing the problem this milestone intends to solve
+      placeholder: Tell us about it from the user's perspective!
+    validations:
+      required: false
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals
+      description: A list of goals that this milestone should accomplish
+    validations:
+      required: false
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: A list of other milestones that must be completed before work can start on this milestone
+    validations:
+      required: false
+  - type: textarea
+    id: epics
+    attributes:
+      label: Epics
+      description: The list of epics that will be completed within this milestone
+    validations:
+      required: false
+  - type: textarea
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: A checklist of criteria that must be met to consider this milestone delivered
+      placeholder: Explain the steps to success!
+    validations:
+      required: true
