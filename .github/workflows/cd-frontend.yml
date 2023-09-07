@@ -6,11 +6,11 @@ run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'd
 on:
   push:
     branches:
-      - "main"
-    paths:
-      - "frontend/**"
-      - "bin/**"
-      - "infra/**"
+      - "daphnegold/issue-463-flow"
+    # paths:
+    #   - "frontend/**"
+    #   - "bin/**"
+    #   - "infra/**"
   workflow_dispatch:
     inputs:
       app_name:
@@ -29,8 +29,23 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
-    uses: ./.github/workflows/deploy.yml
-    with:
-      app_name: ${{ inputs.app_name || 'frontend' }}
-      environment: ${{ inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    env:
+      SHOULD_DEPLOY: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ github.token }}" | gh auth login --with-token
+
+      - name: Run check-suite script
+        run: bash -x ./.github/workflows/check_suite.sh ${{ github.sha }}
+
+      - name: Deploy
+        if: env.SHOULD_DEPLOY == 'true'
+        uses: ./.github/workflows/deploy.yml
+        with:
+          app_name: ${{ inputs.app_name || 'frontend' }}
+          environment: ${{ inputs.environment || 'dev' }}

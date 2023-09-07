@@ -3,7 +3,7 @@ name: Front-end Checks
 on:
   push:
     branches:
-      - main
+      - "daphnegold/issue-463-flow"
   pull_request:
     paths:
       - frontend/**

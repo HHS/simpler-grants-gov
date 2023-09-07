@@ -50,4 +50,4 @@ while :; do
 done
 
 # Output the result
-echo "::set-output name=should_deploy::$SHOULD_DEPLOY"
+echo "SHOULD_DEPLOY=${should_deploy}" >> $GITHUB_ENV
