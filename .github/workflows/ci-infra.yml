@@ -8,10 +8,10 @@ on:
       - infra/**
       - .github/workflows/ci-infra.yml
   pull_request:
-    paths:
-      - infra/**
-      - test/**
-      - .github/workflows/ci-infra.yml
+    # paths:
+    #   - infra/**
+    #   - test/**
+    #   - .github/workflows/ci-infra.yml
 
 env:
   APP_NAME: frontend
