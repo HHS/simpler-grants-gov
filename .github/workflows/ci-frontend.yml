@@ -3,7 +3,12 @@ name: Front-end Checks
 on:
   push:
     branches:
-      - main
+      # TODO: Change to main after testing
+      - "daphnegold/issue-463-flow"
+    paths:
+      - "frontend/**"
+      - "bin/**"
+      - "infra/**"
   pull_request:
     paths:
       - frontend/**

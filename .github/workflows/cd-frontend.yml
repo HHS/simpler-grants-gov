@@ -4,13 +4,13 @@ name: Deploy Frontend
 run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'dev' }}
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Front-end Checks"]
     branches:
-      - "main"
-    paths:
-      - "frontend/**"
-      - "bin/**"
-      - "infra/**"
+      # TODO: Change to main after testing
+      - "daphnegold/issue-463-flow"
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       app_name:
@@ -29,6 +29,8 @@ on:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     name: Deploy
     uses: ./.github/workflows/deploy.yml
     with:
