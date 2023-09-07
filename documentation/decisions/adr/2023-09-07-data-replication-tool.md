@@ -4,13 +4,13 @@
 - **Last Modified:** 2023-09-07
 - **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
 - **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch
-- **Tags:** Hosting, Infrastructure
+- **Tags:** Hosting, Infrastructure, Database
 
 ## Context and Problem Statement
 
 The Beta.Grants.Gov platform will need to consume data and apply additional load to the database, that the database was not planned to support. Therefore, we will replicate the data for the Beta.Grants.Gov work so it will have a negligable impact on the database for replication related tasks and still provide up-to-date production data.
 
-## Decision Drivers <!-- RECOMMENDED -->
+## Decision Drivers
 
 - Data source and destination compatibility: rep tool should support the data sources used in the project (db, file systems) and is compatible with the target destination (db, warehouses, cloud storage).
 - Data volume and throughput: tool can handle the volume and throughput requirements of the data replication process efficiently.
@@ -30,21 +30,21 @@ The Beta.Grants.Gov platform will need to consume data and apply additional load
 - Use AWS DMS (Database Migration Service)
 - Create new data pipelines from data sources
 
-## Decision Outcome <!-- REQUIRED -->
+## Decision Outcome
 
 Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doensn't impact the production database' ability to perform its existing role.
 
-### Positive Consequences <!-- OPTIONAL -->
+### Positive Consequences
 
 - This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
 - This approach allows us to only replicate what we need when we need it, ruducing the cost of replication, and limiting our security exposure.
 - If we impliment DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle databse.
 
-### Negative Consequences <!-- OPTIONAL -->
+### Negative Consequences
 
 - When we want to eventually move away from the expensive Oracle database and it's unoptomized schema, this replica will need to be deprecated as well
 
-## Pros and Cons of the Options <!-- OPTIONAL -->
+## Pros and Cons of the Options
 
 ### Use Production Database
 
@@ -87,7 +87,7 @@ Create new data pipelines from the source of truth similar to the production dat
   - Team is not currently staffed to support this work
 
 
-## Links <!-- OPTIONAL -->
+## Links
 
 - [AWS DMS](https://aws.amazon.com/dms/)
 - [AWS DMS Cross VPC Config](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.VPC.html#CHAP_ReplicationInstance.VPC.Configurations.ScenarioVPCPeer)
