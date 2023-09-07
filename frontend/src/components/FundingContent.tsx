@@ -39,6 +39,8 @@ const FundingContent = () => {
               key={pdf.file}
               file={pdf.file}
               image={pdf.image}
+              height={pdf.height}
+              width={pdf.width}
               alt={t(`${pdf.alt}`)}
             />
           ))}
