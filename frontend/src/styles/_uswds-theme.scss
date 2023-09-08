@@ -47,6 +47,14 @@ in the form $setting: value,
     hover: false,
     visited: false
   ),
+  $flex-settings: (
+    output: true,
+    responsive: true,
+    active: false,
+    focus: false,
+    hover: false,
+    visited: false
+  ),
 
   // Typography settings
   $theme-global-link-styles: true,
