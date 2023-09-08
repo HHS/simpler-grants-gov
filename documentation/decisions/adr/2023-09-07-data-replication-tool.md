@@ -8,7 +8,7 @@
 
 ## Context and Problem Statement
 
-The Beta.Grants.Gov platform will need to consume data and apply additional load to the database, that the database was not planned to support. Therefore, we will replicate the data for the Beta.Grants.Gov work so it will have a negligable impact on the database for replication related tasks and still provide up-to-date production data.
+The Beta.Grants.Gov platform will need to consume data and apply additional load to the database that the database was not planned to support. Therefore, we will replicate the data for the Beta.Grants.Gov work so it will have a negligible impact on the database for replication related tasks and still provide up-to-date production data.
 
 ## Decision Drivers
 
@@ -32,17 +32,19 @@ The Beta.Grants.Gov platform will need to consume data and apply additional load
 
 ## Decision Outcome
 
-Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doesn't impact the production database's ability to perform its existing role. Additionally, [AWS DMS is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/).
+Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doesn't impact the production database's ability to perform its existing role.
+
+Additionally, [AWS DMS is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/).
 
 ### Positive Consequences
 
 - This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
-- This approach allows us to only replicate what we need when we need it, ruducing the cost of replication, and limiting our security exposure.
+- This approach allows us to only replicate what we need when we need it, reducing the cost of replication, and limiting our security exposure.
 - If we implement DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle database.
 
 ### Negative Consequences
 
-- When we want to eventually move away from the expensive Oracle database and it's unoptomized schema, this replica will need to be deprecated as well
+- When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
 
 ## Pros and Cons of the Options
 
@@ -54,7 +56,7 @@ Connect to the Microhealth lower environment replica database, that contains onl
   - No additional cost
   - Easiest to set up
 - **Cons**
-  - Additional load could degrade performance of crtical grants.gov operations
+  - Additional load could degrade performance of critical grants.gov operations
   - Beta environment will have access to PII data that will require security hardening to be prioritized before launch
   - No data transformation possible
 
@@ -62,11 +64,11 @@ Connect to the Microhealth lower environment replica database, that contains onl
 
 Create a new Postgres Database in the Beta lower and production environments and configure AWS DMS to replicate select tables from the MH lower environment database for the beta lower environment and the production database for the beta production environment. This solution requires MH configure VPC Peering to allow DMS traffic between our VPCs.
 
-For this solution we will only replicate oportunities data at first to limit the cost of storage and restrict our environment to publicly accessible data. However, we will build it with the intention of making it easy to add tables to the replication, or even replicating the entire database when that becomes necessary.
+For this solution we will only replicate opportunities data at first to limit the cost of storage and restrict our environment to publicly accessible data. However, we will build it with the intention of making it easy to add tables to the replication, or even replicating the entire database when that becomes necessary.
 
 - **Pros**
   - DMS is AWS's best practice tool for our use case
-  - Negligable impact to source database, even with replicating ongoing changes
+  - Negligible impact to source database, even with replicating ongoing changes
   - Replicating only public data reduces our security criticality
   - Ability to transform data is part of the DMS tool and well documented
 - **Cons**
@@ -75,12 +77,12 @@ For this solution we will only replicate oportunities data at first to limit the
 
 ### Create new data pipelines from data sources
 
-Create new data pipelines from the source of truth similar to the production database. Instead of copying the production schema, design a new database schema that incorporates all the lessons learned from running the current production database as well as designing the new schema for additional requirements that the current schema is not optomized or able to meet.
+Create new data pipelines from the source of truth similar to the production database. Instead of copying the production schema, design a new database schema that incorporates all the lessons learned from running the current production database as well as designing the new schema for additional requirements that the current schema is not optimized or able to meet.
 
 - **Pros**
   - No impact to production database
   - Facilitates moving off expensive Oracle database
-  - Can optomize database schema for current and future requirements
+  - Can optimize database schema for current and future requirements
 - **Cons**
   - We do not have clear requirements for current and existing APIs to design the schema around and will have to work on that first
   - Very long time to deliver
