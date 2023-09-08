@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "daphnegold/issue-463-flow"
+  release:
+    types: [published]
   # pull_request:
   #   paths:
   #     - frontend/**

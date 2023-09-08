@@ -11,6 +11,8 @@ on:
     #   - "frontend/**"
     #   - "bin/**"
     #   - "infra/**"
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       app_name:
@@ -53,4 +55,4 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: ${{ inputs.app_name || 'frontend' }}
-      environment: ${{ inputs.environment || 'dev' }}
+      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
