@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - "daphnegold/issue-463-flow"
-  pull_request:
-    paths:
-      - frontend/**
-      - .github/workflows/ci-frontend.yml
+  # pull_request:
+  #   paths:
+  #     - frontend/**
+  #     - .github/workflows/ci-frontend.yml
 
 defaults:
   run:
