@@ -4,13 +4,13 @@ name: Deploy Frontend
 run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'dev' }}
 
 on:
-  push:
-    branches:
-      - "daphnegold/issue-463-flow"
-    # paths:
-    #   - "frontend/**"
-    #   - "bin/**"
-    #   - "infra/**"
+  # push:
+  #   branches:
+  #     - "daphnegold/issue-463-flow"
+  # paths:
+  #   - "frontend/**"
+  #   - "bin/**"
+  #   - "infra/**"
   workflow_dispatch:
     inputs:
       app_name:
@@ -44,11 +44,11 @@ jobs:
         id: check-suite
         run: |
           ./.github/workflows/check_suite.sh ${{ github.sha }}
-          echo $GITHUB_OUTPUT
 
   deploy:
     name: Deploy
     needs: wait-for-checks
+    # Is there a way to output an error if this check fails, there's a green check mark.
     if: needs.wait-for-checks.outputs.should_deploy == 'true'
     uses: ./.github/workflows/deploy.yml
     with:

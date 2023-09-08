@@ -1,9 +1,14 @@
 name: Front-end Checks
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Deploy Frontend"]
+    types: [requested]
     branches:
       - "daphnegold/issue-463-flow"
+  # push:
+  #   branches:
+  #     - "daphnegold/issue-463-flow"
   # pull_request:
   #   paths:
   #     - frontend/**

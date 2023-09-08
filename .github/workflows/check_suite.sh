@@ -46,6 +46,7 @@ while :; do
     fi
   fi
 
+  echo "Sleeping for $SLEEP_SECONDS seconds."
   sleep $SLEEP_SECONDS
 done
 
