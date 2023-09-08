@@ -38,7 +38,7 @@ Chosen option: Use AWS DMS, because it is the only option that allows us to deli
 
 - This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
 - This approach allows us to only replicate what we need when we need it, ruducing the cost of replication, and limiting our security exposure.
-- If we impliment DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle databse.
+- If we implement DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle database.
 
 ### Negative Consequences
 
