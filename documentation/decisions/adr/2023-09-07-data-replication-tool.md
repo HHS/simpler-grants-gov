@@ -32,7 +32,7 @@ The Beta.Grants.Gov platform will need to consume data and apply additional load
 
 ## Decision Outcome
 
-Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doensn't impact the production database' ability to perform its existing role.
+Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doesn't impact the production database's ability to perform its existing role. Additionally, [AWS DMS is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/).
 
 ### Positive Consequences
 
@@ -92,3 +92,4 @@ Create new data pipelines from the source of truth similar to the production dat
 - [AWS DMS](https://aws.amazon.com/dms/)
 - [AWS DMS Cross VPC Config](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.VPC.html#CHAP_ReplicationInstance.VPC.Configurations.ScenarioVPCPeer)
 - [What is VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
+- [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
