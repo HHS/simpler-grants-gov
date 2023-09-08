@@ -6,11 +6,11 @@ run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'd
 on:
   push:
     branches:
-      - "daphnegold/issue-463-flow"
-    # paths:
-    #   - "frontend/**"
-    #   - "bin/**"
-    #   - "infra/**"
+      - main
+    paths:
+      - "frontend/**"
+      - "bin/**"
+      - "infra/**"
   release:
     types: [published]
   workflow_dispatch:

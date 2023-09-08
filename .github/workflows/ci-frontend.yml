@@ -3,7 +3,7 @@ name: Front-end Checks
 on:
   push:
     branches:
-      - "daphnegold/issue-463-flow"
+      - main
   release:
     types: [published]
   # pull_request:
