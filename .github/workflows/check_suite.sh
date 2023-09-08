@@ -49,4 +49,4 @@ while :; do
   sleep $SLEEP_SECONDS
 done
 
-echo "SHOULD_DEPLOY=${SHOULD_DEPLOY}" >> $GITHUB_ENV
+echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
