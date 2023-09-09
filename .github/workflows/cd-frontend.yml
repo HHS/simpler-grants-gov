@@ -43,10 +43,12 @@ jobs:
         run: echo "${{ github.token }}" | gh auth login --with-token
 
       - name: Run check-suite script
-        id: check-suite
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          REPO: "hhs/grants-equity"
         run: |
-          ./.github/workflows/check_suite.sh ${{ github.sha }}
-          echo $GITHUB_OUTPUT
+          ${{ github.workspace }}/bin/verify-checks.sh
 
   deploy:
     name: Deploy
