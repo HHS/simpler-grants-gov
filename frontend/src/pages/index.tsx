@@ -14,8 +14,6 @@ import Hero from "../components/Hero";
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
-  const unused_var_for_test = "";
-
   return (
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
