@@ -37,6 +37,8 @@ while :; do
     CHECK_RUN_STATUS=$(echo "$run" | jq -r '.status')
     CHECK_RUN_CONCLUSION=$(echo "$run" | jq -r '.conclusion')
 
+    echo "Debug: CHECK_RUN_ID=$CHECK_RUN_ID, CURRENT_GITHUB_RUN_ID=$CURRENT_GITHUB_RUN_ID"
+
     # Skip the current GitHub Actions run to prevent the script from waiting on itself to complete.
     if [[ "$CHECK_RUN_ID" == "$CURRENT_GITHUB_RUN_ID" ]]; then
       echo "Skipping current run ID: $CURRENT_GITHUB_RUN_ID."
