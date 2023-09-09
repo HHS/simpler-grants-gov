@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # Required environment variables
-REPO=${REPO:-""}
-SHA=${SHA:-""}
 CURRENT_GITHUB_RUN_ID=${CURRENT_GITHUB_RUN_ID:-""}
+SHA=${SHA:-""}
+REPO=${REPO:-""}
 
 TIMEOUT_MINUTES=6
 SLEEP_SECONDS=15

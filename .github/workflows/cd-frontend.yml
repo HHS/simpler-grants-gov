@@ -40,10 +40,10 @@ jobs:
       - name: Authenticate GitHub CLI
         run: echo "${{ github.token }}" | gh auth login --with-token
 
-      - name: Run check-suite script
+      - name: Run verify-checks script
         env:
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          GITHUB_SHA: ${{ github.sha }}
+          CURRENT_GITHUB_RUN_ID: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
           REPO: "hhs/grants-equity"
         run: |
           ${{ github.workspace }}/bin/verify-checks.sh
