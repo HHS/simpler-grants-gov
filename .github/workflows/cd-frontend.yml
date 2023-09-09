@@ -32,8 +32,6 @@ on:
 jobs:
   wait-for-checks:
     runs-on: ubuntu-latest
-    outputs:
-      should_deploy: ${{ steps.check-suite.outputs.should_deploy }}
 
     steps:
       - name: Checkout code
@@ -53,7 +51,6 @@ jobs:
   deploy:
     name: Deploy
     needs: wait-for-checks
-    if: needs.wait-for-checks.outputs.should_deploy == 'true'
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: ${{ inputs.app_name || 'frontend' }}
