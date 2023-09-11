@@ -100,7 +100,7 @@ questions, just [shoot us an email](mailto:email address needed@hhs.gov).
 
 ### Security and Responsible Disclosure Policy
 
-The Centers for Medicare & Medicaid Services is committed to ensuring the
+The Department of Health and Human Services is committed to ensuring the
 security of the American public by protecting their information from
 unwarranted disclosure. We want security researchers to feel comfortable
 reporting vulnerabilities they have discovered so we can fix them and keep our
