@@ -44,7 +44,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region = local.database_config.region
   default_tags {
     tags = local.tags
   }
@@ -58,15 +58,33 @@ module "app_config" {
   source = "../app-config"
 }
 
+data "aws_security_groups" "aws_services" {
+  filter {
+    name   = "group-name"
+    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
 module "database" {
   source = "../../modules/database"
 
-  name               = "${local.prefix}${local.database_config.cluster_name}"
-  access_policy_name = "${local.prefix}${local.database_config.access_policy_name}"
-  app_username       = "${local.prefix}${local.database_config.app_username}"
-  migrator_username  = "${local.prefix}${local.database_config.migrator_username}"
-  schema_name        = "${local.prefix}${local.database_config.schema_name}"
+  name                        = "${local.prefix}${local.database_config.cluster_name}"
+  access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
+  app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
+  migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
 
-  vpc_id             = data.aws_vpc.default.id
-  private_subnet_ids = data.aws_subnets.default.ids
+  # The following are not AWS infra resources and therefore do not need to be
+  # isolated via the terraform workspace prefix
+  app_username      = local.database_config.app_username
+  migrator_username = local.database_config.migrator_username
+  schema_name       = local.database_config.schema_name
+
+  vpc_id                         = data.aws_vpc.default.id
+  private_subnet_ids             = data.aws_subnets.default.ids
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 }

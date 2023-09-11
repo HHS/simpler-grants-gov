@@ -22,6 +22,10 @@ output "image_repository_name" {
   value = local.image_repository_name
 }
 
+output "build_repository_config" {
+  value = local.build_repository_config
+}
+
 output "environment_configs" {
   value = local.environment_configs
 }

@@ -24,8 +24,8 @@ set -euo pipefail
 
 ACCOUNT_NAME=$1
 
-ACCOUNT_ID="$(./bin/current-account-id.sh)"
-REGION="$(./bin/current-region.sh)"
+ACCOUNT_ID=$(./bin/current-account-id.sh)
+REGION=$(./bin/current-region.sh)
 
 # Get project name
 terraform -chdir=infra/project-config refresh > /dev/null
@@ -53,10 +53,10 @@ echo "Creating bucket: $TF_STATE_BUCKET_NAME"
 # For creating buckets in us-east-1, LocationConstraint cannot be set
 # See https://docs.aws.amazon.com/cli/latest/reference/s3api/create-bucket.html
 CREATE_BUCKET_CONFIGURATION=""
-if [ $REGION != "us-east-1" ]; then
+if [ "$REGION" != "us-east-1" ]; then
   CREATE_BUCKET_CONFIGURATION="--create-bucket-configuration LocationConstraint=$REGION"
 fi
-aws s3api create-bucket --bucket $TF_STATE_BUCKET_NAME --region $REGION $CREATE_BUCKET_CONFIGURATION > /dev/null
+aws s3api create-bucket --bucket "$TF_STATE_BUCKET_NAME" --region "$REGION" "$CREATE_BUCKET_CONFIGURATION" > /dev/null
 echo
 echo "----------------------------------"
 echo "Creating rest of account resources"
@@ -80,7 +80,7 @@ terraform init \
 # But first check if the bucket already exists in the state file. If we are
 # re-running account setup and the bucket already exists then skip the import step
 if ! terraform state list module.backend.aws_s3_bucket.tf_state; then
-  terraform import module.backend.aws_s3_bucket.tf_state $TF_STATE_BUCKET_NAME
+  terraform import module.backend.aws_s3_bucket.tf_state "$TF_STATE_BUCKET_NAME"
 fi
 
 terraform apply \
@@ -91,4 +91,4 @@ cd -
 
 MODULE_DIR=infra/accounts
 BACKEND_CONFIG_NAME="$ACCOUNT_NAME.$ACCOUNT_ID"
-./bin/create-tfbackend.sh $MODULE_DIR $BACKEND_CONFIG_NAME $TF_STATE_KEY
+./bin/create-tfbackend.sh "$MODULE_DIR" "$BACKEND_CONFIG_NAME" "$TF_STATE_KEY"
