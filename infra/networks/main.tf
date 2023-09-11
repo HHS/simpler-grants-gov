@@ -48,8 +48,8 @@ module "project_config" {
   source = "../project-config"
 }
 
-module "app_config" {
-  source = "../app/app-config"
+module "api_config" {
+  source = "../api/app-config"
 }
 
 data "aws_vpc" "default" {
