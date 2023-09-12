@@ -100,7 +100,7 @@ infra-update-app-build-repository: ## Create or update $APP_NAME's build reposit
 infra-update-app-database: ## Create or update $APP_NAME's database module for $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/$(APP_NAME)/database" init -backend-config="$(ENVIRONMENT).s3.tfbackend"
+	terraform -chdir="infra/$(APP_NAME)/database" init -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
