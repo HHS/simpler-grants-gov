@@ -100,7 +100,7 @@ infra-update-app-build-repository: ## Create or update $APP_NAME's build reposit
 infra-update-app-database: ## Create or update $APP_NAME's database module for $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/$(APP_NAME)/database" init -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
+	terraform -chdir="infra/$(APP_NAME)/database" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
@@ -112,7 +112,7 @@ infra-update-app-service: ## Create or update $APP_NAME's web service module
 	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/$(APP_NAME)/service" init -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
+	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
 
 # The prerequisite for this rule is obtained by
