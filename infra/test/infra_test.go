@@ -1,6 +1,7 @@
 package test
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 	"testing"
@@ -14,6 +15,7 @@ import (
 
 var uniqueId = strings.ToLower(random.UniqueId())
 var workspaceName = fmt.Sprintf("t-%s", uniqueId)
+var appName = flag.String("app_name", "", "name of subdirectory that holds the app's infrastructure code")
 
 func TestService(t *testing.T) {
 	BuildAndPublish(t)
@@ -25,7 +27,7 @@ func TestService(t *testing.T) {
 	})
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		Reconfigure:  true,
-		TerraformDir: "../app/service/",
+		TerraformDir: fmt.Sprintf("../%s/service/", *appName),
 		Vars: map[string]interface{}{
 			"environment_name": "dev",
 			"image_tag":        imageTag,
@@ -59,14 +61,14 @@ func BuildAndPublish(t *testing.T) {
 	// after which we add BackendConfig: []string{"dev.s3.tfbackend": terraform.KeyOnly} to terraformOptions
 	// and replace the call to terraform.RunTerraformCommand with terraform.Init
 	TerraformInit(t, &terraform.Options{
-		TerraformDir: "../app/build-repository/",
+		TerraformDir: fmt.Sprintf("../%s/build-repository/", *appName),
 	}, "shared.s3.tfbackend")
 	fmt.Println("::endgroup::")
 
 	fmt.Println("::group::Build release")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-build", "APP_NAME=app"},
+		Args:       []string{"release-build", fmt.Sprintf("APP_NAME=%s", *appName)},
 		WorkingDir: "../../",
 	})
 	fmt.Println("::endgroup::")
@@ -74,7 +76,7 @@ func BuildAndPublish(t *testing.T) {
 	fmt.Println("::group::Publish release")
 	shell.RunCommand(t, shell.Command{
 		Command:    "make",
-		Args:       []string{"release-publish", "APP_NAME=app"},
+		Args:       []string{"release-publish", fmt.Sprintf("APP_NAME=%s", *appName)},
 		WorkingDir: "../../",
 	})
 	fmt.Println("::endgroup::")
@@ -82,7 +84,7 @@ func BuildAndPublish(t *testing.T) {
 
 func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	fmt.Println("::group::Wait for service to be stable")
-	appName := "app"
+	appName := *appName
 	environmentName := "dev"
 	serviceName := fmt.Sprintf("%s-%s-%s", workspaceName, appName, environmentName)
 	shell.RunCommand(t, shell.Command{

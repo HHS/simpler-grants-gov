@@ -1,20 +1,22 @@
 name: CI Infra Service Checks
 
 on:
-  # !! Uncomment to trigger automated infra tests once dev environment is set up
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - infra/*/service/**
-  #     - infra/test/**
-  #     - .github/workflows/ci-infra-service.yml
-  # pull_request:
-  #   paths:
-  #     - infra/*/service/**
-  #     - infra/test/**
-  #     - .github/workflows/ci-infra-service.yml
+  push:
+    branches:
+      - main
+    paths:
+      - infra/*/service/**
+      - infra/test/**
+      - .github/workflows/ci-infra-service.yml
+  pull_request:
+    paths:
+      - infra/*/service/**
+      - infra/test/**
+      - .github/workflows/ci-infra-service.yml
   workflow_dispatch:
+
+env:
+  APP_NAME: frontend
 
 jobs:
   infra-test-e2e:
@@ -45,4 +47,4 @@ jobs:
           environment: dev
 
       - name: Run Terratest
-        run: make infra-test-service
+        run: make APP_NAME=${{ env.APP_NAME }} infra-test-service
