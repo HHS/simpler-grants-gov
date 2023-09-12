@@ -1,6 +1,6 @@
 # Documentation for the Grants Equity Project
 
-This folder contains documentation for the Grants Equity Project. The following are some important, high-level 
+This folder contains documentation for the Grants Equity Project.
 
 ## Goals
 
