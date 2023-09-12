@@ -6,7 +6,7 @@ A modernization effort for Grants.gov.
 
 Our vision is for the following to become true:
 
-Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government.
+_**Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government.**_
 
 Grants.gov helps ensure that no communities are underserved by the federal government.
 
