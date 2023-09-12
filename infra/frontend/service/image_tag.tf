@@ -6,6 +6,25 @@
 #  1. Accept an optional variable during a terraform plan/apply. (see "image_tag" variable in variables.tf)
 
 #  2. Read the output used from the last terraform state using "terraform_remote_state".
+#     Get the backend config by parsing the backend config file
+locals {
+  backend_config_file_path = "${path.module}/${var.environment_name}.s3.tfbackend"
+  backend_config_file      = file("${path.module}/${var.environment_name}.s3.tfbackend")
+
+  # Use regex to parse backend config file to get a map of variables to their
+  # defined values since there is no built-in terraform function that does that
+  #
+  # The backend config file consists of lines that look like
+  # <variable_name>        = "<variable_value"
+  # so our regex is (\w+)\s+= "(.+)"
+  # Note that backslashes in the regex need to be escaped in Terraform
+  # so they will appear as \\ instead of \
+  # (see https://developer.hashicorp.com/terraform/language/functions/regex)
+  backend_config_regex = "(\\w+)\\s+= \"(.+)\""
+  backend_config       = { for match in regexall(local.backend_config_regex, local.backend_config_file) : match[0] => match[1] }
+  tfstate_bucket       = local.backend_config["bucket"]
+  tfstate_key          = local.backend_config["key"]
+}
 data "terraform_remote_state" "current_image_tag" {
   # Don't do a lookup if image_tag is provided explicitly.
   # This saves some time and also allows us to do a first deploy,
@@ -14,9 +33,9 @@ data "terraform_remote_state" "current_image_tag" {
   backend = "s3"
 
   config = {
-    bucket = var.tfstate_bucket
-    key    = var.tfstate_key
-    region = var.region
+    bucket = local.tfstate_bucket
+    key    = local.tfstate_key
+    region = local.service_config.region
   }
 
   defaults = {
