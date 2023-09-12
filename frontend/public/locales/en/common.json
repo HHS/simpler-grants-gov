@@ -25,7 +25,9 @@
     "fo_paragraph_5": "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
     "wtgi_title": "Ways to get involved",
     "wtgi_paragraph_1": "Follow our progress as we improve grant announcements and build a better API and opportunity search on beta.grants.gov.",
-    "wtgi_list": "<ul><li><LinkToGoals>Read our project goals and milestones</LinkToGoals></li><li>Join our open‑source community on <github>GitHub</github></li><li>Contact us at <email>{{email}}</email></li></ul>"
+    "wtgi_title_2": "Join our open‑source community on <github>GitHub</github>",
+    "wtgi_list": "<ul><li>Follow <repo>the repository <small>(github.com/HHS/grants-equity)</small></repo></li><li>Read the <goals>project goals</goals></li><li>View the <roadmap>Grants Equity Milestone Roadmap</roadmap></li><li>Learn about <contribute>how you can contribute</contribute></li></ul>",
+    "wtgi_paragraph_2": "<strong>Questions?</strong> Contact us at <email>{{email}}</email>."
   },
   "Header": {
     "nav_link_home": "Home",
