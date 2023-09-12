@@ -1,14 +1,14 @@
 # Development
 
-This application is dockerized. Take a look at [Dockerfile](/api/Dockerfile) to see how it works.
+This application is dockerized. Take a look at [Dockerfile](../../api/Dockerfile) to see how it works.
 
-A very simple [docker-compose.yml](/docker-compose.yml) has been included to support local development and deployment.
+A very simple [docker-compose.yml](../../docker-compose.yml) has been included to support local development and deployment.
 
 ## Prerequisites
 
 **Note:** Run everything from within the `/api` folder:
 
-1. Install the version of Python specified in [.python-version](/api/.python-version)
+1. Install the version of Python specified in [pyproject.toml](../../api/pyproject.toml)
    [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
    or [asdf](https://asdf-vm.com/).
 
@@ -39,7 +39,7 @@ A very simple [docker-compose.yml](/docker-compose.yml) has been included to sup
 
 `make clean-volumes` will spin down the docker containers + delete the volumes. This can be useful to reset your DB, or fix any bad states your local environment may have gotten into.
 
-See the [Makefile](/api/Makefile) for a full list of commands you can run.
+See the [Makefile](../../api/Makefile) for a full list of commands you can run.
 
 ## Docker and Native Development
 
@@ -59,9 +59,9 @@ Running in the native/local approach may require additional packages to be insta
 
 Most configuration options are managed by environment variables.
 
-Environment variables for local development are stored in the [local.env](/api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](/docker-compose.yml) file, and loaded [by a script](/api/src/util/local.py) automatically when running most other components outside the container.
+Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../api/src/util/local.py) automatically when running most other components outside the container.
 
-Any environment variables specified directly in the [docker-compose](/docker-compose.yml) file will take precedent over those specified in the [local.env](/api/local.env) file.
+Any environment variables specified directly in the [docker-compose](../../docker-compose.yml) file will take precedent over those specified in the [local.env](../../api/local.env) file.
 
 ## Authentication
 
