@@ -69,4 +69,4 @@ This API uses a very simple [ApiKey authentication approach](https://apiflask.co
 
 ## Next steps
 
-Now that you're up and running, read the [application docs](README.md) to familiarize yourself with the application.
+Now that you're up and running, read the [application docs](../../api/README.md) to familiarize yourself with the application.
