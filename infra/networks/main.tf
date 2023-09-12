@@ -48,7 +48,7 @@ module "project_config" {
   source = "../project-config"
 }
 
-module "api_config" {
+module "app_config" {
   source = "../api/app-config"
 }
 
