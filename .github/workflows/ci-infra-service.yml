@@ -42,7 +42,7 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: env.APP_NAME
+          app_name: ${{ env.APP_NAME }}
           # Run infra CI on dev environment
           environment: dev
 
