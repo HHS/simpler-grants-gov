@@ -41,9 +41,9 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared  = "grants-equity"
-    dev     = "grants-equity"
-    prod    = "grants-equity"
+    shared = "grants-equity"
+    dev    = "grants-equity"
+    prod   = "grants-equity"
   }
 }
 
