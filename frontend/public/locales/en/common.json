@@ -1,6 +1,6 @@
 {
   "Index": {
-    "page_title": "Home | Beta.grants.gov",
+    "page_title": "beta.grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Beta.grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
@@ -33,7 +33,7 @@
     "nav_link_home": "Home",
     "nav_link_health": "Health",
     "nav_menu_toggle": "Menu",
-    "title": "Grants.gov"
+    "title": "beta.grants.gov"
   },
   "Hero": {
     "title": "We're building a new Grants.gov!",
