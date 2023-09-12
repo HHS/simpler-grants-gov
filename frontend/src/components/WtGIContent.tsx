@@ -4,6 +4,7 @@ import { Trans, useTranslation } from "next-i18next";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 const WtGIContent = () => {
+  const email = ExternalRoutes.EMAIL_EQUITYINGRANTS;
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
@@ -22,6 +23,7 @@ const WtGIContent = () => {
           <Trans
             t={t}
             i18nKey="wtgi_list"
+            values={{ email }}
             components={{
               ul: (
                 <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4" />
@@ -41,7 +43,7 @@ const WtGIContent = () => {
                   href={ExternalRoutes.GITHUB_REPO}
                 />
               ),
-              email: <a href={ExternalRoutes.CONTACT_EMAIL} />,
+              email: <a href={`mailto:${email}`} />,
             }}
           />
         </Grid>

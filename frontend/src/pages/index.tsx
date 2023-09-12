@@ -7,7 +7,6 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import PageSEO from "src/components/PageSEO";
 import WtGIContent from "src/components/WtGIContent";
 import FullWidthAlert from "../components/FullWidthAlert";
-import FundingContent from "../components/FundingContent";
 import GoalContent from "../components/GoalContent";
 import Hero from "../components/Hero";
 
@@ -34,7 +33,6 @@ const Home: NextPage = () => {
         />
       </FullWidthAlert>
       <GoalContent />
-      <FundingContent />
       <WtGIContent />
     </>
   );
