@@ -6,7 +6,7 @@ This folder contains documentation for the Grants Equity Project.
 
 Our vision is for the following to become true:
 
-Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government. Grants.gov helps ensure that no communities are underserved by the federal government.
+***Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government. Grants.gov helps ensure that no communities are underserved by the federal government***.
 
 See [goals.md](./goals.md) for more information about the vision and goals for the project.
 

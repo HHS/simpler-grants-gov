@@ -14,7 +14,7 @@ See [goals.md](./documentation/goals.md) for more information about the vision a
 
 ## Core Team
 
-The core team on the grants.gov project is a small group of designers, developers, and product managers working for and with the Department of Health and Human Services, and other federal agencies, and community volunteers.
+The core team on the grants.gov project is a small group of content strategists, designers, developers, and product managers working for and with the Department of Health and Human Services, and other federal agencies, and community volunteers.
 
 An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles. 
 
@@ -25,7 +25,7 @@ An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINT
 - [./bin](./bin) contains scripts for managing infrastructure
 - [./documentation](./documentation) contains project guides, documentation, and decision records
 - [./frontend](./frontend) contains a web application built using Next.js
-- [./infra](./infra) contains Terraform modules and configuration for managing the infrastructure
+- [./infra](./infra) contains Terraform modules and configuration for managing the AWS infrastructure
 
 ## Development
 
@@ -52,7 +52,7 @@ Disclosure Policies, see [SECURITY.md](SECURITY.md).
 
 For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
 
-A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors?type=a) can be found on GitHub.
+A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors) can be found on GitHub.
 
 ## Public domain
 
