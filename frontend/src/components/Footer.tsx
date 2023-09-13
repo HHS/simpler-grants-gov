@@ -76,7 +76,7 @@ const Footer = () => {
       data-testid="footer"
       size="medium"
       returnToTop={
-        <GridContainer className="usa-footer__return-to-top">
+        <GridContainer className="usa-footer__return-to-top margin-top-5">
           <a href="#">{t("return_to_top")}</a>
         </GridContainer>
       }
@@ -105,8 +105,8 @@ const Footer = () => {
                 <a key="telephone" href={`tel:${t("telephone")}`}>
                   {t("telephone")}
                 </a>,
-                <a key="email" href={ExternalRoutes.CONTACT_EMAIL}>
-                  {t("email")}
+                <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
+                  {ExternalRoutes.EMAIL_SUPPORT}
                 </a>,
               ]}
             />
