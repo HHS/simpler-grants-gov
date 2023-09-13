@@ -16,20 +16,27 @@ Options Considered
 Google Calendar
 Nextcloud Calendar
 
-| Features, capabilities, evaluation criteria | Google Calendar             | Nextcloud Calendar |   |   |   |   |   |   |   |
-|---------------------------------------------|-----------------------------|--------------------|---|---|---|---|---|---|---|
-| Experience with current team                | ✅                           | ❌                  |   |   |   |   |   |   |   |
-| Github integration                          | ✅                           | ✅                  |   |   |   |   |   |   |   |
-| Open-source                                 | ❌                           | ✅                  |   |   |   |   |   |   |   |
-| 3rd Party Video Integration                 | ✅                           | ✅                  |   |   |   |   |   |   |   |
-| Government (ATO Approved)                   | Unknown                     | Unknown            |   |   |   |   |   |   |   |
-| Slack integration                           | ✅                           | ✅                  |   |   |   |   |   |   |   |
-| Video Conference Integration                | ✅                           | ✅                  |   |   |   |   |   |   |   |
-| Pricing                                     | 100 users for $46/user/year | $6/user/year       |   |   |   |   |   |   |   |
+| Features, capabilities, evaluation criteria                             | Google Calendar             | Nextcloud Calendar | Slack (Outlook and Gmail Integration)           | Calendly            |
+| ----------------------------------------------------------------------- | --------------------------- | ------------------ | ----------------------------------------------- | ------------------- |
+| Experience with current team                                            | ✅                           | ❌                  | ✅
+
+(Minor onboarding needed for slack commands) | ❌                   |
+| Ability to create an event right from Slack using the shortcuts button. | ✅                           | ✅                  | ✅                                               | ✅                   |
+| Integration with Outlook and Gmail                                      | ❌                           | ✅                  | ✅                                               | ✅                   |
+| Github integration                                                      | ✅                           | ✅                  | ✅                                               | ✅                   |
+| Open-source                                                             | ❌                           | ✅                  | ❌                                               | ❌                   |
+| 3rd Party Video Integration                                             | ✅                           | ✅                  | ✅                                               | ✅                   |
+| Slack integration                                                       | ✅                           | ✅                  | ✅                                               | ❌                   |
+| Built in Video Conference Integration                                   | ✅                           | ✅                  | ✅                                               | ✅                   |
+| Integrations with Gitbook                                               | ✅                           | ❌                  | ❌                                               | ❌                   |
+| Pricing                                                                 | 100 users for $46/user/year | $6/user/year       | Free                                            | $8
+
+ /seat/mo
+
+<br> |
 
 
 # NextCloud 
-
 Summary points:
 Nextcloud offers a modern, easy to use content collaboration platform accessible through mobile, desktop and web interfaces
 Nextcloud offers government pricing. 
@@ -37,6 +44,7 @@ Real-time collaboration and fast but secure document exchange with other organiz
 Data Protection 
 Pricing: Starting at 100 users for $46/user/year
 Government: Contacted the NextCloud for government pricing 
+
 
 
 # Google Calendar
@@ -50,6 +58,20 @@ Pricing:
 Free with a Google account
 Business Starter for Google Workspace, which includes all Google apps, starts at $6/user/month.
 Must be integrated with google workspace
- 
 
+
+# Slack (Outlook and Gmail Integration) 
+Its Free
+Easy onboarding for HHS, Micro Health, Agile6 and Nava
+Ability to view team members availability across calendars
+Ability to add External video conferencing to the meeting invite
+Ability to create meeting invite using slack
+Create an event right from Slack using the shortcuts button.
+Automatically sync your calendar to your Slack status to let your team know when you are in a meeting, out of the office, or working from home.
+See a holistic view of your daily schedule from Slack.
+You can get notified when an event is starting soon, and join a Hangout, Zoom, Webex, or Microsoft Teams meeting directly from the calendar reminder in Slack.
+Ability to RSVP directly to event invitations, get updated when an event’s details change, and change your response as needed.
+
+# Decision
+We’ve decided to move forward with Slack due to its convenience in integrating with Outlook and Google Calendar. The Slack integration also offers a lot of flexibility in viewing team members' calendars whether on Google Calendar or Outlook.
 
