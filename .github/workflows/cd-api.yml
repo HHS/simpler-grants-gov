@@ -13,10 +13,6 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
-      app_name:
-        description: "name of application folder under infra directory"
-        required: true
-        type: string
       environment:
         description: "target environment"
         required: true
@@ -35,5 +31,5 @@ jobs:
     name: Deploy
     uses: ./.github/workflows/deploy.yml
     with:
-      app_name: ${{ inputs.app_name || 'api' }}
+      app_name: "api"
       environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
