@@ -1,14 +1,14 @@
 # Data Replication Strategy & Tool
 
 - **Status:** Active
-- **Last Modified:** 2023-09-07
+- **Last Modified:** 2023-09-14
 - **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
 - **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch
 - **Tags:** Hosting, Infrastructure, Database
 
 ## Context and Problem Statement
 
-The Beta.Grants.Gov platform will need to consume data and apply additional load to the database that the database was not planned to support. Therefore, we will replicate the data for the Beta.Grants.Gov work so it will have a negligible impact on the database for replication related tasks and still provide up-to-date production data.
+The Beta.Grants.Gov platform will need to consume live data and apply additional load to the database that the production database was not planned to support. Therefore, we will replicate the data for the Beta.Grants.Gov work so it will have a negligible impact on the database for replication related tasks and still provide up-to-date production data.
 
 ## Decision Drivers
 
@@ -26,15 +26,24 @@ The Beta.Grants.Gov platform will need to consume data and apply additional load
 
 ## Options Considered
 
+### Data Replication
+
 - Use Production Database
 - Use AWS DMS (Database Migration Service)
 - Create new data pipelines from data sources
+- Import/Export DB snapshots weekly
 
-## Decision Outcome
+### Data Traffic
+
+- AWS VPC Pairing
+- AWS PrivateLink
+- Network Gateway with VPN
+
+## Decision Outcome - Data Replication
 
 Chosen option: Use AWS DMS, because it is the only option that allows us to deliver within our period of performance and doesn't impact the production database's ability to perform its existing role.
 
-Additionally, [AWS DMS is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/).
+Additionally, [AWS DMS and AWS VPC Pairing are FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/).
 
 ### Positive Consequences
 
@@ -46,7 +55,46 @@ Additionally, [AWS DMS is FedRAMP compliant](https://aws.amazon.com/compliance/s
 
 - When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
 
-## Pros and Cons of the Options
+## Decision Outcome - Data Replication
+
+### Positive Consequences
+
+### Negative Consequences
+
+## Security Implications
+
+#### AWS DMS Service
+
+The DMS service is a FedRAMP compliant service that sits in the target database's (beta team's) VPC, and is responsible for reading data from the source databases when there are changes and writing them to the target database. All traffic through DMS is [encrypted in transit and at rest](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Security.DataProtection.html). Additionally, DMS is FedRAMP compliant and in compliance with many other compliance programs, including: SOC, PCI, ISO, FedRAMP, DoD CC SRG, HIPAA BAA, MTCS, CS, K-ISMS, ENS High, OSPAR, and HITRUST CSF. You can read more [DMS Compliance infroramtion, including FedRAMP, on it's dedicated page](https://docs.aws.amazon.com/dms/latest/userguide/dms-compliance.html).
+
+Tools are of course only as secure as the way they are configured and used. For our purposes, we only require SELECT permissions for the DMS instance role on the source database, as describted in this [aws guide on configuring OracleDB as a source database](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html).
+
+Between the limited scope of the DMS instance user access to the MicroHealth database, and the extensive security testing and controls of DMS as a service, DMS seems like a secure solution to replicating the data in the beta AWS account.
+
+#### VPC Peering
+
+[VPC Peering is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
+
+
+## Implemintation Guide
+
+After reviewing the AWS documentation on configuring DMS where the target and source database reside in different VPCs, the recommended approach is to use AWS DMS with VPC Peering to permit the necessary traffic. The following details the division of tasks between Nava and MicroHealth to set up the necessary services.
+
+#### AWS DMS Service
+
+##### Nava
+
+##### MicroHealth
+
+
+#### VPC Peering
+
+##### Nava
+
+##### MicroHealth
+
+
+## Pros and Cons of the Options - Data Replication
 
 ### Use Production Database
 
@@ -88,6 +136,46 @@ Create new data pipelines from the source of truth similar to the production dat
   - Very long time to deliver
   - Team is not currently staffed to support this work
 
+  ### Import/Export DB snapshots weekly
+
+MicroHealth will export a database snapshot on a weekly basis that we will use to update our database on a weekly basis. The exports will be done during times of low database usage so as to have negligible impact on production operations. However, the data will be up to seven days old.
+
+- **Pros**
+  - Negligible impact to production database
+  - Simple to do manually and also to automate
+- **Cons**
+  - Data will be up to 7 days old
+
+## Pros and Cons of the Options - Data Traffic
+
+### AWS VPC Peering
+
+Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow traffic between the two VPCs. For security, lock down the VPC Peering to only allow traffic between the DMS instance in the Nava accoutn and the database instance or database load balancer in the Microhealth account. All traffic between VPCs using VPC Peering is encrypted. Additionally, the traffic between VPCs stays within the AWS Global Backbone and never makes its way to the public internet. Finally, AWS VPC Peering is a FedRAMP compliant AWS feature.
+
+- **Pros**
+  - Many layers of security: encryption in transit, stays withing AWS, additional manual controlls
+  - AWS best practice for multi-VPC DMS configuration
+  - FedRAMP compliant
+- **Cons**
+  - Requries configuration on both Nava and MicroHealth sides
+
+### AWS PrivateLink
+
+Connect
+
+- **Pros**
+  -
+- **Cons**
+  -
+
+### Network Gateway with VPN
+
+Connect
+
+- **Pros**
+  -
+- **Cons**
+  -
 
 ## Links
 
