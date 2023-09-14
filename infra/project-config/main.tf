@@ -14,5 +14,6 @@ locals {
   # otherwise us-east-1 is a good default
   default_region = "us-east-1"
 
-  github_actions_role_name = "${local.project_name}-github-actions"
+  github_actions_role_name                = "${local.project_name}-github-actions"
+  aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
 }

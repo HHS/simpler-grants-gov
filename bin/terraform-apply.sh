@@ -28,14 +28,14 @@ CONFIG_NAME="$2"
 
 # 1. Set working directory to the terraform root module directory
 
-cd $MODULE_DIR
+cd "$MODULE_DIR"
 
 # 2. Run terraform apply with the tfvars file (if it exists) that has the same name as the backend config file
 
 TF_VARS_FILE="$CONFIG_NAME.tfvars"
 TF_VARS_OPTION=""
-if [ -f $TF_VARS_FILE ]; then
+if [ -f "$TF_VARS_FILE" ]; then
   TF_VARS_OPTION="-var-file=$TF_VARS_FILE"
 fi
 
-terraform apply $TF_VARS_OPTION
+terraform apply "$TF_VARS_OPTION"

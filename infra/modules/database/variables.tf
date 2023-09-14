@@ -12,6 +12,16 @@ variable "access_policy_name" {
   type        = string
 }
 
+variable "app_access_policy_name" {
+  description = "name of the IAM policy to create that will provide the service the ability to connect to the database as a user that will have read/write access."
+  type        = string
+}
+
+variable "migrator_access_policy_name" {
+  description = "name of the IAM policy to create that will provide the migration task the ability to connect to the database as a user that will have read/write access."
+  type        = string
+}
+
 variable "app_username" {
   description = "name of the database user to create that will be for the application."
   type        = string
@@ -49,4 +59,9 @@ variable "vpc_id" {
 variable "private_subnet_ids" {
   type        = list(any)
   description = "list of private subnet IDs to put the role provisioner and role checker lambda functions in"
+}
+
+variable "aws_services_security_group_id" {
+  type        = string
+  description = "Security group ID for VPC endpoints that access AWS Services"
 }

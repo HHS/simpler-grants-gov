@@ -5,8 +5,11 @@ locals {
   image_repository_name           = "${local.project_name}-${local.app_name}"
   has_database                    = false
   has_incident_management_service = false
-  environment_configs             = { for environment in local.environments : environment => module.env_config[environment] }
 
+  environment_configs = { for environment in local.environments : environment => module.env_config[environment] }
+  build_repository_config = {
+    region = module.project_config.default_region
+  }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".
@@ -52,6 +55,7 @@ module "env_config" {
 
   source                          = "./env-config"
   app_name                        = local.app_name
+  default_region                  = module.project_config.default_region
   environment                     = each.key
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service

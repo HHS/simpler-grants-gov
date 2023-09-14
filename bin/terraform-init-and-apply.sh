@@ -18,6 +18,6 @@ CONFIG_NAME="$2"
 # For example if a backend config file is named "myaccount.s3.tfbackend", then the CONFIG_NAME would be "myaccount"
 # MODULE_DIR – the location of the root module to initialize and apply
 
-./bin/terraform-init.sh $MODULE_DIR $CONFIG_NAME
+./bin/terraform-init.sh "$MODULE_DIR" "$CONFIG_NAME"
 
-./bin/terraform-apply.sh $MODULE_DIR $CONFIG_NAME
+./bin/terraform-apply.sh "$MODULE_DIR" "$CONFIG_NAME"

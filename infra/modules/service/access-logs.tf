@@ -26,6 +26,7 @@ resource "aws_s3_bucket" "access_logs" {
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
+  # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
 }
 
 resource "aws_s3_bucket_public_access_block" "access_logs" {
@@ -84,13 +85,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
     }
   }
   # checkov:skip=CKV_AWS_300:There is a known issue where this check brings up false positives
-}
-
-resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.access_logs.id
-  versioning_configuration {
-    status = "Enabled"
-  }
 }
 
 

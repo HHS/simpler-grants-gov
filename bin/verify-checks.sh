@@ -8,7 +8,7 @@ fi
 
 TIMEOUT_MINUTES=5
 SLEEP_SECONDS=15
-MAX_ITERATIONS=$(( ($TIMEOUT_MINUTES * 60) / $SLEEP_SECONDS ))
+MAX_ITERATIONS=$(( (TIMEOUT_MINUTES * 60) / SLEEP_SECONDS ))
 
 iteration=0
 
@@ -16,10 +16,9 @@ echo "Starting check suite status polling for SHA: $SHA."
 echo "Maximum iterations: $MAX_ITERATIONS. Time per iteration: $SLEEP_SECONDS seconds."
 
 # Fetch the current check_suite_id
-CURRENT_CHECK_SUITE_ID=$(gh api repos/$REPO/actions/runs/$CURRENT_GITHUB_RUN_ID --jq '.check_suite_id')
-
+CURRENT_CHECK_SUITE_ID=$(gh api repos/"$REPO"/actions/runs/"$CURRENT_GITHUB_RUN_ID" --jq '.check_suite_id')
 while :; do
-  iteration=$(( $iteration + 1 ))
+  iteration=$(( iteration + 1 ))
   echo "Iteration: $iteration of $MAX_ITERATIONS."
 
   if (( iteration > MAX_ITERATIONS )); then
@@ -28,13 +27,13 @@ while :; do
   fi
 
   echo "Fetching check suite details... <3"
-  CHECK_SUITE_DETAILS=$(gh api repos/$REPO/commits/$SHA/check-suites)
+  CHECK_SUITE_DETAILS=$(gh api repos/"$REPO"/commits/"$SHA"/check-suites)
   total_count=$(echo "${CHECK_SUITE_DETAILS}" | jq '.total_count')
   all_suites_passed=true
 
   echo "Total number of check suites: $total_count"
 
-  for (( i=0; i<$total_count; i++ )); do
+  for (( i=0; i<total_count; i++ )); do
     suite=$(echo "${CHECK_SUITE_DETAILS}" | jq -c ".check_suites[$i]")
     CHECK_SUITE_ID=$(echo "$suite" | jq -r '.id')
     CHECK_SUITE_STATUS=$(echo "$suite" | jq -r '.status')
