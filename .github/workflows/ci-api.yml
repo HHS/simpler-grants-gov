@@ -1,12 +1,7 @@
 name: API Checks
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - api/**
-      - .github/workflows/ci-api.yml
+  workflow_call:
   pull_request:
     paths:
       - api/**
@@ -40,3 +35,9 @@ jobs:
         run: |
           make test-audit
           make test-coverage
+
+  vulnerability-scans:
+    name: Run API Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: "api"

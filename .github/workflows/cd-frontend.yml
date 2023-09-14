@@ -9,8 +9,6 @@ on:
       - main
     paths:
       - "frontend/**"
-      - "bin/**"
-      - "infra/**"
   release:
     types: [published]
   workflow_dispatch:
@@ -30,27 +28,13 @@ on:
           - prod
 
 jobs:
-  wait-for-checks:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Authenticate GitHub CLI
-        run: echo "${{ github.token }}" | gh auth login --with-token
-
-      - name: Run verify-checks script
-        env:
-          CURRENT_GITHUB_RUN_ID: ${{ github.run_id }}
-          SHA: ${{ github.sha }}
-          REPO: "hhs/grants-equity"
-        run: |
-          ${{ github.workspace }}/bin/verify-checks.sh
+  frontend-checks:
+    name: Run Frontend Checks
+    uses: ./.github/workflows/ci-frontend.yml
 
   deploy:
     name: Deploy
-    needs: wait-for-checks
+    needs: frontend-checks
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: ${{ inputs.app_name || 'frontend' }}
