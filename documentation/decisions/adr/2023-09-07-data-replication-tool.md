@@ -65,9 +65,9 @@ Additionally, [AWS DMS and AWS VPC Pairing are FedRAMP compliant](https://aws.am
 
 #### AWS DMS Service
 
-The DMS service is a FedRAMP compliant service that sits in the target database's (beta team's) VPC, and is responsible for reading data from the source databases when there are changes and writing them to the target database. All traffic through DMS is [encrypted in transit and at rest](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Security.DataProtection.html). Additionally, DMS is FedRAMP compliant and in compliance with many other compliance programs, including: SOC, PCI, ISO, FedRAMP, DoD CC SRG, HIPAA BAA, MTCS, CS, K-ISMS, ENS High, OSPAR, and HITRUST CSF. You can read more [DMS Compliance infroramtion, including FedRAMP, on it's dedicated page](https://docs.aws.amazon.com/dms/latest/userguide/dms-compliance.html).
+The DMS service is a FedRAMP compliant service that sits in the target database's (beta team's) VPC, and is responsible for reading data from the source databases when there are changes and writing them to the target database. All traffic through DMS is [encrypted in transit and at rest](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Security.DataProtection.html). Additionally, DMS is FedRAMP compliant and in compliance with many other compliance programs, including: SOC, PCI, ISO, FedRAMP, DoD CC SRG, HIPAA BAA, MTCS, CS, K-ISMS, ENS High, OSPAR, and HITRUST CSF. You can read more [DMS Compliance information, including FedRAMP, on its dedicated page](https://docs.aws.amazon.com/dms/latest/userguide/dms-compliance.html).
 
-Tools are of course only as secure as the way they are configured and used. For our purposes, we only require SELECT permissions for the DMS instance role on the source database, as describted in this [aws guide on configuring OracleDB as a source database](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html).
+Tools are of course only as secure as the way they are configured and used. For our purposes, we only require SELECT permissions for the DMS instance role on the source database, as described in this [aws guide on configuring OracleDB as a source database](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html).
 
 Between the limited scope of the DMS instance user access to the MicroHealth database, and the extensive security testing and controls of DMS as a service, DMS seems like a secure solution to replicating the data in the beta AWS account.
 
@@ -76,7 +76,7 @@ Between the limited scope of the DMS instance user access to the MicroHealth dat
 [VPC Peering is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
 
 
-## Implemintation Guide
+## Implementation Guide
 
 After reviewing the AWS documentation on configuring DMS where the target and source database reside in different VPCs, the recommended approach is to use AWS DMS with VPC Peering to permit the necessary traffic. The following details the division of tasks between Nava and MicroHealth to set up the necessary services.
 
@@ -150,14 +150,14 @@ MicroHealth will export a database snapshot on a weekly basis that we will use t
 
 ### AWS VPC Peering
 
-Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow traffic between the two VPCs. For security, lock down the VPC Peering to only allow traffic between the DMS instance in the Nava accoutn and the database instance or database load balancer in the Microhealth account. All traffic between VPCs using VPC Peering is encrypted. Additionally, the traffic between VPCs stays within the AWS Global Backbone and never makes its way to the public internet. Finally, AWS VPC Peering is a FedRAMP compliant AWS feature.
+Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow traffic between the two VPCs. For security, lock down the VPC Peering to only allow traffic between the DMS instance in the Nava account and the database instance or database load balancer in the Microhealth account. All traffic between VPCs using VPC Peering is encrypted. Additionally, the traffic between VPCs stays within the AWS Global Backbone and never makes its way to the public internet. Finally, AWS VPC Peering is a FedRAMP compliant AWS feature.
 
 - **Pros**
-  - Many layers of security: encryption in transit, stays withing AWS, additional manual controlls
+  - Many layers of security: encryption in transit, stays within AWS, additional manual controls
   - AWS best practice for multi-VPC DMS configuration
   - FedRAMP compliant
 - **Cons**
-  - Requries configuration on both Nava and MicroHealth sides
+  - Requires configuration on both Nava and MicroHealth sides
 
 ### AWS PrivateLink
 
