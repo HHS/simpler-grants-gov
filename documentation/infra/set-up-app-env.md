@@ -9,7 +9,7 @@ The application environment setup process will:
 Before setting up the application's environments you'll need to have:
 
 1. [A compatible application in the app folder](https://github.com/navapbc/template-infra/blob/main/template-only-docs/application-requirements.md)
-2. [Configure the app](/infra/frontend/app-config/main.tf). Make sure you update `has_database` to `true` or `false` depending on whether or not your application has a database to integrate with.
+2. [Configure the app](../../infra/frontend/app-config/main.tf). Make sure you update `has_database` to `true` or `false` depending on whether or not your application has a database to integrate with.
 3. (If the application has a database) [Set up the network with VPC endpoints required for the database](./set-up-network.md)
 4. (If the application has a database) [Set up the database for the application](./set-up-database.md)
 5. (If you have an incident management service) [Set up monitoring](./set-up-monitoring-alerts.md)
