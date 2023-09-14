@@ -55,11 +55,17 @@ Additionally, [AWS DMS and AWS VPC Pairing are FedRAMP compliant](https://aws.am
 
 - When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
 
-## Decision Outcome - Data Replication
+## Decision Outcome - Data Traffic
+
+Chosen option: Use AWS VPC Peering, because it is the most secure option for permitting traffic between two VPCs in AWS and is the AWS recommended tool for Multi-VPC DMS database replication. Aside from being FedRAMP compliant, and ensuring all traffic between VPCs is encrypted, it also keeps the traffic off the public internet which makes it harder for bad actors to capture that traffic.
+
+In support of this decision, MicroHealth and Nava will need to work together to limit the traffic between VPCs to only the necessary services, over the necessary ports, using only the necessary protocols. This will need to be configured with security groups in both the MicroHealth and Nava AWS accounts.
 
 ### Positive Consequences
+- If we require more services within the VPCs to talk with each other, we will already have a tool configured for that
 
 ### Negative Consequences
+- This tool assumes MicroHealth and Nava will put security controls in place to limit the permitted traffic to only what's necessary, which will take some coordination between MicroHealth and Nava
 
 ## Security Implications
 
