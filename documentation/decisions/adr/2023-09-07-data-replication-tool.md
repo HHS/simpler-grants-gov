@@ -97,18 +97,109 @@ Non AWS solutions require traffic to leave the AWS network and traverse the publ
 
 After reviewing the AWS documentation on configuring DMS where the target and source database reside in different VPCs, the recommended approach is to use AWS DMS with VPC Peering to permit the necessary traffic. The following details the division of tasks between Nava and MicroHealth to set up the necessary services.
 
-#### AWS DMS Service
-
-##### Nava
-
-##### MicroHealth
-
+VPC Peering must be configured before DMS.
 
 #### VPC Peering
 
 ##### Nava
+-
+
 
 ##### MicroHealth
+-
+
+
+#### AWS DMS Service
+
+##### Nava
+- Create a user with AWS Identity and Access Management (IAM) credentials that allows you to launch Amazon RDS and AWS Database Migration Service (AWS DMS) instances in your AWS Region.
+- Size your target PostgreSQL database host based on the current db host load profile.
+- Create the schemas in the target database
+- Create the AWS DMS user to connect to your target database:
+  - ```
+    CREATE USER postgresql_dms_user WITH PASSWORD 'password';
+    ALTER USER postgresql_dms_user WITH SUPERUSER;
+    ```
+- Create a user for AWS SCT.
+  - ```
+    CREATE USER postgresql_sct_user WITH PASSWORD 'password';
+    GRANT CONNECT ON DATABASE database_name TO postgresql_sct_user;
+    GRANT USAGE ON SCHEMA schema_name TO postgresql_sct_user;
+    GRANT SELECT ON ALL TABLES IN SCHEMA schema_name TO postgresql_sct_user;
+    GRANT ALL ON ALL SEQUENCES IN SCHEMA schema_name TO postgresql_sct_user;
+    ```
+- [Convert the Oracle Schema to PostgreSQL](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.convertschema.html)
+- [Create an AWS DMS Replication Instance](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createreplicationinstance.html) using terraform
+- [Create AWS DMS Source and Target Endpoints](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createsourcetargetendpoints.html)
+- [Create and Run Your AWS DMS Migration Task](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createmigrationtask.html)
+
+##### MicroHealth
+- Communicate the load profile of the current source Oracle database host. Consider CPU, memory, and IOPS.
+- ensure that ARCHIVELOG MODE is on to provide information to LogMiner. AWS DMS uses LogMiner to read information from the archive logs so that AWS DMS can capture changes.
+  - Retaining archive logs for 24 hours is usually sufficient
+- supplemental logging to be enabled on your source database
+- identification key logging be enabled
+  - You can set this option at the database or table level
+- Create or configure a database account to be used by AWS DMS
+  - [Instructions Guide](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html)
+  - AWS DMS requires the following privileges (note, there is one create for session, the rest are select)
+  - ```
+    GRANT CREATE SESSION TO db_user;
+    GRANT SELECT ANY TRANSACTION TO db_user;
+    GRANT SELECT ON V_$ARCHIVED_LOG TO db_user;
+    GRANT SELECT ON V_$LOG TO db_user;
+    GRANT SELECT ON V_$LOGFILE TO db_user;
+    GRANT SELECT ON V_$LOGMNR_LOGS TO db_user;
+    GRANT SELECT ON V_$LOGMNR_CONTENTS TO db_user;
+    GRANT SELECT ON V_$DATABASE TO db_user;
+    GRANT SELECT ON V_$THREAD TO db_user;
+    GRANT SELECT ON V_$PARAMETER TO db_user;
+    GRANT SELECT ON V_$NLS_PARAMETERS TO db_user;
+    GRANT SELECT ON V_$TIMEZONE_NAMES TO db_user;
+    GRANT SELECT ON V_$TRANSACTION TO db_user;
+    GRANT SELECT ON V_$CONTAINERS TO db_user;
+    GRANT SELECT ON ALL_INDEXES TO db_user;
+    GRANT SELECT ON ALL_OBJECTS TO db_user;
+    GRANT SELECT ON ALL_TABLES TO db_user;
+    GRANT SELECT ON ALL_USERS TO db_user;
+    GRANT SELECT ON ALL_CATALOG TO db_user;
+    GRANT SELECT ON ALL_CONSTRAINTS TO db_user;
+    GRANT SELECT ON ALL_CONS_COLUMNS TO db_user;
+    GRANT SELECT ON ALL_TAB_COLS TO db_user;
+    GRANT SELECT ON ALL_IND_COLUMNS TO db_user;
+    GRANT SELECT ON ALL_ENCRYPTED_COLUMNS TO db_user;
+    GRANT SELECT ON ALL_LOG_GROUPS TO db_user;
+    GRANT SELECT ON ALL_TAB_PARTITIONS TO db_user;
+    GRANT SELECT ON SYS.DBA_REGISTRY TO db_user;
+    GRANT SELECT ON SYS.OBJ$ TO db_user;
+    GRANT SELECT ON DBA_TABLESPACES TO db_user;
+    GRANT SELECT ON DBA_OBJECTS TO db_user; -– Required if the Oracle version is earlier than 11.2.0.3.
+    GRANT SELECT ON SYS.ENC$ TO db_user; -– Required if transparent data encryption (TDE) is enabled. For more information on using Oracle TDE with AWS DMS, see Supported encryption methods for
+                        using Oracle as a source for AWS DMS.
+    GRANT SELECT ON GV_$TRANSACTION TO db_user; -– Required if the source database is Oracle RAC in AWS DMS versions 3.4.6 and higher.
+    GRANT SELECT ON V_$DATAGUARD_STATS TO db_user; -- Required if the source database is Oracle Data Guard and Oracle Standby is used in the latest release of DMS version 3.4.6, version 3.4.7, and higher.
+    GRANT EXECUTE on DBMS_LOGMNR to db_user;
+    GRANT SELECT on V_$LOGMNR_LOGS to db_user;
+    GRANT SELECT on V_$LOGMNR_CONTENTS to db_user;
+    GRANT LOGMINING to db_user; -– Required only if the Oracle version is 12c or higher.
+    ```
+- Add the exposeViews=true extra connection attribute to your source endpoint
+- Provide the username and password for the DMS db account to Nava
+
+- Run the following command in RDS to ensure that logs are retained: `exec rdsadmin.rdsadmin_util.set_configuration('archivelog retention hours',24);`
+- Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;`
+- Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD');`
+- Run the following db command: `ALTER DATABASE ADD SUPPLEMENTAL LOG DATA (PRIMARY KEY) COLUMNS;`
+- Run the following command in RDS: `exec rdsadmin.rdsadmin_util.alter_supplemental_logging('ADD','PRIMARY KEY');`
+- Create a user for AWS SCT:
+  - ```
+    CREATE USER oracle_sct_user IDENTIFIED BY password;
+    GRANT CONNECT TO oracle_sct_user;
+    GRANT SELECT_CATALOG_ROLE TO oracle_sct_user;
+    GRANT SELECT ANY DICTIONARY TO oracle_sct_user;
+    ```
+
+
 
 
 ## Pros and Cons of the Options - Data Replication
