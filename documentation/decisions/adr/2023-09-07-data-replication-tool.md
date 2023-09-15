@@ -147,7 +147,7 @@ Create new data pipelines from the source of truth similar to the production dat
   - Very long time to deliver
   - Team is not currently staffed to support this work
 
-  ### Import/Export DB snapshots weekly
+### Import/Export DB snapshots weekly
 
 MicroHealth will export a database snapshot on a weekly basis that we will use to update our database on a weekly basis. The exports will be done during times of low database usage so as to have negligible impact on production operations. However, the data will be up to seven days old.
 
