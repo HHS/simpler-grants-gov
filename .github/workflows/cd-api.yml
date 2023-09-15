@@ -9,16 +9,10 @@ on:
       - "main"
     paths:
       - "api/**"
-      - "bin/**"
-      - "infra/**"
   release:
     types: [published]
   workflow_dispatch:
     inputs:
-      app_name:
-        description: "name of application folder under infra directory"
-        required: true
-        type: string
       environment:
         description: "target environment"
         required: true
@@ -29,28 +23,14 @@ on:
           - prod
 
 jobs:
-  wait-for-checks:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Authenticate GitHub CLI
-        run: echo "${{ github.token }}" | gh auth login --with-token
-
-      - name: Run verify-checks script
-        env:
-          CURRENT_GITHUB_RUN_ID: ${{ github.run_id }}
-          SHA: ${{ github.sha }}
-          REPO: "hhs/grants-equity"
-        run: |
-          ${{ github.workspace }}/bin/verify-checks.sh
+  api-checks:
+    name: Run API Checks
+    uses: ./.github/workflows/ci-api.yml
 
   deploy:
     name: Deploy
-    needs: wait-for-checks
+    needs: api-checks
     uses: ./.github/workflows/deploy.yml
     with:
-      app_name: ${{ inputs.app_name || 'api' }}
+      app_name: "api"
       environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}

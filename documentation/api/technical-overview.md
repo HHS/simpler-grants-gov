@@ -4,8 +4,6 @@
 - [Request operations](#request-operations)
 - [Authentication](#authentication)
 - [Authorization](#authorization)
-- [Running In Hosted Environments](#running-in-hosted-environments)
-  - [ECS](#ecs)
 
 ## Key Technologies
 
