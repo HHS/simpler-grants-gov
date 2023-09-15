@@ -52,7 +52,7 @@ To contribute to documentation you find in this repository, feel free to use the
 
 ### Sharing your story 
 
-Sharing how you or your organization have used the Grants Equity project is an important way for us to raise awareness about the project and its impact. Please tell us your story by sending us an email at `grants-equity@hhs.gov`.
+Sharing how you or your organization have used the Grants Equity project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `grants-equity@hhs.gov`](mailto:grants-equity@hhs.gov).
 
 ## Code Contributions
 
@@ -96,7 +96,7 @@ Pull requests should follow the conventions in [CONTRIBUTING.md](./CONTRIBUTING.
 
 We adhere to the [HHS Open Source
 Policy](https://github.com/CMSGov/cms-open-source-policy). If you have any
-questions, just [shoot us an email](mailto:email address needed@hhs.gov).
+questions, just [shoot us an email](mailto:needed@hhs.gov).
 
 ### Security and Responsible Disclosure Policy
 
