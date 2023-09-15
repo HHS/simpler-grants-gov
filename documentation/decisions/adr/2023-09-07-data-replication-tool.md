@@ -159,20 +159,25 @@ MicroHealth will export a database snapshot on a weekly basis that we will use t
 Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow traffic between the two VPCs. For security, lock down the VPC Peering to only allow traffic between the DMS instance in the Nava account and the database instance or database load balancer in the Microhealth account. All traffic between VPCs using VPC Peering is encrypted. Additionally, the traffic between VPCs stays within the AWS Global Backbone and never makes its way to the public internet. Finally, AWS VPC Peering is a FedRAMP compliant AWS feature.
 
 - **Pros**
-  - Many layers of security: encryption in transit, stays within AWS, additional manual controls
+  - Many layers of security: encryption in transit, traffic stays off public internet, additional manual controls
   - AWS best practice for multi-VPC DMS configuration
   - FedRAMP compliant
+  - Free to operate
 - **Cons**
   - Requires configuration on both Nava and MicroHealth sides
 
 ### AWS PrivateLink
 
-Connect
+AWS PrivateLink provides private connectivity between virtual private clouds (VPCs), supported AWS services, and on-premises networks without exposing  traffic to the public internet. Using AWS PrivateLink a VPC can expose interface VPC endpoints, similar to APIs, for others to query. This is a one way connection through a VPC barrier, instead of the two way connection provided by VPC Peering. Additionally, other security tools can be leveraged to enhance security of AWS PrivateLink, like security groups and VPC endpoint policies, which is similar to VPC Peering. AWS PrivateLink is compatible with DMS across VPCs, however it is not FedRAMP compliant.
 
 - **Pros**
-  -
+  - One way connection
+  - Traffic stays off the public internet
 - **Cons**
-  -
+  - Does not provide encryption
+  - Anyone can connect
+  - Not FedRAMP compliant
+  - There is a cost to operate
 
 ### Network Gateway with VPN
 
