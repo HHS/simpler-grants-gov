@@ -97,16 +97,33 @@ Non AWS solutions require traffic to leave the AWS network and traverse the publ
 
 After reviewing the AWS documentation on configuring DMS where the target and source database reside in different VPCs, the recommended approach is to use AWS DMS with VPC Peering to permit the necessary traffic. The following details the division of tasks between Nava and MicroHealth to set up the necessary services.
 
-VPC Peering must be configured before DMS.
+VPC Peering must be configured before DMS can complete, however in order to limit VPC Peering traffic to only DMS, the DMS instance and subnet must be created with its CIDR block and IP address to share with MicroHealth for updating their route tables.
 
 #### VPC Peering
 
 ##### Nava
--
+- Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
+  - if there are overlapping CIDR blocks create a new VPC with non overlapping CIDR blocks and migrate resources
+- Info to share with MicroHealth
+  - DMS security group ID
+  - DMS instance subnet CIDR block
+  - DMS instance IP address
+- [Create vpc peering connection](https://docs.aws.amazon.com/vpc/latest/peering/create-vpc-peering-connection.html)
+- [Update your security groups to reference peer security groups](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-security-groups.html)
+- - [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
 
 ##### MicroHealth
--
+- Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
+- Share information with Nava:
+  - Region information for the VPC
+  - AZ info for the DB
+  - Account ID
+  - VPC ID
+  - Database or new data replication security group ID
+- [Accept VPC Peering connection request](https://docs.aws.amazon.com/vpc/latest/peering/accept-vpc-peering-connection.html)
+- [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html)
+- [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
 
 #### AWS DMS Service
