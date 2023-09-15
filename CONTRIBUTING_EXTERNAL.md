@@ -87,7 +87,7 @@ External contributors should use the *Bug Report* or *Feature Request* [issue te
 
 Pull requests should follow the conventions in [CONTRIBUTING.md](./CONTRIBUTING.md) with the following changes:
 
-1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External]` format.
+1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
 1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
 
 ## Policies
