@@ -1,7 +1,7 @@
 # Data Replication Strategy & Tool
 
 - **Status:** Active
-- **Last Modified:** 2023-09-14
+- **Last Modified:** 2023-09-15
 - **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
 - **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch
 - **Tags:** Hosting, Infrastructure, Database
