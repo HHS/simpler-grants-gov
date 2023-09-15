@@ -71,16 +71,21 @@ In support of this decision, MicroHealth and Nava will need to work together to 
 
 #### AWS DMS Service
 
-The DMS service is a FedRAMP compliant service that sits in the target database's (beta team's) VPC, and is responsible for reading data from the source databases when there are changes and writing them to the target database. All traffic through DMS is [encrypted in transit and at rest](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Security.DataProtection.html). Additionally, DMS is FedRAMP compliant and in compliance with many other compliance programs, including: SOC, PCI, ISO, FedRAMP, DoD CC SRG, HIPAA BAA, MTCS, CS, K-ISMS, ENS High, OSPAR, and HITRUST CSF. You can read more [DMS Compliance information, including FedRAMP, on its dedicated page](https://docs.aws.amazon.com/dms/latest/userguide/dms-compliance.html).
+The DMS service is a FedRAMP compliant service that sits in the target database's (beta team's) VPC, and is responsible for reading data from the source databases when there are changes and writing them to the target database. All traffic through DMS is [encrypted in transit and at rest](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Security.DataProtection.html). In addition to FedRAMP compliance, DMS is in compliance with many other compliance programs demonstrating its high security standards, including: SOC, PCI, ISO, FedRAMP, DoD CC SRG, HIPAA BAA, MTCS, CS, K-ISMS, ENS High, OSPAR, and HITRUST CSF. You can read more [DMS Compliance information, including FedRAMP, on its dedicated page](https://docs.aws.amazon.com/dms/latest/userguide/dms-compliance.html).
 
-Tools are of course only as secure as the way they are configured and used. For our purposes, we only require SELECT permissions for the DMS instance role on the source database, as described in this [aws guide on configuring OracleDB as a source database](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html).
+Tools are of course only as secure as the way they are configured and used. For our purposes, since we are effectively looking to create a read-only replica of the database, we only require SELECT permissions for the DMS instance role on the source database, as described in this [aws guide on configuring OracleDB as a source database](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Source.Oracle.html).
 
-Between the limited scope of the DMS instance user access to the MicroHealth database, and the extensive security testing and controls of DMS as a service, DMS seems like a secure solution to replicating the data in the beta AWS account.
+Between the limited scope of the DMS instance user access to the MicroHealth database, and the extensive security testing and controls of DMS as a service, DMS seems like a secure solution to replicating the data from the grants.gov AWS account to the beta AWS account.
 
 #### VPC Peering
 
-[VPC Peering is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
+When permitting network traffic between two VPCs in AWS, [AWS provides several solutions and guidance on others](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/amazon-vpc-to-amazon-vpc-connectivity-options.html). Several of the options are discussed in the Pros and Cons section below, however VPC Peering seems to be the best fit for our use case and as secure or more secure than the other options. [VPC Peering is FedRAMP compliant](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/), keeps traffic off the public internet, encrypts traffic in transit, and provides tools to manually secure the connection between the VPCs even further. Some of the manual controls include restricting VPC Peering to a specific CIDR block, or subnet, and using security groups to limit traffic protocol, origin, and destination port. In practice, we can limit traffic through the VPC Peering connection, which is all encrypted and off the public internet, to come from only the beta DMS instance and go to only the grants.gov database subnet or load balancer, using a specific protocol, and targeting a specific port. All other traffic will be denied.
 
+AWS PrivateLink is not FedRAMP compliant, does not encrypt traffic in transit, and is more expensive than VPC Peering.
+
+AWS Transit Gateway has a similar security posture to VPC Peering as much of the underlying technology is the same, however, that solution is optimized for a hub and spoke VPC architecture and is overly complicated for two VPCs to connect to each other.
+
+Non AWS solutions require traffic to leave the AWS network and traverse the public internet. While that traffic can be encrypted with a VPN, that is inherently less secure than keeping the traffic within the AWS boundary.
 
 ## Implementation Guide
 
