@@ -20,7 +20,7 @@ This project follows [trunk-based development](https://trunkbaseddevelopment.com
 * Be open to submitting multiple small pull requests for a single ticket (i.e. reference the same ticket across multiple pull requests).
 * Treat each change you merge to `main` as immediately deployable to production. Do not merge changes that depend on subsequent changes you plan to make, even if you plan to make those changes shortly.
 * Ticket any unfinished or partially finished work.
-* Tests should be written for any change introduced.
+* Tests should be written for changes introduced, and adhere to the text percentage threshold determined by the project.
 
 This project uses **continuous deployment** using [Github Actions](https://github.com/features/actions) which is configured in the [./github/worfklows](./github/workflows) directory.
 
