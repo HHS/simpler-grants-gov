@@ -165,6 +165,7 @@ Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow tra
   - Free to operate
 - **Cons**
   - Requires configuration on both Nava and MicroHealth sides
+  - cost for bandwidth
 
 ### AWS PrivateLink
 
@@ -177,16 +178,17 @@ AWS PrivateLink provides private connectivity between virtual private clouds (VP
   - Does not provide encryption
   - Anyone can connect
   - Not FedRAMP compliant
-  - There is a cost to operate
+  - There is a cost to operate and cost for bandwidth
 
-### Network Gateway with VPN
+### AWS Transit Gateway
 
-Connect
+The AWS Transit service consolidates the AWS VPC routing configuration for a region with a hub-and-spoke architecture. This service uses the same technology as VPC Peering, but instead of connecting VPC directly, they connect through another service called a Transit Gateway. This solution is recommended if many VPCs need to connect to each other across regions as VPC Peering gets significantly more complicated when more than a few VPCs are involved.
 
 - **Pros**
-  -
+  - Similar to VPC Peering
 - **Cons**
-  -
+  - More complicated to implement than VPC Peering
+  - More expensive than VPC Peering
 
 ## Links
 
@@ -194,3 +196,4 @@ Connect
 - [AWS DMS Cross VPC Config](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_ReplicationInstance.VPC.html#CHAP_ReplicationInstance.VPC.Configurations.ScenarioVPCPeer)
 - [What is VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
 - [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
+- [AWS VPC to AWS VPC Connectivity Options](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/amazon-vpc-to-amazon-vpc-connectivity-options.html)
