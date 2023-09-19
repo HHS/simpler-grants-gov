@@ -67,12 +67,6 @@ In support of this decision, MicroHealth and Nava will need to work together to 
 ### Negative Consequences
 - This tool assumes MicroHealth and Nava will put security controls in place to limit the permitted traffic to only what's necessary, which will take some coordination between MicroHealth and Nava
 
-## Preparing for Production
-
-Currently the beta aws account is designated as a lower environment and therefore will only connect to the grants.gov lower environment. However, when we are ready, our plan is to create a second AWS account for our production environment which will then need to peer with the grants.gov production environment. Therefore, our strategy is to implement these tools and study the security impact in action to determine any security risk we need to address in production. It is also our assumption that the production environment will meet all HHS ITS security constraints and will be ATO'd, just like the grants.gov production environment. Nava will work collaboratively with MicroHealth to determine additional security measures that are necessary to ensure production environments and production data meet the necessary security standards.
-
-At this point, we are only considering reading from the production database, however, for beta.grants.gov to reach feature parity with grants.gov we will need to write to the database as well. Several approaches to that will need to be considered. The goal is to eventually deprecate the oracle database and migrate to a postgres database with an improved schema to facilitate more robust opportunity querying and opportunity lifecycle tracking. There will be a time before that third database is created that both applications will need to write data that can be read by both applications. Option 1 is to have each application write to its own database and have DMS replicate the changes in two directions instead of just one. Option 2 is to have the beta api send post requests to the grants.gov database directly and have DMS replicate those changes to the beta database. Option 1 will require enhanced permissions for the DMS instance and option 2 will require db access for the beta api using the network connection decided on here. Another ADR will be written, in collaboration with MicroHealth before making that transition, with the benefit of our collective experience with DMS and VPC Peering security to determine the best course of action.
-
 ## Security Implications
 
 #### AWS DMS Service
@@ -216,8 +210,9 @@ VPC Peering must be configured before DMS can complete, however in order to limi
     GRANT SELECT ANY DICTIONARY TO oracle_sct_user;
     ```
 
+## Preparing for Production
 
-
+Currently the beta aws account is designated as a lower environment and therefore will only connect to the grants.gov lower environment. However, when we are ready, our plan is to create a second AWS account for our production environment which will then need to peer with the grants.gov production environment. Therefore, our strategy is to implement these tools and study the security impact in action to determine any security risk we need to address in production. It is also our assumption that the production environment will meet all HHS ITS security constraints and will be ATO'd, just like the grants.gov production environment. Nava will work collaboratively with MicroHealth to determine additional security measures that are necessary to ensure production environments and production data meet the necessary security standards.
 
 ## Pros and Cons of the Options - Data Replication
 
