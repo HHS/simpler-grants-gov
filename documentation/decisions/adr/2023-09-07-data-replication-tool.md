@@ -1,6 +1,6 @@
 # Data Replication Strategy & Tool
 
-- **Status:** Active
+- **Status:** Draft
 - **Last Modified:** 2023-09-15
 - **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
 - **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch
