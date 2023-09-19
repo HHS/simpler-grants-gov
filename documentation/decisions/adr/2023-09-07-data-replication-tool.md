@@ -85,7 +85,7 @@ AWS PrivateLink is not FedRAMP compliant. Notice it is not included on the [List
 
 AWS Transit Gateway has a similar security posture to VPC Peering as [the underlying technology is the same](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/transit-gateway.html#:~:text=It%20uses%20the%20same%20underlying%20infrastructure%20as%20VPC%20peering), however, that solution is optimized for a hub and spoke VPC architecture with thousands of connected VPCs and is overly complicated for two VPCs to connect to each other.
 
-Non AWS solutions require traffic to leave the AWS network and traverse the public internet. While that traffic can be encrypted with a VPN, that is inherently less secure than keeping the traffic within the AWS boundary.
+Non AWS solutions require traffic to leave the AWS network and [traverse the public internet via internet gateways](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/software-vpn-1.html). While that traffic can be encrypted with a VPN, that is inherently less secure than keeping the traffic within the AWS boundary.
 
 ## Implementation Guide
 
@@ -314,3 +314,4 @@ The AWS Transit service consolidates the AWS VPC routing configuration for a reg
 - [What is VPC Peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)
 - [List of FedRAMP compliant AWS services](https://aws.amazon.com/compliance/services-in-scope/FedRAMP/)
 - [AWS VPC to AWS VPC Connectivity Options](https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/amazon-vpc-to-amazon-vpc-connectivity-options.html)
+- [Multi-VPC Network Infrastructure Whitepaper](https://docs.aws.amazon.com/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html)
