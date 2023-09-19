@@ -19,7 +19,7 @@ Select and implement a set of developer tools that automate key code quality and
 
 ### Business description & value
 
-We must incorporate an effective set of developer tools into our codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and from open source contributors meet key standards and do not introduce bugs or security vulnerabilities. 
+We must incorporate an effective set of developer tools into our codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and from open source contributors meet key standards and do not introduce bugs or security vulnerabilities.
 
 While enforcing compliance with these standards may increase the time and energy required for individual contributions, adopting an effective set of tools can increase the speed of delivery over time by reducing the overhead associated with reviewing new code and identifying potential bugs before they are deployed to production.
 
@@ -63,7 +63,7 @@ Evaluate and adopt a set of tools to enforce the following code quality checks:
   - immutability enforcement
 - Auto-formatting
 - Type checking
-- Code quality scoring tool (e.g. [CodeClimate](https://codeclimate.com/quality)) 
+- Code quality scoring tool (e.g. [CodeClimate](https://codeclimate.com/quality))
 
 ### Security checks
 
@@ -84,7 +84,7 @@ Evaluate and adopt a tool for managing project dependencies that also tracks and
 
 ### Config & secrets management
 
-Evaluate and adopt a set of tools that standardize and enforce best practices around secrets management in the project. This collection of tools should support: 
+Evaluate and adopt a set of tools that standardize and enforce best practices around secrets management in the project. This collection of tools should support:
 
 - Loading configs from environment variables or files (e.g. `secrets.toml`, `.env`, etc.)
 - Secrets storage & sharing
@@ -140,7 +140,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 
@@ -206,7 +206,7 @@ The following work will *not* be completed as part of this milestone:
 
 *Does this milestone expose any new attack vectors or expand the attack surface of the product?*
 
-**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors: 
+**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors:
 
 1. Compromising the access to the secrets manager
 2. Compromising individual secrets when they are injected

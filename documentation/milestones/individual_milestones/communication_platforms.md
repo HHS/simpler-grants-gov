@@ -240,7 +240,7 @@ TODO: See if we can reduce the list of metrics to track
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 

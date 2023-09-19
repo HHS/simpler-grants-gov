@@ -158,7 +158,7 @@ We recommend calculating the following metrics at least once to inform the selec
 
 #### Ongoing metrics
 
-The following metrics should be tracked about the tools selected within this metric: 
+The following metrics should be tracked about the tools selected within this metric:
 
 1. API framework metrics
    1. Days since last patch or minor release
@@ -167,7 +167,7 @@ The following metrics should be tracked about the tools selected within this met
 ### Destination for live updating metrics
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 

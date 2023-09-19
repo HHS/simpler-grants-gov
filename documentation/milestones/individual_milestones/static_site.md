@@ -19,7 +19,7 @@ Launch a simple site at beta.grants.gov that provides static, informational cont
 
 ### Business description & value
 
-The launch of a static site for the Grants Equity project represents the culmination of multiple internally focused deliverables and serves as a landing page where key stakeholders can access information about the project. 
+The launch of a static site for the Grants Equity project represents the culmination of multiple internally focused deliverables and serves as a landing page where key stakeholders can access information about the project.
 
 By sharing this information in a publicly accessible format and investing early in the infrastructure used to host it, this milestone aims to demonstrate the following value propositions:
 
@@ -114,7 +114,7 @@ Process for drafting and updating the content of the site should balance:
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 
