@@ -10,7 +10,7 @@
 
 The Beta.Grants.Gov platform will need to consume live grants data securely and without impacting grants.gov performance. However, the production database was not planned to support additional load to the database from the beta api. The beta work will also want to test schema changes to the database to facilitate new queries and lifecycle tracking that will not be possible in the production database.
 
-Additionally, the grants.gov database resides in another AWS account, which complicates access and security concerns. Any solution will need to comply with HHS security policies, be included on a security impact assessment (SIA), use tools and controls in or added to the System Security Plan (SSP), and not jeopardize the security of the environment with Approval to Operate (ATO).
+Additionally, the grants.gov database resides in another AWS account, which complicates access and security concerns. Any solution in production will need to comply with HHS security policies, be included on a security impact assessment (SIA), use tools and controls in or added to the System Security Plan (SSP), and not jeopardize the security of the environment with Approval to Operate (ATO).
 
 ## Decision Drivers
 
