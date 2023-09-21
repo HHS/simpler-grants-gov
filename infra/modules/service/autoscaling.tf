@@ -7,27 +7,9 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   namespace           = "AWS/ECS"
   period              = "30"
   statistic           = "Average"
-  threshold           = "70"
-  alarm_description   = "Alarm when CPU exceeds 80%"
+  threshold           = "75"
+  alarm_description   = "Alarm when CPU exceeds 75%"
   alarm_actions       = [aws_appautoscaling_policy.scale_up[0].arn]
-  dimensions = {
-    ClusterName = aws_ecs_cluster.cluster.name
-    ServiceName = var.service_name
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "cpu_low" {
-  count               = var.enable_autoscaling ? 1 : 0
-  alarm_name          = "cpu-low-${var.service_name}"
-  comparison_operator = "LessThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "20"
-  alarm_description   = "Alarm when CPU drops below 20%"
-  alarm_actions       = [aws_appautoscaling_policy.scale_down[0].arn]
   dimensions = {
     ClusterName = aws_ecs_cluster.cluster.name
     ServiceName = var.service_name
@@ -55,33 +37,12 @@ resource "aws_appautoscaling_policy" "scale_up" {
 
   step_scaling_policy_configuration {
     adjustment_type         = "ChangeInCapacity"
-    cooldown                = 60
+    cooldown                = 30
     metric_aggregation_type = "Average"
 
     step_adjustment {
       metric_interval_lower_bound = 0
       scaling_adjustment          = 1
-    }
-  }
-}
-
-resource "aws_appautoscaling_policy" "scale_down" {
-  count = var.enable_autoscaling ? 1 : 0
-
-  name               = "scale-down-${var.service_name}"
-  policy_type        = "StepScaling"
-  resource_id        = aws_appautoscaling_target.ecs_target[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_target[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_target[0].service_namespace
-
-  step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 60
-    metric_aggregation_type = "Average"
-
-    step_adjustment {
-      metric_interval_upper_bound = 0
-      scaling_adjustment          = -1
     }
   }
 }
