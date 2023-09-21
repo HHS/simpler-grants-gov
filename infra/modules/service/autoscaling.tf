@@ -27,7 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   statistic           = "Average"
   threshold           = "30" # You can adjust this threshold as per your needs
   alarm_description   = "Alarm when CPU drops below 30%"
-  alarm_actions       = [aws_appautoscaling_policy.scale_up[0].arn]
+  alarm_actions       = [aws_appautoscaling_policy.scale_down[0].arn]
   dimensions = {
     ClusterName = aws_ecs_cluster.cluster.name
     ServiceName = var.service_name
