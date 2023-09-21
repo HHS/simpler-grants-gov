@@ -2,7 +2,7 @@
 
 # Development and Software Delivery Lifecycle 
 
-The following guide is for members of the project team who have access to the repository. For contributors, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
+The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that externabl contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contribributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Local Development
 
