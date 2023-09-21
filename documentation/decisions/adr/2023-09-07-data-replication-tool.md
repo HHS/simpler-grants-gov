@@ -1,9 +1,9 @@
 # Data Replication Strategy & Tool
 
-- **Status:** Draft
-- **Last Modified:** 2023-09-15
+- **Status:** Active
+- **Last Modified:** 2023-09-21
 - **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
-- **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch
+- **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch, Curtis Mayer, Lorenzo Gomez, Marwan Abu-Fadel, Brandon Smith
 - **Tags:** Hosting, Infrastructure, Database
 
 ## Context and Problem Statement
@@ -52,10 +52,18 @@ Additionally, [AWS DMS and AWS VPC Pairing are FedRAMP compliant](https://aws.am
 - This solution will allow us to not only replicate the data, but transform it as well. This will allow us to pilot schema changes very quickly without having to spend the time creating new data pipelines from the original data sources
 - This approach allows us to only replicate what we need when we need it, reducing the cost of replication, and limiting our security exposure.
 - If we implement DMS with the intention of adding additional tables, or even replicating the entire database, this will be an agile tool to support us until we're able to deprecate the Oracle database.
+- Data is extracted and replicated using a replica database as a source, rather than direct impact to the origin DB (production, test, etc.).
+- Security is confined to East-2 rather than allowing connections to the primary site.
+- Configurations are mostly made only against the replica database (some such as a new replication user will still be needed at the origin DB).
+- Performance impacts of the solution replication are limited to the replica database.
 
 ### Negative Consequences
 
 - When we want to eventually move away from the expensive Oracle database and it's unoptimized schema, this replica will need to be deprecated as well
+- Connection issues between VPC will cause archived redo logs to backlog on the replica source until connections are re-established (could theoretically cause storage issues if it persists long enough).
+- Replication monitoring is needed to ensure no backlogs, performance hits, etc.
+- Specific configurations to the replica may need to be made as new objects are added to the replication (new tables, etc). DDL in some instances normally does not transfer via CDC replication without manual intervention.
+- Additional maintenance times for all DB engine upgrades are needed to patch and update the replica.
 
 ## Decision Outcome - Data Traffic
 
@@ -218,9 +226,9 @@ Currently the beta AWS account is designated as a lower environment and therefor
 
 ## Pros and Cons of the Options - Data Replication
 
-### Use Production Database
+### Use MicroHealth Database
 
-Connect to the Microhealth lower environment replica database, that contains only fixture data, for the lower environment and connect to the production database for our production environment.
+Connect to the Microhealth lower environment replica database, that contains only fixture data, for the lower environment.
 
 - **Pros**
   - No additional cost for data storage
