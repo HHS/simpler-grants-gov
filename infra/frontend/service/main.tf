@@ -90,12 +90,13 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 module "service" {
-  source                = "../../modules/service"
-  service_name          = local.service_name
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  source                 = "../../modules/service"
+  service_name           = local.service_name
+  image_repository_name  = module.app_config.image_repository_name
+  image_tag              = local.image_tag
+  vpc_id                 = data.aws_vpc.default.id
+  subnet_ids             = data.aws_subnets.default.ids
+  desired_instance_count = 2
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
