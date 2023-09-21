@@ -2,12 +2,12 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   count               = var.enable_autoscaling ? 1 : 0
   alarm_name          = "cpu-high-${var.service_name}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = "60"
+  period              = "30"
   statistic           = "Average"
-  threshold           = "80"
+  threshold           = "70"
   alarm_description   = "Alarm when CPU exceeds 80%"
   alarm_actions       = [aws_appautoscaling_policy.scale_up[0].arn]
   dimensions = {
@@ -25,8 +25,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   namespace           = "AWS/ECS"
   period              = "60"
   statistic           = "Average"
-  threshold           = "30" # You can adjust this threshold as per your needs
-  alarm_description   = "Alarm when CPU drops below 30%"
+  threshold           = "20"
+  alarm_description   = "Alarm when CPU drops below 20%"
   alarm_actions       = [aws_appautoscaling_policy.scale_down[0].arn]
   dimensions = {
     ClusterName = aws_ecs_cluster.cluster.name
@@ -39,7 +39,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 
   max_capacity       = var.max_capacity
   min_capacity       = var.min_capacity
-  resource_id        = "service/${aws_ecs_cluster.cluster.name}/${var.service_name}" # Using the provided cluster and service names
+  resource_id        = "service/${aws_ecs_cluster.cluster.name}/${var.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
