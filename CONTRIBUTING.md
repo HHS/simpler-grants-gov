@@ -90,7 +90,7 @@ Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md
 
 ### Open Source Policy
 
-We adhere to the [HHS Open Source Policy](https://github.com/CMSGov/cms-open-source-policy). If you have any questions, just [shoot us an email](mailto:needed@hhs.gov).
+We adhere to the [HHS Open Source Policy](https://github.com/CMSGov/cms-open-source-policy). If you have any questions, just [shoot us an email](mailto:equityingrants@hhs.gov?subject=Question About Open Source Policy).
 
 ### Security and Responsible Disclosure Policy
 
