@@ -1,95 +1,113 @@
 <!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
-# How to Contribute (Internal)
+# How to Contribute as an External Contributor
 
-The following guide is for members of the project team who have access to the repository. For external contributors, see: [CONTRIBUTING_EXTERNAL.md](./CONTRIBUTING_EXTERNAL.md).
+🎉 First off, thanks for taking the time to contribute! 🎉
 
-## Local Development
+We're so thankful you're considering contributing to an [open source project of the U.S. government](https://code.gov/)! If you're unsure about anything, just ask -- or submit the issue or pull request anyway. The worst that can happen is you'll be politely asked to change something. We appreciate all friendly contributions.
+
+We encourage you to read this project's CONTRIBUTING-EXTERNAL policy (you are here), its [LICENSE](LICENSE.md), and its [README](README.md).
+
+> :information_source: This project initiated in third quarter of 2023, and is just ramping up efforts to include code contributors as well as contributors from many other disciplines in many different capacities.
+
+## How Can I Contribute?
+
+There are a number of ways to contribute to this project.
+
+### Report a Bug
+
+If you think you have found a bug in the code or static site, [search our issues list](https://github.com/HHS/grants-equity/issues) on GitHub for any similar bugs. If you find a similar bug, please update that issue with your details.
+
+If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
+
+- **Please use the [Bug Report](https://github.com/HHS/grants-equity/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issuethe right information
+- **Use a clear and descriptive issue title** for the issue to identify the problem.
+- **Describe the exact steps to reproduce the problem** in as much detail as possible. For example, start by explaining how you got to the page where you encountered the bug and what you were attempting to do when the bug occurred.
+- **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
+- **Explain which behavior you expected to see instead and why.**
+- **Include screenshots and animated GIFs** if possible, which show you following the described steps and clearly demonstrate the problem.
+- **If the problem wasn't triggered by a specific action**, describe what you were doing before the problem happened.
+
+### Suggest an Enhancement
+
+If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue in this repository.
+
+Please open an issue of type [Feature request](https://github.com/HHS/grants-equity/issues/new?assignees=octocat&labels=enhancement&projects=&template=feature_request.yml&title=%5BFeature+Request%5D%3A+):
+
+In this issue, please describe the use case for the feature you would like to see -, what you need, why you need it, and how it should work. Team members will respond to the Feature request as soon as possible. Often, Feature request suggestions undergo a collaborative discussion with the community to help refine the need for the feature and how it can be implemented.
+
+### Non-Technical Contributions
+
+#### Documentation
+
+To contribute to documentation you find in this repository, feel free to use the GitHub user interface to submit a pull request for your changes. Find more information about using the GitHub user interface for PRs here.
+
+### Contribute to community discussions
+
+> 🚧 Tools and expanding avenues for community engagement are coming soon.
+
+### Sharing your story 
+
+Sharing how you or your organization have used the Grants Equity project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `grants-equity@hhs.gov`](mailto:grants-equity@hhs.gov).
+
+## Code Contributions
+
+The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecylce on the project.
+
+### Getting Started
 
 This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
 
-### Linting and Testing
+### Workflow and Branching
 
-Each application has its own linting and testing guidelines. Lint and code tests are run on each commit, so linters and tests should be run locally before commiting.
+This project follows [trunk-based development](./DEVELOPMENT.md#branching-model), so all contributions are directed toward the `main` branch.
 
-## Branching Model
+1.  Fork the project
+1.  Check out the `main` branch
+1.  Create a feature branch
+1.  Write code and tests for your change
+1.  From your branch, make a pull request against `hhs/grants-equity/main`
+1.  Work with repo maintainers to get your change reviewed
+1.  Wait for your change to be pulled into `hhs/grants-equity/main`
+1.  Delete your feature branch
 
-This project follows [trunk-based development](https://trunkbaseddevelopment.com/), which means:
+### Testing, Coding Style and Linters
 
-* Make small changes in [short-lived feature branches](https://trunkbaseddevelopment.com/short-lived-feature-branches/) and merge to `main` frequently.
-* Be open to submitting multiple small pull requests for a single ticket (i.e. reference the same ticket across multiple pull requests).
-* Treat each change you merge to `main` as immediately deployable to production. Do not merge changes that depend on subsequent changes you plan to make, even if you plan to make those changes shortly.
-* Ticket any unfinished or partially finished work.
-* Tests should be written for changes introduced, and adhere to the text percentage threshold determined by the project.
+Each application has its own testing and linters. Every commit is tested to adhere to tests and the linting guidelines. It is recommended to run tests and linters locally before committing.
 
-This project uses **continuous deployment** using [Github Actions](https://github.com/features/actions) which is configured in the [./github/worfklows](./github/workflows) directory.
+### Issues
 
-Pull-requests are merged to `main` and the changes are immediately deployed to the development environment. Releases are created to push changes to production.
+External contributors should use the *Bug Report* or *Feature Request* [issue templates](https://github.com/HHS/grants-equity/issues/new/choose).
 
-## Writing Pull Requests
+### Pull Requests
 
-Prefix the branch name with your name, and include the ticket number in the branch name e.g. `cooldev/issue-1234-new-feature`.
+Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md) with the following changes:
 
-Commit messages should, but are not required, to follow [git best practice conventions](https://cbea.ms/git-commit/#seven-rules) for consistency and legibility. Commit messages will be squashed, so individual commit messages will only be visible in the commit history of the pull request.
+1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
+1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
 
-### Title
+## Policies
 
-Pull request should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
+### Open Source Policy
 
-### Recommendations
+We adhere to the [HHS Open Source Policy](https://github.com/CMSGov/cms-open-source-policy). If you have any questions, just [shoot us an email](mailto:needed@hhs.gov).
 
-**Use draft PRs to solicit early feedback.**
+### Security and Responsible Disclosure Policy
 
-If your PR is a work-in-progress, or if you are looking for specific feedback on things, create a Draft Pull Request and state what you are looking for in the description.
+The Department of Health and Human Services is committed to ensuring the security of the American public by protecting their information from
+unwarranted disclosure. We want security researchers to feel comfortable reporting vulnerabilities they have discovered so we can fix them and keep our users safe. We developed our disclosure policy to reflect our values and uphold our sense of responsibility to security researchers who share their expertise with us in good faith.
 
-**Provide context for current and future team members.**
-Write a full description that provides all the necessary context for your change. Consider your description as documentation. Include relevant context and business requirements, and add preemptive comments (in code or PR) for sections of code that may be confusing or worth debate.
+*Submit a vulnerability:* Unfortunately, we cannot accept secure submissions via email or via GitHub Issues. Please use our website to submit vulnerabilities at [https://hhs.responsibledisclosure.com](https://hhs.responsibledisclosure.com). HHS maintains an acknowledgements page to recognize your efforts on behalf of the American public, but you are also welcome to submit anonymously.
 
-**Make things easy for your reviewers.**
+Review the HHS Disclosure Policy and websites in scope:
+[https://www.hhs.gov/vulnerability-disclosure-policy/index.html](https://www.hhs.gov/vulnerability-disclosure-policy/index.html).
 
-Do a self-review using the diff in github to make sure you’re not sending through any obvious issues. Run any automations (testing, linters, etc.) before opening your PR.
+This policy describes *what systems and types of research* are covered under this policy, *how to send* us vulnerability reports, and *how long* we ask security researchers to wait before publicly disclosing vulnerabilities.
 
-If any manual testing was performed, document it in enough detail in the PR description that somebody else could recreate your test. Include reference to your test data, if applicable!
+If you have other cybersecurity related questions, please contact us at [csirc@hhs.gov](mailto:csirc@hhs.gov).
 
-### Reviewers
+## Public domain
 
-Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS](./github/CODEOWNERS) for more details.
+This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 
-### Pull in Own Requests
-
-Once a PR is accepted by a reviewer, the author should merge.
-
-### Squash Merge
-
-This project uses the squash merge strategy. When squashing, retain the `[Issue N] Description` format. Any notes in the body of the commit should follow commit best practices.
-
-All changes, including small ones, should have an issue. If they don't `[Hotfix]` should be used in lieu of the issue and number.
-
-## Reviewing Pull Requests
-
-This project takes a very collaborative and [agile](https://agilemanifesto.org/) approach to code reviews. Working versions of code, self-organizing, and individuals are prioritized When reviewing pull requests:
-
-* **Be prompt**. Aim to respond to a review within 24 hours (although sooner is preferable), and if you cannot do so, be sure to communicate delays to the code author.
-* **Be kind and respectful** when leaving comments and maintain a collaborative tone. Don’t use language that disparages or embarrasses the author (name calling, insults to intelligence, etc). Direct any negative feedback towards the code rather than towards the author.
-* **Present suggestions as requests rather than demands**; instead of “Move this function to file B” try “Would this function fit better in file B?” This allows the author to push back on the suggestion by answering a question rather than rejecting a demand, which helps keep things from getting combative.
-* **Praise and compliment** the good parts!
-* **Explain suggestions and recommendations**. These should be opportunities for learning/mentoring, not for criticism or giving orders.
-* **Offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
-* **Review the testing** as well as the code. You may think of edge cases or other things that the author’s testing plan might have missed.
-* **Clearly designate between required and optional changes**. This can take many forms, but as examples: “(optional) We might want to rename this variable to avoid confusion” and “(blocking) We don’t properly handle deadlocks here, so we’ll need to fix that.” It may also be helpful to clearly designate praises, questions, nits, etc to make a comment’s intention very clear.
-* Consider using **[conventional comments](https://conventionalcomments.org/)** for messages.
-* Use the **"Add a suggestion"** feature to suggest small changes in PRs.
-  
-![add a suggestion pop-up](https://github.com/HHS/grants-equity/assets/512243/e08efbd3-91de-43ce-a0d5-4529ccb1ac13)
-
-* **The "Request Changes"** feature *requires* the reviewer approve changes. This takes autonomy from the engineer, and should only be used if there is an urgent need.
-
-## Releases
-
-Releases follow the [CalVer](https://calver.org/) versioning using a `YYY.MM.DD` format. Optionally include a `-N` if more than one releases are published in the same day.
-
-Releases should be [created in Github](https://github.com/HHS/grants-equity/releases) and include a log of changes.
-
-## Documentation
-
-Any changes to features, tools, or workflows should include updates or additions to documentation.
+All contributions to this project will be released under the CC0 dedication. By submitting a pull request or issue, you are agreeing to comply with this waiver of copyright interest.
