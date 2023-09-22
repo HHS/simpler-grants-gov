@@ -93,3 +93,15 @@ resource "aws_vpc_endpoint" "aws_service" {
   subnet_ids          = data.aws_subnets.default.ids
   private_dns_enabled = true
 }
+
+data "aws_ssm_parameter" "tls_private_key" {
+  name = "/lb/frontend-dev/tls-private-key"
+}
+data "aws_ssm_parameter" "tls_cert" {
+  name = "/lb/frontend-dev/tls-cert"
+}
+
+resource "aws_acm_certificate" "dev_frontend_cert" {
+  private_key      = data.aws_ssm_parameter.tls_private_key
+  certificate_body = data.aws_ssm_parameter.tls_cert
+}

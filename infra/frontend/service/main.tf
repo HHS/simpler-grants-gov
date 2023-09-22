@@ -89,6 +89,10 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
+data "aws_acm_certificate" "frontend_cert" {
+  domain   = "beta.grants.gov"
+}
+
 module "service" {
   source                 = "../../modules/service"
   service_name           = local.service_name
@@ -97,6 +101,7 @@ module "service" {
   vpc_id                 = data.aws_vpc.default.id
   subnet_ids             = data.aws_subnets.default.ids
   desired_instance_count = 2
+  cert_arn               = data.aws_acm_certificate.frontend_cert.arn
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids

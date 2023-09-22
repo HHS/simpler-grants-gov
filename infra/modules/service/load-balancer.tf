@@ -71,6 +71,42 @@ resource "aws_lb_listener_rule" "app_http_forward" {
   }
 }
 
+resource "aws_lb_listener" "alb_listener_https" {
+  count = var.cert_arn ? 1 : 0
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = var.cert_arn
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "app_https_forward" {
+  count = var.cert_arn ? 1 : 0
+  listener_arn = aws_lb_listener.alb_listener_https.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
+# add rule to redirect http traffic to https with the count
+
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
   name_prefix          = "app-"
