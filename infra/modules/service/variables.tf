@@ -71,8 +71,8 @@ variable "db_vars" {
 
 variable "cert_arn" {
   description = "The ARN for the TLS certificate passed in from the app service layer"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "enable_autoscaling" {

@@ -57,9 +57,9 @@ resource "aws_lb_listener" "alb_listener_http" {
 }
 
 resource "aws_lb_listener_rule" "redirect_http_to_https" {
-  count = var.cert_arn != null ? 1 : 0
+  count        = var.cert_arn != null ? 1 : 0
   listener_arn = aws_lb_listener.alb_listener_http.arn
-  priority = 101
+  priority     = 101
 
   action {
     type = "redirect"
@@ -96,7 +96,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 
 
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.cert_arn != null ? 1 : 0
+  count             = var.cert_arn != null ? 1 : 0
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
@@ -114,7 +114,7 @@ resource "aws_lb_listener" "alb_listener_https" {
 }
 
 resource "aws_lb_listener_rule" "app_https_forward" {
-  count = var.cert_arn != null ? 1 : 0
+  count        = var.cert_arn != null ? 1 : 0
   listener_arn = aws_lb_listener.alb_listener_https[0].arn
   priority     = 100
 
@@ -128,8 +128,6 @@ resource "aws_lb_listener_rule" "app_https_forward" {
     }
   }
 }
-
-# add rule to redirect http traffic to https with the count
 
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes

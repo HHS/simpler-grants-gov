@@ -90,7 +90,7 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 data "aws_acm_certificate" "frontend_cert" {
-  domain   = "beta.grants.gov"
+  domain = "beta.grants.gov"
 }
 
 module "service" {
