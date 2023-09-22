@@ -34,7 +34,7 @@ HHS needs a way to distribute information about the Simpler Grants workstreams t
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Use **GitBook** to create and manage content publishing the site via **“private” link**. The link to this site will be added to the HHS intranet so that HHS staff can find it.
+Use **GitBook** to create and manage content publishing to the site via **“private” link**. The link to this site will be added to the HHS intranet and/or OG Resource Center so that HHS staff can find it.
 
 In parallel we'll actively work on developing a **visitor authentication option** to restrict access to the site in the long-term. Once this visitor authentication option is built and undergoes security review and approval, we'll change the publishing strategy for GitBook from "private" link to visitor authentication.
 
