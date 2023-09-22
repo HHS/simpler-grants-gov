@@ -56,6 +56,27 @@ resource "aws_lb_listener" "alb_listener_http" {
   }
 }
 
+resource "aws_lb_listener_rule" "redirect_http_to_https" {
+  count = var.cert_arn != null ? 1 : 0
+  listener_arn = aws_lb_listener.alb_listener_http.arn
+
+  action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
 resource "aws_lb_listener_rule" "app_http_forward" {
   listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 100
@@ -71,8 +92,10 @@ resource "aws_lb_listener_rule" "app_http_forward" {
   }
 }
 
+
+
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.cert_arn ? 1 : 0
+  count = var.cert_arn != null ? 1 : 0
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
@@ -90,8 +113,8 @@ resource "aws_lb_listener" "alb_listener_https" {
 }
 
 resource "aws_lb_listener_rule" "app_https_forward" {
-  count = var.cert_arn ? 1 : 0
-  listener_arn = aws_lb_listener.alb_listener_https.arn
+  count = var.cert_arn != null ? 1 : 0
+  listener_arn = aws_lb_listener.alb_listener_https[0].arn
   priority     = 100
 
   action {
