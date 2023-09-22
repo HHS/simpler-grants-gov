@@ -74,3 +74,21 @@ variable "cert_arn" {
   type = string
   default = null
 }
+
+variable "enable_autoscaling" {
+  description = "Flag to enable or disable auto-scaling"
+  type        = bool
+  default     = false
+}
+
+variable "max_capacity" {
+  description = "Maximum number of tasks for autoscaling"
+  type        = number
+  default     = 4
+}
+
+variable "min_capacity" {
+  description = "Minimum number of tasks for autoscaling"
+  type        = number
+  default     = 2
+}

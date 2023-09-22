@@ -100,7 +100,7 @@ module "service" {
   image_tag              = local.image_tag
   vpc_id                 = data.aws_vpc.default.id
   subnet_ids             = data.aws_subnets.default.ids
-  desired_instance_count = 2
+  enable_autoscaling     = module.app_config.enable_autoscaling
   cert_arn               = data.aws_acm_certificate.frontend_cert.arn
 
   db_vars = module.app_config.has_database ? {
