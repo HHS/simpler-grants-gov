@@ -29,3 +29,7 @@ output "build_repository_config" {
 output "environment_configs" {
   value = local.environment_configs
 }
+
+output "enable_autoscaling" {
+  value = local.enable_autoscaling
+}
