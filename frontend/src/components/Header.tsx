@@ -1,4 +1,4 @@
-import { useTranslation } from "next-i18next";
+import { useTranslation, useLanguageQuery } from "next-export-i18n";
 import { useState } from "react";
 import {
   GovBanner,
@@ -19,7 +19,10 @@ type Props = {
 };
 
 const Header = ({ logoPath, primaryLinks }: Props) => {
-  const { t, i18n } = useTranslation("common", {
+  const [i18n] = useLanguageQuery();
+  const lan = i18n ? i18n.lang : "en";
+
+  const { t } = useTranslation("common", {
     keyPrefix: "Header",
   });
 
@@ -41,7 +44,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
       <GovBanner
-        language={i18n.language?.match(/^es-?/) ? "spanish" : "english"}
+        language={lan?.match(/^es-?/) ? "spanish" : "english"}
       />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
@@ -59,7 +62,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">{t("Header.title")}</span>
               </div>
             </Title>
             {showMenu && (
