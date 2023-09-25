@@ -56,10 +56,29 @@ resource "aws_lb_listener" "alb_listener_http" {
   }
 }
 
+resource "aws_lb_listener" "alb_listener_https" {
+  count             = var.cert_arn != null ? 1 : 0
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = var.cert_arn
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
 resource "aws_lb_listener_rule" "redirect_http_to_https" {
   count        = var.cert_arn != null ? 1 : 0
   listener_arn = aws_lb_listener.alb_listener_http.arn
-  priority     = 101
+  priority     = 100
 
   action {
     type = "redirect"
@@ -80,7 +99,7 @@ resource "aws_lb_listener_rule" "redirect_http_to_https" {
 
 resource "aws_lb_listener_rule" "app_http_forward" {
   listener_arn = aws_lb_listener.alb_listener_http.arn
-  priority     = 100
+  priority     = 110
 
   action {
     type             = "forward"
@@ -89,27 +108,6 @@ resource "aws_lb_listener_rule" "app_http_forward" {
   condition {
     path_pattern {
       values = ["/*"]
-    }
-  }
-}
-
-
-
-resource "aws_lb_listener" "alb_listener_https" {
-  count             = var.cert_arn != null ? 1 : 0
-  load_balancer_arn = aws_lb.alb.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = var.cert_arn
-
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Not Found"
-      status_code  = "404"
     }
   }
 }
