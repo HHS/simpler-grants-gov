@@ -102,8 +102,8 @@ data "aws_ssm_parameter" "tls_cert" {
 }
 
 resource "aws_acm_certificate" "dev_frontend_cert" {
-  private_key      = data.aws_ssm_parameter.tls_private_key
-  certificate_body = data.aws_ssm_parameter.tls_cert
+  private_key      = data.aws_ssm_parameter.tls_private_key.value
+  certificate_body = data.aws_ssm_parameter.tls_cert.value
 
   lifecycle {
     create_before_destroy = true
