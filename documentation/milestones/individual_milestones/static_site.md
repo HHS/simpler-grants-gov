@@ -1,15 +1,14 @@
 # Static Site for Simpler Grants.gov Project
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Accepted                                                             |
-| Epic Link       | [Issue 62](https://github.com/HHS/grants-equity/issues/62)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-09-20                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 62](https://github.com/HHS/grants-equity/issues/62)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 ## Short description
 
