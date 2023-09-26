@@ -104,8 +104,9 @@ module "service" {
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
-  # Temporary solution to avoid issues applying SSL config to production infrastructure
-  cert_arn = var.environment_name == "dev" ? data.aws_acm_certificate.frontend_cert.arn : null
+  # TODO: Reroute SSL to production environment
+  # To temporarily avoid issues in production & Terratest: Check if environment is "dev" and workspace is "default"
+  cert_arn = var.environment_name == "dev" && terraform.workspace == "default" ? data.aws_acm_certificate.frontend_cert.arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
