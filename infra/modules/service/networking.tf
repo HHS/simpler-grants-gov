@@ -28,8 +28,8 @@ resource "aws_security_group" "alb" {
   }
 }
 
- # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
-  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
+# TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
+# checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
 resource "aws_security_group_rule" "http_ingress" {
   security_group_id = aws_security_group.alb.id
 
