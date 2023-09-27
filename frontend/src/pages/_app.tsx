@@ -9,7 +9,7 @@ import Layout from "../components/Layout";
 
 import "../styles/styles.scss";
 
-import { assetPath } from "utils/assetPath";
+import { assetPath } from "src/utils/assetPath";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

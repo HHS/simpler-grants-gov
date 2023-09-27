@@ -1,5 +1,5 @@
 import { ExternalRoutes } from "src/constants/routes";
-import { assetPath } from "utils/assetPath";
+import { assetPath } from "src/utils/assetPath";
 
 import { useTranslation } from "next-i18next";
 import { ComponentType } from "react";

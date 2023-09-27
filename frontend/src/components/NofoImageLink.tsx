@@ -1,5 +1,5 @@
 import { pdf } from "src/constants/nofoPdfs";
-import { assetPath } from "utils/assetPath";
+import { assetPath } from "src/utils/assetPath";
 
 import Image from "next/image";
 import Link from "next/link";
