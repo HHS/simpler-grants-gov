@@ -3,9 +3,10 @@ name: Deploy Storybook
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
-    paths:
-      - frontend/**
+    # branches: ["main"]
+    branches: ["daphnegold/issue-545"]
+    # paths:
+    #   - frontend/**
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
