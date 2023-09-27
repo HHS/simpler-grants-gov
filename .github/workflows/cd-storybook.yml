@@ -2,11 +2,11 @@ name: Deploy Storybook
 
 on:
   # Runs on pushes targeting the default branch
-  push:
-    # branches: ["main"]
-    branches: ["daphnegold/issue-545"]
-    # paths:
-    #   - frontend/**
+  # !! Uncomment the lines below to enable this workflow
+  # push:
+  #   branches: ["main"]
+  #   paths:
+  #     - frontend/**
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,9 +18,9 @@ permissions:
   id-token: write
 
 # Cancel any older in-progress runs of this workflow
-# concurrency:
-#   group: "pages"
-#   cancel-in-progress: true
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -57,4 +57,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: hosting
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v1
