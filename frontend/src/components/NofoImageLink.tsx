@@ -1,4 +1,5 @@
 import { pdf } from "src/constants/nofoPdfs";
+import { assetPath } from "utils/assetPath";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +24,7 @@ const NofoImageLink = ({ file, image, alt, width, height }: pdf) => {
         <Image
           alt={alt}
           className="pdf-card"
-          src={image}
+          src={assetPath(image)}
           height={height}
           width={width}
           style={{

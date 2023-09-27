@@ -1,3 +1,5 @@
+import { assetPath } from "utils/assetPath";
+
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import {
@@ -52,9 +54,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
                   <span className="margin-right-1">
                     <img
                       className="width-3 desktop:width-5 text-bottom margin-right-05"
-                      src={`${
-                        process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-                      }${logoPath}`}
+                      src={assetPath(logoPath)}
                       alt="Site logo"
                     />
                   </span>

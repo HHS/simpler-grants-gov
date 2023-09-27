@@ -24,12 +24,6 @@ function blockSearchEnginesInHead(head) {
  * @type {import("@storybook/nextjs").StorybookConfig}
  */
 const config = {
-  webpackFinal: async (config) => {
-    config.output = config.output ?? {};
-    config.output.publicPath = "../../public/";
-    return config;
-  },
-
   stories: ["../stories/**/*.stories.@(mdx|js|jsx|ts|tsx)"],
   addons: [
     "@storybook/addon-essentials",
