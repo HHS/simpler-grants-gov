@@ -1,4 +1,5 @@
 import { ExternalRoutes } from "src/constants/routes";
+import { assetPath } from "src/utils/assetPath";
 
 import { useTranslation } from "next-i18next";
 import { ComponentType } from "react";
@@ -87,7 +88,7 @@ const Footer = () => {
             <img
               className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
               alt={t("logo_alt")}
-              src={"/img/grants-gov-logo.png"}
+              src={assetPath("/img/grants-gov-logo.png")}
             />
           </Grid>
           <Grid
