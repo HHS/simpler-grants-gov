@@ -89,12 +89,9 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
-data "aws_acm_certificate" "frontend_dev_cert" {
-  domain = "beta.grants.gov"
-}
-
-data "aws_acm_certificate" "frontend_prod_cert" {
-  domain = "simpler.grants.gov"
+data "aws_acm_certificate" "cert" {
+  count = var.domain != null ? 1 : 0
+  domain = var.domain
 }
 
 output "environment_name" {
@@ -108,11 +105,7 @@ module "service" {
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
-  cert_arn = (
-    terraform.workspace != "default" ? null :
-    var.environment_name == "prod" ? data.aws_acm_certificate.frontend_prod_cert.arn :
-    data.aws_acm_certificate.frontend_dev_cert.arn
-  )
+  cert_arn              = var.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
