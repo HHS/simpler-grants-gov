@@ -1,15 +1,14 @@
 # API Planning
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed                                                            |
-| Epic Link       | [Issue 42](https://github.com/HHS/grants-equity/issues/42)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-07-12                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 42](https://github.com/HHS/grants-equity/issues/42)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 
 ## Short description

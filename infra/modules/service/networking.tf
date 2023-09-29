@@ -19,16 +19,6 @@ resource "aws_security_group" "alb" {
 
   vpc_id = var.vpc_id
 
-  # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
-  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
-  ingress {
-    description = "Allow HTTP traffic from public internet"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     description = "Allow all outgoing traffic"
     from_port   = 0
@@ -36,6 +26,32 @@ resource "aws_security_group" "alb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group_rule" "http_ingress" {
+  # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
+  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
+
+  security_group_id = aws_security_group.alb.id
+
+  description = "Allow HTTP traffic from public internet"
+  from_port   = 80
+  to_port     = 80
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  type        = "ingress"
+}
+
+resource "aws_security_group_rule" "https_ingress" {
+  count             = var.cert_arn != null ? 1 : 0
+  security_group_id = aws_security_group.alb.id
+
+  description = "Allow HTTPS traffic from public internet"
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  type        = "ingress"
 }
 
 # Security group to allow access to Fargate tasks
