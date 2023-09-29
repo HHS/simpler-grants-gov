@@ -90,7 +90,7 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count = var.domain != null ? 1 : 0
+  count  = var.domain != null ? 1 : 0
   domain = var.domain
 }
 
