@@ -24,16 +24,17 @@ The launch of a public API endpoint which provides information about every grant
 
 By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this milestone aims to demonstrate the following value propositions:
 
-- Exposes `beta.grants.gov/api/` as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
-- Proves the successful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
-- Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
+- Estables a public-facing location (i.e. first API endpoint and API docs) where future API enhancements related to the Simpler Grants.gov initiative will be released
+- Builds critical infrastructure that helps us write quality backend code and deliver future API releases more quickly
+- Proves our ability to connect to grants.gov production systems and maintain eventual consistency between the Simpler Grants.gov API and existing web services (within an acceptable latency threshold)
+- Delivers another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
 ### User Stories
 <!-- Required -->
 
 - As an **HHS staff member**, I want:
   - the API to adopt the proper security practices, so that we have a strategy for preventing and responding to security vulnerabilities before the API is launched
-  - published data about opportunities to be consistent between legacy grants.gov and `beta.grants.gov`, so that users won't be confused by discrepancies between these sources
+  - published data about opportunities to be consistent between the current grants.gov web services and Simpler Grants.gov API, so that users won't be confused by discrepancies between these sources
 - As a **consumer of the API**, I want:
   - clear documentation and a user guide for the API, so that I don't have to rely on reading the source code to learn how to interact with and consume from it
   - changes made to a given endpoint to be backward-compatible, so that I can start building against this API without worrying about breaking changes
@@ -91,7 +92,8 @@ The way that data is stored and delivered through the API should balance:
   - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response milestone](https://github.com/HHS/grants-equity/issues/373)
   - [ ] The `api.grants.gov` sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
 - [ ] The following developer experience (DX) requirements are satisfied:
-  - [ ] The API is live at `beta.grants.gov/api/`
+  - [ ] A base path for the API has been decided and access to the associated subdomain has been secured
+  - [ ] The API is live at that base path
   - [ ] Developers can learn how to interact with the API by referencing the API documentation
   - [ ] The endpoint path indicates which major version of the API the developer is consuming
   - [ ] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning milestone](https://github.com/HHS/grants-equity/issues/68)
@@ -129,7 +131,6 @@ Page on the public wiki that is updated at the end of each sprint. **Note:** Thi
 - [ ] **[API Planning](https://github.com/HHS/grants-equity/issues/):** Determines the language, framework, and deployment service used to build and host the API.
 - [ ] **[DB planning](https://github.com/HHS/grants-equity/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
 - [ ] **[Developer tools](https://github.com/HHS/grants-equity/issues/):** Establishes a suite of tools used to ensure the quality and security of the API codebase.
-- [ ] **[beta.grants.gov domain](https://github.com/HHS/grants-equity/issues/):** Secures access to the `beta.grants.gov` domain from which the API endpoints will be routed.
 - [ ] **[Back-end CI/CD](https://github.com/HHS/grants-equity/issues/):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the API.
 - [ ] **[Data architecture](https://github.com/HHS/grants-equity/issues/):** Establishes the updated data model used to support the new GET Opportunities endpoint.
 - [ ] **[Test data and schema](https://github.com/HHS/grants-equity/issues/):** Enables both project maintainers and open source contributors to effectively mock the database when developing or testing locally.
@@ -177,10 +178,10 @@ Timeline and strategy for translation is still TBD.
 
 *This can include services going into PROD behind a feature flag that is not turned on.*
 
-1. **API:** This milestone is the official release of the `beta.grants.gov/api`
+1. **API:** This milestone is the official release of the first API endpoint
 2. **Replica Database:** A replica of relevant tables from the legacy database
 3. **Updated Data Model:** An updated data model that will provide the data for the GET Opportunities endpoint
-4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `beta.grants.gov` data model
+4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new Simpler Grants.gov data model
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
