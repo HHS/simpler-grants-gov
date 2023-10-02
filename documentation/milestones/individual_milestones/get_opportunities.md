@@ -20,7 +20,7 @@ Deploy a public API endpoint to PROD that allows users to see at least one field
 ### Business description & value
 <!-- Required -->
 
-The launch of a public API endpoint which provides information about every grant opportunity in grants.gov represents the culmination of multiple internally focused deliverables and serves as the foundation for future development that relies on the API.
+The launch of a public API endpoint which provides information about every active opportunity in grants.gov represents the culmination of multiple internally focused deliverables and serves as the foundation for future API development.
 
 By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this milestone aims to demonstrate the following value propositions:
 
@@ -128,17 +128,17 @@ Page on the public wiki that is updated at the end of each sprint. **Note:** Thi
 
 *What capabilities / milestones do we expect to be in place by the completion of work on this milestone?*
 
-- [ ] **[API Planning](https://github.com/HHS/grants-equity/issues/):** Determines the language, framework, and deployment service used to build and host the API.
-- [ ] **[DB planning](https://github.com/HHS/grants-equity/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
-- [ ] **[Developer tools](https://github.com/HHS/grants-equity/issues/):** Establishes a suite of tools used to ensure the quality and security of the API codebase.
-- [ ] **[Back-end CI/CD](https://github.com/HHS/grants-equity/issues/):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the API.
-- [ ] **[Data architecture](https://github.com/HHS/grants-equity/issues/):** Establishes the updated data model used to support the new GET Opportunities endpoint.
-- [ ] **[Test data and schema](https://github.com/HHS/grants-equity/issues/):** Enables both project maintainers and open source contributors to effectively mock the database when developing or testing locally.
-- [ ] **[Database (DB) replica](https://github.com/HHS/grants-equity/issues/):** Ensures parity between the set of opportunities returned by the new GET Opportunities endpoint and the legacy system. It also allows users to access the endpoint when there are outages on the legacy system.
-- [ ] **[Feature flag framework](https://github.com/HHS/grants-equity/issues/):** Enables us to deploy new features or changes without immediately exposing them to the public.
-- [ ] **[API documentation](https://github.com/HHS/grants-equity/issues/):** Establishes a location and strategy for publishing information about the GET Opportunities endpoint (and future API endpoints) that users can reference when learning how to interact with the API.
+- [ ] **[API Planning](https://github.com/HHS/grants-equity/issues/42):** Determines the language, framework, and deployment service used to build and host the API.
+- [ ] **[DB planning](https://github.com/HHS/grants-equity/issues/48):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
+- [ ] **[Developer tools](https://github.com/HHS/grants-equity/issues/50):** Establishes a suite of tools used to ensure the quality and security of the API codebase.
+- [ ] **[Back-end CI/CD](https://github.com/HHS/grants-equity/issues/57):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the API.
+- [ ] **[Data architecture](https://github.com/HHS/grants-equity/issues/125):** Establishes the updated data model used to support the new GET Opportunities endpoint.
+- [ ] **[Test data and schema](https://github.com/HHS/grants-equity/issues/55):** Enables both project maintainers and open source contributors to effectively mock the database when developing or testing locally.
+- [ ] **[Database (DB) replica](https://github.com/HHS/grants-equity/issues/54):** Ensures parity between the set of opportunities returned by the new GET Opportunities endpoint and the legacy system. It also allows users to access the endpoint when there are outages on the legacy system.
+- [ ] **[Feature flag framework](https://github.com/HHS/grants-equity/issues/67):** Enables us to deploy new features or changes without immediately exposing them to the public.
+- [ ] **[API documentation](https://github.com/HHS/grants-equity/issues/71):** Establishes a location and strategy for publishing information about the GET Opportunities endpoint (and future API endpoints) that users can reference when learning how to interact with the API.
 - [ ] **[API Versioning](https://github.com/HHS/grants-equity/issues/68):** Establishes a protocol for publishing breaking and non-breaking changes to the API.
-- [ ] **[API Security Planning](https://github.com/HHS/grants-equity/issues/):** Sets up minimum security standards to protect the API endpoint, such as API keys, rate limits, and security incident response protocols.
+- [ ] **[API Security Planning](https://github.com/HHS/grants-equity/issues/131):** Sets up minimum security standards to protect the API endpoint, such as API keys, rate limits, and security incident response protocols.
 - [ ] **[API Logging & Monitoring](https://github.com/HHS/grants-equity/issues/370):** Sets up logging for the API service and automatic alerts when there is an interruption in service
 - [ ] **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Documents and trains staff on the incident response plan.
 - [ ] **[Performance Testing Framework](https://github.com/HHS/grants-equity/issues/69):** Configures a framework for conducting performance and load testing of the API.
