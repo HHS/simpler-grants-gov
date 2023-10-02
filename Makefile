@@ -108,12 +108,13 @@ infra-update-app-database-roles: ## Create or update database roles and schemas 
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	./bin/create-or-update-database-roles.sh $(APP_NAME) $(ENVIRONMENT)
 
+# TODO: update to no longer use tfvars file: https://github.com/navapbc/template-infra/blob/main/docs/decisions/infra/0008-consolidate-infra-config-from-tfvars-files-into-config-module.md
 infra-update-app-service: ## Create or update $APP_NAME's web service module
 	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
-	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
+	terraform -chdir="infra/$(APP_NAME)/service" apply -var-file="$(ENVIRONMENT).tfvars"
 
 # The prerequisite for this rule is obtained by
 # prefixing each module with the string "infra-validate-module-"
