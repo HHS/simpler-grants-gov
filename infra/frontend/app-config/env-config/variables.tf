@@ -22,6 +22,6 @@ variable "has_incident_management_service" {
 
 variable "domain" {
   description = "Public domain for the website, which is managed by HHS ITS."
-  type = string
-  default = null
+  type        = string
+  default     = null
 }

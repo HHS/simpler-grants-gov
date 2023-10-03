@@ -30,6 +30,7 @@ locals {
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
+  domain                                         = local.environment_config.domain
 }
 
 terraform {
@@ -90,8 +91,8 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count  = var.domain != null ? 1 : 0
-  domain = var.domain
+  count  = local.domain != null ? 1 : 0
+  domain = local.domain
 }
 
 output "environment_name" {
@@ -105,7 +106,7 @@ module "service" {
   vpc_id                = data.aws_vpc.default.id
   subnet_ids            = data.aws_subnets.default.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
-  cert_arn              = var.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  cert_arn              = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
