@@ -21,6 +21,7 @@ marshmallow-dataclass = {extras = ["enum", "union"], version = "^8.5.8"}
 marshmallow = "^3.18.0"
 pip-licenses = "^4.3.2"
 gunicorn = "^21.2.0"
+setuptools = "^68.2.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.6.0"
