@@ -112,6 +112,3 @@ omit = ["src/db/migrations/*.py"]
 
 [tool.coverage.report]
 fail_under = 80
-
-[tools.setuptools]
-packages = ["src"]
