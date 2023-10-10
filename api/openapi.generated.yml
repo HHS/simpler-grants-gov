@@ -239,9 +239,6 @@ components:
       properties:
         type:
           description: The name of the role
-          enum:
-          - USER
-          - ADMIN
     User:
       type: object
       properties:
@@ -334,4 +331,3 @@ components:
       type: apiKey
       in: header
       name: X-Auth
-
