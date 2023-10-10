@@ -56,7 +56,6 @@
     {
       "description": "Handle major updates manually",
       "matchUpdateTypes": ["major"],
-      "labels": ["UPDATE-MAJOR"],
       "enabled": false
     }
   ]
