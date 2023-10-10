@@ -21,7 +21,6 @@
       "vulnerability"
     ]
   },
-  "separateMinorPatch": true,
   "packageRules": [
     {
       "description": "Group React packages together",
@@ -57,7 +56,8 @@
     {
       "description": "Handle major updates manually",
       "matchUpdateTypes": ["major"],
-      "enabled": false
+      "enabled": false,
+      "groupName": null
     }
   ]
 }
