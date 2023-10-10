@@ -1,0 +1,57 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    "group:allNonMajor",
+    "schedule:weekly"
+  ],
+  "ignoreUnstable": true,
+  "labels": ["dependencies"],
+  "branchPrefix": "renovate/",
+  "reviewers": [
+    "sammysteiner",
+    "acouch",
+    "daphnegold"
+  ],
+  "rangeStrategy": "update-lockfile",
+  "timezone": "America/New_York",
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "vulnerability"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Group React packages together",
+      "packageNames": [
+        "react",
+        "@types/react",
+        "react-dom",
+        "@types/react-dom"
+      ],
+      "groupName": "React"
+    },
+    {
+      "description": "Group Storybook packages together",
+      "matchPackagePatterns": ["storybook"],
+      "groupName": "Storybook"
+    },
+    {
+        "description": "Group I18next packages together",
+        "matchPackagePatterns": ["i18next"],
+        "groupName": "I18next"
+    },
+    {
+        "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated.",
+        "enabled": false,
+        "matchPackagePatterns": ["@uswds/uswds"],
+        "groupName": "USWDS core"
+    },
+    {
+        "description": "Leave peer dependencies alone",
+        "depTypeList": ["peerDependencies"],
+        "enabled": false
+    }
+  ]
+}
