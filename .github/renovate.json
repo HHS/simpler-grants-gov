@@ -38,9 +38,20 @@
       "groupName": "Storybook"
     },
     {
-      "description": "Group I18next packages together",
-      "matchPackagePatterns": ["i18next"],
-      "groupName": "I18next"
+        "description": "Group I18next packages together",
+        "matchPackagePatterns": ["i18next"],
+        "groupName": "I18next"
+    },
+    {
+        "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated.",
+        "enabled": false,
+        "matchPackagePatterns": ["@uswds/uswds"],
+        "groupName": "USWDS core"
+    },
+    {
+        "description": "Leave peer dependencies alone",
+        "depTypeList": ["peerDependencies"],
+        "enabled": false
     }
   ]
 }
