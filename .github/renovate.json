@@ -54,10 +54,10 @@
         "enabled": false
     },
     {
-      "description": "Test running only on vulnerability alerts",
-      "packagePatterns": ["*"],
-      "enabled": false,
-      "groupName": "Everything"
+      "description": "Handle major updates manually",
+      "matchUpdateTypes": ["major"],
+      "labels": ["UPDATE-MAJOR"],
+      "enabled": false
     }
   ]
 }
