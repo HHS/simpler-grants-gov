@@ -21,6 +21,7 @@
       "vulnerability"
     ]
   },
+  "separateMinorPatch": true,
   "packageRules": [
     {
       "description": "Group React packages together",
