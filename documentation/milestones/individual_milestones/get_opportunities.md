@@ -14,7 +14,9 @@
 <!-- Required -->
 
 **What:** Deploy a public API endpoint to PROD iteratively that allows users to see at least one field per grant opportunity listed in grants.gov. 
+
 **Why:** Build iteratively, validate connection to the database, and set the groundwork to continue to enhance the API.
+
 **Who:** This release of the API will be mainly focused on delivering for the API consumer
 
 ## Goals
