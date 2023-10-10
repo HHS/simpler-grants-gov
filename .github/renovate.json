@@ -52,12 +52,6 @@
         "description": "Leave peer dependencies alone",
         "depTypeList": ["peerDependencies"],
         "enabled": false
-    },
-    {
-      "description": "Handle major updates manually",
-      "matchUpdateTypes": ["major"],
-      "enabled": false,
-      "groupName": null
     }
   ]
 }
