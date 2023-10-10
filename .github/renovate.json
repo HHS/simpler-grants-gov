@@ -21,6 +21,9 @@
       "vulnerability"
     ]
   },
+  "major": {
+    "enabled": false
+  },
   "packageRules": [
     {
       "description": "Group React packages together",
