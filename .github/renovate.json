@@ -52,6 +52,12 @@
         "description": "Leave peer dependencies alone",
         "depTypeList": ["peerDependencies"],
         "enabled": false
+    },
+    {
+      "description": "Test running only on vulnerability alerts",
+      "packagePatterns": ["*"],
+      "enabled": false,
+      "groupName": "Everything"
     }
   ]
 }
