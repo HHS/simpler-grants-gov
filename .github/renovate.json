@@ -2,8 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    "schedule:weekly",
-    "group:recommended"
+    "group:allNonMajor",
+    "schedule:weekly"
   ],
   "ignoreUnstable": true,
   "labels": ["dependencies"],
@@ -55,6 +55,10 @@
         "description": "Leave peer dependencies alone",
         "depTypeList": ["peerDependencies"],
         "enabled": false
+    },
+    {
+      "matchPackagePatterns": ["*"],
+      "groupName": null
     }
   ]
 }
