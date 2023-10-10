@@ -14,7 +14,7 @@
 ## Short description
 <!-- Required -->
 
-Launch a minimum viable search feature for Simpler Grants.gov that allows non-technical users to filter funding opportunities by *at least* one field and by keywords.
+Launch a minimum viable search feature for Simpler Grants.gov that allows users to filter funding opportunities by *at least* one field and by keywords.
 
 ## Goals
 
@@ -39,19 +39,27 @@ By contrast, this MVP version of search ***does not*** attempt to:
 ### User Stories
 <!-- Required -->
 
-- As a **{type of user 1}**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
-- As a **{type of user 2}**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
+- As a **system-to-system user**, I want:
+  - To be able to access all of the search features via the API, so that search results are the same whether I'm using the API or the UI.
+  - The search functionality to be outlined in the API docs, so that I don't have to rely on experimentation to learn how to search for opportunities.
+- As a **prospective applicant**, I want:
+  - To be able to be able to search with filters applied, so that the only search results returned are ones that match both the keyword and field-based criteria I specified
+  - The opportunity listing page to have a link to apply on grants.gov, so that I don't have to repeat my search on grants.gov after finding an opportunity I want to apply for on simpler.grants.gov
+  - To receive an incentive if I participate in user research for simpler.grants.gov, so that I am fairly compensated for the time that I invest in testing out new features and answering questions
+- As a **project maintainer**, I want:
+  - To be notified when simpler.grants.gov experiences downtime, so that I can quickly troubleshoot the issue with minimal impact on end users
+  - The system architecture we create for this deliverable to support future search features as well, so that we don't need to discard and re-build critical infrastructure
 
 ## Technical description
 
-### {Optional Sub-deliverable}
+### Search API
 <!-- Optional -->
 
-{List reqiurements specific to this sub-deliverable, options to consider, etc.}
+TODO
+
+### Search UI
+
+TODO
 
 ### Definition of done
 <!-- Required -->
@@ -65,7 +73,7 @@ By contrast, this MVP version of search ***does not*** attempt to:
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
-1. {Metric 1}
+1. TODO
 
 ### Destination for live updating metrics
 <!-- Required -->
@@ -77,22 +85,23 @@ By contrast, this MVP version of search ***does not*** attempt to:
 
 What functionality do we expect to be in place ***before*** work starts on this deliverable?
 
-- **Front-end:** The Search UI will build on the front-end work completed in both the initial static site launch and the subsequent improvements that created the following functionality:
-  - **Front-end CI/CD:** Automatically tests and deploys front-end code
-  - **Foundational UI:** Enforces a consistent user interface and web design system across the frontend
-  - **Translation Process:** Facilitates and publishes translations of front-end content in multiple languages
-- **API:** The Search API will build on the existing backend work completed to launch the GET Opportunities endpoint which delivered the following functionality:
-  - **Backend CI/CD:** Automatically tests and deploys backend code
-  - **Database Replica:** Maintains eventual consistency (with low latency) between the data in grants.gov and simpler.grants.gov and ensures that simpler.grants.gov services remain available when grants.gov services experience downtime
-  - **Data Architecture:** Enables simpler.grants.gov to read data from an updated (and simplified) data model
+- **Front-end:** The search UI will build on the front-end work completed in both the [initial static site launch](https://github.com/HHS/grants-equity/issues/62) and the [subsequent improvements](https://github.com/HHS/grants-equity/issues/568) that created the following functionality:
+  - **[Front-end CI/CD](https://github.com/HHS/grants-equity/issues/58):** Automatically tests and deploys front-end code
+  - **[Foundational UI](https://github.com/HHS/grants-equity/issues/60):** Enforces a consistent user interface and web design system across the frontend
+  - **[Translation Process](https://github.com/HHS/grants-equity/issues/81):** Facilitates and publishes translations of front-end content in multiple languages
+- **API:** The search API will build on the existing backend work completed to launch the [GET Opportunities endpoint](https://github.com/HHS/grants-equity/issues/70) which delivered the following functionality:
+  - **[Backend CI/CD](https://github.com/HHS/grants-equity/issues/57):** Automatically tests and deploys backend code
+  - **[Database Replica](https://github.com/HHS/grants-equity/issues/54):** Maintains eventual consistency (with low latency) between the data in grants.gov and simpler.grants.gov and ensures that simpler.grants.gov services remain available when grants.gov services experience downtime
+  - **[Data Architecture](https://github.com/HHS/grants-equity/issues/125):** Enables simpler.grants.gov to read data from an updated (and simplified) data model
+  - **[API Docs](https://github.com/HHS/grants-equity/issues/71):** Documents the API endpoints released with each deliverable
 
 What functionality do we expect to be in place by ***the end*** of work on this deliverable?
 
 - **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Ensures that we have a robust incident response plan in place when simpler.grants.gov services are interrupted
 - **[Search API](https://github.com/HHS/grants-equity/issues/90):** Enables system-to-system users to access the search features through the API
-- **Search Page:** Enables all other users to access the search features through the user interface
+- **[Search Page](https://github.com/HHS/grants-equity/issues/576):** Enables all other users to access the search features through the user interface
 - **[Opportunity Listing Page](https://github.com/HHS/grants-equity/issues/277):** Displays basic information about a given funding opportunity accessed from the search page
-- **User Research Incentives:** Enables us to engage stakeholders for user testing of the new search functionality
+- **[User Research Incentives](https://github.com/HHS/grants-equity/issues/84):** Enables us to engage stakeholders for user testing of the new search functionality
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
