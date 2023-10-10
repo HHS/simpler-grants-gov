@@ -14,7 +14,7 @@
     "daphnegold"
   ],
   "rangeStrategy": "update-lockfile",
-  "timezone": "America/Los_Angeles",
+  "timezone": "America/New_York",
   "vulnerabilityAlerts": {
     "enabled": true,
     "labels": [
