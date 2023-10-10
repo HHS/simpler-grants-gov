@@ -2,7 +2,7 @@ export const ExternalRoutes = {
   ABOUT_HHS: "https://www.hhs.gov/about/index.html",
   ACCESSIBILITY_COMPLIANCE:
     "https://www.grants.gov/web/grants/accessibility-compliance.html",
-  EMAIL_EQUITYINGRANTS: "equityingrants@hhs.gov",
+  EMAIL_SIMPLERGRANTSGOV: "simplergrantsgov@hhs.gov",
   EMAIL_SUPPORT: "support@grants.gov",
   FOIA: "https://www.hhs.gov/foia/index.html",
   GITHUB_REPO: "https://github.com/HHS/grants-equity",
