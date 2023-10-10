@@ -26,6 +26,10 @@
   },
   "packageRules": [
     {
+      "matchPackagePatterns": ["*"],
+      "groupName": null
+    },
+    {
       "description": "Group React packages together",
       "packageNames": [
         "react",
@@ -55,10 +59,6 @@
         "description": "Leave peer dependencies alone",
         "depTypeList": ["peerDependencies"],
         "enabled": false
-    },
-    {
-      "matchPackagePatterns": ["*"],
-      "groupName": null
     }
   ]
 }
