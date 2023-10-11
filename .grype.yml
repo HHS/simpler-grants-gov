@@ -16,3 +16,4 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
+  - vulnerability: GHSA-7fh5-64p2-3v2j
