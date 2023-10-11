@@ -23,14 +23,14 @@ resource "aws_rds_cluster" "db" {
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.CreateInstance.html
   cluster_identifier = var.name
 
-  engine            = "aurora-postgresql"
-  engine_mode       = "provisioned"
-  database_name     = var.database_name
-  port              = var.port
-  master_username   = local.master_username
-  master_password   = aws_ssm_parameter.random_db_password.value
-  storage_encrypted = true
-  kms_key_id        = aws_kms_key.db.arn
+  engine                      = "aurora-postgresql"
+  engine_mode                 = "provisioned"
+  database_name               = var.database_name
+  port                        = var.port
+  master_username             = local.master_username
+  manage_master_user_password = true
+  storage_encrypted           = true
+  kms_key_id                  = aws_kms_key.db.arn
 
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
@@ -61,18 +61,6 @@ resource "aws_rds_cluster_instance" "primary" {
   monitoring_interval        = 30
 }
 
-resource "random_password" "random_db_password" {
-  length = 48
-  # Remove '@' sign from allowed characters since only printable ASCII characters besides '/', '@', '"', ' ' may be used.
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
-
-resource "aws_ssm_parameter" "random_db_password" {
-  name  = "/db/${var.name}/master-password"
-  type  = "SecureString"
-  value = random_password.random_db_password.result
-}
-
 resource "aws_kms_key" "db" {
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
@@ -83,7 +71,7 @@ resource "aws_kms_key" "db" {
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
   name        = var.name
-  family      = "aurora-postgresql13"
+  family      = "aurora-postgresql14"
   description = "Default cluster parameter group"
 
   parameter {

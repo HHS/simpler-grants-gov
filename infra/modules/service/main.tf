@@ -63,9 +63,6 @@ resource "aws_ecs_task_definition" "app" {
   execution_role_arn = aws_iam_role.task_executor.arn
   task_role_arn      = aws_iam_role.app_service.arn
 
-  # when is this needed?
-  # task_role_arn      = aws_iam_role.app_service.arn
-
   container_definitions = jsonencode([
     {
       name                   = var.service_name,
