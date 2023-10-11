@@ -1,0 +1,135 @@
+# Open Source Group Kickoff
+
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Draft                                                        |
+| Epic Link       | [Issue 72](https://github.com/HHS/grants-equity/issues/72)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+
+
+## Short description
+
+-**What:** This 30k effort marks the initiation of our open source project and the establishment of essential communication tools, processes, and documentation to lay the foundation for a thriving open source community.
+-**Why:** Ensure that both open source contributors and the wider public can swiftly and effortlessly participate in the project, fostering a vibrant open source community.
+-**Who:** Any public members who want to contribute to the open source project
+
+## Goals
+
+### Business description & value
+
+Launch an open source community with a primary emphasis on critical components that lay the groundwork for future expansion and productive collaboration, ensuring streamlined community management, fostering a vibrant open source community, and promoting project transparency.
+
+### User stories
+
+- As a **full-time HHS staff member**, I want to:
+  -  have assurance that the open-source channels and methods are configured in a way that eliminates security risks.
+- As a **member of an HHS contractor team**, I want to:
+  -  have streamlined tools and processes for managing contributions, reviewing code, and ensuring code quality, so I can efficiently maintain and enhance the project while upholding its standards.
+  - to have the ability to monitor the health and inclusivity of the project by tracking metrics like community engagement, issue resolution times, and the diversity of contributors, so I can make informed decisions for community growth and sustainability.
+- As a **member of the public**, I want to:
+  -  have easy access to clear documentation and guidelines for joining, contributing, and engaging with the open source community so I can quickly become a productive contributor and understand the community's values and expectations.
+  - have effective communication channels, regular updates, and opportunities for networking and collaboration, so I can stay informed, participate in discussions, and contribute to the community's goals, fostering an active and thriving open source ecosystem. 
+
+## Technical description
+
+### Communication Tools Configuration  
+
+The details of configuring communications tools such as a chat tool, shared calendars, wikis, or other collaboration platforms. It should specify the platforms, integration methods, user access levels, and any technical considerations for making these tools fully operational for the community.  
+
+### Team Scrum Meetings  
+
+Detail the aspects of scheduling and conducting team scrum meetings. This can include information about the chosen video conferencing tools, meeting frequency, methods for the general public to join open meetings, and any requirements for ensuring effective remote communication during these meetings. 
+
+### Getting Started Guide Development  
+
+There is clear documentation and guidelines for the general public to get started and contribute. Documentation typically should include project overviews, installation instructions, usage guidelines, contribution procedures, and community engagement details, fostering a collaborative and informed open source community.
+
+### Developer Tools Setup  
+
+Provide technical instructions for setting up developer tools and environments. This can encompass version control systems, code review tools, and any collaborative platforms for coding and testing.
+
+
+
+### Definition of done
+
+
+
+### Proposed metrics for measuring goals/value/definition of done
+
+
+
+## Planning
+
+### Assumptions & dependencies
+<!-- Required -->
+
+What capabilities / milestones do we expect to be in place at the beginning of work
+on this milestone?
+
+Are there any notable capabilities / milestones do NOT we expect to be in place at the
+beginning of work on this milestone?
+
+
+
+### Open questions
+<!-- Optional -->
+
+- [] 
+
+### Not doing
+<!-- Optional -->
+
+The following work will *not* be completed as part of this milestone:
+
+
+
+## Integrations
+
+### Translations
+<!-- Required -->
+
+
+### Services going into PROD for the first time
+<!-- Required -->
+
+*This can include services going into PROD behind a feature flag that is not turned on.*
+
+Yes the following tools will be deployed:
+
+1. Chat
+2. Ticket tracking
+3. Shared calendar
+4. Video conference
+5. Wiki
+6. Document sharing
+7. Sprint retro
+8. Email listserv
+9. Contact us tool
+
+### Services being integrated in PROD for the first time
+<!-- Required -->
+
+*Are there multiple services that are being connected for the first time in PROD?*
+
+Yes, we expect there to be some integrations between the following tools in production:
+
+1. **Chat + Ticket tracking:** Option to receive updates on key tickets in chat
+2. **Wiki + Chat:** Option to receive updates on key document changes in chat
+3. **Document Sharing + Chat:** Option to show previews of documents shared in chat
+4. **Sprint Retro + Chat:** Option to share retro takeaways and action items in chat
+5. **Video Conference + Shared Calendar:** Option to add video conference details to events
+6. **Document Sharing + Wiki:** Option to embed public documents in wiki
+7. **Shared Calendar + Wiki:** Option to embed public calendar events in the wiki
+
+### Data being shared publicly for the first time
+<!-- Required -->
+
+*Are there any fields being shared publicly that have never been shared in PROD before?*
+
+
+### Security considerations
+<!-- Required -->
+
+*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
+
+
