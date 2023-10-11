@@ -28,7 +28,8 @@ The launch of a public API endpoint which provides information about every grant
 
 By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this 30k effort aims to demonstrate the following value propositions:
 
-- Exposes `simpler.grants.gov/api/` as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
+- Select a URL for the API
+- Expose the chosen URL name as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
 - Proves the successful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
 - Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
@@ -93,9 +94,9 @@ The way that data is stored and delivered through the API should balance:
   - [ ] The API has been load tested using the framework established in the [Peformance Testing Framework milestone](https://github.com/HHS/grants-equity/issues/69) to ensure that it remains performant under heavy user traffic
   - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring milestone](https://github.com/HHS/grants-equity/issues/370)
   - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response milestone](https://github.com/HHS/grants-equity/issues/373)
-  - [ ] The `api.grants.gov` (naming tbd) sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
+  - [ ] The chosen API URL sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
 - [ ] The following developer experience (DX) requirements are satisfied:
-  - [ ] The API is live at `simpler.grants.gov/api/` (naming tbd)
+  - [ ] The API is live at the chosen URL
   - [ ] Developers can learn how to interact with the API by referencing the API documentation
   - [ ] The endpoint path indicates which major version of the API the developer is consuming
   - [ ] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning milestone](https://github.com/HHS/grants-equity/issues/68)
