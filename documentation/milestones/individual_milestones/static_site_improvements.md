@@ -1,14 +1,14 @@
 # Static Site Improvements
 
-| Field           | Value                                                      |
-| --------------- | ---------------------------------------------------------- |
-| Document Status | Completed                                                  |
-| Epic Link       | TODO: Add link                                             |
-| Epic Dashboard  | [Product Roadmap](https://github.com/orgs/HHS/projects/12) |
-| Product Owner   | Lucas Brown                                                |
-| Document Owner  | TODO: Add name                                             |
-| Lead Developer  | Aaron Couch                                                |
-| Lead Designer   | Andy Cochran                                               |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 568](https://github.com/HHS/grants-equity/issues/568) |
+| Epic Dashboard  | [Product Roadmap](https://github.com/orgs/HHS/projects/12)   |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 
 ## Short description
@@ -16,7 +16,7 @@
 
 **What:** Update the static site to include additional functionality and infrastructure that was excluded from the launch, such as content management, translations, and feedback mechanisms.
 
-**Why:** Iteratively delivering new functionality reinforces the agile approach we're taking, and this deliverable continues to improve the infrastructure that supports long-term maintenance of the site.
+**Why:** Reinforces the agile approach we're taking and improves the infrastructure that supports long-term site maintenance.
 
 **Who:** The functionality included in this deliverable has two primary audiences:
 - Stakeholders who speak a language other than English
@@ -27,24 +27,38 @@
 ### Business description & value
 <!-- Required -->
 
-{3-4 sentences that describe why this milestone is critical to the project}
+By delivering the next batch of updates to the static site, this body of work aims to:
+
+- Reinforce the iterative approach we're taking with product improvements and releases
+- Continue to build critical infrastructure to support:
+  - Enabling internal, non-technical stakeholders to more easily make content changes
+  - Translating content into multiple languages
+  - Collecting feedback from site visitors
 
 ### User Stories
 <!-- Required -->
 
-- As a **{type of user 1}**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
-- As a **{type of user 2}**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
+- As a **project maintainer**, I want:
+  - a streamlined way to manage site content, so that minor copy edits aren't blocked by (or detract from) engineering capacity
+  - a mechanism to collect and store feedback from site visitors, so that we can solicit user input and questions throughout the project
+- As an **stakeholder whose primary language is not English**, I want:
+  - the site contents to be translated into my primary language, so that I can understand how to use the simple.grants.gov without relying on automatic translations
+  - to be able to easily toggle between the supported languages from an easy to locate portion of the site, so that I don't have to spend a lot of time searching for that functionality in my non-dominant language
 
 ## Technical description
 
-### {Optional Sub-deliverable}
+### Content Management System (CMS)
 <!-- Optional -->
 
-{List reqiurements specific to this sub-deliverable, options to consider, etc.}
+TODO
+
+### Internationalization & Content Translation
+
+TODO
+
+### Feedback Mechanism
+
+TODO
 
 ### Definition of done
 <!-- Required -->
