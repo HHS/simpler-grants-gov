@@ -4,7 +4,7 @@ import { Trans, useTranslation } from "next-i18next";
 import { Grid, GridContainer, Icon } from "@trussworks/react-uswds";
 
 const WtGIContent = () => {
-  const email = ExternalRoutes.EMAIL_EQUITYINGRANTS;
+  const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
