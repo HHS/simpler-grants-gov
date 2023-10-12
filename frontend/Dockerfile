@@ -67,7 +67,8 @@ VOLUME ["/frontend/.next/cache/images/"]
 # https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md#disabling-cache
 RUN apk add --no-cache wget=1.21.4-r0 \
 # Necessary for installing sharp
-  build-base=0.5-r3
+  build-base=0.5-r3 \
+  openssl=3.1.3-r0
 
 # Remove dev dependencies after build
 RUN npm prune --production
