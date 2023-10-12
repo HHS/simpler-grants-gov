@@ -81,12 +81,12 @@ resource "aws_ecs_task_definition" "app" {
         retries  = 3,
         timeout  = 5,
         command = ["CMD",
-           "curl",
-            "--fail",
-            "-sLo",
-            "/dev/null",
-            "-w",
-            "%%{http_code}",
+          "curl",
+          "--fail",
+          "-sLo",
+          "/dev/null",
+          "-w",
+          "%%{http_code}",
           "http://localhost:8000/health"
         ]
       },
