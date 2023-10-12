@@ -88,6 +88,8 @@ RUN adduser --system --uid 1001 nextjs
 RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
 
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
+
 COPY --from=builder /frontend/public ./public
 
 # Automatically leverage output traces to reduce image size
