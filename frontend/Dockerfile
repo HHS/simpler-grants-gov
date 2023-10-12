@@ -23,6 +23,8 @@ COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
 
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
+
 ENV NEXT_TELEMETRY_DISABLED 1
 
 CMD ["npm", "run", "dev"]
