@@ -1,16 +1,16 @@
-name: CI API Infra Service Checks
+name: CI Frontend Infra Service Checks
 
 on:
   push:
     branches:
       - main
     paths:
-      - infra/api/service/**
+      - infra/frontend/service/**
       - infra/test/**
       - .github/workflows/ci-infra-service.yml
   pull_request:
     paths:
-      - infra/api/service/**
+      - infra/frontend/service/**
       - infra/test/**
       - .github/workflows/ci-infra-service.yml
   workflow_dispatch:
@@ -20,4 +20,4 @@ jobs:
     name: Infra Service Checks
     uses: ./.github/workflows/infra-service.yml
     with:
-      app_name: api
+      app_name: frontend

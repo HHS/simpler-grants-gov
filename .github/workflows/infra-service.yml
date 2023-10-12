@@ -8,9 +8,6 @@ on:
         required: true
         type: string
 
-env:
-  APP_NAME: frontend
-
 jobs:
   infra-test-e2e:
     name: Test service
@@ -35,9 +32,9 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: ${{ env.APP_NAME }}
+          app_name: ${{ inputs.app_name }}
           # Run infra CI on dev environment
           environment: dev
 
       - name: Run Terratest
-        run: make APP_NAME=${{ env.APP_NAME }} infra-test-service
+        run: make APP_NAME=${{ inputs.app_name }} infra-test-service
