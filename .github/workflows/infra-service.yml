@@ -1,19 +1,12 @@
-name: CI Infra Service Checks
+name: Infra Service Checks
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - infra/*/service/**
-      - infra/test/**
-      - .github/workflows/ci-infra-service.yml
-  pull_request:
-    paths:
-      - infra/*/service/**
-      - infra/test/**
-      - .github/workflows/ci-infra-service.yml
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
 
 env:
   APP_NAME: frontend
