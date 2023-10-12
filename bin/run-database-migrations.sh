@@ -13,8 +13,6 @@
 #     staging, prod)
 # -----------------------------------------------------------------------------
 
-# TODO: Use migrator role instead of general role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-
 set -euo pipefail
 
 APP_NAME="$1"
@@ -32,7 +30,7 @@ echo
 echo "Step 0. Check if app has a database"
 
 terraform -chdir="infra/$APP_NAME/app-config" init > /dev/null
-terraform -chdir="infra/$APP_NAME/app-config" refresh > /dev/null
+terraform -chdir="infra/$APP_NAME/app-config" apply -refresh-only -auto-approve> /dev/null
 HAS_DATABASE=$(terraform -chdir="infra/$APP_NAME/app-config" output -raw has_database)
 if [ "$HAS_DATABASE" = "false" ]; then
   echo "Application does not have a database, no migrations to run"
@@ -40,6 +38,9 @@ if [ "$HAS_DATABASE" = "false" ]; then
 fi
 
 DB_MIGRATOR_USER=$(terraform -chdir="infra/$APP_NAME/app-config" output -json environment_configs | jq -r ".$ENVIRONMENT.database_config.migrator_username")
+
+./bin/terraform-init.sh "infra/$APP_NAME/service" "$ENVIRONMENT"
+MIGRATOR_ROLE_ARN=$(terraform -chdir="infra/$APP_NAME/service" output -raw migrator_role_arn)
 
 echo
 echo "::group::Step 1. Update task definition without updating service"
@@ -58,4 +59,4 @@ ENVIRONMENT_VARIABLES=$(cat << EOF
 EOF
 )
 
-./bin/run-command.sh "$APP_NAME" "$ENVIRONMENT" "$COMMAND" "$ENVIRONMENT_VARIABLES"
+./bin/run-command.sh --task-role-arn "$MIGRATOR_ROLE_ARN" --environment-variables "$ENVIRONMENT_VARIABLES" "$APP_NAME" "$ENVIRONMENT" "$COMMAND"

@@ -67,11 +67,6 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
-data "aws_iam_policy" "db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.access_policy_name
-}
-
 data "aws_iam_policy" "app_db_access_policy" {
   count = module.app_config.has_database ? 1 : 0
   name  = local.database_config.app_access_policy_name
@@ -99,7 +94,6 @@ module "service" {
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    access_policy_arn          = data.aws_iam_policy.db_access_policy[0].arn
     app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
     migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
     connection_info = {

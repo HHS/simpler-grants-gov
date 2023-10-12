@@ -68,9 +68,14 @@ From the `frontend/` directory:
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-##### Other scripts
+##### Testing Release Target Locally
 
-- `make release-build` - Creates the Docker image for deployment to the cloud
+To test the release target locally, run:
+
+- `make release-build OPTS="--tag [IMAGE_NAME]"` or
+- `docker buildx build --target release --tag [IMAGE_NAME]` for a faster build on OSX
+
+to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
 
 ## 🖼️ Storybook
 

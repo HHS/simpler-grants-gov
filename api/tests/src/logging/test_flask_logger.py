@@ -83,7 +83,7 @@ def test_request_lifecycle_logs(
     # then the log message in the after_request handler.
 
     assert len(caplog.records) == len(expected_extras)
-    for record, expected_extra in zip(caplog.records, expected_extras):
+    for record, expected_extra in zip(caplog.records, expected_extras, strict=True):
         assert_dict_contains(record.__dict__, expected_extra)
 
 

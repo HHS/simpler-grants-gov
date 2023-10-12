@@ -16,7 +16,7 @@ echo "  IMAGE_TAG=$IMAGE_TAG"
 
 # Need to init module when running in CD since GitHub actions does a fresh checkout of repo
 terraform -chdir="infra/$APP_NAME/app-config" init > /dev/null
-terraform -chdir="infra/$APP_NAME/app-config" refresh > /dev/null
+terraform -chdir="infra/$APP_NAME/app-config" apply -refresh-only -auto-approve> /dev/null
 IMAGE_REPOSITORY_NAME=$(terraform -chdir="infra/$APP_NAME/app-config" output -raw image_repository_name)
 
 REGION=$(./bin/current-region.sh)

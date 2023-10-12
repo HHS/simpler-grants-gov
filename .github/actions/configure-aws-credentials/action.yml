@@ -23,14 +23,14 @@ runs:
         echo "::group::AWS account authentication details"
 
         terraform -chdir=infra/project-config init > /dev/null
-        terraform -chdir=infra/project-config refresh > /dev/null
+        terraform -chdir=infra/project-config apply -refresh-only -auto-approve> /dev/null
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
         echo "AWS_REGION=$AWS_REGION"
         GITHUB_ACTIONS_ROLE_NAME=$(terraform -chdir=infra/project-config output -raw github_actions_role_name)
         echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config refresh > /dev/null
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config apply -refresh-only -auto-approve> /dev/null
         ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names_by_environment | jq -r .${{ inputs.environment }})
         echo "ACCOUNT_NAME=$ACCOUNT_NAME"
 

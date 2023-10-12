@@ -65,7 +65,9 @@ VOLUME ["/frontend/.next/cache/images/"]
 # Install wget for health checks
 # no-cache removes need to rm cache dir
 # https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md#disabling-cache
-RUN apk add --no-cache wget=1.21.4-r0
+RUN apk add --no-cache wget=1.21.4-r0 \
+# Necessary for installing sharp
+  build-base=0.5-r3
 
 # Remove dev dependencies after build
 RUN npm prune --production
