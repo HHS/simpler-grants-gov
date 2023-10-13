@@ -28,7 +28,7 @@ ACCOUNT_ID=$(./bin/current-account-id.sh)
 REGION=$(./bin/current-region.sh)
 
 # Get project name
-terraform -chdir=infra/project-config refresh > /dev/null
+terraform -chdir="infra/project-config" apply -refresh-only -auto-approve> /dev/null
 PROJECT_NAME=$(terraform -chdir=infra/project-config output -raw project_name)
 
 TF_STATE_BUCKET_NAME="$PROJECT_NAME-$ACCOUNT_ID-$REGION-tf"

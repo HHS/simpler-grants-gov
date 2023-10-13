@@ -1,7 +1,7 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 WORKDIR /frontend
 
 # Install dependencies
@@ -22,6 +22,8 @@ COPY *.d.ts .
 COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
+
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -56,16 +58,20 @@ RUN npm run build -- --no-lint
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:20-alpine AS release
+FROM node:20-bullseye-slim AS release
 WORKDIR /frontend
 
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 
-# Install wget for health checks
-# no-cache removes need to rm cache dir
-# https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md#disabling-cache
-RUN apk add --no-cache wget=1.21.4-r0
+RUN apt-get update \
+  # Install security updates
+  # https://pythonspeed.com/articles/security-updates-in-docker/
+  && apt-get upgrade --yes \
+  # Install wget, required for health checks
+  wget \
+  # Reduce the image size by clearing apt cached lists
+  && rm -fr /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production
@@ -81,6 +87,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
+
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
 
 COPY --from=builder /frontend/public ./public
 

@@ -63,9 +63,6 @@ resource "aws_ecs_task_definition" "app" {
   execution_role_arn = aws_iam_role.task_executor.arn
   task_role_arn      = aws_iam_role.app_service.arn
 
-  # when is this needed?
-  # task_role_arn      = aws_iam_role.app_service.arn
-
   container_definitions = jsonencode([
     {
       name                   = var.service_name,
@@ -83,8 +80,14 @@ resource "aws_ecs_task_definition" "app" {
         interval = 30,
         retries  = 3,
         timeout  = 5,
-        command = ["CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
+        command = ["CMD",
+          "curl",
+          "--fail",
+          "-sLo",
+          "/dev/null",
+          "-w",
+          "%%{http_code}",
+          "http://localhost:8000/health"
         ]
       },
       environment = local.environment_variables,

@@ -16,3 +16,6 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
+  # https://github.com/anchore/grype/issues/1172
+  - vulnerability: GHSA-xqr8-7jwr-rhp7
+  - vulnerability: GHSA-7fh5-64p2-3v2j
