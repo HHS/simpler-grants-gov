@@ -14,7 +14,9 @@
 ## Short description
 <!-- Required -->
 
-Launch a minimum viable search feature for Simpler Grants.gov that allows users to filter funding opportunities by *at least* one field and by keywords.
+- **What:** Launch a minimum viable search feature for Simpler Grants.gov that allows users to filter and sort funding opportunities by *at least* one field and by keywords.
+- **Why:** Proves the successful integration of front-end and backend systems in production and delivers basic search functionality that we can begin to leverage for user testing
+- **Who:** Targeted group of external stakeholders with whom we'd like to conduct user research and testing
 
 ## Goals
 
@@ -46,6 +48,7 @@ By contrast, this MVP version of search ***does not*** attempt to:
   - To be able to be able to search with filters applied, so that the only search results returned are ones that match both the keyword and field-based criteria I specified
   - The opportunity listing page to have a link to apply on grants.gov, so that I don't have to repeat my search on grants.gov after finding an opportunity I want to apply for on simpler.grants.gov
   - To receive an incentive if I participate in user research for simpler.grants.gov, so that I am fairly compensated for the time that I invest in testing out new features and answering questions
+  - Filters and search terms to be added to the url, so that I can save or share the link to a particular set of search results
 - As a **project maintainer**, I want:
   - To be notified when simpler.grants.gov experiences downtime, so that I can quickly troubleshoot the issue with minimal impact on end users
   - The system architecture we create for this deliverable to support future search features as well, so that we don't need to discard and re-build critical infrastructure
@@ -55,25 +58,65 @@ By contrast, this MVP version of search ***does not*** attempt to:
 ### Search API
 <!-- Optional -->
 
-TODO
+The ability to search and filter opportunities should be provided through an API endpoint, which allows the user to:
 
-### Search UI
+- Search the list of opportunities with open ended key words
+- Filter the search results by *at least* one structured field (e.g. award date, opportunity type, etc.)
+- Sort the search results based on the value of *at least*
 
-TODO
+Through the design and development of this API endpoint, the team should answer the following questions and record the decisions in one or more ADRs:
+
+- How should search and filter criteria be passed to the API endpoint used for search?
+- How should we support basic logic such as greater than, less than, as well as and/or/not conditions?
+- Which fields should support filtering and sorting?
+- Do we use an existing search service (e.g. Elasticsearch) or build our own?
+
+### Search Page
+
+The primary page we'll need to deliver for the user interface (UI) is a search page, which should allow users to:
+
+- Enter key words to search the list of funding opportunities
+- Filter search results by *at least* one structured field (e.g. award date, opportunity type, etc.)
+- View a common set of fields for each opportunity returned by the search (e.g. title, award date, summary, etc.)
+- Sort the set of results returned by *at least* one structured field (e.g. award date, title, etc.)
+
+### Opportunity Listing Page
+
+The secondary page we want to deliver within the user interface (UI) is an opportunity listing page, which should:
+
+- Display a consistent list of metadata about each opportunity
+- Use only fields that are available in the existing grants.gov cloud database
+- Link to the corresponding opportunity in the existing grant.gov interface
+
+**Note:** This is a stretch goal for this deliverable and may be substituted with a direct link to the grants.gov page for a given opportunity from the search results.
 
 ### Definition of done
 <!-- Required -->
 
-- [ ] [to be added]
-- [ ] Code is deployed to `main` & PROD
-- [ ] Services are live in PROD (may be behind feature flag)
-- [ ] Metrics are published in PROD.
-- [ ] Translations are live in PROD (if necessary)
+- [ ] Basic requirements:
+  - [ ] Code is deployed to `main` & PROD through our CI/CD pipeline
+  - [ ] Services are live in PROD (may be behind feature flag)
+  - [ ] Translations are live in PROD (if necessary)
+  - [ ] All new services have passed a security review (if necessary)
+  - [ ] Data needed for metrics is actively being captured in PROD
+  - [ ] Key architectural decisions made about this deliverable are documented publicly
+- [ ] Functional requirements:
+  - [ ] Users can search for opportunities by key word
+  - [ ] Users can filter search results by *at least one* structured field (e.g. award date, opportunity type, etc.)
+  - [ ] Users can sort search results by *at least* one structured field (e.g. award date, title, etc.)
+  - [ ] All of the search features available in the UI are also available via the API, and vice versa
+  - [ ] Search criteria are reflected in the URL so that users can bookmark or share the link to a given set of search results
+  - [ ] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results or opportunity listing page
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
 
-1. TODO
+1. Total number of searches made via the UI
+2. Total number of searches made via the API
+3. Number of results returned per search
+4. Frequency distribution of keyword search terms
+5. Frequency distribution of field-based filters
+6. Click conversion rate from search results to opportunity listing page
 
 ### Destination for live updating metrics
 <!-- Required -->
@@ -100,7 +143,7 @@ What functionality do we expect to be in place by ***the end*** of work on this 
 - **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Ensures that we have a robust incident response plan in place when simpler.grants.gov services are interrupted
 - **[Search API](https://github.com/HHS/grants-equity/issues/90):** Enables system-to-system users to access the search features through the API
 - **[Search Page](https://github.com/HHS/grants-equity/issues/576):** Enables all other users to access the search features through the user interface
-- **[Opportunity Listing Page](https://github.com/HHS/grants-equity/issues/277):** Displays basic information about a given funding opportunity accessed from the search page
+- **[Opportunity Listing Page](https://github.com/HHS/grants-equity/issues/277):** Displays basic information about a given funding opportunity accessed from the search page. **Note:** This is a stretch goal for this deliverable and may be substituted with a direct link to the grants.gov page for a given opportunity from the search results.
 - **[User Research Incentives](https://github.com/HHS/grants-equity/issues/84):** Enables us to engage stakeholders for user testing of the new search functionality
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
@@ -134,7 +177,11 @@ The following work will *not* be completed as part of this deliverable:
 
 *Does this milestone involve delivering any content that needs translation?*
 
+TODO
+
 *If so, when will English-language content be locked? Then when will translation be started and completed?*
+
+TODO
 
 ### Services going into PROD for the first time
 <!-- Required -->
