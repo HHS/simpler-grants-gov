@@ -23,6 +23,8 @@ COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
 
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
+
 ENV NEXT_TELEMETRY_DISABLED 1
 
 CMD ["npm", "run", "dev"]
@@ -86,6 +88,8 @@ RUN adduser --system --uid 1001 nextjs
 RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
 
+COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
+
 COPY --from=builder /frontend/public ./public
 
 # Automatically leverage output traces to reduce image size
@@ -99,6 +103,7 @@ COPY --from=builder --chown=nextjs:nodejs /frontend/.next/static ./.next/static
 # ARG NEXT_PUBLIC_ENV_VARIABLE
 # ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV HOSTNAME "0.0.0.0"
 ENV PORT 3000
 
 EXPOSE 3000
