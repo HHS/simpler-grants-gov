@@ -44,7 +44,7 @@ variable "container_port" {
 variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"
-  default     = "0.0.0.0"
+  default     = null
 }
 
 variable "vpc_id" {

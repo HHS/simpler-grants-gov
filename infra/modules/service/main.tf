@@ -11,12 +11,12 @@ locals {
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
+  hostname = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
-  base_environment_variables = [
+  base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
-    { name : "HOSTNAME", value: var.hostname },
     { name : "AWS_REGION", value : data.aws_region.current.name },
-  ]
+  ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
