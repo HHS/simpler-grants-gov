@@ -30,7 +30,7 @@ with src.logging.init("migrations"):
 
     def include_object(
         object: sqlalchemy.schema.SchemaItem,
-        name: str,
+        name: str | None,
         type_: str,
         reflected: bool,
         compare_to: Any,

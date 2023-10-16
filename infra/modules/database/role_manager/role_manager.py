@@ -11,6 +11,9 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     if event == "check":
         return check()
+    elif event == "password_ts":
+        connect_as_master_user()
+        return "Succeeded"
     else:
         return manage()
 
@@ -115,11 +118,11 @@ def get_password() -> str:
     ssm = boto3.client("ssm")
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
     logger.info("Fetching password from parameter store")
-    result = ssm.get_parameter(
+    result = json.loads(ssm.get_parameter(
         Name=param_name,
         WithDecryption=True,
-    )
-    return result["Parameter"]["Value"]
+    )["Parameter"]["Value"])
+    return result["password"]
 
 
 def get_roles(conn: Connection) -> list[str]:

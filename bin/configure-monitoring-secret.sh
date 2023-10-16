@@ -17,7 +17,7 @@ ENVIRONMENT=$2
 INTEGRATION_ENDPOINT_URL=$3
 
 terraform -chdir="infra/$APP_NAME/app-config" init > /dev/null
-terraform -chdir="infra/$APP_NAME/app-config" refresh > /dev/null
+terraform -chdir="infra/$APP_NAME/app-config" apply -refresh-only -auto-approve> /dev/null
 
 HAS_INCIDENT_MANAGEMENT_SERVICE=$(terraform -chdir="infra/$APP_NAME/app-config" output -raw has_incident_management_service)
 if [ "$HAS_INCIDENT_MANAGEMENT_SERVICE" = "false" ]; then

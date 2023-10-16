@@ -39,11 +39,11 @@ def _create_schema(conn: db.Connection, schema_name: str):
     """Create a database schema."""
     db_test_user = get_db_config().username
 
-    conn.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name} AUTHORIZATION {db_test_user};")
+    conn.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name} AUTHORIZATION {db_test_user}")
     logger.info("create schema %s", schema_name)
 
 
 def _drop_schema(conn: db.Connection, schema_name: str):
     """Drop a database schema."""
-    conn.execute(f"DROP SCHEMA {schema_name} CASCADE;")
+    conn.execute(f"DROP SCHEMA {schema_name} CASCADE")
     logger.info("drop schema %s", schema_name)
