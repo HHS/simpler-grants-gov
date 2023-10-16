@@ -98,6 +98,7 @@ The secondary page we want to deliver within the user interface (UI) is an oppor
   - [ ] Services are live in PROD (may be behind feature flag)
   - [ ] Translations are live in PROD (if necessary)
   - [ ] All new services have passed a security review (if necessary)
+  - [ ] All new services have completed a 508 compliance review (if necessary)
   - [ ] Data needed for metrics is actively being captured in PROD
   - [ ] Key architectural decisions made about this deliverable are documented publicly
 - [ ] Functional requirements:
