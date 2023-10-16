@@ -47,15 +47,46 @@ By delivering the next batch of updates to the static site, this body of work ai
 
 ### Content Management
 
-TODO
+As part of the static site improvements, we should define a formal process and/or tooling that enables non-technical stakeholders to propose and review content updates to the static site. This content management process/system should:
+
+- Enable internal stakeholders to propose specific content edits asynchronously and in a format that is accessible to non-technical users
+- Enable internal stakeholders users to preview a deployed version of those content edits before they become visible to all users on the PROD version of the site
+- Track the amount of engineering time and effort required to make content edits (if internal stakeholders users aren't able to make these edits directly through a CMS)
+
+Through the design and development of this tool or process, the team should answer the following questions and record the decisions in one or more ADRs:
+
+- Should we adopt a CMS to enable stakeholders to directly manage content? If so, which CMS? Options include:
+  - No CMS, changes requested through tickets or GitBook
+  - Existing grants.gov cloud CMS, Storyblok
+  - Open source headless CMS, e.g. Strapi
+- How can we enable non-technical stakeholders to preview content changes before they are visible to all site visitors? Options include:
+  - Preview deploys on feature branches
+  - Dedicated STAGING environment
+  - Feature flag on PROD
 
 ### Internationalization & Content Translation
 
-TODO
+As part of this deliverable we should define a system for facilitating and publish translations of site content into multiple languages. This internationalization and translation system should:
+
+- Enable site visitors to select their default language from any page on the site
+- Allow the public to track the percentage of site contents that have been translated into each supported language
+- Ideally, enable open source contributors to assist with the translation process
+- Track the amount of time it takes to translate new content first published in English
+
+Through the design and development of this tool or process, the team should answer the following questions and record the decisions in one or more ADRs:
+
+- Which languages should we commit to providing translation support for?
+- Which criteria should determine whether or not content needs to be translated (e.g. audience, source, where it's hosted)?
+- Should we adopt a tool that assists with localization and translation (e.g. [Crowdin](https://crowdin.com/))?
+- How can/should translations be approved and moderated before they are published?
 
 ### Feedback Mechanism
 
-TODO
+As part of this deliverable we should define a system for soliciting user input and feedback via the site. This feedback mechanism should:
+
+- Enable users to provide feedback or ask questions directly from the site
+- Enable internal stakeholders to solicit input from users to specific questions or topics
+- Allow internal stakeholders to view all responses
 
 ### Definition of done
 <!-- Required -->
@@ -68,14 +99,19 @@ TODO
   - [ ] All new services have completed a 508 compliance review (if necessary)
   - [ ] Data needed for metrics is actively being captured in PROD
   - [ ] Key architectural decisions made about this deliverable are documented publicly
-- [ ] Functional requirements:
+- [ ] Functional requirements for content management:
   - [ ] Internal stakeholders can initiate content changes through a formal process and/or tool that is accessible to non-technical users
   - [ ] Internal stakeholders can preview content and design changes before they become visible to all users on the PROD version of the site
+  - [ ] A user guide describing the content management process/system has been published in GitBook
+- [ ] Functional requirements for internationalization:
   - [ ] Static site content is supported in *at least* 3 languages
   - [ ] Users can change the default language from any page of the static site
   - [ ] A formal process and/or tool has been adopted to facilitate content translations
+  - [ ] A user guide describing the translation process has been published in GitBook
+- [ ] Functional requirements for feedback mechanism:
   - [ ] Users can provide feedback or ask questions about Simpler Grants.gov directly from the site
   - [ ] Internal stakeholders can view visitor feedback and/or questions in a centrally location
+  - [ ] A user guide describing how to access and manage user feedback has been published in GitBook
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
@@ -117,7 +153,9 @@ Is there any notable functionality we do ***not*** expect to be in place before 
 ### Open questions
 <!-- Optional -->
 
-- [ ] TODO
+*What existing services does the federal government provide for translation?*
+
+TODO
 
 ### Not doing
 <!-- Optional -->
