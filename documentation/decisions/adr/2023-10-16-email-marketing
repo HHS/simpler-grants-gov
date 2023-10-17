@@ -1,0 +1,142 @@
+# Communications Tooling: Email Marketing
+
+- **Status:** Draft
+- **Last Modified:** 2023-10-16 <!-- REQUIRED -->
+- **Related Issue:** [#590](https://github.com/HHS/grants-equity/issues/590) <!-- RECOMMENDED -->
+- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
+- **Tags:** communucations, open source, email marketing
+
+## Context and Problem Statement
+
+
+## Decision Drivers <!-- RECOMMENDED -->
+
+#### Must Have
+
+- **Usability:** Non-technical users should be able to access and create content with minimal training or guidance.
+- **Content Review:** Collaborators should be able to review and edit draft content before emails are sent out.
+- **Comments:** Reviewers should be able to leave in-line comments on content that they are reviewing.
+- **Internationalization (i18n):** The solution should provide support for displaying content in multiple languages.
+- **Analytics:** The platform should provide support for tracking open rates, click-through-rate and other other web analytics.
+- **Onboarding Costs:** Onboarding new members to the platform should be relatively inexpensive, both in terms of staff time/resources and direct costs (e.g. licensing fees).
+- **Maintenance Costs:** It should not be prohibitively expensive to maintain the email marketing tool, both in terms of staff time/resources and direct costs (e.g. hosting fees).
+- **Authority to Operate (ATO):** The tool should be FedRAMPed or have an Authority to Operate as it will have names and email addresses of public users. 
+
+#### Nice to Have
+
+- **Open Source:** The tool used to manage the email marketing content should be open source, if possible.
+
+## Options Considered
+
+
+- [Sendy](Sendy) - 
+- [Pardot](Pardot) - 
+- [MailChimp](MailChimp) - 
+- [Hubspot](Hubspot) - 
+- [Mautic](Mautic) -
+
+## Decision Outcome <!-- REQUIRED -->
+
+
+
+### Positive Consequences <!-- OPTIONAL -->
+
+
+
+### Negative Consequences <!-- OPTIONAL -->
+
+
+
+### Back-up Options
+
+
+
+## Comparison Matrix
+
+- ✅ Feature available, meets requirement
+- ❌ Feature not available, does not meet requirement
+- 🔄 Partial feature, limited feature availability, feature in progress or undergoing improvements
+- 1-3 Strength level
+- ❓Unknown
+
+
+
+## Pros and Cons of the Options <!-- OPTIONAL -->
+
+### Sendy
+
+
+
+#### Details
+
+
+
+#### Pros
+
+
+#### Cons
+
+
+
+### Pardot
+
+
+#### Details
+
+
+
+#### Pros
+
+
+
+#### Cons
+
+
+
+### MailChimp
+
+
+#### Details
+
+
+
+#### Pros
+
+
+#### Cons
+
+
+
+### Hubspot
+
+
+
+#### Details
+
+
+
+#### Pros
+
+
+
+#### Cons
+
+
+
+### Mautic
+
+
+
+#### Details
+
+
+
+#### Pros
+
+
+
+#### Cons
+
+
+## Links <!-- OPTIONAL -->
+
