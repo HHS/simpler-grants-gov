@@ -29,7 +29,7 @@ resource "aws_lambda_function" "role_manager" {
       DB_PORT                = aws_rds_cluster.db.port
       DB_USER                = local.master_username
       DB_NAME                = aws_rds_cluster.db.database_name
-      DB_PASSWORD_PARAM_NAME = aws_ssm_parameter.random_db_password.name
+      DB_PASSWORD_PARAM_NAME = "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass.name}"
       DB_SCHEMA              = var.schema_name
       APP_USER               = var.app_username
       MIGRATOR_USER          = var.migrator_username
@@ -49,10 +49,14 @@ resource "aws_lambda_function" "role_manager" {
 }
 
 # Installs python packages needed by the role manager lambda function before
-# creating the zip archive. Reinstalls whenever requirements.txt changes
+# creating the zip archive.
+# Runs pip install on every apply so that the role manager archive file that
+# is generated locally is guaranteed to have the required dependencies even
+# when terraform is run by a developer that did not originally create the
+# environment.
+# Timestamp is used to always trigger replacement.
 resource "terraform_data" "role_manager_python_vendor_packages" {
-  triggers_replace = file("${path.module}/role_manager/requirements.txt")
-
+  triggers_replace = timestamp()
   provisioner "local-exec" {
     command = "pip3 install -r ${path.module}/role_manager/requirements.txt -t ${path.module}/role_manager/vendor"
   }
@@ -90,6 +94,10 @@ resource "aws_iam_role" "role_manager" {
   ]
 }
 
+data "aws_secretsmanager_secret" "db_pass" {
+  arn = aws_rds_cluster.db.master_user_secret[0].secret_arn
+}
+
 resource "aws_iam_role_policy" "ssm_access" {
   name = "${var.name}-role-manager-ssm-access"
   role = aws_iam_role.role_manager.id
@@ -99,8 +107,8 @@ resource "aws_iam_role_policy" "ssm_access" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = ["ssm:GetParameter*"]
-        Resource = "${aws_ssm_parameter.random_db_password.arn}"
+        Action   = ["secretsmanager:GetSecretValue"]
+        Resource = [data.aws_secretsmanager_secret.db_pass.arn]
       },
       {
         Effect   = "Allow"

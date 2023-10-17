@@ -55,7 +55,6 @@ variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
     security_group_ids         = list(string)
-    access_policy_arn          = string
     app_access_policy_arn      = string
     migrator_access_policy_arn = string
     connection_info = object({
@@ -67,6 +66,12 @@ variable "db_vars" {
     })
   })
   default = null
+}
+
+variable "cert_arn" {
+  description = "The ARN for the TLS certificate passed in from the app service layer"
+  type        = string
+  default     = null
 }
 
 variable "enable_autoscaling" {
