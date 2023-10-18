@@ -1,8 +1,11 @@
-from apiflask import fields
+from apiflask import fields, validators
 from marshmallow import fields as marshmallow_fields
 
 from src.api.schemas import request_schema
 from src.db.models import user_models
+from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
+
+PHONE_NUMBER_VALIDATOR = validators.Regexp(r"^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$")
 
 
 class RoleSchema(request_schema.OrderedSchema):
@@ -23,10 +26,10 @@ class UserSchema(request_schema.OrderedSchema):
     last_name = fields.String(metadata={"description": "The user's last name"}, required=True)
     phone_number = fields.String(
         required=True,
+        validate=[PHONE_NUMBER_VALIDATOR],
         metadata={
             "description": "The user's phone number",
             "example": "123-456-7890",
-            "pattern": r"^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$",
         },
     )
     date_of_birth = fields.Date(
@@ -37,8 +40,26 @@ class UserSchema(request_schema.OrderedSchema):
         metadata={"description": "Whether the user is active"},
         required=True,
     )
-    roles = fields.List(fields.Nested(RoleSchema), required=True)
+    roles = fields.List(fields.Nested(RoleSchema()), required=True)
 
     # Output only fields in addition to id field
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
+
+class UserSearchSchema(request_schema.OrderedSchema):
+    # Fields that you can search for users by, only includes a subset of user fields
+    phone_number = fields.String(
+        validate=[PHONE_NUMBER_VALIDATOR],
+        metadata={
+            "description": "The user's phone number",
+            "example": "123-456-7890",
+        },
+    )
+
+    is_active = fields.Boolean()
+
+    role_type = fields.Enum(user_models.RoleType, by_value=True)
+
+    sorting = fields.Nested(generate_sorting_schema("UserSortingSchema")())
+    paging = fields.Nested(PaginationSchema(), required=True)

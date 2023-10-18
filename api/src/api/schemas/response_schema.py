@@ -1,6 +1,7 @@
 from apiflask import fields
 
 from src.api.schemas import request_schema
+from src.pagination.pagination_schema import PaginationInfoSchema
 
 
 class ValidationErrorSchema(request_schema.OrderedSchema):
@@ -15,5 +16,10 @@ class ResponseSchema(request_schema.OrderedSchema):
     message = fields.String(metadata={"description": "The message to return"})
     data = fields.Field(metadata={"description": "The REST resource object"}, dump_default={})
     status_code = fields.Integer(metadata={"description": "The HTTP status code"}, dump_default=200)
-    warnings = fields.List(fields.Nested(ValidationErrorSchema), dump_default=[])
-    errors = fields.List(fields.Nested(ValidationErrorSchema), dump_default=[])
+    warnings = fields.List(fields.Nested(ValidationErrorSchema()), dump_default=[])
+    errors = fields.List(fields.Nested(ValidationErrorSchema()), dump_default=[])
+
+    pagination_info = fields.Nested(
+        PaginationInfoSchema(),
+        metadata={"description": "The pagination information for paginated endpoints"},
+    )
