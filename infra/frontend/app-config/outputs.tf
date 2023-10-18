@@ -33,3 +33,7 @@ output "environment_configs" {
 output "enable_autoscaling" {
   value = local.enable_autoscaling
 }
+
+output "hostname" {
+  value = local.hostname
+}

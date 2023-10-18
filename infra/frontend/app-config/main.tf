@@ -6,6 +6,7 @@ locals {
   has_database                    = false
   has_incident_management_service = false
   enable_autoscaling              = true
+  hostname                        = "0.0.0.0"
 
   build_repository_config = {
     region = module.project_config.default_region
