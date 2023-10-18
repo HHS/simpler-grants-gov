@@ -45,7 +45,7 @@ def get_db_session() -> db.Session:
 
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
-# see https://docs.sqlalchemy.org/en/14/orm/contextual.html
+# see https://docs.sqlalchemy.org/en/20/orm/contextual.html
 Session = scoped_session(lambda: get_db_session(), scopefunc=lambda: get_db_session())
 
 

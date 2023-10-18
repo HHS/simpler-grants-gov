@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @user_blueprint.post("/v1/users")
-@user_blueprint.input(user_schemas.UserSchema)
+@user_blueprint.input(user_schemas.UserSchema, arg_name="user_params")
 @user_blueprint.output(user_schemas.UserSchema, status_code=201)
 @user_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
@@ -32,7 +32,7 @@ def user_post(db_session: db.Session, user_params: users.CreateUserParams) -> di
 # Allow partial updates. partial=true means requests that are missing
 # required fields will not be rejected.
 # https://marshmallow.readthedocs.io/en/stable/quickstart.html#partial-loading
-@user_blueprint.input(user_schemas.UserSchema(partial=True))
+@user_blueprint.input(user_schemas.UserSchema(partial=True), arg_name="patch_user_params")
 @user_blueprint.output(user_schemas.UserSchema)
 @user_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()

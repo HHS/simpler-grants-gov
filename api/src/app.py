@@ -53,8 +53,8 @@ def configure_app(app: APIFlask) -> None:
 
     # Set various general OpenAPI config values
     app.info = {
-        "title": "Grants Equity API",
-        "description": "Back end API for grants.gov",
+        "title": "Template Application Flask",
+        "description": "Template API for a Flask Application",
         "contact": {
             "name": "Nava PBC Engineering",
             "url": "https://www.navapbc.com",

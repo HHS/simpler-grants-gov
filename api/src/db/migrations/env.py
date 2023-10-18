@@ -16,7 +16,6 @@ logger = logging.getLogger("migrations")
 
 # Initialize logging
 with src.logging.init("migrations"):
-
     # add your model's MetaData object here
     # for 'autogenerate' support
     # from myapp import mymodel

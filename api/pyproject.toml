@@ -83,7 +83,7 @@ warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
 
-plugins = ["sqlalchemy.ext.mypy.plugin"]
+plugins = ["pydantic.mypy"]
 
 [tool.bandit]
 # Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
