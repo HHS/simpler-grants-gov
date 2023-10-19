@@ -50,6 +50,10 @@ class Base(DeclarativeBase):
         uuid.UUID: postgresql.UUID(as_uuid=True),
     }
 
+    @classmethod
+    def get_table_name(cls) -> str:
+        return cls.__tablename__
+
     def _dict(self) -> dict:
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
