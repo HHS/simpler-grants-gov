@@ -1,5 +1,5 @@
 [tool.poetry]
-name = ""
+name = "simpler-grants-gov-api"
 version = "0.1.0"
 description = "Back end API for simpler.grants.gov"
 packages = [{ include = "src" }]
