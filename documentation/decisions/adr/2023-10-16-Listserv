@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-10-16 <!-- REQUIRED -->
-- **Related Issue:** [#378](https://github.com/HHS/grants-equity/issues/578) <!-- RECOMMENDED -->
+- **Related Issue:** [#378](https://github.com/HHS/grants-equity/issues/378) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Andy Cochran, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, listserv
 
@@ -29,6 +29,19 @@ Nice to have
 ## Decision Outcome <!-- REQUIRED -->
 
 We selected Google Groups as it excels in ease of use, ensuring that both HHS staff, contractors, and the general public can seamlessly navigate and manage communications. The platform's commitment to security, encompassing encryption, authentication, and anti-phishing measures, meets our high standards. Moreover, Google Groups offers cost-effective solutions suitable for the diverse user groups of our project. Its rich features, including email list management, subscription flexibility, and message archiving, cater to our project's unique communication needs. With scalability to accommodate growth, it's well-equipped to support our expanding community. While not mandatory, the platform's capacity for community engagement aligns with our desire for active participation and collaboration. It's a highly favorable choice that complements the open-source philosophy of our project, permitting customization for a cohesive branding and an inclusive communication environment. The decision to opt for Google Groups assures that we have an efficient and versatile listserv platform to meet our project's diverse and evolving requirements.
+
+### Decision Considerations and Implications
+
+We intend the primary focus of **Google Groups** to be as a channel to create discussion forums and online communities. Users can utilize it to post questions and exchange information and ideas. The channel should be used by users to post questions and exchange ideas and information. 
+
+If users have private questions, the **Contact Us** email at simplergrantsgov@hhs.gov is the best method of communication.
+
+The email marketing tool that we will select in the ADR: [#590](https://github.com/HHS/grants-equity/issues/590) will be used for individuals who wish to subscribe to Simpler Grants.gov newsletters. These newsletters are tailored for targeted messaging and notifications, including updates about the Simpler Grants.gov project. 
+
+Regarding Google Groups, it's important to note that if we plan to use individual emails from our Google Group to send newsletters, we must obtain explicit permission from users to send them newsletter notifications. Additionally, we should explore how we can import or integrate individuals who join Google Groups and wish to receive newsletters.
+
+When implementing and using Google Groups (listserv), the 'Contact Us' option, and an email marketing tool, it's important that we clearly communicate the purpose of each tool and guide users on the best way to reach out to us, as there are distinct differences in their usage.
+
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -65,7 +78,8 @@ We selected Google Groups as it excels in ease of use, ensuring that both HHS st
   - Cons: The availability of such services can vary among hosting providers. It may require technical knowledge to set up and maintain.
 
 
-
+### Open Questions
+* How will Google Groups integrate or be used with the email marketing tool that we will use in the future? This should be considered in the [Email Marketing Tool ADR #590](https://github.com/HHS/grants-equity/issues/590).
 
 
 
