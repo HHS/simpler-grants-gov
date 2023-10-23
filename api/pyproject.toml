@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "grants-equity-api"
+name = ""
 version = "0.1.0"
-description = "Back end API for grants.gov"
+description = "Back end API for simpler.grants.gov"
 packages = [{ include = "src" }]
 authors = ["Nava Engineering <engineering@navapbc.com>"]
 
