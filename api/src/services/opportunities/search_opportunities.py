@@ -29,7 +29,7 @@ def search_opportunities(
     )
 
     if search_params.opportunity_title is not None:
-        # TODO - need to figure out what I should be escaping for this query
+        # TODO - we'll need to figure out if we need more escaping for this
         stmt = stmt.where(
             Opportunity.opportunity_title.ilike(f"%{search_params.opportunity_title}%")
         )
