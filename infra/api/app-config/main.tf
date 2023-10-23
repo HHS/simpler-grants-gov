@@ -44,9 +44,9 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared = "simpler-grants-gov"
-    dev    = "simpler-grants-gov"
-    prod   = "simpler-grants-gov"
+    shared = "grants-equity"
+    dev    = "grants-equity"
+    prod   = "grants-equity"
   }
 }
 
