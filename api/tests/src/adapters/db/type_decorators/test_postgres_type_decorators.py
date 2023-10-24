@@ -29,7 +29,7 @@ def test_str_enum_column_conversion(db_session, enable_factory_create, category,
     # Verify what we stored in the DB is the string itself
     raw_db_value = db_session.execute(
         text(
-            f"select oppcategory from {Opportunity.get_table_name()} where opportunity_id={opportunity.opportunity_id}"
+            f"select oppcategory from {Opportunity.get_table_name()} where opportunity_id={opportunity.opportunity_id}"  # nosec
         )
     ).scalar()
     assert raw_db_value == db_value
