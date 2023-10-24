@@ -1,4 +1,4 @@
-# Grants Equity
+# Simpler Grants.gov
 
 A modernization effort for Grants.gov.
 
