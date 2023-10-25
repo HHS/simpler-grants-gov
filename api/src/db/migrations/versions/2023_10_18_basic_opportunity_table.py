@@ -1,7 +1,7 @@
 """Basic opportunity table
 
 Revision ID: fdd9312633d8
-Revises: 4ff1160282d1
+Revises: 3ed861176e3d
 Create Date: 2023-10-18 16:37:18.252136
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "fdd9312633d8"
-down_revision = "4ff1160282d1"
+down_revision = "3ed861176e3d"
 branch_labels = None
 depends_on = None
 
