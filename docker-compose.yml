@@ -6,8 +6,7 @@ services:
     image: postgres:14-alpine
     container_name: main-db
     command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
-    environment:
-      POSTGRES_PASSWORD: secret123
+    env_file: ./api/local.env
     ports:
       - "5432:5432"
     volumes:

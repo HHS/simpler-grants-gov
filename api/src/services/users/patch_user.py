@@ -30,10 +30,9 @@ def patch_user(
     user_id: str,
     patch_user_params: PatchUserParams,
 ) -> User:
-
     with db_session.begin():
         # TODO: move this to service and/or persistence layer
-        user = db_session.query(User).options(orm.selectinload(User.roles)).get(user_id)
+        user = db_session.get(User, user_id, options=[orm.selectinload(User.roles)])
 
         if user is None:
             # TODO move HTTP related logic out of service layer to controller layer and just return None from here
@@ -50,7 +49,6 @@ def patch_user(
 
 
 def _handle_role_patch(db_session: Session, user: User, request_roles: list[RoleParams]) -> None:
-
     current_role_types = set([role.type for role in user.roles])
     request_role_types = set([role["type"] for role in request_roles])
 

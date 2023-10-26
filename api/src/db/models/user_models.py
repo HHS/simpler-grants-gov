@@ -4,9 +4,8 @@ from datetime import date
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import Boolean, Column, Date, Enum, ForeignKey, Text
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.models.base import Base, IdMixin, TimestampMixin
 
@@ -21,22 +20,22 @@ class RoleType(str, enum.Enum):
 class User(Base, IdMixin, TimestampMixin):
     __tablename__ = "user"
 
-    first_name: str = Column(Text, nullable=False)
-    middle_name: Optional[str] = Column(Text)
-    last_name: str = Column(Text, nullable=False)
-    phone_number: str = Column(Text, nullable=False)
-    date_of_birth: date = Column(Date, nullable=False)
-    is_active: bool = Column(Boolean, nullable=False)
+    first_name: Mapped[str]
+    middle_name: Mapped[Optional[str]]
+    last_name: Mapped[str]
+    phone_number: Mapped[str]
+    date_of_birth: Mapped[date]
+    is_active: Mapped[bool]
 
-    roles: list["Role"] = relationship(
+    roles: Mapped[list["Role"]] = relationship(
         "Role", back_populates="user", cascade="all, delete", order_by="Role.type"
     )
 
 
 class Role(Base, TimestampMixin):
     __tablename__ = "role"
-    user_id: Mapped[UUID] = Column(
-        postgresql.UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
 
     # Set native_enum=False to use store enum values as VARCHAR/TEXT
@@ -48,6 +47,6 @@ class Role(Base, TimestampMixin):
     # not yet functional
     # (See https://github.com/sqlalchemy/alembic/issues/363)
     #
-    # https://docs.sqlalchemy.org/en/14/core/type_basics.html#sqlalchemy.types.Enum.params.native_enum
-    type: RoleType = Column(Enum(RoleType, native_enum=False), primary_key=True)
-    user: User = relationship(User, back_populates="roles")
+    # https://docs.sqlalchemy.org/en/20/core/type_basics.html#sqlalchemy.types.Enum.params.native_enum
+    type: Mapped[RoleType] = mapped_column(Enum(RoleType, native_enum=False), primary_key=True)
+    user: Mapped[User] = relationship(User, back_populates="roles")

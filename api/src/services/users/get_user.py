@@ -11,7 +11,7 @@ from src.db.models.user_models import User
 # https://github.com/navapbc/template-application-flask/issues/52
 def get_user(db_session: Session, user_id: str) -> User:
     # TODO: move this to service and/or persistence layer
-    result = db_session.query(User).options(orm.selectinload(User.roles)).get(user_id)
+    result = db_session.get(User, user_id, options=[orm.selectinload(User.roles)])
 
     if result is None:
         # TODO move HTTP related logic out of service layer to controller layer and just return None from here

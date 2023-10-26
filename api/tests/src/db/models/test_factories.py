@@ -61,6 +61,9 @@ def test_factory_create_uninitialized_db_session():
 
 
 def test_user_factory_create(enable_factory_create, db_session: db.Session):
+    # Delete any users created by other tests
+    db_session.query(User).delete()
+
     # Create actually writes a record to the DB when run
     # so we'll check the DB directly as well.
     user = UserFactory.create()
