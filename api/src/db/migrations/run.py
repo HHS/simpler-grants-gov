@@ -43,8 +43,7 @@ def have_all_migrations_run(db_engine: sqlalchemy.engine.Engine) -> None:
                 (
                     "The database schema is not in sync with the migrations."
                     "Please verify that the migrations have been"
-                    f"run up to {expected_heads}\n"
-                    f"currently at {current_heads}"
+                    f"run up to {expected_heads}; currently at {current_heads}"
                 )
             )
 

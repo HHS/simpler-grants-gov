@@ -39,7 +39,7 @@ Example:
         # db_client.get_connection() or db_client.get_session()
 """
 from functools import wraps
-from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
+from typing import Callable, Concatenate, ParamSpec, TypeVar
 
 from flask import Flask, current_app
 
@@ -115,7 +115,7 @@ def with_db_session(
 
     def decorator(f: Callable[Concatenate[db.Session, P], T]) -> Callable[P, T]:
         @wraps(f)
-        def wrapper(*args: Any, **kwargs: Any) -> T:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             with get_db(current_app, client_name=client_name).get_session() as session:
                 return f(session, *args, **kwargs)
 

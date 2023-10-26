@@ -1,8 +1,7 @@
 import dataclasses
-from typing import Optional
+from typing import Any, Optional
 
-from src.api.schemas import response_schema
-from src.db.models.base import Base
+from src.pagination.pagination_models import PaginationInfo
 
 
 @dataclasses.dataclass
@@ -33,16 +32,9 @@ class ApiResponse:
     """Base response model for all API responses."""
 
     message: str
-    data: Optional[Base] = None
+    data: Optional[Any] = None
     warnings: list[ValidationErrorDetail] = dataclasses.field(default_factory=list)
     errors: list[ValidationErrorDetail] = dataclasses.field(default_factory=list)
+    status_code: int = 200
 
-    # This method is used to convert ApiResponse objects to a dictionary
-    # This is necessary because APIFlask has a bug that causes an exception to be
-    # thrown when returning objects from routes when BASE_RESPONSE_SCHEMA is set
-    # (See https://github.com/apiflask/apiflask/issues/384)
-    # Once that issue is fixed, this method can be removed and routes can simply
-    # return ApiResponse objects directly and allow APIFlask to serealize the objects
-    # to JSON automatically.
-    def asdict(self) -> dict:
-        return response_schema.ResponseSchema().dump(self)
+    pagination_info: PaginationInfo | None = None

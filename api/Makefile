@@ -114,12 +114,12 @@ check: format-check lint test
 #########################
 
 # Docker starts the image for the DB but it's not quite
-# fully ready, so add a 5 second sleep so upgrade doesn't
-# fail because the DB hasn't started yet.
-init-db: start-db sleep-5 db-migrate
+# ready to accept connections so we add a brief wait script
+init-db: start-db db-migrate
 
 start-db:
 	docker-compose up --detach main-db
+	./bin/wait-for-local-db.sh
 
 ## Destroy current DB, setup new one
 db-recreate: clean-volumes init-db
