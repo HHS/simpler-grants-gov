@@ -22,10 +22,8 @@ def search_opportunities(
 
     sort_fn = asc if search_params.sorting.is_ascending else desc
 
-    stmt = (
-        select(Opportunity)
-        .order_by(sort_fn(getattr(Opportunity, search_params.sorting.order_by)))
-        .order_by()
+    stmt = select(Opportunity).order_by(
+        sort_fn(getattr(Opportunity, search_params.sorting.order_by))
     )
 
     if search_params.opportunity_title is not None:
