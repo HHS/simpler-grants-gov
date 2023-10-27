@@ -8,7 +8,7 @@ info:
   version: 0.1.0
 tags:
 - name: Health
-- name: User
+- name: Opportunity
 paths:
   /health:
     get:
@@ -50,60 +50,7 @@ paths:
       tags:
       - Health
       summary: Health
-  /v1/users:
-    post:
-      parameters: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/User'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  warnings:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPError'
-          description: Authentication error
-      tags:
-      - User
-      summary: POST /v1/users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      security:
-      - ApiKeyAuth: []
-  /v1/users/search:
+  /v1/opportunities/search:
     post:
       parameters: []
       responses:
@@ -119,7 +66,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: '#/components/schemas/Opportunity'
                   status_code:
                     type: integer
                     description: The HTTP status code
@@ -149,129 +96,13 @@ paths:
                 $ref: '#/components/schemas/HTTPError'
           description: Authentication error
       tags:
-      - User
-      summary: User Search
+      - Opportunity
+      summary: Opportunity Search
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserSearch'
-      security:
-      - ApiKeyAuth: []
-  /v1/users/{user_id}:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/User'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  warnings:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPError'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPError'
-          description: Not found
-      tags:
-      - User
-      summary: User Get
-      security:
-      - ApiKeyAuth: []
-    patch:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/User'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  warnings:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPError'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPError'
-          description: Not found
-      tags:
-      - User
-      summary: User Patch
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
 openapi: 3.0.3
@@ -333,68 +164,15 @@ components:
     Healthcheck:
       type: object
       properties: {}
-    Role:
-      type: object
-      properties:
-        type:
-          description: The name of the role
-          enum:
-          - USER
-          - ADMIN
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        first_name:
-          type: string
-          description: The user's first name
-        middle_name:
-          type: string
-          description: The user's middle name
-        last_name:
-          type: string
-          description: The user's last name
-        phone_number:
-          type: string
-          pattern: ^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$
-          description: The user's phone number
-          example: 123-456-7890
-        date_of_birth:
-          type: string
-          format: date
-          description: The users date of birth
-        is_active:
-          type: boolean
-          description: Whether the user is active
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - date_of_birth
-      - first_name
-      - is_active
-      - last_name
-      - phone_number
-      - roles
-    UserSorting:
+    OpportunitySorting:
       type: object
       properties:
         order_by:
           type: string
           enum:
-          - id
+          - opportunity_id
+          - agency
+          - opportunity_number
           - created_at
           - updated_at
           description: The field to sort the response by
@@ -422,58 +200,68 @@ components:
       required:
       - page_offset
       - page_size
-    UserSearch:
+    OpportunitySearch:
       type: object
       properties:
-        phone_number:
+        opportunity_title:
           type: string
-          pattern: ^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$
-          description: The user's phone number
-          example: 123-456-7890
-        is_active:
-          type: boolean
-        role_type:
+          description: The title of the opportunity to search for
+          example: research
+        category:
+          description: The opportunity category to search for
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - D
           enum:
-          - USER
-          - ADMIN
+          - D
+          - M
+          - C
+          - E
+          - O
+        is_draft:
+          type: boolean
+          description: Whether to search for draft claims
+          example: false
         sorting:
-          $ref: '#/components/schemas/UserSorting'
+          $ref: '#/components/schemas/OpportunitySorting'
         paging:
           $ref: '#/components/schemas/Pagination'
       required:
       - paging
-    UserUpdate:
+      - sorting
+    Opportunity:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
+        opportunity_id:
+          type: integer
           readOnly: true
-        first_name:
+          description: The internal ID of the opportunity
+          example: 12345
+        opportunity_number:
           type: string
-          description: The user's first name
-        middle_name:
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
           type: string
-          description: The user's middle name
-        last_name:
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
           type: string
-          description: The user's last name
-        phone_number:
-          type: string
-          pattern: ^([0-9]|\*){3}\-([0-9]|\*){3}\-[0-9]{4}$
-          description: The user's phone number
-          example: 123-456-7890
-        date_of_birth:
-          type: string
-          format: date
-          description: The users date of birth
-        is_active:
+          description: The agency who created the opportunity
+          example: US-ABC
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - D
+          enum:
+          - D
+          - M
+          - C
+          - E
+          - O
+        is_draft:
           type: boolean
-          description: Whether the user is active
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
+          description: Whether the opportunity is in a draft status
+          example: false
         created_at:
           type: string
           format: date-time
