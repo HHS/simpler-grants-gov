@@ -16,8 +16,10 @@ import faker
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.opportunity_models as opportunity_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
+from src.constants.lookup_constants import OpportunityCategory
 
 _db_session: Optional[db.Session] = None
 
@@ -84,3 +86,16 @@ class UserFactory(BaseFactory):
     is_active = factory.Faker("boolean")
 
     roles = factory.RelatedFactoryList(RoleFactory, size=2, factory_related_name="user")
+
+
+class OpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.Opportunity
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    opportunity_number = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
+    opportunity_title = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+    agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
+    category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
+    is_draft = factory.Faker("boolean", chance_of_getting_true=50)
