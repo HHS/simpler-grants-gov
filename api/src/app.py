@@ -13,7 +13,6 @@ import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities import opportunity_blueprint
 from src.api.schemas import response_schema
-from src.api.users import user_blueprint
 from src.auth.api_key_auth import User, get_app_security_scheme
 
 logger = logging.getLogger(__name__)
@@ -71,7 +70,6 @@ def configure_app(app: APIFlask) -> None:
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(user_blueprint)
     app.register_blueprint(opportunity_blueprint)
 
 

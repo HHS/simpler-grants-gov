@@ -23,18 +23,18 @@ class Paginator(Generic[T]):
     Expected usage::
         from sqlalchemy import desc, select
 
-        from src.db.models.user_models import User
+        from src.db.models.opportunity_models import Opportunity
         from src.pagination.paginator import Paginator
 
         # Create a select statement that includes ordering and sorting
-        stmt = select(User).order_by(desc("id"))
+        stmt = select(User).order_by(desc("opportunity_id"))
 
         # Add any filters
-        stmt = stmt.where(User.phone_number == "123-456-7890")
+        stmt = stmt.where(Opportunity.agency == "US-XYZ")
 
         # Use the paginator to get a specific page (page 2 in this case)
-        paginator: Paginator[User] = Paginator(stmt, db_session, page_size=10)
-        users: list[User] = paginator.page_at(page_offset=2)
+        paginator: Paginator[Opportunity] = Paginator(stmt, db_session, page_size=10)
+        users: list[Opportunity] = paginator.page_at(page_offset=2)
 
     """
 
