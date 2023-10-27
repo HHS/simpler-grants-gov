@@ -161,6 +161,9 @@ db-migrate-history: ## Show migration history
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
+db-seed-local:
+	$(PY_RUN_CMD) db-seed-local
+
 ##################################################
 # Testing
 ##################################################

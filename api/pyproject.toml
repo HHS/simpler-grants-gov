@@ -49,6 +49,7 @@ build-backend = "poetry.core.masonry.api"
 db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
+db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 
 [tool.black]
 line-length = 100
