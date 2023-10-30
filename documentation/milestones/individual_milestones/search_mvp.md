@@ -14,7 +14,7 @@
 ## Short description
 <!-- Required -->
 
-- **What:** Launch a minimum viable search feature for Simpler Grants.gov that allows users to filter and sort funding opportunities by *at least* one field and by keywords.
+- **What:** Soft launch a minimum viable search feature for Simpler Grants.gov that allows users to filter and sort funding opportunities by *at least* one field and by keywords.
 - **Why:** Proves the successful integration of front-end and backend systems in production and delivers basic search functionality that we can begin to leverage for user testing
 - **Who:** Targeted group of external stakeholders with whom we'd like to conduct user research and testing
 
@@ -209,7 +209,7 @@ Are there any fields being shared publicly that have never been shared in PROD b
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product?
+Does this 30k ft deliverable expose any new attack vectors or expand the attack surface of the product?
 
 1. TODO
 
