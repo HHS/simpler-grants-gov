@@ -2,7 +2,7 @@ import shlex
 import subprocess
 
 OWNER = "HHS"
-REPO = "grants-equity"
+REPO = "simpler-grants-gov"
 SPRINT_PROJECT = 13
 
 

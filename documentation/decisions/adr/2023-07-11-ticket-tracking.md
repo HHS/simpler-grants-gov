@@ -2,8 +2,8 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-11 <!-- REQUIRED -->
-- **Related Issue:** [#98](https://github.com/HHS/grants-equity/issues/98) <!-- RECOMMENDED -->
-- **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly 
+- **Related Issue:** [#98](https://github.com/HHS/simpler-grants-gov/issues/98) <!-- RECOMMENDED -->
+- **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly
 - **Tags:** communications, sprint planning, agile <!-- OPTIONAL -->
 
 ## Context and Problem Statement
@@ -80,17 +80,17 @@ We are planning to use **GitHub issues with GitHub projects** because it is the 
 | Factor                    |    Zenhub     | GitHub Projects |     Jira      |  OpenProject  |
 | ------------------------- | :-----------: | :-------------: | :-----------: | :-----------: |
 | Cost                      | $8.33/user/mo |      Free       | $7.75/user/mo | $7.25/user/mo |
-| Ticket Tracking           |      ✅       |       ✅         |      ✅       |      ✅       |
-| Public Access             |      🔄       |       ✅         |      🔄       |      ❌       |
-| Public Requests           |      ✅       |       ✅         |      ❌       |      ❌       |
-| Issue Templates           |      🔄       |       ✅         |      ✅       |      ❌       |
-| Reporting                 |      ✅       |       🔄         |      ✅       |      ✅       |
-| Authority to Operate      |      🔄       |       ✅         |      ✅       |      ✅       |
-| Level of Effort Estimates |      ✅       |       ✅         |      ✅       |      ✅       |
-| Custom Views              |      🔄       |       ✅         |      ✅       |      🔄       |
-| Custom Fields             |      ❌       |       ✅         |      ✅       |      🔄       |
-| Automation                |      🔄       |       ✅         |      ✅       |      ❌       |
-| Open Source               |      ❌       |       ❌         |      ❌       |      ✅       |
+| Ticket Tracking           |      ✅       |       ✅        |      ✅       |      ✅       |
+| Public Access             |      🔄       |       ✅        |      🔄       |      ❌       |
+| Public Requests           |      ✅       |       ✅        |      ❌       |      ❌       |
+| Issue Templates           |      🔄       |       ✅        |      ✅       |      ❌       |
+| Reporting                 |      ✅       |       🔄        |      ✅       |      ✅       |
+| Authority to Operate      |      🔄       |       ✅        |      ✅       |      ✅       |
+| Level of Effort Estimates |      ✅       |       ✅        |      ✅       |      ✅       |
+| Custom Views              |      🔄       |       ✅        |      ✅       |      🔄       |
+| Custom Fields             |      ❌       |       ✅        |      ✅       |      🔄       |
+| Automation                |      🔄       |       ✅        |      ✅       |      ❌       |
+| Open Source               |      ❌       |       ❌        |      ❌       |      ✅       |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -198,16 +198,22 @@ Use the open source project management tool [OpenProject](open-project) for both
 [github-insights]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/viewing-insights-from-your-project/about-insights-for-projects
 [github-project-views]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view
 [github-project-fields]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-text-and-number-fields
+
 <!-- Zenhub -->
+
 [zenhub]: https://www.zenhub.com/
 [zenhub-epics]: https://help.zenhub.com/support/solutions/articles/43000500733-getting-started-with-epics
 [zenhub-story-points]: https://help.zenhub.com/support/solutions/articles/43000010347-estimate-work-using-story-points
 [zenhub-reporting]: https://www.zenhub.com/reporting
+
 <!-- Jira -->
+
 [jira]: https://www.atlassian.com/software/jira
 [jira-reporting]: https://www.atlassian.com/software/jira/features/reports
 [jira-automation]: https://www.atlassian.com/software/jira/features/automation
 [jira-custom-fields]: https://support.atlassian.com/jira-cloud-administration/docs/create-a-custom-field/
 [jira-public-access]: https://marketplace.atlassian.com/apps/1220441/external-share-for-jira?tab=overview&hosting=cloud
+
 <!-- OpenProject -->
+
 [open-project]: https://www.openproject.org/

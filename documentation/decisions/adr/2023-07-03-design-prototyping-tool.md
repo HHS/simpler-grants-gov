@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-03
-- **Related Issue:** [#103](https://github.com/HHS/grants-equity/issues/103)
+- **Related Issue:** [#103](https://github.com/HHS/simpler-grants-gov/issues/103)
 - **Deciders:** Andy Cochran, Emily Ianacone, Lucas Brown
 - **Tags:** design
 
@@ -31,7 +31,7 @@ Chosen option: Figma, because it is not platform specific and its multi-user col
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- Truss has developed [Figma assets using USWDS](https://www.figma.com/community/file/836611771720754351/U.S.-Web-Design-System-(USWDS))
+- Truss has developed [Figma assets using USWDS](<https://www.figma.com/community/file/836611771720754351/U.S.-Web-Design-System-(USWDS)>)
 - Figma's free tier does not require FOSS contributors to purchase licenses
 - Figma has a robust community of plugins and integrations
 - Includes Figjam (tho this may be redundant, depending on chosen whiteboarding tool)

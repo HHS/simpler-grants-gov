@@ -5,6 +5,7 @@ This document is meant to be a living record of the architecture for the beta.gr
 At a high level, this system uses Github to maintain the codebase repository and run the CI/CD pipeline, and AWS to host the applications and its supporting services.
 
 ## Architecture
+
 This is a general architecture diagram of the beta.grants.gov system.
 
 ```mermaid
@@ -133,7 +134,7 @@ flowchart TB
     eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
     subgraph GH ["Github fab:fa-github"]
         repo[Grants Equity Repo]
-        click repo href "https://github.com/HHS/grants-equity" _blank
+        click repo href "https://github.com/HHS/simpler-grants-gov" _blank
     end
     GH --Build and Deploys Image--> iam --> ecr
     GH --Restarts task with new Image--> iam --> ECSS
@@ -150,6 +151,7 @@ flowchart TB
 ```
 
 ## AWS Hosted Infrastructure
+
 This is an architecture diagram focusing on the AWS shared infrastructure managed by beta.grants.gov
 
 ```mermaid
@@ -239,7 +241,9 @@ flowchart TD
 ```
 
 ## AWS Shared Services
+
 The beta.grants.gov is using the following non infrastructure shared services in AWS:
+
 - [ECS: Elastic Container Service](https://aws.amazon.com/ecs/)
 - [ECR: Elastic Container Registry](https://aws.amazon.com/ecr/)
 - [SSM: System Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html)
@@ -248,6 +252,7 @@ The beta.grants.gov is using the following non infrastructure shared services in
 - [Key Management Service](https://aws.amazon.com/kms/)
 
 ## CI/CD Pipeline
+
 This is a diagram focusing on the CI/CD pipeline
 
 ```mermaid
@@ -257,7 +262,7 @@ This is a diagram focusing on the CI/CD pipeline
         eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
         subgraph GH ["Github fab:fa-github"]
             repo[Grants Equity Repo]
-            click repo href "https://github.com/HHS/grants-equity" _blank
+            click repo href "https://github.com/HHS/simpler-grants-gov" _blank
         end
         subgraph AWS[HHS AWS Tenant]
             ECR["AWS
@@ -273,6 +278,7 @@ This is a diagram focusing on the CI/CD pipeline
 ```
 
 ## Relevant ADRs
+
 - [CI/CD Task Runner](../decisions/adr/2023-06-29-ci-cd-task-runner.md)
 - [Database Choices](../decisions/adr/2023-07-05-db-choices.md)
 - [Front-End Language](../decisions/adr/2023-07-10-front-end-language.md)

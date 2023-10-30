@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-07
-- **Related Issue:** [#101](https://github.com/HHS/grants-equity/issues/101)
+- **Related Issue:** [#101](https://github.com/HHS/simpler-grants-gov/issues/101)
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly
 - **Tags:** ADR
 
@@ -27,17 +27,19 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 ### Dependency Management
 
 **[Poetry](https://python-poetry.org/docs/):** Python packaging and dependency management.
+
 ### Code Linting
 
 **[Ruff](https://beta.ruff.rs/docs/):** An extremely fast Python linter, written in Rust. Preferred for its speed and growing community adoption.[^*]
 
 ### Auto-formatting
 
-**[Black](https://github.com/psf/black):** Format Python code. Compatible with [Ruff](https://beta.ruff.rs/docs/faq/#is-ruff-compatible-with-black) out of the box, however, Ruff *may* replace the need for Black at some point. See this [issue](https://github.com/astral-sh/ruff/issues/1904).
+**[Black](https://github.com/psf/black):** Format Python code. Compatible with [Ruff](https://beta.ruff.rs/docs/faq/#is-ruff-compatible-with-black) out of the box, however, Ruff _may_ replace the need for Black at some point. See this [issue](https://github.com/astral-sh/ruff/issues/1904).
 
 ### Type Checking
 
 **[Mypy](https://mypy-lang.org/):** Validate and enforce static type checking in Python.
+
 ### Security
 
 **[Safety](https://docs.pyup.io/docs/getting-started-with-safety-cli):** Safety first! Safety scans dependencies for vulnerabilities and security concerns.[^*]
@@ -51,6 +53,7 @@ Back-end code quality tools should facilitate and efficiently enforce linting, a
 **[Make](https://www.gnu.org/software/make/manual/make.html):** Run scripts, linters and formatters.
 
 ## Decision Outcome <!-- REQUIRED -->
+
 Option #2 is preferred. We would like to use Ruff for linting and add some additional libraries for security and license checks.
 
 We will be using the Flask template repository for initial project set up, which already relies on Flake8 and several additional extensions (bugbear, alfred, bandit) that would be redundant with Ruff. Some extra work will need to be done to migrate away from Flake8 and to Ruff without any regression. Recommend using [flake8-to-ruff](https://pypi.org/project/flake8-to-ruff/) to convert existing configuration.
@@ -58,6 +61,7 @@ We will be using the Flask template repository for initial project set up, which
 There are some additional packages that we desire to use that are not included in the Flask template: safety & pip-licenses.
 
 As we iterate on the tools that work for us, we would like to investigate a possible switch to Pyright in the future as well.
+
 ## Other Options
 
 Adopting [Tox](https://tox.wiki/en/latest/) as a testing / linting manager with some of the libraries.

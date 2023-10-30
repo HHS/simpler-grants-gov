@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-18 <!-- REQUIRED -->
-- **Related Issue:** [183](https://github.com/HHS/grants-equity/issues/183) <!-- RECOMMENDED -->
+- **Related Issue:** [183](https://github.com/HHS/simpler-grants-gov/issues/183) <!-- RECOMMENDED -->
 - **Deciders:** Sammy Steiner, Lucas Brown, Billy Daly, Andy Cochran <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
@@ -20,10 +20,12 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 ## Options Considered
 
 ## Unit Testing
+
 - Jest
 - Mocha
 
 ### Pros and Cons of the Options <!-- OPTIONAL -->
+
 #### [Jest](https://jestjs.io/)
 
 - **Pros**
@@ -50,13 +52,16 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
   - Slower than Jest
 
 ## Visual, Interactive & Component Testing
+
 - Storybook
 - Cypress
 
 ### Pros and Cons of the Options <!-- OPTIONAL -->
+
 #### [Storybook](https://storybook.js.org)
 
 - **Pro**
+
   - Build reusable UI components and pages in isolation, mocking external dependencies and business logic
   - Visually verify changes and debug on multiple device formats easily in the interface
   - Stories can be imported into Jest or other testing frameworks
@@ -74,6 +79,7 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 #### [Cypress](https://www.cypress.io/)
 
 - **Pro**
+
   - Stubbing and mocking is simple comparatively
   - Well-documented with a long history of providing reliable end-to-end and component testing
   - Allows for visual debugging
@@ -90,9 +96,11 @@ Front-end testing is essential in maintaining a stable and healthy codebase, cre
 ## Decision Outcome <!-- REQUIRED -->
 
 ### Unit Testing
+
 **Jest**, because it is integrated into the Next.js template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
 
 ### Visual, Interactive & Component Testing
+
 **Storybook**, because it provides an effective methodology for developing robust front-ends quickly. It is already implemented in the Next.js template application. Integration allows multiple ways to test applications, including compatibility with Jest.
 
 In the future, if we find that Storybook doesn't meet our testing needs, we can look into integration with Cypress. However, not recommended from the start because our use-cases are covered by Storybook and there's a strong preference to not have to integrate another tool or learn another syntax.
