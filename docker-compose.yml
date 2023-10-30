@@ -2,17 +2,17 @@ version: '3'
 
 services:
 
-  main-db:
-    image: postgres:14-alpine
-    container_name: main-db
+  grants-db:
+    image: postgres:16-alpine
+    container_name: grants-db
     command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
     env_file: ./api/local.env
     ports:
       - "5432:5432"
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - grantsdbdata:/var/lib/postgresql/data
 
-  main-api:
+  grants-api:
     build:
       context: ./api
       target: dev
@@ -20,14 +20,14 @@ services:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-api}
     command: ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
-    container_name: main-api
+    container_name: grants-api
     env_file: ./api/local.env
     ports:
       - 8080:8080
     volumes:
       - ./api:/api
     depends_on:
-      - main-db
+      - grants-db
 
   nextjs:
     container_name: next-dev
@@ -62,4 +62,4 @@ services:
       - 6006:6006
 
 volumes:
-  dbdata:
+  grantsdbdata:
