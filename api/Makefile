@@ -2,7 +2,7 @@
 # Constants
 ##################################################
 
-APP_NAME := main-api
+APP_NAME := grants-api
 
 # Adding this to the end of a script that outputs JSON will convert
 # it to a readable format with timestamps and color-coding.
@@ -118,7 +118,7 @@ check: format-check lint test
 init-db: start-db db-migrate
 
 start-db:
-	docker-compose up --detach main-db
+	docker-compose up --detach grants-db
 	./bin/wait-for-local-db.sh
 
 ## Destroy current DB, setup new one
