@@ -46,7 +46,7 @@ By contrast, this MVP version of search ***does not*** attempt to:
   - The search functionality to be outlined in the API docs, so that I don't have to rely on experimentation to learn how to search for opportunities.
 - As a **prospective applicant**, I want:
   - To be able to be able to search with filters applied, so that the only search results returned are ones that match both the keyword and field-based criteria I specified
-  - The opportunity listing page to have a link to apply on grants.gov, so that I don't have to repeat my search on grants.gov after finding an opportunity I want to apply for on simpler.grants.gov
+  - The search results to have a link to the opportunity on grants.gov, so that I don't have to repeat my search on grants.gov after finding an opportunity I want to apply for on simpler.grants.gov
   - To receive an incentive if I participate in user research for simpler.grants.gov, so that I am fairly compensated for the time that I invest in testing out new features and answering questions
   - Filters and search terms to be added to the url, so that I can save or share the link to a particular set of search results
 - As a **project maintainer**, I want:
@@ -80,16 +80,6 @@ The primary page we'll need to deliver for the user interface (UI) is a search p
 - View a common set of fields for each opportunity returned by the search (e.g. title, award date, summary, etc.)
 - Sort the set of results returned by *at least* one structured field (e.g. award date, title, etc.)
 
-### Opportunity Listing Page
-
-The secondary page we want to deliver within the user interface (UI) is an opportunity listing page, which should:
-
-- Display a consistent list of metadata about each opportunity
-- Use only fields that are available in the existing grants.gov cloud database
-- Link to the corresponding opportunity in the existing grant.gov interface
-
-**Note:** This is a stretch goal for this deliverable and may be substituted with a direct link to the grants.gov page for a given opportunity from the search results.
-
 ### Definition of done
 <!-- Required -->
 
@@ -107,7 +97,7 @@ The secondary page we want to deliver within the user interface (UI) is an oppor
   - [ ] Users can sort search results by *at least* one structured field (e.g. award date, title, etc.)
   - [ ] All of the search features available in the UI are also available via the API, and vice versa
   - [ ] Search criteria are reflected in the URL so that users can bookmark or share the link to a given set of search results
-  - [ ] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results or opportunity listing page
+  - [ ] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
@@ -115,12 +105,14 @@ The secondary page we want to deliver within the user interface (UI) is an oppor
 1. Total number of searches made via the UI
 2. Total number of searches made via the API
 3. Number of results returned per search
-4. Frequency distribution of keyword search terms
-5. Frequency distribution of field-based filters
-6. Click conversion rate from search results to opportunity listing page
+4. Number of searches made per search term
+5. Number of searches made per filter combination
+6. Click conversion rate from search results to the opportunity listing (on grants.gov)
 
 ### Destination for live updating metrics
 <!-- Required -->
+
+Page on the public wiki. **Note:** This will likely change once we deliver the [Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 
@@ -144,7 +136,6 @@ What functionality do we expect to be in place by ***the end*** of work on this 
 - **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Ensures that we have a robust incident response plan in place when simpler.grants.gov services are interrupted
 - **[Search API](https://github.com/HHS/grants-equity/issues/90):** Enables system-to-system users to access the search features through the API
 - **[Search Page](https://github.com/HHS/grants-equity/issues/576):** Enables all other users to access the search features through the user interface
-- **[Opportunity Listing Page](https://github.com/HHS/grants-equity/issues/277):** Displays basic information about a given funding opportunity accessed from the search page. **Note:** This is a stretch goal for this deliverable and may be substituted with a direct link to the grants.gov page for a given opportunity from the search results.
 - **[User Research Incentives](https://github.com/HHS/grants-equity/issues/84):** Enables us to engage stakeholders for user testing of the new search functionality
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
@@ -168,8 +159,8 @@ TODO
 The following work will *not* be completed as part of this deliverable:
 
 - **Personalization:** Because the MVP will not support a login experience, any personalized features that require authentication (e.g. saving searches) are explicitly descoped from this deliverable.
+- **Opportunity Listing Page:** The MVP will not include an opportunity listing page, instead the search results will directly link to the corresponding opportunity listing page on grants.gov. An updated opportunity listing page will be completed in its own 30k ft deliverable.
 - **Full Text Search:** The MVP is only expected to include (a subset of) filtering based on opportunity metadata that is already available in the existing grants.gov database, so searching the full text of the opportunity is explicitly descoped from this deliverable.
-- **Full Text Listing:** Similarly, the first iteration of the opportunity listing page delivered is only expected to include opportunity fields that are already available in the existing grants.gov database. As a result, displaying the full text of the opportunity within the listing page is explicitly descoped from this deliverable.
 
 ## Integrations
 
