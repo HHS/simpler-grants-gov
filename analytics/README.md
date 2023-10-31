@@ -1,6 +1,6 @@
-# Grants Equity Analytics
+# Simpler Grants Analytics
 
-This sub-directory enables users to run analytics on data generated within the Grants Equity project.
+This sub-directory enables users to run analytics on data generated within the Simpler Grants project.
 
 ## Getting Started
 

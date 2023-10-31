@@ -216,7 +216,7 @@ Meet.coop is a European based solution that provides online meeting and conferen
 
 #### Pros
 
-- Prides themselves as an ethical, sustainable, and community-driven solution which aligns with Grants Equity values
+- Prides themselves as an ethical, sustainable, and community-driven solution which aligns with Simpler Grants values
 - Data ownership is with the users
 - Fosters a strong sense of community engagement and collaboration amongst its users, providing a platform for shared learning and support
 

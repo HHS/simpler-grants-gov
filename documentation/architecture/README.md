@@ -133,7 +133,7 @@ flowchart TB
     %% CI/CD Pipeline
     eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
     subgraph GH ["Github fab:fa-github"]
-        repo[Grants Equity Repo]
+        repo[Simpler Grants Repo]
         click repo href "https://github.com/HHS/simpler-grants-gov" _blank
     end
     GH --Build and Deploys Image--> iam --> ecr
@@ -261,7 +261,7 @@ This is a diagram focusing on the CI/CD pipeline
         %% CI/CD Pipeline
         eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
         subgraph GH ["Github fab:fa-github"]
-            repo[Grants Equity Repo]
+            repo[Simpler Grants Repo]
             click repo href "https://github.com/HHS/simpler-grants-gov" _blank
         end
         subgraph AWS[HHS AWS Tenant]

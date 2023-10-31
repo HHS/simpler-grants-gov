@@ -48,7 +48,7 @@ To contribute to documentation you find in this repository, feel free to use the
 
 ### Sharing your story
 
-Sharing how you or your organization have used the Grants Equity project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `simpler-grants-gov@hhs.gov`](mailto:simpler-grants-gov@hhs.gov).
+Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `simpler-grants-gov@hhs.gov`](mailto:simpler-grants-gov@hhs.gov).
 
 ## Code Contributions
 
