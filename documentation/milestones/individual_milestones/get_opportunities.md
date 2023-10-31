@@ -39,7 +39,7 @@ By delivering this public endpoint and ensuring it remains available even when t
 
 - As an **HHS staff member**, I want:
   - the API to adopt the proper security practices, so that we have a strategy for preventing and responding to security vulnerabilities before the API is launched
-  - published data about opportunities to be consistent between legacy grants.gov and `beta.grants.gov`, so that users won't be confused by discrepancies between these sources
+  - published data about opportunities to be consistent between legacy grants.gov and `simpler.grants.gov`, so that users won't be confused by discrepancies between these sources
 - As a **consumer of the API**, I want:
   - clear documentation and a user guide for the API, so that I don't have to rely on reading the source code to learn how to interact with and consume from it
   - changes made to a given endpoint to be backward-compatible, so that I can start building against this API without worrying about breaking changes
@@ -139,7 +139,7 @@ _What capabilities / milestones do we expect to be in place by the completion of
 - [ ] **[API Planning](https://github.com/HHS/simpler-grants-gov/issues/):** Determines the language, framework, and deployment service used to build and host the API.
 - [ ] **[DB planning](https://github.com/HHS/simpler-grants-gov/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
 - [ ] **[Developer tools](https://github.com/HHS/simpler-grants-gov/issues/):** Establishes a suite of tools used to ensure the quality and security of the API codebase.
-- [ ] **[beta.grants.gov domain](https://github.com/HHS/simpler-grants-gov/issues/):** Secures access to the `beta.grants.gov` domain from which the API endpoints will be routed.
+- [ ] **[simpler.grants.gov domain](https://github.com/HHS/simpler-grants-gov/issues/):** Secures access to the `simpler.grants.gov` domain from which the API endpoints will be routed.
 - [ ] **[Back-end CI/CD](https://github.com/HHS/simpler-grants-gov/issues/):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the API.
 - [ ] **[Data architecture](https://github.com/HHS/simpler-grants-gov/issues/):** Establishes the updated data model used to support the new GET Opportunities endpoint.
 - [ ] **[Test data and schema](https://github.com/HHS/simpler-grants-gov/issues/):** Enables both project maintainers and open source contributors to effectively mock the database when developing or testing locally.
@@ -191,10 +191,10 @@ Timeline and strategy for translation is still TBD.
 
 _This can include services going into PROD behind a feature flag that is not turned on._
 
-1. **API:** This milestone is the official release of the `beta.grants.gov/api`
+1. **API:** This milestone is the official release of the `simpler.grants.gov/api`
 2. **Replica Database:** A replica of relevant tables from the legacy database
 3. **Updated Data Model:** An updated data model that will provide the data for the GET Opportunities endpoint
-4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `beta.grants.gov` data model
+4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `simpler.grants.gov` data model
 
 ### Services being integrated in PROD for the first time
 
