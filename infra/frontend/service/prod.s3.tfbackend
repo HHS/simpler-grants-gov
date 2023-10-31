@@ -1,4 +1,4 @@
-bucket         = "grants-equity-315341936575-us-east-1-tf"
+bucket         = "simpler-grants-gov-315341936575-us-east-1-tf"
 key            = "infra/frontend/service/prod.tfstate"
-dynamodb_table = "grants-equity-315341936575-us-east-1-tf-state-locks"
+dynamodb_table = "simpler-grants-gov-315341936575-us-east-1-tf-state-locks"
 region         = "us-east-1"
