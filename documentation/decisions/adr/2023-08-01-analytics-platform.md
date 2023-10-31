@@ -8,7 +8,7 @@
 
 ## Context and Problem Statement
 
-The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of beta.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
+The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of simpler.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 

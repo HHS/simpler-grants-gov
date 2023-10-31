@@ -7,7 +7,7 @@
 
 ## Context and Problem Statement
 
-This ADR is to decide what programming language the API server for beta.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encompass all the back-end responsibilities of grants.gov
+This ADR is to decide what programming language the API server for simpler.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encompass all the back-end responsibilities of grants.gov
 
 In addition to the Nava and HHS teams ability to develop and maintain an API in the chosen language, it is also important that this language lends itself to open source engagement.
 
