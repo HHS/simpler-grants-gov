@@ -1,8 +1,11 @@
 from apiflask import fields
 
+from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
+from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.schemas import request_schema
 from src.constants.lookup_constants import OpportunityCategory
 from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
+from marshmallow import post_load
 
 
 class OpportunitySchema(request_schema.OrderedSchema):
@@ -74,3 +77,19 @@ class OpportunitySearchSchema(request_schema.OrderedSchema):
         required=True,
     )
     paging = fields.Nested(PaginationSchema(), required=True)
+
+
+class OpportunitySearchHeaderSchema(request_schema.OrderedSchema):
+
+    # Header field: X-FF-Enable-Opportunity-Log-Msg
+    enable_opportunity_log_msg = fields.Boolean(data_key = FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_header_name(), metadata={"description": "Whether to log a message in the opportunity endpoint"})
+
+    @post_load
+    def post_load(self, data: dict, **kwargs) -> FeatureFlagConfig:
+        feature_flag_config = get_feature_flag_config()
+
+        enable_opportunity_log_msg = data.get("enable_opportunity_log_msg", None)
+        if enable_opportunity_log_msg is not None:
+            feature_flag_config.enable_opportunity_log_msg = enable_opportunity_log_msg
+
+        return feature_flag_config

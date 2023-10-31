@@ -14,6 +14,7 @@ from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities import opportunity_blueprint
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import User, get_app_security_scheme
+import src.api.feature_flags.feature_flag_config as feature_flag_config
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,8 @@ def create_app() -> APIFlask:
 
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
+
+    feature_flag_config.initialize()
 
     configure_app(app)
     register_blueprints(app)
