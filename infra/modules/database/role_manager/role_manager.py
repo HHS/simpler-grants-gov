@@ -1,13 +1,8 @@
 import boto3
 import itertools
-import json
 from operator import itemgetter
 import os
 import logging
-logging.basicConfig()
-logging.getLogger('botocore').setLevel(logging.DEBUG)
-logging.getLogger('boto3').setLevel(logging.DEBUG)
-
 from pg8000.native import Connection, identifier
 
 logger = logging.getLogger()
@@ -107,6 +102,7 @@ def connect_as_master_user() -> Connection:
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
     return Connection(user=user, host=host, port=port, database=database, password=password, ssl_context=True)
 
+
 def connect_using_iam(user: str) -> Connection:
     client = boto3.client("rds")
     host = os.environ["DB_HOST"]
@@ -119,14 +115,15 @@ def connect_using_iam(user: str) -> Connection:
     return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
-    secretsmanager = boto3.client("secretsmanager")
+    ssm = boto3.client("ssm")
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from Secrets Manager")
+    logger.info("Fetching password from parameter store")
+    result = json.loads(ssm.get_parameter(
+        Name=param_name,
+        WithDecryption=True,
+    )["Parameter"]["Value"])
+    return result["password"]
 
-    result = secretsmanager.get_secret_value(SecretId=param_name)
-    secret_data = json.loads(result["SecretString"])
-
-    return secret_data["password"]
 
 def get_roles(conn: Connection) -> list[str]:
     return [row[0] for row in conn.run("SELECT rolname "
