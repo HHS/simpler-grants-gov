@@ -14,6 +14,7 @@ resource "aws_lambda_function" "role_manager" {
   handler          = "role_manager.lambda_handler"
   role             = aws_iam_role.role_manager.arn
   kms_key_arn      = aws_kms_key.role_manager.arn
+  timeout = 30
 
   # Only allow 1 concurrent execution at a time
   reserved_concurrent_executions = 1
@@ -29,7 +30,7 @@ resource "aws_lambda_function" "role_manager" {
       DB_PORT                = aws_rds_cluster.db.port
       DB_USER                = local.master_username
       DB_NAME                = aws_rds_cluster.db.database_name
-      DB_PASSWORD_PARAM_NAME = "/aws/reference/secretsmanager/${data.aws_secretsmanager_secret.db_pass.name}"
+      DB_PASSWORD_PARAM_NAME = data.aws_secretsmanager_secret.db_pass.name
       DB_SCHEMA              = var.schema_name
       APP_USER               = var.app_username
       MIGRATOR_USER          = var.migrator_username
@@ -113,7 +114,7 @@ resource "aws_iam_role_policy" "ssm_access" {
       {
         Effect   = "Allow"
         Action   = ["kms:Decrypt"]
-        Resource = [data.aws_kms_key.default_ssm_key.arn]
+        Resource = [aws_kms_key.db.arn]
       }
     ]
   })
