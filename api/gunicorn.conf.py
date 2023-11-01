@@ -21,5 +21,8 @@ bind = app_config.host + ':' + str(app_config.port)
 # We use 'os.sched_getaffinity(pid)' not 'os.cpu_count()' because it returns only allowable CPUs.
 # os.sched_getaffinity(pid): Return the set of CPUs the process with PID pid is restricted to.
 # os.cpu_count(): Return the number of CPUs in the system.
-workers = len(os.sched_getaffinity(0)) * 2
+
+# Until we figure out better math, ignore the above, hardcoding # workers because Python gets EC2 cpu not Fargate
+# 1 vCPU is equivalent to 1 core of a hyperthreaded processor, which will give you 1 physical core & 2 threads
+workers = 1
 threads = 4
