@@ -80,12 +80,10 @@ Process for drafting and updating the content of the site should balance:
   - [ ] The resources required to deploy and host the site are provisioned programmatically using the framework established in the [Infrastructure-as-Code milestone](https://github.com/HHS/simpler-grants-gov/issues/123)
   - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Front-end CI/CD milestone](https://github.com/HHS/simpler-grants-gov/issues/58)
 - [ ] The following user experience (UX) requirements are satisfied:
-      <<<<<<< HEAD
   - [ ] Anyone can access a live version of the site at simpler.grants.gov
-  - [ ] # The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/grants-equity/issues/60)
+  - [ ] # The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
   - [ ] Anyone can access a live version of the site at beta.grants.gov
   - [ ] The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
-    > > > > > > > main
   - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning milestone
   - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics milestone](https://github.com/HHS/simpler-grants-gov/issues/63)
   - [ ] Additional development tickets have been created for collecting other data needed to calculate the metrics below
