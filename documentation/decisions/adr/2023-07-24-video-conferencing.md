@@ -2,11 +2,11 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-07-24 <!-- REQUIRED -->
-- **Related Issue:** [#99](https://github.com/HHS/grants-equity/issues/99) <!-- RECOMMENDED -->
+- **Related Issue:** [#99](https://github.com/HHS/simpler-grants-gov/issues/99) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, video conferencing
 
-## Context and Problem Statement  
+## Context and Problem Statement
 
 The project aims to implement a reliable video conference platform to facilitate seamless communication for both internal collaborations involving HHS and contractors, as well as external engagements with members of the public. The primary objective of this ADR is to evaluate and ultimately choose a suitable video conference tool that aligns with the project's requirements. The selected platform should enable efficient virtual meetings, ensuring clear and effective communication among project stakeholders, and accommodating diverse use cases, from internal team discussions to public outreach and engagement.
 
@@ -15,35 +15,34 @@ The project aims to implement a reliable video conference platform to facilitate
 #### Must Have
 
 - **Public Access**: If they have the right link, members of the public can join a video call without creating an account
-Waiting Room: Meeting organizers can configure their meetings to require that attendees must be admitted before they can join the call  
-- **Video Recording**: Meeting organizers can record a video call from within the platform  
-- **Screen Sharing**: Attendees can share their screen (if given the appropriate permissions by meeting organizer)  
-- **Chat**: Users can post comments and questions in a chat that are visible to other attendees  
-- **Phone Support**: Users can join by phone if they don't have access to a computer for video  
-- **Live Transcription**: The platform supports live transcription for attendees that may need closed captioning  
-- **Authority to Operate**: The platform should be covered under the existing ATO for Grants.gov 
+  Waiting Room: Meeting organizers can configure their meetings to require that attendees must be admitted before they can join the call
+- **Video Recording**: Meeting organizers can record a video call from within the platform
+- **Screen Sharing**: Attendees can share their screen (if given the appropriate permissions by meeting organizer)
+- **Chat**: Users can post comments and questions in a chat that are visible to other attendees
+- **Phone Support**: Users can join by phone if they don't have access to a computer for video
+- **Live Transcription**: The platform supports live transcription for attendees that may need closed captioning
+- **Authority to Operate**: The platform should be covered under the existing ATO for Grants.gov
 
 #### Nice to Have
 
-- **Webinar**: The platform supports a webinar format, i.e. attendees who can join and post questions but not see one another or unmute without permission  
-- **Breakout Rooms**: A meeting organizer can split users out into virtual "breakout rooms" for small-group discussions  
-- **Open Source**: The code to run this platform is open source and offers a self-hosting option  
+- **Webinar**: The platform supports a webinar format, i.e. attendees who can join and post questions but not see one another or unmute without permission
+- **Breakout Rooms**: A meeting organizer can split users out into virtual "breakout rooms" for small-group discussions
+- **Open Source**: The code to run this platform is open source and offers a self-hosting option
 - **Attendance Tracking**: The platform allows host to access attendees to make follow up and attendance tracking easier
 - **Community & Support**: The platform has a strong community for ongoing support, updates, and bug fixes
 - **Scalability**: The platform should be able to hadndle a growing number of participants and meetings wihtout performance issues
 
-
 ## Options Considered
 
 - [Zoom](https://zoom.us/)
-- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) 
-- [Google Meet](https://meet.google.com/)   
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software)
+- [Google Meet](https://meet.google.com/)
 - [Jitsu](https://meet.jit.si/)
 - [meet.coop](https://www.meet.coop/)
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Zoom stands out as the optimal choice for our video conference tool. It fulfills all the key decision drivers we have outlined, including public access, waiting room feature, video recording capability, screen sharing, and interactive chat. Moreover, Zoom provides phone support, live transcription for closed captioning, and is FedRAMP approved. Its robust features and ease of use make it a reliable platform for both internal and external meetings, ensuring a seamless and inclusive communication experience for all stakeholders involved. 
+Zoom stands out as the optimal choice for our video conference tool. It fulfills all the key decision drivers we have outlined, including public access, waiting room feature, video recording capability, screen sharing, and interactive chat. Moreover, Zoom provides phone support, live transcription for closed captioning, and is FedRAMP approved. Its robust features and ease of use make it a reliable platform for both internal and external meetings, ensuring a seamless and inclusive communication experience for all stakeholders involved.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -74,50 +73,50 @@ Jitsi serves as a strong backup option for our video conferencing needs. Jitsi a
 - 1-3 Strength level
 - ❓Unknown
 
-| Factor                      | Zoom       | Microsoft Teams | Google Meet  | Jitsu    | Meet.coop |
-| --------------------------- | :--------: | :--------:      | :---------:  | :-----:  |  :-----:  | 
-| Public Access               |     ✅     |   ✅            |      ✅      |    ✅     |      ✅   |  
-| Waiting Room                |    ✅      |  ✅             |     ✅       |   ✅      |     ❓    |   
-| Video Recording             |    ✅      |   ✅            |     ✅       |   ✅      |    ✅     | 
-| Screen Sharing              |     ✅     |  ✅             |     ✅       |   ✅      |    ✅     |  
-| Chat                        |     ✅     |   ✅            |     ✅       |   ✅      |     ✅    |  
-| Phone Support               |    ✅      |  ✅             |     ✅       |   ✅      |     ✅    |   
-| Live Transcription          |     ✅     |   ✅            |     ✅       |     ❌    |    ❓     |   
-| Authority to Operate        |     ❓     |   ✅            |      ❓      |    ❓     |    ❓     |  
-| Webinar*                    |     ✅     |   ✅            |      3       |    🔄     |     ❓    |
-| Breakout Rooms*             |     ✅     |   ✅            |     ✅       |   🔄      |     ✅    | 
-| Open Source*                |    ❌      |   ❌            |     ❌       |   ✅      |    ✅     | 
-| Attendance Tracking*        |    ✅      |  ✅             |     🔄       |   ❓      |     ❓    | 
-| Community & Support*        |    3       |   3             |     3       |   3       |     2    |  
-| Scalability*                |     ✅     |   ✅             |     ✅      |   ✅      |      🔄   |
+| Factor                | Zoom | Microsoft Teams | Google Meet | Jitsu | Meet.coop |
+| --------------------- | :--: | :-------------: | :---------: | :---: | :-------: |
+| Public Access         |  ✅  |       ✅        |     ✅      |  ✅   |    ✅     |
+| Waiting Room          |  ✅  |       ✅        |     ✅      |  ✅   |    ❓     |
+| Video Recording       |  ✅  |       ✅        |     ✅      |  ✅   |    ✅     |
+| Screen Sharing        |  ✅  |       ✅        |     ✅      |  ✅   |    ✅     |
+| Chat                  |  ✅  |       ✅        |     ✅      |  ✅   |    ✅     |
+| Phone Support         |  ✅  |       ✅        |     ✅      |  ✅   |    ✅     |
+| Live Transcription    |  ✅  |       ✅        |     ✅      |  ❌   |    ❓     |
+| Authority to Operate  |  ❓  |       ✅        |     ❓      |  ❓   |    ❓     |
+| Webinar\*             |  ✅  |       ✅        |      3      |  🔄   |    ❓     |
+| Breakout Rooms\*      |  ✅  |       ✅        |     ✅      |  🔄   |    ✅     |
+| Open Source\*         |  ❌  |       ❌        |     ❌      |  ✅   |    ✅     |
+| Attendance Tracking\* |  ✅  |       ✅        |     🔄      |  ❓   |    ❓     |
+| Community & Support\* |  3   |        3        |      3      |   3   |     2     |
+| Scalability\*         |  ✅  |       ✅        |     ✅      |  ✅   |    🔄     |
 
-
-  *Nice to have
+\*Nice to have
 
 ## Pros and cons of each option <!-- OPTIONAL -->
 
 ### Zoom
 
-Zoom is a widely used video conferencing platform known for its ease of use and comprehensive features. It offers virtual meetings, webinars, breakout rooms, screen sharing, chat functionality, and phone support. 
+Zoom is a widely used video conferencing platform known for its ease of use and comprehensive features. It offers virtual meetings, webinars, breakout rooms, screen sharing, chat functionality, and phone support.
 
 #### Additional details and pricing
 
-**Pricing**: 
+**Pricing**:
 
 - Free with limitations like 40 minutes per meeting, 100 attendees per meeting, whiteboard basic, team chat, mail & calendar
 - Pricing starts at $149.90/year/user and goes up from there.
-- The Enterprise plan offers rooms and webinars but no pricing is available on the site. We would need to contact Zoom for specific pricing for our project. 
+- The Enterprise plan offers rooms and webinars but no pricing is available on the site. We would need to contact Zoom for specific pricing for our project.
 - We do not need each every user to have access to our paid instance since anyone can join a Zoom session with the invite link.
-- We would need around 15-30 users with access to the paid instance. 
+- We would need around 15-30 users with access to the paid instance.
 
 #### Pros
+
 - User-friendly interface and easy to set up for both organizers and participants.
 - Robust features like breakout rooms, screen sharing, and virtual backgrounds enhance collaboration.
 - Offers a wide range of integrations with other apps and platforms.
 - Availability of a free plan with limited meeting duration.
 
-
 #### Cons
+
 - Security concerns in the past, but the platform has made significant improvements.
 - Free plan has limitations on meeting duration and participant count.
 - Frequent updates may require users to adapt to changes.
@@ -128,11 +127,11 @@ Microsoft Teams is a collaboration platform integrated with Microsoft 365. It of
 
 #### Additional details and pricing
 
-**Pricing**: 
+**Pricing**:
 
 - Prices starting at $4 user / month
 - Webinar hosting is only available in the Business Standard package which is $12.50/user / month
-  
+
 #### Pros
 
 - Part of the Microsoft 365 suite, providing seamless integration with Office apps.
@@ -147,12 +146,11 @@ Microsoft Teams is a collaboration platform integrated with Microsoft 365. It of
 - Resource-intensive, leading to occasional performance issues on lower-end devices.
 - Limited to Microsoft 365 users, which may restrict external collaboration.
 - Frequent updates can lead to occasional disruptions.
-- Potentially paying a premium for the Microsoft 365 suite when the video conferencing is all that is needed for the project. 
-
+- Potentially paying a premium for the Microsoft 365 suite when the video conferencing is all that is needed for the project.
 
 ### Google Meet
 
-Google Meet is part of Google Workspace (formerly G Suite) and is well-suited for Google users. It provides straightforward video conferencing with high-quality audio and video. While it may lack some advanced features, it offers a user-friendly experience for those already using Google's tools.  
+Google Meet is part of Google Workspace (formerly G Suite) and is well-suited for Google users. It provides straightforward video conferencing with high-quality audio and video. While it may lack some advanced features, it offers a user-friendly experience for those already using Google's tools.
 
 #### Additional details and pricing
 
@@ -160,9 +158,8 @@ Google Meet is part of Google Workspace (formerly G Suite) and is well-suited fo
 
 - Google Workspace pricing is for the whole suite, starting at $6 per user/ month. The Enterprise has more advanced options and features.
 - We do not need each every user to have access to our paid instance since anyone can join a Google Meet session with the invite link.
-- We would need around 15-30 users with access to the paid instance. 
+- We would need around 15-30 users with access to the paid instance.
 - **Live Transcription**: Yes but in English only
-
 
 #### Pros
 
@@ -171,26 +168,26 @@ Google Meet is part of Google Workspace (formerly G Suite) and is well-suited fo
 - No additional software installation required for users with Google accounts. Users can access simply through a browser.
 - Good performance on various devices, including smartphones and tablets.
 - Provides live captions for improved accessibility.
-  
+
 #### Cons
 
 - Advanced features are limited compared to some other platforms.
 - Some features may require a paid G Suite subscription.
 - Limited customization options for meeting settings.
 - Live transcription is in English only.
-- Potentially paying a premium for the suite of Google products when the video conferencing is all that is needed for the project. 
+- Potentially paying a premium for the suite of Google products when the video conferencing is all that is needed for the project.
 
 ### Jitsu
 
-Jitsi is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup. 
+Jitsi is an open-source video conferencing solution that stands out for its simplicity and self-hosting capabilities. It supports public access, open meetings, and offers easy setup.
 
 #### Additional details and pricing
 
-- **Pricing**: Free 
+- **Pricing**: Free
 - **Webinar**: Not a built-in feature (third-party integrations available)
 - **Breakout Rooms**: Not a built-in feature (third-party integrations available)
 - **Open Source**: Yes
-- **Attendance Tracking**: Unknown if this exists. The team could potentially contribute and build this since Jitsu is open source. 
+- **Attendance Tracking**: Unknown if this exists. The team could potentially contribute and build this since Jitsu is open source.
 
 #### Pros
 
@@ -213,22 +210,22 @@ Meet.coop is a European based solution that provides online meeting and conferen
 
 #### Additional details and pricing
 
-**Pricing**: 
-- Prices starting at $12 / month for 10 participants and goes up to $115 / monthe for more users. 
+**Pricing**:
+
+- Prices starting at $12 / month for 10 participants and goes up to $115 / monthe for more users.
 
 #### Pros
-- Prides themselves as an ethical, sustainable, and community-driven solution which aligns with Grants Equity values
+
+- Prides themselves as an ethical, sustainable, and community-driven solution which aligns with Simpler Grants values
 - Data ownership is with the users
 - Fosters a strong sense of community engagement and collaboration amongst its users, providing a platform for shared learning and support
- 
 
 #### Cons
+
 - Users may not be as familiar with the Meet.coop and how to use the tool, however the tool does seem user-friendly
 - Features and capabilities are not as mature as the alternatives
 - Meet.coop may lack immediate and direct support options that come with commercial platforms
-- There may be some risks in scalability to accommodate a larger number of users and meetings. 
-
-
+- There may be some risks in scalability to accommodate a larger number of users and meetings.
 
 ## Links <!-- OPTIONAL -->
 

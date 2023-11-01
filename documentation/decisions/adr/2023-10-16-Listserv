@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-10-16 <!-- REQUIRED -->
-- **Related Issue:** [#378](https://github.com/HHS/grants-equity/issues/378) <!-- RECOMMENDED -->
+- **Related Issue:** [#378](https://github.com/HHS/simpler-grants-gov/issues/378) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Andy Cochran, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, listserv
 
@@ -16,15 +16,15 @@ In order to foster an open and transparent communication with the public through
 
 - **Ease of use**: this will be used by HHS, contractors, and the general public and should be user-friendly and easy for both administrators and users to navigate, set up, and manage.
 - **Security**: The solution must prioritize strong security measures, consider encryption, user authentication, and protection against spam and phishing
-- **Cost**: Evaluate the cost implications as this tool will be used by HHS, contractors, and the general public. 
+- **Cost**: Evaluate the cost implications as this tool will be used by HHS, contractors, and the general public.
 - **Features**: Consider features such as email list management, subscription options, message archiving, and customizable templates to meet the communication needs of your project.
 - **Scalability**: Ensure the solution can handle potential growth in subscribers and messages as your project expands without sacrificing performance.
 
 Nice to have
+
 - **Community engagement**: Opt for a solution that encourages active participation, discussion, and collaboration within the open-source community.
 - **Open source**: Consider a solution that aligns with the open-source philosophy of your project, allowing for transparency, customization, and community contributions.
 - **Customization**: Choose a platform that allows you to customize the appearance and functionality of the listserves to match your project's branding and communication needs.
-
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -32,39 +32,38 @@ We selected Google Groups as it excels in ease of use, ensuring that both HHS st
 
 ### Decision Considerations and Implications
 
-We intend the primary focus of **Google Groups** to be as a channel to create discussion forums and online communities. Users can utilize it to post questions and exchange information and ideas. The channel should be used by users to post questions and exchange ideas and information. 
+We intend the primary focus of **Google Groups** to be as a channel to create discussion forums and online communities. Users can utilize it to post questions and exchange information and ideas. The channel should be used by users to post questions and exchange ideas and information.
 
 If users have private questions, the **Contact Us** email at simplergrantsgov@hhs.gov is the best method of communication.
 
-The email marketing tool that we will select in the ADR: [#590](https://github.com/HHS/grants-equity/issues/590) will be used for individuals who wish to subscribe to Simpler Grants.gov newsletters. These newsletters are tailored for targeted messaging and notifications, including updates about the Simpler Grants.gov project. 
+The email marketing tool that we will select in the ADR: [#590](https://github.com/HHS/simpler-grants-gov/issues/590) will be used for individuals who wish to subscribe to Simpler Grants.gov newsletters. These newsletters are tailored for targeted messaging and notifications, including updates about the Simpler Grants.gov project.
 
 Regarding Google Groups, it's important to note that if we plan to use individual emails from our Google Group to send newsletters, we must obtain explicit permission from users to send them newsletter notifications. Additionally, we should explore how we can import or integrate individuals who join Google Groups and wish to receive newsletters.
 
 When implementing and using Google Groups (listserv), the 'Contact Us' option, and an email marketing tool, it's important that we clearly communicate the purpose of each tool and guide users on the best way to reach out to us, as there are distinct differences in their usage.
 
-
 ### Positive Consequences <!-- OPTIONAL -->
 
-- **User-Friendly Experience:** Google Groups provides an intuitive and user-friendly interface, ensuring that both administrators and members can easily navigate and manage communications. 
-- **Robust Security:** The platform prioritizes security, offering features like encryption, user authentication, and protection against spam and phishing. 
-- **Cost-Effective:** Google Groups offers cost-effective solutions, aligning with the budget constraints of the project. 
-- **Feature-Rich:** Google Groups comes with a suite of features, including email list management, subscription options, message archiving, and customizable templates. 
-- **Scalability:** The platform can accommodate potential growth in subscribers and messages as the project expands without compromising performance. 
-- **Community Engagement:** While not a core requirement, Google Groups encourages community engagement, discussion, and collaboration within the open-source community. 
-- **Open Source Alignment:** The platform aligns with the open-source philosophy of the project, promoting transparency, customization, and community contributions. 
+- **User-Friendly Experience:** Google Groups provides an intuitive and user-friendly interface, ensuring that both administrators and members can easily navigate and manage communications.
+- **Robust Security:** The platform prioritizes security, offering features like encryption, user authentication, and protection against spam and phishing.
+- **Cost-Effective:** Google Groups offers cost-effective solutions, aligning with the budget constraints of the project.
+- **Feature-Rich:** Google Groups comes with a suite of features, including email list management, subscription options, message archiving, and customizable templates.
+- **Scalability:** The platform can accommodate potential growth in subscribers and messages as the project expands without compromising performance.
+- **Community Engagement:** While not a core requirement, Google Groups encourages community engagement, discussion, and collaboration within the open-source community.
+- **Open Source Alignment:** The platform aligns with the open-source philosophy of the project, promoting transparency, customization, and community contributions.
 
 ### Negative Consequences <!-- OPTIONAL -->
 
 - **Dependence on External Platform:** Choosing an external platform like Google Groups may raise concerns about dependence on a third-party service. This dependency could potentially result in disruptions if the service experiences downtime or policy changes.
 - **Privacy Concerns:** Storing project communications on an external platform may raise privacy concerns, particularly for sensitive or confidential information.
-- **Limited Control:** While Google Groups allows some customization, it may not offer the same level of control as an internally hosted solution. 
+- **Limited Control:** While Google Groups allows some customization, it may not offer the same level of control as an internally hosted solution.
 - **Data Migration Challenges:** Transferring data to and from Google Groups may present challenges
 - **User Account Requirements:** To participate in Google Groups, users typically need Google accounts. This requirement might exclude potential participants who do not wish to create Google accounts or who have restrictions on using Google services.
 - **Advertisement Display:** Google Groups may display advertisements to users, which could be distracting or raise concerns about privacy and data usage.
 
 ### Back-up Options
 
-- **Mailman:** 
+- **Mailman:**
   - Pros: Mailman is an open-source email list management software. It provides a highly customizable and self-hosted solution. It aligns with the open-source philosophy, promotes community contributions, and offers robust security.
   - Cons: Setting up and maintaining Mailman may require more technical expertise. The user interface may not be as user-friendly as some commercial alternatives.
 - **Microsoft 365 Groups:**
@@ -77,9 +76,6 @@ When implementing and using Google Groups (listserv), the 'Contact Us' option, a
   - Pros: Some web hosting providers offer email list management tools with hosting plans. These can provide full control and customization.
   - Cons: The availability of such services can vary among hosting providers. It may require technical knowledge to set up and maintain.
 
-
 ### Open Questions
-* How will Google Groups integrate or be used with the email marketing tool that we will use in the future? This should be considered in the [Email Marketing Tool ADR #590](https://github.com/HHS/grants-equity/issues/590).
 
-
-
+- How will Google Groups integrate or be used with the email marketing tool that we will use in the future? This should be considered in the [Email Marketing Tool ADR #590](https://github.com/HHS/simpler-grants-gov/issues/590).

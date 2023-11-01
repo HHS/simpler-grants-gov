@@ -3,7 +3,7 @@
 - **Status:** Active
 - **Last Modified:** 2023-06-29 <!-- REQUIRED -->
 - **Related Issue:** [ADR: Task Runner and CI / CD interface #92
-](https://github.com/HHS/grants-equity/issues/92) <!-- RECOMMENDED -->
+  ](https://github.com/HHS/simpler-grants-gov/issues/92) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly <!-- REQUIRED -->
 - **Tags:** Continuous Integration, Continuous Deployment <!-- OPTIONAL -->
 
@@ -29,4 +29,3 @@ The task runner should be able to run on commits and pull requests and support b
 ## Decision Outcome <!-- REQUIRED -->
 
 Github Actions offers competitive speed, developer support, shared / resusable actions, is part of Github which is already approved on the project and part of the [Fedramp marketplace](https://marketplace.fedramp.gov/products/FR1812058188), and is free.
-
