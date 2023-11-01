@@ -4,7 +4,7 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the indentifier of the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/d2f78039-ca4d-4f6e-8e59-ee72e3f85efa)\r\n\r\n\r\n- Add the approved identifier content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* About HHS: https://www.hhs.gov/about/index.html\r\n* Accessibility support: https://www.grants.gov/web/grants/accessibility-compliance.html\r\n* FOIA requests: https://www.hhs.gov/foia/index.html\r\n* No FEAR Act data: https://www.eeoc.gov/\r\n* Officer of the Inspector General: https://oig.hhs.gov/\r\n* Performance reports:  https://www.hhs.gov/about/budget/index.html\r\n* Privacy Policy: https://www.grants.gov/web/grants/privacy.html\r\n* Visit USA.gov: https://www.usa.gov/ \r\n\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Identifier is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
+        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the indentifier of the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/d2f78039-ca4d-4f6e-8e59-ee72e3f85efa)\r\n\r\n\r\n- Add the approved identifier content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* About HHS: https://www.hhs.gov/about/index.html\r\n* Accessibility support: https://www.grants.gov/web/grants/accessibility-compliance.html\r\n* FOIA requests: https://www.hhs.gov/foia/index.html\r\n* No FEAR Act data: https://www.eeoc.gov/\r\n* Officer of the Inspector General: https://oig.hhs.gov/\r\n* Performance reports:  https://www.hhs.gov/about/budget/index.html\r\n* Privacy Policy: https://www.grants.gov/web/grants/privacy.html\r\n* Visit USA.gov: https://www.usa.gov/ \r\n\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Identifier is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
         "title": "[Task]: Implement identifier section to static site",
         "number": 357,
         "repository": "HHS/simpler-grants-gov",
@@ -100,7 +100,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -116,7 +116,7 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\nBlocked by #472 \n- Set up DNS hosting service to manage DNS settings or identify who manages DNS for grants.gov\n- Update DNS to point to domain \n- Configure any necessary subdomains \n\n### Acceptance criteria\n\n- [ ] DNS settings are updated and the domain successfully resolves to correct address\n- [ ] Website is accessible at beta.grants.gov\n- [ ] Relevant documentation is provided for DNS configuration\n\n### Notes\n",
+        "body": "### Summary\n\nBlocked by #472 \n- Set up DNS hosting service to manage DNS settings or identify who manages DNS for grants.gov\n- Update DNS to point to domain \n- Configure any necessary subdomains \n\n### Acceptance criteria\n\n- [ ] DNS settings are updated and the domain successfully resolves to correct address\n- [ ] Website is accessible at simpler.grants.gov\n- [ ] Relevant documentation is provided for DNS configuration\n\n### Notes\n",
         "title": "[Task]: Network DNS entry",
         "number": 295,
         "repository": "HHS/simpler-grants-gov",
@@ -125,7 +125,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgICHzE",
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -155,7 +155,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -259,7 +259,7 @@
       "assignees": ["daphnegold"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the footer of the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/e0cd15c3-6808-4057-b9a2-c929c4781840)\r\n\r\n- Add the approved footer content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* HHS Logo https://www.hhs.gov/web/policies-and-standards/web-policies/logo-seal-and-symbol-policies/index.html\r\n![HHS logo](https://github.com/HHS/simpler-grants-gov/assets/111455374/5ffc0675-3188-45b3-a869-38f0896581ab)\r\n* Twitter Link: https://twitter.com/grantsdotgov\r\n* Youtube link: https://www.youtube.com/user/GrantsGovUS\r\n* RSS link: https://www.grants.gov/web/grants/rss.html\r\n* Facebook link: there is no facebook link, this icon can be removed\r\n* Instagram link: There is no instagram link, this icon can be removed. \r\n* Newsletter link: https://www.grants.gov/web/grants/connect/newsletter-archive.html \r\n* Blog link: https://grantsgovprod.wordpress.com/\r\n* Phone number: 1-877-696-6775\r\n* Email: [support@grants.gov](mailto:support@grants.gov)\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Footer is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n- [ ] Approvers: at least one design or product person\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n",
+        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the footer of the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/e0cd15c3-6808-4057-b9a2-c929c4781840)\r\n\r\n- Add the approved footer content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* HHS Logo https://www.hhs.gov/web/policies-and-standards/web-policies/logo-seal-and-symbol-policies/index.html\r\n![HHS logo](https://github.com/HHS/simpler-grants-gov/assets/111455374/5ffc0675-3188-45b3-a869-38f0896581ab)\r\n* Twitter Link: https://twitter.com/grantsdotgov\r\n* Youtube link: https://www.youtube.com/user/GrantsGovUS\r\n* RSS link: https://www.grants.gov/web/grants/rss.html\r\n* Facebook link: there is no facebook link, this icon can be removed\r\n* Instagram link: There is no instagram link, this icon can be removed. \r\n* Newsletter link: https://www.grants.gov/web/grants/connect/newsletter-archive.html \r\n* Blog link: https://grantsgovprod.wordpress.com/\r\n* Phone number: 1-877-696-6775\r\n* Email: [support@grants.gov](mailto:support@grants.gov)\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Footer is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n- [ ] Approvers: at least one design or product person\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n",
         "title": "[Task]: Implement footer for static site",
         "number": 336,
         "repository": "HHS/simpler-grants-gov",
@@ -312,8 +312,8 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\nImplement analytics.usa.gov on the beta.grants.gov site. \r\n\r\n### Dependencies\r\n- Register for an account, will need @lucasmbrown-usds with a HHS email to request it. \r\n\r\n### Implementation details\r\n\r\n1.[ Github repo with implementation instructions \u0026 code](https://github.com/digital-analytics-program/gov-wide-code)\r\n2. [DigitalGov implementation page](https://digital.gov/guides/dap/add-your-site-dap/)\r\n3. [DAP FAQs](https://digital.gov/guides/dap/common-questions-about-dap/)\r\n\r\n### Notes\r\n- The DAP script should only be applied to public-facing pages. Public-facing web pages are defined as those that can be accessed without any authentication or login, and are not part of an otherwise “privileged session.”\r\n- The DAP script tag should not be placed on pages visited during logged-in sessions. Notably, other seemingly “public” pages that can be accessed without authentication may also be part of privileged sessions; for example, a password reset page that is accessed by clicking a link in an email is not appropriate for DAP code because it assumes the visitor has the privilege of control over the email account used to provide the link. \r\n- How to add the analytics tag: https://digital.gov/guides/dap/add-your-site-dap/\n\n### Acceptance criteria\n\n - [ ] DAP is set up on the beta.grants.gov site ",
-        "title": "[Task]: set up analytics for beta.grants.gov",
+        "body": "### Summary\n\nImplement analytics.usa.gov on the simpler.grants.gov site. \r\n\r\n### Dependencies\r\n- Register for an account, will need @lucasmbrown-usds with a HHS email to request it. \r\n\r\n### Implementation details\r\n\r\n1.[ Github repo with implementation instructions \u0026 code](https://github.com/digital-analytics-program/gov-wide-code)\r\n2. [DigitalGov implementation page](https://digital.gov/guides/dap/add-your-site-dap/)\r\n3. [DAP FAQs](https://digital.gov/guides/dap/common-questions-about-dap/)\r\n\r\n### Notes\r\n- The DAP script should only be applied to public-facing pages. Public-facing web pages are defined as those that can be accessed without any authentication or login, and are not part of an otherwise “privileged session.”\r\n- The DAP script tag should not be placed on pages visited during logged-in sessions. Notably, other seemingly “public” pages that can be accessed without authentication may also be part of privileged sessions; for example, a password reset page that is accessed by clicking a link in an email is not appropriate for DAP code because it assumes the visitor has the privilege of control over the email account used to provide the link. \r\n- How to add the analytics tag: https://digital.gov/guides/dap/add-your-site-dap/\n\n### Acceptance criteria\n\n - [ ] DAP is set up on the simpler.grants.gov site ",
+        "title": "[Task]: set up analytics for simpler.grants.gov",
         "number": 389,
         "repository": "HHS/simpler-grants-gov",
         "url": "https://github.com/HHS/simpler-grants-gov/issues/389"
@@ -325,7 +325,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -335,7 +335,7 @@
         "duration": 14
       },
       "status": "Done",
-      "title": "[Task]: set up analytics for beta.grants.gov"
+      "title": "[Task]: set up analytics for simpler.grants.gov"
     },
     {
       "content": {
@@ -468,7 +468,7 @@
       "assignees": ["daphnegold"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\n### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the hero content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/25465464/95ffea5e-743d-403c-bd77-67e40c5118b3)\r\n\r\n- Add the approved hero content changes to the page\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n\r\n\n\n### Acceptance criteria\n\n### Acceptance criteria\r\n\r\n- [ ] Hero is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n\r\n### Dependencies\r\n#283 ",
+        "body": "### Summary\n\n### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the hero content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/25465464/95ffea5e-743d-403c-bd77-67e40c5118b3)\r\n\r\n- Add the approved hero content changes to the page\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n\r\n\n\n### Acceptance criteria\n\n### Acceptance criteria\r\n\r\n- [ ] Hero is working and match the Figma design\r\n- [ ] Appears as a story in Storybook\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n\r\n### Dependencies\r\n#283 ",
         "title": "[Task]: Implement Hero for static site",
         "number": 359,
         "repository": "HHS/simpler-grants-gov",
@@ -497,7 +497,7 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the funding opportunity section the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/04a696a6-0f1c-41ac-a56d-ee3f0c42faca)\r\n\r\n\r\n- Add the approved funding opportunity content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* The the 4 nofo prototypes available here: https://github.com/HHS/simpler-grants-gov/tree/main/documentation/notice_of_funding_opportunity_prototypes (ACF, ACL, CDC, SAMHSA)\r\n* The method for the feedback form is still TBD, if we have not decided on a method for collecting feedback at the time this ticket is picked up, we will not add the following section: \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/c65a2731-ea79-42f9-9e62-672fbd8e6b29)\r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Funding opportunity section is working and match the Figma design (Feedback form section is optional, depending on status)\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
+        "body": "### Summary\r\n\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the funding opportunity section the content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/04a696a6-0f1c-41ac-a56d-ee3f0c42faca)\r\n\r\n\r\n- Add the approved funding opportunity content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n* The the 4 nofo prototypes available here: https://github.com/HHS/simpler-grants-gov/tree/main/documentation/notice_of_funding_opportunity_prototypes (ACF, ACL, CDC, SAMHSA)\r\n* The method for the feedback form is still TBD, if we have not decided on a method for collecting feedback at the time this ticket is picked up, we will not add the following section: \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/c65a2731-ea79-42f9-9e62-672fbd8e6b29)\r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Funding opportunity section is working and match the Figma design (Feedback form section is optional, depending on status)\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
         "title": "[Task]: Implement the funding opportunity section for the static site",
         "number": 361,
         "repository": "HHS/simpler-grants-gov",
@@ -552,7 +552,7 @@
       "assignees": ["andycochran"],
       "content": {
         "type": "Issue",
-        "body": "### Description\r\n\r\nIn the first iteration of the static site, one goal is to collect general feedback from applicants — especially first-time applicants or users who've created a workspace but haven't applied yet, but anyone should be able to respond regardless of their experience with federal grants. We also want to collect general responses to the new NOFO prototypes. \r\n\r\nWe're basically asking 2 questions: \r\n- What do you think of the new prototype funding announcements? \r\n- What do you think of the current funding announcements and/or grants.gov? \r\n\r\nOpen feedback should be collected through an open-ended text box (or two) that allows the user to write whatever they want. Either question can be address or ignored. \r\n\r\nWe need to decide by which method and technology we will collect this feedback. \r\n\r\n### Approvers\r\n\r\n- @lucasmbrown-usds \r\n- @itsemilyianacone\r\n- @andycochran\r\n- @sumiat \r\n- @acouch, @daphnegold, or @SammySteiner (1+ Engineer)\r\n\r\n\r\n### Options\r\n\r\n- Microsoft Form (created by HHS's 365) \r\n- HTML form that posts to HHS's Sharepoint\r\n- HTML form that creates a GitHub issue, letting users know their response will create a public issue w/o needing to create a GitHub account\r\n- Create and embed an open text form with a user research tool like [Dovetail](https://dovetail.com/), so that feedback  is captured, centralized, and analyzed in the same place as future research studies\r\n- Link to (or embed) a Google form \r\n- Start a Google Group for the community, ask users to share there\r\n- ???\r\n\r\n### Decision Criteria\r\n\r\n- Should not feel like a black box for the user\r\n- Has a better UX than sending an email \r\n- The prompt is open-ended, yet guides the user to contribute meaningful and helpful feedback\r\n- Submissions are easy to sort through, analyze, and synthesize\r\n- User understands how their submission will be used\r\n- Does not require PRA clearance \r\n- Primary audience\r\n\r\nThis work should also include the use case for a Contact Us on beta.grants.gov: \r\n\r\nExplore options for solutions that allow members of of the public to submit questions or comments about the project as an alternative to a public forum like a listserv:\r\n\r\n[Front](https://front.com/)\r\n[Loop Email](https://www.intheloop.io/pricing-us/)\r\n[Google collaborative inbox](https://support.google.com/a/users/answer/167430?hl=en)\r\nContact us form on the website\r\nHHS internal options for shared inbox, such as [grants.simplification@hhs.gov](mailto:grants.simplification@hhs.gov)\r\nOthers as suggested by dev team\r\n\r\n### Definition of Done\r\n\r\n- [ ] The approvers for this decision have been identified (ideally before work on the ADR starts)\r\n- [ ] The ADR is created and stored in `documentation/decisions/adr` with status \"Accepted\"\r\n- [ ] The ADR has been reviewed and approved by the approvers listed above\r\n- [ ] The ADR satisfies requirements that are outlined in the ADR template\r\n- [ ] Any follow-up tickets have been created (if necessary)\r\n\r\n### Open questions / Notes\r\n- What are the use cases? How will we be using the data? \r\n- Design choices: Will we collect PII? Will we respond to the respondents? ",
+        "body": "### Description\r\n\r\nIn the first iteration of the static site, one goal is to collect general feedback from applicants — especially first-time applicants or users who've created a workspace but haven't applied yet, but anyone should be able to respond regardless of their experience with federal grants. We also want to collect general responses to the new NOFO prototypes. \r\n\r\nWe're basically asking 2 questions: \r\n- What do you think of the new prototype funding announcements? \r\n- What do you think of the current funding announcements and/or grants.gov? \r\n\r\nOpen feedback should be collected through an open-ended text box (or two) that allows the user to write whatever they want. Either question can be address or ignored. \r\n\r\nWe need to decide by which method and technology we will collect this feedback. \r\n\r\n### Approvers\r\n\r\n- @lucasmbrown-usds \r\n- @itsemilyianacone\r\n- @andycochran\r\n- @sumiat \r\n- @acouch, @daphnegold, or @SammySteiner (1+ Engineer)\r\n\r\n\r\n### Options\r\n\r\n- Microsoft Form (created by HHS's 365) \r\n- HTML form that posts to HHS's Sharepoint\r\n- HTML form that creates a GitHub issue, letting users know their response will create a public issue w/o needing to create a GitHub account\r\n- Create and embed an open text form with a user research tool like [Dovetail](https://dovetail.com/), so that feedback  is captured, centralized, and analyzed in the same place as future research studies\r\n- Link to (or embed) a Google form \r\n- Start a Google Group for the community, ask users to share there\r\n- ???\r\n\r\n### Decision Criteria\r\n\r\n- Should not feel like a black box for the user\r\n- Has a better UX than sending an email \r\n- The prompt is open-ended, yet guides the user to contribute meaningful and helpful feedback\r\n- Submissions are easy to sort through, analyze, and synthesize\r\n- User understands how their submission will be used\r\n- Does not require PRA clearance \r\n- Primary audience\r\n\r\nThis work should also include the use case for a Contact Us on simpler.grants.gov: \r\n\r\nExplore options for solutions that allow members of of the public to submit questions or comments about the project as an alternative to a public forum like a listserv:\r\n\r\n[Front](https://front.com/)\r\n[Loop Email](https://www.intheloop.io/pricing-us/)\r\n[Google collaborative inbox](https://support.google.com/a/users/answer/167430?hl=en)\r\nContact us form on the website\r\nHHS internal options for shared inbox, such as [grants.simplification@hhs.gov](mailto:grants.simplification@hhs.gov)\r\nOthers as suggested by dev team\r\n\r\n### Definition of Done\r\n\r\n- [ ] The approvers for this decision have been identified (ideally before work on the ADR starts)\r\n- [ ] The ADR is created and stored in `documentation/decisions/adr` with status \"Accepted\"\r\n- [ ] The ADR has been reviewed and approved by the approvers listed above\r\n- [ ] The ADR satisfies requirements that are outlined in the ADR template\r\n- [ ] Any follow-up tickets have been created (if necessary)\r\n\r\n### Open questions / Notes\r\n- What are the use cases? How will we be using the data? \r\n- Design choices: Will we collect PII? Will we respond to the respondents? ",
         "title": "[ADR]: Method \u0026 technology for collecting general feedback",
         "number": 306,
         "repository": "HHS/simpler-grants-gov",
@@ -735,7 +735,7 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the goals section of the content in the Figma.\r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/108a9edb-7d15-4efd-ba31-5cd244e8adc9)\r\n \r\n\r\n- Add the approved goals section content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Goals section is working and match the Figma design\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
+        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup]\r\n\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the goals section of the content in the Figma.\r\n![image](https://github.com/HHS/simpler-grants-gov/assets/111455374/108a9edb-7d15-4efd-ba31-5cd244e8adc9)\r\n \r\n\r\n- Add the approved goals section content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n\r\n### Dependencies\r\n#283 \r\n\r\n\r\n\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Goals section is working and match the Figma design\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)",
         "title": "[Task]: Implement the goals section for the static site",
         "number": 358,
         "repository": "HHS/simpler-grants-gov",
@@ -748,7 +748,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -793,7 +793,7 @@
       "assignees": ["SammySteiner"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future beta.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the Ways to Get Involved section content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/25465464/c2cae0ca-0c92-4256-b3a7-68346f92c04e)\r\n\r\n- Add the approved Ways to Get Involved section content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n  - Read our Project Goals and Milestones: https://github.com/HHS/simpler-grants-gov/blob/main/documentation/milestones/milestone_short_descriptions.md\r\n  - Github: https://github.com/HHS/simpler-grants-gov \r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n### TBD\r\n\r\nNeed content for some TBD items mentioned in Figma:\r\n- Link for survey\r\n- Mailing list signup link\r\n- email address\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Ways to Get Involved section is working and match the Figma design\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/beta.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n\r\n### Dependencies\r\n#283 ",
+        "body": "### Summary\r\n\r\nNow that the Front-end repo has been set up, we can use the template to start adding content for the future simpler.grants.gov site. \r\nWe ultimately want the design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n\r\nWe are breaking up the work into components. This ticket focuses only on the Ways to Get Involved section content. \r\n![image](https://github.com/HHS/simpler-grants-gov/assets/25465464/c2cae0ca-0c92-4256-b3a7-68346f92c04e)\r\n\r\n- Add the approved Ways to Get Involved section content changes to the page\r\n- Ensure all the links and form on the page works as expected\r\n  - Read our Project Goals and Milestones: https://github.com/HHS/simpler-grants-gov/blob/main/documentation/milestones/milestone_short_descriptions.md\r\n  - Github: https://github.com/HHS/simpler-grants-gov \r\n- Following the USWDS style guide\r\n\r\n### Links\r\n* [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0)\r\n* [Static site content](https://docs.google.com/document/d/16l2Gy-AstT9cgJK3jy_qe0I53nHhgri1O3F9UVc1TTU/edit#heading=h.syecbpqvccr6)\r\n\r\n### TBD\r\n\r\nNeed content for some TBD items mentioned in Figma:\r\n- Link for survey\r\n- Mailing list signup link\r\n- email address\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] Ways to Get Involved section is working and match the Figma design\r\n- [ ] Test coverage\r\n- [ ] Static site content served from root of the application\r\n- [ ] Updated content and design to match the [Figma mockup](https://www.figma.com/file/lpKPdyTyLJB5JArxhGjJnE/simpler.grants.gov?type=design\u0026node-id=0-1\u0026mode=design\u0026t=781AdnK0dT5hXDxT-0) \r\n- [ ] mobile formatting as expected\r\n- [ ] desktop formatting as expected\r\n- [ ] Accessibility testing (should be inherited when using USWDS)\r\n\r\n### Dependencies\r\n#283 ",
         "title": "[Task]: Implement Ways to Get Involved Section for static site",
         "number": 362,
         "repository": "HHS/simpler-grants-gov",
@@ -822,7 +822,7 @@
       "assignees": ["sumiat"],
       "content": {
         "type": "Issue",
-        "body": "### Description\r\n\r\nThis ADR aims to evaluate different analytics tools to select one that supports the project in tracking key metrics during the launch of the first version of beta.grants.gov. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.\r\n\r\n### Approvers\r\n\r\n- [ ] @lucasmbrown-usds \r\n- [ ] @widal001 \r\n- [ ] 1 product or designer\r\n- [ ] 1 engineer\r\n\r\n\r\n### Options\r\n\r\n_No response_\r\n\r\n### Decision Criteria\r\n\r\n- **Data tracking capabilities**: solution should be able to track the essential metrics and events relevant to the project's goals, such as page views, user interactions, and other custom events.\r\n- **Data visualization and reporting**: The tool should offer clear and comprehensive data visualization and reporting features to present data in a way that is easy to understand and interpret for multiple audiences (public, internal HHS, etc.)\r\n- **Integration with existing systems**: consider whether the analytics tool can seamlessly integrate with the project's existing infrastructure, and other tools used in the development process. We will have a content management system in the future and we should have forward thinking to ensure it could be compatible with various CMS options. \r\n- **Real-time data processing**: Assess whether the analytics tool can provide real-time data processing capabilities, enabling timely responses to critical events.\r\n- **Data privacy and security**: Ensure that the selected tool complies with data privacy regulations and provides robust security measures to protect sensitive information.\r\n- **Scalability**: Consider whether the analytics tool can handle the expected growth in data volume and user traffic as the project expands.\r\n- **Cost**: Evaluate the pricing structure of the analytics tool.\r\n- **Customization and flexibility**: Determine the level of customization and flexibility offered by the tool to tailor it to the specific needs and requirements of the project.\r\n- **Support and documentation**: Check the availability of technical support, documentation, and community forums to aid in implementation and troubleshooting.\r\n- **User-friendly interface**: Consider the ease of use and intuitiveness of the tool's interface, enabling team members to efficiently navigate and extract insights.\r\n\r\n### Definition of Done\r\n\r\n- [ ] The approvers for this decision have been identified (ideally before work on the ADR starts)\r\n- [ ] The ADR is created and stored in `documentation/decisions/adr` with status \"Accepted\"\r\n- [ ] The ADR has been reviewed and approved by the approvers listed above\r\n- [ ] The ADR satisfies requirements that are outlined in the ADR template\r\n- [ ] Any follow-up tickets have been created (if necessary)",
+        "body": "### Description\r\n\r\nThis ADR aims to evaluate different analytics tools to select one that supports the project in tracking key metrics during the launch of the first version of simpler.grants.gov. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.\r\n\r\n### Approvers\r\n\r\n- [ ] @lucasmbrown-usds \r\n- [ ] @widal001 \r\n- [ ] 1 product or designer\r\n- [ ] 1 engineer\r\n\r\n\r\n### Options\r\n\r\n_No response_\r\n\r\n### Decision Criteria\r\n\r\n- **Data tracking capabilities**: solution should be able to track the essential metrics and events relevant to the project's goals, such as page views, user interactions, and other custom events.\r\n- **Data visualization and reporting**: The tool should offer clear and comprehensive data visualization and reporting features to present data in a way that is easy to understand and interpret for multiple audiences (public, internal HHS, etc.)\r\n- **Integration with existing systems**: consider whether the analytics tool can seamlessly integrate with the project's existing infrastructure, and other tools used in the development process. We will have a content management system in the future and we should have forward thinking to ensure it could be compatible with various CMS options. \r\n- **Real-time data processing**: Assess whether the analytics tool can provide real-time data processing capabilities, enabling timely responses to critical events.\r\n- **Data privacy and security**: Ensure that the selected tool complies with data privacy regulations and provides robust security measures to protect sensitive information.\r\n- **Scalability**: Consider whether the analytics tool can handle the expected growth in data volume and user traffic as the project expands.\r\n- **Cost**: Evaluate the pricing structure of the analytics tool.\r\n- **Customization and flexibility**: Determine the level of customization and flexibility offered by the tool to tailor it to the specific needs and requirements of the project.\r\n- **Support and documentation**: Check the availability of technical support, documentation, and community forums to aid in implementation and troubleshooting.\r\n- **User-friendly interface**: Consider the ease of use and intuitiveness of the tool's interface, enabling team members to efficiently navigate and extract insights.\r\n\r\n### Definition of Done\r\n\r\n- [ ] The approvers for this decision have been identified (ideally before work on the ADR starts)\r\n- [ ] The ADR is created and stored in `documentation/decisions/adr` with status \"Accepted\"\r\n- [ ] The ADR has been reviewed and approved by the approvers listed above\r\n- [ ] The ADR satisfies requirements that are outlined in the ADR template\r\n- [ ] Any follow-up tickets have been created (if necessary)",
         "title": "[ADR]: Analytics platform",
         "number": 323,
         "repository": "HHS/simpler-grants-gov",
@@ -1119,8 +1119,8 @@
       "assignees": ["acouch", "EOKENAVA"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nThe existing System Security Plan needs to be reviewed to include the beta.grants.gov infrastructure, tools, team, and operating procedures.\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- Review the existing SSP and collaborate with MH and ISSO on next steps",
-        "title": "[Task]: Review Existing SSP to Include beta.grants.gov infra, tools, and team",
+        "body": "### Summary\r\n\r\nThe existing System Security Plan needs to be reviewed to include the simpler.grants.gov infrastructure, tools, team, and operating procedures.\r\n\r\n\r\n\r\n### Acceptance criteria\r\n\r\n- Review the existing SSP and collaborate with MH and ISSO on next steps",
+        "title": "[Task]: Review Existing SSP to Include simpler.grants.gov infra, tools, and team",
         "number": 391,
         "repository": "HHS/simpler-grants-gov",
         "url": "https://github.com/HHS/simpler-grants-gov/issues/391"
@@ -1128,7 +1128,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgIsDE0",
       "labels": ["documentation", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -1139,7 +1139,7 @@
         "duration": 14
       },
       "status": "Done",
-      "title": "[Task]: Review Existing SSP to Include beta.grants.gov infra, tools, and team"
+      "title": "[Task]: Review Existing SSP to Include simpler.grants.gov infra, tools, and team"
     },
     {
       "assignees": ["acouch"],
@@ -1268,7 +1268,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -1376,7 +1376,7 @@
       "labels": ["enhancement", "project: grants.gov"],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -1509,8 +1509,8 @@
     {
       "content": {
         "type": "Issue",
-        "body": "### Summary\r\n\r\nSet up hosting for the static beta.grants.gov site\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] The static site is running on AWS (or github pages if necessary)\r\n- [x]  Whatever front-end infrastructure identified in #189 and #188  is deployed\n- [ ] Requests are successfully routed through the application infrastructure\r\n\r\n### Notes\r\n- Blocked by #139\r\n- Use Github actions but need to confirm. Need to know more about the HHS tenant, we might need special permissions. Until we get access to AWS tenant, we don't know for sure. Checking with @marwanabufadel ",
-        "title": "[Task]: Setup hosting for beta.grants.gov",
+        "body": "### Summary\r\n\r\nSet up hosting for the static simpler.grants.gov site\r\n\r\n### Acceptance criteria\r\n\r\n- [ ] The static site is running on AWS (or github pages if necessary)\r\n- [x]  Whatever front-end infrastructure identified in #189 and #188  is deployed\n- [ ] Requests are successfully routed through the application infrastructure\r\n\r\n### Notes\r\n- Blocked by #139\r\n- Use Github actions but need to confirm. Need to know more about the HHS tenant, we might need special permissions. Until we get access to AWS tenant, we don't know for sure. Checking with @marwanabufadel ",
+        "title": "[Task]: Setup hosting for simpler.grants.gov",
         "number": 293,
         "repository": "HHS/simpler-grants-gov",
         "url": "https://github.com/HHS/simpler-grants-gov/issues/293"
@@ -1518,7 +1518,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgICGM0",
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -1529,7 +1529,7 @@
         "duration": 14
       },
       "status": "Backlog",
-      "title": "[Task]: Setup hosting for beta.grants.gov"
+      "title": "[Task]: Setup hosting for simpler.grants.gov"
     },
     {
       "content": {
@@ -1543,7 +1543,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgICHLA",
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -1554,7 +1554,7 @@
     {
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\nSet up SSL certificate for static site to enable secure and encrypted communication between the web server and clients. \n\n- Identify who manages SSL Certificates for grants.gov\n- certificate procurement\n- certificate installation\n- SSL configuration\n- verification and testing\n- set up automatic certificate renewal \n- documentation of the SSL cert details, including expiration and renewal procedure  \n\n### Acceptance criteria\n\n- [ ] SSL cert is successfully installed and validated\n- [ ] Update load balancer to accept connections from port 443\n- [ ] Website is accessible via HTTPS\n- [ ] HTTPS redirection is functional\n- [ ] Documentation is provided for future reference\n\n\n### Notes / Open Questions\n- Who on HHS is responsible for managing/procuring SSL certificates? @EOKENAVA to find the correct contact\n- Does the SSP need to be done before this? \n- This could be done as a follow up. Beta.grants.gov could be released HTTP",
+        "body": "### Summary\n\nSet up SSL certificate for static site to enable secure and encrypted communication between the web server and clients. \n\n- Identify who manages SSL Certificates for grants.gov\n- certificate procurement\n- certificate installation\n- SSL configuration\n- verification and testing\n- set up automatic certificate renewal \n- documentation of the SSL cert details, including expiration and renewal procedure  \n\n### Acceptance criteria\n\n- [ ] SSL cert is successfully installed and validated\n- [ ] Update load balancer to accept connections from port 443\n- [ ] Website is accessible via HTTPS\n- [ ] HTTPS redirection is functional\n- [ ] Documentation is provided for future reference\n\n\n### Notes / Open Questions\n- Who on HHS is responsible for managing/procuring SSL certificates? @EOKENAVA to find the correct contact\n- Does the SSP need to be done before this? \n- This could be done as a follow up. Simpler.grants.gov could be released HTTP",
         "title": "[Task]: SSL certificate setup",
         "number": 296,
         "repository": "HHS/simpler-grants-gov",
@@ -1563,7 +1563,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgICIZ4",
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -2038,7 +2038,7 @@
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -2098,7 +2098,7 @@
     {
       "content": {
         "type": "Issue",
-        "body": "### Summary \r\nThe SIA will cover the approaches being used to launch [beta.grants.gov](http://beta.grants.gov/) as part of our overall [grants.gov](http://grants.gov/) system, and how those approaches fit within our existing [grants.gov](http://grants.gov/) SSP. This work identifies how our approaches might require changes to it the SSP and to document and note those changes and controls. \r\n\r\n### Acceptance Criteria\r\n- [ ] Make the necessary updates to the SSP and Asset Inventory, Catalog of Control in Appendix X for the first release of the static site. \r\n- [ ] Stretch goal: note future changes and updates for the opportunities so we can be better prepared for that in the future",
+        "body": "### Summary \r\nThe SIA will cover the approaches being used to launch [simpler.grants.gov](http://simpler.grants.gov/) as part of our overall [grants.gov](http://grants.gov/) system, and how those approaches fit within our existing [grants.gov](http://grants.gov/) SSP. This work identifies how our approaches might require changes to it the SSP and to document and note those changes and controls. \r\n\r\n### Acceptance Criteria\r\n- [ ] Make the necessary updates to the SSP and Asset Inventory, Catalog of Control in Appendix X for the first release of the static site. \r\n- [ ] Stretch goal: note future changes and updates for the opportunities so we can be better prepared for that in the future",
         "title": "[Task]: SSP alignment for beta launch",
         "number": 464,
         "repository": "HHS/simpler-grants-gov",
@@ -2242,7 +2242,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgIvgm8",
       "labels": ["project: grants.gov", "level: epic"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -2380,8 +2380,8 @@
     {
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\nHook up our public facing URL :D \r\n\r\nBlocked by #299\n\n### Acceptance criteria\n\n- Visiting beta.grants.gov shows static site",
-        "title": "[Task]: Hook up beta.grants.gov",
+        "body": "### Summary\n\nHook up our public facing URL :D \r\n\r\nBlocked by #299\n\n### Acceptance criteria\n\n- Visiting simpler.grants.gov shows static site",
+        "title": "[Task]: Hook up simpler.grants.gov",
         "number": 384,
         "repository": "HHS/simpler-grants-gov",
         "url": "https://github.com/HHS/simpler-grants-gov/issues/384"
@@ -2389,7 +2389,7 @@
       "id": "PVTI_lADOABZxns4ASDf3zgIpeDg",
       "labels": ["topic: infra", "project: grants.gov"],
       "milestone": {
-        "title": "[Epic]: beta.grants.gov domain",
+        "title": "[Epic]: simpler.grants.gov domain",
         "description": "",
         "dueOn": ""
       },
@@ -2400,7 +2400,7 @@
         "duration": 14
       },
       "status": "Refinement",
-      "title": "[Task]: Hook up beta.grants.gov"
+      "title": "[Task]: Hook up simpler.grants.gov"
     },
     {
       "assignees": ["andycochran"],
@@ -2474,7 +2474,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -2485,7 +2485,7 @@
       "assignees": ["sumiat"],
       "content": {
         "type": "Issue",
-        "body": "### Summary\n\nCreate a list of potential FAQs and answers that can be used by the Help Desk / Support staff or as a future FAQ page on the beta.grants.gov site. \n\n### Acceptance criteria\n\n- [ ] Document with FAQs\r\n- [ ] Approval of content to go through the standard content approval process",
+        "body": "### Summary\n\nCreate a list of potential FAQs and answers that can be used by the Help Desk / Support staff or as a future FAQ page on the simpler.grants.gov site. \n\n### Acceptance criteria\n\n- [ ] Document with FAQs\r\n- [ ] Approval of content to go through the standard content approval process",
         "title": "[Task]: Help Center FAQ sheet and transcript",
         "number": 400,
         "repository": "HHS/simpler-grants-gov",
@@ -2495,7 +2495,7 @@
       "labels": ["project: grants.gov", "level: epic"],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -2525,7 +2525,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -2777,7 +2777,7 @@
       ],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -2954,7 +2954,7 @@
       "labels": ["project: grants.gov"],
       "milestone": {
         "title": "FY23 Q4: Static Site Launch with NOFO Content",
-        "description": "Launch a simple site at beta.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
+        "description": "Launch a simple site at simpler.grants.gov that provides static, informational content relevant to the NOFO simplification effort. This content could include:\r\n\r\n- Information about the goals and structure of the NOFO simplification project\r\n- Links to the four NOFO prototypes\r\n- Information about how to sign up for future updates\r\n- Information about upcoming events",
         "dueOn": "2023-09-13T00:00:00Z"
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
@@ -3345,7 +3345,7 @@
       "labels": ["documentation", "docs: adr", "project: grants.gov"],
       "milestone": {
         "title": "[Epic] CMS Planning ",
-        "description": "We will do an exploration around whether we should use a CMS tool, and which CMS tool to use on the beta.grants.gov site. This work should help outline the next steps for implementing the CMS tool. ",
+        "description": "We will do an exploration around whether we should use a CMS tool, and which CMS tool to use on the simpler.grants.gov site. This work should help outline the next steps for implementing the CMS tool. ",
         "dueOn": ""
       },
       "repository": "https://github.com/HHS/simpler-grants-gov",
