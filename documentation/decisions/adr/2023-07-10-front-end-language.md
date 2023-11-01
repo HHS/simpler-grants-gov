@@ -7,7 +7,7 @@
 
 ## Context and Problem Statement
 
-The goal of this ADR is to select a language that we'll use to implement the front end for beta.grants.gov. The front end will only support static content at first, but will grow to include the new search, supported by the API and eventually the entire grants.gov functionality. Therefore, while a simple solution might work in the short term, it will quickly become insufficient to meet our needs.
+The goal of this ADR is to select a language that we'll use to implement the front end for simpler.grants.gov. The front end will only support static content at first, but will grow to include the new search, supported by the API and eventually the entire grants.gov functionality. Therefore, while a simple solution might work in the short term, it will quickly become insufficient to meet our needs.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 

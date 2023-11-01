@@ -22,7 +22,7 @@ Formalize a series of architectural decisions about how data is stored, includin
 
 <!-- Required -->
 
-This milestone is critical because it serves as the initial planning for the beta.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
+This milestone is critical because it serves as the initial planning for the simpler.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
 
 ### User Stories
 

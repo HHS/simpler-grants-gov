@@ -254,7 +254,7 @@ For this solution we will only replicate opportunities data at first to limit th
   - Negligible impact to source database, even with replicating ongoing changes
   - Replicating only public data reduces our security criticality
   - Ability to transform data is part of the DMS tool and well documented
-  - Ensures that beta.grants.gov service remains available even if grants.gov has unexpected or planned downtime
+  - Ensures that simpler.grants.gov service remains available even if grants.gov has unexpected or planned downtime
   - Limits the cross VPC traffic to just DMS
 - **Cons**
   - Additional Cost

@@ -1,12 +1,12 @@
 # Beta.Grants.Gov Architecture
 
-This document is meant to be a living record of the architecture for the beta.grants.gov system. This includes the application, network, and infrastructure architecture, as well as the CI/CD pipeline, and other services and integrations used to support the applications.
+This document is meant to be a living record of the architecture for the simpler.grants.gov system. This includes the application, network, and infrastructure architecture, as well as the CI/CD pipeline, and other services and integrations used to support the applications.
 
 At a high level, this system uses Github to maintain the codebase repository and run the CI/CD pipeline, and AWS to host the applications and its supporting services.
 
 ## Architecture
 
-This is a general architecture diagram of the beta.grants.gov system.
+This is a general architecture diagram of the simpler.grants.gov system.
 
 ```mermaid
 %%{init: {'theme': 'neutral' } }%%
@@ -152,7 +152,7 @@ flowchart TB
 
 ## AWS Hosted Infrastructure
 
-This is an architecture diagram focusing on the AWS shared infrastructure managed by beta.grants.gov
+This is an architecture diagram focusing on the AWS shared infrastructure managed by simpler.grants.gov
 
 ```mermaid
 %%{init: {'theme': 'neutral' } }%%
@@ -242,7 +242,7 @@ flowchart TD
 
 ## AWS Shared Services
 
-The beta.grants.gov is using the following non infrastructure shared services in AWS:
+The simpler.grants.gov is using the following non infrastructure shared services in AWS:
 
 - [ECS: Elastic Container Service](https://aws.amazon.com/ecs/)
 - [ECR: Elastic Container Registry](https://aws.amazon.com/ecr/)

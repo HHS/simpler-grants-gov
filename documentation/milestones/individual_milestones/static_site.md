@@ -12,7 +12,7 @@
 
 ## Short description
 
-Launch a simple site at beta.grants.gov that provides static, informational content about the Simpler Grants.gov initiative.
+Launch a simple site at simpler.grants.gov that provides static, informational content about the Simpler Grants.gov initiative.
 
 ## Goals
 
@@ -23,10 +23,10 @@ The launch of a static site for the Simpler Grants.gov project represents the cu
 By sharing this information in a publicly accessible format and investing early in the infrastructure used to host it, this milestone aims to demonstrate the following value propositions:
 
 - Raises awareness about the Simpler Grants.gov project, its priorities, and ongoing workstreams
-- Establishes beta.grants.gov as the primary location that stakeholders can visit for project updates and previews of deliverables for the Simpler Grants.gov project
+- Establishes simpler.grants.gov as the primary location that stakeholders can visit for project updates and previews of deliverables for the Simpler Grants.gov project
 - Proves the successful completion of technical milestones that enable faster development without sacrificing code quality or security
 - Delivers an early win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
-- Facilitates a parallel approach to development, in which new features can be built and tested on `beta.grants.gov` without risking or disrupting the existing functionality of legacy grants.gov
+- Facilitates a parallel approach to development, in which new features can be built and tested on `simpler.grants.gov` without risking or disrupting the existing functionality of legacy grants.gov
 
 ### User stories
 
@@ -80,13 +80,15 @@ Process for drafting and updating the content of the site should balance:
   - [ ] The resources required to deploy and host the site are provisioned programmatically using the framework established in the [Infrastructure-as-Code milestone](https://github.com/HHS/simpler-grants-gov/issues/123)
   - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Front-end CI/CD milestone](https://github.com/HHS/simpler-grants-gov/issues/58)
 - [ ] The following user experience (UX) requirements are satisfied:
+  - [ ] Anyone can access a live version of the site at simpler.grants.gov
+  - [ ] # The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
   - [ ] Anyone can access a live version of the site at beta.grants.gov
   - [ ] The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
   - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning milestone
   - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics milestone](https://github.com/HHS/simpler-grants-gov/issues/63)
   - [ ] Additional development tickets have been created for collecting other data needed to calculate the metrics below
 - [ ] The following content requirements are satisfied:
-  - [ ] All content is deployed to beta.grants.gov
+  - [ ] All content is deployed to simpler.grants.gov
   - [ ] The content on the site has been been reviewed and approved by the relevant stakeholders within each workstream
   - [ ] The site also links to external resources related to the project (if they are available), including:
     - [ ] The legacy grants.gov site
@@ -123,7 +125,7 @@ _What capabilities / milestones do we expect to be in place by the completion of
 
 - [ ] **[Front-end Planning](https://github.com/HHS/simpler-grants-gov/issues/49):** Determines the language, framework, and deployment service used to build and host the site.
 - [ ] **[Developer Tools](https://github.com/HHS/simpler-grants-gov/issues/50):** Establishes a suite of tools used to ensure the quality and security of the site codebase.
-- [ ] **[beta.grants.gov Domain](https://github.com/HHS/simpler-grants-gov/issues/51):** Secures access to the `beta.grants.gov` domain which is where the site will be hosted.
+- [ ] **[beta.grants.gov Domain](https://github.com/HHS/simpler-grants-gov/issues/51):** Secures access to the `simpler.grants.gov` domain which is where the site will be hosted.
 - [ ] **[Security Approval](https://github.com/HHS/simpler-grants-gov/issues/53):** Ensures that the site and the infrastructure that hosts it are comply with HHS security standards and practices.
 - [ ] **[Infrastructure-as-Code](https://github.com/HHS/simpler-grants-gov/issues/123):** Programmatically provisions the resources needed to deploy and host this site.
 - [ ] **[Front-end CI/CD](https://github.com/orgs/HHS/projects/12/views/3?pane=issue&itemId=31950276):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the site.
@@ -148,7 +150,7 @@ _Are there any notable capabilities / milestones do NOT we expect to be in place
 _The following work will_ not _be completed as part of this milestone:_
 
 1. **Translating site contents:** Translation of key documents will be covered in an upcoming milestone slotted for FY24 Q1 (Oct - Dec 2023)
-2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `beta.grants.gov` will happen in a later milestone
+2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `simpler.grants.gov` will happen in a later milestone
 
 ## Integrations
 
@@ -171,8 +173,8 @@ The initial process for translation is slotted for release sometime in FY24 Q1 (
 _This can include services going into PROD behind a feature flag that is not turned on._
 
 - **Static Site:** This milestone represents the official launch of the static site
-- **beta.grants.gov Domain:** The static site is the first service to officially use the `beta.grants.gov` domain
-- **Stakeholder Feedback Form:** This is the first time we're collecting feedback directly from stakeholders on `beta.grants.gov`
+- **simpler.grants.gov Domain:** The static site is the first service to officially use the `simpler.grants.gov` domain
+- **Stakeholder Feedback Form:** This is the first time we're collecting feedback directly from stakeholders on `simpler.grants.gov`
 - **Web Analytics:** This will most likely be the first service for which we are configuring web analytics
 
 ### Services being integrated in PROD for the first time
@@ -191,7 +193,7 @@ _Are there multiple services that are being connected for the first time in PROD
 
 _Are there any fields being shared publicly that have never been shared in PROD before?_
 
-- No, the content of the static site in this milestone will be limited to general information about the Simpler Grants.gov project. It does not include exposing any production data from the new beta.grants.gov data model.
+- No, the content of the static site in this milestone will be limited to general information about the Simpler Grants.gov project. It does not include exposing any production data from the new simpler.grants.gov data model.
 
 ### Security considerations
 
