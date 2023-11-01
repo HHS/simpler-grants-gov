@@ -82,7 +82,7 @@ Process for drafting and updating the content of the site should balance:
 - [ ] The following user experience (UX) requirements are satisfied:
   - [ ] Anyone can access a live version of the site at simpler.grants.gov
   - [ ] # The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
-  - [ ] Anyone can access a live version of the site at beta.grants.gov
+  - [ ] Anyone can access a live version of the site at simpler.grants.gov
   - [ ] The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
   - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning milestone
   - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics milestone](https://github.com/HHS/simpler-grants-gov/issues/63)
@@ -125,7 +125,7 @@ _What capabilities / milestones do we expect to be in place by the completion of
 
 - [ ] **[Front-end Planning](https://github.com/HHS/simpler-grants-gov/issues/49):** Determines the language, framework, and deployment service used to build and host the site.
 - [ ] **[Developer Tools](https://github.com/HHS/simpler-grants-gov/issues/50):** Establishes a suite of tools used to ensure the quality and security of the site codebase.
-- [ ] **[beta.grants.gov Domain](https://github.com/HHS/simpler-grants-gov/issues/51):** Secures access to the `simpler.grants.gov` domain which is where the site will be hosted.
+- [ ] **[simpler.grants.gov Domain](https://github.com/HHS/simpler-grants-gov/issues/51):** Secures access to the `simpler.grants.gov` domain which is where the site will be hosted.
 - [ ] **[Security Approval](https://github.com/HHS/simpler-grants-gov/issues/53):** Ensures that the site and the infrastructure that hosts it are comply with HHS security standards and practices.
 - [ ] **[Infrastructure-as-Code](https://github.com/HHS/simpler-grants-gov/issues/123):** Programmatically provisions the resources needed to deploy and host this site.
 - [ ] **[Front-end CI/CD](https://github.com/orgs/HHS/projects/12/views/3?pane=issue&itemId=31950276):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the site.

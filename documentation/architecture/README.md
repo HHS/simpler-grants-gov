@@ -1,4 +1,4 @@
-# Beta.Grants.Gov Architecture
+# Simpler.Grants.Gov Architecture
 
 This document is meant to be a living record of the architecture for the simpler.grants.gov system. This includes the application, network, and infrastructure architecture, as well as the CI/CD pipeline, and other services and integrations used to support the applications.
 
