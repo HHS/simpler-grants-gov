@@ -1,9 +1,7 @@
 name: Front-end Checks
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
   pull_request:
     paths:
       - frontend/**
@@ -90,3 +88,9 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
       - run: npm run storybook-build
+
+  vulnerability-scans:
+    name: Run Frontend Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: "frontend"

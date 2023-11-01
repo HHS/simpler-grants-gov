@@ -1,15 +1,14 @@
 # {Milestone name}
 
-| Field           | Value                                    |
-| --------------- | ---------------------------------------- |
-| Document Status | [One of: Draft, Final Draft, Completed ] |
-| Epic Link       | TODO: Add Link                           |
-| Epic Dashboard  | TODO: Add Link                           |
-| Target Release  | TODO: Add Date                           |
-| Product Owner   | TODO: Add Name                           |
-| Document Owner  | TODO: Add Name                           |
-| Lead Developer  | TODO: Add Name                           |
-| Lead Designer   | TODO: Add Name                           |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | TODO: Add link                                               |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | TODO: Add name                                               |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 
 ## Short description

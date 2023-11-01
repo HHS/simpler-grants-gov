@@ -1,20 +1,21 @@
 # GET Opportunities Endpoint
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Accepted                                                             |
-| Epic Link       | [Issue 70](https://github.com/HHS/grants-equity/issues/70)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-10-11                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 70](https://github.com/HHS/grants-equity/issues/70)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 ## Short description
 <!-- Required -->
 
-Deploy a public API endpoint to PROD that allows users to see at least one field per grant opportunity listed in grants.gov
+- **What:** Deploy a public API endpoint to PROD iteratively that allows users to see at least one field per grant opportunity listed in grants.gov. 
+- **Why:** Build iteratively, validate connection to the database, and set the groundwork to continue to enhance the API.
+- **Who:** This release of the API will be mainly focused on delivering for the API consumer.
 
 ## Goals
 
@@ -23,9 +24,10 @@ Deploy a public API endpoint to PROD that allows users to see at least one field
 
 The launch of a public API endpoint which provides information about every grant opportunity in grants.gov represents the culmination of multiple internally focused deliverables and serves as the foundation for future development that relies on the API.
 
-By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this milestone aims to demonstrate the following value propositions:
+By delivering this public endpoint and ensuring it remains available even when the legacy grants.gov site is experiencing planned or unplanned outages, this 30k effort aims to demonstrate the following value propositions:
 
-- Exposes `beta.grants.gov/api/` as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
+- Select a URL for the API
+- Expose the chosen URL name as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
 - Proves the successful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
 - Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
@@ -90,15 +92,15 @@ The way that data is stored and delivered through the API should balance:
   - [ ] The API has been load tested using the framework established in the [Peformance Testing Framework milestone](https://github.com/HHS/grants-equity/issues/69) to ensure that it remains performant under heavy user traffic
   - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring milestone](https://github.com/HHS/grants-equity/issues/370)
   - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response milestone](https://github.com/HHS/grants-equity/issues/373)
-  - [ ] The `api.grants.gov` sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
+  - [ ] The chosen API URL sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
 - [ ] The following developer experience (DX) requirements are satisfied:
-  - [ ] The API is live at `beta.grants.gov/api/`
+  - [ ] The API is live at the chosen URL
   - [ ] Developers can learn how to interact with the API by referencing the API documentation
   - [ ] The endpoint path indicates which major version of the API the developer is consuming
   - [ ] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning milestone](https://github.com/HHS/grants-equity/issues/68)
   - [ ] The endpoint is available when legacy grants.gov experiences planned or unplanned downtime, maintenance, and upgrades
   - [ ] Test data is scripted to provide consistent and reliable test fixtures for integration tests and local development per the [Test Data and Schema milestone](https://github.com/HHS/grants-equity/issues/)
-  - [ ] All developers (including open source contributors) are able to spin up a database replica including test fixture data so that they can conduct local development.
+  - [ ] All developers (including open source contributors) are able to spin up either database replica or test fixture data so that they can conduct local development.
   - [ ] Feature flag framework is implemented so that functionality can be deployed to PROD without being turned on per the [Feature flag framework milestone](https://github.com/HHS/grants-equity/issues/)
 - [ ] The following data requirements are satisfied:
   - [ ] The endpoint returns all of the grant opportunities that are available on grants.gov
@@ -118,24 +120,26 @@ The way that data is stored and delivered through the API should balance:
 ### Destination for live updating metrics
 <!-- Required -->
 
-Page on the public wiki that is updated at the end of each sprint. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki that is updated at the end of each sprint. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 
 ### Assumptions & dependencies
 <!-- Required -->
 
+
+
 *What capabilities / milestones do we expect to be in place by the completion of work on this milestone?*
 
 - [ ] **[API Planning](https://github.com/HHS/grants-equity/issues/):** Determines the language, framework, and deployment service used to build and host the API.
 - [ ] **[DB planning](https://github.com/HHS/grants-equity/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
 - [ ] **[Developer tools](https://github.com/HHS/grants-equity/issues/):** Establishes a suite of tools used to ensure the quality and security of the API codebase.
-- [ ] **[beta.grants.gov domain](https://github.com/HHS/grants-equity/issues/):** Secures access to the `beta.grants.gov` domain from which the API endpoints will be routed. 
+- [ ] **[beta.grants.gov domain](https://github.com/HHS/grants-equity/issues/):** Secures access to the `beta.grants.gov` domain from which the API endpoints will be routed.
 - [ ] **[Back-end CI/CD](https://github.com/HHS/grants-equity/issues/):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the API.
 - [ ] **[Data architecture](https://github.com/HHS/grants-equity/issues/):** Establishes the updated data model used to support the new GET Opportunities endpoint.
 - [ ] **[Test data and schema](https://github.com/HHS/grants-equity/issues/):** Enables both project maintainers and open source contributors to effectively mock the database when developing or testing locally.
 - [ ] **[Database (DB) replica](https://github.com/HHS/grants-equity/issues/):** Ensures parity between the set of opportunities returned by the new GET Opportunities endpoint and the legacy system. It also allows users to access the endpoint when there are outages on the legacy system.
-- [ ] **[Feature flag framework](https://github.com/HHS/grants-equity/issues/):** Enables us to deploy new features or changes without immediately exposing them to the public. 
+- [ ] **[Feature flag framework](https://github.com/HHS/grants-equity/issues/):** Enables us to deploy new features or changes without immediately exposing them to the public.
 - [ ] **[API documentation](https://github.com/HHS/grants-equity/issues/):** Establishes a location and strategy for publishing information about the GET Opportunities endpoint (and future API endpoints) that users can reference when learning how to interact with the API.
 - [ ] **[API Versioning](https://github.com/HHS/grants-equity/issues/68):** Establishes a protocol for publishing breaking and non-breaking changes to the API.
 - [ ] **[API Security Planning](https://github.com/HHS/grants-equity/issues/):** Sets up minimum security standards to protect the API endpoint, such as API keys, rate limits, and security incident response protocols.

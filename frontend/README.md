@@ -68,9 +68,14 @@ From the `frontend/` directory:
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-##### Other scripts
+##### Testing Release Target Locally
 
-- `make release-build` - Creates the Docker image for deployment to the cloud
+To test the release target locally, run:
+
+- `make release-build OPTS="--tag [IMAGE_NAME]"` or
+- `docker buildx build --target release --tag [IMAGE_NAME]` for a faster build on OSX
+
+to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
 
 ## 🖼️ Storybook
 
@@ -135,7 +140,7 @@ It's recommended that developers configure their code editor to auto run these t
   <summary>VSCode instructions</summary>
 
 1. Install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extensions.
-2. Add the following to a `.vscode/settings.json` file:
+2. Add the following to a `.vscode/settings.json` Worspace Settings file:
 
    ```json
    {
@@ -149,9 +154,13 @@ It's recommended that developers configure their code editor to auto run these t
    }
    ```
 
+   For these tools to auto run, the settings must be located in the root of your current VSCode workspace. For example, if you open the `frontend/` directory in VSCode, the settings should be located at `frontend/.vscode/settings.json`. If you then open then root repository directory in VSCode as your workspace, these tools will not auto run. (Note that adding the settings to the root repository directory may affect other parts of a monorepo.)
+
+   You can alternatively add the settings to your User Settings, however they will apply globally to any workspace you open. See [User and Workspace Settings](https://code.visualstudio.com/docs/getstarted/settings) for more guidance.
+
 </details>
 
 ## Other topics
 
-- [Internationalization](../docs/internationalization.md)
-- Refer to the [architecture decision records](../docs/decisions) for more context on technical decisions.
+- [Internationalization](../documentation/frontend/internationalization.md)
+- Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.

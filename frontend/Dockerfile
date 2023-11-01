@@ -1,7 +1,7 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:18-bullseye-slim AS base
+FROM node:20-bullseye-slim AS base
 WORKDIR /frontend
 
 # Install dependencies
@@ -56,8 +56,23 @@ RUN npm run build -- --no-lint
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:18-bullseye-slim AS release
+FROM node:20-bullseye-slim AS release
 WORKDIR /frontend
+
+RUN mkdir -p /frontend/.next/cache/images/
+VOLUME ["/frontend/.next/cache/images/"]
+
+RUN apt-get update \
+  # Install security updates
+  # https://pythonspeed.com/articles/security-updates-in-docker/
+  && apt-get upgrade --yes \
+  # Install wget, required for health checks
+  wget \
+  # Reduce the image size by clearing apt cached lists
+  && rm -fr /var/lib/apt/lists/*
+
+# Remove dev dependencies after build
+RUN npm prune --production
 
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
@@ -68,6 +83,7 @@ RUN rm -rf /opt/yarn-v*
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
 
 COPY --from=builder /frontend/public ./public

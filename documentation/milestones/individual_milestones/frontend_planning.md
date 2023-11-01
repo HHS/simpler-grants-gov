@@ -1,15 +1,14 @@
 # Front-end Planning
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed                                                            |
-| Epic Link       | [Issue 49](https://github.com/HHS/grants-equity/issues/49)              |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-07-19                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 49](https://github.com/HHS/grants-equity/issues/49)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 
 ## Short description
@@ -77,7 +76,7 @@ Some factors to consider are:
 
 - Is this framework popular with a broad community of users?
 - Is this framework actively maintained, with a strong governance structure?
-- How easy 
+- How easy
 - Does this framework support both Static Site Generation (SSG) and Server-side Rendering (SSR)?
 - Is there an established set of plugins or libraries that extend the framework's key features? (e.g. AuthN/AuthZ, component library, etc.)
 
@@ -128,7 +127,7 @@ We recommend calculating the following metrics at least once to inform the selec
 
 #### Ongoing metrics
 
-The following metrics should be tracked about the tools selected within this metric: 
+The following metrics should be tracked about the tools selected within this metric:
 
 1. Front-end framework metrics
    1. Days since last patch or minor release
@@ -137,7 +136,7 @@ The following metrics should be tracked about the tools selected within this met
 ### Destination for live updating metrics
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 

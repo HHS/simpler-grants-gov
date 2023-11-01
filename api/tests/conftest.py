@@ -80,7 +80,8 @@ def db_client(monkeypatch_session) -> db.DBClient:
     """
 
     with db_testing.create_isolated_db(monkeypatch_session) as db_client:
-        models.metadata.create_all(bind=db_client.get_connection())
+        with db_client.get_connection() as conn, conn.begin():
+            models.metadata.create_all(bind=conn)
         yield db_client
 
 

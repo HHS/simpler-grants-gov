@@ -72,7 +72,9 @@ handle_audit_event.__cantrace__ = True  # type: ignore
 def log_audit_event(event_name: str, args: Sequence[Any], arg_names: Sequence[str]) -> None:
     """Log a message but only log recently repeated messages at intervals."""
     extra = {
-        f"audit.args.{arg_name}": arg for arg_name, arg in zip(arg_names, args) if arg_name != "_"
+        f"audit.args.{arg_name}": arg
+        for arg_name, arg in zip(arg_names, args, strict=True)
+        if arg_name != "_"
     }
 
     key = (event_name, repr(args))

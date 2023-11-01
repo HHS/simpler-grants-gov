@@ -22,11 +22,12 @@
     "@trussworks/react-uswds": "^5.0.0",
     "@uswds/uswds": "3.1.0",
     "i18next": "^23.0.0",
-    "next": "^13.2.4",
+    "next": "^13.5.2",
     "next-i18next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.0.0"
+    "react-i18next": "^13.0.0",
+    "sharp": "^0.32.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
@@ -39,7 +40,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/jest-axe": "^3.5.5",
-    "@types/node": "^18.15.3",
+    "@types/node": "^20.8.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
@@ -58,7 +59,7 @@
     "jest-axe": "^7.0.0",
     "jest-cli": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
-    "postcss": "^8.4.21",
+    "postcss": "^8.4.31",
     "postcss-loader": "^7.1.0",
     "postcss-preset-env": "^8.0.1",
     "prettier": "^2.8.4",

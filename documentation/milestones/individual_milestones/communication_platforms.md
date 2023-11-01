@@ -1,15 +1,14 @@
 # Communication platforms
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed.                                                           |
-| Epic Link       | [Issue 47](https://github.com/HHS/grants-equity/issues/47)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-08-23                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| Document Status | Completed                                                    |
+| Epic Link       | [Issue 47](https://github.com/HHS/grants-equity/issues/47)   |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product Owner   | Lucas Brown                                                  |
+| Document Owner  | Billy Daly                                                   |
+| Lead Developer  | Aaron Couch                                                  |
+| Lead Designer   | Andy Cochran                                                 |
 
 ## Short description
 
@@ -240,7 +239,7 @@ TODO: See if we can reduce the list of metrics to track
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
 
 ## Planning
 

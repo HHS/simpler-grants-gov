@@ -2,7 +2,7 @@
 
 This directory contains information about our milestones for the modernization project.
 
-[The milestone short descriptions file](./milestone_short_descriptions.md) contains brief descriptions of upcoming milestones. They are grouped into sections. Within sections, they are roughly presented in approximate priority order, but not in firm priority order.
+[The product roadmap](https://github.com/orgs/HHS/projects/12) contains brief descriptions of upcoming milestones. They are grouped into sections. Within sections, they are roughly presented in approximate priority order, but not in firm priority order.
 
 The milestones are also graphed in the [dependency diagram](./milestone_dependency_diagram.mmd). This diagram is rendered using [Mermaid.js](https://mermaid.js.org/).
 
@@ -18,5 +18,5 @@ In a separate document, we will track ongoing priorities, clearly defining which
 
 If this is your first time engaging with these milestones, we suggest you:
 
-1. Start by reading the milestone short descriptions in [the milestone short descriptions file](./milestone_short_descriptions.md)
+1. Start by reading the milestone short descriptions in [the product roadmap](https://github.com/orgs/HHS/projects/12)
 2. Then review the [dependency diagram](./milestone_dependency_diagram.mmd).

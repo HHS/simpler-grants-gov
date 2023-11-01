@@ -1,81 +1,41 @@
-# Grants.gov modernization
+# Simpler Grants.gov
 
 A modernization effort for Grants.gov.
 
-## Getting Started
+## About the Project
 
-### Agency Mission
+Our vision is for the following to become true:
 
-### Team Mission
+_**Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government.**_
 
-### Project Vision
+Grants.gov helps ensure that no communities are underserved by the federal government.
 
-### Project Information
-<!-- Example Innersource Project Info
- * [Project Website](https://cms.gov/digital-service-cms)
- * [Project Documentation:](https://confluence.cms.gov/)
- * [Project Sprint/Roadmap:](https://jira.cms.gov/)
- * [Project Slack Channel:](https://cmsgov.slack.com/archives/XXXXXXXXXX)
- * [Project Tools/Hosting/Deployment:](https://confluence.cms.gov)
- * Project Keyword(s) for Search: KEYWORD1, KEYWORD2
- * Project Members:
-    * Team Lead, PO, Delivery Lead, Approvers, Trusted Committers etc.
--->
+See [goals.md](./documentation/goals.md) for more information about the vision and goals for the project.
 
-<!-- Example Open Source Info
- * [Project Website](https://cms.gov/digital-service-cms)
- * [Project Documentation:](https://confluence.cms.gov/)
- * Public Contact: opensource@cms.hhs.gov (**NOTE: Do not use individual/personal email addresses**)
- * Follow [@CMSgov](https://twitter.com/cmsgov) on Twitter for updates.
--->
+## Core Team
 
-### Installation
+The core team on the grants.gov project is a small group of content strategists, designers, developers, and product managers working for and with the Department of Health and Human Services, and other federal agencies, and community volunteers.
 
-<!--- Example Install Instructions
+An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles. 
 
-1. Clone the repo
+## Repository Structure
 
-    `git clone https://github.com/cmsgov/PROJECT_REPO.git`
+- [./.github](./.github) contains Github specific settings files and testing, linting, and CI/CD workflows
+- [./api](./api) contains an API built in Python using the Flask library
+- [./bin](./bin) contains scripts for managing infrastructure
+- [./documentation](./documentation) contains project guides, documentation, and decision records
+- [./frontend](./frontend) contains a web application built using Next.js
+- [./infra](./infra) contains Terraform modules and configuration for managing the AWS infrastructure
 
-1. Setup your development environment
+## Development
 
-    `python -m venv venv`
+### API
 
-1. Install project dependencies
+Documentation for the API is linked to from the [API README.md](./api/README.md). For installation instructions, see the [development documentation](./documentation/api/development.md).
 
-    `pip install -r requirements.txt`
+### Front-end
 
-    `yarn install package.json`
-
-1. Run the test suite
-
-    `pytest tests/tox.ini`
-
-1. Start the webserver
-
-    `make start`
-
-1. Visit [localhost:9001](https://localhost:9001) to view the server
--->
-
-### Setting up development tools 
-
-#### Configuring pre-commit hooks
-
-To promote consistent code style and quality, we use git pre-commit hooks to
-automatically lint and reformat our code before every commit we make to the codebase.
-Pre-commit hooks are defined in the file [`.pre-commit-config.yaml`](../.pre-commit-config.yaml).
-
-1.  First, install [`pre-commit`](https://pre-commit.com/) globally:
-
-        $ brew install pre-commit
-
-2.  While in the root `grants-equity` directory, run `pre-commit install` to install
-    the specific git hooks used in this repository.
-
-Now, any time you commit code to the repository, the hooks will run on all modified files automatically. If you wish, you can force a re-run on all files with `pre-commit run --all-files`.
-
-### Testing
+Documentation and development instructions for the front-end are provided in the [Front-end README.md](./frontend/README.md).
 
 ## Contributing
 
@@ -91,7 +51,8 @@ Disclosure Policies, see [SECURITY.md](SECURITY.md).
 ## Authors and Maintainers
 
 For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
-A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors?type=a) can be found on GitHub.
+
+A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors) can be found on GitHub.
 
 ## Public domain
 
