@@ -8,6 +8,7 @@
 
 ## Context and Problem Statement
 
+An email marketing tool is primarily used for creating, sending, and tracking email campaigns to a list of subscribers. It allows for us to engage with our audience, push notifications and newsletters to our users, share information, and build customer relationships through email. 
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -25,15 +26,17 @@
 #### Nice to Have
 
 - **Open Source:** The tool used to manage the email marketing content should be open source, if possible.
+- **Community & Support**: The platform has a strong community for ongoing support, updates, and bug fixes
+- **Scalability**: The platform should be able to hadndle a growing number of subscribers without performance issues
 
 ## Options Considered
 
 
-- [Sendy](Sendy) - 
-- [Pardot](Pardot) - 
-- [MailChimp](MailChimp) - 
-- [Hubspot](Hubspot) - 
-- [Mautic](Mautic) -
+- [Sendy](https://sendy.co/) 
+- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) - 
+- [MailChimp](https://mailchimp.com/)
+- [Hubspot](https://www.hubspot.com/)
+- [Mautic](https://www.mautic.org/)
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -73,12 +76,18 @@
 
 #### Pros
 
+- Sendy is currently used by HHS and it would be simple for existing users to start using the tool right away
+- It provides great metrics and analytics
+- HHS is able to send a few campaigns simultaneously
+- Sendy is self-hosted which means we have control over the email list and the data. Sendy is a self hosted application that runs on our own web server. Pay once and it's yours, there's no recurring fee.
 
 #### Cons
 
+- Campaigns with larged audiences or number of emails take a long time to send and a user cannot use the tool while an email is being sent. Currently, we have 1M subscribers and it takes a long time to send to that many subscribers
 
 
-### Pardot
+
+### Salesforce Marketing
 
 
 #### Details
