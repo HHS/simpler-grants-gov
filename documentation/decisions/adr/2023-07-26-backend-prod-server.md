@@ -2,7 +2,7 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-2i <!-- REQUIRED -->
-- **Related Issue:** [#245](https://github.com/HHS/grants-equity/issues/245) <!-- RECOMMENDED -->
+- **Related Issue:** [#245](https://github.com/HHS/simpler-grants-gov/issues/245) <!-- RECOMMENDED -->
 - **Deciders:** Daphne Gold, Sammy Steiner, Billy Daly, Lucas Brown <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
@@ -11,6 +11,7 @@
 The Flask development server is not meant for production use and only intended for local development. It is not secure, stable, efficient, or scaled for a production environment. In addition to choosing a production server, this ADR will specify a high level implementation option.
 
 ## Decision Drivers <!-- RECOMMENDED -->
+
 - **Scalable:** The chosen solution should be configurable to scale and a multi-worker, multi-threaded production-ready, WSGI wrapper.
 - **Ease of use:** The production server should be relatively simple to set up and start.
 - **Well-maintained:** We have a preference towards a production server that is widely adopted and have active maintainers.
@@ -18,10 +19,12 @@ The Flask development server is not meant for production use and only intended f
 ## Options Considered
 
 ### Production Server
+
 - Gunicorn
 - Waitress
 
 ### Implementation
+
 1. API entrypoint responsible for conditional logic determining dev vs prod environment and starting corresponding server
 2. Dockerfile executable command for the prod server is overridden in the IaC [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html), API by default starts dev server
 3. Dockerfile executable command for the dev server is overridden in `docker-compose.yml`, API by default starts prod server
@@ -41,6 +44,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
 ### Production Server
+
 #### [Gunicorn](https://gunicorn.org/)
 
 - **Pros**
@@ -62,6 +66,7 @@ Chosen option: #3 Dockerfile executable command for the dev server is overridden
   - Runs on CPython and has "very acceptable performance"
 
 ### Implementation
+
 #### #1 API entrypoint responsible for conditional logic determining dev vs prod environment and starting corresponding server
 
 - **Pros**
