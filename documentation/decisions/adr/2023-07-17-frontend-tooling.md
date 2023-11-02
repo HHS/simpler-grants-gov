@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-17 <!-- REQUIRED -->
-- **Related Issue:** [#102](https://github.com/HHS/grants-equity/issues/102) <!-- RECOMMENDED -->
+- **Related Issue:** [#102](https://github.com/HHS/simpler-grants-gov/issues/102) <!-- RECOMMENDED -->
 - **Deciders:** Aaron Couch, Daphne Gold, Sammy Steiner, Gina Carson, Lucas Brown, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
@@ -27,23 +27,27 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 ### Dependency Management
 
 **[npm](https://www.npmjs.com/):** Package manager for Node.js.
+
 - npm is a robust package manager that is pre-bundled with Node, simplifying installation steps
 - Maintained by Github/Microsoft
 
 ### Code Linting
 
 **[ESLint](https://eslint.org/):** Statically analyzes your code to quickly find problems.
+
 - Supported by a huge variety of editors and easy to integrate into CI/CD pipeline
 - Very long-standing project, hugely popular, and well-supported tool
 
 ### Auto-formatting
 
 **[Prettier](https://prettier.io/):** Enforces code style and consistency while reducing the need for manual formatting or nitpicking.
+
 - Top pick in many JavaScript repositories as a well-maintained formatting tool
 
 ### Type Checking
 
 **[TypeScript](https://www.typescriptlang.org/):** Strongly typed programming language that builds on JavaScript
+
 - Converts to JavaScript, therefore works everywhere JavaScript is compatible
 - Static-type checking built into language
 - Identifies problems early at compile time
@@ -52,13 +56,15 @@ Front-end code quality tools should facilitate and efficiently enforce linting, 
 ### Dependency Checks
 
 **[Renovate](https://docs.renovatebot.com/):** Automated dependency updates.
+
 - Free and open source
 - Can batch, schedule, auto-assign and auto merge updates
 - Multi-language and supports Python as well
 
-*Note: Do we need the Safety package for our Python code as well or is this sufficient?*
+_Note: Do we need the Safety package for our Python code as well or is this sufficient?_
 
 ### License Checking[^*]
+
 **[License Checker](https://www.npmjs.com/package/license-checker):** Very aptly named tool to check licenses for dependencies. Can fail on specified input, a semicolon separated list.
 
 ## Decision Outcome <!-- REQUIRED -->

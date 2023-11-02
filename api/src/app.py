@@ -56,8 +56,8 @@ def configure_app(app: APIFlask) -> None:
 
     # Set various general OpenAPI config values
     app.info = {
-        "title": "Grants Equity API",
-        "description": "Back end API for grants.gov",
+        "title": "Simpler Grants API",
+        "description": "Back end API for simpler.grants.gov",
         "contact": {
             "name": "Nava PBC Engineering",
             "url": "https://www.navapbc.com",

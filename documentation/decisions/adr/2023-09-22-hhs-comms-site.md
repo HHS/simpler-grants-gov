@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-09-22
-- **Related Issue:** [#498](https://github.com/HHS/grants-equity/issues/498)
+- **Related Issue:** [#498](https://github.com/HHS/simpler-grants-gov/issues/498)
 - **Deciders:** Lucas, Elizabeth, Julius, Billy
 - **Tags:** topic: comms
 
@@ -12,7 +12,7 @@ HHS needs a way to distribute information about the Simpler Grants workstreams t
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- **Deployment Timeline:**  We can deploy a site with this tool in less than a month
+- **Deployment Timeline:** We can deploy a site with this tool in less than a month
 - **User Experience (UX):** The site is easy to navigate with a modern-looking user interface
 - **Hosting Cost:** It is not prohibitively expensive to extend access to all of HHS
 - **Access Control:** We can control who can read and edit the site with minimal overhead
@@ -53,6 +53,7 @@ In parallel we'll actively work on developing a **visitor authentication option*
 ## Comparison Matrix
 
 ### Table Legend
+
 - ✅ - Meets decision criteria
 - ❌ - Does not meet decision criteria
 - 🟡 - Partially meets criteria or requires more info
@@ -61,13 +62,13 @@ In parallel we'll actively work on developing a **visitor authentication option*
 
 | Option                          | Timeline | UX  | Cost | Access | Content | Feedback |
 | ------------------------------- | :------: | :-: | :--: | :----: | :-----: | :------: |
-| GitBook: Guest Access           |    ✅    |  ✅  |  ❌  |   🟡   |    ✅    |    ✅     |
-| GitBook: Visitor Authentication |    ❌    |  ✅  |  ✅  |   ✅   |    ✅    |    ✅     |
-| Gitbook: “Private” Link         |    ✅    |  ✅  |  ✅  |   ❌   |    ✅    |    ✅     |
-| SharePoint: HHS-owned           |    🟡    |  🟡  |  ✅  |   ✅   |    🟡    |    ✅     |
-| SharePoint: Contractor-owned    |    🟡    |  🟡  |  ❌  |   🟡   |    ✅    |    ✅     |
-| Custom: HHS Intranet Page       |    🟡    |  ✅  |  ✅  |   🟡   |    ❌    |    🟡     |
-| Custom: Contractor-built Site   |    ❌    |  ✅  |  ✅  |   🟡   |    ✅    |    ✅     |
+| GitBook: Guest Access           |    ✅    | ✅  |  ❌  |   🟡   |   ✅    |    ✅    |
+| GitBook: Visitor Authentication |    ❌    | ✅  |  ✅  |   ✅   |   ✅    |    ✅    |
+| Gitbook: “Private” Link         |    ✅    | ✅  |  ✅  |   ❌   |   ✅    |    ✅    |
+| SharePoint: HHS-owned           |    🟡    | 🟡  |  ✅  |   ✅   |   🟡    |    ✅    |
+| SharePoint: Contractor-owned    |    🟡    | 🟡  |  ❌  |   🟡   |   ✅    |    ✅    |
+| Custom: HHS Intranet Page       |    🟡    | ✅  |  ✅  |   🟡   |   ❌    |    🟡    |
+| Custom: Contractor-built Site   |    ❌    | ✅  |  ✅  |   🟡   |   ✅    |    ✅    |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
