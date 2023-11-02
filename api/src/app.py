@@ -8,13 +8,13 @@ from werkzeug.exceptions import Unauthorized
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities import opportunity_blueprint
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import User, get_app_security_scheme
-import src.api.feature_flags.feature_flag_config as feature_flag_config
 
 logger = logging.getLogger(__name__)
 

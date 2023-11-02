@@ -1,10 +1,12 @@
-from src.util.env_config import PydanticBaseEnvConfig
-from pydantic import Field
-from src.api.feature_flags.feature_flag import FeatureFlag
-
 import logging
 
+from pydantic import Field
+
+from src.api.feature_flags.feature_flag import FeatureFlag
+from src.util.env_config import PydanticBaseEnvConfig
+
 logger = logging.getLogger(__name__)
+
 
 class FeatureFlagConfig(PydanticBaseEnvConfig):
     """
@@ -15,11 +17,14 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
     """
 
     # ENABLE_OPPORTUNITY_LOG_MSG
-    enable_opportunity_log_msg: bool = Field(False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name())
+    enable_opportunity_log_msg: bool = Field(
+        False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name()
+    )
 
 
 # Global, loaded once at startup by calling initialize
 _config: FeatureFlagConfig | None = None
+
 
 def initialize() -> None:
     global _config
@@ -27,6 +32,7 @@ def initialize() -> None:
     if not _config:
         _config = FeatureFlagConfig()
         logger.info("Constructed feature flag configuration", extra=_config.model_dump())
+
 
 def get_feature_flag_config() -> FeatureFlagConfig:
     if not _config:

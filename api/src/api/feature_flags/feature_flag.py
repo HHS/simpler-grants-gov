@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class FeatureFlag(StrEnum):
     """
     This enum class serves as a list of constant values for feature flags.

@@ -14,13 +14,18 @@ logger = logging.getLogger(__name__)
 
 @opportunity_blueprint.post("/v1/opportunities/search")
 @opportunity_blueprint.input(opportunity_schemas.OpportunitySearchSchema, arg_name="search_params")
-@opportunity_blueprint.input(opportunity_schemas.OpportunitySearchHeaderSchema, location="headers", arg_name="feature_flag_config")
+@opportunity_blueprint.input(
+    opportunity_schemas.OpportunitySearchHeaderSchema,
+    location="headers",
+    arg_name="feature_flag_config",
+)
 # many=True allows us to return a list of opportunity objects
 @opportunity_blueprint.output(opportunity_schemas.OpportunitySchema(many=True))
 @opportunity_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
-def opportunity_search(db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig) -> response.ApiResponse:
-
+def opportunity_search(
+    db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig
+) -> response.ApiResponse:
     if feature_flag_config.enable_opportunity_log_msg:
         logger.info("Feature flag enabled")
 
