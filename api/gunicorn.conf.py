@@ -24,5 +24,5 @@ bind = app_config.host + ':' + str(app_config.port)
 
 # Until we figure out better math, ignore the above, hardcoding # workers because Python gets EC2 cpu not Fargate
 # 1 vCPU is equivalent to 1 core of a hyperthreaded processor, which will give you 1 physical core & 2 threads
-workers = 1
+workers = 2
 threads = 4
