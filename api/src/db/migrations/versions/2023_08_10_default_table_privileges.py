@@ -1,7 +1,7 @@
 """default table privileges
 
 Revision ID: 3ed861176e3d
-Revises:
+Revises: 9fe657340f70
 Create Date: 2023-08-10 15:52:10.626153
 
 """
@@ -9,7 +9,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "3ed861176e3d"
-down_revision = None
+down_revision = "9fe657340f70"
 branch_labels = None
 depends_on = None
 
