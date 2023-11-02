@@ -20,7 +20,6 @@ Add the flag to the `FeatureFlag` enum. The value of the enum will be used
 to generate the environment variable name as well as the header field name as described above.
 
 ```py
-
 class FeatureFlag(StrEnum):
     # ... Existing flags
 
