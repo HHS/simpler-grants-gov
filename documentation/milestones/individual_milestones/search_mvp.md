@@ -173,7 +173,7 @@ TODO
 
 *If so, when will English-language content be locked? Then when will translation be started and completed?*
 
-TODO
+The translations process will be determined in the 30k ft deliverable: Static Site Public Launch.
 
 ### Services going into PROD for the first time
 <!-- Required -->
