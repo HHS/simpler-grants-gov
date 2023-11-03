@@ -202,7 +202,7 @@ The search data and text will be shared for the first time on the site.
 
 Does this 30k ft deliverable expose any new attack vectors or expand the attack surface of the product?
 
-1. TODO
+We're exposing new endpoints that are all read-only this limits vulnerabilities. 
 
 If so, how are we addressing these risks?
 
