@@ -86,7 +86,7 @@ The primary page we'll need to deliver for the user interface (UI) is a search p
 - [ ] Basic requirements:
   - [ ] Code is deployed to `main` & PROD through our CI/CD pipeline
   - [ ] Services are live in PROD (may be behind feature flag)
-  - [ ] Translations are live in PROD (if necessary)
+  - [ ] Simpler site translations are live in PROD (if necessary). Translations of the search results content coming from grants.gov will not be included in this 30k ft deliverable. 
   - [ ] All new services have passed a security review (if necessary)
   - [ ] All new services have completed a 508 compliance review (if necessary)
   - [ ] Data needed for metrics is actively being captured in PROD
