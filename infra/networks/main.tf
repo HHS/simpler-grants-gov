@@ -93,3 +93,10 @@ resource "aws_vpc_endpoint" "aws_service" {
   subnet_ids          = data.aws_subnets.default.ids
   private_dns_enabled = true
 }
+
+# We put this here because it makes sense. We need to fill out the vpc info and maybe investigate inter-region config to add.
+resource "aws_vpc_peering_connection" "foo" {
+  peer_owner_id = var.peer_owner_id
+  peer_vpc_id   = aws_vpc.bar.id
+  vpc_id        = aws_vpc.foo.id
+}
