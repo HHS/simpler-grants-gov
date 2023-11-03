@@ -195,7 +195,7 @@ Are there multiple services that are being connected for the first time in PROD?
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
-1. TODO
+The search data and text will be shared for the first time on the site. 
 
 ### Security considerations
 <!-- Required -->
