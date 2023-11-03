@@ -147,7 +147,7 @@ Is there any notable functionality we do ***not*** expect to be in place before 
 
 #### Does the metadata and the text of the opportunity need to be translated?
 
-TODO
+We will determine if individual fields from the search results can be easily translated in this effort but opportunity listings and all search results will not be translated in this 30k ft deliverable. 
 
 #### What metadata is currently available about each opportunity?
 
