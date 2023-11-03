@@ -206,4 +206,4 @@ Does this 30k ft deliverable expose any new attack vectors or expand the attack 
 
 If so, how are we addressing these risks?
 
-1. TODO
+We plan to complete a security review and set up any mitigation strategies as needed. 
