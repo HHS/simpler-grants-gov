@@ -169,7 +169,7 @@ The following work will *not* be completed as part of this deliverable:
 
 *Does this milestone involve delivering any content that needs translation?*
 
-TODO
+The translation process will be determined in the 30k ft deliverable in Public Launch: Static Site.
 
 *If so, when will English-language content be locked? Then when will translation be started and completed?*
 
