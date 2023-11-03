@@ -151,7 +151,7 @@ We will determine if individual fields from the search results can be easily tra
 
 #### What metadata is currently available about each opportunity?
 
-TODO
+Metadata is being determined in the GET Opportunity 30k deliverable. We plan to use publicly available data only. For example, is_draft state will not be used in this Search feature. 
 
 ### Not doing
 <!-- Optional -->
