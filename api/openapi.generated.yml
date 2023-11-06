@@ -52,7 +52,13 @@ paths:
       summary: Health
   /v1/opportunities/search:
     post:
-      parameters: []
+      parameters:
+      - in: header
+        name: X-FF-Enable-Opportunity-Log-Msg
+        description: Whether to log a message in the opportunity endpoint
+        schema:
+          type: boolean
+        required: false
       responses:
         '200':
           content:
