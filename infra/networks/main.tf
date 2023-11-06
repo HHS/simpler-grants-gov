@@ -95,11 +95,11 @@ resource "aws_vpc_endpoint" "aws_service" {
 }
 
 data "aws_ssm_parameter" "dms_peer_owner_id" {
-  name  = "/network/dms/peer-owner-id"
+  name = "/network/dms/peer-owner-id"
 }
 
 data "aws_ssm_parameter" "dms_peer_vpc_id" {
-  name  = "/network/dms/peer-vpc-id"
+  name = "/network/dms/peer-vpc-id"
 }
 
 resource "aws_vpc_peering_connection" "dms" {
