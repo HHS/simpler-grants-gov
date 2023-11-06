@@ -19,3 +19,6 @@ ignore:
   # https://github.com/anchore/grype/issues/1172
   - vulnerability: GHSA-xqr8-7jwr-rhp7
   - vulnerability: GHSA-7fh5-64p2-3v2j
+    # pip vulnerability, need to wait for the Python image to update to 23.x
+    # https://github.com/docker-library/python/blob/402b993af9ca7a5ee22d8ecccaa6197bfb957bc5/3.12/slim-bookworm/Dockerfile#L137
+  - vulnerability: GHSA-mq26-g339-26xf
