@@ -2,6 +2,9 @@ setup:
 	poetry install
 	gh auth login
 
+export_sprint_data:
+	poetry run python cli.py --owner HHS --repo simpler-grants-gov --project 13
+
 sprint_report:
-	poetry run python cli.py
+	export_sprint_data
 	poetry run jupyter notebook
