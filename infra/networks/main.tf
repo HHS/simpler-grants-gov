@@ -94,9 +94,21 @@ resource "aws_vpc_endpoint" "aws_service" {
   private_dns_enabled = true
 }
 
-# We put this here because it makes sense. We need to fill out the vpc info and maybe investigate inter-region config to add.
-resource "aws_vpc_peering_connection" "foo" {
-  peer_owner_id = var.peer_owner_id
-  peer_vpc_id   = aws_vpc.bar.id
-  vpc_id        = aws_vpc.foo.id
+data "aws_ssm_parameter" "dms_peer_owner_id" {
+  name  = "/network/dms/peer-owner-id"
+}
+
+data "aws_ssm_parameter" "dms_peer_vpc_id" {
+  name  = "/network/dms/peer-vpc-id"
+}
+
+resource "aws_vpc_peering_connection" "dms" {
+  peer_owner_id = data.aws_ssm_parameter.dms_peer_owner_id.value
+  peer_vpc_id   = data.aws_ssm_parameter.dms_peer_vpc_id.value
+  vpc_id        = data.aws_vpc.default.id
+  peer_region   = "us-east-2"
+
+  tags = {
+    Name = "DMS VPC Peering"
+  }
 }
