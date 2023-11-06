@@ -307,9 +307,42 @@ def test_opportunity_search_unauthorized_401(client, api_auth_token):
         "/v1/opportunities/search", json=get_search_request(), headers={"X-Auth": "incorrect token"}
     )
 
-    print(response.get_json())
     assert response.status_code == 401
     assert (
         response.get_json()["message"]
         == "The server could not verify that you are authorized to access the URL requested"
     )
+
+
+@pytest.mark.parametrize("enable_opportunity_log_msg", [True, False, None])
+def test_opportunity_search_feature_flag_200(
+    client, api_auth_token, enable_opportunity_log_msg, caplog
+):
+    headers = {"X-Auth": api_auth_token}
+
+    if enable_opportunity_log_msg is not None:
+        headers["X-FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
+
+    client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
+
+    # Verify the header override works, and if not set the default of False is used
+    if enable_opportunity_log_msg is True:
+        assert "Feature flag enabled" in caplog.messages
+    else:
+        assert "Feature flag enabled" not in caplog.messages
+
+
+@pytest.mark.parametrize("enable_opportunity_log_msg", ["hello", 5, {}])
+def test_opportunity_search_feature_flag_invalid_value_422(
+    client, api_auth_token, enable_opportunity_log_msg
+):
+    headers = {
+        "X-Auth": api_auth_token,
+        "X-FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
+    }
+
+    resp = client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
+    assert resp.status_code == 422
+
+    response_data = resp.get_json()["detail"]["headers"]
+    assert response_data == {"X-FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
