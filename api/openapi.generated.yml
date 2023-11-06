@@ -54,7 +54,7 @@ paths:
     post:
       parameters:
       - in: header
-        name: X-FF-Enable-Opportunity-Log-Msg
+        name: FF-Enable-Opportunity-Log-Msg
         description: Whether to log a message in the opportunity endpoint
         schema:
           type: boolean
