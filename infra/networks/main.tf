@@ -94,6 +94,9 @@ resource "aws_vpc_endpoint" "aws_service" {
   private_dns_enabled = true
 }
 
+# VPC Configuration for DMS
+# ----------------------------------------
+#
 data "aws_ssm_parameter" "dms_peer_owner_id" {
   name = "/network/dms/peer-owner-id"
 }
@@ -111,4 +114,10 @@ resource "aws_vpc_peering_connection" "dms" {
   tags = {
     Name = "DMS VPC Peering"
   }
+}
+
+resource "aws_route" "dms" {
+  route_table_id            = data.aws_vpc.default.main_route_table_id
+  destination_cidr_block    = "10.220.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
 }
