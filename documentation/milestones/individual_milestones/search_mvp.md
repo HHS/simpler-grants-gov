@@ -141,17 +141,18 @@ What functionality do we expect to be in place by ***the end*** of work on this 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
 - **AuthN/AuthZ:** Authentication (AuthN) and Authorization (AuthZ) will be the focus of a subsequent deliverable, so the MVP is not expected to support any features that require users to be logged in.
+- **Translating text of the NOFOs:** We will not be translating the full text of the NOFO as part of this or future deliverables.
 
 ### Open questions
 <!-- Optional -->
 
 #### Does the metadata and the text of the opportunity need to be translated?
 
-We will determine if individual fields from the search results can be easily translated in this effort but opportunity listings and all search results will not be translated in this 30k ft deliverable. 
+We will determine if individual fields from the search results can be easily translated in this effort but opportunity listings and all search results will _**not**_ be translated in this 30k ft deliverable. 
 
 #### What metadata is currently available about each opportunity?
 
-Metadata is being determined in the GET Opportunity 30k deliverable. We plan to use publicly available data only. For example, is_draft state will not be used in this Search feature. 
+Metadata is being determined in the [GET Opportunity 30k deliverable](https://github.com/HHS/simpler-grants-gov/issues/70). We plan to use publicly available data only. For example, `is_draft` state will not be used in this Search feature. 
 
 ### Not doing
 <!-- Optional -->
@@ -169,11 +170,11 @@ The following work will *not* be completed as part of this deliverable:
 
 *Does this milestone involve delivering any content that needs translation?*
 
-The translation process will be determined in the 30k ft deliverable in Public Launch: Static Site.
+The translation process will be determined within the [static site public launch deliverable](https://github.com/HHS/simpler-grants-gov/issues/568).
 
 *If so, when will English-language content be locked? Then when will translation be started and completed?*
 
-The translations process will be determined in the 30k ft deliverable: Static Site Public Launch.
+The translation process will be determined within the [static site public launch deliverable](https://github.com/HHS/simpler-grants-gov/issues/568).
 
 ### Services going into PROD for the first time
 <!-- Required -->
@@ -193,17 +194,17 @@ Are there multiple services that are being connected for the first time in PROD?
 ### Data being shared publicly for the first time
 <!-- Required -->
 
-Are there any fields being shared publicly that have never been shared in PROD before?
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
 The search data and text will be shared for the first time on the site. 
 
 ### Security considerations
 <!-- Required -->
 
-Does this 30k ft deliverable expose any new attack vectors or expand the attack surface of the product?
+_Does this 30k ft deliverable expose any new attack vectors or expand the attack surface of the product?_
 
 We're exposing new endpoints that are all read-only this limits vulnerabilities. 
 
-If so, how are we addressing these risks?
+_If so, how are we addressing these risks?_
 
 We plan to complete a security review and set up any mitigation strategies as needed. 
