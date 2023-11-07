@@ -2,13 +2,13 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-08-01 <!-- REQUIRED -->
-- **Related Issue:** [#323](https://github.com/HHS/grants-equity/issues/323) <!-- RECOMMENDED -->
+- **Related Issue:** [#323](https://github.com/HHS/simpler-grants-gov/issues/323) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, analytics
 
 ## Context and Problem Statement
 
-The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of beta.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
+The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of simpler.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -16,7 +16,7 @@ The [communications platform milestone](milestone) identifies a series of platfo
 
 - **Data tracking capabilities**: solution should be able to track the essential metrics and events relevant to the project's goals, such as page views, user interactions, and other custom events.
 - **Data visualization and reporting**: The tool should offer clear and comprehensive data visualization and reporting features to present data in a way that is easy to understand and interpret for multiple audiences (public, internal HHS, etc.)
-- **Integration with existing systems**: consider whether the analytics tool can seamlessly integrate with the project's existing infrastructure, and other tools used in the development process. We will have a content management system in the future and we should have forward thinking to ensure it could be compatible with various CMS options. 
+- **Integration with existing systems**: consider whether the analytics tool can seamlessly integrate with the project's existing infrastructure, and other tools used in the development process. We will have a content management system in the future and we should have forward thinking to ensure it could be compatible with various CMS options.
 - **Real-time data processing**: Assess whether the analytics tool can provide real-time data processing capabilities, enabling timely responses to critical events.
 - **Data privacy and security**: Ensure that the selected tool complies with data privacy regulations and provides robust security measures to protect sensitive information.
 - **Scalability**: Consider whether the analytics tool can handle the expected growth in data volume and user traffic as the project expands.
@@ -37,18 +37,16 @@ The [communications platform milestone](milestone) identifies a series of platfo
 - [Adobe Analytics](https://business.adobe.com/products/analytics/adobe-analytics.html)
 - [Matomo](https://matomo.org/)
 
-
 ## Decision Outcome <!-- REQUIRED -->
 
-We recommend moving forward with analytics.usa.gov through the Digital Analytics Program for the public facing analytics. It is required for all public-facing government agency websites. The platform aligns well with our goals due to its robust data tracking capabilities, allowing us to monitor essential metrics and custom events critical to our project's success. Its comprehensive data visualization and reporting features ensure that data can be presented in an easily understandable format for various audiences, including the general public and internal stakeholders at HHS. Since it is run by the Digital Analytics Program, we have greater confidence in the data and security standards. It is free for government agencies. Additionally, it allows us to align with other government agencies and ensure transparency to public. 
+We recommend moving forward with analytics.usa.gov through the Digital Analytics Program for the public facing analytics. It is required for all public-facing government agency websites. The platform aligns well with our goals due to its robust data tracking capabilities, allowing us to monitor essential metrics and custom events critical to our project's success. Its comprehensive data visualization and reporting features ensure that data can be presented in an easily understandable format for various audiences, including the general public and internal stakeholders at HHS. Since it is run by the Digital Analytics Program, we have greater confidence in the data and security standards. It is free for government agencies. Additionally, it allows us to align with other government agencies and ensure transparency to public.
 
-DAP cannot be used for authenticated pages. We recommend Google Analytics with any logged in or authenticated pages. Since DAP is powered by Google Analytics, it makes sense to have the same Analytics platform on those pages as well. An assumption is that we will be able to connect the user sessions between authenticated and the public site together. However, if it is not possible to stitch the user journey (unauthenticated to authenticated and back and forth) together, it is worth revisiting the analytics tool selection. 
-
+DAP cannot be used for authenticated pages. We recommend Google Analytics with any logged in or authenticated pages. Since DAP is powered by Google Analytics, it makes sense to have the same Analytics platform on those pages as well. An assumption is that we will be able to connect the user sessions between authenticated and the public site together. However, if it is not possible to stitch the user journey (unauthenticated to authenticated and back and forth) together, it is worth revisiting the analytics tool selection.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- **Data-Driven Decision Making**: With an analytics platform, our project can gather valuable data and insights about usage and identify where there are shortfalls to our product. It can allow us to ensure we are building an equitable solution for the public. This data-driven approach enables informed decision-making and allows teams to identify trends, opportunities, and areas for improvement.  
-- **Improved Performance**: Analytics platforms help track key performance indicators (KPIs) and measure the success of various initiatives and milestones. By monitoring these metrics, we can optimize our strategies and improve overall performance.  
+- **Data-Driven Decision Making**: With an analytics platform, our project can gather valuable data and insights about usage and identify where there are shortfalls to our product. It can allow us to ensure we are building an equitable solution for the public. This data-driven approach enables informed decision-making and allows teams to identify trends, opportunities, and areas for improvement.
+- **Improved Performance**: Analytics platforms help track key performance indicators (KPIs) and measure the success of various initiatives and milestones. By monitoring these metrics, we can optimize our strategies and improve overall performance.
 - **Enhanced User Experience**: Understanding user behavior through analytics helps tailor products, services, and content to meet users' needs and preferences leading to a better user experience.
 
 ### Negative Consequences <!-- OPTIONAL -->
@@ -58,7 +56,6 @@ DAP cannot be used for authenticated pages. We recommend Google Analytics with a
 - **Misinterpretation of Data**: Misinterpreting or misrepresenting data can lead to incorrect conclusions and misguided strategies. Proper data analysis and understanding are essential to draw accurate insights.
 - **Cost and Resource Allocation**: Implementing and maintaining an analytics platform can be costly and resource-intensive that goes beyond just the cost of the tool.
 - **Learning Curve**: Adopting new analytics platforms may require training and time for team members to become proficient, potentially affecting productivity during the initial stages.
-
 
 ## Comparison Matrix
 
@@ -70,20 +67,20 @@ DAP cannot be used for authenticated pages. We recommend Google Analytics with a
 
 | Factor                            | Analytics.usa.gov | Google Analytics | Mixpanel | Adobe Analytics | Matomo |
 | --------------------------------- | :---------------: | :--------------: | :------: | :-------------: | :----: |
-| Data tracking capabilities        |       ✅          |        3         |    3     |    3            |    3   |
-| Data visualization and reporting  |      1            |        3         |    2     |   3             |   1    |
-| Integration with existing systems |      ❓           |        3         |    2     |   1             |   2    |
-| Real-time data processing         |     ✅            |        🔄        |    ✅    |   🔄            |   🔄   |
-| Data privacy and security         |     3             |        3         |     3    |   3             |   4    |
-| Scalability                       |      2            |        4         |     3    |   3             |   3    |
-| Cost                              |     Free (gov use)|   Free + Premium |     $    |   $$            |   Free |
-| Customization and flexibility     |     1             |        4         |     3    |    3            |    4   |
-| Support and documentation         |     2             |        4         |     3    |    4            |    3   |
-| User-friendly interface           |     ✅            |   ✅             |     ✅   |   ✅            |   🔄   |
-| Authority to Operate              |     ✅            |   ❓             |     ❓   |   ❓            |   ❓   |
-| Open Source*                      |    ❌             |  ❌              |     ❌   |   ❌            |   ✅   |
+| Data tracking capabilities        |        ✅         |        3         |    3     |        3        |   3    |
+| Data visualization and reporting  |         1         |        3         |    2     |        3        |   1    |
+| Integration with existing systems |        ❓         |        3         |    2     |        1        |   2    |
+| Real-time data processing         |        ✅         |        🔄        |    ✅    |       🔄        |   🔄   |
+| Data privacy and security         |         3         |        3         |    3     |        3        |   4    |
+| Scalability                       |         2         |        4         |    3     |        3        |   3    |
+| Cost                              |  Free (gov use)   |  Free + Premium  |    $     |       $$        |  Free  |
+| Customization and flexibility     |         1         |        4         |    3     |        3        |   4    |
+| Support and documentation         |         2         |        4         |    3     |        4        |   3    |
+| User-friendly interface           |        ✅         |        ✅        |    ✅    |       ✅        |   🔄   |
+| Authority to Operate              |        ✅         |        ❓        |    ❓    |       ❓        |   ❓   |
+| Open Source\*                     |        ❌         |        ❌        |    ❌    |       ❌        |   ✅   |
 
- *Nice to have
+\*Nice to have
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -107,7 +104,7 @@ DAP provides federal agencies with:
 - DAP is required: On November 8, 2016, the Office of Management and Budget (OMB) released a memorandum on [Policies for Federal Agency Public Websites and Digital Services](https://www.whitehouse.gov/wp-content/uploads/legacy_drupal_files/omb/memoranda/2017/m-17-06.pdf) (PDF, 1.2 MB, 18 pages), which requires executive branch federal agencies to implement the DAP JavaScript code on all public facing federal websites.
 - Details on the code are available at the [DAP Github Repo](https://github.com/digital-analytics-program/gov-wide-code). Under the Code Capabilities Summary there are details on the types of data that are collected.
 - The DAP script should only be applied to public-facing pages. Public-facing web pages are defined as those that can be accessed without any authentication or login, and are not part of an otherwise “privileged session.”
-- The DAP script tag should not be placed on pages visited during logged-in sessions. Notably, other seemingly “public” pages that can be accessed without authentication may also be part of privileged sessions; for example, a password reset page that is accessed by clicking a link in an email is not appropriate for DAP code because it assumes the visitor has the privilege of control over the email account used to provide the link. 
+- The DAP script tag should not be placed on pages visited during logged-in sessions. Notably, other seemingly “public” pages that can be accessed without authentication may also be part of privileged sessions; for example, a password reset page that is accessed by clicking a link in an email is not appropriate for DAP code because it assumes the visitor has the privilege of control over the email account used to provide the link.
 
 #### Pros
 
@@ -119,6 +116,7 @@ DAP provides federal agencies with:
 - The insights derived from Analytics.usa.gov can contribute to the optimization of government websites and services especially by our users and community as they will have a direct view, resulting in a more efficient and effective delivery of information and services to the public.
 
 #### Cons
+
 - DAP can only be on public facing systems, no logged in states should have DAP
 
 ### Google Analytics
@@ -140,7 +138,7 @@ Google Analytics is a widely used web and app analytics platform that provides i
 
 ### Mixpanel
 
-Mixpanel is a user-centric analytics tool primarily focused on app analytics. It excels in tracking specific events and user flows, providing valuable insights into user engagement. Its funnel analysis helps pinpoint where users drop off in processes. While it's strong for app analytics, its web tracking capabilities might be less comprehensive. 
+Mixpanel is a user-centric analytics tool primarily focused on app analytics. It excels in tracking specific events and user flows, providing valuable insights into user engagement. Its funnel analysis helps pinpoint where users drop off in processes. While it's strong for app analytics, its web tracking capabilities might be less comprehensive.
 
 #### Pros
 
@@ -156,11 +154,9 @@ Mixpanel is a user-centric analytics tool primarily focused on app analytics. It
 - Mixpanel's pricing can be higher compared to some other analytics tools, particularly as usage scales.
 - Will need to get ATO or FedRAMP approval
 
-
 ### Adobe Analytics
 
 Adobe Analytics is an enterprise-grade solution suitable for large organizations. It integrates well with other Adobe products and offers extensive customization options, allowing for tailor-made reports and dashboards.
-
 
 #### Pros
 
@@ -169,7 +165,6 @@ Adobe Analytics is an enterprise-grade solution suitable for large organizations
 - Adobe Analytics allows extensive customization and flexibility in creating reports, segments, and dashboards.
 - Real-time data reporting is available, allowing for immediate insights into user behavior.
 
-
 #### Cons
 
 - Adobe Analytics can be complex to set up and manage, requiring expertise and dedicated resources.
@@ -177,11 +172,9 @@ Adobe Analytics is an enterprise-grade solution suitable for large organizations
 - Due to its advanced capabilities, Adobe Analytics might have a steeper learning curve for new users and the general public.
 - Will need to get ATO or FedRAMP approval
 
-  
 ### Matomo
 
-Matomo, an open-source alternative, offers data ownership and control, making it attractive for privacy-conscious organizations. As self-hosted software, it can be customized and audited, addressing data privacy concerns. 
-
+Matomo, an open-source alternative, offers data ownership and control, making it attractive for privacy-conscious organizations. As self-hosted software, it can be customized and audited, addressing data privacy concerns.
 
 #### Pros
 
@@ -195,8 +188,6 @@ Matomo, an open-source alternative, offers data ownership and control, making it
 - There are downsides and costs to self-hosting
 - The support ecosystem might not be as extensive as that of larger, commercial analytics platforms.
 - Will need to get ATO or FedRAMP approval
-
-
 
 ## Links <!-- OPTIONAL -->
 

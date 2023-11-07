@@ -52,8 +52,6 @@ RUN poetry install --no-root --with dev
 
 COPY . /api
 
-COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
-
 # Set the host to 0.0.0.0 to make the server available external
 # to the Docker container that it's running in.
 ENV HOST=0.0.0.0
@@ -98,9 +96,7 @@ RUN poetry install --no-root --only main
 # include section in pyproject.toml. Also note that if you change the name or
 # version section in pyproject.toml, you will need to change the dist/... to match
 # or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/grants_equity_api-0.1.0-py3-none-any.whl'
-
-COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
+RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defiend in pyproject.toml

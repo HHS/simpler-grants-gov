@@ -2,7 +2,7 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-19 <!-- REQUIRED -->
-- **Related Issue:** [#186](https://github.com/HHS/grants-equity/issues/186) <!-- RECOMMENDED -->
+- **Related Issue:** [#186](https://github.com/HHS/simpler-grants-gov/issues/186) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
 
 ## Context and Problem Statement
@@ -12,10 +12,10 @@ The project will require a backend API. The goal of this ADR is to evaluate and 
 ## Decision Drivers <!-- RECOMMENDED -->
 
 ### Must Haves
-- Well-Established Paradigm & Ease of Adoption: The API protocol needs to be well-established so that the consumer of the API is familiar with how to structure requests and process responses. The API should be simplistic, consistent, clear and backward compatibile
-- Supports Common Uses Cases: The API needs to support our common use cases (e.g. querying a list of NOFOs that match certain search criteria), so that it "just works" out of the box without having to spend much time learning how to use it 
-- Easily Maintained and Scalable: The API needs to be relatively easy to maintain and scale, so that we can prioritize developing important product features over managing basic infrastructure. We need a flexible protocol that can satisfy both current and future needs of the project.
 
+- Well-Established Paradigm & Ease of Adoption: The API protocol needs to be well-established so that the consumer of the API is familiar with how to structure requests and process responses. The API should be simplistic, consistent, clear and backward compatibile
+- Supports Common Uses Cases: The API needs to support our common use cases (e.g. querying a list of NOFOs that match certain search criteria), so that it "just works" out of the box without having to spend much time learning how to use it
+- Easily Maintained and Scalable: The API needs to be relatively easy to maintain and scale, so that we can prioritize developing important product features over managing basic infrastructure. We need a flexible protocol that can satisfy both current and future needs of the project.
 
 ## Options Considered
 
@@ -27,7 +27,6 @@ The project will require a backend API. The goal of this ADR is to evaluate and 
 ## Decision Outcome <!-- REQUIRED -->
 
 Chosen protocol: REST, because this option is widely opted, is highly scalable and can meet the demands of a large and active user base, and is flexible.
-
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -60,7 +59,7 @@ SOAP (Simple Object Access Protocol) is a protocol for exchanging information be
 
 ### RPC
 
-RPC (Remote Procedure Call) is a style of programming where a client application calls a procedure on a remote server. 
+RPC (Remote Procedure Call) is a style of programming where a client application calls a procedure on a remote server.
 
 - **Pros**
   - Efficient
@@ -83,7 +82,6 @@ GraphQL is a query language for APIs. It allows clients to request specific data
   - Not as widely adopted as REST or SOAP
   - Can be complex to implement
   - Not as well-suited for complex data structures
-
 
 ## Links <!-- OPTIONAL -->
 

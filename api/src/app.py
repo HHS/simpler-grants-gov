@@ -8,11 +8,12 @@ from werkzeug.exceptions import Unauthorized
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.opportunities import opportunity_blueprint
 from src.api.schemas import response_schema
-from src.api.users import user_blueprint
 from src.auth.api_key_auth import User, get_app_security_scheme
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,8 @@ def create_app() -> APIFlask:
 
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
+
+    feature_flag_config.initialize()
 
     configure_app(app)
     register_blueprints(app)
@@ -53,8 +56,8 @@ def configure_app(app: APIFlask) -> None:
 
     # Set various general OpenAPI config values
     app.info = {
-        "title": "Grants Equity API",
-        "description": "Back end API for grants.gov",
+        "title": "Simpler Grants API",
+        "description": "Back end API for simpler.grants.gov",
         "contact": {
             "name": "Nava PBC Engineering",
             "url": "https://www.navapbc.com",
@@ -70,7 +73,7 @@ def configure_app(app: APIFlask) -> None:
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(user_blueprint)
+    app.register_blueprint(opportunity_blueprint)
 
 
 def get_project_root_dir() -> str:

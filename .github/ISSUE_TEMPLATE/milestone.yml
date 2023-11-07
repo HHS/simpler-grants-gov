@@ -12,7 +12,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Example:** [DB & API Planning](https://github.com/HHS/grants-equity/issues/21)
+        **Example:** [DB & API Planning](https://github.com/HHS/simpler-grants-gov/issues/21)
   - type: textarea
     id: description
     attributes:
