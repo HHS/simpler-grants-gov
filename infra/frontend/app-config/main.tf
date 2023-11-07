@@ -6,6 +6,7 @@ locals {
   has_database                    = false
   has_incident_management_service = false
   enable_autoscaling              = true
+  hostname                        = "0.0.0.0"
 
   build_repository_config = {
     region = module.project_config.default_region
@@ -45,9 +46,9 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared = "grants-equity"
-    dev    = "grants-equity"
-    prod   = "grants-equity"
+    shared = "simpler-grants-gov"
+    dev    = "simpler-grants-gov"
+    prod   = "simpler-grants-gov"
   }
 }
 

@@ -102,6 +102,7 @@ module "service" {
   subnet_ids            = data.aws_subnets.default.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
   cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
+  hostname              = module.app_config.hostname
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids

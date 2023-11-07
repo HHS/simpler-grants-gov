@@ -2,13 +2,13 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-09-21
-- **Related Issue:** [#322](https://github.com/HHS/grants-equity/issues/322)
+- **Related Issue:** [#322](https://github.com/HHS/simpler-grants-gov/issues/322)
 - **Deciders:** Lucas Brown, Billy Daly, Sammy Steiner, Daphne Gold, Aaron Couch, Curtis Mayer, Lorenzo Gomez, Marwan Abu-Fadel, Brandon Smith
 - **Tags:** Hosting, Infrastructure, Database
 
 ## Context and Problem Statement
 
-The Beta.Grants.Gov platform will need to consume live grants data securely and without impacting grants.gov performance. However, the production database was not planned to support additional load to the database from the beta api. The beta work will also want to test schema changes to the database to facilitate new queries and lifecycle tracking that will not be possible in the production database.
+The Simpler.Grants.Gov platform will need to consume live grants data securely and without impacting grants.gov performance. However, the production database was not planned to support additional load to the database from the beta api. The beta work will also want to test schema changes to the database to facilitate new queries and lifecycle tracking that will not be possible in the production database.
 
 Additionally, the grants.gov database resides in another AWS account, which complicates access and security concerns. Any solution in production will need to comply with HHS security policies, be included on a security impact assessment (SIA), use tools and controls in or added to the System Security Plan (SSP), and not jeopardize the security of the environment with Approval to Operate (ATO).
 
@@ -72,9 +72,11 @@ Chosen option: Use AWS VPC Peering, because it is the most secure option for per
 In support of this decision, MicroHealth and Nava will need to work together to limit the traffic between VPCs to only the necessary services, over the necessary ports, using only the necessary protocols. This will need to be configured with security groups in both the MicroHealth and Nava AWS accounts.
 
 ### Positive Consequences
+
 - If we require more services within the VPCs to talk with each other, we will already have a tool configured for that
 
 ### Negative Consequences
+
 - This tool assumes MicroHealth and Nava will put security controls in place to limit the permitted traffic to only what's necessary, which will take some coordination between MicroHealth and Nava
 
 ## Security Implications
@@ -106,6 +108,7 @@ VPC Peering must be configured before DMS can complete, however in order to limi
 #### VPC Peering
 
 ##### Nava
+
 - Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
   - if there are overlapping CIDR blocks create a new VPC with non overlapping CIDR blocks and migrate resources
 - Info to share with MicroHealth
@@ -116,8 +119,8 @@ VPC Peering must be configured before DMS can complete, however in order to limi
 - [Update your security groups to reference peer security groups](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-security-groups.html)
 - - [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
-
 ##### MicroHealth
+
 - Confirm there are no overlapping IPv4 or IPv6 CIDR blocks
 - Share information with Nava:
   - Region information for the VPC
@@ -129,10 +132,10 @@ VPC Peering must be configured before DMS can complete, however in order to limi
 - [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html)
 - [Update route tables for peering connection to the db subnet](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html) or to a [specific IP address](https://docs.aws.amazon.com/vpc/latest/peering/peering-configurations-partial-access.html)
 
-
 #### AWS DMS Service
 
 ##### Nava
+
 - Create a user with AWS Identity and Access Management (IAM) credentials that allows you to launch Amazon RDS and AWS Database Migration Service (AWS DMS) instances in your AWS Region.
 - Size your target PostgreSQL database host based on the current db host load profile.
 - Create the schemas in the target database
@@ -155,6 +158,7 @@ VPC Peering must be configured before DMS can complete, however in order to limi
 - [Create and Run Your AWS DMS Migration Task](https://docs.aws.amazon.com/dms/latest/sbs/chap-rdsoracle2postgresql.steps.createmigrationtask.html)
 
 ##### MicroHealth
+
 - Communicate the load profile of the current source Oracle database host. Consider CPU, memory, and IOPS.
 - ensure that ARCHIVELOG MODE is on to provide information to LogMiner. AWS DMS uses LogMiner to read information from the archive logs so that AWS DMS can capture changes.
   - Retaining archive logs for 24 hours is usually sufficient
@@ -250,7 +254,7 @@ For this solution we will only replicate opportunities data at first to limit th
   - Negligible impact to source database, even with replicating ongoing changes
   - Replicating only public data reduces our security criticality
   - Ability to transform data is part of the DMS tool and well documented
-  - Ensures that beta.grants.gov service remains available even if grants.gov has unexpected or planned downtime
+  - Ensures that simpler.grants.gov service remains available even if grants.gov has unexpected or planned downtime
   - Limits the cross VPC traffic to just DMS
 - **Cons**
   - Additional Cost
@@ -296,7 +300,7 @@ Configure AWS VPC Peering on both the Nava and MicroHealth AWS VPCs to allow tra
 
 ### AWS PrivateLink
 
-AWS PrivateLink provides private connectivity between virtual private clouds (VPCs), supported AWS services, and on-premises networks without exposing  traffic to the public internet. Using AWS PrivateLink a VPC can expose interface VPC endpoints, similar to APIs, for others to query. This is a one way connection through a VPC barrier, instead of the two way connection provided by VPC Peering. Additionally, other security tools can be leveraged to enhance security of AWS PrivateLink, like security groups and VPC endpoint policies, which is similar to VPC Peering. AWS PrivateLink is compatible with DMS across VPCs, however it is not FedRAMP compliant.
+AWS PrivateLink provides private connectivity between virtual private clouds (VPCs), supported AWS services, and on-premises networks without exposing traffic to the public internet. Using AWS PrivateLink a VPC can expose interface VPC endpoints, similar to APIs, for others to query. This is a one way connection through a VPC barrier, instead of the two way connection provided by VPC Peering. Additionally, other security tools can be leveraged to enhance security of AWS PrivateLink, like security groups and VPC endpoint policies, which is similar to VPC Peering. AWS PrivateLink is compatible with DMS across VPCs, however it is not FedRAMP compliant.
 
 - **Pros**
   - One way connection

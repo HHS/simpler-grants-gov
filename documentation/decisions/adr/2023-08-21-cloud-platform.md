@@ -13,24 +13,25 @@ The project needs a hosting provider in order to operate. The hosting provider s
 ## Decision Drivers <!-- RECOMMENDED -->
 
 - **Past Performance:** The provider should have a proven track record of providing services for HHS.
-- **Security:** The provider should be [Fedramp Authorizedi](https://marketplace.fedramp.gov/products) as a Platform as a Service Provider. 
+- **Security:** The provider should be [Fedramp Authorizedi](https://marketplace.fedramp.gov/products) as a Platform as a Service Provider.
 - **Tools**: The service provider should offer a competitive suite of tools that can be used to host the project.
 
 ## Options Considered
 
-- Amazon Web Services 
-- Gov Cloud 
-- Google Cloud Platform 
+- Amazon Web Services
+- Gov Cloud
+- Google Cloud Platform
 
 ## Decision Outcome <!-- REQUIRED -->
 
 HHS has selected Amazon Web Services to provide hosting services for the project due to:
-* HHS' existing relationship with AWS,
-* the existing grants.gov infrastructure is on AWS,
-* migrating data and systems is more diffictult between multiple service providers,
-* AWS is Fedramp approved,
-* AWS offers a competitive set of tools, and
-* the current engineering team and supporting organization have years of experience on AWS.
+
+- HHS' existing relationship with AWS,
+- the existing grants.gov infrastructure is on AWS,
+- migrating data and systems is more diffictult between multiple service providers,
+- AWS is Fedramp approved,
+- AWS offers a competitive set of tools, and
+- the current engineering team and supporting organization have years of experience on AWS.
 
 The cumulative cost and risk associated with moving away from AWS and the fact that the other service providers do not offer markedly superior features or service models meant that a feature by feature comparison was not necessary for this decision.
 
@@ -39,7 +40,7 @@ The cumulative cost and risk associated with moving away from AWS and the fact t
 - AWS is well documented and supported, and is an industry standard, which will help the development team to perform efficiently.
 - There are a large number of developers that are familiar with AWS, which will make it easier to get support and bring on more team member in the future.
 - Migrating data is easier to configure, manage, secure, and is less costly than between multiple service providers.
-- Grants Equity team and existing Grants.gov teams will use the same cloud service provider.
+- Simpler Grants team and existing Grants.gov teams will use the same cloud service provider.
 
 ### Negative Consequences <!-- OPTIONAL -->
 

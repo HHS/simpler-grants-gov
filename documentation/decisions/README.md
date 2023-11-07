@@ -1,6 +1,5 @@
 # Architecture Decision Records (ADRs)
 
-
 ## About ADRs
 
 ### Why do we need to document architecture decisions?
@@ -18,9 +17,9 @@ Developing software involves making lots of decisions. Documenting these decisio
 
 Almost all of engineering and code development involves making choices, so how do you know when a particular choices rises to the level of an architecture decision and requires an ADR?
 
->An Architectural Decision (AD) is a software design choice that addresses a functional or non-functional requirement that is architecturally significant.
+> An Architectural Decision (AD) is a software design choice that addresses a functional or non-functional requirement that is architecturally significant.
 >
->Source: [ADR GitHub Organization](adr)
+> Source: [ADR GitHub Organization](adr)
 
 Another way to recognize when making a decision related to your project constitutes an architecture decision is to ask yourself three questions about that decision:
 
@@ -43,12 +42,14 @@ While architecture decisions come in all shapes and sizes, some common examples 
 
 When an architectural decision needs to be recorded, please use the following steps:
 
-1. [Create a new ADR ticket in GitHub](https://github.com/HHS/grants-equity/issues/new/choose)
+1. [Create a new ADR ticket in GitHub](https://github.com/HHS/simpler-grants-gov/issues/new/choose)
 2. Identify the approvers for this decision, i.e. individuals or groups who must sign off on the decision before the ADR can be merged (ideally this happens before work starts on the ADR)
 3. Draft an ADR in a branch named after the ticket, then open a Pull Request (PR)
-  - Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](./template.md) into the [adr](./adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
-  - The ADR should use the status "Active"
-  - If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](./deprecated/) directory
+
+- Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](./template.md) into the [adr](./adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
+- The ADR should use the status "Active"
+- If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](./deprecated/) directory
+
 4. Invite the approvers to review the PR and provide feedback or approve the decision
 5. Once the approvers have signed off on the decision, merge the PR into the `main` branch
 6. Create any follow-up tickets that are needed to implement the decision outlined in the ADR (if necessary)

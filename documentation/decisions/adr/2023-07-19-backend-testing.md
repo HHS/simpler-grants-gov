@@ -2,7 +2,7 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-19 <!-- REQUIRED -->
-- **Related Issue:** [174](https://github.com/HHS/grants-equity/issues/174) <!-- RECOMMENDED -->
+- **Related Issue:** [174](https://github.com/HHS/simpler-grants-gov/issues/174) <!-- RECOMMENDED -->
 - **Deciders:** Sammy Steiner, Lucas Brown, Billy Daly, Andy Cochran, Daphne Gold <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
@@ -20,15 +20,18 @@ Back-end testing is essential in maintaining a stable and healthy codebase, crea
 ## Options Considered
 
 ## Unit Testing
+
 - Pytest
 
 ## Test Coverage
+
 - Coverage
 
 ### Pros and Cons of the Options <!-- OPTIONAL -->
-#### [Pytest](https://docs.pytest.org/)
-The pytest framework makes it easy to write small, readable tests, and can scale to support complex functional testing for applications and libraries.
 
+#### [Pytest](https://docs.pytest.org/)
+
+The pytest framework makes it easy to write small, readable tests, and can scale to support complex functional testing for applications and libraries.
 
 - **Pros**
   - Lightweight, well-supported and documented testing solution
@@ -40,6 +43,7 @@ The pytest framework makes it easy to write small, readable tests, and can scale
   - Compatibility issues with other testing frameworks means it's difficult to swap out for other frameworks
 
 #### [Coverage](https://coverage.readthedocs.io/)
+
 Coverage.py is a tool for measuring code coverage of Python programs. It monitors your program, noting which parts of the code have been executed, then analyzes the source to identify code that could have been executed but was not.
 
 - **Pros**
@@ -47,13 +51,14 @@ Coverage.py is a tool for measuring code coverage of Python programs. It monitor
 - **Cons**
   - Code coverage is only one piece of a stable and healthy testing approach
 
-
 ## Decision Outcome <!-- REQUIRED -->
 
 ### Unit Testing
+
 **Pytest**, because it is integrated into the Nava Flask template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
 
 ### Testing Coverage
+
 **Coverage**, because it is integrated into the Nava Flask template application, well-maintained, and lightweight. Importantly, documentation is thorough and helpful information for troubleshooting can be easily accessed.
 
 We added a code coverage threshold of %80 in `api/pyproject.toml`

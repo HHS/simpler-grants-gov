@@ -1,4 +1,4 @@
-# Grants Equity Infrastructure
+# Simpler Grants Infrastructure
 
 The infrastructure for this project is stored as Terraform files and hosted on Amazon Web Services.
 

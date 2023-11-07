@@ -23,8 +23,6 @@ COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
 
-COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
-
 ENV NEXT_TELEMETRY_DISABLED 1
 
 CMD ["npm", "run", "dev"]
@@ -87,8 +85,6 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
-
-COPY --from=ghcr.io/tarampampam/curl:8.1.1 /bin/curl /bin/curl
 
 COPY --from=builder /frontend/public ./public
 
