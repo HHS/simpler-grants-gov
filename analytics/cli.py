@@ -3,7 +3,7 @@ import argparse
 from analytics.etl import github
 
 ISSUE_FILE = "data/issue-data.json"
-PROJECT_FILE = "data/project-data.json"
+PROJECT_FILE = "data/sprint-data.json"
 
 if __name__ == "__main__":
     # parse arguments passed to the command line
