@@ -13,7 +13,6 @@ from src.services.opportunities.search_opportunities import search_opportunities
 logger = logging.getLogger(__name__)
 
 
-
 @opportunity_blueprint.post("/v1/opportunities/search")
 @opportunity_blueprint.input(opportunity_schemas.OpportunitySearchSchema, arg_name="search_params")
 @opportunity_blueprint.input(
@@ -47,6 +46,4 @@ def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.Api
     with db_session.begin():
         opportunity = get_opportunity(db_session, opportunity_id)
 
-    return response.ApiResponse(
-        message="Success", data=opportunity
-    )
+    return response.ApiResponse(message="Success", data=opportunity)
