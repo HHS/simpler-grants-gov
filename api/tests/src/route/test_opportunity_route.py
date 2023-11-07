@@ -346,3 +346,17 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 
     response_data = resp.get_json()["detail"]["headers"]
     assert response_data == {"X-FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+
+
+def test_opportunity_get_200(client, api_auth_token, enable_factory_create):
+    opportunity = OpportunityFactory.create()
+
+    resp = client.get(f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token})
+    assert resp.status_code == 200
+
+    response_data = resp.get_json()["data"]
+
+    assert response_data["opportunity_id"] == opportunity.opportunity_id
+    assert response_data["opportunity_title"] == opportunity.opportunity_title
+    assert response_data["agency"] == opportunity.agency
+    assert response_data["category"] == opportunity.category
