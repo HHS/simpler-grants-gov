@@ -128,6 +128,8 @@ As part of this deliverable we should define a system for soliciting user input 
 ### Destination for live updating metrics
 <!-- Required -->
 
+Page on the public wiki. **Note:** This will likely change once we deliver the [Public Measurement Dashboard deliverable](https://github.com/HHS/grants-equity/issues/65)
+
 ## Planning
 
 ### Assumptions & dependencies
@@ -160,7 +162,7 @@ TODO
 ### Not doing
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
+The following work will *not* be completed as part of this deliverable:
 
 1. **Search Functionality:** Because search requires the API, site improvements in this deliverable will ***not*** include any search functionality. That will be completed in a [search-specific deliverable](https://github.com/HHS/grants-equity/issues/89)
 
@@ -169,40 +171,40 @@ The following work will *not* be completed as part of this milestone:
 ### Translations
 <!-- Required -->
 
-*Does this milestone involve delivering any content that needs translation?*
+Does this deliverable involve delivering any content that needs translation?
 
-TODO
-
-*If so, when will English-language content be locked? Then when will translation be started and completed?*
-
-TODO
+- **Static site contents:** The contents of the static site should either be translated as part of this deliverable _or_ tickets should be created to track that outstanding work as part of a translation backlog.
 
 ### Services going into PROD for the first time
 <!-- Required -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
-1. TODO
+1. **Translation process:** Depending on the translation process that is developed as part of this deliverable, we _may_ adopt a new system that enables open source contributors to provide translations, such as [Crowdin](https://crowdin.com/)
+3. **Feedback mechanism:** Depending on our approach to collecting feedback as part of this deliverable, we _may_ adopt a new survey tool, such as [Medallia](https://www.medallia.com/), or re-use an existing survey tool like [Microsoft forms](https://www.microsoft.com/en-us/microsoft-365/online-surveys-polls-quizzes)
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
-Are there multiple services that are being connected for the first time in PROD?
+_Are there multiple services that are being connected for the first time in PROD?_
 
-1. TODO
+1. **Static site + translation process:** This deliverable involves connecting our translation process to the repo for the static site and allowing site visitors to view that using our [internationalization framework](https://nextjs.org/docs/pages/building-your-application/routing/internationalization)
+2. **Static site + feedback mechanism:** This deliverable involves embedding a feedback mechanism on our static site so that site visitors can submit feedback without leaving the site.
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
-Are there any fields being shared publicly that have never been shared in PROD before?
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
-1. TODO
+1. This deliverable will not be exposing any new fields from production data in grants.gov, but it will be sharing summary-level information about the user research conducted by Huge for the first time.
 
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product?
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
-If so, how are we addressing these risks?
+1. TODO
+
+_If so, how are we addressing these risks?_
 
 1. TODO
