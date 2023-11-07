@@ -37,7 +37,7 @@ By delivering the next batch of updates to the static site, this body of work ai
 <!-- Required -->
 
 - As a **project maintainer**, I want:
-  - a streamlined way to manage site content, so that minor copy edits aren't blocked by (or detract from) engineering capacity
+  - a streamlined way to manage site content and content approvals, so that minor copy edits aren't blocked by (or detract from) engineering capacity
   - a mechanism to collect and store feedback from site visitors, so that we can solicit user input and questions throughout the project
 - As an **stakeholder whose primary language is not English**, I want:
   - the site contents to be translated into my primary language, so that I can understand how to use the simple.grants.gov without relying on automatic translations
@@ -157,7 +157,8 @@ Is there any notable functionality we do ***not*** expect to be in place before 
 
 *What existing services does the federal government provide for translation?*
 
-TODO
+-  [USWDS design pattern recommendations](https://designsystem.digital.gov/patterns/select-a-language/)
+
 
 ### Not doing
 <!-- Optional -->
