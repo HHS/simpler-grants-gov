@@ -2,9 +2,9 @@ info:
   title: Simpler Grants API
   description: Back end API for simpler.grants.gov
   contact:
-    name: Nava PBC Engineering
-    url: https://www.navapbc.com
-    email: engineering@navapbc.com
+    name: Simpler Grants.gov
+    url: https://simpler.grants.gov/
+    email: simplergrantsgov@hhs.gov
   version: 0.1.0
 tags:
 - name: Health
@@ -111,7 +111,7 @@ paths:
               $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
-openapi: 3.0.3
+openapi: 3.1.0
 components:
   schemas:
     ValidationError:
