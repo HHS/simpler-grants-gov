@@ -1,6 +1,7 @@
 import json
 
 import pandas as pd
+import pytest
 
 from analytics.datasets import github_projects
 
@@ -62,6 +63,9 @@ def write_test_data_to_file(data: dict, output_file: str):
 class TestSprintBoard:
     """Tests the SprintBoard data class"""
 
+    ISSUE_FILE = "data/test-issue.json"
+    SPRINT_FILE = "data/test-sprint.json"
+
     def test_get_sprint_start_and_end_dates(self):
         """Sprint start date should be returned correctly"""
         # setup - create test data for two different sprints
@@ -71,12 +75,10 @@ class TestSprintBoard:
         ]
         issue_data = [json_issue_row(issue=1), json_issue_row(issue=2)]
         # setup - write test data to json files
-        issue_file = "data/test-issue.json"
-        sprint_file = "data/test-sprint.json"
-        write_test_data_to_file(issue_data, issue_file)
-        write_test_data_to_file({"items": sprint_data}, sprint_file)
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board
-        board = github_projects.SprintBoard(sprint_file, issue_file)
+        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         # validation - check sprint start dates
         assert board.sprint_start("Sprint 1") == pd.Timestamp("2023-11-01", tz="UTC")
         assert board.sprint_start("Sprint 2") == pd.Timestamp("2023-11-16", tz="UTC")
@@ -96,12 +98,10 @@ class TestSprintBoard:
             json_issue_row(issue=222, created_at="2023-11-16"),
         ]
         # setup - write test data to json files
-        issue_file = "data/test-issue.json"
-        sprint_file = "data/test-sprint.json"
-        write_test_data_to_file(issue_data, issue_file)
-        write_test_data_to_file({"items": sprint_data}, sprint_file)
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = github_projects.SprintBoard(sprint_file, issue_file)
+        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         df = board.df.set_index("issue_number")
         # validation -- check that both rows are preserved
         assert len(board.df) == 2
@@ -118,13 +118,29 @@ class TestSprintBoard:
         sprint_data = [json_sprint_row(issue=111), json_sprint_row(issue=222)]
         issue_data = [json_issue_row(issue=111)]
         # setup - write test data to json files
-        issue_file = "data/test-issue.json"
-        sprint_file = "data/test-sprint.json"
-        write_test_data_to_file(issue_data, issue_file)
-        write_test_data_to_file({"items": sprint_data}, sprint_file)
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = github_projects.SprintBoard(sprint_file, issue_file)
+        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         df = board.df.set_index("issue_number")
         # validation -- check that issue 222 was dropped
         assert len(df) == 1
         assert 222 not in list(df.index)
+
+    @pytest.mark.parametrize(
+        "parent_number",
+        [222, 333, 444],  # run this test against multiple inputs
+    )
+    def test_extract_parent_issue_correctly(self, parent_number):
+        """The parent issue number should be extracted from the milestone description"""
+        # setup - create test data for two different sprints
+        sprint_data = [json_sprint_row(issue=111, parent_number=parent_number)]
+        issue_data = [json_issue_row(issue=111)]
+        # setup - write test data to json files
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
+        # execution - load data into a sprint board and extract the df
+        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
+        df = board.df.set_index("issue_number")
+        # validation -- check that issue 111's parent_issue_number is 222
+        assert df.loc[111]["parent_issue_number"] == parent_number
