@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import pytest
 
-from analytics.datasets import github_projects
+from analytics.datasets import sprint_board
 
 
 def json_issue_row(
@@ -78,7 +78,7 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board
-        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
+        board = sprint_board.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         # validation - check sprint start dates
         assert board.sprint_start("Sprint 1") == pd.Timestamp("2023-11-01", tz="UTC")
         assert board.sprint_start("Sprint 2") == pd.Timestamp("2023-11-16", tz="UTC")
@@ -101,7 +101,7 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
+        board = sprint_board.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         df = board.df.set_index("issue_number")
         # validation -- check that both rows are preserved
         assert len(board.df) == 2
@@ -121,7 +121,7 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
+        board = sprint_board.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         df = board.df.set_index("issue_number")
         # validation -- check that issue 222 was dropped
         assert len(df) == 1
@@ -140,7 +140,7 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = github_projects.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
+        board = sprint_board.SprintBoard(self.SPRINT_FILE, self.ISSUE_FILE)
         df = board.df.set_index("issue_number")
         # validation -- check that issue 111's parent_issue_number is 222
         assert df.loc[111]["parent_issue_number"] == parent_number
