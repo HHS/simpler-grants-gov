@@ -96,7 +96,7 @@ resource "aws_vpc_endpoint" "aws_service" {
 
 # VPC Configuration for DMS
 # ----------------------------------------
-#
+
 data "aws_ssm_parameter" "dms_peer_owner_id" {
   name = "/network/dms/peer-owner-id"
 }
