@@ -89,6 +89,13 @@ class SprintBoard(BaseDataset):
         # calculate sprint end date
         df["sprint_duration"] = pd.to_timedelta(df["sprint_duration"], unit="day")
         df["sprint_end_date"] = df["sprint_start_date"] + df["sprint_duration"]
+        # extract parent issue number from the milestone description
+        parent_issue_regex = r"(?: deliverable: \#)(?P<parent_issue_number>\d+)"
+        df["parent_issue_number"] = (
+            df["milestone_description"]
+            .str.extract(pat=parent_issue_regex, expand=False)
+            .astype("Int64")
+        )
         return df
 
 
