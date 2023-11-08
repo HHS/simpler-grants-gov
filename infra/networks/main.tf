@@ -117,7 +117,7 @@ resource "aws_vpc_peering_connection" "dms" {
 }
 
 resource "aws_route" "dms" {
-  route_table_id            = data.aws_vpc.default.main_route_table_id
+  route_table_id = data.aws_vpc.default.main_route_table_id
   # MicroHealth VPC CIDR block
   destination_cidr_block    = "10.220.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
