@@ -87,6 +87,11 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     OpportunityFactory.create(category=OpportunityCategory.MANDATORY, is_draft=False)
 
 
+#####################################
+# POST /opportunities/search
+#####################################
+
+
 @pytest.mark.parametrize(
     "search_request,expected_values",
     [
@@ -302,18 +307,6 @@ def test_opportunity_search_invalid_request_422(
     assert response_data == expected_response_data
 
 
-def test_opportunity_search_unauthorized_401(client, api_auth_token):
-    response = client.post(
-        "/v1/opportunities/search", json=get_search_request(), headers={"X-Auth": "incorrect token"}
-    )
-
-    assert response.status_code == 401
-    assert (
-        response.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
-
-
 @pytest.mark.parametrize("enable_opportunity_log_msg", [True, False, None])
 def test_opportunity_search_feature_flag_200(
     client, api_auth_token, enable_opportunity_log_msg, caplog
@@ -346,3 +339,58 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 
     response_data = resp.get_json()["detail"]["headers"]
     assert response_data == {"FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+
+
+#####################################
+# GET /opportunities/<opportunity_id>
+#####################################
+
+
+def test_get_opportunity_200(client, api_auth_token, enable_factory_create):
+    opportunity = OpportunityFactory.create()
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+    assert resp.status_code == 200
+
+    response_data = resp.get_json()["data"]
+
+    assert response_data["opportunity_id"] == opportunity.opportunity_id
+    assert response_data["opportunity_title"] == opportunity.opportunity_title
+    assert response_data["agency"] == opportunity.agency
+    assert response_data["category"] == opportunity.category
+
+
+def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportunities):
+    resp = client.get("/v1/opportunities/1", headers={"X-Auth": api_auth_token})
+    assert resp.status_code == 404
+    assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
+
+
+def test_get_opportunity_invalid_id_404(client, api_auth_token):
+    # with how the route naming resolves, this won't be an invalid request, but instead a 404
+    resp = client.get("/v1/opportunities/text", headers={"X-Auth": api_auth_token})
+    assert resp.status_code == 404
+    assert resp.get_json()["message"] == "Not Found"
+
+
+#####################################
+# Auth tests
+#####################################
+@pytest.mark.parametrize(
+    "method,url,body",
+    [
+        ("POST", "/v1/opportunities/search", get_search_request()),
+        ("GET", "/v1/opportunities/1", None),
+    ],
+)
+def test_opportunity_unauthorized_401(client, api_auth_token, method, url, body):
+    # open is just the generic method that post/get/etc. call under the hood
+    response = client.open(url, method=method, json=body, headers={"X-Auth": "incorrect token"})
+
+    assert response.status_code == 401
+    assert (
+        response.get_json()["message"]
+        == "The server could not verify that you are authorized to access the URL requested"
+    )

@@ -7,6 +7,7 @@ import src.api.response as response
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig
 from src.api.opportunities.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
+from src.services.opportunities.get_opportunities import get_opportunity
 from src.services.opportunities.search_opportunities import search_opportunities
 
 logger = logging.getLogger(__name__)
@@ -35,3 +36,14 @@ def opportunity_search(
     return response.ApiResponse(
         message="Success", data=opportunities, pagination_info=pagination_info
     )
+
+
+@opportunity_blueprint.get("/v1/opportunities/<int:opportunity_id>")
+@opportunity_blueprint.output(opportunity_schemas.OpportunitySchema)
+@opportunity_blueprint.auth_required(api_key_auth)
+@flask_db.with_db_session()
+def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
+    with db_session.begin():
+        opportunity = get_opportunity(db_session, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=opportunity)

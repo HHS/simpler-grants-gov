@@ -111,6 +111,59 @@ paths:
               $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
+  /v1/opportunities/{opportunity_id}:
+    get:
+      parameters:
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/Opportunity'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ValidationError'
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPError'
+          description: Not found
+      tags:
+      - Opportunity
+      summary: Opportunity Get
+      security:
+      - ApiKeyAuth: []
 openapi: 3.1.0
 components:
   schemas:
