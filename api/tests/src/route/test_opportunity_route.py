@@ -314,7 +314,7 @@ def test_opportunity_search_feature_flag_200(
     headers = {"X-Auth": api_auth_token}
 
     if enable_opportunity_log_msg is not None:
-        headers["X-FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
+        headers["FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
 
     client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
 
@@ -331,14 +331,14 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 ):
     headers = {
         "X-Auth": api_auth_token,
-        "X-FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
+        "FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
     }
 
     resp = client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
     assert resp.status_code == 422
 
     response_data = resp.get_json()["detail"]["headers"]
-    assert response_data == {"X-FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+    assert response_data == {"FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
 
 
 #####################################
