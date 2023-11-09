@@ -79,7 +79,7 @@ class OpportunitySearchSchema(Schema):
 
 
 class OpportunitySearchHeaderSchema(Schema):
-    # Header field: X-FF-Enable-Opportunity-Log-Msg
+    # Header field: FF-Enable-Opportunity-Log-Msg
     enable_opportunity_log_msg = fields.Boolean(
         data_key=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_header_name(),
         metadata={"description": "Whether to log a message in the opportunity endpoint"},
