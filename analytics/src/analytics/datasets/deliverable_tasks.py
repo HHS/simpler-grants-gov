@@ -1,3 +1,4 @@
+from typing import Optional
 import pandas as pd
 
 from analytics.datasets.base import BaseDataset
@@ -83,6 +84,7 @@ class DeliverableTasks(BaseDataset):
         is_closed = df_task["closed_date"].isna()
         df_task.loc[is_closed, "status"] = "closed"
         # isolate 30k deliverable issues and rename their cols
+        df_task["labels"] = df_task["labels"].apply(pluck_label_name)
         deliverable_mask = df_task["labels"].apply(lambda x: deliverable_label in x)
         deliverable_cols = {
             "issue_number": "deliverable_number",
@@ -94,3 +96,10 @@ class DeliverableTasks(BaseDataset):
         df = df_deliverable.merge(df_task, on="deliverable_number", how="left")
         df = df[cls.FINAL_COLUMNS]
         return df
+
+
+def pluck_label_name(labels: Optional[list]):
+    """Reformat the label dictionary to return a list of label names"""
+    if labels and isinstance(labels, list):
+        return [label["name"] for label in labels]
+    return []
