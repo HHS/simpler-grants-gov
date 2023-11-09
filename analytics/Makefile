@@ -5,6 +5,5 @@ setup:
 export_sprint_data:
 	poetry run python cli.py --owner HHS --repo simpler-grants-gov --project 13
 
-sprint_report:
-	export_sprint_data
+open_report_notebook: export_sprint_data
 	poetry run jupyter notebook
