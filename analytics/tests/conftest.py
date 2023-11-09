@@ -19,7 +19,7 @@ def json_issue_row(
         "createdAt": created_at,
         "number": issue,
         "labels": labels,
-        "title": "Issue {issue}",
+        "title": f"Issue {issue}",
     }
 
 
@@ -37,7 +37,7 @@ def json_sprint_row(
         "content": {
             "type": "Issue",
             "body": f"Description of test issue {issue}",
-            "title": f"Test issue {issue}",
+            "title": f"Issue {issue}",
             "number": issue,
             "repository": "HHS/simpler-grants-gov",
             "url": f"https://github.com/HHS/simpler-grants-gov/issues/{issue}",
