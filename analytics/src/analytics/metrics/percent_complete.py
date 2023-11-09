@@ -17,6 +17,7 @@ class DeliverablePercentComplete(BaseMetric):
     ) -> None:
         """Initialize the DeliverablePercentComplete metric"""
         self.deliverable_col = "deliverable_title"
+        self.unit = unit
         super().__init__(dataset, unit=unit)
 
     def calculate(self, unit: Literal["tasks", "points"]) -> pd.DataFrame:
@@ -68,3 +69,23 @@ class DeliverablePercentComplete(BaseMetric):
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg("sum")
         df_agg.columns = [self.deliverable_col, status]
         return df_agg
+
+    def visualize(self) -> None:
+        df = self.result.melt(
+            id_vars=[self.deliverable_col],
+            value_vars=["open", "closed"],
+            value_name=self.unit,
+            var_name="status",
+        )
+        df = df.sort_values([self.unit, "status"], ascending=True)
+        fig = px.bar(
+            df,
+            x=self.unit,
+            y="deliverable_title",
+            color="status",
+            orientation="h",
+            title=f"Deliverable Percent Complete by {self.unit}",
+            height=800,
+        )
+        fig.show()
+        return

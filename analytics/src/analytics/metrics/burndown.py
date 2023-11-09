@@ -54,6 +54,11 @@ class SprintBurndown(BaseMetric):
 
     def visualize(self) -> None:
         """Plot the sprint burndown using a plotly line chart"""
+        # suppress plotly FutureWarning related to pandas API change
+        # TODO: @widal001 2023-11-03: Address this warning instead of ignoring it
+        import warnings
+
+        warnings.simplefilter("ignore", category=FutureWarning)
         fig = px.line(
             self.result,
             x=self.date_col,
