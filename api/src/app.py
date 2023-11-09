@@ -1,8 +1,8 @@
 import logging
 import os
-from typing import Optional
+from typing import Optional, Tuple, Any
 
-from apiflask import APIFlask
+from apiflask import APIFlask, exceptions
 from flask import g
 from werkzeug.exceptions import Unauthorized
 
@@ -13,6 +13,7 @@ import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities import opportunity_blueprint
+from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import User, get_app_security_scheme
 
@@ -50,6 +51,8 @@ def configure_app(app: APIFlask) -> None:
     # which adds additional details to the object.
     # https://apiflask.com/schema/#base-response-schema-customization
     app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
+    app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
 
     # Set a few values for the Swagger endpoint
     app.config["OPENAPI_VERSION"] = "3.1.0"
@@ -71,6 +74,11 @@ def configure_app(app: APIFlask) -> None:
     # where we expect the API token to reside.
     # See: https://apiflask.com/authentication/#use-external-authentication-library
     app.security_schemes = get_app_security_scheme()
+
+
+    @app.error_processor
+    def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:
+        return restructure_error_response(error)
 
 
 def register_blueprints(app: APIFlask) -> None:

@@ -1,15 +1,14 @@
 from typing import Type
 
-from apiflask import fields, validators
+from src.api.schemas.extension import fields, validators, Schema
 
-from src.api.schemas import request_schema
 from src.pagination.pagination_models import SortDirection
 
 
-class PaginationSchema(request_schema.OrderedSchema):
+class PaginationSchema(Schema):
     page_size = fields.Integer(
         required=True,
-        validate=validators.Range(min=1),
+        validate=[validators.Range(min=1)],
         metadata={"description": "The size of the page to fetch", "example": 25},
     )
     page_offset = fields.Integer(
@@ -21,7 +20,7 @@ class PaginationSchema(request_schema.OrderedSchema):
 
 def generate_sorting_schema(
     cls_name: str, order_by_fields: list[str] | None = None
-) -> Type[request_schema.OrderedSchema]:
+) -> Type[Schema]:
     """
     Generate a schema that describes the sorting for a pagination endpoint.
 
@@ -30,7 +29,7 @@ def generate_sorting_schema(
 
     This is functionally equivalent to specifying your own class like so:
 
-        class MySortingSchema(request_schema.OrderedSchema):
+        class MySortingSchema(Schema):
             order_by = fields.String(
                 validate=[validators.OneOf(["id","created_at","updated_at"])],
                 required=True,
@@ -59,10 +58,10 @@ def generate_sorting_schema(
             metadata={"description": "Whether to sort the response ascending or descending"},
         ),
     }
-    return request_schema.OrderedSchema.from_dict(ordering_schema_fields, name=cls_name)  # type: ignore
+    return Schema.from_dict(ordering_schema_fields, name=cls_name)  # type: ignore
 
 
-class PaginationInfoSchema(request_schema.OrderedSchema):
+class PaginationInfoSchema(Schema):
     # This is part of the response schema to provide all pagination information back to a user
 
     page_offset = fields.Integer(
