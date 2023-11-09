@@ -79,9 +79,9 @@ class TestLoadFromJsonFile:
         # setup - create test data for two different sprints
         sprint_data = [json_sprint_row(issue=1, parent_number=2)]
         issue_data = [
-            json_issue_row(issue=1, labels=["task"]),
-            json_issue_row(issue=2, labels=[self.LABEL]),
-            json_issue_row(issue=3, labels=[self.LABEL]),
+            json_issue_row(issue=1, labels=["task", "topic: frontend"]),
+            json_issue_row(issue=2, labels=[self.LABEL, "topic: data"]),
+            json_issue_row(issue=3, labels=[self.LABEL, "topic: data"]),
         ]
         # setup - write test data to json files
         write_test_data_to_file(issue_data, self.ISSUE_FILE)

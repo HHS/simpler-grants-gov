@@ -23,5 +23,9 @@ def export_project_data(owner: str, project: int, output_file: str) -> None:
 def export_issue_data(owner: str, repo: str, output_file: str) -> None:
     """Exports and writes GitHub issue data to a JSON file"""
     print(f"Exporting issue data from {owner}/{repo} to {output_file}")
-    command = f"gh issue list --json number,createdAt,closedAt -R {owner}/{repo} -L 1000 --state all"
+    # plucks label name from the list of json objects nested in labels
+    command = (
+        f"gh issue list --json number,createdAt,closedAt,labels,title "
+        f"-R {owner}/{repo} -L 1000 --state all"
+    )
     pipe_command_output_to_file(command, output_file)

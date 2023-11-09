@@ -14,6 +14,8 @@ def json_issue_row(
     closed_at: str = "2023-11-01T00:00:00Z",
 ) -> dict:
     """Generate a row of JSON issue data for testing"""
+    if labels:
+        labels = [{"name": label, "id": hash(label)} for label in labels]
     return {
         "closedAt": closed_at,
         "createdAt": created_at,
