@@ -42,6 +42,7 @@ class DeliverablePercentComplete(BaseMetric):
         df_all = df_all.fillna(0)
         df_all["open"] = df_all["total"] - df_all["closed"]
         df_all["percent_complete"] = df_all["closed"] / df_all["total"]
+        df_all["percent_complete"] = df_all["percent_complete"].fillna(0)
         return df_all
 
     def _get_count_by_deliverable(
