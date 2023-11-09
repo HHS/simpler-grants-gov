@@ -27,25 +27,28 @@ paths:
                     $ref: '#/components/schemas/Healthcheck'
                   status_code:
                     type: integer
+                    minimum: -2147483648
+                    maximum: 2147483647
                     description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type:
+                    - object
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
+                      type:
+                      - object
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Successful response
         '503':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPError'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Service Unavailable
       tags:
       - Health
@@ -75,31 +78,34 @@ paths:
                       $ref: '#/components/schemas/Opportunity'
                   status_code:
                     type: integer
+                    minimum: -2147483648
+                    maximum: 2147483647
                     description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type:
+                    - object
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
+                      type:
+                      - object
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Successful response
         '422':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
         '401':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPError'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
       - Opportunity
@@ -133,31 +139,34 @@ paths:
                     $ref: '#/components/schemas/Opportunity'
                   status_code:
                     type: integer
+                    minimum: -2147483648
+                    maximum: 2147483647
                     description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type:
+                    - object
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ValidationError'
-                  errors:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ValidationError'
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
+                      type:
+                      - object
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Successful response
         '401':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPError'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
         '404':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPError'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
       - Opportunity
@@ -167,41 +176,31 @@ paths:
 openapi: 3.1.0
 components:
   schemas:
-    ValidationError:
-      type: object
-      properties:
-        type:
-          type: string
-          description: The type of error
-        message:
-          type: string
-          description: The message to return
-        rule:
-          type: string
-          description: The rule that failed
-        field:
-          type: string
-          description: The field that failed
-        value:
-          type: string
-          description: The value that failed
     PaginationInfo:
       type: object
       properties:
         page_offset:
           type: integer
+          minimum: -2147483648
+          maximum: 2147483647
           description: The page number that was fetched
           example: 1
         page_size:
           type: integer
+          minimum: -2147483648
+          maximum: 2147483647
           description: The size of the page fetched
           example: 25
         total_records:
           type: integer
+          minimum: -2147483648
+          maximum: 2147483647
           description: The total number of records fetchable
           example: 42
         total_pages:
           type: integer
+          minimum: -2147483648
+          maximum: 2147483647
           description: The total number of pages that can be fetched
           example: 2
         order_by:
@@ -213,16 +212,48 @@ components:
           enum:
           - ascending
           - descending
-    HTTPError:
+          type:
+          - string
+    ValidationIssue:
+      type: object
       properties:
-        detail:
-          type: object
+        type:
+          type: string
+          description: The type of error
         message:
           type: string
-      type: object
+          description: The message to return
+        field:
+          type: string
+          description: The field that failed
+        value:
+          type: string
+          description: The value that failed
     Healthcheck:
       type: object
-      properties: {}
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          minimum: -2147483648
+          maximum: 2147483647
+          description: The HTTP status code
+        errors:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ValidationIssue'
     OpportunitySorting:
       type: object
       properties:
@@ -240,6 +271,8 @@ components:
           enum:
           - ascending
           - descending
+          type:
+          - string
       required:
       - order_by
       - sort_direction
@@ -276,14 +309,22 @@ components:
           - C
           - E
           - O
+          type:
+          - string
         is_draft:
           type: boolean
           description: Whether to search for draft claims
           example: false
         sorting:
-          $ref: '#/components/schemas/OpportunitySorting'
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySorting'
         paging:
-          $ref: '#/components/schemas/Pagination'
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/Pagination'
       required:
       - paging
       - sorting
@@ -293,6 +334,8 @@ components:
         opportunity_id:
           type: integer
           readOnly: true
+          minimum: -2147483648
+          maximum: 2147483647
           description: The internal ID of the opportunity
           example: 12345
         opportunity_number:
@@ -317,6 +360,8 @@ components:
           - C
           - E
           - O
+          type:
+          - string
         is_draft:
           type: boolean
           description: Whether the opportunity is in a draft status
