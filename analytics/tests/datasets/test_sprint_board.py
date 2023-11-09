@@ -101,10 +101,10 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE)
-        df = board.df.set_index("issue_number")
+        df = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE).df
+        df = df.set_index("issue_number")
         # validation -- check that both rows are preserved
-        assert len(board.df) == 2
+        assert len(df) == 2
         # validation -- check that the sprints are matched to the right issue
         assert df.loc[111]["sprint"] == "Sprint 1"
         assert df.loc[222]["sprint"] == "Sprint 2"
@@ -121,8 +121,8 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE)
-        df = board.df.set_index("issue_number")
+        df = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE).df
+        df = df.set_index("issue_number")
         # validation -- check that issue 222 was dropped
         assert len(df) == 1
         assert 222 not in list(df.index)
@@ -140,7 +140,7 @@ class TestSprintBoard:
         write_test_data_to_file(issue_data, self.ISSUE_FILE)
         write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
         # execution - load data into a sprint board and extract the df
-        board = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE)
-        df = board.df.set_index("issue_number")
+        df = SprintBoard.load_from_json_files(self.SPRINT_FILE, self.ISSUE_FILE).df
+        df = df.set_index("issue_number")
         # validation -- check that issue 111's parent_issue_number is 222
         assert df.loc[111]["parent_issue_number"] == parent_number
