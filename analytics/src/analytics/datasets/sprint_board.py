@@ -34,13 +34,8 @@ class SprintBoard(BaseDataset):
         "sprint.startDate": "sprint_start_date",
         "sprint.duration": "sprint_duration",
     }
-    SPRINT_COLUMN_MAP
 
-    def __init__(
-        self,
-        sprint_file: str = "data/sprint-data.json",
-        issue_file: str = "data/issue-data.json",
-    ) -> None:
+    def __init__(self, df: pd.DataFrame) -> None:
         """Intializes the sprint board dataset"""
         # set named columns
         self.opened_col = "created_date"
@@ -48,10 +43,8 @@ class SprintBoard(BaseDataset):
         self.sprint_col = "sprint"
         self.sprint_start_col = "sprint_start_date"
         self.sprint_end_col = "sprint_end_date"
-        # load the input data
-        self.df = self._load_data(sprint_file, issue_file)
         # initialize the parent class
-        super().__init__()
+        super().__init__(df)
 
     def sprint_start(self, sprint: str) -> datetime64:
         """Return the date on which a given sprint started"""
@@ -67,23 +60,30 @@ class SprintBoard(BaseDataset):
         sprint_end = sprint_end.tz_localize("UTC")
         return sprint_end
 
-    def _load_data(self, sprint_file: str, issue_file: str) -> pd.DataFrame:
+    @classmethod
+    def load_from_json_files(
+        cls,
+        sprint_file: str = "data/sprint-data.json",
+        issue_file: str = "data/issue-data.json",
+    ) -> pd.DataFrame:
         """Load the input datasets and generate the final dataframe"""
         # load and merge input datasets
         df_sprints = load_json_data_as_df(
             file_path=sprint_file,
-            column_map=self.SPRINT_COLUMN_MAP,
-            date_cols=self.SPRINT_DATE_COLS,
+            column_map=cls.SPRINT_COLUMN_MAP,
+            date_cols=cls.SPRINT_DATE_COLS,
             key_for_nested_items="items",
         )
         df_issues = load_json_data_as_df(
             file_path=issue_file,
-            column_map=self.ISSUE_COLUMN_MAP,
-            date_cols=self.ISSUE_DATE_COLS,
+            column_map=cls.ISSUE_COLUMN_MAP,
+            date_cols=cls.ISSUE_DATE_COLS,
         )
         df = df_sprints.merge(df_issues, on="issue_number")
-        return self._apply_transformations(df)
+        df = cls._apply_transformations(df)
+        return cls(df)
 
+    @classmethod
     def _apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply column specific data transformations"""
         # calculate sprint end date
