@@ -66,5 +66,4 @@ class DeliverablePercentComplete(BaseMetric):
         # group by deliverable and sum the unit field
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg("sum")
         df_agg.columns = [self.deliverable_col, status]
-        print(df_agg)
         return df_agg
