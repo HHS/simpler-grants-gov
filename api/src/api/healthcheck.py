@@ -8,7 +8,7 @@ from werkzeug.exceptions import ServiceUnavailable
 
 import src.adapters.db.flask_db as flask_db
 from src.api import response
-from src.api.schemas.extension import fields, Schema
+from src.api.schemas.extension import Schema, fields
 
 logger = logging.getLogger(__name__)
 

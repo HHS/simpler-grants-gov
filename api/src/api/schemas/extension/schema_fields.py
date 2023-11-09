@@ -38,8 +38,8 @@ class MixinField(original_fields.Field):
         ),
     }
 
-    def __init__(self, allow_none: bool = True, **kwargs: typing.Any) -> None:
-        super().__init__(allow_none=allow_none, **kwargs)
+    def __init__(self, **kwargs: typing.Any) -> None:
+        super().__init__(**kwargs)
 
         # The actual error mapping used for a specific instance
         self._error_mapping: dict[str, MarshmallowErrorContainer] = {}

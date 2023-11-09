@@ -1,6 +1,5 @@
-
+from src.api.schemas.extension import Schema, fields
 from src.pagination.pagination_schema import PaginationInfoSchema
-from src.api.schemas.extension import fields, Schema
 
 
 class ValidationIssueSchema(Schema):
@@ -15,13 +14,15 @@ class BaseResponseSchema(Schema):
     data = fields.MixinField(metadata={"description": "The REST resource object"}, dump_default={})
     status_code = fields.Integer(metadata={"description": "The HTTP status code"}, dump_default=200)
 
+
+class ErrorResponseSchema(BaseResponseSchema):
+    errors = fields.List(fields.Nested(ValidationIssueSchema()), dump_default=[])
+
+
+class ResponseSchema(BaseResponseSchema):
     pagination_info = fields.Nested(
         PaginationInfoSchema(),
         metadata={"description": "The pagination information for paginated endpoints"},
     )
 
-class ErrorResponseSchema(BaseResponseSchema):
-    errors = fields.List(fields.Nested(ValidationIssueSchema()), dump_default=[])
-
-class ResponseSchema(BaseResponseSchema):
     warnings = fields.List(fields.Nested(ValidationIssueSchema()), dump_default=[])

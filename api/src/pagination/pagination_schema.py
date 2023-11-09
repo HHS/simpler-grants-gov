@@ -1,7 +1,6 @@
 from typing import Type
 
-from src.api.schemas.extension import fields, validators, Schema
-
+from src.api.schemas.extension import Schema, fields, validators
 from src.pagination.pagination_models import SortDirection
 
 
@@ -38,7 +37,6 @@ def generate_sorting_schema(
             sort_direction = fields.Enum(
                 SortDirection,
                 required=True,
-                by_value=True,
                 metadata={"description": "Whether to sort the response ascending or descending"},
         )
     """
@@ -54,7 +52,6 @@ def generate_sorting_schema(
         "sort_direction": fields.Enum(
             SortDirection,
             required=True,
-            by_value=True,
             metadata={"description": "Whether to sort the response ascending or descending"},
         ),
     }
@@ -81,6 +78,5 @@ class PaginationInfoSchema(Schema):
     )
     sort_direction = fields.Enum(
         SortDirection,
-        by_value=True,
         metadata={"description": "The direction the records are sorted"},
     )

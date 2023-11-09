@@ -1,13 +1,15 @@
 import dataclasses
-import apiflask
 import logging
 from typing import Any, Optional, Tuple
+
+import apiflask
 
 from src.api.schemas.extension import MarshmallowErrorContainer
 from src.pagination.pagination_models import PaginationInfo
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class ValidationErrorDetail:
@@ -81,6 +83,7 @@ def process_marshmallow_issues(marshmallow_issues: dict) -> list[ValidationError
 
     return validation_errors
 
+
 def restructure_error_response(error: apiflask.exceptions.HTTPError) -> Tuple[dict, int, Any]:
     # Note that body needs to have the same schema as the ErrorResponseSchema we defined
     # in app.api.route.schemas.response_schema.py
@@ -102,6 +105,12 @@ def restructure_error_response(error: apiflask.exceptions.HTTPError) -> Tuple[di
             # We don't want to make the response confusing
             # so we remove the now-duplicate error detail
             del body["data"]["json"]
+
+        marshmallow_issues = error.detail.get("headers")
+        if marshmallow_issues:
+            validation_errors.extend(process_marshmallow_issues(marshmallow_issues))
+
+            del body["data"]["headers"]
 
     # If we called raise_flask_error with a list of validation_issues
     # then they get appended to the error response here

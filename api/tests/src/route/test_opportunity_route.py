@@ -265,20 +265,88 @@ def test_opportunity_search_paging_and_sorting_200(
     [
         (
             {},
-            [{'field': 'sorting', 'message': 'Missing data for required field.', 'type': 'required', 'value': None},
-             {'field': 'paging', 'message': 'Missing data for required field.', 'type': 'required', 'value': None}]
+            [
+                {
+                    "field": "sorting",
+                    "message": "Missing data for required field.",
+                    "type": "required",
+                    "value": None,
+                },
+                {
+                    "field": "paging",
+                    "message": "Missing data for required field.",
+                    "type": "required",
+                    "value": None,
+                },
+            ],
         ),
         (
             get_search_request(page_offset=-1, page_size=-1),
-            [{'field': 'paging.page_size', 'message': 'Must be greater than or equal to 1.', 'type': 'min_or_max_value', 'value': None}, {'field': 'paging.page_offset', 'message': 'Must be greater than or equal to 1.', 'type': 'min_or_max_value', 'value': None}],
+            [
+                {
+                    "field": "paging.page_size",
+                    "message": "Must be greater than or equal to 1.",
+                    "type": "min_or_max_value",
+                    "value": None,
+                },
+                {
+                    "field": "paging.page_offset",
+                    "message": "Must be greater than or equal to 1.",
+                    "type": "min_or_max_value",
+                    "value": None,
+                },
+            ],
         ),
         (
             get_search_request(order_by="fake_field", sort_direction="up"),
-            [{'field': 'sorting.order_by', 'message': 'Value must be one of: opportunity_id, agency, opportunity_number, created_at, updated_at', 'type': 'invalid_choice', 'value': None}, {'field': 'sorting.sort_direction', 'message': 'Must be one of: ascending, descending.', 'type': 'invalid_choice', 'value': None}],
+            [
+                {
+                    "field": "sorting.order_by",
+                    "message": "Value must be one of: opportunity_id, agency, opportunity_number, created_at, updated_at",
+                    "type": "invalid_choice",
+                    "value": None,
+                },
+                {
+                    "field": "sorting.sort_direction",
+                    "message": "Must be one of: ascending, descending.",
+                    "type": "invalid_choice",
+                    "value": None,
+                },
+            ],
         ),
-        (get_search_request(opportunity_title={}), [{'field': 'opportunity_title', 'message': 'Not a valid string.', 'type': 'invalid', 'value': None}]),
-        (get_search_request(category="X"), [{'field': 'category', 'message': 'Must be one of: D, M, C, E, O.', 'type': 'invalid_choice', 'value': None}]),
-        (get_search_request(is_draft="hello"), [{'field': 'is_draft', 'message': 'Not a valid boolean.', 'type': 'invalid', 'value': None}]),
+        (
+            get_search_request(opportunity_title={}),
+            [
+                {
+                    "field": "opportunity_title",
+                    "message": "Not a valid string.",
+                    "type": "invalid",
+                    "value": None,
+                }
+            ],
+        ),
+        (
+            get_search_request(category="X"),
+            [
+                {
+                    "field": "category",
+                    "message": "Must be one of: D, M, C, E, O.",
+                    "type": "invalid_choice",
+                    "value": None,
+                }
+            ],
+        ),
+        (
+            get_search_request(is_draft="hello"),
+            [
+                {
+                    "field": "is_draft",
+                    "message": "Not a valid boolean.",
+                    "type": "invalid",
+                    "value": None,
+                }
+            ],
+        ),
     ],
 )
 def test_opportunity_search_invalid_request_422(
@@ -324,8 +392,15 @@ def test_opportunity_search_feature_flag_invalid_value_422(
     resp = client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
     assert resp.status_code == 422
 
-    response_data = resp.get_json()["detail"]["headers"]
-    assert response_data == {"X-FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+    response_data = resp.get_json()["errors"]
+    assert response_data == [
+        {
+            "field": "X-FF-Enable-Opportunity-Log-Msg",
+            "message": "Not a valid boolean.",
+            "type": "invalid",
+            "value": None,
+        }
+    ]
 
 
 #####################################

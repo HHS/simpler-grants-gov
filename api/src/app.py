@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional, Tuple, Any
+from typing import Any, Optional, Tuple
 
 from apiflask import APIFlask, exceptions
 from flask import g
@@ -23,11 +23,8 @@ logger = logging.getLogger(__name__)
 def create_app() -> APIFlask:
     app = APIFlask(__name__)
 
-    src.logging.init(__package__)
-    flask_logger.init_app(logging.root, app)
-
-    db_client = db.PostgresDBClient()
-    flask_db.register_db_client(db_client, app)
+    setup_logging(app)
+    register_db_client(app)
 
     feature_flag_config.initialize()
 
@@ -44,6 +41,16 @@ def current_user(is_user_expected: bool = True) -> Optional[User]:
         logger.error("No current user found for request")
         raise Unauthorized
     return current
+
+
+def setup_logging(app: APIFlask) -> None:
+    src.logging.init(__package__)
+    flask_logger.init_app(logging.root, app)
+
+
+def register_db_client(app: APIFlask) -> None:
+    db_client = db.PostgresDBClient()
+    flask_db.register_db_client(db_client, app)
 
 
 def configure_app(app: APIFlask) -> None:
@@ -74,7 +81,6 @@ def configure_app(app: APIFlask) -> None:
     # where we expect the API token to reside.
     # See: https://apiflask.com/authentication/#use-external-authentication-library
     app.security_schemes = get_app_security_scheme()
-
 
     @app.error_processor
     def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:

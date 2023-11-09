@@ -1,10 +1,10 @@
 from typing import Any
 
-from src.api.schemas.extension import fields, Schema
 from marshmallow import post_load
 
 from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
+from src.api.schemas.extension import Schema, fields
 from src.constants.lookup_constants import OpportunityCategory
 from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
 
@@ -30,7 +30,6 @@ class OpportunitySchema(Schema):
 
     category = fields.Enum(
         OpportunityCategory,
-        by_value=True,
         metadata={
             "description": "The opportunity category",
             "example": OpportunityCategory.DISCRETIONARY,
@@ -54,7 +53,6 @@ class OpportunitySearchSchema(Schema):
     )
     category = fields.Enum(
         OpportunityCategory,
-        by_value=True,
         metadata={
             "description": "The opportunity category to search for",
             "example": OpportunityCategory.DISCRETIONARY,
