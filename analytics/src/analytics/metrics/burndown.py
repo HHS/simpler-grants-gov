@@ -24,12 +24,12 @@ class SprintBurndown(BaseMetric):
         Notes
         -----
         Sprint burndown is calculated with the following algorithm:
-            1. Isolate the records that belong to the given sprint
-            2. Get the range of dates over which these tickets were opened and closed
-            3. Count the number of tickets opened and closed on each day of that range
-            4. Calculate the delta between opened and closed tickets per day
-            5. Cumulatively sum those deltas to get the running total of open tix
-            6. Filter out dates outside of the sprint range
+        1. Isolate the records that belong to the given sprint
+        2. Get the range of dates over which these tickets were opened and closed
+        3. Count the number of tickets opened and closed on each day of that range
+        4. Calculate the delta between opened and closed tickets per day
+        5. Cumulatively sum those deltas to get the running total of open tix
+        6. Filter out dates outside of the sprint range
         """
         # create local variables for key columns
         date_col = self.date_col
