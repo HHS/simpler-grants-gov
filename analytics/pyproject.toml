@@ -13,6 +13,7 @@ plotly = "^5.15.0"
 pydantic = "^2.0.3"
 python = "^3.10"
 pandas-stubs = "^2.0.2.230605"
+slack-sdk = "^3.23.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
