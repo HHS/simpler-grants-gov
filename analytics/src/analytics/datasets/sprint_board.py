@@ -1,4 +1,5 @@
-"""Implements the SprintBoard dataset
+"""
+Implements the SprintBoard dataset.
 
 This is a sub-class of BaseDataset that stores the tickets and metadata
 set for each ticket in the Sprint Planning Board
@@ -13,7 +14,7 @@ from analytics.datasets.utils import load_json_data_as_df
 
 
 class SprintBoard(BaseDataset):
-    """Stores the GitHub project data for the Sprint Planning Board"""
+    """Stores the GitHub project data for the Sprint Planning Board."""
 
     ISSUE_DATE_COLS = ["created_date", "closed_date"]
     ISSUE_COLUMN_MAP = {
@@ -41,7 +42,7 @@ class SprintBoard(BaseDataset):
     }
 
     def __init__(self, df: pd.DataFrame) -> None:
-        """Intializes the sprint board dataset"""
+        """Intializes the sprint board dataset."""
         # set named columns
         self.opened_col = "created_date"
         self.closed_col = "closed_date"
@@ -52,18 +53,16 @@ class SprintBoard(BaseDataset):
         super().__init__(df)
 
     def sprint_start(self, sprint: str) -> datetime64:
-        """Return the date on which a given sprint started"""
+        """Return the date on which a given sprint started."""
         sprint_mask = self.df[self.sprint_col] == sprint
         sprint_start = self.df.loc[sprint_mask, self.sprint_start_col].min()
-        sprint_start = sprint_start.tz_localize("UTC")
-        return sprint_start
+        return sprint_start.tz_localize("UTC")
 
     def sprint_end(self, sprint: str) -> datetime64:
-        """Return the date on which a given sprint ended"""
+        """Return the date on which a given sprint ended."""
         sprint_mask = self.df[self.sprint_col] == sprint
         sprint_end = self.df.loc[sprint_mask, self.sprint_end_col].max()
-        sprint_end = sprint_end.tz_localize("UTC")
-        return sprint_end
+        return sprint_end.tz_localize("UTC")
 
     @classmethod
     def load_from_json_files(
@@ -71,7 +70,8 @@ class SprintBoard(BaseDataset):
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
     ) -> Self:
-        """Load the input datasets and instantiate the SprintBoard class
+        """
+        Load the input datasets and instantiate the SprintBoard class.
 
         Parameters
         ----------
@@ -103,7 +103,7 @@ class SprintBoard(BaseDataset):
 
     @classmethod
     def _apply_transformations(cls, df: pd.DataFrame) -> pd.DataFrame:
-        """Apply column specific data transformations"""
+        """Apply column specific data transformations."""
         # calculate sprint end date
         df["sprint_duration"] = pd.to_timedelta(df["sprint_duration"], unit="day")
         df["sprint_end_date"] = df["sprint_start_date"] + df["sprint_duration"]

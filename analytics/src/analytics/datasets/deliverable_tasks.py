@@ -1,9 +1,11 @@
-"""Implements the DeliverableTasks dataset
+"""
+Implements the DeliverableTasks dataset.
 
 This is a sub-class of BaseDataset that groups 30k ft deliverables with the
 tasks needed to complete those delivearable
 """
-from typing import Optional, Self
+from typing import Self
+
 import pandas as pd
 
 from analytics.datasets.base import BaseDataset
@@ -11,7 +13,7 @@ from analytics.datasets.utils import load_json_data_as_df
 
 
 class DeliverableTasks(BaseDataset):
-    """Stores 30k ft deliverables and the tasks needed to complete them"""
+    """Stores 30k ft deliverables and the tasks needed to complete them."""
 
     ISSUE_DATE_COLS = ["created_date", "closed_date"]
     ISSUE_COLUMN_MAP = {
@@ -49,7 +51,8 @@ class DeliverableTasks(BaseDataset):
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
     ) -> Self:
-        """Load the input datasets and instantiate the DeliverableTasks class
+        """
+        Load the input datasets and instantiate the DeliverableTasks class.
 
         Parameters
         ----------
@@ -88,7 +91,8 @@ class DeliverableTasks(BaseDataset):
         df_all: pd.DataFrame,
         deliverable_label: str,
     ) -> pd.DataFrame:
-        """Apply column specific data transformations
+        """
+        Apply column specific data transformations.
 
         Parameters
         ----------
@@ -119,12 +123,11 @@ class DeliverableTasks(BaseDataset):
         df_deliverable = df_deliverable.rename(columns=deliverable_cols)
         # left join to df on "deliverable_number" to get the deliverable title
         df = df_deliverable.merge(df_all, on="deliverable_number", how="left")
-        df = df[cls.FINAL_COLUMNS]
-        return df
+        return df[cls.FINAL_COLUMNS]
 
 
-def pluck_label_name(labels: Optional[list]):
-    """Reformat the label dictionary to return a list of label names"""
+def pluck_label_name(labels: list | None) -> list[str]:
+    """Reformat the label dictionary to return a list of label names."""
     if labels and isinstance(labels, list):
         return [label["name"] for label in labels]
     return []
