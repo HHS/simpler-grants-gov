@@ -1,7 +1,7 @@
 name: Internal - Task
-description: Work items, user stories, or user needs that must be met that roll up to an epic
+description: Describes an individual task that needs to be completed
 title: "[Task]: "
-labels: ["project: grants.gov", "level: task"]
+labels: ["project: grants.gov"]
 assignees:
   - octocat
 body:
