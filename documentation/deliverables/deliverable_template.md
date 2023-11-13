@@ -1,29 +1,29 @@
-# {Milestone name}
+# {deliverable name}
 
-| Field           | Value                                                        |
-| --------------- | ------------------------------------------------------------ |
-| Document Status | Completed                                                    |
-| Epic Link       | TODO: Add link                                               |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
-| Product Owner   | Lucas Brown                                                  |
-| Document Owner  | TODO: Add name                                               |
-| Lead Developer  | Aaron Couch                                                  |
-| Lead Designer   | Andy Cochran                                                 |
+| Field              | Value                                                      |
+| ------------------ | ---------------------------------------------------------- |
+| Document status    | Completed                                                  |
+| Deliverable ticket | TODO: Add link                                             |
+| Roadmap dashboard  | [Product Roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product owner      | Lucas Brown                                                |
+| Document Owner     | TODO: Add name                                             |
+| Lead developer     | Aaron Couch                                                |
+| Lead designer      | Andy Cochran                                               |
 
 
 ## Short description
 <!-- Required -->
 
-{1-2 sentences describing milestone at a high-level}
+{1-2 sentences describing deliverable at a high-level}
 
 ## Goals
 
 ### Business description & value
 <!-- Required -->
 
-{3-4 sentences that describe why this milestone is critical to the project}
+{3-4 sentences that describe why this deliverable is critical to the project}
 
-### User Stories
+### User stories
 <!-- Required -->
 
 - As a **{type of user 1}**, I want to:
@@ -35,7 +35,7 @@
 
 ## Technical description
 
-### {Optional Sub-deliverable}
+### {Optional sub-deliverable}
 <!-- Optional -->
 
 {List reqiurements specific to this sub-deliverable, options to consider, etc.}
@@ -57,42 +57,49 @@
 ### Destination for live updating metrics
 <!-- Required -->
 
+[to be added]
+
 ## Planning
 
 ### Assumptions & dependencies
 <!-- Required -->
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What functionality do we expect to be in place ***before*** work starts on this deliverable?
 
-- [ ] [to be added]
+- [to be added]
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+What functionality do we expect to be in place by ***the end*** of work on this deliverable?
 
-- [ ] [to be added]
+- [to be added]
+
+Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
+
+- [to be added]
 
 ### Open questions
 <!-- Optional -->
 
-- [ ] [to be added]
+- [to be added]
 
 ### Not doing
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
+The following work will *not* be completed as part of this deliverable:
 
-1. [to be added]
+- [to be added]
 
 ## Integrations
 
 ### Translations
 <!-- Required -->
 
-Does this milestone involve delivering any content that needs translation?
+Does this deliverable involve delivering any content that needs translation?
 
-If so, when will English-language content be locked? Then when will translation be
-started and completed?
+1. [to be added]
+
+If so, when will English-language content be locked? Then when will translation be started and completed?
+
+1. [to be added]
 
 ### Services going into PROD for the first time
 <!-- Required -->
@@ -118,7 +125,9 @@ Are there any fields being shared publicly that have never been shared in PROD b
 ### Security considerations
 <!-- Required -->
 
-Does this milestone expose any new attack vectors or expand the attack surface of the product?
+Does this deliverable expose any new attack vectors or expand the attack surface of the product?
+
+1. [to be added]
 
 If so, how are we addressing these risks?
 
