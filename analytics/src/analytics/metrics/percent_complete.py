@@ -20,9 +20,9 @@ class DeliverablePercentComplete(BaseMetric):
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
         self.unit = unit
-        super().__init__(dataset, unit=unit)
+        self.dataset = dataset
 
-    def calculate(self, unit: Literal["tasks", "points"]) -> pd.DataFrame:
+    def calculate(self) -> pd.DataFrame:
         """Calculates the percent complete per deliverable
 
         Notes
@@ -37,8 +37,8 @@ class DeliverablePercentComplete(BaseMetric):
         5. Divide closed count by total count to get percent complete
         """
         # get total and closed counts per deliverable
-        df_total = self._get_count_by_deliverable(status="all", unit=unit)
-        df_closed = self._get_count_by_deliverable(status="closed", unit=unit)
+        df_total = self._get_count_by_deliverable(status="all", unit=self.unit)
+        df_closed = self._get_count_by_deliverable(status="closed", unit=self.unit)
         # join total and closed counts on deliverable
         # and calculate remaining columns
         df_all = df_total.merge(df_closed, on=self.deliverable_col, how="left")
@@ -50,7 +50,7 @@ class DeliverablePercentComplete(BaseMetric):
 
     def _get_count_by_deliverable(
         self,
-        status: Literal["closed", "open", "all"],
+        status: str,
         unit: Literal["tasks", "points"] = "points",
     ) -> pd.DataFrame:
         """Get the count of tasks (or points) by deliverable and status"""
@@ -67,9 +67,11 @@ class DeliverablePercentComplete(BaseMetric):
         else:
             status = "total"  # rename status var to use as column name
             df = df[key_cols]
-        # group by deliverable and sum the unit field
-        df_agg = df.groupby(self.deliverable_col, as_index=False).agg("sum")
-        df_agg.columns = [self.deliverable_col, status]
+        # group by deliverable and sum the values in the unit field
+        # then rename the sum column to the value of the status var
+        # to prevent duplicate col names when open and closed counts are joined
+        df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit: "sum"})
+        df_agg = df_agg.rename(columns={unit: status})
         return df_agg
 
     def visualize(self) -> Figure:

@@ -7,12 +7,11 @@ from analytics.datasets.base import BaseDataset
 class BaseMetric:
     """Base class for all metrics"""
 
-    def __init__(self, dataset: BaseDataset, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         """Initialize and calculate the metric from the input dataset"""
-        self.dataset = dataset
-        self.result = self.calculate(**kwargs)
+        self.result = self.calculate()
 
-    def calculate(self, **kwargs) -> pd.DataFrame:
+    def calculate(self) -> pd.DataFrame:
         """Calculate the metric and return the result dataset"""
         raise NotImplementedError
 
