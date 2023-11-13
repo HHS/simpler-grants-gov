@@ -1,3 +1,4 @@
+"""Calculates and visualizes percent completion by deliverable"""
 from typing import Literal
 
 import pandas as pd
@@ -21,6 +22,7 @@ class DeliverablePercentComplete(BaseMetric):
         self.status_col = "status"
         self.unit = unit
         self.dataset = dataset
+        super().__init__()
 
     def calculate(self) -> pd.DataFrame:
         """Calculates the percent complete per deliverable

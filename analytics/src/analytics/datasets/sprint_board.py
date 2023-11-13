@@ -1,3 +1,8 @@
+"""Implements the SprintBoard dataset
+
+This is a sub-class of BaseDataset that stores the tickets and metadata
+set for each ticket in the Sprint Planning Board
+"""
 from typing import Self
 
 import pandas as pd
@@ -66,7 +71,20 @@ class SprintBoard(BaseDataset):
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
     ) -> Self:
-        """Load the input datasets and generate the final dataframe"""
+        """Load the input datasets and instantiate the SprintBoard class
+
+        Parameters
+        ----------
+        sprint_file: str
+            Path to the local copy of sprint data exported from GitHub
+        issue_file: str
+            Path to the local copy of issue data exported from GitHub
+
+        Returns
+        -------
+        Self:
+            An instance of the SprintBoard dataset class
+        """
         # load and merge input datasets
         df_sprints = load_json_data_as_df(
             file_path=sprint_file,
