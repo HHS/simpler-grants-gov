@@ -1,4 +1,5 @@
-"""Calculates burndown for sprints
+"""
+Calculates burndown for sprints.
 
 This is a subclass of the BaseMetric class that calculates the running total of
 open tickets for each day in a sprint
@@ -14,10 +15,10 @@ from analytics.metrics.base import BaseMetric
 
 
 class SprintBurndown(BaseMetric):
-    """Calculates the running total of open tickets per day in the sprint"""
+    """Calculates the running total of open tickets per day in the sprint."""
 
     def __init__(self, dataset: SprintBoard, sprint: str) -> None:
-        """Initialize the SprintBurndown metric"""
+        """Initialize the SprintBurndown metric."""
         self.sprint = sprint
         self.date_col = "dates"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
@@ -26,7 +27,8 @@ class SprintBurndown(BaseMetric):
         super().__init__()
 
     def calculate(self) -> pd.DataFrame:
-        """Calculate the sprint burndown
+        """
+        Calculate the sprint burndown.
 
         Notes
         -----
@@ -49,13 +51,12 @@ class SprintBurndown(BaseMetric):
         df_opened = self._get_daily_tix_counts_by_status(df_sprint, "opened")
         df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
         # combine the daily opened and closed counts to get total open per day
-        df_burndown = self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
-        return df_burndown
+        return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
     def visualize(self) -> Figure:
-        """Plot the sprint burndown using a plotly line chart"""
+        """Plot the sprint burndown using a plotly line chart."""
         # suppress plotly FutureWarning related to pandas API change
-        # TODO: @widal001 2023-11-03: Address this warning instead of ignoring it
+        # TODO(@widal001): 2023-11-03: Address this warning instead of ignoring it
         import warnings  # pylint: disable=C0415
 
         warnings.simplefilter("ignore", category=FutureWarning)
@@ -81,7 +82,8 @@ class SprintBurndown(BaseMetric):
         df: pd.DataFrame,
         status: Literal["opened", "closed"],
     ) -> pd.DataFrame:
-        """Count the number of tickets opened or closed by date
+        """
+        Count the number of tickets opened or closed by date.
 
         Notes
         -----
@@ -89,15 +91,12 @@ class SprintBurndown(BaseMetric):
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
         """
-        if status == "opened":
-            agg_col = self.opened_col
-        else:
-            agg_col = self.closed_col
-        df_agg = df.groupby(agg_col, as_index=False).agg({status: "size"})
-        return df_agg
+        agg_col = self.opened_col if status == "opened" else self.closed_col
+        return df.groupby(agg_col, as_index=False).agg({status: "size"})
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Get the date range over which tickets were created and closed
+        """
+        Get the date range over which tickets were created and closed.
 
         Notes
         -----
@@ -120,7 +119,8 @@ class SprintBurndown(BaseMetric):
         opened: pd.DataFrame,
         closed: pd.DataFrame,
     ) -> pd.DataFrame:
-        """Get the cumulative sum of open tickets per day
+        """
+        Get the cumulative sum of open tickets per day.
 
         Notes
         -----

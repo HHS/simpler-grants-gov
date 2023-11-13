@@ -1,9 +1,10 @@
-from slack_sdk import WebClient
+"""Test the code in analytics.etl.slack."""
+from slack_sdk import WebClient  # noqa: I001
 
 from analytics.etl.slack import (
+    FileMapping,
     fetch_slack_channel_info,
     upload_file_to_slack_channel,
-    FileMapping,
 )
 from config import settings
 
@@ -11,6 +12,7 @@ client = WebClient(token=settings.slack_bot_token)
 
 
 def test_fetch_slack_channels():
+    """The fetch_slack_channels() function should execute correctly."""
     result = fetch_slack_channel_info(
         client=client,
         channel_id=settings.reporting_channel_id,
@@ -19,7 +21,8 @@ def test_fetch_slack_channels():
     assert result["channel"]["name"] == "z_bot-sprint-reporting"
 
 
-def test_upload_files_to_slack_channels():
+def test_upload_files_to_slack_channel():
+    """The upload_files_to_slack_channel() function should execute correctly."""
     # setup - create test files to upload
     files = [
         FileMapping(file_path="data/test1.txt", file_name="test1.txt"),
@@ -36,4 +39,5 @@ def test_upload_files_to_slack_channels():
         message="This is a test upload",
     )
     print(result["files"])
-    assert 0
+    assert result["ok"] is True
+    assert result["files"] is not None

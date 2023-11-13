@@ -1,4 +1,4 @@
-"""Calculates and visualizes percent completion by deliverable"""
+"""Calculate and visualizes percent completion by deliverable."""
 from typing import Literal
 
 import pandas as pd
@@ -10,14 +10,14 @@ from analytics.metrics.base import BaseMetric
 
 
 class DeliverablePercentComplete(BaseMetric):
-    """Calculates the percentage of tasks or points completed per deliverable"""
+    """Calculate the percentage of tasks or points completed per deliverable."""
 
     def __init__(
         self,
         dataset: DeliverableTasks,
         unit: Literal["tasks", "points"],
     ) -> None:
-        """Initialize the DeliverablePercentComplete metric"""
+        """Initialize the DeliverablePercentComplete metric."""
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
         self.unit = unit
@@ -25,7 +25,8 @@ class DeliverablePercentComplete(BaseMetric):
         super().__init__()
 
     def calculate(self) -> pd.DataFrame:
-        """Calculates the percent complete per deliverable
+        """
+        Calculate the percent complete per deliverable.
 
         Notes
         -----
@@ -55,7 +56,7 @@ class DeliverablePercentComplete(BaseMetric):
         status: str,
         unit: Literal["tasks", "points"] = "points",
     ) -> pd.DataFrame:
-        """Get the count of tasks (or points) by deliverable and status"""
+        """Get the count of tasks (or points) by deliverable and status."""
         # create local copies of the dataset and key column names
         df = self.dataset.df.copy()
         key_cols = [self.deliverable_col, unit]
@@ -73,11 +74,10 @@ class DeliverablePercentComplete(BaseMetric):
         # then rename the sum column to the value of the status var
         # to prevent duplicate col names when open and closed counts are joined
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit: "sum"})
-        df_agg = df_agg.rename(columns={unit: status})
-        return df_agg
+        return df_agg.rename(columns={unit: status})
 
     def visualize(self) -> Figure:
-        """Creates a bar chart of percent completion from the data in self.result"""
+        """Create a bar chart of percent completion from the data in self.result."""
         # unpivots open and closed counts so that each deliverable has both
         # an open and a closed row with just one column for count
         df = self.result.melt(

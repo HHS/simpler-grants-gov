@@ -1,5 +1,4 @@
-"""Tests for analytics/datasets/percent_complete.py"""
-from typing import Optional
+"""Tests for analytics/datasets/percent_complete.py."""
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.percent_complete import DeliverablePercentComplete
@@ -7,11 +6,11 @@ from analytics.metrics.percent_complete import DeliverablePercentComplete
 
 def task_row(
     deliverable: int,
-    task: Optional[int],
-    points: Optional[int] = 1,
-    status: Optional[str] = "open",
+    task: int | None,
+    points: int | None = 1,
+    status: str | None = "open",
 ) -> dict:
-    """Create a sample row of the DeliverableTasks dataset"""
+    """Create a sample row of the DeliverableTasks dataset."""
     return {
         "deliverable_number": deliverable,
         "deliverable_title": f"Deliverable {deliverable}",
@@ -23,10 +22,10 @@ def task_row(
 
 
 class TestDeliverablePercentComplete:
-    """Tests the DeliverablePercentComplete metric"""
+    """Test the DeliverablePercentComplete metric."""
 
     def test_percent_complete_based_on_task_count(self):
-        """Check that percent completion is correct when tasks are the unit"""
+        """Check that percent completion is correct when tasks are the unit."""
         # setup - create test dataset
         test_rows = [
             task_row(deliverable=1, task=1, status="open"),
@@ -53,7 +52,7 @@ class TestDeliverablePercentComplete:
         assert df.loc["Deliverable 2", "percent_complete"] == 0.0
 
     def test_percent_complete_based_on_points(self):
-        """"""
+        """Check that percent completion is correct when points are the unit."""
         # setup - create test dataset
         test_rows = [
             task_row(deliverable=1, task=1, points=1, status="open"),
@@ -80,7 +79,7 @@ class TestDeliverablePercentComplete:
         assert df.loc["Deliverable 2", "percent_complete"] == 0.0
 
     def test_show_0_pct_for_deliverables_without_tasks(self):
-        """Deliverables without tasks should show 0% complete instead of throwing an error"""
+        """Deliverables without tasks should show 0% complete instead of throwing an error."""
         # setup - create test dataset where deliverable 2 has no tasks
         test_rows = [
             task_row(deliverable=1, task=2, status="closed"),
@@ -106,7 +105,7 @@ class TestDeliverablePercentComplete:
         assert df.loc["Deliverable 2", "percent_complete"] == 0.0
 
     def test_show_0_pct_for_deliverables_without_points(self):
-        """Deliverables without points should show 0% complete instead of throwing an error"""
+        """Deliverables without points should show 0% complete instead of throwing an error."""
         # setup - create test dataset where deliverable 2 has no points
         test_rows = [
             task_row(deliverable=1, task=2, points=2, status="closed"),

@@ -1,4 +1,5 @@
-"""Stores configurations for pytest tests in this directory
+"""
+Configure pytest settings and create reusable fixtures and functions.
 
 Visit pytest docs for more info:
 https://docs.pytest.org/en/7.1.x/reference/fixtures.html
@@ -8,11 +9,12 @@ import json
 from pathlib import Path
 
 # skips the integration tests in tests/integrations/
+# to run the integration tests, invoke them directly: pytest tests/integrations/
 collect_ignore = ["integrations"]
 
 
 def write_test_data_to_file(data: dict, output_file: str):
-    """Writes test JSON data to a file for use in a test"""
+    """Write test JSON data to a file for use in a test."""
     parent_dir = Path(output_file).parent
     parent_dir.mkdir(exist_ok=True, parents=True)
     with open(output_file, "w", encoding="UTF-8") as f:
@@ -21,15 +23,14 @@ def write_test_data_to_file(data: dict, output_file: str):
 
 def json_issue_row(
     issue: int,
-    labels: list[str] = None,
+    labels: list[str] | None = None,
     created_at: str = "2023-11-01T00:00:00Z",
     closed_at: str = "2023-11-01T00:00:00Z",
 ) -> dict:
-    """Generate a row of JSON issue data for testing"""
-    if labels:
-        new_labels = [{"name": label, "id": hash(label)} for label in labels]
-    else:
-        new_labels = []
+    """Generate a row of JSON issue data for testing."""
+    new_labels = (
+        [{"name": label, "id": hash(label)} for label in labels] if labels else []
+    )
     return {
         "closedAt": closed_at,
         "createdAt": created_at,
@@ -47,7 +48,7 @@ def json_sprint_row(
     status: str = "Done",
     points: int = 5,
 ) -> dict:
-    """Generate a row of JSON sprint data for testing"""
+    """Generate a row of JSON sprint data for testing."""
     return {
         "assignees": ["mickeymouse"],
         "content": {
