@@ -1,3 +1,8 @@
+"""Implements the DeliverableTasks dataset
+
+This is a sub-class of BaseDataset that groups 30k ft deliverables with the
+tasks needed to complete those delivearable
+"""
 from typing import Optional, Self
 import pandas as pd
 
@@ -37,10 +42,6 @@ class DeliverableTasks(BaseDataset):
         "status",
     ]
 
-    def __init__(self, df: pd.DataFrame) -> None:
-        """Initializes the DeliverableTasks dataset"""
-        super().__init__(df)
-
     @classmethod
     def load_from_json_files(
         cls,
@@ -48,6 +49,22 @@ class DeliverableTasks(BaseDataset):
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
     ) -> Self:
+        """Load the input datasets and instantiate the DeliverableTasks class
+
+        Parameters
+        ----------
+        deliverable_label: str
+            The GitHub label used to flag deliverable tickets
+        sprint_file: str
+            Path to the local copy of sprint data exported from GitHub
+        issue_file: str
+            Path to the local copy of issue data exported from GitHub
+
+        Returns
+        -------
+        Self:
+            An instance of the DeliverableTasks dataset class
+        """
         # load and merge input datasets
         df_sprints = load_json_data_as_df(
             file_path=sprint_file,
@@ -68,32 +85,40 @@ class DeliverableTasks(BaseDataset):
     @classmethod
     def _apply_transformations(
         cls,
-        df_task: pd.DataFrame,
+        df_all: pd.DataFrame,
         deliverable_label: str,
     ) -> pd.DataFrame:
-        """Apply column specific data transformations"""
+        """Apply column specific data transformations
+
+        Parameters
+        ----------
+        df_all: pd.DataFrame
+            A dataframe of all issues and their fields from the sprint board
+        deliverable_label: str
+            The GitHub label used to flag deliverable tickets
+        """
         # extract parent issue number from the milestone description
         deliverable_regex = r"(?: deliverable: \#)(?P<parent_issue_number>\d+)"
-        df_task["deliverable_number"] = (
-            df_task["milestone_description"]
+        df_all["deliverable_number"] = (
+            df_all["milestone_description"]
             .str.extract(pat=deliverable_regex, expand=False)
             .astype("Int64")
         )
         # calculate task status
-        df_task["status"] = "open"
-        is_closed = df_task["closed_date"].isna()
-        df_task.loc[is_closed, "status"] = "closed"
+        df_all["status"] = "open"
+        is_closed = df_all["closed_date"].isna()
+        df_all.loc[is_closed, "status"] = "closed"
         # isolate 30k deliverable issues and rename their cols
-        df_task["labels"] = df_task["labels"].apply(pluck_label_name)
-        deliverable_mask = df_task["labels"].apply(lambda x: deliverable_label in x)
+        df_all["labels"] = df_all["labels"].apply(pluck_label_name)
+        deliverable_mask = df_all["labels"].apply(lambda x: deliverable_label in x)
         deliverable_cols = {
             "issue_number": "deliverable_number",
             "issue_title": "deliverable_title",
         }
-        df_deliverable = df_task.loc[deliverable_mask, list(deliverable_cols.keys())]
+        df_deliverable = df_all.loc[deliverable_mask, list(deliverable_cols.keys())]
         df_deliverable = df_deliverable.rename(columns=deliverable_cols)
         # left join to df on "deliverable_number" to get the deliverable title
-        df = df_deliverable.merge(df_task, on="deliverable_number", how="left")
+        df = df_deliverable.merge(df_all, on="deliverable_number", how="left")
         df = df[cls.FINAL_COLUMNS]
         return df
 

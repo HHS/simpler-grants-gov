@@ -1,3 +1,4 @@
+"""A series of ETL functions to export data from GitHub"""
 from pathlib import Path
 import shlex
 import subprocess
@@ -9,7 +10,7 @@ def pipe_command_output_to_file(command: str, output_file: str):
     file_path = Path(output_file)
     file_path.parent.mkdir(exist_ok=True, parents=True)
     # invoke the command via a subprocess and write the output to a file
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         subprocess.call(shlex.split(command), stdout=f)
 
 
