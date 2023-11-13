@@ -1,9 +1,11 @@
 ---
 
 name: Internal - 10k deliverable
-description: Describe product features or functionality at a 10,000 foot view
+about: Describe a new feature or functionality at a 10,000 ft view
 title: "[10k]: "
-labels: "deliverable: 10k ft"
+labels:
+  - "deliverable: 10k ft"
+assignees: ""
 
 ---
 
@@ -26,7 +28,7 @@ labels: "deliverable: 10k ft"
 
 ### Tasks
 
-- [ ] {Link to 10k ticket that should be completed with this deliverable}
+- [ ] {Link to tasks that should be completed with this deliverable}
 
 ### Definition of Done
 
