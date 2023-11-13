@@ -1,3 +1,4 @@
+"""Stores utility functions for Dataset classes"""
 import json
 from typing import Optional
 
@@ -34,7 +35,7 @@ def load_json_data_as_df(
         pydantic schema which would also allow us to do type validation and conversions
     """
     # load json data from the local file
-    with open(file_path) as f:
+    with open(file_path, encoding="utf-8") as f:
         json_data = json.loads(f.read())
     # if the items we want to convert are nested under a key extract them
     if key_for_nested_items:

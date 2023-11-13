@@ -19,10 +19,10 @@ slack-sdk = "^3.23.0"
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
 mypy = "^1.4.1"
+pylint = "^3.0.2"
 pytest = "^7.4.0"
 ruff = "^0.0.278"
 safety = "^2.3.5"
-pylint = "^3.0.2"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -35,4 +35,10 @@ python_version = "3.11"
 ignore_missing_imports = true
 module = [
   "plotly.*",
+]
+
+[tool.pylint."MESSAGE CONTROL"]
+disable = [
+  "R0801", # duplicate-code
+  "W0511", # fix-me
 ]

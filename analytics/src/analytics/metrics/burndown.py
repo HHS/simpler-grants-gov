@@ -1,4 +1,8 @@
-""""""
+"""Calculates burndown for sprints
+
+This is a subclass of the BaseMetric class that calculates the running total of
+open tickets for each day in a sprint
+"""
 from typing import Literal
 
 import pandas as pd
@@ -52,7 +56,7 @@ class SprintBurndown(BaseMetric):
         """Plot the sprint burndown using a plotly line chart"""
         # suppress plotly FutureWarning related to pandas API change
         # TODO: @widal001 2023-11-03: Address this warning instead of ignoring it
-        import warnings
+        import warnings  # pylint: disable=C0415
 
         warnings.simplefilter("ignore", category=FutureWarning)
         # Limit the data in the line chart to dates within the sprint

@@ -1,3 +1,4 @@
+"""A series of ETL functions that allows us to read and write data to slack"""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -8,7 +9,7 @@ from slack_sdk.errors import SlackApiError
 
 @dataclass
 class FileMapping:
-    """"""
+    """A dataclass that maps file path to file name"""
 
     file_path: str
     file_name: str
