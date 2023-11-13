@@ -42,3 +42,20 @@ disable = [
   "R0801", # duplicate-code
   "W0511", # fix-me
 ]
+
+[tool.ruff]
+ignore = [
+  "ANN101", # missing type annotation for self
+  "ANN102", # missing type annotation for cls
+  "D203", # no blank line before class
+  "D212", # multi-line summary first line
+  "FIX002", # line contains TODO
+  "PD901", # pandas df variable name
+  "PLR0913", # Too many arguments to function call
+  "PTH123", # `open()` should be replaced by `Path.open()`
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+  "TD003", # missing an issue link on TODO
+  "T201", # use of `print` detected
+]
+line-length = 100
+select = ["ALL"]

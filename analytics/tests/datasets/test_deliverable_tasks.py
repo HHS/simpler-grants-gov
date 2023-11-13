@@ -1,7 +1,7 @@
-"""Tests for analytics/datasets/deliverable_tasks.py"""
+"""Tests for analytics/datasets/deliverable_tasks.py."""
 import numpy as np
-
 from analytics.datasets.deliverable_tasks import DeliverableTasks
+
 from tests.conftest import (
     json_issue_row,
     json_sprint_row,
@@ -10,14 +10,14 @@ from tests.conftest import (
 
 
 class TestLoadFromJsonFile:
-    """Tests the DeliverableTasks.load_from_json_file() class method"""
+    """Tests the DeliverableTasks.load_from_json_file() class method."""
 
     LABEL = "deliverable: 30k ft"
     ISSUE_FILE = "data/test-issue.json"
     SPRINT_FILE = "data/test-sprint.json"
 
     def test_returns_correct_columns(self):
-        """The method should return a dataframe with the correct set of columns"""
+        """The method should return a dataframe with the correct set of columns."""
         # setup - create test data for two different sprints
         sprint_data = [json_sprint_row(issue=1, parent_number=2)]
         issue_data = [
@@ -44,7 +44,7 @@ class TestLoadFromJsonFile:
         ]
 
     def test_join_correctly_on_deliverable_number(self):
-        """Tasks should be joined to 30k deliverables on deliverable number"""
+        """Tasks should be joined to 30k deliverables on deliverable number."""
         # setup - create test data for two different sprints
         sprint_data = [
             json_sprint_row(issue=1, parent_number=4),
@@ -76,7 +76,7 @@ class TestLoadFromJsonFile:
         assert df.loc[3, "deliverable_title"] == "Issue 5"
 
     def test_keep_30k_deliverables_without_tasks(self):
-        """30k deliverable tickets without tasks should still appear in the dataset"""
+        """30k deliverable tickets without tasks should still appear in the dataset."""
         # setup - create test data for two different sprints
         sprint_data = [json_sprint_row(issue=1, parent_number=2)]
         issue_data = [

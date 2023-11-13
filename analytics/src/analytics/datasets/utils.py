@@ -1,6 +1,5 @@
-"""Stores utility functions for Dataset classes"""
+"""Stores utility functions for Dataset classes."""
 import json
-from typing import Optional
 
 import pandas as pd
 
@@ -9,9 +8,10 @@ def load_json_data_as_df(
     file_path: str,
     column_map: dict,
     date_cols: list[str],
-    key_for_nested_items: Optional[str] = None,
+    key_for_nested_items: str | None = None,
 ) -> pd.DataFrame:
-    """Load a file that contains JSON data and format is as a DataFrame
+    """
+    Load a file that contains JSON data and format is as a DataFrame.
 
     Parameters
     ----------
@@ -21,8 +21,9 @@ def load_json_data_as_df(
         Dictionary mapping of existing JSON keys to their new column names
     date_cols: list[str]
         List of columns that need to be converted to date types
-    key_for_items: str
-        Name of the
+    key_for_nested_items: Optional[str]
+        Name of the key containing a list of objects to load as a dataframe.
+        Only needed if the JSON loaded is an object instead of a list
 
     Returns
     -------
@@ -31,7 +32,7 @@ def load_json_data_as_df(
 
     Notes
     -----
-    TODO: @widal001 2023-11-06 - Consider replacing column_map and date_cols with a
+    TODO(@widal001): 2023-11-06 - Consider replacing column_map and date_cols with a
         pydantic schema which would also allow us to do type validation and conversions
     """
     # load json data from the local file
