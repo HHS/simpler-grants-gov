@@ -6,7 +6,7 @@
 | Deliverable ticket | TODO: Add link                                             |
 | Roadmap dashboard  | [Product Roadmap](https://github.com/orgs/HHS/projects/12) |
 | Product owner      | Lucas Brown                                                |
-| Document Owner     | TODO: Add name                                             |
+| Document owner     | TODO: Add name                                             |
 | Lead developer     | Aaron Couch                                                |
 | Lead designer      | Andy Cochran                                               |
 
