@@ -2,6 +2,7 @@ from typing import Literal
 
 import pandas as pd
 import plotly.express as px
+from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric
@@ -29,7 +30,6 @@ class SprintBurndown(BaseMetric):
         3. Count the number of tickets opened and closed on each day of that range
         4. Calculate the delta between opened and closed tickets per day
         5. Cumulatively sum those deltas to get the running total of open tix
-        6. Filter out dates outside of the sprint range
         """
         # create local variables for key columns
         date_col = self.date_col
@@ -45,28 +45,31 @@ class SprintBurndown(BaseMetric):
         df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
         # combine the daily opened and closed counts to get total open per day
         df_burndown = self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
-        # isolate the dates for this sprint
-        date_mask = df_burndown[date_col].between(
-            self.dataset.sprint_start(self.sprint),
-            self.dataset.sprint_end(self.sprint),
-        )
-        return df_burndown[date_mask]
+        return df_burndown
 
-    def visualize(self) -> None:
+    def visualize(self) -> Figure:
         """Plot the sprint burndown using a plotly line chart"""
         # suppress plotly FutureWarning related to pandas API change
         # TODO: @widal001 2023-11-03: Address this warning instead of ignoring it
         import warnings
 
         warnings.simplefilter("ignore", category=FutureWarning)
+        # Limit the data in the line chart to dates within the sprint
+        # NOTE: This will *not* affect the running totals on those days
+        date_mask = self.result[self.date_col].between(
+            self.dataset.sprint_start(self.sprint),
+            self.dataset.sprint_end(self.sprint),
+        )
+        df = self.result[date_mask]
+        # create a line chart from the data in self.result
         fig = px.line(
-            self.result,
+            data_frame=df,
             x=self.date_col,
             y="total_open",
             title=f"{self.sprint} Burndown",
         )
         fig.show()
-        return
+        return fig
 
     def _get_daily_tix_counts_by_status(
         self,

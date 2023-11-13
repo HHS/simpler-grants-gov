@@ -2,6 +2,7 @@ from typing import Literal
 
 import pandas as pd
 import plotly.express as px
+from plotly.graph_objects import Figure
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.base import BaseMetric
@@ -17,6 +18,7 @@ class DeliverablePercentComplete(BaseMetric):
     ) -> None:
         """Initialize the DeliverablePercentComplete metric"""
         self.deliverable_col = "deliverable_title"
+        self.status_col = "status"
         self.unit = unit
         super().__init__(dataset, unit=unit)
 
@@ -60,7 +62,7 @@ class DeliverablePercentComplete(BaseMetric):
             df["tasks"] = 1
         # isolate tasks with the status we want
         if status != "all":
-            status_filter = df["status"] == status
+            status_filter = df[self.status_col] == status
             df = df.loc[status_filter, key_cols]
         else:
             status = "total"  # rename status var to use as column name
@@ -70,22 +72,28 @@ class DeliverablePercentComplete(BaseMetric):
         df_agg.columns = [self.deliverable_col, status]
         return df_agg
 
-    def visualize(self) -> None:
+    def visualize(self) -> Figure:
+        """Creates a bar chart of percent completion from the data in self.result"""
+        # unpivots open and closed counts so that each deliverable has both
+        # an open and a closed row with just one column for count
         df = self.result.melt(
             id_vars=[self.deliverable_col],
             value_vars=["open", "closed"],
             value_name=self.unit,
-            var_name="status",
+            var_name=self.status_col,
         )
-        df = df.sort_values([self.unit, "status"], ascending=True)
+        # sort the dataframe by count and status so that the resulting chart
+        # has deliverables with more tasks/points at the top
+        df = df.sort_values([self.unit, self.status_col], ascending=True)
+        # create a stacked bar chart from the data
         fig = px.bar(
             df,
             x=self.unit,
-            y="deliverable_title",
-            color="status",
+            y=self.deliverable_col,
+            color=self.status_col,
             orientation="h",
             title=f"Deliverable Percent Complete by {self.unit}",
             height=800,
         )
         fig.show()
-        return
+        return fig
