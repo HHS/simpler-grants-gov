@@ -1,5 +1,8 @@
 import json
 
+# skips the integration tests in tests/integrations/
+collect_ignore = ["integrations"]
+
 
 def write_test_data_to_file(data: dict, output_file: str):
     """Writes test JSON data to a file for use in a test"""
