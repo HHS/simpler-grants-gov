@@ -1,3 +1,4 @@
+""""""
 from typing import Literal
 
 import pandas as pd
@@ -15,9 +16,10 @@ class SprintBurndown(BaseMetric):
         """Initialize the SprintBurndown metric"""
         self.sprint = sprint
         self.date_col = "dates"
-        self.opened_col = dataset.opened_col
-        self.closed_col = dataset.closed_col
-        super().__init__(dataset)
+        self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
+        self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
+        self.dataset = dataset
+        super().__init__()
 
     def calculate(self) -> pd.DataFrame:
         """Calculate the sprint burndown
@@ -32,7 +34,6 @@ class SprintBurndown(BaseMetric):
         5. Cumulatively sum those deltas to get the running total of open tix
         """
         # create local variables for key columns
-        date_col = self.date_col
         opened_col = self.opened_col
         closed_col = self.closed_col
         # isolate columns we need to calculate burndown
@@ -74,7 +75,7 @@ class SprintBurndown(BaseMetric):
     def _get_daily_tix_counts_by_status(
         self,
         df: pd.DataFrame,
-        status: Literal["open", "closed"],
+        status: Literal["opened", "closed"],
     ) -> pd.DataFrame:
         """Count the number of tickets opened or closed by date
 
@@ -88,8 +89,7 @@ class SprintBurndown(BaseMetric):
             agg_col = self.opened_col
         else:
             agg_col = self.closed_col
-        df_agg = df.groupby(agg_col, as_index=False).agg("size")
-        df_agg.columns = [self.date_col, status]
+        df_agg = df.groupby(agg_col, as_index=False).agg({status: "size"})
         return df_agg
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:

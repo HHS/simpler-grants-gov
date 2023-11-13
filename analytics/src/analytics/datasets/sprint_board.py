@@ -1,3 +1,5 @@
+from typing import Self
+
 import pandas as pd
 from numpy import datetime64
 
@@ -63,7 +65,7 @@ class SprintBoard(BaseDataset):
         cls,
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
-    ) -> None:
+    ) -> Self:
         """Load the input datasets and generate the final dataframe"""
         # load and merge input datasets
         df_sprints = load_json_data_as_df(

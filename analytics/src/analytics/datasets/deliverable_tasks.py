@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 import pandas as pd
 
 from analytics.datasets.base import BaseDataset
@@ -47,7 +47,7 @@ class DeliverableTasks(BaseDataset):
         deliverable_label: str = "deliverable: 30k ft",
         sprint_file: str = "data/sprint-data.json",
         issue_file: str = "data/issue-data.json",
-    ) -> pd.DataFrame:
+    ) -> Self:
         # load and merge input datasets
         df_sprints = load_json_data_as_df(
             file_path=sprint_file,
@@ -90,7 +90,7 @@ class DeliverableTasks(BaseDataset):
             "issue_number": "deliverable_number",
             "issue_title": "deliverable_title",
         }
-        df_deliverable = df_task.loc[deliverable_mask, deliverable_cols.keys()]
+        df_deliverable = df_task.loc[deliverable_mask, list(deliverable_cols.keys())]
         df_deliverable = df_deliverable.rename(columns=deliverable_cols)
         # left join to df on "deliverable_number" to get the deliverable title
         df = df_deliverable.merge(df_task, on="deliverable_number", how="left")

@@ -7,14 +7,14 @@ readme = "README.md"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
+dynaconf = "^3.2.4"
 notebook = "^7.0.0" # Goal is to replace this with another method of presenting charts
 pandas = "^2.0.3"
+pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
 pydantic = "^2.0.3"
-python = "^3.10"
-pandas-stubs = "^2.0.2.230605"
+python = "^3.11"
 slack-sdk = "^3.23.0"
-dynaconf = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -22,7 +22,17 @@ mypy = "^1.4.1"
 pytest = "^7.4.0"
 ruff = "^0.0.278"
 safety = "^2.3.5"
+pylint = "^3.0.2"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
+
+[tool.mypy]
+python_version = "3.11"
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = [
+  "plotly.*",
+]

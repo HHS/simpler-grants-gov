@@ -1,4 +1,3 @@
-import pytest
 from slack_sdk import WebClient
 
 from analytics.etl.slack import (
@@ -16,7 +15,7 @@ def test_fetch_slack_channels():
         client=client,
         channel_id=settings.reporting_channel_id,
     )
-    assert result["ok"] == True
+    assert result["ok"] is True
     assert result["channel"]["name"] == "z_bot-sprint-reporting"
 
 
