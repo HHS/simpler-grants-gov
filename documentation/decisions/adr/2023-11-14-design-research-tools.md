@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** Nov 14, 2023
-- **Related Issue:** [#117}](https://github.com/HHS/simpler-grants-gov/issues/117})
+- **Related Issue:** [#117](https://github.com/HHS/simpler-grants-gov/issues/117)
 - **Deciders:** Andy Cochran, \[Designer/researcher\]
 - **Tags:** design, research, recruitment, incentives, scheduling
 
