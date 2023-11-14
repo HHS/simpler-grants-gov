@@ -27,8 +27,6 @@ paths:
                     $ref: '#/components/schemas/Healthcheck'
                   status_code:
                     type: integer
-                    minimum: -2147483648
-                    maximum: 2147483647
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
@@ -78,8 +76,6 @@ paths:
                       $ref: '#/components/schemas/Opportunity'
                   status_code:
                     type: integer
-                    minimum: -2147483648
-                    maximum: 2147483647
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
@@ -139,8 +135,6 @@ paths:
                     $ref: '#/components/schemas/Opportunity'
                   status_code:
                     type: integer
-                    minimum: -2147483648
-                    maximum: 2147483647
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
@@ -181,26 +175,18 @@ components:
       properties:
         page_offset:
           type: integer
-          minimum: -2147483648
-          maximum: 2147483647
           description: The page number that was fetched
           example: 1
         page_size:
           type: integer
-          minimum: -2147483648
-          maximum: 2147483647
           description: The size of the page fetched
           example: 25
         total_records:
           type: integer
-          minimum: -2147483648
-          maximum: 2147483647
           description: The total number of records fetchable
           example: 42
         total_pages:
           type: integer
-          minimum: -2147483648
-          maximum: 2147483647
           description: The total number of pages that can be fetched
           example: 2
         order_by:
@@ -226,9 +212,6 @@ components:
         field:
           type: string
           description: The field that failed
-        value:
-          type: string
-          description: The value that failed
     Healthcheck:
       type: object
       properties:
@@ -244,8 +227,6 @@ components:
           description: The REST resource object
         status_code:
           type: integer
-          minimum: -2147483648
-          maximum: 2147483647
           description: The HTTP status code
         errors:
           type: array
@@ -334,8 +315,6 @@ components:
         opportunity_id:
           type: integer
           readOnly: true
-          minimum: -2147483648
-          maximum: 2147483647
           description: The internal ID of the opportunity
           example: 12345
         opportunity_number:
