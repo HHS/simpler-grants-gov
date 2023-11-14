@@ -32,14 +32,15 @@ Simpler Grants would benefit from more robust tools for conducting user research
 
 | tool/feature    | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
 | --------------- | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
-| User            | ✔        | ✗            | ✔           | ✔               | ✗          | ✗         | ✗          | ✗              |
-| Incentives      | ✔        | ✔            | ✢           | ✢               | ✗          | ✔         | ✗          | ✗              |
-| Scheduling/cal  | ✔        | ✗            | ✔           | ✔               | ✗          | ✗         | ✗          | ✗              |
-| Surveys         | ✔        | ✗            | ✔           | ✔               | ✗          | ✗         | ✔          | ✔              |
-| Data repo       | ✢        | ✗            | ✔           | ✔               | ✔          | ✗         | ✗          | ✗              |
-| Nava experience | ✔        | ✔            | ✗           | ✔               | ✔          | ✗         | ✗          | ✗              |
+| User Mgmt       | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✘          | ✘              |
+| Incentives      | ✔        | ✔            | ✢           | ✢               | ✘          | ✔         | ✘          | ✘              |
+| Schedule/Cal    | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✘          | ✘              |
+| Surveys         | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✔          | ✔              |
+| Data repo       | ✢        | ✘            | ✔           | ✔               | ✔          | ✘         | ✘          | ✘              |
+| Nava experience | ✔        | ✔            | ✘           | ✔               | ✔          | ✘         | ✘          | ✘              |
 
-(✔ Built-in, ✢ Integration available, ✗ Not included)
+(✔ Built-in, ✢ Integration available, ✘ Not included)
+
 
 ## Decision Outcome
 
