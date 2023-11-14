@@ -16,7 +16,7 @@ Simpler Grants would benefit from more robust tools for conducting user research
 - **Incentives disbursement** -- It's important ethically that we compensate research participants for their time. We need a tool that allows us to easily send electronic rewards (e.g. gift cards) to participants after research sessions. This tool should include tracking and reporting.
 - **Scheduling** -- Larger research efforts require a lot of calendar coordination to provide participants with options that also work for facilitators. The tool should be able to schedule 1:1s, group sessions, and multi-part sessions; account for time zones; allow syncing of facilitators' calendars; integrate with Zoom; and send emails to participants (bonus: SMS) to both schedule and remind them of their scheduled time.
 - **Screeners / intercepts** -- Calls-to-action on the site should allow users to sign up as potential research participants. The tool should include a way of analyzing the pool of participants so that they can be funnelled to the right engagement opportunity (usability study, interview, focus group, etc) based on their answers to a set of survey questions that help identify the their archetype.
-- **Research data repository** -- The tool(s) _might_ also include a place to store, manage, analyze, and share customer insights. However, of these decsion drivers, this may most easily be done through existing tools (see (Use Mural for design diagrams and whiteboarding)[./2023-07-11-design-diagramming-tool.md]), and insights/findings should be stored in a long-term location kepr separate from PII.
+- **Research data repository** -- The tool(s) _might_ also include a place to store, manage, analyze, and share customer insights. However, of these decsion drivers, this may most easily be done through existing tools (see [Use Mural for design diagrams and whiteboarding](./2023-07-11-design-diagramming-tool.md)), and insights/findings should be stored in a long-term location kepr separate from PII.
 
 
 ## Options Considered
@@ -44,7 +44,7 @@ Simpler Grants would benefit from more robust tools for conducting user research
 
 ## Decision Outcome
 
-Chosen option: (Ethnio)[https://ethn.io/], because as a single tool it satisfies most decision drivers and has been validated/endorsed by Nava experience.
+Chosen option: [Ethnio], because as a single tool it satisfies most decision drivers and has been validated/endorsed by Nava experience.
 
 ### Positive Consequences
 
@@ -71,7 +71,7 @@ The cost is $82+/seat/month, however an Enterprise account is required for the P
 
 ### Tremendous
 
-(Tremendous)[https://www.tremendous.com/] is only for incentives disbursement. Nava has experience using this. Free to use, Tremendous lets the user select their preferred method: cash, prepaid card, gift card, or donation.
+[Tremendous] is only for incentives disbursement. Nava has experience using this. Free to use, Tremendous lets the user select their preferred method: cash, prepaid card, gift card, or donation.
 
 **Cost:** Free (Only pay for the incentives loaded into it.)
 
@@ -86,7 +86,7 @@ The cost is $82+/seat/month, however an Enterprise account is required for the P
 
 ### Qualtrics
 
-(Qualtrics)[https://www.qualtrics.com/] is used for feedback forms on HHS.gov. Includes a user research CRM (among other features). Integrates with Tremendous, Slack, Figma, calendars, Zoom.
+[Qualtrics] is used for feedback forms on HHS.gov. Includes a user research CRM (among other features). Integrates with Tremendous, Slack, Figma, calendars, Zoom.
 
 **Unknowns:** Might it possible for both Simpler Grants teams (Nava and HHS staff) to access this tool? If seats are available, we could use it for participant recruiting & management, as a research data repository, and integrate with Tremendous for incentives.
 
@@ -102,7 +102,7 @@ The cost is $82+/seat/month, however an Enterprise account is required for the P
 
 ### GreatQuestion
 
-(GreatQuestion)[https://greatquestion.co] is the all-in-one solution. It has all the features we need. It even includes unmoderated usability testing (note: Nava would recommend maze.co if we were to pick a single-purpose tool for usability tests, and choosing other tools does not preclude us from conducting unmoderated tests in the future). Integrates with Tremendous and other tools. GDPR/HIPAA compliant.
+[GreatQuestion] is the all-in-one solution. It has all the features we need. It even includes unmoderated usability testing (note: Nava would recommend maze.co if we were to pick a single-purpose tool for usability tests, and choosing other tools does not preclude us from conducting unmoderated tests in the future). Integrates with Tremendous and other tools. GDPR/HIPAA compliant.
 
 **Cost:** $35/seat/month "Team" plan may suffice.
 
@@ -114,7 +114,7 @@ The cost is $82+/seat/month, however an Enterprise account is required for the P
 
 ### Other tools explored (tho quickly ruled out)
 - [Dovetail] -- Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
-- [Giftbit] -- Similar functionality to Tremendous (which is preferred by Nava). Is (recommended by 18F/TSS)[https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants].
+- [Giftbit] -- Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
 - [Typeform] -- Basic surveys. Custom branding. High price point.Integrates w/ Tremendous, Dovetail. Only feature it provides is surveys.
 - [SurveyMonkey] -- Integrates with Tremendous, Dovetail. Only feature it provides is surveys.
-- (maze.co)[https://maze.co] -- Industry-standard Figma testing. Nava's recommended platform for unmoderated usability testing (likely not needed in the near-term).
+- [maze](https://maze.co) -- Industry-standard Figma testing. Nava's recommended platform for unmoderated usability testing (likely not needed in the near-term).
