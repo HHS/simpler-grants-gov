@@ -8,9 +8,7 @@
 
 ## Context and Problem Statement
 
-{Describe the context and problem statement, e.g., in free form using two to three sentences. You may want to articulate the problem in form of a question.}
-
-Simpler Grants would benefit from a tool (or tools) with features for conducting user research (e.g. interviews and usability tests).
+Simpler Grants would benefit from more robust tools for conducting user research (e.g. interviews and usability tests).
 
 ## Decision Drivers
 
