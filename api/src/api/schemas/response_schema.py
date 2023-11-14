@@ -6,7 +6,6 @@ class ValidationIssueSchema(Schema):
     type = fields.String(metadata={"description": "The type of error"})
     message = fields.String(metadata={"description": "The message to return"})
     field = fields.String(metadata={"description": "The field that failed"})
-    value = fields.String(metadata={"description": "The value that failed"})
 
 
 class BaseResponseSchema(Schema):

@@ -88,7 +88,7 @@ class Integer(original_fields.Integer, MixinField):
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid integer."),
     }
 
-    def __init__(self, restrict_to_32bit_int: bool = True, **kwargs: typing.Any):
+    def __init__(self, restrict_to_32bit_int: bool = False, **kwargs: typing.Any):
         # By default, we'll restrict all integer values to 32-bits so that they can be stored in
         # Postgres' integer column. If you wish to process a larger value, simply set this to false or specify
         # your own min/max Range.

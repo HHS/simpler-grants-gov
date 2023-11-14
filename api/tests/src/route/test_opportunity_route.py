@@ -270,13 +270,11 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "sorting",
                     "message": "Missing data for required field.",
                     "type": "required",
-                    "value": None,
                 },
                 {
                     "field": "paging",
                     "message": "Missing data for required field.",
                     "type": "required",
-                    "value": None,
                 },
             ],
         ),
@@ -287,13 +285,11 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "paging.page_size",
                     "message": "Must be greater than or equal to 1.",
                     "type": "min_or_max_value",
-                    "value": None,
                 },
                 {
                     "field": "paging.page_offset",
                     "message": "Must be greater than or equal to 1.",
                     "type": "min_or_max_value",
-                    "value": None,
                 },
             ],
         ),
@@ -304,13 +300,11 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "sorting.order_by",
                     "message": "Value must be one of: opportunity_id, agency, opportunity_number, created_at, updated_at",
                     "type": "invalid_choice",
-                    "value": None,
                 },
                 {
                     "field": "sorting.sort_direction",
                     "message": "Must be one of: ascending, descending.",
                     "type": "invalid_choice",
-                    "value": None,
                 },
             ],
         ),
@@ -321,7 +315,6 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "opportunity_title",
                     "message": "Not a valid string.",
                     "type": "invalid",
-                    "value": None,
                 }
             ],
         ),
@@ -332,7 +325,6 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "category",
                     "message": "Must be one of: D, M, C, E, O.",
                     "type": "invalid_choice",
-                    "value": None,
                 }
             ],
         ),
@@ -343,7 +335,6 @@ def test_opportunity_search_paging_and_sorting_200(
                     "field": "is_draft",
                     "message": "Not a valid boolean.",
                     "type": "invalid",
-                    "value": None,
                 }
             ],
         ),
@@ -398,7 +389,6 @@ def test_opportunity_search_feature_flag_invalid_value_422(
             "field": "FF-Enable-Opportunity-Log-Msg",
             "message": "Not a valid boolean.",
             "type": "invalid",
-            "value": None,
         }
     ]
 

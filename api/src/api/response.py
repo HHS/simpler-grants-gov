@@ -16,7 +16,6 @@ class ValidationErrorDetail:
     type: str
     message: str = ""
     field: Optional[str] = None
-    value: Optional[str] = None  # Do not store PII data here, as it gets logged in some cases
 
 
 class ValidationException(apiflask.exceptions.HTTPError):

@@ -146,10 +146,10 @@ def test_werkzeug_exceptions(simple_client, api_auth_token, monkeypatch, excepti
             None,
             [
                 ValidationErrorDetail(
-                    type="example", message="example message", field="example_field", value="value"
+                    type="example", message="example message", field="example_field"
                 ),
                 ValidationErrorDetail(
-                    type="example2", message="example message2", field="example_field2", value=4
+                    type="example2", message="example message2", field="example_field2"
                 ),
             ],
         ),
@@ -277,7 +277,6 @@ def test_marshmallow_validation(simple_client, api_auth_token, monkeypatch):
                     "type": error.key,
                     "message": error.message,
                     "field": field.removesuffix("._schema"),
-                    "value": None,
                 }
             )
 
