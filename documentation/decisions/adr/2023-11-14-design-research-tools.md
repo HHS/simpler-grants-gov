@@ -31,6 +31,7 @@ Simpler Grants would benefit from more robust tools for conducting user research
 [SurveyMonkey]: https://www.surveymonkey.com/
 
 | tool/feature    | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
+| --------------- | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
 | User            | ✔        | ✗            | ✔           | ✔               | ✗          | ✗         | ✗          | ✗              |
 | Incentives      | ✔        | ✔            | ✢           | ✢               | ✗          | ✔         | ✗          | ✗              |
 | Scheduling/cal  | ✔        | ✗            | ✔           | ✔               | ✗          | ✗         | ✗          | ✗              |
