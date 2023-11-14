@@ -1,4 +1,4 @@
-# {short title of solved problem and solution}
+# Use Ethnio for design research
 
 - **Status:** Active
 - **Last Modified:** Nov 14, 2023
