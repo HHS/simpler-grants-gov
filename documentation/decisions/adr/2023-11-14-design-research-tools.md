@@ -39,7 +39,7 @@ Simpler Grants would benefit from more robust tools for conducting user research
 | Data repo       | 🛠️        | ❌          | ✅          | ✅              | ✅         | ❌        | ❌         | ❌            |
 | Nava experience | ✅        | ✅          | ❌          | ✅              | ✅         | ❌        | ❌         | ❌            |
 
-(✅ Built-in, 🛠️ Integration available, ❌	 Not included)
+(✅ Built-in, 🛠️ Integration available, ❌ Not included)
 
 
 ## Decision Outcome
