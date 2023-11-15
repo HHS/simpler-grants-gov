@@ -58,6 +58,8 @@ Ethnio is a user research CRM for tracking participant activity. Nava has used i
 
 There is potential (depending on procurement) for Ethnio to be used both by this Simpler.Grants.gov project and HHS's other grants improvement efforts, which would let them share a single participant pool within a centralized database where participants can be tagged/labeled and their activity can be tracked (incentives might also be funded in a single location).
 
+Ethnio has the ability to create surveys of various types (open-ended feedback, targeted, screening potential participants), which could also satisfy the ["Method & technology for collecting targeted feedback" ADR issue](https://github.com/HHS/simpler-grants-gov/issues/306).
+
 Other features of note: Internationalized and localized. Section 508 and WCAG 2.0 (AA). GDPR- and CCPA-compliant data retention, expiration, and portability.
 
 **Cost:** $82+/seat/month, an Enterprise account is required for Participant Pool feature
