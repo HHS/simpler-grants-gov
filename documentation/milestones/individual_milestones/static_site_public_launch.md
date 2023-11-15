@@ -99,6 +99,13 @@ The two main communication outputs needed for this deliverable are:
 
 Both the initial email communication and the communication plan should be reviewed and approved by key stakeholders in the recurring communications meetings.
 
+### Email subscription mechanism
+
+One stretch goal for this deliverable is to adopt a service that allows site visitors to subscribe to a mailing list to receive updates about the Simpler.Grants.gov initiative. As part of this deliverable the team should answer the following questions:
+
+- Which email marketing provider will we use for email-based communications?
+- How will visitors submit their information to be added to a mailing list for Simpler.Grants.gov communications?
+
 ### Definition of done
 <!-- Required -->
 
@@ -199,40 +206,40 @@ The following work will *not* be completed as part of this deliverable:
 
 Does this deliverable involve delivering any content that needs translation?
 
-1. [to be added]
+1. Yes, the site contents will need to be translated -- but not as part of this deliverable.
 
 If so, when will English-language content be locked? Then when will translation be started and completed?
 
-1. [to be added]
+1. The site contents will be translated when we complete the [static site improvements deliverable](https://github.com/HHS/grants-equity/issues/568)
 
 ### Services going into PROD for the first time
 <!-- Required -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
-1. [to be added]
+1. **Subscription to mailing list:** This deliverable *may* include deploying a service that allows site visitors to sign up for a mailing list for updates about the Simpler.Grants.gov initiative.
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
 Are there multiple services that are being connected for the first time in PROD?
 
-1. [to be added]
+1. **Static site + mailing list:** If this deliverable includes a mechanism for visitors to subscribe to a mailing list, it will need to be integrated in the static site for the first time.
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
-1. [to be added]
+1. No, the content of the static site in this milestone will be limited to general information about the Simpler.Grants.gov project. It does not include exposing any production data from the new simpler.grants.gov data model.
 
 ### Security considerations
 <!-- Required -->
 
 Does this deliverable expose any new attack vectors or expand the attack surface of the product?
 
-1. [to be added]
+1. If it is included in this deliverable, the mechanism to allow site visitors to sign up for our mailing list will expose a new attack vector through the form submission for this service.
 
 If so, how are we addressing these risks?
 
-1. [to be added]
+1. The implementation plan for email subscriptions will evaluate and consider common security practices for validating and sanitizing user input. Where possible, we should adopt an existing system that HHS uses to manage email subscriptions.
