@@ -32,19 +32,19 @@ Simpler Grants would benefit from more robust tools for conducting user research
 
 | tool/feature    | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
 | --------------- | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
-| User Mgmt       | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✘          | ✘              |
-| Incentives      | ✔        | ✔            | ⚒           | ⚒               | ✘          | ✔         | ✘          | ✘              |
-| Schedule/Cal    | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✘          | ✘              |
-| Surveys         | ✔        | ✘            | ✔           | ✔               | ✘          | ✘         | ✔          | ✔              |
-| Data repo       | ⚒        | ✘            | ✔           | ✔               | ✔          | ✘         | ✘          | ✘              |
-| Nava experience | ✔        | ✔            | ✘           | ✔               | ✔          | ✘         | ✘          | ✘              |
+| User Mgmt       | ✅        | ❌          | ✅          | ✅              | ❌         | ❌        | ❌         | ❌            |
+| Incentives      | ✅        | ✅          | 🛠️          | 🛠️              | ❌         | ✅        | ❌         | ❌            |
+| Schedule/Cal    | ✅        | ❌          | ✅          | ✅              | ❌         | ❌        | ❌         | ❌            |
+| Surveys         | ✅        | ❌          | ✅          | ✅              | ❌         | ❌        | ✅         | ✅            |
+| Data repo       | 🛠️        | ❌          | ✅          | ✅              | ✅         | ❌        | ❌         | ❌            |
+| Nava experience | ✅        | ✅          | ❌          | ✅              | ✅         | ❌        | ❌         | ❌            |
 
-(✔ Built-in, ⚒ Integration available, ✘ Not included)
+(✅ Built-in, 🛠️ Integration available, ❌	 Not included)
 
 
 ## Decision Outcome
 
-Chosen option: [Ethnio], because as a single tool it satisfies most decision drivers and has been validated/endorsed by Nava experience.
+Chosen option: [Ethnio], because as a single tool it satisfies most decision drivers and has been validated by Nava experience.
 
 ### Positive Consequences
 
