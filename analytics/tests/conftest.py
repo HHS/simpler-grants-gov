@@ -4,7 +4,6 @@ Configure pytest settings and create reusable fixtures and functions.
 Visit pytest docs for more info:
 https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
-# pylint: disable=R0913
 import json
 from pathlib import Path
 
@@ -17,7 +16,7 @@ def write_test_data_to_file(data: dict, output_file: str):
     """Write test JSON data to a file for use in a test."""
     parent_dir = Path(output_file).parent
     parent_dir.mkdir(exist_ok=True, parents=True)
-    with open(output_file, "w", encoding="UTF-8") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(json.dumps(data, indent=2))
 
 

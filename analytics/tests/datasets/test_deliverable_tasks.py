@@ -1,7 +1,7 @@
 """Tests for analytics/datasets/deliverable_tasks.py."""
-import numpy as np
-from analytics.datasets.deliverable_tasks import DeliverableTasks
+import numpy as np  # noqa: I001
 
+from analytics.datasets.deliverable_tasks import DeliverableTasks
 from tests.conftest import (
     json_issue_row,
     json_sprint_row,

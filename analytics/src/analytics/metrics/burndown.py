@@ -20,7 +20,7 @@ class SprintBurndown(BaseMetric):
     def __init__(self, dataset: SprintBoard, sprint: str) -> None:
         """Initialize the SprintBurndown metric."""
         self.sprint = sprint
-        self.date_col = "dates"
+        self.date_col = "date"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
         self.dataset = dataset
@@ -92,7 +92,9 @@ class SprintBurndown(BaseMetric):
         - Counting the total number of rows per group
         """
         agg_col = self.opened_col if status == "opened" else self.closed_col
-        return df.groupby(agg_col, as_index=False).agg({status: "size"})
+        df_agg = df.groupby(agg_col, as_index=False).agg("size")
+        df_agg.columns = [self.date_col, status]
+        return pd.DataFrame(df_agg)  # prevents mypy issue
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -102,14 +104,15 @@ class SprintBurndown(BaseMetric):
         -----
         It does this by:
         - Finding the earliest date a ticket was created
-        - Finding the latest date a ticket was closed
-        - Creating a row for each day between those two dates
+        - Finding the date when the sprint ends
+        - Creating a row for each day between the earliest date a ticket was closed
+
         """
         opened_min = df[self.opened_col].min()  # earliest date a tix was created
-        closed_max = df[self.closed_col].max()  # latest date a tix was closed
+        sprint_end = self.dataset.sprint_end(self.sprint)
         # creates a dataframe with one row for each day between min and max date
         return pd.DataFrame(
-            pd.date_range(opened_min, closed_max),
+            pd.date_range(opened_min, sprint_end),
             columns=[self.date_col],
         )
 
@@ -132,6 +135,9 @@ class SprintBurndown(BaseMetric):
         - Cumulatively summing the deltas to get the running total of open tix
         """
         # left join the full date range to open and closed counts
+        print(opened)
+        print(closed)
+        print(dates)
         df = (
             dates.merge(opened, on=self.date_col, how="left")
             .merge(closed, on=self.date_col, how="left")
