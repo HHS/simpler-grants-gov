@@ -60,11 +60,12 @@ There is potential (depending on procurement) for Ethnio to be used both by this
 
 Other features of note: Internationalized and localized. Section 508 and WCAG 2.0 (AA). GDPR- and CCPA-compliant data retention, expiration, and portability.
 
+**Cost:** $82+/seat/month, an Enterprise account is required for Participant Pool feature
+
+
 ### Negative Consequences
 
-Ethnio does not include a research data repository. However, this is the one single feature need unmet (and shared text docs, internal wiki, and Mural will suffice).
-
-The cost is $82+/seat/month, however an Enterprise account is required for the Participant Pool feature.
+Ethnio does not include a research data repository. However, this is the one single feature need unmet, and shared text docs, internal wiki, and Mural will suffice for storing and analyzing insights.
 
 
 ## Pros and Cons of other options
