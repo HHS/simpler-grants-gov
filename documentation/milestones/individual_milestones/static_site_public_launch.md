@@ -120,6 +120,7 @@ Both the initial email communication and the communication plan should be review
     - [ ] 1 million users
   - [ ] Engineering staff are notified when the site goes down
   - [ ] Engineering staff have been trained on a documented incident response plan that describes a set of actions to take when the site goes down
+  - [ ] A set of SLAs have been defined internally for site availability and responsiveness
 - [ ] Communications requirements
   - [ ] An email has been sent out to the subset of public stakeholders with whom we plan to share the static site
   - [ ] Key internal stakeholders (e.g. help desk staff, HHS leadership) have been notified when the email is sent out so that they can prepare for questions from public stakeholders
@@ -155,27 +156,41 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 What functionality do we expect to be in place ***before*** work starts on this deliverable?
 
-- [to be added]
+- **[Static site soft launch](https://github.com/HHS/simpler-grants-gov/issues/62):** Delivered the following functionality that is needed by this deliverable:
+  - **Front-end CI/CD:** Enables us to run a series of code quality and security checks and deploy front-end code automatically
+  - **Foundational UI:** Allows us to continue to make site updates using a consistent design system and set of UI components
+  - **Domain access:** Secured the simpler.grants.gov where the public site will be hosted
 
 What functionality do we expect to be in place by ***the end*** of work on this deliverable?
 
-- [to be added]
+- **Communications strategy:** Allows us to create a schedule for future release announcements and estimate site traffic
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
-- [to be added]
+- **Content management:** A more formal content management process will be defined in its own 30k deliverable.
+- **Translation process:** Both translations and internationalization are being worked on in a separate 30k deliverable for static site improvements.
+- **Feedback mechanism:** A feedback mechanism will be worked on in a future 30k deliverable alongside the translation process.
 
 ### Open questions
 <!-- Optional -->
 
-- [to be added]
+#### Who is the audience for the initial public release and what is the estimated size of that audience?
+
+The initial audience will primarily be a set of federal stakeholders and system-to-system (S2S) users who currently use grants.gov often and who will want to stay up to date about new features being tested on simpler.grants.gov.
+
+This initial group is estimated to be around 1,000 stakeholders, but the communications plan will likely involve sharing the site with successively larger groups of public stakeholders shortly afterward. As a result, we'll want to plan for infrastructure updates needed to support site traffic at multiple levels (e.g. 1k users, 10k users, 100k users, etc.)
+
+#### What are the expectations about site availability, responsiveness, and traffic?
+
+We have not defined explicit SLAs for site availability or responsiveness yet, and proposing a set of SLAs is one of the acceptance criteria for this deliverable. In proposing those SLAs, however, the team should consider the importance of maintaining a high rate of availability for this site in building both public and federal trust in the Simpler.Grants.gov initiative.
 
 ### Not doing
 <!-- Optional -->
 
 The following work will *not* be completed as part of this deliverable:
 
-- [to be added]
+- **Translations:** Because translating the content of the site depends on formalizing the translation process, translating site contents into multiple languages is out of scope for this deliverable.
+- **User survey:** Because a feedback mechanism won't be adopted during this deliverable, a user survey will also be descoped from the public launch.
 
 ## Integrations
 
