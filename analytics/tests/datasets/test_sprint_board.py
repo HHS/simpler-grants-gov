@@ -1,8 +1,8 @@
 """Tests for analytics/datasets/sprint_board.py."""
-import pandas as pd
+import pandas as pd  # noqa: I001
 import pytest
-from analytics.datasets.sprint_board import SprintBoard
 
+from analytics.datasets.sprint_board import SprintBoard
 from tests.conftest import (
     json_issue_row,
     json_sprint_row,

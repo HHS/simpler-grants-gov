@@ -29,7 +29,7 @@ def test_upload_files_to_slack_channel():
         FileMapping(file_path="data/test2.txt", file_name="test2.txt"),
     ]
     for _file in files:
-        with open(_file.file_path, "w") as f:
+        with open(_file.file_path, "w", encoding="utf-8") as f:
             f.write(_file.file_name)
     # execution - run the upload
     result = upload_file_to_slack_channel(
