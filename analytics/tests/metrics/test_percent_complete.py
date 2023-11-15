@@ -1,7 +1,7 @@
 """Tests for analytics/datasets/percent_complete.py."""
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.metrics.percent_complete import DeliverablePercentComplete
+from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
 
 
 def task_row(
@@ -34,7 +34,7 @@ class TestDeliverablePercentComplete:
         ]
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution
-        df = DeliverablePercentComplete(test_data, unit="tasks").result
+        df = DeliverablePercentComplete(test_data, unit=Unit.tasks).result
         df = df.set_index("deliverable_title")
         # validation - check number of rows returned
         assert len(df) == 2
@@ -61,7 +61,7 @@ class TestDeliverablePercentComplete:
         ]
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution
-        df = DeliverablePercentComplete(test_data, unit="points").result
+        df = DeliverablePercentComplete(test_data, unit=Unit.points).result
         df = df.set_index("deliverable_title")
         # validation - check number of rows returned
         assert len(df) == 2
@@ -87,7 +87,7 @@ class TestDeliverablePercentComplete:
         ]
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution - use tasks as the unit
-        df = DeliverablePercentComplete(test_data, unit="tasks").result
+        df = DeliverablePercentComplete(test_data, unit=Unit.tasks).result
         df = df.set_index("deliverable_title")
         # validation - check number of rows returned
         assert len(df) == 2
@@ -113,7 +113,7 @@ class TestDeliverablePercentComplete:
         ]
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution - use points as the unit
-        df = DeliverablePercentComplete(test_data, unit="points").result
+        df = DeliverablePercentComplete(test_data, unit=Unit.points).result
         df = df.set_index("deliverable_title")
         # validation - check number of rows returned
         assert len(df) == 2
