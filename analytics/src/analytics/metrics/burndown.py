@@ -135,9 +135,6 @@ class SprintBurndown(BaseMetric):
         - Cumulatively summing the deltas to get the running total of open tix
         """
         # left join the full date range to open and closed counts
-        print(opened)
-        print(closed)
-        print(dates)
         df = (
             dates.merge(opened, on=self.date_col, how="left")
             .merge(closed, on=self.date_col, how="left")

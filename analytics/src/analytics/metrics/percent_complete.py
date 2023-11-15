@@ -1,4 +1,5 @@
 """Calculate and visualizes percent completion by deliverable."""
+from enum import Enum
 from typing import Literal
 
 import pandas as pd
@@ -9,18 +10,25 @@ from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.base import BaseMetric
 
 
+class Unit(Enum):
+    """List the units in which percent completion can be calculated."""
+
+    tasks = "tasks"  # pylint: disable=C0103
+    points = "points"  # pylint: disable=C0103
+
+
 class DeliverablePercentComplete(BaseMetric):
     """Calculate the percentage of tasks or points completed per deliverable."""
 
     def __init__(
         self,
         dataset: DeliverableTasks,
-        unit: Literal["tasks", "points"],
+        unit: Unit,
     ) -> None:
         """Initialize the DeliverablePercentComplete metric."""
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
-        self.unit = unit
+        self.unit: Literal["tasks", "points"] = unit.value
         self.dataset = dataset
         super().__init__()
 
