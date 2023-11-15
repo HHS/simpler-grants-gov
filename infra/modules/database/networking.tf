@@ -40,7 +40,16 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_role_manager" {
   referenced_security_group_id = aws_security_group.role_manager.id
 }
 
-# Not sure if we need egress for DMS instance?
+resource "aws_vpc_security_group_egress_rule" "db_egress_from_dms" {
+  security_group_id = aws_security_group.db.id
+  description       = "Allow outbound requests to database from DMS"
+
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.dms.id
+}
+
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_dms" {
   security_group_id = aws_security_group.db.id
   description       = "Allow inbound requests to database from DMS"
