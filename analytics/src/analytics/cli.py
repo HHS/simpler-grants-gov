@@ -93,7 +93,9 @@ def calculate_sprint_burndown(
 def calculate_deliverable_percent_complete(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
-    unit: Annotated[Unit, UNIT_ARG] = Unit.points,
+    # Typer uses the Unit enum to validate user inputs from the CLI
+    # but the default arg must be a string or the CLI will throw an error
+    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,

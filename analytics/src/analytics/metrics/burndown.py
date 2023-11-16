@@ -25,6 +25,7 @@ class SprintBurndown(BaseMetric):
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
         self.dataset = dataset
+        self.unit = "tickets"
         super().__init__()
 
     def calculate(self) -> pd.DataFrame:
@@ -73,7 +74,21 @@ class SprintBurndown(BaseMetric):
 
     def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
         """Post sprint burndown results and chart to slack channel."""
-        message = f"*Burndown summary for {self.sprint} :github:*"
+        # calculate a series of stats about the sprint
+        df = self.results
+        sprint_start = self.dataset.sprint_start(self.sprint).strftime("%Y-%m-%d")
+        sprint_end = self.dataset.sprint_end(self.sprint).strftime("%Y-%m-%d")
+        total_opened = int(df["opened"].sum())
+        total_closed = int(df["closed"].sum())
+        pct_closed = round(total_closed / total_opened * 100, 2)
+        message = f"""
+*:github: Burndown summary for {self.sprint}*
+• *Sprint start date:* {sprint_start}
+• *Sprint end date:* {sprint_end}
+• *Total opened:* {total_opened} {self.unit}
+• *Total closed:* {total_closed} {self.unit}
+• *Percent closed:* {pct_closed}%
+"""
         return super()._post_results_to_slack(
             slackbot=slackbot,
             channel_id=channel_id,
