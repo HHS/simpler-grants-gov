@@ -2,12 +2,14 @@
 from typing import Annotated
 
 import typer
+from slack_sdk import WebClient
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.etl import github
+from analytics.etl import github, slack
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
+from config import settings
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -19,6 +21,8 @@ REPO_ARG = typer.Option(help="Name of the GitHub repo")
 PROJECT_ARG = typer.Option(help="Number of the GitHub project")
 SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating burndown")
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
+SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
+POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -61,6 +65,9 @@ def calculate_sprint_burndown(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
+    *,  # makes the following args keyword only
+    show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
+    post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
@@ -70,8 +77,16 @@ def calculate_sprint_burndown(
     )
     # calculate burndown
     burndown = SprintBurndown(sprint_data, sprint=sprint)
-    # plot burndown as a line chart
-    burndown.visualize()
+    # optionally display the burndown chart in the browser
+    if show_results:
+        burndown.show_chart()
+    # optionally post the results to slack
+    if post_results:
+        slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
+        burndown.post_results_to_slack(
+            slackbot=slackbot,
+            channel_id=settings.reporting_channel_id,
+        )
 
 
 @metrics_app.command(name="deliverable_percent_complete")
@@ -79,6 +94,9 @@ def calculate_deliverable_percent_complete(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     unit: Annotated[Unit, UNIT_ARG] = Unit.points,
+    *,  # makes the following args keyword only
+    show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
+    post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate percentage completion by deliverable."""
     # load the input data
@@ -88,5 +106,12 @@ def calculate_deliverable_percent_complete(
     )
     # calculate burndown
     pct_complete = DeliverablePercentComplete(task_data, unit=unit)
-    # plot burndown as a line chart
-    pct_complete.visualize()
+    # optionally display the burndown chart in the browser
+    if show_results:
+        pct_complete.show_chart()
+    if post_results:
+        slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
+        pct_complete.post_results_to_slack(
+            slackbot=slackbot,
+            channel_id=settings.reporting_channel_id,
+        )

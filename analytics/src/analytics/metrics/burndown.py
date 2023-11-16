@@ -11,6 +11,7 @@ import plotly.express as px
 from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
+from analytics.etl.slack import SlackBot
 from analytics.metrics.base import BaseMetric
 
 
@@ -53,29 +54,31 @@ class SprintBurndown(BaseMetric):
         # combine the daily opened and closed counts to get total open per day
         return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
-    def visualize(self) -> Figure:
+    def plot_results(self) -> Figure:
         """Plot the sprint burndown using a plotly line chart."""
-        # suppress plotly FutureWarning related to pandas API change
-        # TODO(@widal001): 2023-11-03: Address this warning instead of ignoring it
-        import warnings  # pylint: disable=C0415
-
-        warnings.simplefilter("ignore", category=FutureWarning)
         # Limit the data in the line chart to dates within the sprint
         # NOTE: This will *not* affect the running totals on those days
-        date_mask = self.result[self.date_col].between(
+        date_mask = self.results[self.date_col].between(
             self.dataset.sprint_start(self.sprint),
             self.dataset.sprint_end(self.sprint),
         )
-        df = self.result[date_mask]
-        # create a line chart from the data in self.result
-        fig = px.line(
+        df = self.results[date_mask]
+        # create a line chart from the data in self.results
+        return px.line(
             data_frame=df,
             x=self.date_col,
             y="total_open",
             title=f"{self.sprint} Burndown",
         )
-        fig.show()
-        return fig
+
+    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
+        """Post sprint burndown results and chart to slack channel."""
+        message = f"*Burndown summary for {self.sprint} :github:*"
+        return super()._post_results_to_slack(
+            slackbot=slackbot,
+            channel_id=channel_id,
+            message=message,
+        )
 
     def _get_daily_tix_counts_by_status(
         self,

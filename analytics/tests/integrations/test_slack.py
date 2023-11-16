@@ -36,10 +36,17 @@ def test_upload_files_to_slack_channel(slackbot: SlackBot):
         with open(_file.path, "w", encoding="utf-8") as f:
             f.write(_file.name)
     # execution - run the upload
-    result = slackbot.upload_file_to_slack_channel(
+    var = "variable"
+    markdown = f"""
+*Bolded text {var}* :thread:
+
+• *Bullet 1:* Text 1
+• *Bullet 2:* Text 2
+"""
+    result = slackbot.upload_files_to_slack_channel(
         files=files,
         channel_id=settings.reporting_channel_id,
-        message="This is a test upload",
+        message=markdown,
     )
     assert result["ok"] is True
     assert result["files"] is not None
