@@ -19,6 +19,7 @@ pydantic = "^2.0.3"
 python = "^3.11"
 slack-sdk = "^3.23.0"
 typer = {extras = ["all"], version = "^0.9.0"}
+kaleido = "0.2.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
