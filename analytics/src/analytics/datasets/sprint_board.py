@@ -7,7 +7,6 @@ set for each ticket in the Sprint Planning Board
 from typing import Self
 
 import pandas as pd
-from numpy import datetime64
 
 from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df
@@ -52,13 +51,13 @@ class SprintBoard(BaseDataset):
         # initialize the parent class
         super().__init__(df)
 
-    def sprint_start(self, sprint: str) -> datetime64:
+    def sprint_start(self, sprint: str) -> pd.Timestamp:
         """Return the date on which a given sprint started."""
         sprint_mask = self.df[self.sprint_col] == sprint
         sprint_start = self.df.loc[sprint_mask, self.sprint_start_col].min()
         return sprint_start.tz_localize("UTC")
 
-    def sprint_end(self, sprint: str) -> datetime64:
+    def sprint_end(self, sprint: str) -> pd.Timestamp:
         """Return the date on which a given sprint ended."""
         sprint_mask = self.df[self.sprint_col] == sprint
         sprint_end = self.df.loc[sprint_mask, self.sprint_end_col].max()

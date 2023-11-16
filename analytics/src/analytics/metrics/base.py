@@ -10,9 +10,9 @@ from analytics.etl.slack import FileMapping, SlackBot
 class BaseMetric:
     """Base class for all metrics."""
 
-    CHART_PNG = "data/sprint-burndown-chart.png"
-    CHART_HTML = "data/sprint-burndown-chart.html"
-    RESULTS_CSV = "data/sprint-burndown-results.csv"
+    CHART_PNG = "data/chart-static.png"
+    CHART_HTML = "data/chart-interactive.html"
+    RESULTS_CSV = "data/results.csv"
 
     def __init__(self) -> None:
         """Initialize and calculate the metric from the input dataset."""
@@ -36,13 +36,22 @@ class BaseMetric:
         self.results.to_csv(output_path)
         return output_path
 
-    def export_chart(self) -> Path:
+    def export_chart_to_html(self) -> Path:
         """Export the plotly chart in self.chart to a png file."""
         # make sure the parent directory exists
         output_path = Path(self.CHART_HTML)
         output_path.parent.mkdir(exist_ok=True, parents=True)
         # export chart to a png
         self.chart.write_html(output_path)
+        return output_path
+
+    def export_chart_to_png(self) -> Path:
+        """Export the plotly chart in self.chart to a png file."""
+        # make sure the parent directory exists
+        output_path = Path(self.CHART_PNG)
+        output_path.parent.mkdir(exist_ok=True, parents=True)
+        # export chart to a png
+        self.chart.write_image(output_path, width=900)
         return output_path
 
     def show_chart(self) -> None:
@@ -64,11 +73,13 @@ class BaseMetric:
         message: str,
     ) -> None:
         """Execute shared code required to upload files to a slack channel."""
-        results_path = self.export_results()
-        chart_path = self.export_chart()
+        results_csv = self.export_results()
+        chart_png = self.export_chart_to_png()
+        chart_html = self.export_chart_to_html()
         files = [
-            FileMapping(path=str(results_path), name=results_path.name),
-            FileMapping(path=str(chart_path), name=chart_path.name),
+            FileMapping(path=str(results_csv), name=results_csv.name),
+            FileMapping(path=str(chart_png), name=chart_png.name),
+            FileMapping(path=str(chart_html), name=chart_html.name),
         ]
         slackbot.upload_files_to_slack_channel(
             files=files,
