@@ -1,18 +1,17 @@
 # DB Planning
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed                                                            |
-| Epic Link       | [Issue 48](https://github.com/HHS/grants-equity/issues/48)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-07-19                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Gina Carson                                                          |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
-
+| Field           | Value                                                           |
+| --------------- | --------------------------------------------------------------- |
+| Document Status | Completed                                                       |
+| Epic Link       | [Issue 48](https://github.com/HHS/simpler-grants-gov/issues/48) |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
+| Product Owner   | Lucas Brown                                                     |
+| Document Owner  | Gina Carson                                                     |
+| Lead Developer  | Aaron Couch                                                     |
+| Lead Designer   | Andy Cochran                                                    |
 
 ## Short description
+
 <!-- Required -->
 
 Formalize a series of architectural decisions about how data is stored, including the type of database we will use and the platform we'll use host it.
@@ -20,11 +19,13 @@ Formalize a series of architectural decisions about how data is stored, includin
 ## Goals
 
 ### Business description & value
+
 <!-- Required -->
 
-This milestone is critical because it serves as the initial planning for the beta.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
+This milestone is critical because it serves as the initial planning for the simpler.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
 
 ### User Stories
+
 <!-- Required -->
 
 - As an **HHS Staff Member**, I want:
@@ -96,6 +97,7 @@ Some factors to consider are:
 - Does the service offer features like automatic backups or read replicas?
 
 ### Definition of done
+
 <!-- Required -->
 
 - [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate) and/or are FedRAMP approved
@@ -105,11 +107,13 @@ Some factors to consider are:
   - [ ] Database Hosting Service
 
 ### Proposed metrics for measuring goals/value/definition of done
+
 <!-- Required -->
 
 N/A for planning milestone
 
 ### Destination for live updating metrics
+
 <!-- Required -->
 
 N/A for planning milestone
@@ -117,6 +121,7 @@ N/A for planning milestone
 ## Planning
 
 ### Assumptions & dependencies
+
 <!-- Optional -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
@@ -130,60 +135,64 @@ beginning of work on this milestone?
 - [x] None
 
 ### Open questions
+
 <!-- Optional -->
 
 - [ ] Will this database serve as an OLTP system, OLAP system, or both? Will this database be used for analytics, and is there a need for a second database to be created with data pipelines?
-- [ ] What are the current datastores that support the legacy Grants.gov system?
-      - Oracle on RDS (used for opportunity data, etc)
-      - MongoDB (I'm not sure exactly what data is in the document store)
-      - Flat file storage with application data
+- [ ] What are the current datastores that support the legacy Grants.gov system? - Oracle on RDS (used for opportunity data, etc) - MongoDB (I'm not sure exactly what data is in the document store) - Flat file storage with application data
 - [ ] Is the existing Grants.gov database heavy on read or write transactions?
 - [ ] How many external sources does the existing database have?
 
 ### Not doing
+
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
+The following work will _not_ be completed as part of this milestone:
 
 1. **Deploying services:** This milestone involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
 
 ## Integrations
 
 ### Translations
+
 <!-- Required -->
 
-*Does this milestone involve delivering any content that needs translation?*
+_Does this milestone involve delivering any content that needs translation?_
 
-*If so, when will English-language content be locked? Then when will translation be started and completed?*
+_If so, when will English-language content be locked? Then when will translation be started and completed?_
 
 - No
 
 ### Services going into PROD for the first time
+
 <!-- Required -->
 
-*This can include services going into PROD behind a feature flag that is not turned on.*
+_This can include services going into PROD behind a feature flag that is not turned on._
 
 1. No
 
 ### Services being integrated in PROD for the first time
+
 <!-- Required -->
 
-*Are there multiple services that are being connected for the first time in PROD?*
+_Are there multiple services that are being connected for the first time in PROD?_
 
 1. No
 
 ### Data being shared publicly for the first time
+
 <!-- Required -->
 
-*Are there any fields being shared publicly that have never been shared in PROD before?*
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
 1. No
 
 ### Security considerations
+
 <!-- Required -->
 
-*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
+_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
 
-*If so, how are we addressing these risks?*
+_If so, how are we addressing these risks?_
 
 1. No

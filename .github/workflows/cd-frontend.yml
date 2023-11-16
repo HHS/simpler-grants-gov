@@ -6,18 +6,13 @@ run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || 'd
 on:
   push:
     branches:
-      - "main"
+      - main
     paths:
       - "frontend/**"
-      - "bin/**"
-      - "infra/**"
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
-      app_name:
-        description: "name of application folder under infra directory"
-        default: frontend
-        required: true
-        type: string
       environment:
         description: "target environment"
         required: true
@@ -28,9 +23,14 @@ on:
           - prod
 
 jobs:
+  frontend-checks:
+    name: Run Frontend Checks
+    uses: ./.github/workflows/ci-frontend.yml
+
   deploy:
     name: Deploy
+    needs: frontend-checks
     uses: ./.github/workflows/deploy.yml
     with:
-      app_name: ${{ inputs.app_name || 'frontend' }}
-      environment: ${{ inputs.environment || 'dev' }}
+      app_name: "frontend"
+      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}

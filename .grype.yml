@@ -16,30 +16,9 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
-
-  # glob-parent before 5.1.2 vulnerable to Regular Expression Denial of Service in enclosure regex
-  # https://github.com/advisories/GHSA-ww39-953v-wcq6
-  # High severity
-  # Ignoring since this is only a dependency of dev tools: storybook (for storybook docs site),
-  # eslint (for Linting in CI), and sass (for compiling CSS during CI build phase)
-  - vulnerability: GHSA-ww39-953v-wcq6
-
-  # Regular Expression Denial of Service in trim
-  # https://github.com/advisories/GHSA-w5p7-h5w8-2hfq
-  # High severity
-  # Ignoring since this is only used in storybook which is a dev tool
-  - vulnerability: GHSA-w5p7-h5w8-2hfq
-
-  # Uncontrolled Resource Consumption in trim-newlines
-  # https://github.com/advisories/GHSA-7p7h-4mm5-852v
-  # Ignoring since this is only used in storybook which is a dev tool
-  - vulnerability: GHSA-7p7h-4mm5-852v
-
-  #####################
-  ## False positives ##
-  #####################
-
-  # http-cache-semantics vulnerable to Regular Expression Denial of Service
-  # https://github.com/advisories/GHSA-rc47-6667-2j5j
-  # http-cache-semantics does not exist as a dependency in this app
-  - vulnerability: GHSA-rc47-6667-2j5j
+  # https://github.com/anchore/grype/issues/1172
+  - vulnerability: GHSA-xqr8-7jwr-rhp7
+  - vulnerability: GHSA-7fh5-64p2-3v2j
+    # pip vulnerability, need to wait for the Python image to update to 23.x
+    # https://github.com/docker-library/python/blob/402b993af9ca7a5ee22d8ecccaa6197bfb957bc5/3.12/slim-bookworm/Dockerfile#L137
+  - vulnerability: GHSA-mq26-g339-26xf

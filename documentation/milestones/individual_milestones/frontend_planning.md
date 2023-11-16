@@ -1,18 +1,17 @@
 # Front-end Planning
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed                                                            |
-| Epic Link       | [Issue 49](https://github.com/HHS/grants-equity/issues/49)              |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-07-19                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
-
+| Field           | Value                                                           |
+| --------------- | --------------------------------------------------------------- |
+| Document Status | Completed                                                       |
+| Epic Link       | [Issue 49](https://github.com/HHS/simpler-grants-gov/issues/49) |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
+| Product Owner   | Lucas Brown                                                     |
+| Document Owner  | Billy Daly                                                      |
+| Lead Developer  | Aaron Couch                                                     |
+| Lead Designer   | Andy Cochran                                                    |
 
 ## Short description
+
 <!-- Required -->
 
 Formalize a series of architectural decisions about the front-end, including the technology stack we will use and the services we'll leverage to deploy and host it.
@@ -20,14 +19,15 @@ Formalize a series of architectural decisions about the front-end, including the
 ## Goals
 
 ### Business description & value
+
 <!-- Required -->
 
 We want to select a technology stack that will maximize the long-term maintainability and performance of the front-end application that we build.
 
 The prime motivation for the decisions outlined below is to select tools that have a proven track record for front-end development, are relatively accessible to both internal and external stakeholders, and can support the future needs of the project both in terms of scale and complexity.
 
-
 ### User Stories
+
 <!-- Required -->
 
 - As an **HHS Staff Member**, I want:
@@ -77,7 +77,7 @@ Some factors to consider are:
 
 - Is this framework popular with a broad community of users?
 - Is this framework actively maintained, with a strong governance structure?
-- How easy 
+- How easy
 - Does this framework support both Static Site Generation (SSG) and Server-side Rendering (SSR)?
 - Is there an established set of plugins or libraries that extend the framework's key features? (e.g. AuthN/AuthZ, component library, etc.)
 
@@ -100,8 +100,8 @@ Some factors to consider are:
 - How expensive is it to deploy a front-end application with this option, both in terms of direct operating costs and in terms of team resources?
 - How easily does this option scale?
 
-
 ### Definition of done
+
 <!-- Required -->
 
 - [ ] The tools and services chosen have been authorized under the Grants.gov ATO (Authority to Operate) and/or are FedRAMP approved
@@ -111,6 +111,7 @@ Some factors to consider are:
   - [ ] Front-end deployment service
 
 ### Proposed metrics for measuring goals/value/definition of done
+
 <!-- Required -->
 
 #### One-time metrics
@@ -128,20 +129,22 @@ We recommend calculating the following metrics at least once to inform the selec
 
 #### Ongoing metrics
 
-The following metrics should be tracked about the tools selected within this metric: 
+The following metrics should be tracked about the tools selected within this metric:
 
 1. Front-end framework metrics
    1. Days since last patch or minor release
    2. Number of GitHub stars on main repository
 
 ### Destination for live updating metrics
+
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
 ### Assumptions & dependencies
+
 <!-- Optional -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
@@ -155,54 +158,61 @@ beginning of work on this milestone?
 - [x] None
 
 ### Open questions
+
 <!-- Optional -->
 
 - [x] None
 
 ### Not doing
+
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
+The following work will _not_ be completed as part of this milestone:
 
 1. **Deploying services:** This milestone involves evaluating and selecting the tools that constitute the front-end technology stack, but does not involve actively setting up the code base to implement or deploying any services
 
 ## Integrations
 
 ### Translations
+
 <!-- Required -->
 
-*Does this milestone involve delivering any content that needs translation?*
+_Does this milestone involve delivering any content that needs translation?_
 
-*If so, when will English-language content be locked? Then when will translation be started and completed?*
+_If so, when will English-language content be locked? Then when will translation be started and completed?_
 
 - No
 
 ### Services going into PROD for the first time
+
 <!-- Required -->
 
-*This can include services going into PROD behind a feature flag that is not turned on.*
+_This can include services going into PROD behind a feature flag that is not turned on._
 
 1. No, this is just a planning milestone
 
 ### Services being integrated in PROD for the first time
+
 <!-- Required -->
 
-*Are there multiple services that are being connected for the first time in PROD?*
+_Are there multiple services that are being connected for the first time in PROD?_
 
 1. No, this is just a planning milestone
 
 ### Data being shared publicly for the first time
+
 <!-- Required -->
 
-*Are there any fields being shared publicly that have never been shared in PROD before?*
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
 1. No, this is just a planning milestone
 
 ### Security considerations
+
 <!-- Required -->
 
-*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
+_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
 
-*If so, how are we addressing these risks?*
+_If so, how are we addressing these risks?_
 
 1. No, this is just a planning milestone

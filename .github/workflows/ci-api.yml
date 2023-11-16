@@ -1,12 +1,7 @@
 name: API Checks
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - api/**
-      - .github/workflows/ci-api.yml
+  workflow_call:
   pull_request:
     paths:
       - api/**
@@ -18,10 +13,6 @@ defaults:
 
 jobs:
   lint-test:
-    # We could run these steps in parallel
-    # if we built the docker image and shared
-    # it across jobs as described in:
-    # https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow
     name: API Lint, Format & Tests
     runs-on: ubuntu-latest
     steps:
@@ -40,3 +31,9 @@ jobs:
         run: |
           make test-audit
           make test-coverage
+
+  vulnerability-scans:
+    name: Run API Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: "api"

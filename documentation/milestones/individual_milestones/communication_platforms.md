@@ -1,15 +1,14 @@
 # Communication platforms
 
-| Field           | Value                                                                |
-| --------------- | -------------------------------------------------------------------- |
-| Document Status | Completed.                                                           |
-| Epic Link       | [Issue 47](https://github.com/HHS/grants-equity/issues/47)           |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-08-23                                                           |
-| Product Owner   | Lucas Brown                                                          |
-| Document Owner  | Billy Daly                                                           |
-| Lead Developer  | Aaron Couch                                                          |
-| Lead Designer   | Andy Cochran                                                         |
+| Field           | Value                                                           |
+| --------------- | --------------------------------------------------------------- |
+| Document Status | Completed                                                       |
+| Epic Link       | [Issue 47](https://github.com/HHS/simpler-grants-gov/issues/47) |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
+| Product Owner   | Lucas Brown                                                     |
+| Document Owner  | Billy Daly                                                      |
+| Lead Developer  | Aaron Couch                                                     |
+| Lead Designer   | Andy Cochran                                                    |
 
 ## Short description
 
@@ -26,18 +25,18 @@ These need to be accessible to internal (HHS or employed by HHS) partners as wel
 ### User stories
 
 - As a **full-time HHS staff member**, I want to:
-  -  adopt tools that are intuitive and easy to use, so that I can spend less time learning how to use these tools and more time completing the important work they are designed to facilitate.
-  -  review contributions from external users before those changes are published, so that we can ensure the content aligns with our values as an agency.
-  -  be able to access these communication platforms from within the HHS network, so that I can reliably get work done while I'm at the office.
+  - adopt tools that are intuitive and easy to use, so that I can spend less time learning how to use these tools and more time completing the important work they are designed to facilitate.
+  - review contributions from external users before those changes are published, so that we can ensure the content aligns with our values as an agency.
+  - be able to access these communication platforms from within the HHS network, so that I can reliably get work done while I'm at the office.
 - As a **member of an HHS contractor team**, I want to:
-  -  adopt tools require as little ongoing maintenance, so that I minimize the amount of time spent supporting the deliverables associated with this milestone and begin working on delivering future milestones.
-  -  monitor user participation across these platforms, so that I can understand how well we are engaging stakeholders throughout this process.
-  -  track metrics about our projects like task burndown, so that we can monitor progress and identify blockers more quickly.
+  - adopt tools require as little ongoing maintenance, so that I minimize the amount of time spent supporting the deliverables associated with this milestone and begin working on delivering future milestones.
+  - monitor user participation across these platforms, so that I can understand how well we are engaging stakeholders throughout this process.
+  - track metrics about our projects like task burndown, so that we can monitor progress and identify blockers more quickly.
 - As a **member of the public**, I want to:
-  -  know when HHS is hosting public meetings about grants.gov, so that I can help inform the priorities and roadmap for the new grants.gov
-  -  be able to access and view project documents and tasks without logging in, so that I can understand the priorities of the project and the progress being made on those priorities.
-  -  be able to report issues with or requests features for the team work on, so that the new version of grants.gov actually meets my needs.
-  -  be able to ask questions about or recommend improvements to documentation, so that the documentation is clear and easy to understand for other members of the public as well.
+  - know when HHS is hosting public meetings about grants.gov, so that I can help inform the priorities and roadmap for the new grants.gov
+  - be able to access and view project documents and tasks without logging in, so that I can understand the priorities of the project and the progress being made on those priorities.
+  - be able to report issues with or requests features for the team work on, so that the new version of grants.gov actually meets my needs.
+  - be able to ask questions about or recommend improvements to documentation, so that the documentation is clear and easy to understand for other members of the public as well.
 
 ## Technical description
 
@@ -158,7 +157,7 @@ Ideally, the tool would have the ability to designate some users as direct edito
   - [ ] At least 5 members of contractor teams (employed by HHS) have been onboarded.
   - [ ] At least 3 members of the general public have been onboarded.
   - [ ] New users can be onboarded to the tool for no cost to the user in a process that takes less than 2 days.
-  - [ ] Services are accessible to all people on the HHS network, public internet, and *preferably* the White House network and most or all agency networks
+  - [ ] Services are accessible to all people on the HHS network, public internet, and _preferably_ the White House network and most or all agency networks
   - [ ] Onboarding instructions for new users are clearly and accessibly documented in a public place.
   - [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in a public place.
   - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
@@ -240,11 +239,12 @@ TODO: See if we can reduce the list of metrics to track
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
 ### Assumptions & dependencies
+
 <!-- Required -->
 
 What capabilities / milestones do we expect to be in place at the beginning of work
@@ -258,25 +258,28 @@ beginning of work on this milestone?
 - [x] **Internationalization:** While there will be content delivered within this milestone that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this milestone is delivered.
 
 ### Open questions
+
 <!-- Optional -->
 
 - [x] None
 
 ### Not doing
+
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
+The following work will _not_ be completed as part of this milestone:
 
 1. **Translating onboarding documents:** Translation of key documents will be covered in an upcoming milestone
 
 ## Integrations
 
 ### Translations
+
 <!-- Required -->
 
-*Does this milestone involve delivering any content that needs translation?*
+_Does this milestone involve delivering any content that needs translation?_
 
-*If so, when will English-language content be locked? Then when will translation be started and completed?*
+_If so, when will English-language content be locked? Then when will translation be started and completed?_
 
 - Yes, the onboarding documents for each of the tools will need to be translated:
   - Chat
@@ -291,9 +294,10 @@ The following work will *not* be completed as part of this milestone:
 - Timeline and strategy for translation is still TBD
 
 ### Services going into PROD for the first time
+
 <!-- Required -->
 
-*This can include services going into PROD behind a feature flag that is not turned on.*
+_This can include services going into PROD behind a feature flag that is not turned on._
 
 Yes the following tools will be deployed:
 
@@ -308,9 +312,10 @@ Yes the following tools will be deployed:
 9. Contact us tool
 
 ### Services being integrated in PROD for the first time
+
 <!-- Required -->
 
-*Are there multiple services that are being connected for the first time in PROD?*
+_Are there multiple services that are being connected for the first time in PROD?_
 
 Yes, we expect there to be some integrations between the following tools in production:
 
@@ -323,21 +328,23 @@ Yes, we expect there to be some integrations between the following tools in prod
 7. **Shared Calendar + Wiki:** Option to embed public calendar events in the wiki
 
 ### Data being shared publicly for the first time
+
 <!-- Required -->
 
-*Are there any fields being shared publicly that have never been shared in PROD before?*
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
 1. No
 
 ### Security considerations
+
 <!-- Required -->
 
-*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
+_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
 
 1. **Public Access:** While most of these tools are meant for sharing publicly available content to external stakeholders, some tools we may also want to use for internal collaboration (e.g. document sharing, shared calendar). As a result we must be mindful of configuration changes that may expose internal content (documents, events, etc.) to members of the public who are also on these platforms.
 2. **External Contributions:** If members of the public are able to comment on or contribute content to these communications platforms, certain contributors may contribute content that does not align with the values or perspectives of HHS or the community guidelines established for the open source community.
 
-*If so, how are we addressing these risks?*
+_If so, how are we addressing these risks?_
 
 1. **Public Access:** Document expectations around what content can be made public on these platforms and train internal stakeholders (e.g. HHS full-time staff and HHS contractors) on how to appropriately determine whether content can be published on these platforms.
 2. **External Contributions:** Document the community guidelines within the public repository and prioritize tools and platforms that enable content moderation and review, so that internal members can ensure that inappropriate content is either prevented from being published or removed once its identified.

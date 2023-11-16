@@ -16,8 +16,8 @@ set -euo pipefail
 APP_NAME=$1
 ENVIRONMENT=$2
 
-./bin/terraform-init.sh infra/$APP_NAME/database $ENVIRONMENT
-DB_ROLE_MANAGER_FUNCTION_NAME=$(terraform -chdir=infra/$APP_NAME/database output -raw role_manager_function_name)
+./bin/terraform-init.sh "infra/$APP_NAME/database" "$ENVIRONMENT"
+DB_ROLE_MANAGER_FUNCTION_NAME=$(terraform -chdir="infra/$APP_NAME/database" output -raw role_manager_function_name)
 
 echo "================================"
 echo "Creating/updating database users"
@@ -27,7 +27,22 @@ echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo
 echo "Invoking Lambda function: $DB_ROLE_MANAGER_FUNCTION_NAME"
-aws lambda invoke --function-name $DB_ROLE_MANAGER_FUNCTION_NAME --no-cli-pager response.json
+CLI_RESPONSE=$(aws lambda invoke \
+  --function-name "$DB_ROLE_MANAGER_FUNCTION_NAME" \
+  --no-cli-pager \
+  --log-type Tail \
+  --output json \
+  response.json)
+
+# Print logs out (they are returned base64 encoded)
+echo "$CLI_RESPONSE" | jq -r '.LogResult' | base64 --decode
+echo
 echo "Lambda function response:"
 cat response.json
 rm response.json
+
+# Exit with nonzero status if function failed
+FUNCTION_ERROR=$(echo "$CLI_RESPONSE" | jq -r '.FunctionError')
+if [ "$FUNCTION_ERROR" != "null" ]; then
+  exit 1
+fi

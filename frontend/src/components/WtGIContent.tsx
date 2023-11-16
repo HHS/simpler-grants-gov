@@ -1,9 +1,10 @@
 import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { Grid, GridContainer, Icon } from "@trussworks/react-uswds";
 
 const WtGIContent = () => {
+  const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
@@ -19,6 +20,14 @@ const WtGIContent = () => {
           <p className="usa-intro">{t("wtgi_paragraph_1")}</p>
         </Grid>
         <Grid tabletLg={{ col: 6 }}>
+          <h3 className="margin-bottom-0-- desktop-lg:font-sans-lg">
+            <strong>
+              Join our open‑source community on{" "}
+              <span className="text-no-wrap">
+                GitHub <Icon.Github size={3} aria-label="Github" />
+              </span>
+            </strong>
+          </h3>
           <Trans
             t={t}
             i18nKey="wtgi_list"
@@ -27,23 +36,51 @@ const WtGIContent = () => {
                 <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4" />
               ),
               li: <li />,
-              LinkToGoals: (
+              small: <small />,
+              repo: (
                 <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={ExternalRoutes.MILESTONES}
-                />
-              ),
-              github: (
-                <a
+                  className="usa-link--external"
                   target="_blank"
                   rel="noopener noreferrer"
                   href={ExternalRoutes.GITHUB_REPO}
                 />
               ),
-              email: <a href={ExternalRoutes.CONTACT_EMAIL} />,
+              goals: (
+                <a
+                  className="usa-link--external"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.GITHUB_REPO_GOALS}
+                />
+              ),
+              roadmap: (
+                <a
+                  className="usa-link--external"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.GITHUB_REPO_ROADMAP}
+                />
+              ),
+              contribute: (
+                <a
+                  className="usa-link--external"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={ExternalRoutes.GITHUB_REPO_CONTRIBUTING}
+                />
+              ),
             }}
           />
+          <p className="margin-top-3 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+            <Trans
+              t={t}
+              i18nKey="wtgi_paragraph_2"
+              values={{ email }}
+              components={{
+                email: <a href={`mailto:${email}`} />,
+              }}
+            />
+          </p>
         </Grid>
       </Grid>
     </GridContainer>

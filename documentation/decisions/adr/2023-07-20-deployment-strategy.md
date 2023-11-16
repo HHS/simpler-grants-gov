@@ -2,7 +2,7 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-20 <!-- REQUIRED -->
-- **Related Issue:** [187](https://github.com/HHS/grants-equity/issues/187) <!-- RECOMMENDED -->
+- **Related Issue:** [187](https://github.com/HHS/simpler-grants-gov/issues/187) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Daphne Gold, Sammy Steiner, Billy Daly <!-- REQUIRED -->
 - **Tags:** ADR <!-- OPTIONAL -->
 
@@ -64,6 +64,7 @@ Secure and resizable compute capacity for virtually any workload.
   - Less friendly for engineering teams that are not DevOps dedicated
 
 **A note on ECS:** It is possible to run EC2 instances to host our Docker containers without using ECS orchestration. However, since ECS is a free service provided by AWS and we would only pay for the underlying resources, forgoing ECS and an orchestration tool isn't an appealing strategy.
+
 ### S3
 
 Object storage built to retrieve any amount of data from anywhere.

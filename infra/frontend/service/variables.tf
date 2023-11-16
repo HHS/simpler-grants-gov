@@ -9,14 +9,8 @@ variable "image_tag" {
   default     = null
 }
 
-variable "tfstate_bucket" {
-  type = string
-}
-
-variable "tfstate_key" {
-  type = string
-}
-
-variable "region" {
-  type = string
+variable "domain" {
+  type        = string
+  description = "DNS domain of the website managed by HHS"
+  default     = null
 }

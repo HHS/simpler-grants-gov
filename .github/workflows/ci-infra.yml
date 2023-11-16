@@ -5,18 +5,37 @@ on:
     branches:
       - main
     paths:
+      - bin/**
       - infra/**
-      - .github/workflows/ci-infra.yml
+      - .github/workflows/**
   pull_request:
     paths:
+      - bin/**
       - infra/**
-      - test/**
-      - .github/workflows/ci-infra.yml
-
-env:
-  APP_NAME: frontend
+      - .github/workflows/**
 
 jobs:
+  lint-github-actions:
+    # Lint github actions files using https://github.com/rhysd/actionlint
+    # This job configuration is largely copied from https://github.com/rhysd/actionlint/blob/main/docs/usage.md#use-actionlint-on-github-actions
+    name: Lint GitHub Actions workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download actionlint
+        id: get_actionlint
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        shell: bash
+      - name: Check workflow files
+        run: ${{ steps.get_actionlint.outputs.executable }} -color
+        shell: bash
+  lint-scripts:
+    name: Lint scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Shellcheck
+        run: make infra-lint-scripts
   check-terraform-format:
     name: Check Terraform format
     runs-on: ubuntu-latest
@@ -26,10 +45,10 @@ jobs:
         with:
           terraform_version: 1.4.6
           terraform_wrapper: false
-      - name: Run infra-lint
+      - name: Run infra-lint-terraform
         run: |
           echo "If this fails, run 'make infra-format'"
-          make infra-lint
+          make infra-lint-terraform
   validate-terraform:
     name: Validate Terraform modules
     runs-on: ubuntu-latest
@@ -39,8 +58,8 @@ jobs:
         with:
           terraform_version: 1.4.6
           terraform_wrapper: false
-      - name: Run infra-validate
-        run: make infra-validate
+      - name: Validate
+        run: make infra-validate-modules
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-latest
@@ -74,33 +93,3 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
-
-  infra-test-e2e:
-    name: End-to-end tests
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.2.1
-          terraform_wrapper: false
-
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ">=1.19.0"
-
-      - name: Configure AWS credentials
-        uses: ./.github/actions/configure-aws-credentials
-        with:
-          app_name: frontend
-          # Run infra CI on dev environment
-          environment: dev
-
-      - name: Run Terratest
-        run: make APP_NAME=${{ env.APP_NAME }} infra-test

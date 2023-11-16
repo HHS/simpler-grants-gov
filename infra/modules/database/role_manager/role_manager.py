@@ -9,10 +9,21 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    conn = connect()
+    if event == "check":
+        return check()
+    elif event == "password_ts":
+        connect_as_master_user()
+        return "Succeeded"
+    else:
+        return manage()
+
+def manage():
+    """Manage database roles, schema, and privileges"""
+
+    logger.info("Running command 'manage' to manage database roles, schema, and privileges")
+    conn = connect_as_master_user()
 
     logger.info("Current database configuration")
-
     prev_roles = get_roles(conn)
     print_roles(prev_roles)
 
@@ -40,7 +51,48 @@ def lambda_handler(event, context):
         },
     }
 
-def connect() -> Connection:
+def check():
+    """Check that database roles, schema, and privileges were
+    properly configured
+    """
+    logger.info("Running command 'check' to check database roles, schema, and privileges")
+    app_username = os.environ.get("APP_USER")
+    migrator_username = os.environ.get("MIGRATOR_USER")
+    schema_name = os.environ.get("DB_SCHEMA")
+    app_conn = connect_using_iam(app_username)
+    migrator_conn = connect_using_iam(migrator_username)
+
+    check_search_path(migrator_conn, schema_name)
+    check_migrator_create_table(migrator_conn, app_username)
+    check_app_use_table(app_conn)
+    cleanup_migrator_drop_table(migrator_conn)
+
+    return {"success": True}
+
+
+def check_search_path(migrator_conn: Connection, schema_name: str):
+    logger.info("Checking that search path is %s", schema_name)
+    assert migrator_conn.run("SHOW search_path") == [[schema_name]]
+
+
+def check_migrator_create_table(migrator_conn: Connection, app_username: str):
+    logger.info("Checking that migrator is able to create tables and grant access to app user: %s", app_username)
+    migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
+    migrator_conn.run(f"GRANT ALL PRIVILEGES ON temporary TO {identifier(app_username)}")
+
+
+def check_app_use_table(app_conn: Connection):
+    logger.info("Checking that app is able to read and write from the table")
+    app_conn.run("INSERT INTO temporary (created_at) VALUES (NOW())")
+    app_conn.run("SELECT * FROM temporary")
+
+
+def cleanup_migrator_drop_table(migrator_conn: Connection):
+    logger.info("Cleaning up the table that migrator created")
+    migrator_conn.run("DROP TABLE IF EXISTS temporary")
+
+
+def connect_as_master_user() -> Connection:
     user = os.environ["DB_USER"]
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]
@@ -48,18 +100,29 @@ def connect() -> Connection:
     password = get_password()
 
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
-    return Connection(user=user, host=host, port=port, database=database, password=password)
+    return Connection(user=user, host=host, port=port, database=database, password=password, ssl_context=True)
 
+
+def connect_using_iam(user: str) -> Connection:
+    client = boto3.client("rds")
+    host = os.environ["DB_HOST"]
+    port = os.environ["DB_PORT"]
+    database = os.environ["DB_NAME"]
+    token = client.generate_db_auth_token(
+        DBHostname=host, Port=port, DBUsername=user
+    )
+    logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
+    return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
     ssm = boto3.client("ssm")
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
     logger.info("Fetching password from parameter store")
-    result = ssm.get_parameter(
+    result = json.loads(ssm.get_parameter(
         Name=param_name,
         WithDecryption=True,
-    )
-    return result["Parameter"]["Value"]
+    )["Parameter"]["Value"])
+    return result["password"]
 
 
 def get_roles(conn: Connection) -> list[str]:
@@ -97,18 +160,26 @@ def configure_database(conn: Connection) -> None:
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")
+    database_name = os.environ.get("DB_NAME")
 
-    configure_roles(conn, [migrator_username, app_username])
+    logger.info("Revoking default access on public schema")
+    conn.run("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+    logger.info("Revoking database access from public role")
+    conn.run(f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
+    logger.info("Setting default search path to schema=%s", schema_name)
+    conn.run(f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}")
+
+    configure_roles(conn, [migrator_username, app_username], database_name)
     configure_schema(conn, schema_name, migrator_username, app_username)
 
 
-def configure_roles(conn: Connection, roles: list[str]) -> None:
+def configure_roles(conn: Connection, roles: list[str], database_name: str) -> None:
     logger.info("Configuring roles")
     for role in roles:
-        configure_role(conn, role)
+        configure_role(conn, role, database_name)
 
 
-def configure_role(conn: Connection, username: str) -> None:
+def configure_role(conn: Connection, username: str, database_name: str) -> None:
     logger.info("Configuring role: username=%s", username)
     role = "rds_iam"
     conn.run(
@@ -123,6 +194,7 @@ def configure_role(conn: Connection, username: str) -> None:
         """
     )
     conn.run(f"GRANT {identifier(role)} TO {identifier(username)}")
+    conn.run(f"GRANT CONNECT ON DATABASE {identifier(database_name)} TO {identifier(username)}")
 
 
 def configure_schema(conn: Connection, schema_name: str, migrator_username: str, app_username: str) -> None:

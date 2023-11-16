@@ -1,43 +1,45 @@
 [tool.poetry]
-name = "grants-equity-api"
+name = "simpler-grants-gov-api"
 version = "0.1.0"
-description = "Back end API for grants.gov"
+description = "Back end API for simpler.grants.gov"
 packages = [{ include = "src" }]
 authors = ["Nava Engineering <engineering@navapbc.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-SQLAlchemy = {extras = ["mypy"], version = "^1.4.40"}
-alembic = "^1.8.1"
-psycopg2-binary = "^2.9.3"
-python-dotenv = "^0.20.0"
-pydantic = "^1.10.0"
-botocore = "^1.27.67"
-boto3 = "~1.24.67"
+SQLAlchemy = {version = "^2.0.21", extras = ["mypy"]}
+alembic = "^1.12.0"
+python-dotenv = "^1.0.0"
+pydantic = "^2.4.2"
+botocore = "^1.31.62"
+boto3 = "^1.28.62"
 smart-open = "^6.1.0"
-pytz = "^2022.2.1"
-APIFlask = "^1.1.3"
+pytz = "^2023.3.post1"
+APIFlask = "^2.0.2"
 marshmallow-dataclass = {extras = ["enum", "union"], version = "^8.5.8"}
-marshmallow = "^3.18.0"
-pip-licenses = "^4.3.2"
+marshmallow = "^3.20.1"
 gunicorn = "^21.2.0"
+psycopg = {extras = ["binary"], version = "^3.1.10"}
+pydantic-settings = "^2.0.3"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.6.0"
-flake8 = "^5.0.4"
-flake8-bugbear = "^22.8.23"
+black = "^23.9.1"
+flake8 = "^6.1.0"
+flake8-bugbear = "^23.9.16"
 flake8-alfred = "^1.1.1"
-isort = "^5.10.1"
-mypy = "^0.971"
+isort = "^5.12.0"
+mypy = "^1.5.1"
 moto = {extras = ["s3"], version = "^4.0.2"}
-types-pytz = "^2022.2.1"
-coverage = "^6.4.4"
-Faker = "^14.2.0"
-factory-boy = "^3.2.1"
-bandit = "^1.7.4"
-pytest = "^6.0.0"
+types-pytz = "^2023.3.1.1"
+coverage = "^7.3.2"
+Faker = "^19.8.0"
+factory-boy = "^3.3.0"
+bandit = "^1.7.5"
+pytest = "^7.4.2"
 pytest-watch = "^4.2.0"
 pytest-lazy-fixture = "^0.6.3"
+types-pyyaml = "^6.0.12.11"
+setuptools = "^68.2.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -47,6 +49,7 @@ build-backend = "poetry.core.masonry.api"
 db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
+db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 
 [tool.black]
 line-length = 100
@@ -81,7 +84,7 @@ warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
 
-plugins = ["sqlalchemy.ext.mypy.plugin"]
+plugins = ["pydantic.mypy"]
 
 [tool.bandit]
 # Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
@@ -100,9 +103,7 @@ disallow_untyped_defs = false
 # When a library has addressed its deprecation issues and we've updated the
 # library, we can remove the ignore filter for that library.
 filterwarnings = [
-  "ignore::DeprecationWarning:botocore.*",
-  "ignore::DeprecationWarning:apispec.*",
-  "ignore::DeprecationWarning:certifi.*"] # pytest-watch errors if the closing bracket is on it's own line
+  "ignore::DeprecationWarning:botocore.*"] # pytest-watch errors if the closing bracket is on it's own line
 
 markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests"]

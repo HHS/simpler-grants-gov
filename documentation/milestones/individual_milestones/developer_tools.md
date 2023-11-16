@@ -1,15 +1,14 @@
 # Developer Tools
 
-| Field           | Value                                                                 |
-| --------------- | --------------------------------------------------------------------- |
-| Document Status | Completed                                                             |
-| Epic Link       | [Issue 50](https://github.com/HHS/grants-equity/issues/50)            |
-| Epic Dashboard  | [Milestones Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
-| Target Release  | 2023-07-19                                                            |
-| Product Owner   | Lucas Brown                                                           |
-| Document Owner  | Billy Daly                                                            |
-| Lead Developer  | Aaron Couch                                                           |
-| Lead Designer   | Andy Cochran                                                          |
+| Field           | Value                                                           |
+| --------------- | --------------------------------------------------------------- |
+| Document Status | Completed                                                       |
+| Epic Link       | [Issue 50](https://github.com/HHS/simpler-grants-gov/issues/50) |
+| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
+| Product Owner   | Lucas Brown                                                     |
+| Document Owner  | Billy Daly                                                      |
+| Lead Developer  | Aaron Couch                                                     |
+| Lead Designer   | Andy Cochran                                                    |
 
 ## Short description
 
@@ -19,7 +18,7 @@ Select and implement a set of developer tools that automate key code quality and
 
 ### Business description & value
 
-We must incorporate an effective set of developer tools into our codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and from open source contributors meet key standards and do not introduce bugs or security vulnerabilities. 
+We must incorporate an effective set of developer tools into our codebase to ensure that code contributions from maintainers (HHS staff members and contractors) and from open source contributors meet key standards and do not introduce bugs or security vulnerabilities.
 
 While enforcing compliance with these standards may increase the time and energy required for individual contributions, adopting an effective set of tools can increase the speed of delivery over time by reducing the overhead associated with reviewing new code and identifying potential bugs before they are deployed to production.
 
@@ -63,7 +62,7 @@ Evaluate and adopt a set of tools to enforce the following code quality checks:
   - immutability enforcement
 - Auto-formatting
 - Type checking
-- Code quality scoring tool (e.g. [CodeClimate](https://codeclimate.com/quality)) 
+- Code quality scoring tool (e.g. [CodeClimate](https://codeclimate.com/quality))
 
 ### Security checks
 
@@ -84,7 +83,7 @@ Evaluate and adopt a tool for managing project dependencies that also tracks and
 
 ### Config & secrets management
 
-Evaluate and adopt a set of tools that standardize and enforce best practices around secrets management in the project. This collection of tools should support: 
+Evaluate and adopt a set of tools that standardize and enforce best practices around secrets management in the project. This collection of tools should support:
 
 - Loading configs from environment variables or files (e.g. `secrets.toml`, `.env`, etc.)
 - Secrets storage & sharing
@@ -140,7 +139,7 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](../milestone_short_descriptions.md#public-measurement-dashboards)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -164,54 +163,55 @@ beginning of work on this milestone?
 
 ### Not doing
 
-The following work will *not* be completed as part of this milestone:
+The following work will _not_ be completed as part of this milestone:
 
-1. **Full CI/CD setup:** While we *do* want the code quality and security checks to be run on each push to GitHub, the task runner that orchestrates these checks does not need to be the full CI/CD pipeline that will also manage production deployments of the frontend or backend codebases.
+1. **Full CI/CD setup:** While we _do_ want the code quality and security checks to be run on each push to GitHub, the task runner that orchestrates these checks does not need to be the full CI/CD pipeline that will also manage production deployments of the frontend or backend codebases.
 
 ## Integrations
 
 ### Translations
 
-*Does this milestone involve delivering any content that needs translation?*
+_Does this milestone involve delivering any content that needs translation?_
 
 - Instructions for adopting and using developer tools
 - Instructions for reporting security vulnerabilities
 
-*If so, when will English-language content be locked? Then when will translation be started and completed?*
+_If so, when will English-language content be locked? Then when will translation be started and completed?_
 
 - Languages to support TBD
 - Translation timeline TBD
 
 ### Services going into PROD for the first time
 
-*This can include services going into PROD behind a feature flag that is not turned on.*
+_This can include services going into PROD behind a feature flag that is not turned on._
 
 1. **Task Runner:** This milestone involves setting up a task runner for the repository that will execute a series of code quality and security checks for both the backend and frontend parts of the codebase
 2. **Secrets Management:** This milestone includes setting up a service to manage secrets.
 
 ### Services being integrated in PROD for the first time
 
-*Are there multiple services that are being connected for the first time in PROD?*
+_Are there multiple services that are being connected for the first time in PROD?_
 
 1. **Task Runner & Secrets Management:** In addition to deploying these services separately, this milestone should also support a strategy for injecting secrets into the task runner during the CI/CD pipeline for running integration tests.
 
 ### Data being shared publicly for the first time
 
-*Are there any fields being shared publicly that have never been shared in PROD before?*
+_Are there any fields being shared publicly that have never been shared in PROD before?_
 
 1. None
 
 ### Security considerations
+
 <!-- Required -->
 
-*Does this milestone expose any new attack vectors or expand the attack surface of the product?*
+_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
 
-**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors: 
+**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors:
 
 1. Compromising the access to the secrets manager
 2. Compromising individual secrets when they are injected
 
-*If so, how are we addressing these risks?*
+_If so, how are we addressing these risks?_
 
 1. **Least Privileged Access:** Access to the secrets manager should follow the [principle of least privilege (POLP)](https://csrc.nist.gov/glossary/term/least_privilege)
 2. **Rotating Keys/Tokens:** All secrets, keys, and tokens stored in the secrets manager should have expiration dates (where possible) and we should prioritize secrets managers that support dynamically rotating keys and secrets
