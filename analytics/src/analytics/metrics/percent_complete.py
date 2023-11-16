@@ -7,6 +7,7 @@ import plotly.express as px
 from plotly.graph_objects import Figure
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
+from analytics.etl.slack import SlackBot
 from analytics.metrics.base import BaseMetric
 
 
@@ -59,6 +60,31 @@ class DeliverablePercentComplete(BaseMetric):
         df_all["percent_complete"] = df_all["percent_complete"].fillna(0)
         return df_all
 
+    def plot_results(self) -> Figure:
+        """Create a bar chart of percent completion from the data in self.results."""
+        # reshape the dataframe in self.results for plotly
+        df = self._prepare_result_dataframe_for_plotly()
+        # create a stacked bar chart from the data
+        return px.bar(
+            df,
+            x=self.unit,
+            y=self.deliverable_col,
+            color=self.status_col,
+            text="percent_of_total",
+            color_discrete_map={"open": "#aacde3", "closed": "#06508f"},
+            orientation="h",
+            title=f"Deliverable Percent Complete by {self.unit}",
+            height=800,
+        )
+
+    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
+        """Post sprint burndown results and chart to slack channel."""
+        return super()._post_results_to_slack(
+            slackbot=slackbot,
+            channel_id=channel_id,
+            message="*Percent complete by deliverable :github:*",
+        )
+
     def _get_count_by_deliverable(
         self,
         status: str,
@@ -84,28 +110,20 @@ class DeliverablePercentComplete(BaseMetric):
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit: "sum"})
         return df_agg.rename(columns={unit: status})
 
-    def visualize(self) -> Figure:
-        """Create a bar chart of percent completion from the data in self.result."""
-        # unpivots open and closed counts so that each deliverable has both
+    def _prepare_result_dataframe_for_plotly(self) -> pd.DataFrame:
+        """Stack the open and closed counts self.results for plotly charts."""
+        # unpivot open and closed counts so that each deliverable has both
         # an open and a closed row with just one column for count
-        df = self.result.melt(
+        df = self.results.melt(
             id_vars=[self.deliverable_col],
             value_vars=["open", "closed"],
             value_name=self.unit,
             var_name=self.status_col,
         )
+        # calculate the percentage of open and closed per deliverable
+        # so that we can use this value as label in the chart
+        df["total"] = df.groupby(self.deliverable_col)[self.unit].transform("sum")
+        df["percent_of_total"] = (df[self.unit] / df["total"] * 100).round(2)
         # sort the dataframe by count and status so that the resulting chart
         # has deliverables with more tasks/points at the top
-        df = df.sort_values([self.unit, self.status_col], ascending=True)
-        # create a stacked bar chart from the data
-        fig = px.bar(
-            df,
-            x=self.unit,
-            y=self.deliverable_col,
-            color=self.status_col,
-            orientation="h",
-            title=f"Deliverable Percent Complete by {self.unit}",
-            height=800,
-        )
-        fig.show()
-        return fig
+        return df.sort_values([self.unit, self.status_col], ascending=True)
