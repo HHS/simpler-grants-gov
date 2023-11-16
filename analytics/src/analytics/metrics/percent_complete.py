@@ -82,7 +82,7 @@ class DeliverablePercentComplete(BaseMetric):
         return super()._post_results_to_slack(
             slackbot=slackbot,
             channel_id=channel_id,
-            message="*Percent complete by deliverable :github:*",
+            message="*:github: Percent complete by deliverable*",
         )
 
     def _get_count_by_deliverable(
