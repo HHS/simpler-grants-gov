@@ -1,7 +1,8 @@
 """A series of ETL functions that allows us to read and write data to slack."""
 import functools
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Any
+from typing import Any
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -21,8 +22,8 @@ def slack_api_error_handler(slackbot_api_call: Callable) -> Callable:
 
     @functools.wraps(slackbot_api_call)
     def try_to_make_slackbot_api_call_and_catch_error(
-        *args: Any,
-        **kwargs: Any,
+        *args: Any,  # noqa: ANN401
+        **kwargs: Any,  # noqa: ANN401
     ) -> SlackResponse | None:
         """Try to make a slack API call, and print the error if it fails."""
         try:
@@ -48,7 +49,7 @@ class SlackBot:
         return self.client.conversations_info(channel=channel_id)
 
     @slack_api_error_handler
-    def upload_file_to_slack_channel(
+    def upload_files_to_slack_channel(
         self,
         channel_id: str,
         files: list[FileMapping],

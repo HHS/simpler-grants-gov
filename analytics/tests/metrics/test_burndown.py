@@ -80,7 +80,7 @@ class TestSprintBurndown:
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1")
-        df = output.result
+        df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
@@ -103,7 +103,7 @@ class TestSprintBurndown:
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1")
-        df = output.result
+        df = output.results
         # validation - check burndown output
         expected = [
             result_row(day=DAY_0, opened=1, closed=0, delta=1, total=1),
@@ -123,6 +123,6 @@ class TestSprintBurndown:
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1")
-        df = output.result
+        df = output.results
         # validation - check max date is end of sprint not last closed date
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
