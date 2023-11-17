@@ -8,3 +8,9 @@
 #  Last checked:  Date last checked in scans
 #The-CVE-or-vuln-id # Remove comment at start of line
 CVE-2023-5363
+# 11/14/2023 - Postgres vulnerabilities in the Debian image
+CVE-2023-39417
+CVE-2023-5869
+CVE-2023-39418
+CVE-2023-5868
+CVE-2023-5870

@@ -8,7 +8,7 @@
 
 ## Context and Problem Statement
 
-The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of simpler.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
+The communications platform deliverable identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is an analytics platform for tracking key metrics during the launch of the first version of simpler.grants.gov and as the project continues to grow. We will evaluate top 3-5 analytics tools, including analytics.gov and Google Analytics, to identify the best fit for our specific needs and objectives. The selected tool should provide valuable insights and data to help us measure and optimize the platform's performance.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -46,7 +46,7 @@ DAP cannot be used for authenticated pages. We recommend Google Analytics with a
 ### Positive Consequences <!-- OPTIONAL -->
 
 - **Data-Driven Decision Making**: With an analytics platform, our project can gather valuable data and insights about usage and identify where there are shortfalls to our product. It can allow us to ensure we are building an equitable solution for the public. This data-driven approach enables informed decision-making and allows teams to identify trends, opportunities, and areas for improvement.
-- **Improved Performance**: Analytics platforms help track key performance indicators (KPIs) and measure the success of various initiatives and milestones. By monitoring these metrics, we can optimize our strategies and improve overall performance.
+- **Improved Performance**: Analytics platforms help track key performance indicators (KPIs) and measure the success of various initiatives and deliverables. By monitoring these metrics, we can optimize our strategies and improve overall performance.
 - **Enhanced User Experience**: Understanding user behavior through analytics helps tailor products, services, and content to meet users' needs and preferences leading to a better user experience.
 
 ### Negative Consequences <!-- OPTIONAL -->

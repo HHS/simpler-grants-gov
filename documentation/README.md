@@ -10,11 +10,11 @@ Our vision is for the following to become true:
 
 See [goals.md](./goals.md) for more information about the vision and goals for the project.
 
-## Milestones
+## Deliverables
 
-The [milestones](./milestones) directory contains information about our milestones for the modernization project.
+The [deliverables](./deliverables) directory contains information about our deliverables for the modernization project.
 
-[The product roadmap](https://github.com/orgs/HHS/projects/12) contains brief descriptions of upcoming milestones. The [individual milestones](./milestones/individual_milestones) directory contains detailed descriptions of the project milestones.
+[The product roadmap](https://github.com/orgs/HHS/projects/12) contains brief descriptions of upcoming deliverables. The [individual deliverables](./deliverables/individual_deliverables) directory contains detailed descriptions of the project deliverables.
 
 ## Decisions
 
