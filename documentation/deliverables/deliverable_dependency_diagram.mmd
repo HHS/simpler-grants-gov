@@ -1,10 +1,10 @@
 %% A note on syntax:
-%% 1. Since node IDs cannot have spaces, prefer to give each milestone a short name with any spaces replaced by `-`. For instance, "Development Tools Implemented" becomes "Dev-Tools".
+%% 1. Since node IDs cannot have spaces, prefer to give each deliverable a short name with any spaces replaced by `-`. For instance, "Development Tools Implemented" becomes "Dev-Tools".
 
 %% For unclear reasons, PyCharm's mermaid editor does not support title attributes. Comment on or off the title as needed.
 
 %% ---
-%% title: Grants.gov modernization milestones
+%% title: Grants.gov modernization deliverables
 %% ---
 
 %% Diagram is oriented left-to-right ("LR") rather than top-to-bottom
@@ -12,7 +12,7 @@
 flowchart LR
 
     subgraph NOFO
-        NOFO-Milestone-Planning:::executing
+        NOFO-Deliverable-Planning:::executing
         NOFO-Prototypes:::finished
         Start-PRA-Comment:::executing
         NOFO-Prototypes-Metrics:::executing
@@ -181,7 +181,7 @@ flowchart LR
 
     subgraph Communications Tooling
         Setup-Meetings
-        Comms-Platforms:::executing --> Milestone-Template:::executing
+        Comms-Platforms:::executing --> Deliverable-Template:::executing
         Comms-Platforms --> Open-Source-Tools
         Comms-Platforms --> HHS-Internal-Site
         Open-Source-Tools & Comms-Platforms --> Open-Source-Group:::northStar
@@ -191,9 +191,9 @@ flowchart LR
 
     subgraph Legend
         direction LR
-        a4[This milestone is not yet planned] --> a3[This milestone is being planned]:::planning
-        a2[This milestone is being executed]:::executing --> a1[This milestone is finished]:::finished
-        a5[This milestone is a 'north star' milestone]:::northStar
+        a4[This deliverable is not yet planned] --> a3[This deliverable is being planned]:::planning
+        a2[This deliverable is being executed]:::executing --> a1[This deliverable is finished]:::finished
+        a5[This deliverable is a 'north star' deliverable]:::northStar
     end
 
 
