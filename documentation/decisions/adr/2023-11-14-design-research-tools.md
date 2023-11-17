@@ -122,10 +122,18 @@ Ethnio does not include a research data repository. However, this is the one sin
 - **Cons**
   - Nava has little experience with it (a free trial for a single project test)
 
-### Other tools explored (tho quickly ruled out as more appropriate for [#306](https://github.com/HHS/simpler-grants-gov/issues/306))
+### Other tools explored
+
+**Surveys tools (more appropriate for [#306](https://github.com/HHS/simpler-grants-gov/issues/306)):**
 - [Touchpoints] — Just surveys, really. PRA-friendly, including forms that already have clearance. Free to use for federal projects. However, required .gov or .mil email address to admin.
-- [Dovetail] — Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
-- [Giftbit] — Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
 - [Typeform] — Basic surveys. Custom branding. High price point.Integrates w/ Tremendous, Dovetail. Only feature it provides is surveys.
 - [SurveyMonkey] — Integrates with Tremendous, Dovetail. Only feature it provides is surveys.
+
+**Data repo tools:**
+- [Dovetail] — Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
+
+**Incentives:**
+- [Giftbit] — Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
+
+**Unmoderated testing (not yet a requirement, can be considered later):**
 - [maze](https://maze.co) — Industry-standard Figma testing. Nava's recommended platform for unmoderated usability testing (likely not needed in the near-term).
