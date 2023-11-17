@@ -8,7 +8,7 @@
 
 ## Context and Problem Statement
 
-The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is a wiki for storing notes, documents, and other content about the project. Ideally we would select a platform that balances ease of use and flexibility with the cost of implementing and maintaining the wiki.
+The communications platform deliverable identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is a wiki for storing notes, documents, and other content about the project. Ideally we would select a platform that balances ease of use and flexibility with the cost of implementing and maintaining the wiki.
 
 The goal of this ADR is to evaluate a series of potential wiki platforms and determine which one best fits the needs and objectives of this project based on the decision criteria outlined below.
 
@@ -306,7 +306,7 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 ## Links <!-- OPTIONAL -->
 
-- [Comms Tooling Milestone](milestone)
+- [Comms Tooling Deliverable](deliverable)
 - [Confluence](confluence)
   - [Confluence Pricing](confluence-pricing)
   - [Confluence Permissions](confluence-permissions)
@@ -325,7 +325,7 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
   - [GitBook Internationalization](gitbook-i18n)
   - [GitBook Google Analytics](gitbook-ga)
 
-[milestone]: ../milestones/individual_milestones/communication_platforms.md
+[deliverable]: ../deliverables/individual_deliverables/communication_platforms.md
 
 <!-- Confluence links -->
 
