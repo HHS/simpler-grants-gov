@@ -12,11 +12,11 @@ Simpler Grants would benefit from more robust tools for conducting user research
 
 ## Decision Drivers
 
-- **Participant recruitment and management** -- The tool(s) should allow for robust management of research participants. We need the ability to track, sort, and filter participants and our interaction with them in a central database.
-- **Incentives disbursement** -- It's important ethically that we compensate research participants for their time. We need a tool that allows us to easily send electronic rewards (e.g. gift cards) to participants after research sessions. This tool should include tracking and reporting.
-- **Scheduling** -- Larger research efforts require a lot of calendar coordination to provide participants with options that also work for facilitators. The tool should be able to schedule 1:1s, group sessions, and multi-part sessions; account for time zones; allow syncing of facilitators' calendars; integrate with Zoom; and send emails to participants (bonus: SMS) to both schedule and remind them of their scheduled time.
-- **Screeners / Intercepts** -- Calls-to-action on the site should allow users to sign up as potential research participants or provide real-time feedback as they're using the site. Screeners allow us to analyze the pool of participants so that they can be funnelled to the right engagement opportunity (usability study, interview, focus group, etc) based on their answers to a set of survey questions that help identify the their archetype. Intercepts allow us to create controlled triggers that gather the right feedback in specific parts of a user's journey.
-- **Research data repository** -- The tool(s) _might_ also include a place to store, manage, analyze, and share customer insights. However, of these decsion drivers, this may most easily be done through existing tools (see [Use Mural for design diagrams and whiteboarding](./2023-07-11-design-diagramming-tool.md)), and insights/findings should be stored in a long-term location kepr separate from PII.
+- **Participant recruitment and management** — The tool(s) should allow for robust management of research participants. We need the ability to track, sort, and filter participants and our interaction with them in a central database.
+- **Incentives disbursement** — It's important ethically that we compensate research participants for their time. We need a tool that allows us to easily send electronic rewards (e.g. gift cards) to participants after research sessions. This tool should include tracking and reporting.
+- **Scheduling** — Larger research efforts require a lot of calendar coordination to provide participants with options that also work for facilitators. The tool should be able to schedule 1:1s, group sessions, and multi-part sessions; account for time zones; allow syncing of facilitators' calendars; integrate with Zoom; and send emails to participants (bonus: SMS) to both schedule and remind them of their scheduled time.
+- **Screeners / Intercepts** — Calls-to-action on the site should allow users to sign up as potential research participants or provide real-time feedback as they're using the site. Screeners allow us to analyze the pool of participants so that they can be funnelled to the right engagement opportunity (usability study, interview, focus group, etc) based on their answers to a set of survey questions that help identify the their archetype. Intercepts allow us to create controlled triggers that gather the right feedback in specific parts of a user's journey.
+- **Research data repository** — The tool(s) _might_ also include a place to store, manage, analyze, and share customer insights. However, of these decsion drivers, this may most easily be done through existing tools (see [Use Mural for design diagrams and whiteboarding](./2023-07-11-design-diagramming-tool.md)), and insights/findings should be stored in a long-term location kepr separate from PII.
 
 
 ## Options Considered
@@ -63,7 +63,10 @@ There is potential (depending on procurement) for Ethnio to be used both by this
 
 Ethnio has the ability to create surveys of various types (open-ended feedback, targeted, screening potential participants), which could also satisfy the ["Method & technology for collecting targeted feedback" ADR issue](https://github.com/HHS/simpler-grants-gov/issues/306).
 
-Other features of note: Internationalized and localized. Section 508 and WCAG 2.0 (AA). GDPR- and CCPA-compliant data retention, expiration, and portability.
+Other features of note:
+- Internationalized and localized — [Ethnio is fully i18n-friendly](https://help.ethn.io/article/118-international-ethnio-using-other-languages-in-screeners-scheduling-and-incentives). Screeners, intercepts, and inentives/scheduling emails can all be given manual translations through advanced options in the editor (with the exception of right-to-left support).
+- Section 508 and WCAG 2.0 (AA)
+- GDPR- and CCPA-compliant data retention, expiration, and portability
 
 **Cost:** $82+/seat/month, an Enterprise account is required for Participant Pool feature
 
@@ -119,8 +122,8 @@ Ethnio does not include a research data repository. However, this is the one sin
   - Nava has little experience with it (a free trial for a single project test)
 
 ### Other tools explored (tho quickly ruled out)
-- [Dovetail] -- Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
-- [Giftbit] -- Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
-- [Typeform] -- Basic surveys. Custom branding. High price point.Integrates w/ Tremendous, Dovetail. Only feature it provides is surveys.
-- [SurveyMonkey] -- Integrates with Tremendous, Dovetail. Only feature it provides is surveys.
-- [maze](https://maze.co) -- Industry-standard Figma testing. Nava's recommended platform for unmoderated usability testing (likely not needed in the near-term).
+- [Dovetail] — Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
+- [Giftbit] — Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
+- [Typeform] — Basic surveys. Custom branding. High price point.Integrates w/ Tremendous, Dovetail. Only feature it provides is surveys.
+- [SurveyMonkey] — Integrates with Tremendous, Dovetail. Only feature it provides is surveys.
+- [maze](https://maze.co) — Industry-standard Figma testing. Nava's recommended platform for unmoderated usability testing (likely not needed in the near-term).
