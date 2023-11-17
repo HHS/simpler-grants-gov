@@ -73,4 +73,4 @@ class OpportunityFactory(BaseFactory):
     opportunity_title = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
     agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
-    is_draft = factory.Faker("boolean", chance_of_getting_true=50)
+    is_draft = False  # Because we filter out drafts, just default these to False
