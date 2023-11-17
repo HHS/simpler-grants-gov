@@ -35,7 +35,7 @@ Simpler Grants would benefit from more robust tools for conducting user research
 | User Mgmt    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
 | Incentives   |  ✅      |  ✅           |  🛠️         |  🛠️             |  ❌         |  ✅       |  ❌        |  ❌            |
 | Schedule/Cal |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
-| Surveys      |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ✅        |  ✅            |
+| Screeners    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ✅        |  ✅            |
 | Intercepts   |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
 | Data repo    |  🛠️      |  ❌           |  ✅         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
 | Nava exp.    |  ✅      |  ✅           |  ❌         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
