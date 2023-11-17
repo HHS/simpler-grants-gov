@@ -25,20 +25,21 @@ Simpler Grants would benefit from more robust tools for conducting user research
 [Tremendous]: https://www.tremendous.com/
 [Qualtrics]: https://www.qualtrics.com/
 [GreatQuestion]: https://greatquestion.co
+[Touchpoints]: https://touchpoints.digital.gov/
 [Dovetail]: https://dovetail.com/
 [Giftbit]: https://www.giftbit.com/
 [Typeform]: https://www.typeform.com/
 [SurveyMonkey]: https://www.surveymonkey.com/
 
-| tool/feature | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
-| ------------ | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
-| User Mgmt    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
-| Incentives   |  ✅      |  ✅           |  🛠️         |  🛠️             |  ❌         |  ✅       |  ❌        |  ❌            |
-| Schedule/Cal |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
-| Screeners    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ✅        |  ✅            |
-| Intercepts   |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
-| Data repo    |  🛠️      |  ❌           |  ✅         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
-| Nava exp.    |  ✅      |  ✅           |  ❌         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
+| tool/feature | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Touchpoints] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
+| ------------ | -------- | ------------ | ----------- | --------------- | ------------- | ---------- | --------- | ---------- | -------------- |
+| User Mgmt    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌            |  ❌        |  ❌       |  ❌         |  ❌            |
+| Incentives   |  ✅      |  ✅           |  🛠️         |  🛠️             |  ❌            |  ❌        |  ✅       |  ❌         |  ❌            |
+| Schedule/Cal |  ✅      |  ❌           |  ✅         |  ✅             |  ❌            |  ❌        |  ❌       |  ❌         |  ❌            |
+| Screeners    |  ✅      |  ❌           |  ✅         |  ✅             |  ✅            |  ❌        |  ❌       |  ✅         |  ✅            |
+| Intercepts   |  ✅      |  ❌           |  ✅         |  ✅             |  ✅            |  ❌        |  ❌       |  ❌         |  ❌            |
+| Data repo    |  🛠️      |  ❌           |  ✅         |  ✅             |  ✅            |  ✅        |  ❌       |  ❌         |  ❌            |
+| Nava exp.    |  ✅      |  ✅           |  ❌         |  ✅             |  ✅            |  ✅        |  ❌       |  ❌         |  ❌            |
 
 - ✅ Built-in
 - 🛠️ Integration available
@@ -122,6 +123,7 @@ Ethnio does not include a research data repository. However, this is the one sin
   - Nava has little experience with it (a free trial for a single project test)
 
 ### Other tools explored (tho quickly ruled out)
+- [Touchpoints] — Just surveys, really. PRA-friendly, including forms that already have clearance. Free to use for federal projects. However, required .gov or .mil email address to admin.
 - [Dovetail] — Industry-standard research data repository. Lots of tool integrations. Hefty price tag. Likely not necessary for such a small team. Only feature it provides is a data repo.
 - [Giftbit] — Similar functionality to Tremendous (which is preferred by Nava). Is [recommended by 18F/TSS](https://handbook.tts.gsa.gov/18f/how-18f-works/research-guidelines/#how-do-i-actually-distribute-the-compensation-to-research-participants).
 - [Typeform] — Basic surveys. Custom branding. High price point.Integrates w/ Tremendous, Dovetail. Only feature it provides is surveys.
