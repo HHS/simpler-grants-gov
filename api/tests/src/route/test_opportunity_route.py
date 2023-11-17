@@ -353,6 +353,20 @@ def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportun
     assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
 
 
+def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_factory_create):
+    # The endpoint won't return drafts, so this'll be a 404 despite existing
+    opportunity = OpportunityFactory.create(is_draft=True)
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+    assert resp.status_code == 404
+    assert (
+        resp.get_json()["message"]
+        == f"Could not find Opportunity with ID {opportunity.opportunity_id}"
+    )
+
+
 def test_get_opportunity_invalid_id_404(client, api_auth_token):
     # with how the route naming resolves, this won't be an invalid request, but instead a 404
     resp = client.get("/v1/opportunities/text", headers={"X-Auth": api_auth_token})
