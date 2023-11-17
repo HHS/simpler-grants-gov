@@ -30,14 +30,15 @@ Simpler Grants would benefit from more robust tools for conducting user research
 [Typeform]: https://www.typeform.com/
 [SurveyMonkey]: https://www.surveymonkey.com/
 
-| tool/feature    | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
-| --------------- | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
-| User Mgmt       |  ✅      |  ❌          |  ✅         |  ✅             |  ❌        |  ❌       |  ❌        |  ❌           |
-| Incentives      |  ✅      |  ✅          |  🛠️         |  🛠️             |  ❌        |  ✅       |  ❌        |  ❌           |
-| Schedule/Cal    |  ✅      |  ❌          |  ✅         |  ✅             |  ❌        |  ❌       |  ❌        |  ❌           |
-| Surveys         |  ✅      |  ❌          |  ✅         |  ✅             |  ❌        |  ❌       |  ✅        |  ✅           |
-| Data repo       |  🛠️      |  ❌          |  ✅         |  ✅             |  ✅        |  ❌       |  ❌        |  ❌           |
-| Nava experience |  ✅      |  ✅          |  ❌         |  ✅             |  ✅        |  ❌       |  ❌        |  ❌           |
+| tool/feature | [Ethnio] | [Tremendous] | [Qualtrics] | [GreatQuestion] | [Dovetail] | [Giftbit] | [Typeform] | [SurveyMonkey] |
+| ------------ | -------- | ------------ | ----------- | --------------- | ---------- | --------- | ---------- | -------------- |
+| User Mgmt    |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
+| Incentives   |  ✅      |  ✅           |  🛠️         |  🛠️             |  ❌         |  ✅       |  ❌        |  ❌            |
+| Schedule/Cal |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
+| Surveys      |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ✅        |  ✅            |
+| Intercepts   |  ✅      |  ❌           |  ✅         |  ✅             |  ❌         |  ❌       |  ❌        |  ❌            |
+| Data repo    |  🛠️      |  ❌           |  ✅         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
+| Nava exp.    |  ✅      |  ✅           |  ❌         |  ✅             |  ✅         |  ❌       |  ❌        |  ❌            |
 
 - ✅ Built-in
 - 🛠️ Integration available
