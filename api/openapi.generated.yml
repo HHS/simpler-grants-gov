@@ -292,10 +292,6 @@ components:
           - O
           type:
           - string
-        is_draft:
-          type: boolean
-          description: Whether to search for draft claims
-          example: false
         sorting:
           type:
           - object
@@ -341,10 +337,6 @@ components:
           - O
           type:
           - string
-        is_draft:
-          type: boolean
-          description: Whether the opportunity is in a draft status
-          example: false
         created_at:
           type: string
           format: date-time

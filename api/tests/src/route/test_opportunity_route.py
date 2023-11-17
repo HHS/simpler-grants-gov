@@ -22,7 +22,6 @@ def get_search_request(
     sort_direction: str = "descending",
     opportunity_title: str | None = None,
     category: str | None = None,
-    is_draft: bool | None = None,
 ):
     req = {
         "paging": {"page_offset": page_offset, "page_size": page_size},
@@ -34,9 +33,6 @@ def get_search_request(
 
     if category is not None:
         req["category"] = category
-
-    if is_draft is not None:
-        req["is_draft"] = is_draft
 
     return req
 
@@ -74,17 +70,18 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     # Create a handful of opportunities for testing
     # Once we've built out the endpoint more, we'll probably want to make this more robust.
 
+    OpportunityFactory.create(opportunity_title="Find me abc", category=OpportunityCategory.EARMARK)
     OpportunityFactory.create(
-        opportunity_title="Find me abc", category=OpportunityCategory.EARMARK, is_draft=True
-    )
-    OpportunityFactory.create(
-        opportunity_title="Find me xyz", category=OpportunityCategory.CONTINUATION, is_draft=False
+        opportunity_title="Find me xyz", category=OpportunityCategory.CONTINUATION
     )
 
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY, is_draft=True)
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY, is_draft=False)
+    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
+    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
 
-    OpportunityFactory.create(category=OpportunityCategory.MANDATORY, is_draft=False)
+    OpportunityFactory.create(category=OpportunityCategory.MANDATORY)
+
+    # Add a few opportunities with is_draft=True which should never be found
+    OpportunityFactory.create_batch(size=10, is_draft=True)
 
 
 #####################################
@@ -138,29 +135,19 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
             get_search_request(category=OpportunityCategory.OTHER),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
-        # is_draft filter
-        (
-            get_search_request(is_draft=True),
-            SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
-        ),
-        (
-            get_search_request(is_draft=False),
-            SearchExpectedValues(total_pages=1, total_records=3, response_record_count=3),
-        ),
         # A mix of filters
         (
             get_search_request(opportunity_title="find me", category=OpportunityCategory.EARMARK),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
-            get_search_request(category=OpportunityCategory.DISCRETIONARY, is_draft=True),
-            SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
+            get_search_request(category=OpportunityCategory.DISCRETIONARY),
+            SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
         ),
         (
             get_search_request(
                 opportunity_title="find me",
                 category=OpportunityCategory.CONTINUATION,
-                is_draft=False,
             ),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
@@ -168,7 +155,6 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
             get_search_request(
                 opportunity_title="something else",
                 category=OpportunityCategory.OTHER,
-                is_draft=True,
             ),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
@@ -328,16 +314,6 @@ def test_opportunity_search_paging_and_sorting_200(
                 }
             ],
         ),
-        (
-            get_search_request(is_draft="hello"),
-            [
-                {
-                    "field": "is_draft",
-                    "message": "Not a valid boolean.",
-                    "type": "invalid",
-                }
-            ],
-        ),
     ],
 )
 def test_opportunity_search_invalid_request_422(
@@ -418,6 +394,20 @@ def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportun
     resp = client.get("/v1/opportunities/1", headers={"X-Auth": api_auth_token})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
+
+
+def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_factory_create):
+    # The endpoint won't return drafts, so this'll be a 404 despite existing
+    opportunity = OpportunityFactory.create(is_draft=True)
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+    assert resp.status_code == 404
+    assert (
+        resp.get_json()["message"]
+        == f"Could not find Opportunity with ID {opportunity.opportunity_id}"
+    )
 
 
 def test_get_opportunity_invalid_id_404(client, api_auth_token):

@@ -36,10 +36,6 @@ class OpportunitySchema(Schema):
         },
     )
 
-    is_draft = fields.Boolean(
-        metadata={"description": "Whether the opportunity is in a draft status", "example": False}
-    )
-
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -57,9 +53,6 @@ class OpportunitySearchSchema(Schema):
             "description": "The opportunity category to search for",
             "example": OpportunityCategory.DISCRETIONARY,
         },
-    )
-    is_draft = fields.Boolean(
-        metadata={"description": "Whether to search for draft claims", "example": False}
     )
 
     sorting = fields.Nested(
