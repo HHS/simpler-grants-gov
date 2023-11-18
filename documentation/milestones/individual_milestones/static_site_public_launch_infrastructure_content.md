@@ -1,4 +1,4 @@
-# Static site public launch
+# Static site public launch: infrastructure and content
 
 | Field              | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -14,16 +14,26 @@
 ## Short description
 <!-- Required -->
 
-- **What:** Update the static site to prepare for a public launch and adopt tools needed to manage content changes and collect user feedback.
-- **Why:** Continues to improve front-end infrastructure and begins to build public excitement for the Simpler Grants.gov initiative.
-- **Who:**
-  - Internal content managers
-  - Subset of grants.gov mailing list
+- **What:** We want to make a series of updates to the content and the infrastructure to the static site so that we are prepared to launch to a wider audience publicly and effectively communicate the project's goals, ways of working, and ongoing efforts.  
+- **Why:** Continues to improve front-end infrastructure, demonstrate ongoing value both internally and publicly, and begins to build public excitement for the Simpler Grants.gov initiative. These updates underscore our agile methodology of releasing often, even with minimal updates. We also want to ensure that our site can handle an increase in traffic. 
+- **Who:** The site will be announced directly with a small group of applicants, grantors, and internal stakeholders. These include: 
+    - Federal Demonstration Partnership (mostly applicants)
+    - S2S Federal User Group (grantors) 
+    - Grantor S2S CGMO (Grants Management Officers and others within HHS)
+    - Internal content managers
+    - Subset of grants.gov mailing list
 
 ## Goals
 
 ### Business description & value
 <!-- Required -->
+**Problem statement:** In our initial static site release, we released quickly to get learnings and release iteratively. We have limited content on our site that does not properly communicate enough about our project to the public. We also have room for improvement on the infrastructure and operations so that we can confidently handle more traffic.
+
+**Value:** We want to build on our initial release and enhance the site to provide a more comprehensive communication about our project's efforts, ongoing initiatives, and avenues for public involvement. We also aim to validate and reinforce our infrastructure and operations, ensuring they are robust enough to effectively handle the anticipated surge in site traffic. 
+
+This allows us to continue to deliver iteratively, improve the site's infrastructure for sustained maintenance, and communicate our project vision, principles, and the way we work more clearly to anyone coming to the site.
+
+This effort allows us to...
 
 - Begin sharing simpler.grants.gov with a targeted set of public stakeholders
 - Develop a communication strategy for future stakeholder engagement
@@ -36,6 +46,7 @@
   - to approve the content on the site before we share it with the public, so that I know what information will be visible to external stakeholders.
   - to know when I can share the site publicly, so that I can direct key stakeholders to a centralized location where they can learn more about the Simpler.Grants.gov initiative.
   - to have a communications strategy for stakeholder engagement, so that we have clear expectations about which groups will receive updates on the Simpler.Grants.gov initiative and can review proposed messaging to those groups.
+  - clear and concise content that effectively communicates our project's goals, vision, and way of working to the public. This user story is essential to ensure that we uphold our commitment to transparency, fostering open communication and alignment with our overarching project objectives.
 - As an **internal developer**, I want:
   - to be notified when the site goes down, so that I can work to troubleshoot the issue and minimize downtime.
   - the front-end infrastructure to auto-scale based on site traffic, so that I don't have to manually monitor traffic and provision additional resources when there is heavy usage.
@@ -47,7 +58,7 @@
 
 ### Content updates
 
-Prior to the public launch of the site, update the contents to include:
+Prior to the public launch of the site, update the content to include:
 
 - Summary of user research findings that have informed our product roadmap
 - Description of our process and approach to building simpler.grants.gov
@@ -63,7 +74,7 @@ The focus of infrastructure improvements for this deliverable should be on chang
 In particular, it would be helpful to review our approach to the following:
 
 - Employing static site generation (SSG) when possible
-- Caching the site via a content delivery network (CDN)
+- Caching the site via a content delivery network (CDN) or test load times to meet appropriate response times
 - Load balancing and/or proxying requests
 - Auto-scaling infrastructure resources based on volume of traffic
 - Other strategies as recommended by the engineering team
@@ -84,8 +95,8 @@ In particular, it would be helpful to review our approach to the following:
 - **Procedures**
   - Internally-defined service level agreements for availability and incident response
   - Documented incident response plan with steps and roles identified
-  - Documented plan for rotating on-call schedule to receive and respond to alerts
-  - Staff trainings and dry-runs for common types of incidents
+  - Documented plan for receiving and responding to alerts
+  - Staff trainings, tabletop and/or dry-runs for common types of incidents
 
 ### Communication strategy
 
@@ -132,6 +143,7 @@ One stretch goal for this deliverable is to adopt a service that allows site vis
   - [ ] An email has been sent out to the subset of public stakeholders with whom we plan to share the static site
   - [ ] Key internal stakeholders (e.g. help desk staff, HHS leadership) have been notified when the email is sent out so that they can prepare for questions from public stakeholders
   - [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
+  - [ ] Help Desk is notified and trained for any potential support issues that may come through
 
 #### Nice to have
 
@@ -198,6 +210,7 @@ The following work will *not* be completed as part of this deliverable:
 
 - **Translations:** Because translating the content of the site depends on formalizing the translation process, translating site contents into multiple languages is out of scope for this deliverable.
 - **User survey:** Because a feedback mechanism won't be adopted during this deliverable, a user survey will also be descoped from the public launch.
+- **Testable features from users:** The site will functionally remain a static site. There will be methods for the public to get involved with the project and follow our progress but there is currently no API or functionality on the site for users to engage with in this release. 
 
 ## Integrations
 
