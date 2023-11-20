@@ -276,10 +276,6 @@ components:
           - C
           - E
           - O
-        is_draft:
-          type: boolean
-          description: Whether to search for draft claims
-          example: false
         sorting:
           $ref: '#/components/schemas/OpportunitySorting'
         paging:
@@ -317,10 +313,6 @@ components:
           - C
           - E
           - O
-        is_draft:
-          type: boolean
-          description: Whether the opportunity is in a draft status
-          example: false
         created_at:
           type: string
           format: date-time
