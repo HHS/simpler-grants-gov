@@ -1,14 +1,14 @@
 # Static Site for Simpler Grants.gov Project
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 62](https://github.com/HHS/simpler-grants-gov/issues/62) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Billy Daly                                                      |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 62](https://github.com/HHS/simpler-grants-gov/issues/62) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Billy Daly                                                      |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -20,11 +20,11 @@ Launch a simple site at simpler.grants.gov that provides static, informational c
 
 The launch of a static site for the Simpler Grants.gov project represents the culmination of multiple internally focused deliverables and serves as a landing page where key stakeholders can access information about the project.
 
-By sharing this information in a publicly accessible format and investing early in the infrastructure used to host it, this milestone aims to demonstrate the following value propositions:
+By sharing this information in a publicly accessible format and investing early in the infrastructure used to host it, this deliverable aims to demonstrate the following value propositions:
 
 - Raises awareness about the Simpler Grants.gov project, its priorities, and ongoing workstreams
 - Establishes simpler.grants.gov as the primary location that stakeholders can visit for project updates and previews of deliverables for the Simpler Grants.gov project
-- Proves the successful completion of technical milestones that enable faster development without sacrificing code quality or security
+- Proves the successful completion of technical deliverables that enable faster development without sacrificing code quality or security
 - Delivers an early win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 - Facilitates a parallel approach to development, in which new features can be built and tested on `simpler.grants.gov` without risking or disrupting the existing functionality of legacy grants.gov
 
@@ -75,17 +75,17 @@ Process for drafting and updating the content of the site should balance:
 
 - [ ] The following infrastructure requirements are satisfied:
   - [ ] The code needed to build and deploy the site is merged to `main`
-  - [ ] The site is built and hosted with the tools selected in the [Front-end Planning milestone](https://github.com/HHS/simpler-grants-gov/issues/49)
-  - [ ] All code quality checks set up in the [Developer Tools milestone](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
-  - [ ] The resources required to deploy and host the site are provisioned programmatically using the framework established in the [Infrastructure-as-Code milestone](https://github.com/HHS/simpler-grants-gov/issues/123)
-  - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Front-end CI/CD milestone](https://github.com/HHS/simpler-grants-gov/issues/58)
+  - [ ] The site is built and hosted with the tools selected in the [Front-end Planning deliverable](https://github.com/HHS/simpler-grants-gov/issues/49)
+  - [ ] All code quality checks set up in the [Developer Tools deliverable](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
+  - [ ] The resources required to deploy and host the site are provisioned programmatically using the framework established in the [Infrastructure-as-Code deliverable](https://github.com/HHS/simpler-grants-gov/issues/123)
+  - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Front-end CI/CD deliverable](https://github.com/HHS/simpler-grants-gov/issues/58)
 - [ ] The following user experience (UX) requirements are satisfied:
   - [ ] Anyone can access a live version of the site at simpler.grants.gov
-  - [ ] # The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
+  - [ ] # The site adopts the UI principles and framework established in the [Foundational UI deliverable](https://github.com/HHS/simpler-grants-gov/issues/60)
   - [ ] Anyone can access a live version of the site at simpler.grants.gov
-  - [ ] The site adopts the UI principles and framework established in the [Foundational UI milestone](https://github.com/HHS/simpler-grants-gov/issues/60)
-  - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning milestone
-  - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics milestone](https://github.com/HHS/simpler-grants-gov/issues/63)
+  - [ ] The site adopts the UI principles and framework established in the [Foundational UI deliverable](https://github.com/HHS/simpler-grants-gov/issues/60)
+  - [ ] The site is 508 compliant and satisfies the other guidelines outlined in the Accessibility Planning deliverable
+  - [ ] Web traffic data for the site is actively being collected by the framework implemented in the [Web Analytics deliverable](https://github.com/HHS/simpler-grants-gov/issues/63)
   - [ ] Additional development tickets have been created for collecting other data needed to calculate the metrics below
 - [ ] The following content requirements are satisfied:
   - [ ] All content is deployed to simpler.grants.gov
@@ -113,7 +113,7 @@ Process for drafting and updating the content of the site should balance:
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard deliverable](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -121,7 +121,7 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 <!-- Required -->
 
-_What capabilities / milestones do we expect to be in place by the completion of work on this milestone?_
+_What capabilities / deliverables do we expect to be in place by the completion of work on this deliverable?_
 
 - [ ] **[Front-end Planning](https://github.com/HHS/simpler-grants-gov/issues/49):** Determines the language, framework, and deployment service used to build and host the site.
 - [ ] **[Developer Tools](https://github.com/HHS/simpler-grants-gov/issues/50):** Establishes a suite of tools used to ensure the quality and security of the site codebase.
@@ -130,11 +130,11 @@ _What capabilities / milestones do we expect to be in place by the completion of
 - [ ] **[Infrastructure-as-Code](https://github.com/HHS/simpler-grants-gov/issues/123):** Programmatically provisions the resources needed to deploy and host this site.
 - [ ] **[Front-end CI/CD](https://github.com/orgs/HHS/projects/12/views/3?pane=issue&itemId=31950276):** Sets up a CI/CD pipeline that will be used to test and publish code changes to the site.
 - [ ] **[Foundational UI](https://github.com/HHS/simpler-grants-gov/issues/60):** Determines the UI framework that the site will adopt before launch.
-- [ ] **[Web Analytics](https://github.com/HHS/simpler-grants-gov/issues/63):** Enables tracking key success metrics for this milestone, e.g. site traffic and number of unique visitors.
+- [ ] **[Web Analytics](https://github.com/HHS/simpler-grants-gov/issues/63):** Enables tracking key success metrics for this deliverable, e.g. site traffic and number of unique visitors.
 
-_Are there any notable capabilities / milestones do NOT we expect to be in place by the completion of work on this milestone?_
+_Are there any notable capabilities / deliverables do NOT we expect to be in place by the completion of work on this deliverable?_
 
-- [x] **Internationalization:** While there will be content delivered within this milestone that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this milestone is delivered.
+- [x] **Internationalization:** While there will be content delivered within this deliverable that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this deliverable is delivered.
 - [x] **CMS:** While in the long-term we may want to support a Content Management Service (CMS) that allows non-technical users to update and manage copy for the website, we do not expect a CMS to be selected and implemented when we launch this site.
 
 ### Open questions
@@ -147,10 +147,10 @@ _Are there any notable capabilities / milestones do NOT we expect to be in place
 
 <!-- Optional -->
 
-_The following work will_ not _be completed as part of this milestone:_
+_The following work will_ not _be completed as part of this deliverable:_
 
-1. **Translating site contents:** Translation of key documents will be covered in an upcoming milestone slotted for FY24 Q1 (Oct - Dec 2023)
-2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `simpler.grants.gov` will happen in a later milestone
+1. **Translating site contents:** Translation of key documents will be covered in an upcoming deliverable slotted for FY24 Q1 (Oct - Dec 2023)
+2. **Legacy web analytics:** Updating the existing analytics recorded on legacy grants.gov in order to establish a baseline for comparing the site traffic for `simpler.grants.gov` will happen in a later deliverable
 
 ## Integrations
 
@@ -158,7 +158,7 @@ _The following work will_ not _be completed as part of this milestone:_
 
 <!-- Required -->
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 Yes, the site contents will need to be translated.
 
@@ -172,7 +172,7 @@ The initial process for translation is slotted for release sometime in FY24 Q1 (
 
 _This can include services going into PROD behind a feature flag that is not turned on._
 
-- **Static Site:** This milestone represents the official launch of the static site
+- **Static Site:** This deliverable represents the official launch of the static site
 - **simpler.grants.gov Domain:** The static site is the first service to officially use the `simpler.grants.gov` domain
 - **Stakeholder Feedback Form:** This is the first time we're collecting feedback directly from stakeholders on `simpler.grants.gov`
 - **Web Analytics:** This will most likely be the first service for which we are configuring web analytics
@@ -193,13 +193,13 @@ _Are there multiple services that are being connected for the first time in PROD
 
 _Are there any fields being shared publicly that have never been shared in PROD before?_
 
-- No, the content of the static site in this milestone will be limited to general information about the Simpler Grants.gov project. It does not include exposing any production data from the new simpler.grants.gov data model.
+- No, the content of the static site in this deliverable will be limited to general information about the Simpler Grants.gov project. It does not include exposing any production data from the new simpler.grants.gov data model.
 
 ### Security considerations
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
 - **Deployment Services:** Automating our deployment process using a CI/CD platform exposes the deployment process as a potential attack vector if the deployment secrets/tokens are compromised or if malicious code through a supply chain attack.
 - **Form Submissions:** While the majority of the site content will be static, accepting user input through a feedback form does expose a potential attack vector.
@@ -207,7 +207,7 @@ _Does this milestone expose any new attack vectors or expand the attack surface 
 _If so, how are we addressing these risks?_
 
 - **Security Approval:** Before the official launch of the static site to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
-- **Developer Tools:** As part of the Developer Tools milestone, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
+- **Developer Tools:** As part of the Developer Tools deliverable, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
 - **Form Submissions:** The implementation plan for form submissions will evaluate and consider common security practices for validating and sanitizing user input. Form submissions will also likely be stored in a system that is separate from the production database with grant data.
 
 <!-- Links -->

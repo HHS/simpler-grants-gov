@@ -16,14 +16,14 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 #### Must Have
 
-- **Ticket Tracking:** Tickets can be organized into sprints and tracked as part of larger milestones or epics
+- **Ticket Tracking:** Tickets can be organized into sprints and tracked as part of larger deliverables
 - **Public Access:** Without logging in, members of the public can see tickets that are being worked on
 - **Public Requests:** Members of the public can submit bug reports and feature requests and track how that work is being prioritized
 - **Templates:** The system supports default templates for different types of tickets which prompts the person creating the ticket for a specific set of information
 - **Authority to Operate (ATO):** The platform already must be authorized under the Grants.gov ATO (Authority to Operate) or ATO coverage must be requested
 - **Reporting:** Users can report on the following key metrics:
   - Sprint burndown -- % of tickets and/or points remaining over the course of the sprint
-  - Milestone burdown -- % of tickets and/or points remaining per milestone over time
+  - Deliverable burdown -- % of tickets and/or points remaining per deliverable over time
   - Sprint allocation -- # of tickets and/or points allocated to each team member per sprint
   - Sprint completion -- # of tickets and/or points created vs planned per sprint
   - Sprint velocity -- Average # of tickets and/or points completed per sprint
@@ -61,7 +61,7 @@ We are planning to use **GitHub issues with GitHub projects** because it is the 
 
 - We will need to develop custom reports to track some of the same metrics that Jira or Confluence offers out of the box. Our current proposed strategy for doing so is to create a Python script that exports the tickets and produces the following charts at the end of each sprint:
   - Sprint burndown -- % of tickets and/or points remaining over the course of the sprint
-  - Milestone burdown -- % of tickets and/or points remaining per milestone over time
+  - Deliverable burdown -- % of tickets and/or points remaining per deliverable over time
   - Sprint allocation -- # of tickets and/or points allocated to each team member per sprint
   - Sprint completion -- # of tickets and/or points created vs planned per sprint
   - Sprint velocity -- Average # of tickets and/or points completed per sprint

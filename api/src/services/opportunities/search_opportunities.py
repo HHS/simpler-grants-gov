@@ -11,7 +11,6 @@ from src.pagination.paginator import Paginator
 
 class SearchOpportunityParams(PaginationParams):
     opportunity_title: str | None = None
-    is_draft: bool | None = None
     category: OpportunityCategory | None = None
 
 
@@ -22,8 +21,10 @@ def search_opportunities(
 
     sort_fn = asc if search_params.sorting.is_ascending else desc
 
-    stmt = select(Opportunity).order_by(
-        sort_fn(getattr(Opportunity, search_params.sorting.order_by))
+    stmt = (
+        select(Opportunity)
+        .order_by(sort_fn(getattr(Opportunity, search_params.sorting.order_by)))
+        .where(Opportunity.is_draft.is_(False))  # Only ever return non-drafts
     )
 
     if search_params.opportunity_title is not None:
@@ -31,9 +32,6 @@ def search_opportunities(
         stmt = stmt.where(
             Opportunity.opportunity_title.ilike(f"%{search_params.opportunity_title}%")
         )
-
-    if search_params.is_draft is not None:
-        stmt = stmt.where(Opportunity.is_draft == search_params.is_draft)
 
     if search_params.category is not None:
         stmt = stmt.where(Opportunity.category == search_params.category)
@@ -44,5 +42,4 @@ def search_opportunities(
     opportunities = paginator.page_at(page_offset=search_params.paging.page_offset)
     pagination_info = PaginationInfo.from_pagination_models(search_params, paginator)
 
-    # just creating a static pagination info for the moment until we hook up pagination
     return opportunities, pagination_info

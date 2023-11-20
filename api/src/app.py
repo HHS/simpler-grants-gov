@@ -52,16 +52,18 @@ def configure_app(app: APIFlask) -> None:
     app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
 
     # Set a few values for the Swagger endpoint
-    app.config["OPENAPI_VERSION"] = "3.0.3"
+    app.config["OPENAPI_VERSION"] = "3.1.0"
+
+    app.json.compact = False  # type: ignore
 
     # Set various general OpenAPI config values
     app.info = {
         "title": "Simpler Grants API",
         "description": "Back end API for simpler.grants.gov",
         "contact": {
-            "name": "Nava PBC Engineering",
-            "url": "https://www.navapbc.com",
-            "email": "engineering@navapbc.com",
+            "name": "Simpler Grants.gov",
+            "url": "https://simpler.grants.gov/",
+            "email": "simplergrantsgov@hhs.gov",
         },
     }
 

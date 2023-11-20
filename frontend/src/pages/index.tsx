@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
@@ -38,8 +38,8 @@ const Home: NextPage = () => {
   );
 };
 
-// Change this to getStaticProps if you're not using server-side rendering
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+// Change this to GetServerSideProps if you're using server-side rendering
+export const getStaticProps: GetStaticProps = async ({ locale }) => {
   const translations = await serverSideTranslations(locale ?? "en");
   return { props: { ...translations } };
 };

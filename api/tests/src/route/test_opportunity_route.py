@@ -22,7 +22,6 @@ def get_search_request(
     sort_direction: str = "descending",
     opportunity_title: str | None = None,
     category: str | None = None,
-    is_draft: bool | None = None,
 ):
     req = {
         "paging": {"page_offset": page_offset, "page_size": page_size},
@@ -34,9 +33,6 @@ def get_search_request(
 
     if category is not None:
         req["category"] = category
-
-    if is_draft is not None:
-        req["is_draft"] = is_draft
 
     return req
 
@@ -74,17 +70,23 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     # Create a handful of opportunities for testing
     # Once we've built out the endpoint more, we'll probably want to make this more robust.
 
+    OpportunityFactory.create(opportunity_title="Find me abc", category=OpportunityCategory.EARMARK)
     OpportunityFactory.create(
-        opportunity_title="Find me abc", category=OpportunityCategory.EARMARK, is_draft=True
-    )
-    OpportunityFactory.create(
-        opportunity_title="Find me xyz", category=OpportunityCategory.CONTINUATION, is_draft=False
+        opportunity_title="Find me xyz", category=OpportunityCategory.CONTINUATION
     )
 
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY, is_draft=True)
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY, is_draft=False)
+    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
+    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
 
-    OpportunityFactory.create(category=OpportunityCategory.MANDATORY, is_draft=False)
+    OpportunityFactory.create(category=OpportunityCategory.MANDATORY)
+
+    # Add a few opportunities with is_draft=True which should never be found
+    OpportunityFactory.create_batch(size=10, is_draft=True)
+
+
+#####################################
+# POST /opportunities/search
+#####################################
 
 
 @pytest.mark.parametrize(
@@ -133,29 +135,19 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
             get_search_request(category=OpportunityCategory.OTHER),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
-        # is_draft filter
-        (
-            get_search_request(is_draft=True),
-            SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
-        ),
-        (
-            get_search_request(is_draft=False),
-            SearchExpectedValues(total_pages=1, total_records=3, response_record_count=3),
-        ),
         # A mix of filters
         (
             get_search_request(opportunity_title="find me", category=OpportunityCategory.EARMARK),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
-            get_search_request(category=OpportunityCategory.DISCRETIONARY, is_draft=True),
-            SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
+            get_search_request(category=OpportunityCategory.DISCRETIONARY),
+            SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
         ),
         (
             get_search_request(
                 opportunity_title="find me",
                 category=OpportunityCategory.CONTINUATION,
-                is_draft=False,
             ),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
@@ -163,7 +155,6 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
             get_search_request(
                 opportunity_title="something else",
                 category=OpportunityCategory.OTHER,
-                is_draft=True,
             ),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
@@ -287,7 +278,6 @@ def test_opportunity_search_paging_and_sorting_200(
         ),
         (get_search_request(opportunity_title={}), {"opportunity_title": ["Not a valid string."]}),
         (get_search_request(category="X"), {"category": ["Must be one of: D, M, C, E, O."]}),
-        (get_search_request(is_draft="hello"), {"is_draft": ["Not a valid boolean."]}),
     ],
 )
 def test_opportunity_search_invalid_request_422(
@@ -302,18 +292,6 @@ def test_opportunity_search_invalid_request_422(
     assert response_data == expected_response_data
 
 
-def test_opportunity_search_unauthorized_401(client, api_auth_token):
-    response = client.post(
-        "/v1/opportunities/search", json=get_search_request(), headers={"X-Auth": "incorrect token"}
-    )
-
-    assert response.status_code == 401
-    assert (
-        response.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
-
-
 @pytest.mark.parametrize("enable_opportunity_log_msg", [True, False, None])
 def test_opportunity_search_feature_flag_200(
     client, api_auth_token, enable_opportunity_log_msg, caplog
@@ -321,7 +299,7 @@ def test_opportunity_search_feature_flag_200(
     headers = {"X-Auth": api_auth_token}
 
     if enable_opportunity_log_msg is not None:
-        headers["X-FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
+        headers["FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
 
     client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
 
@@ -338,11 +316,80 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 ):
     headers = {
         "X-Auth": api_auth_token,
-        "X-FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
+        "FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
     }
 
     resp = client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
     assert resp.status_code == 422
 
     response_data = resp.get_json()["detail"]["headers"]
-    assert response_data == {"X-FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+    assert response_data == {"FF-Enable-Opportunity-Log-Msg": ["Not a valid boolean."]}
+
+
+#####################################
+# GET /opportunities/<opportunity_id>
+#####################################
+
+
+def test_get_opportunity_200(client, api_auth_token, enable_factory_create):
+    opportunity = OpportunityFactory.create()
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+    assert resp.status_code == 200
+
+    response_data = resp.get_json()["data"]
+
+    assert response_data["opportunity_id"] == opportunity.opportunity_id
+    assert response_data["opportunity_title"] == opportunity.opportunity_title
+    assert response_data["agency"] == opportunity.agency
+    assert response_data["category"] == opportunity.category
+
+
+def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportunities):
+    resp = client.get("/v1/opportunities/1", headers={"X-Auth": api_auth_token})
+    assert resp.status_code == 404
+    assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
+
+
+def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_factory_create):
+    # The endpoint won't return drafts, so this'll be a 404 despite existing
+    opportunity = OpportunityFactory.create(is_draft=True)
+
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+    assert resp.status_code == 404
+    assert (
+        resp.get_json()["message"]
+        == f"Could not find Opportunity with ID {opportunity.opportunity_id}"
+    )
+
+
+def test_get_opportunity_invalid_id_404(client, api_auth_token):
+    # with how the route naming resolves, this won't be an invalid request, but instead a 404
+    resp = client.get("/v1/opportunities/text", headers={"X-Auth": api_auth_token})
+    assert resp.status_code == 404
+    assert resp.get_json()["message"] == "Not Found"
+
+
+#####################################
+# Auth tests
+#####################################
+@pytest.mark.parametrize(
+    "method,url,body",
+    [
+        ("POST", "/v1/opportunities/search", get_search_request()),
+        ("GET", "/v1/opportunities/1", None),
+    ],
+)
+def test_opportunity_unauthorized_401(client, api_auth_token, method, url, body):
+    # open is just the generic method that post/get/etc. call under the hood
+    response = client.open(url, method=method, json=body, headers={"X-Auth": "incorrect token"})
+
+    assert response.status_code == 401
+    assert (
+        response.get_json()["message"]
+        == "The server could not verify that you are authorized to access the URL requested"
+    )
