@@ -65,12 +65,15 @@ class SprintBurndown(BaseMetric):
         )
         df = self.results[date_mask]
         # create a line chart from the data in self.results
-        return px.line(
+        chart = px.line(
             data_frame=df,
             x=self.date_col,
             y="total_open",
             title=f"{self.sprint} Burndown",
         )
+        # set the scale of the y axis to start at 0
+        chart.update_yaxes(range=[0, df["total_open"].max() + 2])
+        return chart
 
     def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
         """Post sprint burndown results and chart to slack channel."""
