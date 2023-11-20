@@ -21,7 +21,7 @@ config:
     local:
       target: http://localhost:3000
   plugins:
-    expect: 
+    expect:
       outputFormat: prettyError
     ensure: {}
     apdex: {}
@@ -29,21 +29,21 @@ config:
   apdex:
     threshold: 100
 scenarios:
-    - name: root
-      flow:
-        - get: 
-            url: "/"
-            expect:
-              - statusCode: 200
-    - name: health
-      flow: 
-        - get: 
-            url: "/health"
-            expect:
-              - statusCode: 200
-    - name: hello
-      flow: 
-        - get: 
-            url: "/api/hello"
-            expect:
-              - statusCode: 200
+  - name: root
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+  - name: health
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+  - name: hello
+    flow:
+      - get:
+          url: "/api/hello"
+          expect:
+            - statusCode: 200
