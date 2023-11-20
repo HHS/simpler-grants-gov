@@ -1,14 +1,14 @@
 # API Planning
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 42](https://github.com/HHS/simpler-grants-gov/issues/42) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Billy Daly                                                      |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 42](https://github.com/HHS/simpler-grants-gov/issues/42) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Billy Daly                                                      |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -139,7 +139,7 @@ Some factors to consider are:
 
 #### One-time metrics
 
-We recommend calculating the following metrics at least once to inform the selection of tools for this milestone:
+We recommend calculating the following metrics at least once to inform the selection of tools for this deliverable:
 
 1. API language metrics
    1. Days since last patch or minor release
@@ -171,7 +171,7 @@ The following metrics should be tracked about the tools selected within this met
 
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard deliverable](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -179,13 +179,13 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 <!-- Required -->
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What capabilities / deliverables do we expect to be in place at the beginning of work
+on this deliverable?
 
 - [x] **Onboard dev team:** The dev team will be evaluating and making many of these key architectural decisions
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+Are there any notable capabilities / deliverables do NOT we expect to be in place at the
+beginning of work on this deliverable?
 
 - [x] None
 
@@ -199,9 +199,9 @@ beginning of work on this milestone?
 
 <!-- Optional -->
 
-The following work will _not_ be completed as part of this milestone:
+The following work will _not_ be completed as part of this deliverable:
 
-1. **Deploying services:** This milestone involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
+1. **Deploying services:** This deliverable involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
 
 ## Integrations
 
@@ -209,7 +209,7 @@ The following work will _not_ be completed as part of this milestone:
 
 <!-- Required -->
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 _If so, when will English-language content be locked? Then when will translation be started and completed?_
 
@@ -221,7 +221,7 @@ _If so, when will English-language content be locked? Then when will translation
 
 _This can include services going into PROD behind a feature flag that is not turned on._
 
-1. No, this is just a planning milestone
+1. No, this is just a planning deliverable
 
 ### Services being integrated in PROD for the first time
 
@@ -229,7 +229,7 @@ _This can include services going into PROD behind a feature flag that is not tur
 
 _Are there multiple services that are being connected for the first time in PROD?_
 
-1. No, this is just a planning milestone
+1. No, this is just a planning deliverable
 
 ### Data being shared publicly for the first time
 
@@ -237,14 +237,14 @@ _Are there multiple services that are being connected for the first time in PROD
 
 _Are there any fields being shared publicly that have never been shared in PROD before?_
 
-1. No, this is just a planning milestone
+1. No, this is just a planning deliverable
 
 ### Security considerations
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
 _If so, how are we addressing these risks?_
 
-1. No, this is just a planning milestone
+1. No, this is just a planning deliverable
