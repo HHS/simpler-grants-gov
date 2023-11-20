@@ -6,7 +6,7 @@ This sub-directory enables users to run analytics on data generated within the S
 
 ### Pre-requisites
 
-- Python version 3.10 or 3.11
+- Python version 3.11
 - Poetry
 - GitHub CLI
 
