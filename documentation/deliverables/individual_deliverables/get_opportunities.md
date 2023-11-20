@@ -1,14 +1,14 @@
 # GET Opportunities Endpoint
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 70](https://github.com/HHS/simpler-grants-gov/issues/70) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Billy Daly                                                      |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 70](https://github.com/HHS/simpler-grants-gov/issues/70) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Billy Daly                                                      |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -30,7 +30,7 @@ By delivering this public endpoint and ensuring it remains available even when t
 
 - Select a URL for the API
 - Expose the chosen URL name as the public API for the project that technical stakeholders can access and where future endpoints and/or features will be released
-- Proves the successful completion of technical milestones that enable faster development on the API without sacrificing code quality or security
+- Proves the successful completion of technical deliverables that enable faster development on the API without sacrificing code quality or security
 - Delivering another public win that both internal and external stakeholders can rally around, which helps build momentum and enthusiam for the project
 
 ### User Stories
@@ -88,24 +88,24 @@ The way that data is stored and delivered through the API should balance:
 
 - [ ] The following infrastructure requirements are satisfied:
   - [ ] The code needed to build and deploy the site is merged to `main`
-  - [ ] The site is built and hosted with the tools selected in the [API Planning](https://github.com/HHS/simpler-grants-gov/issues/42) and [DB Planning](https://github.com/HHS/simpler-grants-gov/issues/48) milestones
-  - [ ] All code quality checks set up in the [Developer Tools milestone](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
-  - [ ] The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code milestone](https://github.com/HHS/simpler-grants-gov/issues/123) framework
-  - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD milestone](https://github.com/HHS/simpler-grants-gov/issues/57)
+  - [ ] The site is built and hosted with the tools selected in the [API Planning](https://github.com/HHS/simpler-grants-gov/issues/42) and [DB Planning](https://github.com/HHS/simpler-grants-gov/issues/48) deliverables
+  - [ ] All code quality checks set up in the [Developer Tools deliverable](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
+  - [ ] The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code deliverable](https://github.com/HHS/simpler-grants-gov/issues/123) framework
+  - [ ] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD deliverable](https://github.com/HHS/simpler-grants-gov/issues/57)
   - [ ] DB migrations are automatically configured through scripts that enable upgrading/downgrading database quickly and easily (e.g., by using Alembic https://github.com/sqlalchemy/alembic)
-  - [ ] The API has been load tested using the framework established in the [Peformance Testing Framework milestone](https://github.com/HHS/simpler-grants-gov/issues/69) to ensure that it remains performant under heavy user traffic
-  - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring milestone](https://github.com/HHS/simpler-grants-gov/issues/370)
-  - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response milestone](https://github.com/HHS/simpler-grants-gov/issues/373)
+  - [ ] The API has been load tested using the framework established in the [Peformance Testing Framework deliverable](https://github.com/HHS/simpler-grants-gov/issues/69) to ensure that it remains performant under heavy user traffic
+  - [ ] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring deliverable](https://github.com/HHS/simpler-grants-gov/issues/370)
+  - [ ] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response deliverable](https://github.com/HHS/simpler-grants-gov/issues/373)
   - [ ] The chosen API URL sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
 - [ ] The following developer experience (DX) requirements are satisfied:
   - [ ] The API is live at the chosen URL
   - [ ] Developers can learn how to interact with the API by referencing the API documentation
   - [ ] The endpoint path indicates which major version of the API the developer is consuming
-  - [ ] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning milestone](https://github.com/HHS/simpler-grants-gov/issues/68)
+  - [ ] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning deliverable](https://github.com/HHS/simpler-grants-gov/issues/68)
   - [ ] The endpoint is available when legacy grants.gov experiences planned or unplanned downtime, maintenance, and upgrades
-  - [ ] Test data is scripted to provide consistent and reliable test fixtures for integration tests and local development per the [Test Data and Schema milestone](https://github.com/HHS/simpler-grants-gov/issues/)
+  - [ ] Test data is scripted to provide consistent and reliable test fixtures for integration tests and local development per the [Test Data and Schema deliverable](https://github.com/HHS/simpler-grants-gov/issues/)
   - [ ] All developers (including open source contributors) are able to spin up either database replica or test fixture data so that they can conduct local development.
-  - [ ] Feature flag framework is implemented so that functionality can be deployed to PROD without being turned on per the [Feature flag framework milestone](https://github.com/HHS/simpler-grants-gov/issues/)
+  - [ ] Feature flag framework is implemented so that functionality can be deployed to PROD without being turned on per the [Feature flag framework deliverable](https://github.com/HHS/simpler-grants-gov/issues/)
 - [ ] The following data requirements are satisfied:
   - [ ] The endpoint returns all of the grant opportunities that are available on grants.gov
   - [ ] The endpoint returns at least one (1) field per opportunity
@@ -126,7 +126,7 @@ The way that data is stored and delivered through the API should balance:
 
 <!-- Required -->
 
-Page on the public wiki that is updated at the end of each sprint. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki that is updated at the end of each sprint. **Note:** This will likely change once we deliver [the Public Measurement Dashboard deliverable](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -134,7 +134,7 @@ Page on the public wiki that is updated at the end of each sprint. **Note:** Thi
 
 <!-- Required -->
 
-_What capabilities / milestones do we expect to be in place by the completion of work on this milestone?_
+_What capabilities / deliverables do we expect to be in place by the completion of work on this deliverable?_
 
 - [ ] **[API Planning](https://github.com/HHS/simpler-grants-gov/issues/):** Determines the language, framework, and deployment service used to build and host the API.
 - [ ] **[DB planning](https://github.com/HHS/simpler-grants-gov/issues/):** Determines the DMBS and hosting service used to store and manage the data serviced by the API.
@@ -152,9 +152,9 @@ _What capabilities / milestones do we expect to be in place by the completion of
 - [ ] **[Incident Response](https://github.com/HHS/simpler-grants-gov/issues/373):** Documents and trains staff on the incident response plan.
 - [ ] **[Performance Testing Framework](https://github.com/HHS/simpler-grants-gov/issues/69):** Configures a framework for conducting performance and load testing of the API.
 
-_Are there any notable capabilities / milestones do NOT we expect to be in place by the completion of work on this milestone?_
+_Are there any notable capabilities / deliverables do NOT we expect to be in place by the completion of work on this deliverable?_
 
-- [ ] **AuthN/AuthZ:** While the implementation of rate limiting or other API security measures may require some basic authentication, the full AuthN/AuthZ framework will be developed in a later milestone.
+- [ ] **AuthN/AuthZ:** While the implementation of rate limiting or other API security measures may require some basic authentication, the full AuthN/AuthZ framework will be developed in a later deliverable.
 
 ### Open questions
 
@@ -166,10 +166,10 @@ _Are there any notable capabilities / milestones do NOT we expect to be in place
 
 <!-- Optional -->
 
-The following work will _not_ be completed as part of this milestone:
+The following work will _not_ be completed as part of this deliverable:
 
-1. **User Interface:** Because this milestone is focused on the API endpoint, it will not include delivering a user interface for non-technical users to access a list of opportunities. That work will be incorporated in the Search UI milestone instead.
-2. **Translating API Docs:** Translation of key documents will be covered in an upcoming milestone.
+1. **User Interface:** Because this deliverable is focused on the API endpoint, it will not include delivering a user interface for non-technical users to access a list of opportunities. That work will be incorporated in the Search UI deliverable instead.
+2. **Translating API Docs:** Translation of key documents will be covered in an upcoming deliverable.
 
 ## Integrations
 
@@ -177,7 +177,7 @@ The following work will _not_ be completed as part of this milestone:
 
 <!-- Required -->
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 Yes, portions of the API user guide and docs will need to be translated.
 
@@ -191,7 +191,7 @@ Timeline and strategy for translation is still TBD.
 
 _This can include services going into PROD behind a feature flag that is not turned on._
 
-1. **API:** This milestone is the official release of the `simpler.grants.gov/api`
+1. **API:** This deliverable is the official release of the `simpler.grants.gov/api`
 2. **Replica Database:** A replica of relevant tables from the legacy database
 3. **Updated Data Model:** An updated data model that will provide the data for the GET Opportunities endpoint
 4. **ETL Pipeline:** An ETL pipeline that both replicates data from legacy grants.gov and then transforms that data into the new `simpler.grants.gov` data model
@@ -210,20 +210,20 @@ _Are there multiple services that are being connected for the first time in PROD
 
 _Are there any fields being shared publicly that have never been shared in PROD before?_
 
-1. **Opportunity Field(s):** This milestone will expose at least one field from the opportunity resource in production.
+1. **Opportunity Field(s):** This deliverable will expose at least one field from the opportunity resource in production.
 
 ### Security considerations
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
-1. **Legacy DB Access:** Because this milestone requires replicating data from the legacy database, it exposes a new potential attack vector to that database.
-2. **Replica Database Access:** This milestone expands the attack surface of the application by introducing the replica database as another data store that needs to be secured against unauthorized access.
-3. **API:** This milestone milestone also expands the attack surface of the application by launching the API, which needs to be secured against Denial of Service (DoS) attackes.
+1. **Legacy DB Access:** Because this deliverable requires replicating data from the legacy database, it exposes a new potential attack vector to that database.
+2. **Replica Database Access:** This deliverable expands the attack surface of the application by introducing the replica database as another data store that needs to be secured against unauthorized access.
+3. **API:** This deliverable deliverable also expands the attack surface of the application by launching the API, which needs to be secured against Denial of Service (DoS) attackes.
 
 _If so, how are we addressing these risks?_
 
 1. **Security Approval:** Before the official launch of the API to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
-2. **Developer Tools:** As part of the Developer Tools milestone, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
-3. **API Security Planning:** As part of the API Security Planning milestone, we will specifically be identifying and evaluating strategies to mitigate security risks for the API, such as the use of API tokens and/or rate limiting API requests.
+2. **Developer Tools:** As part of the Developer Tools deliverable, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
+3. **API Security Planning:** As part of the API Security Planning deliverable, we will specifically be identifying and evaluating strategies to mitigate security risks for the API, such as the use of API tokens and/or rate limiting API requests.

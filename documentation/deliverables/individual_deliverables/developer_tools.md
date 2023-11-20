@@ -1,14 +1,14 @@
 # Developer Tools
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 50](https://github.com/HHS/simpler-grants-gov/issues/50) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Billy Daly                                                      |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 50](https://github.com/HHS/simpler-grants-gov/issues/50) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Billy Daly                                                      |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -139,23 +139,23 @@ Evaluate and adopt a set of tools that standardize and enforce best practices ar
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard deliverable](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
 ### Assumptions & dependencies
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What capabilities / deliverables do we expect to be in place at the beginning of work
+on this deliverable?
 
 - [ ] **API & Front-end Planning:** Choosing a set of developer tools will depend heavily on the language selected for both the backend and the frontend.
 - [ ] **Onboard Dev Team:** The dev team should be involved in the selection and implementation of these tools.
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+Are there any notable capabilities / deliverables do NOT we expect to be in place at the
+beginning of work on this deliverable?
 
-- **CI/CD:** While the checks should run automatically each time code is pushed to GitHub, these checks will be incorporated more formally into a CI/CD pipeline in a separate milestone
-- **Internationalization:** While this milestone will involve content that needs to be translated, we are not likely to have the mechanism for supporting translation in place by the time work starts on this milestone.
+- **CI/CD:** While the checks should run automatically each time code is pushed to GitHub, these checks will be incorporated more formally into a CI/CD pipeline in a separate deliverable
+- **Internationalization:** While this deliverable will involve content that needs to be translated, we are not likely to have the mechanism for supporting translation in place by the time work starts on this deliverable.
 
 ### Open questions
 
@@ -163,7 +163,7 @@ beginning of work on this milestone?
 
 ### Not doing
 
-The following work will _not_ be completed as part of this milestone:
+The following work will _not_ be completed as part of this deliverable:
 
 1. **Full CI/CD setup:** While we _do_ want the code quality and security checks to be run on each push to GitHub, the task runner that orchestrates these checks does not need to be the full CI/CD pipeline that will also manage production deployments of the frontend or backend codebases.
 
@@ -171,7 +171,7 @@ The following work will _not_ be completed as part of this milestone:
 
 ### Translations
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 - Instructions for adopting and using developer tools
 - Instructions for reporting security vulnerabilities
@@ -185,14 +185,14 @@ _If so, when will English-language content be locked? Then when will translation
 
 _This can include services going into PROD behind a feature flag that is not turned on._
 
-1. **Task Runner:** This milestone involves setting up a task runner for the repository that will execute a series of code quality and security checks for both the backend and frontend parts of the codebase
-2. **Secrets Management:** This milestone includes setting up a service to manage secrets.
+1. **Task Runner:** This deliverable involves setting up a task runner for the repository that will execute a series of code quality and security checks for both the backend and frontend parts of the codebase
+2. **Secrets Management:** This deliverable includes setting up a service to manage secrets.
 
 ### Services being integrated in PROD for the first time
 
 _Are there multiple services that are being connected for the first time in PROD?_
 
-1. **Task Runner & Secrets Management:** In addition to deploying these services separately, this milestone should also support a strategy for injecting secrets into the task runner during the CI/CD pipeline for running integration tests.
+1. **Task Runner & Secrets Management:** In addition to deploying these services separately, this deliverable should also support a strategy for injecting secrets into the task runner during the CI/CD pipeline for running integration tests.
 
 ### Data being shared publicly for the first time
 
@@ -204,9 +204,9 @@ _Are there any fields being shared publicly that have never been shared in PROD 
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
-**Secrets Management:** This milestone includes selecting and deploying a secrets management service, which introduces two potential attack vectors:
+**Secrets Management:** This deliverable includes selecting and deploying a secrets management service, which introduces two potential attack vectors:
 
 1. Compromising the access to the secrets manager
 2. Compromising individual secrets when they are injected
