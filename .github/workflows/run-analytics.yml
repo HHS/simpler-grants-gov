@@ -8,6 +8,10 @@ on:
       - analytics/**
       - .github/workflows/run-analytics.yml
 
+defaults:
+  run:
+    working-directory: ./analytics # ensures that this job runs from the analytics sub-directory
+
 jobs:
   check-cli-help:
     name: Check that the CLI is installed correctly
