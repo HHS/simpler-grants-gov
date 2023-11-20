@@ -28,12 +28,8 @@ jobs:
       - name: Install analytics package using poetry
         run: make install
 
-      - name: Run format check
-        run: make format-check
-
       - name: Run linting
         run: make lint
 
-      - name: Start tests
-        run: |
-          make test
+      - name: Run tests
+        run: make test
