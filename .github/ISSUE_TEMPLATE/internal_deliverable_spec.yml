@@ -1,0 +1,27 @@
+name: Internal - Deliverable Spec
+description: Describe the deliverable specification that needs to be drafted
+title: "[Deliverable Spec]: "
+labels: ["docs: deliverable"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Example:** [DB & API Planning](https://github.com/HHS/simpler-grants-gov/issues/21)
+  - type: input
+    id: description
+    attributes:
+      label: Deliverable ticket
+      description: Tag the deliverable that requires a deliverable spec
+    validations:
+      required: true
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Leave the following acceptance criteria unchecked when the ticket is created then mark them as completed as you meet each criterion with the milestone document
+      options:
+        - label: The deliverable spec is updated and stored in `documents/deliverables/individual_deliverables/`
+        - label: The deliverable spec has been linked under the appropriate section in the short description doc
+        - label: The deliverable spec has been reviewed and approved by the internal team
