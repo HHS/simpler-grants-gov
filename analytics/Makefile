@@ -1,9 +1,31 @@
+POETRY ?= poetry
+GITHUB ?= gh
+
+check-prereqs:
+	@echo "=> Checking for pre-requisites"
+	@if ! $(POETRY) --version; then echo "=> Poetry isn't installed"; fi
+	@if ! $(GITHUB) --version; then echo "=> GitHub CLI isn't installed"; fi
+	@echo "=> All pre-requisites satisfied"
+
+install: check-prereqs
+	@echo "=> Installing python dependencies"
+	$(POETRY) install
+
 setup:
-	poetry install
-	gh auth login
+	$(MAKE) install
+	$(GITHUB) auth login
 
-export_sprint_data:
-	poetry run python cli.py --owner HHS --repo simpler-grants-gov --project 13
+lint:
+	@echo "=> Running code quality checks"
+	@echo "============================="
+	$(POETRY) run black src tests
+	$(POETRY) run ruff src tests --fix
+	$(POETRY) run pylint src tests
+	$(POETRY) run mypy src
+	@echo "============================="
+	@echo "=> All checks succeeded"
 
-open_report_notebook: export_sprint_data
-	poetry run jupyter notebook
+test:
+	@echo "=> Running tests"
+	@echo "============================="
+	$(POETRY) run pytest
