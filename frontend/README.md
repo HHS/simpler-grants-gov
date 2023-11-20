@@ -123,6 +123,18 @@ A subset of tests can be ran by passing a pattern to the script. For example, to
 npm run test-watch -- pages
 ```
 
+## Load Testing
+
+[Artillery.io](https://www.artillery.io/docs) is the open source tool used to load test the application. You can find the yml file for the frontend load test at [`/frontend/artillery-load-test.yml`](./artillery-load-test.yml).
+
+To run the load test:
+
+1. Install artillery locally if you haven't done so with `npm install -g artillery@latest`
+2. From the root directory run `artillery run frontend/artillery-load-test.yml`
+3. For testing local or production add the `-e` flag ie. 
+  * `artillery run -e local frontend/artillery-load-test.yml` 
+  * `artillery run -e production frontend/artillery-load-test.yml`
+
 ## 🤖 Type checking, linting, and formatting
 
 - [TypeScript](https://www.typescriptlang.org/) is used for type checking.
