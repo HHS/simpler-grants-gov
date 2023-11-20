@@ -1,14 +1,14 @@
 # DB Planning
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 48](https://github.com/HHS/simpler-grants-gov/issues/48) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Gina Carson                                                     |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 48](https://github.com/HHS/simpler-grants-gov/issues/48) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Gina Carson                                                     |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -22,7 +22,7 @@ Formalize a series of architectural decisions about how data is stored, includin
 
 <!-- Required -->
 
-This milestone is critical because it serves as the initial planning for the simpler.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
+This deliverable is critical because it serves as the initial planning for the simpler.grants.gov database and ultimately future grants.gov database, and has large downstream impact for the APIs and development related to Grants.gov.
 
 ### User Stories
 
@@ -110,13 +110,13 @@ Some factors to consider are:
 
 <!-- Required -->
 
-N/A for planning milestone
+N/A for planning deliverable
 
 ### Destination for live updating metrics
 
 <!-- Required -->
 
-N/A for planning milestone
+N/A for planning deliverable
 
 ## Planning
 
@@ -124,13 +124,13 @@ N/A for planning milestone
 
 <!-- Optional -->
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What capabilities / deliverables do we expect to be in place at the beginning of work
+on this deliverable?
 
 - [x] **Onboard dev team:** The dev team will be evaluating and making many of these key architectural decisions
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+Are there any notable capabilities / deliverables do NOT we expect to be in place at the
+beginning of work on this deliverable?
 
 - [x] None
 
@@ -147,9 +147,9 @@ beginning of work on this milestone?
 
 <!-- Optional -->
 
-The following work will _not_ be completed as part of this milestone:
+The following work will _not_ be completed as part of this deliverable:
 
-1. **Deploying services:** This milestone involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
+1. **Deploying services:** This deliverable involves evaluating and selecting the tools that constitute the API technology stack, but does not involve actively setting up the code base to implement or deploying any services
 
 ## Integrations
 
@@ -157,7 +157,7 @@ The following work will _not_ be completed as part of this milestone:
 
 <!-- Required -->
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 _If so, when will English-language content be locked? Then when will translation be started and completed?_
 
@@ -191,7 +191,7 @@ _Are there any fields being shared publicly that have never been shared in PROD 
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
 _If so, how are we addressing these risks?_
 

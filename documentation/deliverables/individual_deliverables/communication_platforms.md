@@ -1,14 +1,14 @@
 # Communication platforms
 
-| Field           | Value                                                           |
-| --------------- | --------------------------------------------------------------- |
-| Document Status | Completed                                                       |
-| Epic Link       | [Issue 47](https://github.com/HHS/simpler-grants-gov/issues/47) |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)    |
-| Product Owner   | Lucas Brown                                                     |
-| Document Owner  | Billy Daly                                                      |
-| Lead Developer  | Aaron Couch                                                     |
-| Lead Designer   | Andy Cochran                                                    |
+| Field              | Value                                                           |
+| ------------------ | --------------------------------------------------------------- |
+| Document status    | Completed                                                       |
+| Deliverable ticket | [Issue 47](https://github.com/HHS/simpler-grants-gov/issues/47) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown                                                     |
+| Document owner     | Billy Daly                                                      |
+| Lead developer     | Aaron Couch                                                     |
+| Lead designer      | Andy Cochran                                                    |
 
 ## Short description
 
@@ -29,7 +29,7 @@ These need to be accessible to internal (HHS or employed by HHS) partners as wel
   - review contributions from external users before those changes are published, so that we can ensure the content aligns with our values as an agency.
   - be able to access these communication platforms from within the HHS network, so that I can reliably get work done while I'm at the office.
 - As a **member of an HHS contractor team**, I want to:
-  - adopt tools require as little ongoing maintenance, so that I minimize the amount of time spent supporting the deliverables associated with this milestone and begin working on delivering future milestones.
+  - adopt tools require as little ongoing maintenance, so that I minimize the amount of time spent supporting the deliverables associated with this deliverable and begin working on delivering future deliverables.
   - monitor user participation across these platforms, so that I can understand how well we are engaging stakeholders throughout this process.
   - track metrics about our projects like task burndown, so that we can monitor progress and identify blockers more quickly.
 - As a **member of the public**, I want to:
@@ -239,7 +239,7 @@ TODO: See if we can reduce the list of metrics to track
 
 ### Destination for live updating metrics
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki. **Note:** This will likely change once we deliver [the Public Measurement Dashboard deliverable](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -247,15 +247,15 @@ Page on the public wiki. **Note:** This will likely change once we deliver [the 
 
 <!-- Required -->
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What capabilities / deliverables do we expect to be in place at the beginning of work
+on this deliverable?
 
 - [x] **Onboard dev team:** The dev team will be evaluating and making many of these key architectural decisions
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+Are there any notable capabilities / deliverables do NOT we expect to be in place at the
+beginning of work on this deliverable?
 
-- [x] **Internationalization:** While there will be content delivered within this milestone that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this milestone is delivered.
+- [x] **Internationalization:** While there will be content delivered within this deliverable that needs to be translated in the future, we do not expect to have a framework for managing translations set up by the time this deliverable is delivered.
 
 ### Open questions
 
@@ -267,9 +267,9 @@ beginning of work on this milestone?
 
 <!-- Optional -->
 
-The following work will _not_ be completed as part of this milestone:
+The following work will _not_ be completed as part of this deliverable:
 
-1. **Translating onboarding documents:** Translation of key documents will be covered in an upcoming milestone
+1. **Translating onboarding documents:** Translation of key documents will be covered in an upcoming deliverable
 
 ## Integrations
 
@@ -277,7 +277,7 @@ The following work will _not_ be completed as part of this milestone:
 
 <!-- Required -->
 
-_Does this milestone involve delivering any content that needs translation?_
+_Does this deliverable involve delivering any content that needs translation?_
 
 _If so, when will English-language content be locked? Then when will translation be started and completed?_
 
@@ -339,7 +339,7 @@ _Are there any fields being shared publicly that have never been shared in PROD 
 
 <!-- Required -->
 
-_Does this milestone expose any new attack vectors or expand the attack surface of the product?_
+_Does this deliverable expose any new attack vectors or expand the attack surface of the product?_
 
 1. **Public Access:** While most of these tools are meant for sharing publicly available content to external stakeholders, some tools we may also want to use for internal collaboration (e.g. document sharing, shared calendar). As a result we must be mindful of configuration changes that may expose internal content (documents, events, etc.) to members of the public who are also on these platforms.
 2. **External Contributions:** If members of the public are able to comment on or contribute content to these communications platforms, certain contributors may contribute content that does not align with the values or perspectives of HHS or the community guidelines established for the open source community.

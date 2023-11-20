@@ -23,6 +23,18 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
 
 
 # Global, loaded once at startup by calling initialize
+"""
+NOTE: This structure of requiring you to initialize the config
+is to allow us to expand the feature flag implementation in the future
+to allow for updating feature flags while the application is still running.
+
+What we would need to add is a background thread that periodically
+checks some external system (the database, S3, AWS app config, etc.)
+for the current feature flag value, and load that into this configuration.
+
+By having this structure of initialize() + get_feature_flag_config() - we don't
+need to later modify the usage of the feature flag config, just this underlying implementation.
+"""
 _config: FeatureFlagConfig | None = None
 
 

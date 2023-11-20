@@ -38,10 +38,6 @@ class OpportunitySchema(request_schema.OrderedSchema):
         },
     )
 
-    is_draft = fields.Boolean(
-        metadata={"description": "Whether the opportunity is in a draft status", "example": False}
-    )
-
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -61,9 +57,6 @@ class OpportunitySearchSchema(request_schema.OrderedSchema):
             "example": OpportunityCategory.DISCRETIONARY,
         },
     )
-    is_draft = fields.Boolean(
-        metadata={"description": "Whether to search for draft claims", "example": False}
-    )
 
     sorting = fields.Nested(
         generate_sorting_schema(
@@ -82,7 +75,7 @@ class OpportunitySearchSchema(request_schema.OrderedSchema):
 
 
 class OpportunitySearchHeaderSchema(request_schema.OrderedSchema):
-    # Header field: X-FF-Enable-Opportunity-Log-Msg
+    # Header field: FF-Enable-Opportunity-Log-Msg
     enable_opportunity_log_msg = fields.Boolean(
         data_key=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_header_name(),
         metadata={"description": "Whether to log a message in the opportunity endpoint"},
