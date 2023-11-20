@@ -1,3 +1,4 @@
+# pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
 from typing import Annotated
 
@@ -9,7 +10,6 @@ from analytics.datasets.sprint_board import SprintBoard
 from analytics.etl import github, slack
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
-from config import settings
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -70,6 +70,10 @@ def calculate_sprint_burndown(
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate the burndown for a particular sprint."""
+    # defer load of settings until this command is called
+    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
+    from config import settings
+
     # load the input data
     sprint_data = SprintBoard.load_from_json_files(
         sprint_file=sprint_file,
@@ -101,6 +105,10 @@ def calculate_deliverable_percent_complete(
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate percentage completion by deliverable."""
+    # defer load of settings until this command is called
+    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
+    from config import settings
+
     # load the input data
     task_data = DeliverableTasks.load_from_json_files(
         sprint_file=sprint_file,
