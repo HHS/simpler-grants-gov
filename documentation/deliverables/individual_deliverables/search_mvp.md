@@ -1,14 +1,14 @@
 # Search MVP
 
-| Field           | Value                                                      |
-| --------------- | ---------------------------------------------------------- |
-| Document Status | Completed                                                  |
-| Epic Link       | [Issue 89](https://github.com/HHS/grants-equity/issues/89) |
-| Epic Dashboard  | [Product Roadmap](https://github.com/orgs/HHS/projects/12) |
-| Product Owner   | Lucas Brown                                                |
-| Document Owner  | Billy Daly                                                 |
-| Lead Developer  | Aaron Couch                                                |
-| Lead Designer   | Andy Cochran                                               |
+| Field              | Value                                                      |
+| ------------------ | ---------------------------------------------------------- |
+| Document Status    | Completed                                                  |
+| Deliverable ticket | [Issue 89](https://github.com/HHS/grants-equity/issues/89) |
+| Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12) |
+| Product owner      | Lucas Brown                                                |
+| Document owner     | Billy Daly                                                 |
+| Lead developer     | Aaron Couch                                                |
+| Lead designer      | Andy Cochran                                               |
 
 
 ## Short description
@@ -62,7 +62,7 @@ The ability to search and filter opportunities should be provided through an API
 
 - Search the list of opportunities with open ended key words
 - Filter the search results by *at least* one structured field (e.g. award date, opportunity type, etc.)
-- Sort the search results based on the value of *at least*
+- Sort the search results based on the value of *at least* one structured field (e.g. award date, title, etc.)
 
 Through the design and development of this API endpoint, the team should answer the following questions and record the decisions in one or more ADRs:
 
@@ -85,8 +85,8 @@ The primary page we'll need to deliver for the user interface (UI) is a search p
 
 - [ ] Basic requirements:
   - [ ] Code is deployed to `main` & PROD through our CI/CD pipeline
-  - [ ] Services are live in PROD (may be behind feature flag)
-  - [ ] Simpler site translations are live in PROD (if necessary). Translations of the search results content coming from grants.gov will not be included in this 30k ft deliverable. 
+  - [ ] Services are live in PROD (maybe behind feature flag)
+  - [ ] Simpler site translations are live in PROD. Translations of the search results content coming from grants.gov will not be included in this 30k ft deliverable.
   - [ ] All new services have passed a security review (if necessary)
   - [ ] All new services have completed a 508 compliance review (if necessary)
   - [ ] Data needed for metrics is actively being captured in PROD
@@ -108,6 +108,8 @@ The primary page we'll need to deliver for the user interface (UI) is a search p
 4. Number of searches made per search term
 5. Number of searches made per filter combination
 6. Click conversion rate from search results to the opportunity listing (on grants.gov)
+
+**Note:** While not in scope for this deliverable, we may want to track the accuracy of search results based on user feedback in the future.
 
 ### Destination for live updating metrics
 <!-- Required -->
