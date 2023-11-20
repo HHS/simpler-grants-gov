@@ -1,7 +1,6 @@
 export const ExternalRoutes = {
   ABOUT_HHS: "https://www.hhs.gov/about/index.html",
-  ACCESSIBILITY_COMPLIANCE:
-    "https://www.grants.gov/web/grants/accessibility-compliance.html",
+  ACCESSIBILITY_COMPLIANCE: "https://www.grants.gov/accessibility-compliance",
   EMAIL_SIMPLERGRANTSGOV: "simplergrantsgov@hhs.gov",
   EMAIL_SUPPORT: "support@grants.gov",
   FOIA: "https://www.hhs.gov/foia/index.html",
@@ -23,6 +22,6 @@ export const ExternalRoutes = {
   MILESTONES: "https://github.com/orgs/HHS/projects/12",
   NO_FEAR: "https://www.hhs.gov/about/agencies/asa/eeo/no-fear-act/index.html",
   PERFORMANCE_REPORTS: "https://www.hhs.gov/about/budget/index.html",
-  PRIVACY_POLICY: "https://www.grants.gov/web/grants/privacy.html",
+  PRIVACY_POLICY: "https://www.grants.gov/privacy-policy",
   USA: "https://www.usa.gov",
 };
