@@ -1,5 +1,7 @@
 config:
-  target: https://beta.grants.gov
+  target: https://frontend-dev-143463875.us-east-1.elb.amazonaws.com
+  tls:
+    rejectUnauthorized: false
   http:
     timeout: 10
   phases:
