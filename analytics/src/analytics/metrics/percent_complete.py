@@ -123,7 +123,10 @@ class DeliverablePercentComplete(BaseMetric):
         # calculate the percentage of open and closed per deliverable
         # so that we can use this value as label in the chart
         df["total"] = df.groupby(self.deliverable_col)[self.unit].transform("sum")
-        df["percent_of_total"] = (df[self.unit] / df["total"] * 100).round(2)
+        df["percent_of_total"] = (df[self.unit] / df["total"] * 100).round(0)
+        df["percent_of_total"] = (
+            df["percent_of_total"].astype("Int64").astype("str") + "%"
+        )
         # sort the dataframe by count and status so that the resulting chart
         # has deliverables with more tasks/points at the top
-        return df.sort_values([self.unit, self.status_col], ascending=True)
+        return df.sort_values(["total", self.status_col], ascending=True)
