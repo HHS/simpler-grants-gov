@@ -31,8 +31,8 @@ app = typer.Typer()
 export_app = typer.Typer()
 metrics_app = typer.Typer()
 # add sub-commands to main entrypoint
-app.add_typer(export_app, name="export")
-app.add_typer(metrics_app, name="calculate")
+app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
+app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 
 
 @app.callback()
