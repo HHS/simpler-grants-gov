@@ -141,6 +141,7 @@ Another goal for this deliverable is to adopt a service that allows site visitor
   - [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
   - [ ] Help Desk is notified and trained for any potential support issues that may come through
   - [ ] Site visitors can subscribe to mailing list to receive updates about the Simpler.Grants.gov initiative
+  - [ ] Site visitors can sign up for user research opportunities
 
 #### Nice to have
 
