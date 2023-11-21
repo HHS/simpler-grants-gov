@@ -112,7 +112,7 @@ Both the initial email communication and the communication plan should be review
 
 ### Email subscription mechanism
 
-One stretch goal for this deliverable is to adopt a service that allows site visitors to subscribe to a mailing list to receive updates about the Simpler.Grants.gov initiative. As part of this deliverable the team should answer the following questions:
+Another goal for this deliverable is to adopt a service that allows site visitors to subscribe to a mailing list to receive updates about the Simpler.Grants.gov initiative. As part of this deliverable the team should answer the following questions:
 
 - Which email marketing provider will we use for email-based communications?
 - How will visitors submit their information to be added to a mailing list for Simpler.Grants.gov communications?
@@ -132,10 +132,6 @@ One stretch goal for this deliverable is to adopt a service that allows site vis
 - [ ] Functional requirements
   - [ ] The static site has been updated with content approved by internal stakeholders
   - [ ] The front-end infrastructure can handle site traffic of up to 1,000 concurrent users
-  - [ ] Tickets and/or documentation have been created that describe the infrastructure changes needed to support future site traffic at the following levels:
-    - [ ] 10,000 users
-    - [ ] 100,000 users
-    - [ ] 1 million users
   - [ ] Engineering staff are notified when the site goes down
   - [ ] Engineering staff have been trained on a documented incident response plan that describes a set of actions to take when the site goes down
   - [ ] A set of SLAs have been defined internally for site availability and responsiveness
@@ -144,11 +140,15 @@ One stretch goal for this deliverable is to adopt a service that allows site vis
   - [ ] Key internal stakeholders (e.g. help desk staff, HHS leadership) have been notified when the email is sent out so that they can prepare for questions from public stakeholders
   - [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
   - [ ] Help Desk is notified and trained for any potential support issues that may come through
+  - [ ] Site visitors can subscribe to mailing list to receive updates about the Simpler.Grants.gov initiative
 
 #### Nice to have
 
-- [ ] Site visitors can subscribe to mailing list to receive updates about the Simpler.Grants.gov initiative
 - [ ] Internal stakeholders can preview a live version of content changes before they are visible to everyone on simpler.grants.gov
+- [ ] Tickets and/or documentation have been created that describe the infrastructure changes needed to support future site traffic at the following levels:
+    - [ ] 10,000 users
+    - [ ] 100,000 users
+    - [ ] 1 million users
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
@@ -161,12 +161,12 @@ One stretch goal for this deliverable is to adopt a service that allows site vis
 6. [Lighthouse score](lighthouse) for the site
 7. Deployment build time
 8. Deployment/hosting costs
-9. (Stretch) Number of visitors who subscribe to the mailing list
+9. Number of visitors who subscribe to the mailing list
 
 ### Destination for live updating metrics
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver [the public measurement dashboard](https://github.com/HHS/simpler-grants-gov/issues/65)
+Page on the public wiki with these metrics or a link to our page on https://analytics.usa.gov/ **Note:** This will likely change once we deliver [the public measurement dashboard](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
