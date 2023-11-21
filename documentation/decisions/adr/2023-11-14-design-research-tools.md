@@ -69,7 +69,7 @@ Other features of note:
 - Section 508 and WCAG 2.0 (AA)
 - GDPR- and CCPA-compliant data retention, expiration, and portability
 
-**Cost:** $82+/seat/month, an Enterprise account is required for Participant Pool feature
+**Cost:** $82+/seat/month (note: The Enterprise account is required for Participant Pool feature. It has an 8 seat minimum, which should more than suffice)
 
 
 ### Negative Consequences
