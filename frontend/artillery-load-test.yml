@@ -1,0 +1,51 @@
+config:
+  target: https://frontend-dev-143463875.us-east-1.elb.amazonaws.com
+  tls:
+    rejectUnauthorized: false
+  http:
+    timeout: 10
+  phases:
+    - duration: 30
+      arrivalRate: 2
+      maxVusers: 50
+      name: Warm up phase
+    - duration: 30
+      arrivalRate: 28
+      maxVusers: 250
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 56
+      maxVusers: 1000
+      name: Spike phase
+  environments:
+    production:
+      target: https://simpler.grants.gov
+    local:
+      target: http://localhost:3000
+  plugins:
+    expect:
+      outputFormat: prettyError
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+scenarios:
+  - name: root
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+  - name: health
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+  - name: hello
+    flow:
+      - get:
+          url: "/api/hello"
+          expect:
+            - statusCode: 200
