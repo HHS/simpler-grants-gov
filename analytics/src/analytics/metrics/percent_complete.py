@@ -1,7 +1,7 @@
 """Calculate and visualizes percent completion by deliverable."""
+import datetime as dt
 from enum import Enum
 from typing import Literal
-import datetime as dt
 
 import pandas as pd
 import plotly.express as px
