@@ -6,50 +6,13 @@ import pytest
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.burndown import SprintBurndown
 
-DAY_0 = "2023-10-31"
-DAY_1 = "2023-11-01"
-DAY_2 = "2023-11-02"
-DAY_3 = "2023-11-03"
-
-
-def sprint_row(
-    issue: int,
-    created: str = DAY_1,
-    closed: str | None = None,
-    status: str = "In Progress",
-    points: int = 1,
-    sprint: int = 1,
-    sprint_start: str = DAY_1,
-    sprint_length: int = 2,
-) -> dict:
-    """Create a sample row of the SprintBoard dataset."""
-    # create timestamp and time delta fields
-    sprint_start_ts = pd.Timestamp(sprint_start)
-    sprint_duration = pd.Timedelta(days=sprint_length)
-    sprint_end_ts = sprint_start_ts + sprint_duration
-    created_date = pd.Timestamp(created, tz="UTC")
-    closed_date = pd.Timestamp(closed, tz="UTC") if closed else None
-    # return the sample record
-    return {
-        "issue_number": issue,
-        "issue_title": f"Issue {issue}",
-        "type": "issue",
-        "issue_body": f"Description of issue {issue}",
-        "status": "Done" if closed else status,
-        "assignees": "mickeymouse",
-        "labels": [],
-        "url": f"https://github.com/HHS/simpler-grants-gov/issues/{issue}",
-        "points": points,
-        "milestone": "Milestone 1",
-        "milestone_due_date": sprint_end_ts,
-        "milestone_description": "Milestone 1 description",
-        "sprint": f"Sprint {sprint}",
-        "sprint_start_date": sprint_start_ts,
-        "sprint_end_date": sprint_end_ts,
-        "sprint_duration": sprint_duration,
-        "created_date": created_date,
-        "closed_date": closed_date,
-    }
+from tests.conftest import (
+    DAY_0,
+    DAY_1,
+    DAY_2,
+    DAY_3,
+    sprint_row,
+)
 
 
 def result_row(
