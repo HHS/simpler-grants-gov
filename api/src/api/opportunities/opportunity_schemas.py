@@ -1,16 +1,15 @@
 from typing import Any
 
-from apiflask import fields
 from marshmallow import post_load
 
 from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
-from src.api.schemas import request_schema
+from src.api.schemas.extension import Schema, fields
 from src.constants.lookup_constants import OpportunityCategory
 from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
 
 
-class OpportunitySchema(request_schema.OrderedSchema):
+class OpportunitySchema(Schema):
     opportunity_id = fields.Integer(
         dump_only=True,
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
@@ -31,7 +30,6 @@ class OpportunitySchema(request_schema.OrderedSchema):
 
     category = fields.Enum(
         OpportunityCategory,
-        by_value=True,
         metadata={
             "description": "The opportunity category",
             "example": OpportunityCategory.DISCRETIONARY,
@@ -42,7 +40,7 @@ class OpportunitySchema(request_schema.OrderedSchema):
     updated_at = fields.DateTime(dump_only=True)
 
 
-class OpportunitySearchSchema(request_schema.OrderedSchema):
+class OpportunitySearchSchema(Schema):
     opportunity_title = fields.String(
         metadata={
             "description": "The title of the opportunity to search for",
@@ -51,7 +49,6 @@ class OpportunitySearchSchema(request_schema.OrderedSchema):
     )
     category = fields.Enum(
         OpportunityCategory,
-        by_value=True,
         metadata={
             "description": "The opportunity category to search for",
             "example": OpportunityCategory.DISCRETIONARY,
@@ -74,7 +71,7 @@ class OpportunitySearchSchema(request_schema.OrderedSchema):
     paging = fields.Nested(PaginationSchema(), required=True)
 
 
-class OpportunitySearchHeaderSchema(request_schema.OrderedSchema):
+class OpportunitySearchHeaderSchema(Schema):
     # Header field: FF-Enable-Opportunity-Log-Msg
     enable_opportunity_log_msg = fields.Boolean(
         data_key=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_header_name(),
