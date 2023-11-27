@@ -1,6 +1,7 @@
 """Calculate and visualizes percent completion by deliverable."""
 from enum import Enum
 from typing import Literal
+import datetime as dt
 
 import pandas as pd
 import plotly.express as px
@@ -62,6 +63,8 @@ class DeliverablePercentComplete(BaseMetric):
 
     def plot_results(self) -> Figure:
         """Create a bar chart of percent completion from the data in self.results."""
+        # get the current date in YYYY-MM-DD format
+        today = dt.datetime.now(tz=dt.timezone.utc).strftime("%Y-%m-%d")
         # reshape the dataframe in self.results for plotly
         df = self._prepare_result_dataframe_for_plotly()
         # create a stacked bar chart from the data
@@ -73,7 +76,7 @@ class DeliverablePercentComplete(BaseMetric):
             text="percent_of_total",
             color_discrete_map={"open": "#aacde3", "closed": "#06508f"},
             orientation="h",
-            title=f"Deliverable Percent Complete by {self.unit}",
+            title=f"Deliverable percent complete by {self.unit} as of {today}",
             height=800,
         )
 
