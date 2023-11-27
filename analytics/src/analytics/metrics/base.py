@@ -17,7 +17,7 @@ class BaseMetric:
     def __init__(self) -> None:
         """Initialize and calculate the metric from the input dataset."""
         self.results = self.calculate()
-        self._chart: Figure | None
+        self._chart: Figure | None = None
 
     def calculate(self) -> pd.DataFrame:
         """Calculate the metric and return the resulting dataset."""

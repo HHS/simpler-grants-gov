@@ -86,11 +86,11 @@ class SprintBurndown(BaseMetric):
         pct_closed = round(total_closed / total_opened * 100, 2)
         message = f"""
 *:github: Burndown summary for {self.sprint}*
-  • *Sprint start date:* {sprint_start}
-  • *Sprint end date:* {sprint_end}
-  • *Total opened:* {total_opened} {self.unit}
-  • *Total closed:* {total_closed} {self.unit}
-  • *Percent closed:* {pct_closed}%
+• *Sprint start date:* {sprint_start}
+• *Sprint end date:* {sprint_end}
+• *Total opened:* {total_opened} {self.unit}
+• *Total closed:* {total_closed} {self.unit}
+• *Percent closed:* {pct_closed}%
 """
         return super()._post_results_to_slack(
             slackbot=slackbot,
