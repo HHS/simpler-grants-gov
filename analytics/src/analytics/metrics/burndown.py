@@ -20,11 +20,11 @@ class SprintBurndown(BaseMetric):
 
     def __init__(self, dataset: SprintBoard, sprint: str) -> None:
         """Initialize the SprintBurndown metric."""
-        self.sprint = sprint
+        self.dataset = dataset
+        self.sprint = self._get_and_validate_sprint_name(sprint)
         self.date_col = "date"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
-        self.dataset = dataset
         self.unit = "tickets"
         super().__init__()
 
@@ -86,17 +86,32 @@ class SprintBurndown(BaseMetric):
         pct_closed = round(total_closed / total_opened * 100, 2)
         message = f"""
 *:github: Burndown summary for {self.sprint}*
-• *Sprint start date:* {sprint_start}
-• *Sprint end date:* {sprint_end}
-• *Total opened:* {total_opened} {self.unit}
-• *Total closed:* {total_closed} {self.unit}
-• *Percent closed:* {pct_closed}%
+  • *Sprint start date:* {sprint_start}
+  • *Sprint end date:* {sprint_end}
+  • *Total opened:* {total_opened} {self.unit}
+  • *Total closed:* {total_closed} {self.unit}
+  • *Percent closed:* {pct_closed}%
 """
         return super()._post_results_to_slack(
             slackbot=slackbot,
             channel_id=channel_id,
             message=message,
         )
+
+    def _get_and_validate_sprint_name(self, sprint: str | None) -> str:
+        """Get the name of the sprint we're using to calculate burndown or raise an error."""
+        # save dataset to local variable for brevity
+        dataset = self.dataset
+        # update sprint name if calculating burndown for the current sprint
+        if sprint == "@current":
+            sprint = dataset.current_sprint
+        # check that the sprint name matches one of the sprints in the dataset
+        valid_sprint = sprint in list(dataset.sprints[dataset.sprint_col])
+        if not sprint or not valid_sprint:  # needs `not sprint` for mypy checking
+            msg = "Sprint value doesn't match one of the available sprints"
+            raise ValueError(msg)
+        # return the sprint name if it's valid
+        return sprint
 
     def _get_daily_tix_counts_by_status(
         self,
