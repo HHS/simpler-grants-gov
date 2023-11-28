@@ -8,13 +8,13 @@ from werkzeug.exceptions import ServiceUnavailable
 
 import src.adapters.db.flask_db as flask_db
 from src.api import response
-from src.api.schemas import request_schema
+from src.api.schemas.extension import Schema, fields
 
 logger = logging.getLogger(__name__)
 
 
-class HealthcheckSchema(request_schema.OrderedSchema):
-    message: str
+class HealthcheckSchema(Schema):
+    message = fields.String()
 
 
 healthcheck_blueprint = APIBlueprint("healthcheck", __name__, tag="Health")
