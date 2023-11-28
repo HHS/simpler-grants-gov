@@ -1,0 +1,33 @@
+# TODO(@widal001): 2023-11-20 - Update this file to run on a schedule: https://github.com/HHS/simpler-grants-gov/issues/742
+name: Run analytics package
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - analytics/**
+      - .github/workflows/run-analytics.yml
+
+defaults:
+  run:
+    working-directory: ./analytics # ensures that this job runs from the analytics sub-directory
+
+jobs:
+  check-cli-help:
+    name: Check that the CLI is installed correctly
+    runs-on: ubuntu-latest
+    steps:
+      # set up python
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # install poetry
+      - uses: Gr1N/setup-poetry@v8
+
+      - name: Install analytics package using poetry
+        run: make install
+
+      - name: Run CLI help to test that it's working
+        run: poetry run analytics --help
