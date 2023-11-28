@@ -75,8 +75,3 @@ New Relic is an observability platform that provides monitoring of infrastructur
 - **Cons**
   - Complex tool that is redundant with some of our other tools
   - Outside existing codebase, build, review, deployment process
-
-## Links <!-- OPTIONAL -->
-
-- [{Link name}](link to external resource)
-- ...
