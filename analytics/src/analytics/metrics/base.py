@@ -17,11 +17,25 @@ class BaseMetric:
     def __init__(self) -> None:
         """Initialize and calculate the metric from the input dataset."""
         self.results = self.calculate()
-        self.chart = self.plot_results()
+        self._chart: Figure | None = None
 
     def calculate(self) -> pd.DataFrame:
         """Calculate the metric and return the resulting dataset."""
         raise NotImplementedError
+
+    @property
+    def chart(self) -> Figure:
+        """
+        Return a chart visualizing the results.
+
+        Note:
+        ----
+        By deferring the self.plot_results() method invocation until the chart is
+        needed, we decrease the amount of time required to instantiate the class
+        """
+        if not self._chart:
+            self._chart = self.plot_results()
+        return self._chart
 
     def plot_results(self) -> Figure:
         """Create a plotly chart that visually represents the results."""

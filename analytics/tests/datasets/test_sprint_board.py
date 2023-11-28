@@ -1,11 +1,17 @@
 """Tests for analytics/datasets/sprint_board.py."""
-import pandas as pd  # noqa: I001
-import pytest
 
+import pandas as pd
+import pytest
 from analytics.datasets.sprint_board import SprintBoard
+
 from tests.conftest import (
+    DAY_1,
+    DAY_2,
+    DAY_4,
+    DAY_5,
     json_issue_row,
     json_sprint_row,
+    sprint_row,
     write_test_data_to_file,
 )
 
@@ -94,3 +100,43 @@ class TestSprintBoard:
         df = df.set_index("issue_number")
         # validation -- check that issue 111's parent_issue_number is 222
         assert df.loc[111]["parent_issue_number"] == parent_number
+
+
+class TestGetSprintNameFromDate:
+    """Test the SprintBoard.get_sprint_name_from_date() method."""
+
+    @pytest.mark.parametrize(
+        ("date", "expected"),
+        [
+            (DAY_1, "Sprint 1"),
+            (DAY_2, "Sprint 1"),
+            (DAY_4, "Sprint 2"),
+            (DAY_5, "Sprint 2"),
+        ],
+    )
+    def test_return_name_if_matching_sprint_exists(self, date: str, expected: str):
+        """Test that correct sprint is returned if date exists in a sprint."""
+        # setup - create sample dataset
+        board_data = [
+            sprint_row(issue=1, sprint=1, sprint_start=DAY_1),
+            sprint_row(issue=2, sprint=1, sprint_start=DAY_1),
+            sprint_row(issue=3, sprint=2, sprint_start=DAY_4),
+        ]
+        board = SprintBoard.from_dict(board_data)
+        # validation
+        sprint_date = pd.Timestamp(date)
+        sprint_name = board.get_sprint_name_from_date(sprint_date)
+        assert sprint_name == expected
+
+    def test_return_none_if_no_matching_sprint(self):
+        """The method should return None if no sprint contains the date."""
+        # setup - create sample dataset
+        board_data = [
+            sprint_row(issue=1, sprint=1, sprint_start=DAY_1),
+            sprint_row(issue=2, sprint=2, sprint_start=DAY_4),
+        ]
+        board = SprintBoard.from_dict(board_data)
+        # validation
+        bad_date = pd.Timestamp("1900-01-01")
+        sprint_name = board.get_sprint_name_from_date(bad_date)
+        assert sprint_name is None

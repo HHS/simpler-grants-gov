@@ -75,13 +75,13 @@ poetry run analytics export gh_project_data --owner HHS --project 13 --output-fi
 Once you've exported the sprint and issue data from GitHub, you can start calculating metrics. We'll begin with sprint burndown:
 
 ```bash
-poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "Sprint 10" --show-results
+poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint @current --show-results
 ```
 
 A couple of important notes about this command:
 
-- `--sprint "Sprint 10"` In order to calculate burndown, you'll need to specify a sprint by name. We're currently working to add an option to use `@current` and other date-relative sprint flags
-- `--show-results` In order to the see the output in a browser you'll need to pass this flag. 
+- `--sprint @current` In order to calculate burndown, you'll need to specify either `@current` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
+- `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
 ![Screenshot of burndown for sprint 10](static/reporting-notebook-screenshot.png)
 
@@ -97,7 +97,7 @@ poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.js
 
 ### Calculating deliverable percent complete
 
-Another key metric you can report is the percentage of tasks or points completed per 30k deliverable. 
+Another key metric you can report is the percentage of tasks or points completed per 30k deliverable.
 You can specify the unit you want to use for percent complete (e.g. points or tasks) using the `--unit` flag.
 
 For example, here we're calculating percentage completion based on the number of tickets under each deliverable.
