@@ -1,7 +1,7 @@
 import { Meta } from "@storybook/react";
+import { PROCESS_CRUMBS, RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { RESEARCH_CRUMBS, PROCESS_CRUMBS } from "src/constants/breadcrumbs";
 
 const meta: Meta<typeof Breadcrumbs> = {
   title: "Components/Breadcrumbs",
@@ -17,7 +17,7 @@ export const Home = {
     },
   },
   args: {
-    breadcrumbList: [{title: "Home", path: "/"}],
+    breadcrumbList: [{ title: "Home", path: "/" }],
   },
 };
 
