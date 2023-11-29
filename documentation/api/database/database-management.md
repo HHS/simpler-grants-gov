@@ -65,7 +65,7 @@ $ make db-migrate
 ```python
 class ExampleTable(Base):
     ...
-    my_new_timestamp = Column(TIMESTAMP(timezone=True)) # Newly added line
+    my_new_timestamp: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True)) # Newly added line
 ```
 
 2. Automatically generate a migration file with `make db-migrate-create MIGRATE_MSG="Add created_at timestamp to address table"`
