@@ -22,12 +22,13 @@ class SprintBurndown(BaseMetric):
         self,
         dataset: SprintBoard,
         sprint: str,
-        unit: Unit = Unit.points,
+        unit: Unit,
     ) -> None:
         """Initialize the SprintBurndown metric."""
         self.dataset = dataset
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.date_col = "date"
+        self.points_col = "points"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
         self.unit = unit
@@ -46,12 +47,10 @@ class SprintBurndown(BaseMetric):
         4. Calculate the delta between opened and closed tickets per day
         5. Cumulatively sum those deltas to get the running total of open tix
         """
-        # create local variables for key columns
-        opened_col = self.opened_col
-        closed_col = self.closed_col
-        # isolate columns we need to calculate burndown
-        sprint_mask = self.dataset.df[self.dataset.sprint_col] == self.sprint
-        df_sprint = self.dataset.df.loc[sprint_mask, [opened_col, closed_col]]
+        # isolate columns and rows we need to calculate burndown for this sprint
+        burndown_cols = [self.opened_col, self.closed_col, self.points_col]
+        sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
+        df_sprint = self.dataset.df.loc[sprint_filter, burndown_cols]
         # get the date range over which tix were created and closed
         df_tix_range = self._get_tix_date_range(df_sprint)
         # get the number of tix opened and closed each day
@@ -132,8 +131,7 @@ class SprintBurndown(BaseMetric):
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
         """
-        # create local copies of the dataset and key column names
-        df = self.dataset.df.copy()
+        # create local copies of the key column names
         agg_col = self.opened_col if status == "opened" else self.closed_col
         unit_col = self.unit.value
         key_cols = [agg_col, unit_col]

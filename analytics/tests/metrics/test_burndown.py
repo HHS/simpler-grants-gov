@@ -11,6 +11,7 @@ from tests.conftest import (
     DAY_1,
     DAY_2,
     DAY_3,
+    DAY_4,
     sprint_row,
 )
 
@@ -34,6 +35,32 @@ def result_row(
 
 class TestSprintBurndownByTasks:
     """Test the SprintBurndown class with unit='tasks'."""
+
+    def test_exclude_tix_assigned_to_other_sprints(self):
+        """The burndown should exclude tickets that are assigned to other sprints"""
+        # setup - create test data
+        sprint_data = [
+            # fmt: off
+            # include this row - assigned to sprint 1
+            sprint_row(issue=1, sprint=1, sprint_start=DAY_1, created=DAY_1, closed=DAY_3),
+            # exclude this row - assigned to sprint 2
+            sprint_row(issue=1, sprint=2, sprint_start=DAY_4, created=DAY_0, closed=DAY_4),
+            # fmt: on
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        df = output.results
+        # validation - check min and max dates
+        assert df[output.date_col].min() == pd.Timestamp(DAY_1, tz="UTC")
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+        # validation - check burndown output
+        expected = [
+            result_row(day=DAY_1, opened=1, closed=0, delta=1, total=1),
+            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=1),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
+        ]
+        assert df.to_dict("records") == expected
 
     def test_count_tix_created_before_sprint_start(self):
         """Burndown should include tix opened before the sprint but closed during it."""
@@ -67,7 +94,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1")
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
         df = output.results
         # validation - check burndown output
         expected = [
@@ -105,7 +132,7 @@ class TestSprintBurndownByTasks:
             ValueError,
             match="Sprint value doesn't match one of the available sprints",
         ):
-            SprintBurndown(test_data, sprint="Fake sprint")
+            SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.tasks)
 
     def test_calculate_burndown_for_current_sprint(self):
         """A ValueError should be raised if the sprint argument isn't valid."""
