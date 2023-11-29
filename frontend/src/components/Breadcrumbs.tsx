@@ -36,10 +36,10 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
     return (
       <Breadcrumb
         key={breadcrumbInfo.title + "-crumb"}
-        current={i + 1 == breadcrumbList.length}
+        current={i + 1 === breadcrumbList.length}
         {...rdfaMetadata.li}
       >
-        {i + 1 != breadcrumbList.length ? (
+        {i + 1 !== breadcrumbList.length ? (
           <BreadcrumbLink href={breadcrumbInfo.path} {...rdfaMetadata.a}>
             {}
             <span property="name">{breadcrumbInfo.title}</span>
