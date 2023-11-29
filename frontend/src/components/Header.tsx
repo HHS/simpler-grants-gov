@@ -30,12 +30,17 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
+  const primaryLinkList: PrimaryLinks = [
+    {i18nKey: "", href: "/"},
+    {i18nKey: "process", href: "/process"},
+    {i18nKey: "research", href: "/research"},
+  ]
+
   const navItems = primaryLinks?.map((link) => (
     <a href={link.href} key={link.href}>
       {t(link.i18nKey)}
     </a>
   ));
-  const showMenu = !!navItems;
 
   return (
     <>
@@ -62,20 +67,16 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
                 <span className="font-sans-lg flex-fill">{t("title")}</span>
               </div>
             </Title>
-            {showMenu && (
-              <NavMenuButton
-                onClick={handleMobileNavToggle}
-                label={t("nav_menu_toggle")}
-              />
-            )}
+            <NavMenuButton
+              onClick={handleMobileNavToggle}
+              label={t("nav_menu_toggle")}
+            />
           </div>
-          {navItems && (
-            <PrimaryNav
-              items={navItems}
-              mobileExpanded={isMobileNavExpanded}
-              onToggleMobileNav={handleMobileNavToggle}
-            ></PrimaryNav>
-          )}
+          <PrimaryNav
+            items={navItems}
+            mobileExpanded={isMobileNavExpanded}
+            onToggleMobileNav={handleMobileNavToggle}
+          ></PrimaryNav>
         </div>
       </USWDSHeader>
     </>
