@@ -50,7 +50,8 @@
   },
   "Header": {
     "nav_link_home": "Home",
-    "nav_link_health": "Health",
+    "nav_link_process": "Process",
+    "nav_link_research": "Research",
     "nav_menu_toggle": "Menu",
     "title": "Simpler Grants.gov"
   },

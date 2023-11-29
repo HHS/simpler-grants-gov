@@ -15,12 +15,17 @@ type PrimaryLinks = {
   href: string;
 }[];
 
+const primaryLinks: PrimaryLinks = [
+  { i18nKey: "nav_link_home", href: "/" },
+  { i18nKey: "nav_link_process", href: "/process" },
+  { i18nKey: "nav_link_research", href: "/research" },
+];
+
 type Props = {
   logoPath?: string;
-  primaryLinks?: PrimaryLinks;
 };
 
-const Header = ({ logoPath, primaryLinks }: Props) => {
+const Header = ({ logoPath }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -30,13 +35,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const primaryLinkList: PrimaryLinks = [
-    {i18nKey: "", href: "/"},
-    {i18nKey: "process", href: "/process"},
-    {i18nKey: "research", href: "/research"},
-  ]
-
-  const navItems = primaryLinks?.map((link) => (
+  const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
       {t(link.i18nKey)}
     </a>
