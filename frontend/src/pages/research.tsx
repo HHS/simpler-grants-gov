@@ -6,6 +6,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
+import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs"
 
 const Research: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Research" });
@@ -28,6 +30,7 @@ const Research: NextPage = () => {
           }}
         />
       </FullWidthAlert>
+      <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       Research Placeholder
     </>
   );

@@ -6,6 +6,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
+import { PROCESS_CRUMBS } from "src/constants/breadcrumbs"
 
 const Process: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
@@ -28,6 +30,7 @@ const Process: NextPage = () => {
           }}
         />
       </FullWidthAlert>
+      <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       Process Placeholder
     </>
   );
