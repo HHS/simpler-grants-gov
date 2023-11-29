@@ -1,5 +1,4 @@
 import type { GetStaticProps, NextPage } from "next";
-
 import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { ExternalRoutes } from "src/constants/routes";
 
