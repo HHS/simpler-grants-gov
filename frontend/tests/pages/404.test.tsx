@@ -16,7 +16,7 @@ describe("PageNotFound", () => {
     const link = screen.getByRole("link", { name: /Return Home/i });
 
     expect(link).toBeInTheDocument();
-  })
+  });
 
   it("passes accessibility scan", async () => {
     const { container } = render(<PageNotFound />);
