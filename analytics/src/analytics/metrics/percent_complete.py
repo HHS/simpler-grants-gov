@@ -1,6 +1,5 @@
 """Calculate and visualizes percent completion by deliverable."""
 import datetime as dt
-from enum import Enum
 from typing import Literal
 
 import pandas as pd
@@ -9,14 +8,7 @@ from plotly.graph_objects import Figure
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.etl.slack import SlackBot
-from analytics.metrics.base import BaseMetric
-
-
-class Unit(Enum):
-    """List the units in which percent completion can be calculated."""
-
-    tasks = "tasks"  # pylint: disable=C0103
-    points = "points"  # pylint: disable=C0103
+from analytics.metrics.base import BaseMetric, Unit
 
 
 class DeliverablePercentComplete(BaseMetric):

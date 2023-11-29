@@ -1,10 +1,18 @@
 """Base class for all metrics."""
+from enum import Enum
 from pathlib import Path
 
 import pandas as pd
 from plotly.graph_objects import Figure
 
 from analytics.etl.slack import FileMapping, SlackBot
+
+
+class Unit(Enum):
+    """List the units in which metrics can be calculated."""
+
+    tasks = "tasks"  # pylint: disable=C0103
+    points = "points"  # pylint: disable=C0103
 
 
 class BaseMetric:

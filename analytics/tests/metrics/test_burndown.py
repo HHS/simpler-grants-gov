@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 import pytest
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.metrics.burndown import SprintBurndown
+from analytics.metrics.burndown import SprintBurndown, Unit
 
 from tests.conftest import (
     DAY_0,
@@ -32,8 +32,8 @@ def result_row(
     }
 
 
-class TestSprintBurndown:
-    """Test the SprintBurndown class."""
+class TestSprintBurndownByTasks:
+    """Test the SprintBurndown class with unit='tasks'."""
 
     def test_count_tix_created_before_sprint_start(self):
         """Burndown should include tix opened before the sprint but closed during it."""
@@ -44,7 +44,7 @@ class TestSprintBurndown:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1")
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
@@ -87,7 +87,7 @@ class TestSprintBurndown:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1")
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
         df = output.results
         # validation - check max date is end of sprint not last closed date
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
@@ -120,12 +120,55 @@ class TestSprintBurndown:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1")
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
         df = output.results
         # validation - check burndown output
         expected = [
             result_row(day=day_1, opened=2, closed=0, delta=2, total=2),
             result_row(day=day_2, opened=0, closed=1, delta=-1, total=1),
             result_row(day=day_3, opened=0, closed=0, delta=0, total=1),
+        ]
+        assert df.to_dict("records") == expected
+
+
+class TestSprintBurndownByPoints:
+    """Test the SprintBurndown class with unit='points'."""
+
+    def test_burndown_works_with_points(self):
+        """Burndown should be calculated correctly with points."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        df = output.results
+        # validation
+        expected = [
+            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_2, opened=3, closed=0, delta=3, total=5),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=5),
+        ]
+        assert df.to_dict("records") == expected
+
+    def test_burndown_excludes_tix_without_points(self):
+        """Burndown should exclude tickets that are not pointed."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        df = output.results
+        # validation
+        expected = [
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=2),
         ]
         assert df.to_dict("records") == expected

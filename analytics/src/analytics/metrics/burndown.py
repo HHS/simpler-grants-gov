@@ -12,20 +12,25 @@ from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.etl.slack import SlackBot
-from analytics.metrics.base import BaseMetric
+from analytics.metrics.base import BaseMetric, Unit
 
 
 class SprintBurndown(BaseMetric):
     """Calculates the running total of open tickets per day in the sprint."""
 
-    def __init__(self, dataset: SprintBoard, sprint: str) -> None:
+    def __init__(
+        self,
+        dataset: SprintBoard,
+        sprint: str,
+        unit: Unit = Unit.points,
+    ) -> None:
         """Initialize the SprintBurndown metric."""
         self.dataset = dataset
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.date_col = "date"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
-        self.unit = "tickets"
+        self.unit = unit
         super().__init__()
 
     def calculate(self) -> pd.DataFrame:
@@ -88,8 +93,8 @@ class SprintBurndown(BaseMetric):
 *:github: Burndown summary for {self.sprint}*
 • *Sprint start date:* {sprint_start}
 • *Sprint end date:* {sprint_end}
-• *Total opened:* {total_opened} {self.unit}
-• *Total closed:* {total_closed} {self.unit}
+• *Total opened:* {total_opened} {self.unit.value}
+• *Total closed:* {total_closed} {self.unit.value}
 • *Percent closed:* {pct_closed}%
 """
         return super()._post_results_to_slack(
@@ -119,7 +124,7 @@ class SprintBurndown(BaseMetric):
         status: Literal["opened", "closed"],
     ) -> pd.DataFrame:
         """
-        Count the number of tickets opened or closed by date.
+        Count the number of tickets or points opened or closed by date.
 
         Notes
         -----
@@ -127,10 +132,17 @@ class SprintBurndown(BaseMetric):
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
         """
+        # create local copies of the dataset and key column names
+        df = self.dataset.df.copy()
         agg_col = self.opened_col if status == "opened" else self.closed_col
-        df_agg = df.groupby(agg_col, as_index=False).agg("size")
-        df_agg.columns = [self.date_col, status]
-        return pd.DataFrame(df_agg)  # prevents mypy issue
+        unit_col = self.unit.value
+        key_cols = [agg_col, unit_col]
+        # create a dummy column to sum per row if the unit is tasks
+        if self.unit == Unit.tasks:
+            df[unit_col] = 1
+        # isolate the key columns, group by open or closed date, then sum the units
+        df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
+        return df_agg.rename(columns={agg_col: self.date_col, unit_col: status})
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
         """
