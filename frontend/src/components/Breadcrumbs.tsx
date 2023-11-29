@@ -34,7 +34,11 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
 
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
-      <Breadcrumb current={i + 1 == breadcrumbList.length} {...rdfaMetadata.li}>
+      <Breadcrumb
+        key={breadcrumbInfo.title + "-crumb"}
+        current={i + 1 == breadcrumbList.length}
+        {...rdfaMetadata.li}
+      >
         {i + 1 != breadcrumbList.length ? (
           <BreadcrumbLink href={breadcrumbInfo.path} {...rdfaMetadata.a}>
             {}
@@ -49,7 +53,10 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
   });
 
   return (
-    <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6">
+    <GridContainer
+      className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
+      data-testid="breadcrumb"
+    >
       <BreadcrumbBar listProps={{ ...rdfaMetadata.ol }}>
         {breadcrumArray}
       </BreadcrumbBar>
