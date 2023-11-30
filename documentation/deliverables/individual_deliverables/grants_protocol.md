@@ -61,12 +61,15 @@ Some early candidates for names include "Open Finance Protocol" (unfortunately, 
 - [ ] A complete draft specification is available that can be used to represent opportunity listings from Grants.gov, to be returned over the new Simpler Grants.gov APIs.
 
 *Generic specification:*
-- [ ] One or more minimum necessary fields for any financial opportunity are included in the spec as REQUIRED fields. An example field is the due date of applications for the financial opportunity.
-- [ ] One or more fields that are either necessary for Grants.gov specifically, or are often used for financial opportunities in general but are not required, are implemented. These will be fields that have well-designed implementations that any implementer of the protocol can OPTIONALLY implement (by choosing them from a catalog of schemas). An example field is the federal opportunity number.
-- [ ] For all these fields, well-designed field TYPES exist and are joined one-to-many on these fields. (This means that every `type` can be used by one or more `field`s.) For instance, there could be a type for DateTime, a type for Geospatial, etc. Types can also include other types: such as an object with `type:Application` might include a field that has a `type:Timestamp`. Every `field` that is implemented has one and only one `type`.
-- [ ] There exists an easy method to EXTEND the protocol to custom fields that are used by any implementation of the protocol. These custom fields are not necessarily reflected in the shared protocol specification, and can be implemented "locally."
-- [ ] There exists a way for any extensions to be PROPOSED to become optional or required parts of the common spec. There are tools that support these proposals.
-- [ ] There are tools that support community decisionmaking to ACCEPT OR REJECT PROPOSALS for modifications to the spec.
+- [ ] **Required fields:** One or more minimum necessary fields for any financial opportunity are included in the spec as required fields. An example field is the due date of applications for the financial opportunity.
+- [ ] **Optional fields:** One or more fields that are either necessary for Grants.gov specifically, or are often used for financial opportunities in general but are not required, are implemented. These will be fields that have well-designed implementations that any implementer of the protocol can optionally implement (by choosing them from a catalog of schemas). An example field is the federal opportunity number.
+- [ ] **Types:** For all these fields, well-designed field types exist and are joined one-to-many on these fields. (This means that every `type` can be used by one or more `field`s.) For instance, there could be a type for DateTime, a type for Geospatial, etc. Types can also include other types: such as an object with `type:Application` might include a field that has a `type:Timestamp`. Every `field` that is implemented has one and only one `type`.
+- [ ] **Extensions:** There exists an easy method for any implementer of the protocol to extend the protocol to custom fields and types. These custom fields and types are not necessarily reflected in the shared protocol specification, and can be implemented "locally." Custom extensions are easy to share and reuse with other projects.
+- [ ] **Proposals:** There are clear plans for putting processes and tools in place so that anyone can propose that their "local" extensions should become optional or required parts of the common spec.
+- [ ] **Decisionmaking:** There are clear plans for putting processes and tools in place that support community decisionmaking to accept or reject proposals for modifications to the spec.
+
+*Generic specification:*
+- [ ] **Translation:** There are clear plans for putting tools and processes in place that translate the protocol's meaning and documentation into multiple languages. For instance, this could include building a data dictionary that defines the `fields` and `types` in multiple languages.
 
 *Integration:*
 - [ ] A decision has been made on where the code for the protocol will live -- either as part of `simpler-grants-gov` repo or a new open source repo -- and the code is hosted there publicly.
@@ -100,7 +103,7 @@ What functionality do we expect to be in place by ***the end*** of work on this 
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
-- `API Launch: GET Opportunities` does not need to be complete before we begin work on the specification, but does need to be complete before we finish this deliverable
+- `API Launch: GET Opportunities` does not need to be complete before we begin work on the specification, but does need to be complete before we finish this deliverable.
 
 ### Open questions
 <!-- Optional -->
@@ -121,7 +124,7 @@ The following work will *not* be completed as part of this deliverable:
 
 Does this deliverable involve delivering any content that needs translation?
 
-1. [to be added]
+1. Documentation of protocol needs translation.
 
 If so, when will English-language content be locked? Then when will translation be started and completed?
 
