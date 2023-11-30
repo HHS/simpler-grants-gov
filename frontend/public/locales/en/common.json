@@ -1,15 +1,26 @@
 {
   "Index": {
-    "page_title": "Simpler Grants.gov",
+    "page_title": "Simpler.Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
-    "goal_title": "What's the goal?",
-    "goal_paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
-    "goal_title_2": "For applicants",
-    "goal_paragraph_2": "We’re building a one‑stop shop for all federal discretionary funding that makes it easy for you to discover, understand, and apply for opportunities.",
-    "goal_title_3": "For grantmakers",
-    "goal_paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities (including underserved communities) to find the funding they need.",
+    "alert_title": "Beta! Simpler Grants.gov is a work in progress.",
+    "alert": "To search and apply for grants, please continue using <LinkToGrants>www.grants.gov</LinkToGrants> as we add new functionality to Simpler.Grants.gov.",
+    "goal": {
+      "title": "The goal",
+      "paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
+      "title_2": "For applicants",
+      "paragraph_2": "We’re building a one‑stop shop for all federal discretionary funding that makes it easy for you to discover, understand, and apply for opportunities.",
+      "title_3": "For grantmakers",
+      "paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities (including underserved communities) to find the funding they need.",
+      "cta": "Sign up for project updates"
+    },
+    "process": {
+      "title": "The process",
+      "paragraph_1": "This project is transparent, iterative, and agile. All of the code we are writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give feedback to tell us what works, what can be improved, and inform what happens next. ",
+      "cta": "Learn about what's happening",
+      "title_2": "Are you code-savvy?",
+      "paragraph_2": "If you’re interested in exploring the details of exactly what we’re building, check out the GitHub project:",
+      "list": "<ul><li>Follow <repo>the code repository</repo></li><li>Read the <goals>project goals</goals></li><li>View the <roadmap>roadmap</roadmap></li><li>Learn about <contribute>how you can contribute</contribute></li><li>Explore the <adr>architecture decision records</adr></li></ul>"
+    },
     "fo_title": "Improvements to funding opportunity announcements",
     "fo_paragraph_1": "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
     "fo_paragraph_2": "We want to help grantmakers write clear, concise announcements that encourage strong submissions from qualified applicants and make opportunities more accessible to everyone.",
@@ -23,10 +34,6 @@
     "fo_paragraph_4": "We value your feedback. Tell us what you think of grant announcements and grants.gov.",
     "fo_title_4": "Are you a first‑time applicant? Created a workspace but haven't applied yet?",
     "fo_paragraph_5": "We're especially interested in hearing from first‑time applicants and organizations that have never applied for funding opportunities. We encourage you to review our announcements and share your feedback, regardless of your experience with federal grants.",
-    "wtgi_title": "Ways to get involved",
-    "wtgi_paragraph_1": "Follow our progress as we build a better API and opportunity search, and make it easier to find, share, and apply.",
-    "wtgi_title_2": "Join our open‑source community on <github>GitHub</github>",
-    "wtgi_list": "<ul><li>Follow <repo>the code repository</repo></li><li>Read the <goals>project goals</goals></li><li>View the <roadmap>roadmap</roadmap></li><li>Learn about <contribute>how you can contribute</contribute></li></ul>",
     "wtgi_paragraph_2": "<strong>Questions?</strong> Contact us at <email>{{email}}</email>."
   },
   "Research": {
@@ -56,9 +63,8 @@
     "title": "Simpler Grants.gov"
   },
   "Hero": {
-    "title": "We're building a Simpler Grants.gov!",
-    "beta": "BETA!",
-    "content": "This new website will be your go‑to resource to follow our progress as we improve the grants experience, making it easier to find, share, and apply.",
+    "title": "We're building a simpler Grants.gov!",
+    "content": "This new website will be your go‑to resource to follow our progress as we improve the Grants.gov experience, making it easier to find, share, and apply for grants.",
     "github_link": "Follow on GitHub"
   },
   "Footer": {

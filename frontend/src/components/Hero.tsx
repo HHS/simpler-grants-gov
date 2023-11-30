@@ -16,7 +16,6 @@ const Hero = () => {
           <span>{t("title")}</span>
         </h1>
         <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl">
-          <span className="text-yellow text-bold">{t("beta")}</span>&nbsp;
           {t("content")}
         </p>
         <Link

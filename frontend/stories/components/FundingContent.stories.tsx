@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/react";
 
-import FundingContent from "src/components/FundingContent";
+import FundingContent from "src/pages/content/FundingContent";
 
 const meta: Meta<typeof FundingContent> = {
   title: "Components/Content/Funding Content",

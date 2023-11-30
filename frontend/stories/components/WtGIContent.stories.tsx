@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/react";
 
-import WtGIContent from "src/components/WtGIContent";
+import WtGIContent from "src/pages/content/WtGIContent";
 
 const meta: Meta<typeof WtGIContent> = {
   title: "Components/Content/Ways to Get Involved Content",
