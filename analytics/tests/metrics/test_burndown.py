@@ -37,7 +37,7 @@ class TestSprintBurndownByTasks:
     """Test the SprintBurndown class with unit='tasks'."""
 
     def test_exclude_tix_assigned_to_other_sprints(self):
-        """The burndown should exclude tickets that are assigned to other sprints"""
+        """The burndown should exclude tickets that are assigned to other sprints."""
         # setup - create test data
         sprint_data = [
             # fmt: off

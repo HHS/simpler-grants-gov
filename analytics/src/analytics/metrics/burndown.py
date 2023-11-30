@@ -73,7 +73,8 @@ class SprintBurndown(BaseMetric):
             data_frame=df,
             x=self.date_col,
             y="total_open",
-            title=f"{self.sprint} Burndown",
+            title=f"{self.sprint} burndown by {self.unit.value}",
+            labels={"total_open": f"total {self.unit.value} open"},
         )
         # set the scale of the y axis to start at 0
         chart.update_yaxes(range=[0, df["total_open"].max() + 2])
@@ -89,7 +90,7 @@ class SprintBurndown(BaseMetric):
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
         message = f"""
-*:github: Burndown summary for {self.sprint}*
+*:github: Burndown summary for {self.sprint} by {self.unit.value}*
 • *Sprint start date:* {sprint_start}
 • *Sprint end date:* {sprint_end}
 • *Total opened:* {total_opened} {self.unit.value}
