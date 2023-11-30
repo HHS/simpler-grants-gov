@@ -56,6 +56,7 @@ Some early candidates for names include "Open Finance Protocol" (unfortunately, 
 *User experience:*
 - [ ] The protocol has a name that is approved by Emily Ianacone in her role as UX lead for Grants.gov.
 - [ ] Documentation is published that explains the protocol in an intuitive, accessible manner.
+- [ ] **Translation:** There are clear plans for putting tools and processes in place that translate the protocol's meaning and documentation into multiple languages. For instance, this could include building a data dictionary that defines the `fields` and `types` in multiple languages.
 
 *Financial opportunities specification:*
 - [ ] A complete draft specification is available that can be used to represent opportunity listings from Grants.gov, to be returned over the new Simpler Grants.gov APIs.
@@ -68,8 +69,8 @@ Some early candidates for names include "Open Finance Protocol" (unfortunately, 
 - [ ] **Proposals:** There are clear plans for putting processes and tools in place so that anyone can propose that their "local" extensions should become optional or required parts of the common spec.
 - [ ] **Decisionmaking:** There are clear plans for putting processes and tools in place that support community decisionmaking to accept or reject proposals for modifications to the spec.
 
-*Generic specification:*
-- [ ] **Translation:** There are clear plans for putting tools and processes in place that translate the protocol's meaning and documentation into multiple languages. For instance, this could include building a data dictionary that defines the `fields` and `types` in multiple languages.
+*Schema validation:*
+- [ ] A schema validator is built that verifies whether a given implementation of the protocol (or perhaps, an individual response object provided to or from an API) is a valid implementation of the shared protocol.
 
 *Integration:*
 - [ ] A decision has been made on where the code for the protocol will live -- either as part of `simpler-grants-gov` repo or a new open source repo -- and the code is hosted there publicly.
