@@ -1,6 +1,5 @@
 """Calculate and visualizes percent completion by deliverable."""
 import datetime as dt
-from typing import Literal
 
 import pandas as pd
 import plotly.express as px
@@ -22,7 +21,7 @@ class DeliverablePercentComplete(BaseMetric):
         """Initialize the DeliverablePercentComplete metric."""
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
-        self.unit: Literal["tasks", "points"] = unit.value
+        self.unit = unit
         self.dataset = dataset
         super().__init__()
 
@@ -42,8 +41,8 @@ class DeliverablePercentComplete(BaseMetric):
         5. Divide closed count by total count to get percent complete
         """
         # get total and closed counts per deliverable
-        df_total = self._get_count_by_deliverable(status="all", unit=self.unit)
-        df_closed = self._get_count_by_deliverable(status="closed", unit=self.unit)
+        df_total = self._get_count_by_deliverable(status="all")
+        df_closed = self._get_count_by_deliverable(status="closed")
         # join total and closed counts on deliverable
         # and calculate remaining columns
         df_all = df_total.merge(df_closed, on=self.deliverable_col, how="left")
@@ -62,13 +61,14 @@ class DeliverablePercentComplete(BaseMetric):
         # create a stacked bar chart from the data
         return px.bar(
             df,
-            x=self.unit,
+            x=self.unit.value,
             y=self.deliverable_col,
             color=self.status_col,
             text="percent_of_total",
+            labels={self.deliverable_col: "deliverable"},
             color_discrete_map={"open": "#aacde3", "closed": "#06508f"},
             orientation="h",
-            title=f"Deliverable percent complete by {self.unit} as of {today}",
+            title=f"Percent of {self.unit.value} complete by deliverable as of {today}",
             height=800,
         )
 
@@ -83,15 +83,15 @@ class DeliverablePercentComplete(BaseMetric):
     def _get_count_by_deliverable(
         self,
         status: str,
-        unit: Literal["tasks", "points"] = "points",
     ) -> pd.DataFrame:
         """Get the count of tasks (or points) by deliverable and status."""
         # create local copies of the dataset and key column names
         df = self.dataset.df.copy()
-        key_cols = [self.deliverable_col, unit]
+        unit_col = self.unit.value
+        key_cols = [self.deliverable_col, unit_col]
         # create a dummy column to sum per row if the unit is tasks
-        if unit == "tasks":
-            df["tasks"] = 1
+        if self.unit == Unit.tasks:
+            df[unit_col] = 1
         # isolate tasks with the status we want
         if status != "all":
             status_filter = df[self.status_col] == status
@@ -102,23 +102,24 @@ class DeliverablePercentComplete(BaseMetric):
         # group by deliverable and sum the values in the unit field
         # then rename the sum column to the value of the status var
         # to prevent duplicate col names when open and closed counts are joined
-        df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit: "sum"})
-        return df_agg.rename(columns={unit: status})
+        df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit_col: "sum"})
+        return df_agg.rename(columns={unit_col: status})
 
     def _prepare_result_dataframe_for_plotly(self) -> pd.DataFrame:
         """Stack the open and closed counts self.results for plotly charts."""
         # unpivot open and closed counts so that each deliverable has both
         # an open and a closed row with just one column for count
+        unit = self.unit.value
         df = self.results.melt(
             id_vars=[self.deliverable_col],
             value_vars=["open", "closed"],
-            value_name=self.unit,
+            value_name=unit,
             var_name=self.status_col,
         )
         # calculate the percentage of open and closed per deliverable
         # so that we can use this value as label in the chart
-        df["total"] = df.groupby(self.deliverable_col)[self.unit].transform("sum")
-        df["percent_of_total"] = (df[self.unit] / df["total"] * 100).round(0)
+        df["total"] = df.groupby(self.deliverable_col)[unit].transform("sum")
+        df["percent_of_total"] = (df[unit] / df["total"] * 100).round(0)
         df["percent_of_total"] = (
             df["percent_of_total"].astype("Int64").astype("str") + "%"
         )
