@@ -71,6 +71,8 @@ Some early candidates for names include "Open Finance Protocol" (unfortunately, 
 
 *Schema validation:*
 - [ ] A schema validator is built that verifies whether a given implementation of the protocol (or perhaps, an individual response object provided to or from an API) is a valid implementation of the shared protocol.
+- [ ] The schema validator is setup to run automatically on Grants.gov APIs.
+- [ ] Nice-to-have: the schema validator is provided through a package manager (such as `pip` for Python packages or `npmjs.com` for Javascript).
 
 *Integration:*
 - [ ] A decision has been made on where the code for the protocol will live -- either as part of `simpler-grants-gov` repo or a new open source repo -- and the code is hosted there publicly.
