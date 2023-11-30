@@ -29,9 +29,29 @@
     "wtgi_list": "<ul><li>Follow <repo>the code repository</repo></li><li>Read the <goals>project goals</goals></li><li>View the <roadmap>roadmap</roadmap></li><li>Learn about <contribute>how you can contribute</contribute></li></ul>",
     "wtgi_paragraph_2": "<strong>Questions?</strong> Contact us at <email>{{email}}</email>."
   },
+  "Research": {
+    "page_title": "Research | Simpler Grants.gov",
+    "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+    "alert_title": "Simpler Grants.gov is a work in progress.",
+    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>."
+  },
+  "Process": {
+    "page_title": "Process | Simpler Grants.gov",
+    "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+    "alert_title": "Simpler Grants.gov is a work in progress.",
+    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>."
+  },
+  "ErrorPages": {
+    "page_not_found": {
+      "title": "Ooops! Page Not Found",
+      "message_content_1": "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instrcuted not to let you view it. There is nothing to see here.",
+      "visit_homepage_button": "Return Home"
+    }
+  },
   "Header": {
     "nav_link_home": "Home",
-    "nav_link_health": "Health",
+    "nav_link_process": "Process",
+    "nav_link_research": "Research",
     "nav_menu_toggle": "Menu",
     "title": "Simpler Grants.gov"
   },
