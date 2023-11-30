@@ -19,7 +19,7 @@ const Hero = () => {
           {t("content")}
         </p>
         <Link
-          className="usa-button usa-button--outline usa-button--inverse font-sans-2xs tablet:font-sans-md margin-bottom-3 desktop:position-absolute top-3 right-0 desktop:margin-y-3 desktop:margin-x-4"
+          className="usa-button usa-button--outline usa-button--inverse font-sans-2xs tablet:font-sans-md margin-bottom-3 desktop:position-absolute top-3 left-0 desktop:margin-y-3 desktop:margin-x-4"
           href={ExternalRoutes.GITHUB_REPO}
           target="_blank"
         >

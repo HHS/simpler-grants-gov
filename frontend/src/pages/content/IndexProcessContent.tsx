@@ -1,7 +1,8 @@
 import { useTranslation, Trans } from "next-i18next";
-import { Grid } from "@trussworks/react-uswds";
+import { Button, Grid, Icon } from "@trussworks/react-uswds";
 import ContentLayout from "src/components/ContentLayout";
 import { ExternalRoutes } from "src/constants/routes";
+import Link from "next/link";
 
 const IndexProcessContent = () => {
     const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -10,6 +11,9 @@ const IndexProcessContent = () => {
     <ContentLayout title={t("process.title")} data-testid="process-content">
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("process.paragraph_1")}</p>
+          <Link href="/process" passHref>
+            <Button type="button" size="big">{t("process.cta")} <Icon.ArrowForward className="text-middle" size={4} /></Button>
+          </Link>
         </Grid>
         <Grid tabletLg={{ col: 6 }}>
             <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
