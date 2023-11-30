@@ -11,7 +11,7 @@ const IndexGoalContent = () => {
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
         <p className="usa-intro">{t("goal.paragraph_1")}</p>
         <Link href="/process" passHref>
-            <Button type="button" size="big">{t("goal.cta")} <Icon.Launch className="text-middle" size={4} /></Button>
+            <Button className="margin-bottom-4" type="button" size="big">{t("goal.cta")} <Icon.Launch className="text-middle" size={4} /></Button>
           </Link>
       </Grid>
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 7 }} desktopLg={{ col: 6 }}>

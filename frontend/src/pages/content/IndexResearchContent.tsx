@@ -11,17 +11,17 @@ const IndexResearchContent = () => {
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
         <p className="usa-intro">{t("research.paragraph_1")}</p>
         <Link href="/process" passHref>
-            <Button type="button" size="big">{t("research.cta")} <Icon.ArrowForward className="text-middle" size={4} /></Button>
+            <Button className="margin-bottom-4" type="button" size="big">{t("research.cta")} <Icon.ArrowForward className="text-middle" size={4} /></Button>
           </Link>
       </Grid>
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 7 }} desktopLg={{ col: 6 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
           {t("research.title_2")}
         </h3>
-        <p className="usa-intro"><Trans t={t} i18nKey="research.paragraph_2" /></p>
-        <p className="usa-intro"><Trans t={t} i18nKey="research.paragraph_3" /></p>
-        <p className="usa-intro"><Trans t={t} i18nKey="research.paragraph_4" /></p>
-        <p className="usa-intro"><Trans t={t} i18nKey="research.paragraph_5" /></p>
+        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"><Trans t={t} i18nKey="research.paragraph_2" /></p>
+        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"><Trans t={t} i18nKey="research.paragraph_3" /></p>
+        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"><Trans t={t} i18nKey="research.paragraph_4" /></p>
+        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"><Trans t={t} i18nKey="research.paragraph_5" /></p>
       </Grid>
     </ContentLayout>  
   )

@@ -15,11 +15,11 @@ const Hero = () => {
         <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl text-ls-neg-2">
           <span>{t("title")}</span>
         </h1>
-        <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl">
+        <p className="usa-intro line-height-sans-4 font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl">
           {t("content")}
         </p>
         <Link
-          className="usa-button usa-button--outline usa-button--inverse font-sans-2xs tablet:font-sans-md margin-bottom-3 desktop:position-absolute top-3 left-0 desktop:margin-y-3 desktop:margin-x-4"
+          className="usa-button usa-button--outline usa-button--inverse font-sans-2xs tablet:font-sans-md margin-bottom-3 desktop:position-absolute top-3 right-0 desktop:margin-y-3 desktop:margin-x-4"
           href={ExternalRoutes.GITHUB_REPO}
           target="_blank"
         >

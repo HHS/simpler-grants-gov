@@ -12,19 +12,20 @@ const IndexProcessContent = () => {
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("process.paragraph_1")}</p>
           <Link href="/process" passHref>
-            <Button type="button" size="big">{t("process.cta")} <Icon.ArrowForward className="text-middle" size={4} /></Button>
+            <Button className="margin-bottom-4" type="button" size="big">{t("process.cta")} <Icon.ArrowForward className="text-middle" size={4} /></Button>
           </Link>
         </Grid>
         <Grid tabletLg={{ col: 6 }}>
             <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
             {t("process.title_2")}
             </h3>
+            <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">{t('process.paragraph_2')}</p>
           <Trans
             t={t}
             i18nKey="process.list"
             components={{
               ul: (
-                <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4" />
+                <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4 margin-bottom-2" />
               ),
               li: <li />,
               small: <small />,
