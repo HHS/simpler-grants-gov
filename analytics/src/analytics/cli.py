@@ -66,6 +66,7 @@ def calculate_sprint_burndown(
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
     *,  # makes the following args keyword only
+    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
@@ -80,7 +81,7 @@ def calculate_sprint_burndown(
         issue_file=issue_file,
     )
     # calculate burndown
-    burndown = SprintBurndown(sprint_data, sprint=sprint)
+    burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
     # optionally display the burndown chart in the browser
     if show_results:
         burndown.show_chart()
