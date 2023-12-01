@@ -1,7 +1,8 @@
 import { useTranslation } from "next-i18next";
-import { Button, Grid, Icon } from "@trussworks/react-uswds";
-import ContentLayout from "src/components/ContentLayout";
 import Link from "next/link";
+import { Button, Grid, Icon } from "@trussworks/react-uswds";
+
+import ContentLayout from "src/components/ContentLayout";
 
 const IndexGoalContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -10,9 +11,11 @@ const IndexGoalContent = () => {
     <ContentLayout title={t("goal.title")} data-testid="goal-content">
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
         <p className="usa-intro">{t("goal.paragraph_1")}</p>
-        <Link href="/process" passHref>
-            <Button className="margin-bottom-4" type="button" size="big">{t("goal.cta")} <Icon.Launch className="text-middle" size={4} /></Button>
-          </Link>
+        <Link href="#" passHref>
+          <Button className="margin-bottom-4" type="button" size="big">
+            {t("goal.cta")} <Icon.Launch className="text-middle" size={4} />
+          </Button>
+        </Link>
       </Grid>
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 7 }} desktopLg={{ col: 6 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
@@ -28,8 +31,8 @@ const IndexGoalContent = () => {
           {t("goal.paragraph_3")}
         </p>
       </Grid>
-    </ContentLayout>  
-  )
+    </ContentLayout>
+  );
 };
 
 export default IndexGoalContent;

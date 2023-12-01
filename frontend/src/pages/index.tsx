@@ -6,8 +6,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
-import IndexGoalContent from "./content/IndexGoalContent";
 import Hero from "../components/Hero";
+import IndexGoalContent from "./content/IndexGoalContent";
 import IndexProcessContent from "./content/IndexProcessContent";
 import IndexResearchContent from "./content/IndexResearchContent";
 

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-
 import GoalContent from "src/pages/content/IndexGoalContent";
 
 describe("Goal Content", () => {

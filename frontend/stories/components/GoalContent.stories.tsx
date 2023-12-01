@@ -1,5 +1,4 @@
 import { Meta } from "@storybook/react";
-
 import GoalContent from "src/pages/content/IndexGoalContent";
 
 const meta: Meta<typeof GoalContent> = {

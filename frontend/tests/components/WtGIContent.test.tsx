@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-
 import WtGIContent from "src/pages/content/WtGIContent";
 
 describe("Ways to get involved", () => {
