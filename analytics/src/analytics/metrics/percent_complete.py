@@ -109,17 +109,17 @@ class DeliverablePercentComplete(BaseMetric):
         """Stack the open and closed counts self.results for plotly charts."""
         # unpivot open and closed counts so that each deliverable has both
         # an open and a closed row with just one column for count
-        unit = self.unit.value
+        unit_col: str = self.unit.value
         df = self.results.melt(
             id_vars=[self.deliverable_col],
             value_vars=["open", "closed"],
-            value_name=unit,
+            value_name=unit_col,
             var_name=self.status_col,
         )
         # calculate the percentage of open and closed per deliverable
         # so that we can use this value as label in the chart
-        df["total"] = df.groupby(self.deliverable_col)[unit].transform("sum")
-        df["percent_of_total"] = (df[unit] / df["total"] * 100).round(0)
+        df["total"] = df.groupby(self.deliverable_col)[unit_col].transform("sum")
+        df["percent_of_total"] = (df[unit_col] / df["total"] * 100).round(0)
         df["percent_of_total"] = (
             df["percent_of_total"].astype("Int64").astype("str") + "%"
         )
