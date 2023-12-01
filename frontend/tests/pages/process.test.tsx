@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import Process from "src/pages/process";
 
-describe("Index", () => {
+describe("Process", () => {
   it("renders alert with grants.gov link", () => {
     render(<Process />);
 

@@ -1,9 +1,11 @@
 import type { GetStaticProps, NextPage } from "next";
+import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
 
@@ -28,6 +30,7 @@ const Research: NextPage = () => {
           }}
         />
       </FullWidthAlert>
+      <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       Research Placeholder
     </>
   );
