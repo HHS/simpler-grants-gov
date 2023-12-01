@@ -110,7 +110,7 @@ poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.js
 A couple of important notes about this command:
 
 - `--sprint @current` In order to calculate burndown, you'll need to specify either `@current` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
-- `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `tasks`
+- `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `issues`
 - `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
 ![Screenshot of burndown for sprint 10](static/reporting-notebook-screenshot.png)
@@ -127,15 +127,15 @@ poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.js
 
 ### Calculating deliverable percent complete
 
-Another key metric you can report is the percentage of tasks or points completed per 30k deliverable.
-You can specify the unit you want to use for percent complete (e.g. points or tasks) using the `--unit` flag.
+Another key metric you can report is the percentage of issues or points completed per 30k deliverable.
+You can specify the unit you want to use for percent complete (e.g. points or issues) using the `--unit` flag.
 
 For example, here we're calculating percentage completion based on the number of tickets under each deliverable.
 
 ```bash
-poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit tasks
+poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit issues
 ```
-![Screenshot of deliverable percent complete by tasks](static/screenshot-deliverable-pct-complete-tasks.png)
+![Screenshot of deliverable percent complete by issues](static/screenshot-deliverable-pct-complete-tasks.png)
 
 And here we're calculating it based on the total story point value of those tickets.
 
@@ -143,6 +143,6 @@ And here we're calculating it based on the total story point value of those tick
 poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit points
 ```
 
-![Screenshot of deliverable percent complete by tasks](static/screenshot-deliverable-pct-complete-points.png)
+![Screenshot of deliverable percent complete by points](static/screenshot-deliverable-pct-complete-points.png)
 
 The `deliverable_pct_complete` sub-command also supports the `--post-results` flag if you want to post this data to slack.

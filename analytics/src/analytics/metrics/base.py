@@ -11,7 +11,7 @@ from analytics.etl.slack import FileMapping, SlackBot
 class Unit(Enum):
     """List the units in which metrics can be calculated."""
 
-    tasks = "tasks"  # pylint: disable=C0103
+    issues = "issues"  # pylint: disable=C0103
     points = "points"  # pylint: disable=C0103
 
 

@@ -49,7 +49,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_1, tz="UTC")
@@ -71,7 +71,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
@@ -94,7 +94,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check burndown output
         expected = [
@@ -114,7 +114,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check max date is end of sprint not last closed date
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
@@ -132,7 +132,7 @@ class TestSprintBurndownByTasks:
             ValueError,
             match="Sprint value doesn't match one of the available sprints",
         ):
-            SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.tasks)
+            SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.issues)
 
     def test_calculate_burndown_for_current_sprint(self):
         """A ValueError should be raised if the sprint argument isn't valid."""
@@ -147,7 +147,7 @@ class TestSprintBurndownByTasks:
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.tasks)
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check burndown output
         expected = [

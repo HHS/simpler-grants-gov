@@ -2,7 +2,7 @@
 Calculates burndown for sprints.
 
 This is a subclass of the BaseMetric class that calculates the running total of
-open tickets for each day in a sprint
+open issues for each day in a sprint
 """
 from typing import Literal
 
@@ -16,7 +16,7 @@ from analytics.metrics.base import BaseMetric, Unit
 
 
 class SprintBurndown(BaseMetric):
-    """Calculates the running total of open tickets per day in the sprint."""
+    """Calculates the running total of open issues per day in the sprint."""
 
     def __init__(
         self,
@@ -42,9 +42,9 @@ class SprintBurndown(BaseMetric):
         -----
         Sprint burndown is calculated with the following algorithm:
         1. Isolate the records that belong to the given sprint
-        2. Get the range of dates over which these tickets were opened and closed
-        3. Count the number of tickets opened and closed on each day of that range
-        4. Calculate the delta between opened and closed tickets per day
+        2. Get the range of dates over which these issues were opened and closed
+        3. Count the number of issues opened and closed on each day of that range
+        4. Calculate the delta between opened and closed issues per day
         5. Cumulatively sum those deltas to get the running total of open tix
         """
         # isolate columns and rows we need to calculate burndown for this sprint
@@ -124,7 +124,7 @@ class SprintBurndown(BaseMetric):
         status: Literal["opened", "closed"],
     ) -> pd.DataFrame:
         """
-        Count the number of tickets or points opened or closed by date.
+        Count the number of issues or points opened or closed by date.
 
         Notes
         -----
@@ -137,7 +137,7 @@ class SprintBurndown(BaseMetric):
         unit_col = self.unit.value
         key_cols = [agg_col, unit_col]
         # create a dummy column to sum per row if the unit is tasks
-        if self.unit == Unit.tasks:
+        if self.unit == Unit.issues:
             df[unit_col] = 1
         # isolate the key columns, group by open or closed date, then sum the units
         df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
@@ -145,7 +145,7 @@ class SprintBurndown(BaseMetric):
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Get the date range over which tickets were created and closed.
+        Get the date range over which issues were created and closed.
 
         Notes
         -----
@@ -170,7 +170,7 @@ class SprintBurndown(BaseMetric):
         closed: pd.DataFrame,
     ) -> pd.DataFrame:
         """
-        Get the cumulative sum of open tickets per day.
+        Get the cumulative sum of open issues per day.
 
         Notes
         -----

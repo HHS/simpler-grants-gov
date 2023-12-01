@@ -11,7 +11,7 @@ from analytics.metrics.base import BaseMetric, Unit
 
 
 class DeliverablePercentComplete(BaseMetric):
-    """Calculate the percentage of tasks or points completed per deliverable."""
+    """Calculate the percentage of issues or points completed per deliverable."""
 
     def __init__(
         self,
@@ -32,9 +32,9 @@ class DeliverablePercentComplete(BaseMetric):
         Notes
         -----
         Percent completion is calculated using the following steps:
-        1. Count the number of all tasks (or points) per deliverable
-        2. Count the number of closed tasks (or points) per deliverable
-        3. Left join all tasks/points with open tasks/points on deliverable
+        1. Count the number of all issues (or points) per deliverable
+        2. Count the number of closed issues (or points) per deliverable
+        3. Left join all issues/points with open issues/points on deliverable
            so that we have a row per deliverable with a total count column
            and a closed count column
         4. Subtract closed count from total count to get open count
@@ -84,15 +84,15 @@ class DeliverablePercentComplete(BaseMetric):
         self,
         status: str,
     ) -> pd.DataFrame:
-        """Get the count of tasks (or points) by deliverable and status."""
+        """Get the count of issues (or points) by deliverable and status."""
         # create local copies of the dataset and key column names
         df = self.dataset.df.copy()
         unit_col = self.unit.value
         key_cols = [self.deliverable_col, unit_col]
-        # create a dummy column to sum per row if the unit is tasks
-        if self.unit == Unit.tasks:
+        # create a dummy column to sum per row if the unit is issues
+        if self.unit == Unit.issues:
             df[unit_col] = 1
-        # isolate tasks with the status we want
+        # isolate issues with the status we want
         if status != "all":
             status_filter = df[self.status_col] == status
             df = df.loc[status_filter, key_cols]
@@ -124,5 +124,5 @@ class DeliverablePercentComplete(BaseMetric):
             df["percent_of_total"].astype("Int64").astype("str") + "%"
         )
         # sort the dataframe by count and status so that the resulting chart
-        # has deliverables with more tasks/points at the top
+        # has deliverables with more issues/points at the top
         return df.sort_values(["total", self.status_col], ascending=True)
