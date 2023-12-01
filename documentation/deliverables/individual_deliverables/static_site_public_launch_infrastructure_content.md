@@ -92,7 +92,6 @@ In particular, it would be helpful to review our approach to the following:
     - resources reach a certain usage threshold or are auto-scaled
   - Logging capabilities (e.g. search, filtering) and retention policies to assist with troubleshooting
 - **Procedures**
-  - Internally-defined service level agreements for availability and incident response
   - Documented incident response plan with steps and roles identified
   - Documented plan for receiving and responding to alerts
   - Staff trainings, tabletop and/or dry-runs for common types of incidents
