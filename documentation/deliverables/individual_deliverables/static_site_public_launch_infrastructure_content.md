@@ -48,7 +48,7 @@ This effort allows us to...
   - clear and concise content that effectively communicates our project's goals, vision, and way of working to the public. This user story is essential to ensure that we uphold our commitment to transparency, fostering open communication and alignment with our overarching project objectives.
 - As an **internal developer**, I want:
   - to be notified when the site goes down, so that I can work to troubleshoot the issue and minimize downtime.
-  - the front-end infrastructure to auto-scale based on site traffic, so that I don't have to manually monitor traffic and provision additional resources when there is heavy usage.
+  - the front-end infrastructure to handle the expected traffic with limited/no performance degradation, so that the site remains available and responsive after the launch.
 - As a **site visitor**, I want:
   - the site to load quickly when I visit it, so that I don't have to wait a long time to access the information I'm looking for.
   - there to be minimal planned or unplanned downtime, so that I can trust the new Simpler.Grants.gov site will be reliable when I use it to apply for grants.
@@ -99,10 +99,9 @@ In particular, it would be helpful to review our approach to the following:
 
 ### Communication strategy
 
-The two main communication outputs needed for this deliverable are:
+The two main communication outputs needed for this deliverable is an email campaign that is sent to the people with whom we plan to share the site.
 
-- An email campaign that is sent to the subset of the grants.gov mailing list with whom we plan to share the site.
-- A communications plan that outlines future plans for stakeholder engagement about the Simpler.Grants.gov initiative. This plan should answer the following questions:
+An additional stretch goal is to develop a communications plan that outlines future plans for stakeholder engagement about the Simpler.Grants.gov initiative. This plan should answer the following questions:
   - Which stakeholder groups are we planning to engage?
   - Who is responsible for managing the relationship with each group?
   - What is the primary channel and cadence for those communications?
@@ -124,8 +123,8 @@ Another goal for this deliverable is to adopt a service that allows site visitor
 - [ ] Basic requirements
   - [ ] Code is deployed to main & PROD through our CI/CD pipeline
   - [ ] Services are live in PROD (may be behind feature flag)
-  - [ ] All new services have passed a security review (as needed)
-  - [ ] All new services have completed a 508 compliance review (as needed)
+  - [x] All new services have passed a security review (as needed)
+  - [x] All new services have completed a 508 compliance review (as needed)
   - [ ] Data needed for metrics is actively being captured in PROD
   - [ ] Key architectural decisions made about this deliverable are documented publicly (as needed)
 - [ ] Functional requirements
