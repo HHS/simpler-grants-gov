@@ -134,18 +134,17 @@ Another goal for this deliverable is to adopt a service that allows site visitor
   - [ ] The front-end infrastructure can handle site traffic of up to 1,000 concurrent users
   - [ ] Engineering staff are notified when the site goes down
   - [ ] Engineering staff have been trained on a documented incident response plan that describes a set of actions to take when the site goes down
-  - [ ] A set of SLAs have been defined internally for site availability and responsiveness
 - [ ] Communications requirements
   - [ ] An email has been sent out to the subset of public stakeholders with whom we plan to share the static site
   - [ ] Key internal stakeholders (e.g. help desk staff, HHS leadership) have been notified when the email is sent out so that they can prepare for questions from public stakeholders
   - [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
   - [ ] Help Desk is notified and trained for any potential support issues that may come through
   - [ ] Site visitors can subscribe to mailing list to receive updates about the Simpler.Grants.gov initiative
-  - [ ] Site visitors can sign up for user research opportunities
 
 #### Nice to have
 
 - [ ] Internal stakeholders can preview a live version of content changes before they are visible to everyone on simpler.grants.gov
+- [ ] Site visitors can sign up for user research opportunities
 - [ ] Tickets and/or documentation have been created that describe the infrastructure changes needed to support future site traffic at the following levels:
     - [ ] 10,000 users
     - [ ] 100,000 users
