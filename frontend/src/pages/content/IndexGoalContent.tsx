@@ -13,7 +13,7 @@ const IndexGoalContent = () => {
         <p className="usa-intro">{t("goal.paragraph_1")}</p>
         <Link href="#" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
-            {t("goal.cta")} <Icon.Launch className="text-middle" size={4} />
+            {t("goal.cta")} <Icon.Launch className="text-middle" size={4} aria-label="launch"/>
           </Button>
         </Link>
       </Grid>

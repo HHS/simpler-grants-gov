@@ -19,7 +19,7 @@ const IndexResearchContent = () => {
         <Link href="/process" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("research.cta")}{" "}
-            <Icon.ArrowForward className="text-middle" size={4} />
+            <Icon.ArrowForward className="text-middle" size={4} aria-label="arrow forward"/>
           </Button>
         </Link>
       </Grid>
