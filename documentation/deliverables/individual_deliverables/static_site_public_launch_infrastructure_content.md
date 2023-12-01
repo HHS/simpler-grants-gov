@@ -21,7 +21,6 @@
     - S2S Federal User Group (grantors) 
     - Grantor S2S CGMO (Grants Management Officers and others within HHS)
     - Internal content managers
-    - Subset of grants.gov mailing list
 
 ## Goals
 
@@ -74,7 +73,7 @@ The focus of infrastructure improvements for this deliverable should be on chang
 In particular, it would be helpful to review our approach to the following:
 
 - Employing static site generation (SSG) when possible
-- Caching the site via a content delivery network (CDN) or test load times to meet appropriate response times
+- Caching the site via a content delivery network (CDN)
 - Load balancing and/or proxying requests
 - Auto-scaling infrastructure resources based on volume of traffic
 - Other strategies as recommended by the engineering team
@@ -137,12 +136,12 @@ Another goal for this deliverable is to adopt a service that allows site visitor
 - [ ] Communications requirements
   - [ ] An email has been sent out to the subset of public stakeholders with whom we plan to share the static site
   - [ ] Key internal stakeholders (e.g. help desk staff, HHS leadership) have been notified when the email is sent out so that they can prepare for questions from public stakeholders
-  - [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
   - [ ] Help Desk is notified and trained for any potential support issues that may come through
   - [ ] Site visitors can subscribe to mailing list to receive updates about the Simpler.Grants.gov initiative
 
 #### Nice to have
 
+- [ ] A longer-term stakeholder engagement plan has been drafted that describes future phases of engagement
 - [ ] Internal stakeholders can preview a live version of content changes before they are visible to everyone on simpler.grants.gov
 - [ ] Site visitors can sign up for user research opportunities
 - [ ] Tickets and/or documentation have been created that describe the infrastructure changes needed to support future site traffic at the following levels:
