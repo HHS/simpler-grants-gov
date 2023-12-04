@@ -72,12 +72,43 @@ class DeliverablePercentComplete(BaseMetric):
             height=800,
         )
 
+    def get_stats(self) -> dict[str, Statistic]:
+        """Calculate stats for this metric."""
+        df_src = self.dataset.df
+        # get the total number of issues and the number of issues with points per deliverable
+        is_pointed = df_src[Unit.points.value] >= 1
+        issues_total = df_src.value_counts(self.deliverable_col).to_frame()
+        issues_pointed = (
+            df_src[is_pointed].value_counts(self.deliverable_col).to_frame()
+        )
+        # join the count of all issues to the count of pointed issues and
+        # calculate the percentage of all issues that have points per deliverable
+        df_tgt = issues_total.join(issues_pointed, lsuffix="_total", rsuffix="_pointed")
+        df_tgt["pct_pointed"] = df_tgt["count_pointed"] / df_tgt["count_total"] * 100
+        df_tgt["pct_pointed"] = round(df_tgt["pct_pointed"], 2).fillna(0)
+        # export to a dictionary of stats)
+        stats = {}
+        for row in df_tgt.reset_index().to_dict("records"):
+            deliverable = row[self.deliverable_col]
+            stats[deliverable] = Statistic(
+                value=row["pct_pointed"],
+                suffix=f"% of {Unit.issues.value} pointed",
+            )
+        return stats
+
+    def format_slack_message(self) -> str:
+        """Format the message that will be included with the charts posted to slack."""
+        message = f"*:github: Percent of {self.unit.value} completed by deliverable*\n"
+        for label, stat in self.stats.items():
+            message += f"• *{label}:* {stat.value}{stat.suffix}\n"
+        return message
+
     def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
         """Post sprint burndown results and chart to slack channel."""
         return super()._post_results_to_slack(
             slackbot=slackbot,
             channel_id=channel_id,
-            message="*:github: Percent complete by deliverable*",
+            message=self.format_slack_message(),
         )
 
     def _get_count_by_deliverable(
@@ -104,10 +135,6 @@ class DeliverablePercentComplete(BaseMetric):
         # to prevent duplicate col names when open and closed counts are joined
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit_col: "sum"})
         return df_agg.rename(columns={unit_col: status})
-
-    def get_stats(self) -> dict[str, Statistic]:
-        """Calculate stats for this metric."""
-        return {}
 
     def _prepare_result_dataframe_for_plotly(self) -> pd.DataFrame:
         """Stack the open and closed counts self.results for plotly charts."""

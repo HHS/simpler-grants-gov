@@ -117,7 +117,9 @@ class SprintBurndown(BaseMetric):
 
     def format_slack_message(self) -> str:
         """Format the message that will be included with the charts posted to slack."""
-        message = f"*:github: Burndown summary for {self.sprint} by {self.unit.value}*"
+        message = (
+            f"*:github: Burndown summary for {self.sprint} by {self.unit.value}*\n"
+        )
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
