@@ -161,16 +161,21 @@ class SprintBurndown(BaseMetric):
         Notes
         -----
         It does this by:
-        - Finding the earliest date a ticket was created
         - Finding the date when the sprint ends
-        - Creating a row for each day between the earliest date a ticket was closed
-
+        - Finding the earliest date a issue was created
+        - Finding the latest date a issue was closed
+        - Creating a row for each day between the earliest date a ticket was opened
+          and either the sprint end _or_ the latest date an issue was closed,
+          whichever is the later date.
         """
-        opened_min = df[self.opened_col].min()  # earliest date a tix was created
+        # get earliest date an issue was opened and latest date one was closed
         sprint_end = self.dataset.sprint_end(self.sprint)
+        opened_min = df[self.opened_col].min()
+        closed_max = df[self.closed_col].max()
+        closed_max = sprint_end if closed_max is nan else max(sprint_end, closed_max)
         # creates a dataframe with one row for each day between min and max date
         return pd.DataFrame(
-            pd.date_range(opened_min, sprint_end),
+            pd.date_range(opened_min, closed_max),
             columns=[self.date_col],
         )
 

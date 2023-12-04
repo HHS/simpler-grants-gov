@@ -85,6 +85,41 @@ class TestSprintBurndownByTasks:
         ]
         assert df.to_dict("records") == expected
 
+    def test_count_tix_closed_after_sprint_start(self):
+        """Burndown should include tix closed after the sprint ended."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(  # closed before sprint end
+                issue=1,
+                sprint_start=DAY_1,
+                sprint_length=2,
+                created=DAY_1,
+                closed=DAY_2,
+            ),
+            sprint_row(  # closed after sprint end
+                issue=1,
+                sprint_start=DAY_1,
+                sprint_length=2,
+                created=DAY_1,
+                closed=DAY_4,
+            ),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        df = output.results
+        # validation - check min and max dates
+        assert df[output.date_col].min() == pd.Timestamp(DAY_1, tz="UTC")
+        assert df[output.date_col].max() == pd.Timestamp(DAY_4, tz="UTC")
+        # validation - check burndown output
+        expected = [
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=1),
+            result_row(day=DAY_4, opened=0, closed=1, delta=-1, total=0),
+        ]
+        assert df.to_dict("records") == expected
+
     def test_count_tix_created_after_sprint_start(self):
         """Burndown should include tix opened and closed during the sprint."""
         # setup - create test data
@@ -234,10 +269,10 @@ class TestGetStats:
         """Test that total_closed is calculated correctly when unit is issues."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
-            sprint_row(issue=2, sprint_start=DAY_1, created=DAY_2, closed=DAY_4),
-            sprint_row(issue=3, sprint_start=DAY_1, created=DAY_2),  # not closed
-            sprint_row(issue=4, sprint_start=DAY_1, created=DAY_2),  # not closed
+            sprint_row(issue=1, sprint=1, created=DAY_0, closed=DAY_2),
+            sprint_row(issue=2, sprint=1, created=DAY_0, closed=DAY_3),
+            sprint_row(issue=3, sprint=1, created=DAY_2),  # not closed
+            sprint_row(issue=4, sprint=1, created=DAY_2),  # not closed
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
@@ -255,14 +290,12 @@ class TestGetStats:
     def test_get_total_closed_and_opened_when_unit_is_points(self):
         """Test that total_closed is calculated correctly when unit is issues."""
         # setup - create test data
-        # fmt: off
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2, closed=DAY_2),
-            sprint_row(issue=2, sprint_start=DAY_1, created=DAY_2, points=1, closed=DAY_4),
-            sprint_row(issue=3, sprint_start=DAY_1, created=DAY_2, points=2),  # not closed
-            sprint_row(issue=4, sprint_start=DAY_1, created=DAY_2, points=4),  # not closed
+            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            sprint_row(issue=3, sprint=1, created=DAY_2, points=2),  # not closed
+            sprint_row(issue=4, sprint=1, created=DAY_2, points=4),  # not closed
         ]
-        # fmt: on
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
@@ -274,3 +307,36 @@ class TestGetStats:
         assert Unit.points.value in output.stats.get(self.TOTAL_CLOSED).suffix
         assert Unit.points.value in output.stats.get(self.TOTAL_OPENED).suffix
         assert "%" in output.stats.get(self.PCT_CLOSED).suffix
+
+    def test_include_issues_closed_after_sprint_end(self):
+        """Issues that are closed after sprint ended should be included in closed count."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(  # closed during sprint
+                issue=1,
+                sprint_start=DAY_1,
+                sprint_length=2,
+                created=DAY_1,
+                closed=DAY_2,
+            ),
+            sprint_row(  # closed after sprint
+                issue=2,
+                sprint_start=DAY_1,
+                sprint_length=2,
+                created=DAY_2,
+                closed=DAY_4,
+            ),
+            sprint_row(  # not closed
+                issue=3,
+                sprint_start=DAY_1,
+                sprint_length=2,
+                created=DAY_2,
+            ),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        # validation
+        assert output.stats.get(self.TOTAL_CLOSED).value == 2
+        assert output.stats.get(self.TOTAL_OPENED).value == 3
+        assert output.stats.get(self.PCT_CLOSED).value == 66.67  # rounded to 2 places
