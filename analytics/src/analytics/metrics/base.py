@@ -22,7 +22,7 @@ class Statistic:
     """Store a single value that represents a summary statistic about a dataset."""
 
     value: Any
-    suffix: str | None = None
+    suffix: str = ""
 
 
 class BaseMetric:

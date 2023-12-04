@@ -197,14 +197,15 @@ class TestFormatSlackMessage:
         # setup - create test dataset
         test_rows = [
             task_row(deliverable=1, task=1, points=2, status="open"),
-            task_row(deliverable=2, task=2, points=1, status=None),
+            task_row(deliverable=2, task=2, points=1, status="closed"),
+            task_row(deliverable=3, task=3, points=3, status="open"),
         ]
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
-        lines = output.format_slack_message().partition("\n")
+        lines = output.format_slack_message().splitlines()
         # validation
-        assert len(lines) == 3
+        assert len(lines) == 4
 
     def test_title_includes_issues_when_unit_is_issue(self):
         """Test that the title is formatted correctly when unit is issues."""
@@ -216,7 +217,7 @@ class TestFormatSlackMessage:
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
-        title = output.format_slack_message().partition("\n")[0]
+        title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.issues.value in title
 
@@ -230,6 +231,6 @@ class TestFormatSlackMessage:
         test_data = DeliverableTasks.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.points)
-        title = output.format_slack_message().partition("\n")[0]
+        title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.points.value in title

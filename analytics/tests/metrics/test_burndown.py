@@ -362,3 +362,51 @@ class TestGetStats:
         assert output.stats.get(self.PCT_POINTED).value == 50
         # validation - check that stat contains '%' suffix
         assert f"% of {Unit.issues.value}" in output.stats.get(self.PCT_POINTED).suffix
+
+
+class TestFormatSlackMessage:
+    """Test the DeliverablePercentComplete.format_slack_message()."""
+
+    def test_slack_message_contains_right_number_of_lines(self):
+        """Message should contain one line for the title and one for each stat."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        lines = output.format_slack_message().splitlines()
+        for line in lines:
+            print(line)
+        # validation
+        assert len(lines) == len(list(output.stats)) + 1
+
+    def test_title_includes_issues_when_unit_is_issue(self):
+        """Test that the title is formatted correctly when unit is issues."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        title = output.format_slack_message().splitlines()[0]
+        # validation
+        assert Unit.issues.value in title
+
+    def test_title_includes_points_when_unit_is_points(self):
+        """Test that the title is formatted correctly when unit is points."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        title = output.format_slack_message().splitlines()[0]
+        # validation
+        assert Unit.points.value in title
