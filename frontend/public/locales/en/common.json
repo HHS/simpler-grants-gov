@@ -40,7 +40,7 @@
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Simpler Grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
-    "title": "Our Open Process",
+    "title": "Our open process",
     "content": "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
     "transparent_title": "Transparent",
     "transparent_content": "We’re building a simpler Grants.gov in the open. You can see our plans and our progress. And you can join us in shaping the vision and details of the features we build.",
