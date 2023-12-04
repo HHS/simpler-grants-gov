@@ -82,19 +82,37 @@ class SprintBurndown(BaseMetric):
         return chart
 
     def get_stats(self) -> dict[str, Statistic]:
-        """Calculate summary statistics for this metric."""
+        """
+        Calculate summary statistics for this metric.
+
+        Notes
+        -----
+        TODO(@widal001): 2023-12-04 - Should stats be calculated in separate private methods?
+        """
         df = self.results
+        # get sprint start and end dates
         sprint_start = self.dataset.sprint_start(self.sprint).strftime("%Y-%m-%d")
         sprint_end = self.dataset.sprint_end(self.sprint).strftime("%Y-%m-%d")
+        # get open and closed counts and percentages
         total_opened = int(df["opened"].sum())
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
+        # get the percentage of tickets that were ticketed
+        is_pointed = self.dataset.df[Unit.points.value] >= 1
+        issues_pointed = len(self.dataset.df[is_pointed])
+        issues_total = len(self.dataset.df)
+        pct_pointed = round(issues_pointed / issues_total * 100, 2)
+        # format and return stats
         return {
             "Sprint start date": Statistic(value=sprint_start),
             "Sprint end date": Statistic(value=sprint_end),
             "Total opened": Statistic(total_opened, suffix=f" {self.unit.value}"),
             "Total closed": Statistic(total_closed, suffix=f" {self.unit.value}"),
             "Percent closed": Statistic(value=pct_closed, suffix="%"),
+            "Percent pointed": Statistic(
+                value=pct_pointed,
+                suffix=f"% of {Unit.issues.value}",
+            ),
         }
 
     def format_slack_message(self) -> str:

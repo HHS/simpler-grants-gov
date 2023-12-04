@@ -222,6 +222,7 @@ class TestSprintBurndownByPoints:
         sprint_data = [
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=None),
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
@@ -244,6 +245,7 @@ class TestGetStats:
     TOTAL_OPENED = "Total opened"
     TOTAL_CLOSED = "Total closed"
     PCT_CLOSED = "Percent closed"
+    PCT_POINTED = "Percent pointed"
 
     def test_sprint_start_and_sprint_end_not_affected_by_unit(self):
         """Test that sprint start and end are the same regardless of unit."""
@@ -340,3 +342,23 @@ class TestGetStats:
         assert output.stats.get(self.TOTAL_CLOSED).value == 2
         assert output.stats.get(self.TOTAL_OPENED).value == 3
         assert output.stats.get(self.PCT_CLOSED).value == 66.67  # rounded to 2 places
+
+    def test_get_percent_pointed(self):
+        """Test that percent pointed is calculated correctly."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            sprint_row(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
+            sprint_row(issue=4, sprint=1, created=DAY_2, points=0),  # not closed
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        # validation
+        assert output.stats.get(self.TOTAL_CLOSED).value == 3
+        assert output.stats.get(self.TOTAL_OPENED).value == 3
+        assert output.stats.get(self.PCT_CLOSED).value == 100
+        assert output.stats.get(self.PCT_POINTED).value == 50
+        # validation - check that stat contains '%' suffix
+        assert f"% of {Unit.issues.value}" in output.stats.get(self.PCT_POINTED).suffix
