@@ -34,7 +34,7 @@ jobs:
           cache-dependency-path: ./frontend/package-lock.json # or yarn.lock
           cache: npm # or yarn
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v3
         id: pages_config
       - name: Install dependencies
         run: npm ci
