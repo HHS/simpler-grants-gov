@@ -7,7 +7,7 @@ from plotly.graph_objects import Figure
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.etl.slack import SlackBot
-from analytics.metrics.base import BaseMetric, Unit
+from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
 class DeliverablePercentComplete(BaseMetric):
@@ -104,6 +104,10 @@ class DeliverablePercentComplete(BaseMetric):
         # to prevent duplicate col names when open and closed counts are joined
         df_agg = df.groupby(self.deliverable_col, as_index=False).agg({unit_col: "sum"})
         return df_agg.rename(columns={unit_col: status})
+
+    def get_stats(self) -> dict[str, Statistic]:
+        """Calculate stats for this metric."""
+        return {}
 
     def _prepare_result_dataframe_for_plotly(self) -> pd.DataFrame:
         """Stack the open and closed counts self.results for plotly charts."""

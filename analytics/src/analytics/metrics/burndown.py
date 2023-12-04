@@ -8,11 +8,12 @@ from typing import Literal
 
 import pandas as pd
 import plotly.express as px
+from numpy import nan
 from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.etl.slack import SlackBot
-from analytics.metrics.base import BaseMetric, Unit
+from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
 class SprintBurndown(BaseMetric):
@@ -80,23 +81,33 @@ class SprintBurndown(BaseMetric):
         chart.update_yaxes(range=[0, df["total_open"].max() + 2])
         return chart
 
-    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
-        """Post sprint burndown results and chart to slack channel."""
-        # calculate a series of stats about the sprint
+    def get_stats(self) -> dict[str, Statistic]:
+        """Calculate summary statistics for this metric."""
         df = self.results
         sprint_start = self.dataset.sprint_start(self.sprint).strftime("%Y-%m-%d")
         sprint_end = self.dataset.sprint_end(self.sprint).strftime("%Y-%m-%d")
         total_opened = int(df["opened"].sum())
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
-        message = f"""
-*:github: Burndown summary for {self.sprint} by {self.unit.value}*
-• *Sprint start date:* {sprint_start}
-• *Sprint end date:* {sprint_end}
-• *Total opened:* {total_opened} {self.unit.value}
-• *Total closed:* {total_closed} {self.unit.value}
-• *Percent closed:* {pct_closed}%
-"""
+        return {
+            "Sprint start date": Statistic(value=sprint_start),
+            "Sprint end date": Statistic(value=sprint_end),
+            "Total opened": Statistic(total_opened, suffix=f" {self.unit.value}"),
+            "Total closed": Statistic(total_closed, suffix=f" {self.unit.value}"),
+            "Percent closed": Statistic(value=pct_closed, suffix="%"),
+        }
+
+    def format_slack_message(self) -> str:
+        """Format the message that will be included with the charts posted to slack."""
+        message = f"*:github: Burndown summary for {self.sprint} by {self.unit.value}*"
+        for label, stat in self.stats.items():
+            message += f"• *{label}:* {stat.value}{stat.suffix}\n"
+        return message
+
+    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
+        """Post sprint burndown results and chart to slack channel."""
+        # calculate a series of stats about the sprint
+        message = self.format_slack_message()
         return super()._post_results_to_slack(
             slackbot=slackbot,
             channel_id=channel_id,

@@ -1,6 +1,8 @@
 """Base class for all metrics."""
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from plotly.graph_objects import Figure
@@ -15,6 +17,14 @@ class Unit(Enum):
     points = "points"  # pylint: disable=C0103
 
 
+@dataclass
+class Statistic:
+    """Store a single value that represents a summary statistic about a dataset."""
+
+    value: Any
+    suffix: str | None = None
+
+
 class BaseMetric:
     """Base class for all metrics."""
 
@@ -25,10 +35,15 @@ class BaseMetric:
     def __init__(self) -> None:
         """Initialize and calculate the metric from the input dataset."""
         self.results = self.calculate()
+        self.stats = self.get_stats()
         self._chart: Figure | None = None
 
     def calculate(self) -> pd.DataFrame:
         """Calculate the metric and return the resulting dataset."""
+        raise NotImplementedError
+
+    def get_stats(self) -> dict[str, Statistic]:
+        """Get the list of stats associated with this metric to include in reporting."""
         raise NotImplementedError
 
     @property
