@@ -28,6 +28,7 @@ class SprintBurndown(BaseMetric):
         """Initialize the SprintBurndown metric."""
         self.dataset = dataset
         self.sprint = self._get_and_validate_sprint_name(sprint)
+        self.sprint_data = self._isolate_data_for_this_sprint()
         self.date_col = "date"
         self.points_col = "points"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
@@ -48,10 +49,9 @@ class SprintBurndown(BaseMetric):
         4. Calculate the delta between opened and closed issues per day
         5. Cumulatively sum those deltas to get the running total of open tix
         """
-        # isolate columns and rows we need to calculate burndown for this sprint
+        # make a copy of columns and rows we need to calculate burndown for this sprint
         burndown_cols = [self.opened_col, self.closed_col, self.points_col]
-        sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
-        df_sprint = self.dataset.df.loc[sprint_filter, burndown_cols]
+        df_sprint = self.sprint_data[burndown_cols].copy()
         # get the date range over which tix were created and closed
         df_tix_range = self._get_tix_date_range(df_sprint)
         # get the number of tix opened and closed each day
@@ -98,9 +98,9 @@ class SprintBurndown(BaseMetric):
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
         # get the percentage of tickets that were ticketed
-        is_pointed = self.dataset.df[Unit.points.value] >= 1
-        issues_pointed = len(self.dataset.df[is_pointed])
-        issues_total = len(self.dataset.df)
+        is_pointed = self.sprint_data[Unit.points.value] >= 1
+        issues_pointed = len(self.sprint_data[is_pointed])
+        issues_total = len(self.sprint_data)
         pct_pointed = round(issues_pointed / issues_total * 100, 2)
         # format and return stats
         return {
@@ -148,6 +148,11 @@ class SprintBurndown(BaseMetric):
             raise ValueError(msg)
         # return the sprint name if it's valid
         return sprint
+
+    def _isolate_data_for_this_sprint(self) -> pd.DataFrame:
+        """Filter out issues that are not assigned to the current sprint."""
+        sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
+        return self.dataset.df[sprint_filter]
 
     def _get_daily_tix_counts_by_status(
         self,

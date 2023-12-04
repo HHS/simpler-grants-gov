@@ -363,6 +363,23 @@ class TestGetStats:
         # validation - check that stat contains '%' suffix
         assert f"% of {Unit.issues.value}" in output.stats.get(self.PCT_POINTED).suffix
 
+    def test_exclude_other_sprints_in_percent_pointed(self):
+        """Only include issues in this sprint when calculating percent pointed."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            sprint_row(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
+            sprint_row(issue=4, sprint=2, created=DAY_2, points=None),  # other sprint
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        # validation
+        assert output.stats.get(self.TOTAL_CLOSED).value == 2
+        assert output.stats.get(self.TOTAL_OPENED).value == 3
+        assert output.stats.get(self.PCT_POINTED).value == 66.67  # exclude final row
+
 
 class TestFormatSlackMessage:
     """Test the DeliverablePercentComplete.format_slack_message()."""

@@ -85,6 +85,8 @@ def calculate_sprint_burndown(
     # optionally display the burndown chart in the browser
     if show_results:
         burndown.show_chart()
+        print("Slack message:\n")
+        print(burndown.format_slack_message())
     # optionally post the results to slack
     if post_results:
         slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
@@ -120,6 +122,8 @@ def calculate_deliverable_percent_complete(
     # optionally display the burndown chart in the browser
     if show_results:
         pct_complete.show_chart()
+        print("Slack message:\n")
+        print(pct_complete.format_slack_message())
     if post_results:
         slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
         pct_complete.post_results_to_slack(
