@@ -1,7 +1,7 @@
 # Communications Tooling: Email Marketing
 
 - **Status:** Draft
-- **Last Modified:** 2023-10-16 <!-- REQUIRED -->
+- **Last Modified:** 2023-12-04 <!-- REQUIRED -->
 - **Related Issue:** [#590](https://github.com/HHS/grants-equity/issues/590) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, email marketing
@@ -43,6 +43,8 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 
 The suggested approach is to utilize Sendy and create a campaign for Simpler Grants.gov within the existing main account for the near-term, leveraging existing knowledge and allowing for faster use. This allows for a faster initiation of the process. One of the most important criteria given by users of the tool, the Grants.gov Communications team, is the need to be able to send an email to the current 1M current subscribers quickly which Sendy cannot do. There are other limitations of this solution so we recommend that we select a back-up option email marketing solution for our long-term needs. 
 
+There are limitations to Sendy and the recommendation is to move to another email marketing tool that is a better long-term solution that works for HHS and the larger communications strategy for Simpler Grants.gov, current Grants.gov, and NOFO. This makes it easier and consistent to implement and manage one tool. 
+
 
 ### Open Questions <!-- OPTIONAL -->
 
@@ -50,11 +52,19 @@ The suggested approach is to utilize Sendy and create a campaign for Simpler Gra
 
 Yes, we are able to transfer the list created in Sendy to a new tool in the future. 
 
+2. What is the long-term tool that we should use?
+
+As we're determining the brand identity and communications strategy and how the different HHS teams will work together, we will determine the long-term solution at a later time. 
+
+3. Can we send to individual lists?
+   
+We can use Sendy to send to individuals and also for a separate subscription lists which is called a "Brand" in Sendy.
+
+5. How can we integrate with the current implementation of Sendy?
+   
+A Brand can be created under the existing Sendy account which allows users who subscribe through that form to be added to a separate list specific to Simpler.Grants.gov. This list will be distinct from the other lists within the Sendy account.
 
 
-### Back-up Options
-
-Alternatively, as a backup solution, Mautic is a cost-effective and customizable option that can handle growing subscribers. Being an open-source platform, it comes with a slightly steeper learning curve. However, since only a limited number of individuals will be using the tool, we can provide training to facilitate a smooth onboarding process. 
 
 ## Comparison Matrix
 
@@ -69,17 +79,17 @@ Alternatively, as a backup solution, Mautic is a cost-effective and customizable
 | Usability                      |  2    |   1        |      3    |    3    |    1   |    3  |
 | Content Review                 |  🔄   |   ✅        |     ✅    |   ✅    |   ✅    |  ✅   |
 | Comments                       |   ❌  |   ✅        |     ❌    |   ✅    |   ✅    |   ✅  |
-| Open source*                   |  🔄   |    ❌       |     ❌    |   ❌    |   ✅    |   ❌  |
 | Multi-Media                    |   ✅  |   ✅        |     ❌    |   ✅    |   ✅    |   🔄  |
 | Analytics                      |    1  |   ✅        |      ✅   |    ✅   |   ✅    |   ✅  |
 | Internationalization           |     ❓ |   2        |      3    |    2   |    1   |   1   |
 | Onboarding costs               |     1 |   3        |      1    |    2    |    1    |    2 |
-| Community and Support*         |     1 |   3        |     3     |   3     |   3     |   3  |
-| Scalability                    |     🔄 |   ✅       |     ✅    |   ✅    |   ✅     | ❌    |
 | Send 1M emails quickly         |    ❌  |   ❓       |     ❓    |   ❓    |   ❓     |   ❓  |
 | Authority to Operate or FedRAMP|     ✅ |   ❓       |     ❌    |   ❌    |   ❌     |   ✅  |
+| Open source*                   |  🔄   |    ❌       |     ❌    |   ❌    |   ✅    |   ❌  |
+| Community and Support*         |     1 |   3        |     3     |   3     |   3     |   3  |
+| Scalability*                    |     🔄 |   ✅       |     ✅    |   ✅    |   ✅     | ❌    |
 
-
+ * Nice to have
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -100,7 +110,7 @@ Sendy is a self-hosted email marketing application that allows users to send new
 
 #### Cons
 
-- Campaigns with larged audiences or number of emails take a long time to send and a user cannot use the tool while an email is being sent. Currently, we have 1M subscribers and it takes a long time to send to that many subscribers
+- Campaigns with larger audiences or number of emails take a long time to send and a user cannot use the tool while an email is being sent. Currently, we have 1M subscribers and it takes a long time to send to that many subscribers. There are methods that could be done to improve this. 
 - Lacks some advanced features present in other platforms.
 - It requires technical knowledge for setup and maintenance.
 - Limited customer support compared to premium services.
