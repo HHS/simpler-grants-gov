@@ -5,11 +5,11 @@ import ProcessContent from "src/components/ProcessContent";
 describe("Process Content", () => {
   it("Renders without errors", () => {
     render(<ProcessContent />);
-    const ProcessH2 = screen.getByRole("heading", {
-      level: 2,
+    const ProcessH1 = screen.getByRole("heading", {
+      level: 1,
       name: /Our open process/i,
     });
 
-    expect(ProcessH2).toBeInTheDocument();
+    expect(ProcessH1).toBeInTheDocument();
   });
 });

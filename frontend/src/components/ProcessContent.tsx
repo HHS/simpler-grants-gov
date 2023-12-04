@@ -22,30 +22,30 @@ const GoalContent = () => {
       </Grid>
       <Grid row gap className="flex-align-start">
         <Grid tabletLg={{ col: 4 }} desktopLg={{ col: 4 }}>
-          <div className="margin-bottom-2 desktop:margin-y-0 border radius-md border-base-lighter padding-x-3">
-            <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+          <div className="margin-bottom-2 desktop:margin-y-0 border radius-md border-base-lighter padding-3">
+            <strong className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
               {t("transparent_title")}
-            </h3>
+            </strong>
             <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
               {t("transparent_content")}
             </p>
           </div>
         </Grid>
         <Grid tabletLg={{ col: 4 }} desktopLg={{ col: 4 }}>
-          <div className="margin-bottom-2 desktop:margin-y-0 border radius-md border-base-lighter padding-x-3">
-            <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+          <div className="margin-bottom-2 desktop:margin-y-0 border radius-md border-base-lighter padding-3">
+            <strong className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
               {t("iterative_title")}
-            </h3>
+            </strong>
             <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
               {t("iterative_content")}
             </p>
           </div>
         </Grid>
         <Grid tabletLg={{ col: 4 }} desktopLg={{ col: 4 }}>
-          <div className="border radius-md border-base-lighter padding-x-3">
-            <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+          <div className="border radius-md border-base-lighter padding-3">
+            <strong className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
               {t("agile_title")}
-            </h3>
+            </strong>
             <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
               {t("agile_content")}
             </p>
