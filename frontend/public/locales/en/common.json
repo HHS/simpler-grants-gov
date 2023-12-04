@@ -53,8 +53,8 @@
   },
   "ErrorPages": {
     "page_not_found": {
-      "title": "Ooops! Page Not Found",
-      "message_content_1": "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instrcuted not to let you view it. There is nothing to see here.",
+      "title": "Oops! Page Not Found",
+      "message_content_1": "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
       "visit_homepage_button": "Return Home"
     }
   },
