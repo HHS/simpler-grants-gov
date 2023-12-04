@@ -33,7 +33,9 @@
     "page_title": "Research | Simpler Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>."
+    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "intro_title": "Our existing research",
+    "intro_content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
   },
   "Process": {
     "page_title": "Process | Simpler Grants.gov",
