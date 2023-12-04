@@ -41,15 +41,14 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 
 ## Decision Outcome <!-- REQUIRED -->
 
-The suggested approach is to utilize Sendy and create a campaign for Simpler Grants.gov within the existing main account, leveraging existing knowledge and allowing for faster use. This allows for a faster initiation of the process. One of the most important criteria given by users of the tool, the Grants.gov Communications team, is the need to be able to send an email to the current 1M current subscribers quickly which Sendy cannot do. There are other limitations of this solution so we recommend that we select a back-up option email marketing solution for our long-term needs. 
-
+The suggested approach is to utilize Sendy and create a campaign for Simpler Grants.gov within the existing main account for the near-term, leveraging existing knowledge and allowing for faster use. This allows for a faster initiation of the process. One of the most important criteria given by users of the tool, the Grants.gov Communications team, is the need to be able to send an email to the current 1M current subscribers quickly which Sendy cannot do. There are other limitations of this solution so we recommend that we select a back-up option email marketing solution for our long-term needs. 
 
 
 ### Open Questions <!-- OPTIONAL -->
 
-1. Can we transfer the Simpler Grants.gov email list to a different tool in the future?
+1. Can we transfer the Simpler Grants.gov email list from Sendy to a different tool in the future?
 
-   TODO
+Yes, we are able to transfer the list created in Sendy to a new tool in the future. 
 
 
 
@@ -168,8 +167,6 @@ HubSpot is an all-in-one inbound marketing, sales, and customer service platform
 
 ### Mautic
 
-
-
 #### Details
 
 Mautic is an open-source marketing automation platform that allows users to automate marketing tasks, personalize communication, and track the behavior of leads. It is known for its flexibility, open-source nature, and strong community support.
@@ -188,8 +185,6 @@ Mautic is an open-source marketing automation platform that allows users to auto
 
 
 ### Adobe Campaign
-
-
 
 #### Details
 
