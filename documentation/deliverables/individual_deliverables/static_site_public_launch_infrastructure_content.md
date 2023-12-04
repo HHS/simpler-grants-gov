@@ -98,7 +98,7 @@ In particular, it would be helpful to review our approach to the following:
 
 ### Communication strategy
 
-The two main communication outputs needed for this deliverable is an email campaign that is sent to the people with whom we plan to share the site.
+The main communication output needed for this deliverable is an email campaign that is sent to the people with whom we plan to share the site.
 
 An additional stretch goal is to develop a communications plan that outlines future plans for stakeholder engagement about the Simpler.Grants.gov initiative. This plan should answer the following questions:
   - Which stakeholder groups are we planning to engage?
