@@ -1,7 +1,7 @@
 import { useTranslation } from "next-i18next";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-const GoalContent = () => {
+const ProcessContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
 
   return (
@@ -56,4 +56,4 @@ const GoalContent = () => {
   );
 };
 
-export default GoalContent;
+export default ProcessContent;
