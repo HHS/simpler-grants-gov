@@ -33,18 +33,28 @@
     "page_title": "Research | Simpler Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>."
+    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "intro_title": "Our existing research",
+    "intro_content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
   },
   "Process": {
     "page_title": "Process | Simpler Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>."
+    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "title": "Our open process",
+    "content": "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+    "transparent_title": "Transparent",
+    "transparent_content": "We’re building a simpler Grants.gov in the open. You can see our plans and our progress. And you can join us in shaping the vision and details of the features we build.",
+    "iterative_title": "Iterative",
+    "iterative_content": "We’re releasing features early and often through a continuous cycle of planning, implementation, and assessment. Each cycle will incrementally improve the product, as we incorporate your feedback from the prior iteration.",
+    "agile_title": "Agile",
+    "agile_content": "We’re building a simpler Grants.gov with you, not for you. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements."
   },
   "ErrorPages": {
     "page_not_found": {
-      "title": "Ooops! Page Not Found",
-      "message_content_1": "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instrcuted not to let you view it. There is nothing to see here.",
+      "title": "Oops! Page Not Found",
+      "message_content_1": "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
       "visit_homepage_button": "Return Home"
     }
   },

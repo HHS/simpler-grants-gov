@@ -7,6 +7,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
+import ResearchIntro from "src/components/ResearchIntro";
 import FullWidthAlert from "../components/FullWidthAlert";
 
 const Research: NextPage = () => {
@@ -31,7 +32,7 @@ const Research: NextPage = () => {
         />
       </FullWidthAlert>
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
-      Research Placeholder
+      <ResearchIntro />
     </>
   );
 };
