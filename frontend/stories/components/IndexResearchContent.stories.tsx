@@ -1,9 +1,9 @@
 import { Meta } from "@storybook/react";
-import ResearchContent from "src/pages/content/IndexResearchContent";
+import IndexResearchContent from "src/pages/content/IndexResearchContent";
 
-const meta: Meta<typeof ResearchContent> = {
-  title: "Components/Content/Research Content",
-  component: ResearchContent,
+const meta: Meta<typeof IndexResearchContent> = {
+  title: "Components/Content/Index Research Content",
+  component: IndexResearchContent,
 };
 export default meta;
 

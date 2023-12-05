@@ -2,7 +2,7 @@ import { Meta } from "@storybook/react";
 import ProcessContent from "src/pages/content/IndexProcessContent";
 
 const meta: Meta<typeof ProcessContent> = {
-  title: "Components/Content/Process Content",
+  title: "Components/Content/Index Process Content",
   component: ProcessContent,
 };
 export default meta;
