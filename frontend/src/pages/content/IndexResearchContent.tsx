@@ -38,6 +38,7 @@ const IndexResearchContent = () => {
               style={{ filter: "invert(33%)" }}
               src={embarrassed as string}
               alt="embarrased"
+              priority={false}
             />
           </Grid>
           <Grid col={10}>
@@ -53,6 +54,7 @@ const IndexResearchContent = () => {
               style={{ filter: "invert(33%)" }}
               src={leadership as string}
               alt="leadership"
+              priority={false}
             />
           </Grid>
           <Grid col={10}>
@@ -68,6 +70,7 @@ const IndexResearchContent = () => {
               style={{ filter: "invert(33%)" }}
               src={goal as string}
               alt="goal"
+              priority={false}
             />
           </Grid>
           <Grid col={10}>
@@ -83,6 +86,7 @@ const IndexResearchContent = () => {
               style={{ filter: "invert(33%)" }}
               src={hiring as string}
               alt="hiring"
+              priority={false}
             />
           </Grid>
           <Grid col={10}>
