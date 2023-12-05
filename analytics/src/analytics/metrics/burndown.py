@@ -64,9 +64,11 @@ class SprintBurndown(BaseMetric):
         # Limit the data in the line chart to dates within the sprint
         # or through today, if the sprint hasn't yet ended
         # NOTE: This will *not* affect the running totals on those days
+        sprint_start = self.dataset.sprint_start(self.sprint)
+        sprint_end = self.dataset.sprint_end(self.sprint)
         date_mask = self.results[self.date_col].between(
-            self.dataset.sprint_start(self.sprint),
-            min(self.dataset.sprint_end(self.sprint), pd.Timestamp.today(tz="utc")),
+            sprint_start,
+            min(sprint_end, pd.Timestamp.today(tz="utc")),
         )
         df = self.results[date_mask]
         # create a line chart from the data in self.results
@@ -79,6 +81,7 @@ class SprintBurndown(BaseMetric):
         )
         # set the scale of the y axis to start at 0
         chart.update_yaxes(range=[0, df["total_open"].max() + 2])
+        chart.update_xaxes(range=[sprint_start, sprint_end])
         return chart
 
     def get_stats(self) -> dict[str, Statistic]:
