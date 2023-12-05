@@ -46,14 +46,14 @@ const NewsletterUnsubscribe: NextPage = () => {
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p className="usa-intro">{t("paragraph_1")}</p>
-            <Link className="usa-button" href="/newsletter">
+            <Link className="usa-button margin-bottom-4" href="/newsletter">
               {t("button_resub")}
             </Link>
           </Grid>
           <Grid tabletLg={{ col: 6 }}>
-            <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+            <h2 className="font-sans-md tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
               {t("heading")}
-            </h3>
+            </h2>
             <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
               <Trans
                 t={t}
@@ -66,6 +66,9 @@ const NewsletterUnsubscribe: NextPage = () => {
             </p>
           </Grid>
         </Grid>
+      </GridContainer>
+      <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
+        <p className="font-sans-3xs text-base-dark">{t("disclaimer")}</p>
       </GridContainer>
     </>
   );

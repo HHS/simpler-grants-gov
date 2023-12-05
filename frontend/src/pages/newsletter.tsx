@@ -4,7 +4,13 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import {
+  Button,
+  Grid,
+  GridContainer,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
@@ -54,8 +60,39 @@ const Newsletter: NextPage = () => {
               }}
             />
           </Grid>
-          <Grid tabletLg={{ col: 6 }}>[Sendy HTML goes here]</Grid>
+          <Grid tabletLg={{ col: 6 }}>
+            <form
+              data-testid="sendy-form"
+              action="https://communications.grants.gov/app/subscribe"
+              method="POST"
+              accept-charset="utf-8"
+            >
+              <Label htmlFor="name">First Name</Label>
+              <TextInput type="text" name="name" id="name" />
+              <Label htmlFor="LastName">Last Name</Label>
+              <TextInput type="text" name="LastName" id="LastName" />
+              <div className="display-none">
+                <Label htmlFor="hp">HP</Label>
+                <TextInput type="text" name="hp" id="hp" />
+              </div>
+              <Label htmlFor="email">Email</Label>
+              <TextInput type="email" name="email" id="email" />
+              <input type="hidden" name="list" value="A2zerhEC59Ea6mzTgzdTgw" />
+              <input type="hidden" name="subform" value="yes" />
+              <Button
+                type="submit"
+                name="submit"
+                id="submit"
+                className="margin-top-4"
+              >
+                Subscribe
+              </Button>
+            </form>
+          </Grid>
         </Grid>
+      </GridContainer>
+      <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
+        <p className="font-sans-3xs text-base-dark">{t("disclaimer")}</p>
       </GridContainer>
     </>
   );
