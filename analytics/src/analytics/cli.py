@@ -8,8 +8,9 @@ from slack_sdk import WebClient
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.etl import github, slack
+from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
-from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
+from analytics.metrics.percent_complete import DeliverablePercentComplete
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -65,16 +66,12 @@ def calculate_sprint_burndown(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
-    *,  # makes the following args keyword only
     unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
+    *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate the burndown for a particular sprint."""
-    # defer load of settings until this command is called
-    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
-    from config import settings
-
     # load the input data
     sprint_data = SprintBoard.load_from_json_files(
         sprint_file=sprint_file,
@@ -82,18 +79,11 @@ def calculate_sprint_burndown(
     )
     # calculate burndown
     burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
-    # optionally display the burndown chart in the browser
-    if show_results:
-        burndown.show_chart()
-        print("Slack message:\n")
-        print(burndown.format_slack_message())
-    # optionally post the results to slack
-    if post_results:
-        slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
-        burndown.post_results_to_slack(
-            slackbot=slackbot,
-            channel_id=settings.reporting_channel_id,
-        )
+    show_and_or_post_results(
+        metric=burndown,
+        show_results=show_results,
+        post_results=post_results,
+    )
 
 
 @metrics_app.command(name="deliverable_percent_complete")
@@ -108,25 +98,39 @@ def calculate_deliverable_percent_complete(
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
     """Calculate percentage completion by deliverable."""
-    # defer load of settings until this command is called
-    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
-    from config import settings
-
     # load the input data
     task_data = DeliverableTasks.load_from_json_files(
         sprint_file=sprint_file,
         issue_file=issue_file,
     )
-    # calculate burndown
-    pct_complete = DeliverablePercentComplete(task_data, unit=unit)
+    # calculate percent complete
+    metric = DeliverablePercentComplete(task_data, unit=unit)
+    show_and_or_post_results(
+        metric=metric,
+        show_results=show_results,
+        post_results=post_results,
+    )
+
+
+def show_and_or_post_results(
+    metric: BaseMetric,
+    *,  # makes the following args keyword only
+    show_results: bool,
+    post_results: bool,
+) -> None:
+    """Optionally show the results of a metric and/or post them to slack."""
+    # defer load of settings until this command is called
+    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
+    from config import settings
+
     # optionally display the burndown chart in the browser
     if show_results:
-        pct_complete.show_chart()
+        metric.show_chart()
         print("Slack message:\n")
-        print(pct_complete.format_slack_message())
+        print(metric.format_slack_message())
     if post_results:
         slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
-        pct_complete.post_results_to_slack(
+        metric.post_results_to_slack(
             slackbot=slackbot,
             channel_id=settings.reporting_channel_id,
         )

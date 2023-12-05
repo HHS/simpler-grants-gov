@@ -6,7 +6,6 @@ import plotly.express as px
 from plotly.graph_objects import Figure
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.etl.slack import SlackBot
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
@@ -102,14 +101,6 @@ class DeliverablePercentComplete(BaseMetric):
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
-
-    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
-        """Post sprint burndown results and chart to slack channel."""
-        return super()._post_results_to_slack(
-            slackbot=slackbot,
-            channel_id=channel_id,
-            message=self.format_slack_message(),
-        )
 
     def _get_count_by_deliverable(
         self,

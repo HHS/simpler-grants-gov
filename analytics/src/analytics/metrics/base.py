@@ -95,21 +95,16 @@ class BaseMetric:
         """Display self.chart in a browser."""
         self.chart.show()
 
+    def format_slack_message(self) -> str:
+        """Format the message that will be included with the charts posted to slack."""
+        raise NotImplementedError
+
     def post_results_to_slack(
         self,
         slackbot: SlackBot,
         channel_id: str,
     ) -> None:
-        """Upload copies of the results and chart to a slack channel."""
-        raise NotImplementedError
-
-    def _post_results_to_slack(
-        self,
-        slackbot: SlackBot,
-        channel_id: str,
-        message: str,
-    ) -> None:
-        """Execute shared code required to upload files to a slack channel."""
+        """Upload copies of the results and chart to a slack channel.."""
         results_csv = self.export_results()
         chart_png = self.export_chart_to_png()
         chart_html = self.export_chart_to_html()
@@ -121,5 +116,5 @@ class BaseMetric:
         slackbot.upload_files_to_slack_channel(
             files=files,
             channel_id=channel_id,
-            message=message,
+            message=self.format_slack_message(),
         )

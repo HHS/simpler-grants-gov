@@ -12,7 +12,6 @@ from numpy import nan
 from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.etl.slack import SlackBot
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
@@ -123,16 +122,6 @@ class SprintBurndown(BaseMetric):
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
-
-    def post_results_to_slack(self, slackbot: SlackBot, channel_id: str) -> None:
-        """Post sprint burndown results and chart to slack channel."""
-        # calculate a series of stats about the sprint
-        message = self.format_slack_message()
-        return super()._post_results_to_slack(
-            slackbot=slackbot,
-            channel_id=channel_id,
-            message=message,
-        )
 
     def _get_and_validate_sprint_name(self, sprint: str | None) -> str:
         """Get the name of the sprint we're using to calculate burndown or raise an error."""
