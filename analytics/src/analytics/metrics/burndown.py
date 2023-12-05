@@ -2,7 +2,7 @@
 Calculates burndown for sprints.
 
 This is a subclass of the BaseMetric class that calculates the running total of
-open tickets for each day in a sprint
+open issues for each day in a sprint
 """
 from typing import Literal
 
@@ -12,20 +12,26 @@ from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.etl.slack import SlackBot
-from analytics.metrics.base import BaseMetric
+from analytics.metrics.base import BaseMetric, Unit
 
 
 class SprintBurndown(BaseMetric):
-    """Calculates the running total of open tickets per day in the sprint."""
+    """Calculates the running total of open issues per day in the sprint."""
 
-    def __init__(self, dataset: SprintBoard, sprint: str) -> None:
+    def __init__(
+        self,
+        dataset: SprintBoard,
+        sprint: str,
+        unit: Unit,
+    ) -> None:
         """Initialize the SprintBurndown metric."""
         self.dataset = dataset
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.date_col = "date"
+        self.points_col = "points"
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
-        self.unit = "tickets"
+        self.unit = unit
         super().__init__()
 
     def calculate(self) -> pd.DataFrame:
@@ -36,17 +42,15 @@ class SprintBurndown(BaseMetric):
         -----
         Sprint burndown is calculated with the following algorithm:
         1. Isolate the records that belong to the given sprint
-        2. Get the range of dates over which these tickets were opened and closed
-        3. Count the number of tickets opened and closed on each day of that range
-        4. Calculate the delta between opened and closed tickets per day
+        2. Get the range of dates over which these issues were opened and closed
+        3. Count the number of issues opened and closed on each day of that range
+        4. Calculate the delta between opened and closed issues per day
         5. Cumulatively sum those deltas to get the running total of open tix
         """
-        # create local variables for key columns
-        opened_col = self.opened_col
-        closed_col = self.closed_col
-        # isolate columns we need to calculate burndown
-        sprint_mask = self.dataset.df[self.dataset.sprint_col] == self.sprint
-        df_sprint = self.dataset.df.loc[sprint_mask, [opened_col, closed_col]]
+        # isolate columns and rows we need to calculate burndown for this sprint
+        burndown_cols = [self.opened_col, self.closed_col, self.points_col]
+        sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
+        df_sprint = self.dataset.df.loc[sprint_filter, burndown_cols]
         # get the date range over which tix were created and closed
         df_tix_range = self._get_tix_date_range(df_sprint)
         # get the number of tix opened and closed each day
@@ -69,7 +73,8 @@ class SprintBurndown(BaseMetric):
             data_frame=df,
             x=self.date_col,
             y="total_open",
-            title=f"{self.sprint} Burndown",
+            title=f"{self.sprint} burndown by {self.unit.value}",
+            labels={"total_open": f"total {self.unit.value} open"},
         )
         # set the scale of the y axis to start at 0
         chart.update_yaxes(range=[0, df["total_open"].max() + 2])
@@ -85,11 +90,11 @@ class SprintBurndown(BaseMetric):
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
         message = f"""
-*:github: Burndown summary for {self.sprint}*
+*:github: Burndown summary for {self.sprint} by {self.unit.value}*
 • *Sprint start date:* {sprint_start}
 • *Sprint end date:* {sprint_end}
-• *Total opened:* {total_opened} {self.unit}
-• *Total closed:* {total_closed} {self.unit}
+• *Total opened:* {total_opened} {self.unit.value}
+• *Total closed:* {total_closed} {self.unit.value}
 • *Percent closed:* {pct_closed}%
 """
         return super()._post_results_to_slack(
@@ -119,7 +124,7 @@ class SprintBurndown(BaseMetric):
         status: Literal["opened", "closed"],
     ) -> pd.DataFrame:
         """
-        Count the number of tickets opened or closed by date.
+        Count the number of issues or points opened or closed by date.
 
         Notes
         -----
@@ -127,14 +132,20 @@ class SprintBurndown(BaseMetric):
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
         """
+        # create local copies of the key column names
         agg_col = self.opened_col if status == "opened" else self.closed_col
-        df_agg = df.groupby(agg_col, as_index=False).agg("size")
-        df_agg.columns = [self.date_col, status]
-        return pd.DataFrame(df_agg)  # prevents mypy issue
+        unit_col = self.unit.value
+        key_cols = [agg_col, unit_col]
+        # create a dummy column to sum per row if the unit is tasks
+        if self.unit == Unit.issues:
+            df[unit_col] = 1
+        # isolate the key columns, group by open or closed date, then sum the units
+        df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
+        return df_agg.rename(columns={agg_col: self.date_col, unit_col: status})
 
     def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Get the date range over which tickets were created and closed.
+        Get the date range over which issues were created and closed.
 
         Notes
         -----
@@ -159,7 +170,7 @@ class SprintBurndown(BaseMetric):
         closed: pd.DataFrame,
     ) -> pd.DataFrame:
         """
-        Get the cumulative sum of open tickets per day.
+        Get the cumulative sum of open issues per day.
 
         Notes
         -----

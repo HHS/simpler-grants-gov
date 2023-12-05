@@ -17,11 +17,40 @@ Check that you have the following with: `make check-prereqs`
 1. Clone the GitHub repo: `git clone https://github.com/HHS/simpler-grants-gov.git`
 2. Change directory into the analytics folder: `cd simpler-grants-gov/analytics`
 4. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
-5. Create a `.secrets.toml` with the following details:
+5. Create a `.secrets.toml` with the following details, see the next section to discover where these values can be found:
    ```toml
    reporting_channel_id = "<REPLACE_WITH_CHANNEL_ID>"
    slack_bot_token = "<REPLACE_WITH_SLACKBOT_TOKEN_ID>"
    ```
+
+### Configuring secrets
+
+#### Prerequisites
+
+In order to correctly set the value of the `slack_bot_token` and `reporting_channel_id` you will need:
+
+1. To be a member of the Simpler.Grants.gov slack workspace
+2. To be a collaborator on the Sprint Reporting Bot slack app
+
+If you need to be added to the slack workspace or to the list of collaborators for the app, contact a project maintainer.
+
+#### Finding reporting channel ID
+
+1. Go to the `#z_bot-sprint-reporting` channel in the Simpler.Grants.gov slack workspace.
+2. Click on the name of the channel in the top left part of the screen.
+3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID`.
+4. Copy and paste that ID into your `.secrets.toml` file under the `reporting_channel_id` variable.
+
+<img alt="Screenshot of dialog box with channel ID" src="./static/screenshot-channel-id.png" height=500>
+
+#### Finding slackbot token
+
+1. Go to [the dashboard](https://api.slack.com/apps) that displays the slack apps for which you have collaborator access
+2. Click on `Sprint Reporting Bot` to go to the settings for our analytics slackbot
+3. From the side menu, select `OAuth & Permissions` and scroll down to the "OAuth tokens for your workspace" section
+4. Copy the "Bot user OAuth token" which should start with `xoxb` and paste it into your `.secrets.toml` file under the `slack_bot_token` variable.
+
+<img alt="Screenshot of slack app settings page with bot user OAuth token" src="./static/screenshot-slackbot-token.png" width=900>
 
 ## Getting started
 
@@ -75,12 +104,13 @@ poetry run analytics export gh_project_data --owner HHS --project 13 --output-fi
 Once you've exported the sprint and issue data from GitHub, you can start calculating metrics. We'll begin with sprint burndown:
 
 ```bash
-poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint @current --show-results
+poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint @current --unit points --show-results
 ```
 
 A couple of important notes about this command:
 
 - `--sprint @current` In order to calculate burndown, you'll need to specify either `@current` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
+- `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `issues`
 - `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
 ![Screenshot of burndown for sprint 10](static/reporting-notebook-screenshot.png)
@@ -88,7 +118,7 @@ A couple of important notes about this command:
 You can also post the results of this metric to a Slack channel:
 
 ```bash
-poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "Sprint 10" --post-results
+poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "Sprint 10" --unit points --post-results
 ```
 
 > **NOTE:** This requires you to have the `.secrets.toml` configured according to the directions in step 5 of the [installation section](#installation)
@@ -97,15 +127,15 @@ poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.js
 
 ### Calculating deliverable percent complete
 
-Another key metric you can report is the percentage of tasks or points completed per 30k deliverable.
-You can specify the unit you want to use for percent complete (e.g. points or tasks) using the `--unit` flag.
+Another key metric you can report is the percentage of issues or points completed per 30k deliverable.
+You can specify the unit you want to use for percent complete (e.g. points or issues) using the `--unit` flag.
 
 For example, here we're calculating percentage completion based on the number of tickets under each deliverable.
 
 ```bash
-poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit tasks
+poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit issues
 ```
-![Screenshot of deliverable percent complete by tasks](static/screenshot-deliverable-pct-complete-tasks.png)
+![Screenshot of deliverable percent complete by issues](static/screenshot-deliverable-pct-complete-tasks.png)
 
 And here we're calculating it based on the total story point value of those tickets.
 
@@ -113,6 +143,6 @@ And here we're calculating it based on the total story point value of those tick
 poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit points
 ```
 
-![Screenshot of deliverable percent complete by tasks](static/screenshot-deliverable-pct-complete-points.png)
+![Screenshot of deliverable percent complete by points](static/screenshot-deliverable-pct-complete-points.png)
 
 The `deliverable_pct_complete` sub-command also supports the `--post-results` flag if you want to post this data to slack.
