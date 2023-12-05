@@ -5,10 +5,11 @@ import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import PageSEO from "src/components/PageSEO";
-import WtGIContent from "src/components/WtGIContent";
 import FullWidthAlert from "../components/FullWidthAlert";
-import GoalContent from "../components/GoalContent";
 import Hero from "../components/Hero";
+import IndexGoalContent from "./content/IndexGoalContent";
+import IndexProcessContent from "./content/IndexProcessContent";
+import IndexResearchContent from "./content/IndexResearchContent";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -32,8 +33,9 @@ const Home: NextPage = () => {
           }}
         />
       </FullWidthAlert>
-      <GoalContent />
-      <WtGIContent />
+      <IndexGoalContent />
+      <IndexProcessContent />
+      <IndexResearchContent />
     </>
   );
 };

@@ -25,11 +25,7 @@ const getBGColor = (type: Props["type"]) => {
 
 const FullWidthAlert = ({ type, heading, children }: Props) => {
   return (
-    <div
-      className={`${getBGColor(
-        type
-      )} tablet:position-sticky top-0 desktop:z-top`}
-    >
+    <div className={`${getBGColor(type)} desktop:position-sticky top-0 z-top`}>
       <GridContainer className="padding-y-1 tablet-lg:padding-y-2">
         <Grid>
           <USWDSAlert
