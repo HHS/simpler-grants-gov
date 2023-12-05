@@ -62,10 +62,11 @@ class SprintBurndown(BaseMetric):
     def plot_results(self) -> Figure:
         """Plot the sprint burndown using a plotly line chart."""
         # Limit the data in the line chart to dates within the sprint
+        # or through today, if the sprint hasn't yet ended
         # NOTE: This will *not* affect the running totals on those days
         date_mask = self.results[self.date_col].between(
             self.dataset.sprint_start(self.sprint),
-            self.dataset.sprint_end(self.sprint),
+            min(self.dataset.sprint_end(self.sprint), pd.Timestamp.today(tz="utc")),
         )
         df = self.results[date_mask]
         # create a line chart from the data in self.results
