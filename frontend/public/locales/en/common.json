@@ -63,7 +63,8 @@
     "intro": "You are signed up to receive project updates from Simpler.Grants.gov.",
     "paragraph_1": "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     "heading": "Learn more",
-    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work."
+    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work.",
+    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_unsubscribe": {
     "title": "You have unsubscribed",
@@ -71,7 +72,8 @@
     "paragraph_1": "Did you unsubscribe by accident? Sign up again.",
     "button_resub": "Re-subscribe",
     "heading": "Learn more",
-    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work."
+    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work.",
+    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "ErrorPages": {
     "page_not_found": {
