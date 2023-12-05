@@ -19,7 +19,11 @@ const IndexResearchContent = () => {
         <Link href="/process" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("research.cta")}{" "}
-            <Icon.ArrowForward className="text-middle" size={4} aria-label="arrow forward"/>
+            <Icon.ArrowForward
+              className="text-middle"
+              size={4}
+              aria-label="arrow forward"
+            />
           </Button>
         </Link>
       </Grid>
@@ -30,6 +34,7 @@ const IndexResearchContent = () => {
         <Grid row gap={2}>
           <Grid className="maxw-10" col={2}>
             <Image
+              className="height-auto"
               style={{ filter: "invert(33%)" }}
               src={embarrassed as string}
               alt="embarrased"
@@ -44,6 +49,7 @@ const IndexResearchContent = () => {
         <Grid row gap={2}>
           <Grid className="maxw-10" col={2}>
             <Image
+              className="height-auto"
               style={{ filter: "invert(33%)" }}
               src={leadership as string}
               alt="leadership"
@@ -58,6 +64,7 @@ const IndexResearchContent = () => {
         <Grid row gap={2}>
           <Grid className="maxw-10" col={2}>
             <Image
+              className="height-auto"
               style={{ filter: "invert(33%)" }}
               src={goal as string}
               alt="goal"
@@ -72,6 +79,7 @@ const IndexResearchContent = () => {
         <Grid row gap={2}>
           <Grid className="maxw-10" col={2}>
             <Image
+              className="height-auto"
               style={{ filter: "invert(33%)" }}
               src={hiring as string}
               alt="hiring"

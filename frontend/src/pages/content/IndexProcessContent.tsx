@@ -16,7 +16,11 @@ const IndexProcessContent = () => {
         <Link href="/process" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("process.cta")}{" "}
-            <Icon.ArrowForward className="text-middle" size={4} aria-label="arrow forward"/>
+            <Icon.ArrowForward
+              className="text-middle"
+              size={4}
+              aria-label="arrow forward"
+            />
           </Button>
         </Link>
       </Grid>

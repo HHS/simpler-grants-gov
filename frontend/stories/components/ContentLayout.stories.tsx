@@ -9,8 +9,9 @@ const meta: Meta<typeof ContentLayout> = {
 export default meta;
 
 export const Default = {
-    args: {
-        title: "This is a Content Layout Component",
-        children: "This is some content. You can remove the title or make it a smaller font. You can also remove the border on the bottom. This section should be formatted as a react component.",
-        },
+  args: {
+    title: "This is a Content Layout Component",
+    children:
+      "This is some content. You can remove the title or make it a smaller font. You can also remove the border on the bottom. This section should be formatted as a react component.",
+  },
 };
