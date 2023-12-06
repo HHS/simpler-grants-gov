@@ -36,7 +36,7 @@ const Research: NextPage = () => {
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />
       <ResearchMethodology />
-      <div className="bg-gray-5">
+      <div className="padding-top-4 bg-gray-5">
         <ResearchArchetypes />
       </div>
     </>
