@@ -42,7 +42,7 @@ const ContentLayout = ({
   return (
     <GridContainer
       className={`padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 ${
-        paddingTop
+        !paddingTop
           ? "padding-top-0 tablet:padding-top-0 desktop-lg:padding-top-0"
           : ""
       } ${bborder}`}
