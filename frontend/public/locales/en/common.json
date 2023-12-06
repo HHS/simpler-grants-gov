@@ -51,8 +51,42 @@
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "alert_title": "Simpler Grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
-    "intro_title": "Our existing research",
-    "intro_content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
+    "intro": {
+      "title": "Our existing research",
+      "content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
+    },
+    "methodology": {
+      "title": "The methodology",
+      "paragraph_1": "Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. Recruiting choices were made equitably to ensure a diverse pool of participants. We spoke to a large number of users, well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants. With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.",
+      "title_2": "Research objectives:",
+      "paragraph_2": "<ul><li>Examine existing user journeys and behaviors, identifying where Grants.gov fits into their overall approach and its role in relation to other systems</li><li>Learn from their experiences, roles, challenges, and ability to complete specific tasks</li><li>Identify barriers and areas of opportunity where a simpler Grants.gov can create a more equitable experience for underserved communities</li></ul>",
+      "title_3": "Want to be notified when there are upcoming user research efforts?",
+      "cta": "Sign up for project updates"
+    },
+    "archetypes": {
+      "title": "Applicant archetypes",
+      "paragraph_1": "Archetypes are compelling summaries that highlight the types of applicants that Grants.gov serves. They’re informed by and summarize user research data, and represent user behaviors, attitudes, motivations, pain points, and goals. We’ll use these archetypes to influence our design decisions, guide the product’s direction, and keep our work human-centered. ",
+      "novice": {
+        "title": "The Novice",
+        "paragraph_1": "Applicants lacking familiarity with the grant application process, including first-time or infrequent applicants and those who never apply",
+        "paragraph_2": "Novices often come from low-capacity organizations. They face a steep learning curve to find and apply for funding opportunities. Solving their needs will generate a more inclusive Grants.gov experience."
+      },
+      "collaborator": {
+        "title": "The Collaborator",
+        "paragraph_1": "Applicants who've applied before, working with colleagues or partner organizations to increase their chances of success",
+        "paragraph_2": "Collaborators have more familiarity with Grants.gov. But they face challenges with coordinating application materials, and often resorting to tools and resources outside of Grants.gov."
+      },
+      "maestro": {
+        "title": "The Maestro",
+        "paragraph_1": "Frequent applicants familiar with Grants.gov, who are often directly responsible for managing multiple applications at once",
+        "paragraph_2": "Maestros have an established approach to applying, which may include software and tools outside of Grants.gov. Their primary concerns are rooted in determining grant feasibility and staying ahead of deadlines."
+      },
+      "supervisor": {
+        "title": "The Supervisor",
+        "paragraph_1": "Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros.",
+        "paragraph_2": "Supervisors are responsible for oversight, approvals, final submissions, and keeping registrations up to date. Their time is limited, as they're often busy with the organization's other needs."
+      }
+    }
   },
   "Process": {
     "page_title": "Process | Simpler Grants.gov",

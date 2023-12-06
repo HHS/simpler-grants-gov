@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import ProcessContent from "src/pages/content/ProcessContent";
+import ResearchMethodology from "src/pages/content/ResearchMethodology";
 
-describe("Process Content", () => {
+describe("Research Content", () => {
   it("Renders without errors", () => {
-    render(<ProcessContent />);
+    render(<ResearchMethodology />);
     const ProcessH1 = screen.getByRole("heading", {
       level: 2,
-      name: /Our open process/i,
+      name: /The methodology/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();

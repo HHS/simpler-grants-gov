@@ -16,7 +16,7 @@ const IndexResearchContent = () => {
     <ContentLayout title={t("research.title")} data-testid="research-content">
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
         <p className="usa-intro">{t("research.paragraph_1")}</p>
-        <Link href="/process" passHref>
+        <Link href="/research" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("research.cta")}{" "}
             <Icon.ArrowForward
