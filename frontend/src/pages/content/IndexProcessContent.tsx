@@ -10,7 +10,11 @@ const IndexProcessContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
-    <ContentLayout title={t("process.title")} data-testid="process-content">
+    <ContentLayout
+      title={t("process.title")}
+      data-testid="process-content"
+      bottomBorder="light"
+    >
       <Grid tabletLg={{ col: 6 }}>
         <p className="usa-intro">{t("process.paragraph_1")}</p>
         <Link href="/process" passHref>

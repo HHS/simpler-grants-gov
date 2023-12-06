@@ -1,6 +1,5 @@
 import { Meta } from "@storybook/react";
-
-import ProcessContent from "src/components/ProcessContent";
+import ProcessContent from "src/pages/content/ProcessContent";
 
 const meta: Meta<typeof ProcessContent> = {
   title: "Components/Content/Process Content",

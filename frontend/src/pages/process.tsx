@@ -8,7 +8,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
-import ProcessContent from "../components/ProcessContent";
+import ProcessContent from "./content/ProcessContent";
 
 const Process: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
