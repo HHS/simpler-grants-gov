@@ -78,7 +78,7 @@ flowchart LR
 
     subgraph User interface
         Web-Analytics-Legacy
-        FE-Plan::executing
+        FE-Plan:::executing
         FE-Plan --> Static-Site:::executing
         FE-CI-CD
         FE-Plan --> FE-CI-CD
@@ -126,7 +126,7 @@ flowchart LR
     subgraph Initial API deployment
         Onboard-Dev-Team --> SaaS-Plan
         SaaS-Plan
-        API-Plan::planning
+        API-Plan:::planning
         Legacy-Architecture
         Onboard-Dev-Team:::executing
         Onboard-Dev-Team --> Feature-Flags
@@ -135,7 +135,7 @@ flowchart LR
         Onboard-Dev-Team & API-Plan --> Dev-Tools
         Beta-Domain
         Beta-Domain --> Static-Site
-        DB-Plan::executing & API-Plan --> Infrastructure-as-Code
+        DB-Plan:::executing & API-Plan --> Infrastructure-as-Code
         DB-Replica & DB-Plan --> DB-Test-Data
         DB-Plan & API-Plan & DB-Test-Data & DB-Replica & Dev-Tools & Beta-Domain --> GET-Opportunities:::executing
         API-Plan & GET-Opportunities --> Webhooks-Opportunities
