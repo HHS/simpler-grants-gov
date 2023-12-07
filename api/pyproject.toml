@@ -40,6 +40,8 @@ pytest-watch = "^4.2.0"
 pytest-lazy-fixture = "^0.6.3"
 types-pyyaml = "^6.0.12.11"
 setuptools = "^68.2.2"
+pydot = "1.4.2"
+sadisplay = "0.4.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -50,6 +52,7 @@ db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
 db-seed-local = "tests.lib.seed_local_db:seed_local_db"
+create-erds = "bin.create_erds:main"
 
 [tool.black]
 line-length = 100
