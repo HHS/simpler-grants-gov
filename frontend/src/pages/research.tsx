@@ -10,7 +10,9 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
 import ResearchArchetypes from "./content/ResearchArchetypes";
+import ResearchImpact from "./content/ResearchImpact";
 import ResearchMethodology from "./content/ResearchMethodology";
+import ResearchThemes from "./content/ResearchThemes";
 
 const Research: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Research" });
@@ -38,7 +40,9 @@ const Research: NextPage = () => {
       <ResearchMethodology />
       <div className="padding-top-4 bg-gray-5">
         <ResearchArchetypes />
+        <ResearchThemes />
       </div>
+      <ResearchImpact />
     </>
   );
 };

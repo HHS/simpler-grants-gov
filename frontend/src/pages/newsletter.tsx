@@ -65,10 +65,10 @@ const Newsletter: NextPage = () => {
               data-testid="sendy-form"
               action="https://communications.grants.gov/app/subscribe"
               method="POST"
-              accept-charset="utf-8"
+              acceptCharset="utf-8"
             >
               <Label htmlFor="name">First Name</Label>
-              <TextInput type="text" name="name" id="name" />
+              <TextInput type="text" name="name" id="name" required />
               <Label htmlFor="LastName">Last Name</Label>
               <TextInput type="text" name="LastName" id="LastName" />
               <div className="display-none">
@@ -76,7 +76,7 @@ const Newsletter: NextPage = () => {
                 <TextInput type="text" name="hp" id="hp" />
               </div>
               <Label htmlFor="email">Email</Label>
-              <TextInput type="email" name="email" id="email" />
+              <TextInput type="email" name="email" id="email" required />
               <input type="hidden" name="list" value="A2zerhEC59Ea6mzTgzdTgw" />
               <input type="hidden" name="subform" value="yes" />
               <Button
