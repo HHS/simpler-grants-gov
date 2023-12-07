@@ -12,10 +12,15 @@ type ImpactBoxes = {
 };
 
 const ResearchImpact = () => {
-  const { t } = useTranslation("common", { keyPrefix: "Research" });
+  const { t } = useTranslation("common", {
+    keyPrefix: "Research",
+  });
   const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
 
   const boxes: ImpactBoxes[] = t("impact.boxes", { returnObjects: true });
+
+  // Do not render if translations aren't ready as returnObjects and map causes the prerender to fail
+  // if (!ready) return <></>;
 
   return (
     <ContentLayout
@@ -31,22 +36,24 @@ const ResearchImpact = () => {
         </p>
       </Grid>
       <Grid row gap="lg" className="margin-top-2">
-        {boxes.map((box) => {
-          return (
-            <Grid
-              className="margin-bottom-6"
-              key={box.title + "-key"}
-              tabletLg={{ col: 4 }}
-            >
-              <div className="border radius-md border-base-lighter padding-x-205">
-                <h3 className="tablet-lg:font-serif-lg">{box.title}</h3>
-                <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-                  {box.content}
-                </p>
-              </div>
-            </Grid>
-          );
-        })}
+        {!Array.isArray(boxes)
+          ? ""
+          : boxes.map((box) => {
+              return (
+                <Grid
+                  className="margin-bottom-6"
+                  key={box.title + "-key"}
+                  tabletLg={{ col: 4 }}
+                >
+                  <div className="border radius-md border-base-lighter padding-x-205">
+                    <h3 className="tablet-lg:font-serif-lg">{box.title}</h3>
+                    <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+                      {box.content}
+                    </p>
+                  </div>
+                </Grid>
+              );
+            })}
       </Grid>
       <Grid tabletLg={{ col: 8 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
