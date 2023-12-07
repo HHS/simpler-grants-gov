@@ -21,6 +21,7 @@ ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 # If we want to generate separate files for more specific groups, we can set that up here
 ALL_MODULES = [opportunity_models]
 
+
 def create_erds(modules: Any, file_name: str) -> None:
     logger.info("Generating ERD diagrams for %s", file_name)
 
