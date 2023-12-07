@@ -75,7 +75,7 @@ const ResearchArchetypes = () => {
         gap="sm"
         tabletLg={{ col: 6 }}
       >
-        <Grid tabletLg={{ col: 3 }} className="text-center">
+        <Grid col={3} className="text-center">
           <Image
             className="height-auto margin-top-1"
             style={{ filter: "invert(33%)" }}
@@ -84,7 +84,7 @@ const ResearchArchetypes = () => {
             priority={false}
           />
         </Grid>
-        <Grid tabletLg={{ col: 9 }}>
+        <Grid col={9}>
           <p className="usa-intro margin-top-0">
             {t("archetypes.maestro.paragraph_1")}
           </p>
@@ -99,7 +99,7 @@ const ResearchArchetypes = () => {
         gap="sm"
         tabletLg={{ col: 6 }}
       >
-        <Grid tabletLg={{ col: 3 }} className="text-center">
+        <Grid col={3} className="text-center">
           <Image
             className="height-auto margin-top-1"
             style={{ filter: "invert(33%)" }}
@@ -108,7 +108,7 @@ const ResearchArchetypes = () => {
             priority={false}
           />
         </Grid>
-        <Grid tabletLg={{ col: 9 }}>
+        <Grid col={9}>
           <p className="usa-intro margin-top-0">
             {t("archetypes.supervisor.paragraph_1")}
           </p>
