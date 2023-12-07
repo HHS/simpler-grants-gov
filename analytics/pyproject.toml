@@ -48,6 +48,7 @@ disable = [
   "R0801", # duplicate-code
   "W0511", # fix-me
   "R0913", # too-many-arguments
+  "R0902", # too-many-instance-attributes
 ]
 
 [tool.ruff]

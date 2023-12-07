@@ -54,7 +54,7 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
 
   return (
     <GridContainer
-      className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6"
+      className="padding-top-1 tablet:padding-top-3 desktop-lg:padding-top-4"
       data-testid="breadcrumb"
     >
       <BreadcrumbBar listProps={{ ...rdfaMetadata.ol }}>
