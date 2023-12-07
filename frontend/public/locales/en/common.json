@@ -86,6 +86,41 @@
         "paragraph_1": "Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros.",
         "paragraph_2": "Supervisors are responsible for oversight, approvals, final submissions, and keeping registrations up to date. Their time is limited, as they're often busy with the organization's other needs."
       }
+    },
+    "themes": {
+      "title": "General themes",
+      "paragraph_1": "The existing Grants.gov website works best for those who use it regularly. Larger organizations and teams of Collaborators and Maestros are typically more familiar with the ins and outs of the system. To create a simpler Grants.gov with an intuitive user experience that addresses the needs of all archetypes, four themes were defined:",
+      "title_2": "Frictionless functionality ",
+      "paragraph_2": "Reduce the burden on applicants and grantmakers, from both a process and systems perspective, by addressing the pain points that negatively affect their experience",
+      "title_3": "Sophisticated self-direction",
+      "paragraph_3": "Meet users where they are during crucial moments, by providing a guided journey through opt-in contextual support that reduces their need to find help outside the system",
+      "title_4": "Demystify the grants process",
+      "paragraph_4": "Ensure that all users have the same easy access to instructional and educational information that empowers them to have a smoother, informed, and confident user experience",
+      "title_5": "Create an ownable identity",
+      "paragraph_5": "Create a presence that reflections our mission and supports our users through visual brand, content strategy, and user interface design systems"
+    },
+    "impact": {
+      "title": "Where can we have the most impact?",
+      "paragraph_1": "The most burden is on the Novice to become an expert on the grants process and system. In order to execute our mission, there is a need to improve awareness, access, and choice. This requires reaching out to those who are unfamiliar with the grant application process.",
+      "paragraph_2": "There are many common barriers that Novices face:",
+      "boxes": [
+        {
+          "title": "Digital connectivity",
+          "content": "Depending on availability and geography, a stable internet connection is not a guarantee to support a digital-only experience."
+        },
+        {
+          "title": "Organization size",
+          "content": "Not all organizations have dedicated resources for seeking grant funding. Many are 1-person shops who are trying to do it all."
+        },
+        {
+          "title": "Overworked",
+          "content": "New organizations are often too burdened with internal paperwork and infrastructure to support external funding and reporting."
+        },
+        {
+          "title": "Expertise",
+          "content": "Small organizations face higher turnover, and alumni often take their institutional knowledge and expertise with them when they leave."
+        }
+      ]
     }
   },
   "Process": {
