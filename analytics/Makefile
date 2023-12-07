@@ -1,5 +1,13 @@
 POETRY ?= poetry
 GITHUB ?= gh
+ORG ?= HHS
+REPO ?= simpler-grants-gov
+SPRINT_PROJECT ?= 13
+SPRINT_FILE ?= data/sprint-data.json
+ISSUE_FILE ?= data/issue-data.json
+SPRINT ?= @current
+UNIT ?= points
+ACTION ?= show-results
 
 check-prereqs:
 	@echo "=> Checking for pre-requisites"
@@ -11,8 +19,7 @@ install: check-prereqs
 	@echo "=> Installing python dependencies"
 	$(POETRY) install
 
-setup:
-	$(MAKE) install
+setup: install
 	$(GITHUB) auth login
 
 lint:
@@ -29,3 +36,40 @@ test:
 	@echo "=> Running tests"
 	@echo "============================="
 	$(POETRY) run pytest
+
+sprint-data-export:
+	$(POETRY) run analytics export gh_project_data \
+	--owner $(ORG) \
+	--project $(SPRINT_PROJECT) \
+	--output-file $(SPRINT_FILE)
+
+issue-data-export:
+	$(POETRY) run analytics export gh_issue_data \
+	--owner $(ORG) \
+	--repo $(REPO) \
+	--output-file $(ISSUE_FILE)
+
+gh-data-export: sprint-data-export issue-data-export
+
+sprint-burndown:
+	@echo "=> Running sprint burndown report"
+	@echo "====================================================="
+	poetry run analytics calculate sprint_burndown \
+	--sprint-file $(SPRINT_FILE) \
+	--issue-file $(ISSUE_FILE) \
+	--sprint  $(SPRINT) \
+	--unit $(UNIT) \
+	--$(ACTION)
+
+percent-complete:
+	@echo "=> Running percent complete deliverable"
+	@echo "====================================================="
+	poetry run analytics calculate deliverable_percent_complete \
+	--sprint-file $(SPRINT_FILE) \
+	--issue-file $(ISSUE_FILE) \
+	--unit $(UNIT) \
+	--$(ACTION)
+
+sprint-reports: sprint-burndown percent-complete
+
+sprint-reports-with-export: gh-data-export sprint-reports
