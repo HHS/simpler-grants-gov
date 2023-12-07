@@ -34,7 +34,7 @@ const ResearchMethodology = () => {
         <h3 className="tablet-lg:font-sans-lg margin-top-4 margin-bottom-2">
           {t("methodology.title_3")}
         </h3>
-        <Link href="/#" passHref>
+        <Link href="/newsletter" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("methodology.cta")}{" "}
             <Icon.Launch className="text-middle" size={4} aria-label="launch" />
