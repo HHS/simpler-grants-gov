@@ -1,6 +1,6 @@
 # Communications Tooling: Email Marketing
 
-- **Status:** Draft
+- **Status:** Active
 - **Last Modified:** 2023-12-04 <!-- REQUIRED -->
 - **Related Issue:** [#590](https://github.com/HHS/grants-equity/issues/590) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
@@ -33,7 +33,7 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 
 
 - [Sendy](https://sendy.co/) 
-- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) - 
+- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) 
 - [MailChimp](https://mailchimp.com/)
 - [Hubspot](https://www.hubspot.com/)
 - [Mautic](https://www.mautic.org/)
@@ -89,7 +89,7 @@ A Brand can be created under the existing Sendy account which allows users who s
 | Community and Support*         |     1 |   3        |     3     |   3     |   3     |   3  |
 | Scalability*                    |     🔄 |   ✅       |     ✅    |   ✅    |   ✅     | ❌    |
 
- * Nice to have
+[*] Nice to have
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -218,3 +218,9 @@ Adobe Campaign is a marketing automation tool that forms part of the Adobe Exper
 
 ## Links <!-- OPTIONAL -->
 
+- [Sendy](https://sendy.co/) 
+- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) 
+- [MailChimp](https://mailchimp.com/)
+- [Hubspot](https://www.hubspot.com/)
+- [Mautic](https://www.mautic.org/)
+- [Adobe Campaign](https://business.adobe.com/products/campaign/adobe-campaign.html)
