@@ -1,3 +1,5 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { Button, Grid, Icon } from "@trussworks/react-uswds";
@@ -36,7 +38,7 @@ const ProcessMethodology = () => {
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
             {t("milestones.sub_paragraph_2")}
           </p>
-          <Link href="/#" passHref>
+          <Link href={ExternalRoutes.MILESTONES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
               {t("milestones.cta_1")}{" "}
               <Icon.Launch
@@ -64,7 +66,7 @@ const ProcessMethodology = () => {
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
             {t("milestones.sub_paragraph_3")}
           </p>
-          <Link href="/#" passHref>
+          <Link href={ExternalRoutes.MILESTONES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
               {t("milestones.cta_2")}{" "}
               <Icon.Launch
