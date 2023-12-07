@@ -1,6 +1,6 @@
 import { ExternalRoutes } from "src/constants/routes";
 
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import Link from "next/link";
 import { Button, Grid, Icon } from "@trussworks/react-uswds";
 
@@ -10,8 +10,8 @@ const ProcessMethodology = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
 
   return (
-    <div className="padding-top-4 bg-gray-5">
-      <Grid tabletLg={{ col: 6 }} className="grid-container">
+    <>
+      <Grid className="grid-container padding-top-1 tablet:padding-top-3 desktop-lg:padding-top-6 padding-bottom-0 tablet:padding-bottom-0 desktop-lg:padding-bottom-0">
         <strong className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
           {t("milestones.tag")}
         </strong>
@@ -53,9 +53,9 @@ const ProcessMethodology = () => {
       <ContentLayout
         title={t("milestones.title_2")}
         data-testid="process-methodology-content"
+        paddingTop={false}
         titleSize="m"
         bottomBorder="none"
-        paddingTop={false}
       >
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("milestones.paragraph_2")}</p>
@@ -65,7 +65,28 @@ const ProcessMethodology = () => {
             {t("milestones.sub_title_3")}
           </h3>
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-            {t("milestones.sub_paragraph_3")}
+            <Trans
+              t={t}
+              i18nKey="milestones.sub_paragraph_3"
+              components={{
+                LinkToGrants: (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={ExternalRoutes.GRANTS_HOME}
+                  />
+                ),
+              }}
+            />
+          </p>
+          <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+            <Trans
+              t={t}
+              i18nKey="milestones.sub_paragraph_4"
+              components={{
+                LinkToNewsletter: <Link href="/newsletter" />,
+              }}
+            />
           </p>
           <Link href={ExternalRoutes.MILESTONES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
@@ -79,7 +100,7 @@ const ProcessMethodology = () => {
           </Link>
         </Grid>
       </ContentLayout>
-    </div>
+    </>
   );
 };
 

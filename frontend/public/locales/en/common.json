@@ -104,7 +104,7 @@
     "milestones": {
       "tag": "Learn about our first two project milestones",
       "title_1": "Milestone 1: Laying the foundation with a modern Application Programming Interface (API)",
-      "paragraph_1": "Since the grant application process depends on data, we’re starting with a new modern API to make that data more accessible. Our API-first approach will not only prioritize data at the beginning, it will also make sure data remains a priority as we iterate. We’re starting here because it’s crucial that grants data and the features we build work together. The Grants.gov website, 3rd-party apps, and other services will be able to more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications. ",
+      "paragraph_1": "Since the grant application process depends on data, we’re starting with a new modern API to make that data more accessible. Our API-first approach will not only prioritize data at the beginning, it will also make sure data remains a priority as we iterate. We’re starting here because it’s crucial that grants data and the features we build work together. The Grants.gov website, 3rd-party apps, and other services will be able to more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications. ",
       "sub_title_1": "What’s an API?",
       "sub_paragraph_1": "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
       "sub_title_2": "Are you interested in the tech?",
@@ -113,8 +113,8 @@
       "title_2": "Milestone 2: A new search interface accessible to everyone",
       "paragraph_2": "Once our new API is in place, we’ll begin focusing on how applicants most commonly access grants data. Our first user-facing milestone will be a simple search interface that makes data from our modern API accessible to anyone who wants to try out new ways to search for funding opportunities.",
       "sub_title_3": "Can’t wait to try out the new search?",
-      "sub_paragraph_3": "Search will be the first feature on Simpler.Grants.gov that you’ll be able to test. It’ll be quite basic at first, and you’ll need to continue using www.grants.gov as we iterate. But your feedback will inform what happens next.",
-      "milestone_2_goal_paragraph_2": "Be sure to sign up for product updates so you know when the new search is available.",
+      "sub_paragraph_3": "Search will be the first feature on Simpler.Grants.gov that you’ll be able to test. It’ll be quite basic at first, and you’ll need to continue using <LinkToGrants>www.grants.gov</LinkToGrants> as we iterate. But your feedback will inform what happens next.",
+      "sub_paragraph_4": "Be sure to <LinkToNewsletter>sign up for product updates</LinkToNewsletter> so you know when the new search is available.",
       "cta_2": "View the search milestone on GitHub"
     }
   },
