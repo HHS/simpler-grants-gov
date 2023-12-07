@@ -1,9 +1,9 @@
 import { Meta } from "@storybook/react";
-import ResearchThemes from "src/pages/content/ResearchThemes";
+import ResearchImpact from "src/pages/content/ResearchImpact";
 
-const meta: Meta<typeof ResearchThemes> = {
-  title: "Components/Content/Research Themes Content",
-  component: ResearchThemes,
+const meta: Meta<typeof ResearchImpact> = {
+  title: "Components/Content/Research Impact Content",
+  component: ResearchImpact,
 };
 export default meta;
 

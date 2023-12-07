@@ -10,6 +10,7 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
 import ResearchArchetypes from "./content/ResearchArchetypes";
+import ResearchImpact from "./content/ResearchImpact";
 import ResearchMethodology from "./content/ResearchMethodology";
 import ResearchThemes from "./content/ResearchThemes";
 
@@ -41,6 +42,7 @@ const Research: NextPage = () => {
         <ResearchArchetypes />
         <ResearchThemes />
       </div>
+      <ResearchImpact />
     </>
   );
 };

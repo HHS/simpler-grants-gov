@@ -119,6 +119,38 @@
         {
           "title": "Expertise",
           "content": "Small organizations face higher turnover, and alumni often take their institutional knowledge and expertise with them when they leave."
+        },
+        {
+          "title": "Cognitive load",
+          "content": "Applicants often apply for funding through several agencies, requiring they learn multiple processes and satisfy varying requirements."
+        },
+        {
+          "title": "Language",
+          "content": "Applicants are faced with a lot of jargon without context or definitions, which is especially difficult when English is not their native language."
+        },
+        {
+          "title": "Education",
+          "content": "It often requires a high level of education to comprehend the complexity and language of funding opportunity announcements."
+        },
+        {
+          "title": "Lost at the start",
+          "content": "Novices don’t see a clear call-to-action for getting started, and they have trouble finding the one-on-one help at the beginning of the process."
+        },
+        {
+          "title": "Overwhelmed by search",
+          "content": "New applicants misuse the keyword search function and have trouble understanding the acronyms and terminology."
+        },
+        {
+          "title": "Confused by announcements",
+          "content": "Novices have difficulty determining their eligibility and understanding the details of the funding opportunity announcement."
+        },
+        {
+          "title": "Time",
+          "content": "Most individuals wear a lot of hats (community advocate, program lead, etc.) and \"grants applicant\" is only part of their responsibilities and requires efficiency."
+        },
+        {
+          "title": "Blindsided by requirements",
+          "content": "New applicants are caught off guard by SAM.gov registration and often miss the format and file name requirements."
         }
       ]
     }
