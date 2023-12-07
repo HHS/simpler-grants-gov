@@ -26,9 +26,11 @@ const ResearchImpact = () => {
     >
       <Grid>
         <p className="usa-intro">{t("impact.paragraph_1")}</p>
-        <p className="usa-intro text-bold">{t("impact.paragraph_2")}</p>
+        <p className="usa-intro text-bold margin-top-4">
+          {t("impact.paragraph_2")}
+        </p>
       </Grid>
-      <Grid row gap="lg">
+      <Grid row gap="lg" className="margin-top-2">
         {boxes.map((box) => {
           return (
             <Grid
