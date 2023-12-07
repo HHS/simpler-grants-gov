@@ -55,6 +55,7 @@ const ProcessMethodology = () => {
         data-testid="process-methodology-content"
         titleSize="m"
         bottomBorder="none"
+        paddingTop={false}
       >
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("milestones.paragraph_2")}</p>
