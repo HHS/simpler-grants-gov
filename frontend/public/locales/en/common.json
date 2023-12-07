@@ -102,6 +102,7 @@
     "agile_title": "Agile",
     "agile_content": "We’re building a simpler Grants.gov with you, not for you. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements.",
     "milestones": {
+      "tag": "Learn about our first two project milestones",
       "title_1": "Milestone 1: Laying the foundation with a modern Application Programming Interface (API)",
       "paragraph_1": "Since the grant application process depends on data, we’re starting with a new modern API to make that data more accessible. Our API-first approach will not only prioritize data at the beginning, it will also make sure data remains a priority as we iterate. We’re starting here because it’s crucial that grants data and the features we build work together. The Grants.gov website, 3rd-party apps, and other services will be able to more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications. ",
       "sub_title_1": "What’s an API?",

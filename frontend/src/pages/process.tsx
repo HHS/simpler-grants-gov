@@ -34,7 +34,9 @@ const Process: NextPage = () => {
       </FullWidthAlert>
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessContent />
-      <ProcessMethodology />
+      <div className="padding-top-4 bg-gray-5">
+        <ProcessMethodology />
+      </div>
     </>
   );
 };
