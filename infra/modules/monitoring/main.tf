@@ -83,3 +83,50 @@ resource "aws_sns_topic_subscription" "incident_management_service_integration" 
   protocol               = "https"
   topic_arn              = aws_sns_topic.this.arn
 }
+
+
+# TODO: Move to own file
+#
+# Synthetic Canary Resources:
+#
+#
+
+# Logging Bucket 
+resource "aws_s3_bucket" "canary-reports" {
+  bucket = "s3-canaries-reports"
+}
+resource "aws_s3_bucket_versioning" "canary-reports" {
+  bucket = aws_s3_bucket.canary-reports.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Canary
+resource "aws_synthetics_canary" "canary" {
+  name                 = "homepage-monitoring"
+  artifact_s3_location = "s3://${aws_s3_bucket.canary-reports.id}/"
+  execution_role_arn   = data.aws_iam_role.role.arn
+  runtime_version      = "syn-python-selenium-2.0"
+  handler              = "canary.handler"
+  zip_file             = "" # pull from AWS
+  start_canary         = true
+
+  success_retention_period = 2
+  failure_retention_period = 14
+
+  schedule {
+    expression          = "rate( 5 minutes)"
+    duration_in_seconds = 0
+  }
+
+  run_config {
+    timeout_in_seconds = 15
+    active_tracing     = false
+  }
+
+  tags = {
+    Name = "canary"
+  }
+
+}
