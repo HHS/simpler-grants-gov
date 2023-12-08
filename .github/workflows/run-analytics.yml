@@ -16,6 +16,8 @@ jobs:
   run-reports:
     name: Run sprint reports and deliverable reports
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       # set up python
       - uses: actions/checkout@v3
