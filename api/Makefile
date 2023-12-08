@@ -108,7 +108,7 @@ clean-volumes: ## Remove project docker volumes (which includes the DB state)
 stop:
 	docker-compose down
 
-check: format-check lint test
+check: format-check lint db-check-migrations test
 
 ##################################################
 # DB & migrations
