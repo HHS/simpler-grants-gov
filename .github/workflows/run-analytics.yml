@@ -3,6 +3,8 @@ name: Run analytics package
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "30 5 * * 1-5"
 
 defaults:
   run:
