@@ -4,6 +4,11 @@
 
 APP_NAME := grants-api
 
+# Colors for output, can be used as:
+# 	echo -e "this text is the default color $(RED) this text is red $(NO_COLOR) everything here is the default color again"
+RED := \033[0;31m
+NO_COLOR := \033[0m
+
 # Adding this to the end of a script that outputs JSON will convert
 # it to a readable format with timestamps and color-coding.
 #
@@ -165,7 +170,7 @@ db-seed-local:
 	$(PY_RUN_CMD) db-seed-local
 
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
-	$(alembic_cmd) check
+	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 ##################################################
 # Testing
