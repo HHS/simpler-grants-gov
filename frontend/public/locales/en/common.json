@@ -197,7 +197,7 @@
         }
       ],
       "title_1": "Milestone 1: Laying the foundation with a modern Application Programming Interface (API)",
-      "paragraph_1": "Since the grant application process depends on data, we’re starting with a new modern API to make that data more accessible. Our API-first approach will not only prioritize data at the beginning, it will also make sure data remains a priority as we iterate. We’re starting here because it’s crucial that grants data and the features we build work together. The Grants.gov website, 3rd-party apps, and other services will be able to more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications. ",
+      "paragraph_1": "We’re starting with a new modern API to make grants data more accessible. Our API-first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd-party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications.",
       "sub_title_1": "What’s an API?",
       "sub_paragraph_1": "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
       "sub_title_2": "Are you interested in the tech?",
