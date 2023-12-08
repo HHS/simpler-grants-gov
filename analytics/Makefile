@@ -38,12 +38,16 @@ test:
 	$(POETRY) run pytest
 
 sprint-data-export:
+	@echo "=> Exporting project data from the sprint board"
+	@echo "====================================================="
 	$(POETRY) run analytics export gh_project_data \
 	--owner $(ORG) \
 	--project $(SPRINT_PROJECT) \
 	--output-file $(SPRINT_FILE)
 
 issue-data-export:
+	@echo "=> Exporting issue data from the repository"
+	@echo "====================================================="
 	$(POETRY) run analytics export gh_issue_data \
 	--owner $(ORG) \
 	--repo $(REPO) \
@@ -72,4 +76,4 @@ percent-complete:
 
 sprint-reports: sprint-burndown percent-complete
 
-sprint-reports-with-export: gh-data-export sprint-reports
+sprint-reports-with-latest-data: gh-data-export sprint-reports
