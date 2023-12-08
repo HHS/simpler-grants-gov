@@ -74,6 +74,7 @@ const ProcessMilestones = () => {
               );
             })}
       </ContentLayout>
+      <div className="padding-2 tablet:padding-1" />
       <ContentLayout
         title={t("milestones.title_1")}
         data-testid="process-methodology-content"
