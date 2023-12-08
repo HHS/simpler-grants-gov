@@ -107,6 +107,7 @@ It should also open two new browser tabs, each with a separate report:
 - `make gh-data-export` - Exports both issue and sprint data
 - `make sprint-burndown` - Runs the sprint burndown report
 - `make percent-complete` - Runs the percent complete by deliverable report
+- `make sprint-reports` - Runs both percent complete and sprint burndown (without exporting data first)
 
 ## Using the command line interface
 
