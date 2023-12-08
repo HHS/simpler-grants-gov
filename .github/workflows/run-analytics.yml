@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      ANALYTICS_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ANALYTICS_REPORTING_CHANNEL_ID: ${{ secrets.REPORTING_CHANNEL_ID }}
     steps:
       # set up python
       - uses: actions/checkout@v3
@@ -31,5 +33,8 @@ jobs:
       - name: Install analytics package using poetry
         run: make install
 
-      - name: Run reports
+      - name: Export GitHub data
         run: make gh-data-export
+
+      - name: Run reports
+        run: make sprint-reports
