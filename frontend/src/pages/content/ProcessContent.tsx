@@ -1,20 +1,19 @@
 import { useTranslation } from "next-i18next";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { Grid } from "@trussworks/react-uswds";
+
+import ContentLayout from "src/components/ContentLayout";
 
 const ProcessContent = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
 
   return (
-    <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
-      <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-        {t("title")}
-      </h1>
+    <ContentLayout
+      title={t("title")}
+      data-testid="process-intro-content"
+      paddingTop={false}
+    >
       <Grid row gap>
-        <Grid
-          tabletLg={{ col: 12 }}
-          desktop={{ col: 12 }}
-          desktopLg={{ col: 12 }}
-        >
+        <Grid>
           <p className="tablet-lg:font-sans-xl line-height-sans-3 usa-intro margin-top-2">
             {t("content")}
           </p>
@@ -52,7 +51,7 @@ const ProcessContent = () => {
           </div>
         </Grid>
       </Grid>
-    </GridContainer>
+    </ContentLayout>
   );
 };
 

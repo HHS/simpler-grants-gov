@@ -8,7 +8,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
-import ProcessContent from "../components/ProcessContent";
+import ProcessContent from "./content/ProcessContent";
+import ProcessMethodology from "./content/ProcessMethodology";
 
 const Process: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
@@ -33,6 +34,9 @@ const Process: NextPage = () => {
       </FullWidthAlert>
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessContent />
+      <div className="padding-top-4 bg-gray-5">
+        <ProcessMethodology />
+      </div>
     </>
   );
 };

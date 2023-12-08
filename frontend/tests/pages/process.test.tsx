@@ -7,7 +7,8 @@ describe("Process", () => {
     render(<Process />);
 
     const alert = screen.getByTestId("alert");
-    const link = screen.getByRole("link", { name: /grants\.gov/i });
+    // There are multiple links to grants.gov
+    const link = screen.getAllByText("www.grants.gov")[0];
 
     expect(alert).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "https://www.grants.gov");
