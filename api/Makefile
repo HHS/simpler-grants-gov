@@ -164,6 +164,9 @@ db-migrate-heads: ## Show migrations marked as a head
 db-seed-local:
 	$(PY_RUN_CMD) db-seed-local
 
+db-check-migrations: ## Verify the DB schema matches the DB migrations generated
+	$(alembic_cmd) check
+
 ##################################################
 # Testing
 ##################################################
