@@ -4,7 +4,7 @@ This sub-directory enables users to run analytics on data generated within the S
 
 ## Getting started
 
-> NOTE: The following guide will focus on interacting with our analytics package through GitHub and slack. If you'd like to run is package locally skip to the section on [how to install it locally](#installing-the-analytics-package-locally).
+> Note: The following guide will focus on interacting with our analytics package through GitHub and Slack. If you'd like to run this package locally skip to the section on [how to install it locally](#installing-the-analytics-package-locally).
 
 ### See the daily reports
 
@@ -18,7 +18,7 @@ We have some automation set up in this repository that automatically runs our an
 
 ### Triggering a report
 
-> NOTE: This option is only available to project maintainers with write access to the repo.
+> Note: This option is only available to project maintainers with write access to the repo.
 
 If you're a project maintainer and want to run the reports outside of the daily schedule, you can also trigger the report to run manually using the following steps:
 
