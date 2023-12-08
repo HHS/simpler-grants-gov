@@ -13,8 +13,8 @@ defaults:
     working-directory: ./analytics # ensures that this job runs from the analytics sub-directory
 
 jobs:
-  check-cli-help:
-    name: Check that the CLI is installed correctly
+  run-reports:
+    name: Run sprint reports and deliverable reports
     runs-on: ubuntu-latest
     steps:
       # set up python
@@ -29,5 +29,5 @@ jobs:
       - name: Install analytics package using poetry
         run: make install
 
-      - name: Run CLI help to test that it's working
-        run: poetry run analytics --help
+      - name: Run reports
+        run: make gh-data-export
