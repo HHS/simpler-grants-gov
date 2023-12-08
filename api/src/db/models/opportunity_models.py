@@ -26,5 +26,4 @@ class Opportunity(Base, TimestampMixin):
 
     is_draft: Mapped[bool] = mapped_column("is_draft")
 
-
     new_column: Mapped[str | None]
