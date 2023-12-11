@@ -13,23 +13,13 @@
       "paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities (including underserved communities) to find the funding they need.",
       "cta": "Sign up for project updates"
     },
-    "process": {
-      "title": "The process",
-      "paragraph_1": "This project is transparent, iterative, and agile. All of the code we are writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give feedback to tell us what works, what can be improved, and inform what happens next. ",
-      "cta": "Learn about what's happening",
-      "title_2": "Are you code-savvy?",
-      "paragraph_2": "If you’re interested in exploring the details of exactly what we’re building, check out the GitHub project:",
-      "list": "<ul><li>Follow <repo>the code repository</repo></li><li>Read the <goals>project goals</goals></li><li>View the <roadmap>roadmap</roadmap></li><li>Learn about <contribute>how you can contribute</contribute></li><li>Explore the <adr>architecture decision records</adr></li></ul>"
-    },
-    "research": {
-      "title": "The research",
-      "paragraph_1": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together.",
-      "cta": "Read the research findings",
-      "title_2": "Applicant archetypes",
-      "paragraph_2": "<strong>The Novice</strong> — Applicants lacking familiarity with the grant application process, including first-time or infrequent applicants and those who never apply",
-      "paragraph_3": "<strong>The Collaborator</strong> — Applicants who've applied before, working with colleagues or partner organizations to increase their chances of success",
-      "paragraph_4": "<strong>The Maestro</strong> — Frequent applicants familiar with Grants.gov, who are often directly responsible for managing multiple applications at once",
-      "paragraph_5": "<strong>The Supervisor</strong> — Applicants who have a more senior role at organizations and have less frequent direct involvement with Grants.gov than Maestros."
+    "process_and_research": {
+      "title_1": "The process",
+      "title_2": "The research",
+      "paragraph_1": "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+      "paragraph_2": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together.",
+      "cta_1": "Learn about what’s happening",
+      "cta_2": "Read the research findings"
     },
     "fo_title": "Improvements to funding opportunity announcements",
     "fo_paragraph_1": "Funding opportunities should not only be easy to find, share, and apply for. They should also be easy to read and understand. Our objective is to simplify and organize funding opportunities announcements. ",
