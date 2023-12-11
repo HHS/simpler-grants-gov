@@ -71,6 +71,12 @@ class OpportunityFactory(BaseFactory):
 
     opportunity_number = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
     opportunity_title = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+
     agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
+
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
+    category_explanation = factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}")
+
     is_draft = False  # Because we filter out drafts, just default these to False
+
+    revision_number = 0  # We'll want to consider how we handle this when we add history
