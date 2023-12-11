@@ -28,6 +28,7 @@ pylint = "^3.0.2"
 pytest = "^7.4.0"
 ruff = "^0.0.278"
 safety = "^2.3.5"
+pytest-cov = "^4.1.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
