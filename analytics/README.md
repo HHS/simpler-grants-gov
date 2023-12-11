@@ -84,7 +84,7 @@ In most cases, the reports you'd like to run are already available as `make` com
 
 ### Export data and run reports
 
-If want to run reports with the most recent data from GitHub, the easiest way to do it with the `make sprint-reports-with-latest-data`
+If want to run reports with the most recent data from GitHub, the easiest way to do it is with the `make sprint-reports-with-latest-data`.
 
 That should result in something like the following being logged to the command line:
 
