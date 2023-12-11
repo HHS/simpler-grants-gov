@@ -14,11 +14,15 @@ const IndexGoalContent = () => {
       bottomBorder="light"
     >
       <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
-        <p className="usa-intro">{t("goal.paragraph_1")}</p>
-        <Link href="#" passHref>
+        <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
+        <Link href="/newsletter" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             {t("goal.cta")}{" "}
-            <Icon.Launch className="text-middle" size={4} aria-label="launch" />
+            <Icon.ArrowForward
+              className="text-middle"
+              size={4}
+              aria-label="arrow-forward"
+            />
           </Button>
         </Link>
       </Grid>
