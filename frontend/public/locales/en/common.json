@@ -57,9 +57,9 @@
     },
     "methodology": {
       "title": "The methodology",
-      "paragraph_1": "Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. Recruiting choices were made equitably to ensure a diverse pool of participants. We spoke to a large number of users, well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants. With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.",
+      "paragraph_1": "<p>Applicants and grantmakers were selected for a series of user interviews to better understand their experience using Grants.gov. We recruited equitably to ensure a diverse pool of participants.</p><p>The quantity of participants was well above industry standards. Of the applicants who were interviewed, 26% were first-time applicants, 39% were occasional applicants, and 34% were frequent applicants.</p><p>With the findings from these interviews, we defined user archetypes and general themes to guide the Simpler.Grants.gov user experience.</p>",
       "title_2": "Research objectives:",
-      "paragraph_2": "<ul><li>Examine existing user journeys and behaviors, identifying where Grants.gov fits into their overall approach and its role in relation to other systems</li><li>Learn from their experiences, roles, challenges, and ability to complete specific tasks</li><li>Identify barriers and areas of opportunity where a simpler Grants.gov can create a more equitable experience for underserved communities</li></ul>",
+      "paragraph_2": "<ul><li>Examine existing user journeys and behaviors, identifying how Grants.gov fits into their overall approach</li><li>Learn from user experiences, roles, challenges</li><li>Identify barriers and how a simpler Grants.gov can create a more intuitive user experience, especially for new users</li></ul>",
       "title_3": "Want to be notified when there are upcoming user research efforts?",
       "cta": "Sign up for project updates"
     },

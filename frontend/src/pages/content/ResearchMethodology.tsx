@@ -15,7 +15,17 @@ const ResearchMethodology = () => {
       bottomBorder="none"
     >
       <Grid tabletLg={{ col: 6 }}>
-        <p className="usa-intro">{t("methodology.paragraph_1")}</p>
+        <div className="margin-top-3">
+          <Trans
+            t={t}
+            i18nKey={"methodology.paragraph_1"}
+            components={{
+              p: (
+                <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6" />
+              ),
+            }}
+          />
+        </div>
       </Grid>
       <Grid tabletLg={{ col: 6 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
@@ -26,18 +36,21 @@ const ResearchMethodology = () => {
           i18nKey="methodology.paragraph_2"
           components={{
             ul: (
-              <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4 margin-bottom-2" />
+              <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4 margin-bottom-4" />
             ),
             li: <li />,
           }}
         />
-        <h3 className="tablet-lg:font-sans-lg margin-top-4 margin-bottom-2">
+        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
           {t("methodology.title_3")}
-        </h3>
+        </p>
         <Link href="/newsletter" passHref>
-          <Button className="margin-bottom-4" type="button" size="big">
+          <Button className="margin-bottom-4" type="button" outline>
             {t("methodology.cta")}{" "}
-            <Icon.Launch className="text-middle" size={4} aria-label="launch" />
+            <Icon.ArrowForward
+              className="text-middle"
+              aria-label="arror-forward"
+            />
           </Button>
         </Link>
       </Grid>
