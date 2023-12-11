@@ -1,5 +1,5 @@
 import type { GetStaticProps, NextPage } from "next";
-import { NEWSLETTER_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
+import { NEWSLETTER_UNSUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
@@ -9,11 +9,11 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import FullWidthAlert from "../components/FullWidthAlert";
+import FullWidthAlert from "../../components/FullWidthAlert";
 
-const NewsletterConfirmation: NextPage = () => {
+const NewsletterUnsubscribe: NextPage = () => {
   const { t } = useTranslation("common", {
-    keyPrefix: "Newsletter_confirmation",
+    keyPrefix: "Newsletter_unsubscribe",
   });
 
   return (
@@ -34,7 +34,7 @@ const NewsletterConfirmation: NextPage = () => {
           }}
         />
       </FullWidthAlert>
-      <Breadcrumbs breadcrumbList={NEWSLETTER_CONFIRMATION_CRUMBS} />
+      <Breadcrumbs breadcrumbList={NEWSLETTER_UNSUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
@@ -46,9 +46,12 @@ const NewsletterConfirmation: NextPage = () => {
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p className="usa-intro">{t("paragraph_1")}</p>
+            <Link className="usa-button margin-bottom-4" href="/newsletter">
+              {t("button_resub")}
+            </Link>
           </Grid>
           <Grid tabletLg={{ col: 6 }}>
-            <h2 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+            <h2 className="font-sans-md tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
               {t("heading")}
             </h2>
             <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
@@ -77,4 +80,4 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => {
   return { props: { ...translations } };
 };
 
-export default NewsletterConfirmation;
+export default NewsletterUnsubscribe;

@@ -14,7 +14,7 @@ import {
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import FullWidthAlert from "../components/FullWidthAlert";
+import FullWidthAlert from "../../components/FullWidthAlert";
 
 const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
