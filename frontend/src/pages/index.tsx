@@ -8,8 +8,7 @@ import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../components/FullWidthAlert";
 import Hero from "../components/Hero";
 import IndexGoalContent from "./content/IndexGoalContent";
-import IndexProcessContent from "./content/IndexProcessContent";
-import IndexResearchContent from "./content/IndexResearchContent";
+import ProcessAndResearchContent from "./content/ProcessAndResearchContent";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -34,8 +33,7 @@ const Home: NextPage = () => {
         />
       </FullWidthAlert>
       <IndexGoalContent />
-      <IndexProcessContent />
-      <IndexResearchContent />
+      <ProcessAndResearchContent />
     </>
   );
 };
