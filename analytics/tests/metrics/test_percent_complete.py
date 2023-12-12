@@ -1,4 +1,7 @@
 """Tests for analytics/datasets/percent_complete.py."""
+from pathlib import Path  # noqa: I001
+
+import pytest
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
@@ -19,6 +22,20 @@ def task_row(
         "points": points,
         "status": status,
     }
+
+
+@pytest.fixture(name="percent_complete")
+def sample_percent_complete() -> DeliverablePercentComplete:
+    """Create a sample burndown to simplify test setup."""
+    # setup - create test data
+    test_rows = [
+        task_row(deliverable=1, task=1, status="open"),
+        task_row(deliverable=1, task=2, status="closed"),
+        task_row(deliverable=2, task=3, status="open"),
+    ]
+    test_data = DeliverableTasks.from_dict(test_rows)
+    # return sprint burndown by points
+    return DeliverablePercentComplete(test_data, unit=Unit.points)
 
 
 class TestDeliverablePercentComplete:
@@ -234,3 +251,77 @@ class TestFormatSlackMessage:
         title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.points.value in title
+
+
+class TestPlotResults:
+    """Test the DeliverablePercentComplete.plot_results() method."""
+
+    def test_plot_results_output_stored_in_chart_property(self):
+        """SprintBurndown.chart should contain the output of plot_results()."""
+        # setup - create test dataset
+        test_rows = [
+            task_row(deliverable=1, task=1, points=2, status="open"),
+            task_row(deliverable=1, task=2, points=0, status="closed"),
+            task_row(deliverable=2, task=3, points=3, status="open"),
+            task_row(deliverable=2, task=3, points=None, status="open"),
+        ]
+        test_data = DeliverableTasks.from_dict(test_rows)
+        # execution
+        output = DeliverablePercentComplete(test_data, unit=Unit.issues)
+        # validation - check that the chart attribute matches output of plot_results()
+        assert output.chart == output.plot_results()
+
+
+class TestExportMethods:
+    """Test the export methods method for SprintBurndown."""
+
+    @pytest.mark.parametrize(
+        ("method", "file_path"),
+        [
+            ("export_results", "output.csv"),
+            ("export_chart_to_html", "output.html"),
+        ],
+    )
+    def test_export_results_to_correct_file_path(
+        self,
+        method: str,
+        file_path: str,
+        tmp_path: Path,
+        percent_complete: DeliverablePercentComplete,
+    ):
+        """The file should be exported to the correct location."""
+        # setup - check that file doesn't exist at output location
+        expected_path = tmp_path / file_path
+        assert expected_path.parent.exists() is True
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(percent_complete, method)
+        output = func(expected_path)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()
+
+    @pytest.mark.parametrize(
+        ("method", "file_path"),
+        [
+            ("export_results", "output.csv"),
+            ("export_chart_to_html", "output.html"),
+        ],
+    )
+    def test_create_parent_dir_if_it_does_not_exists(
+        self,
+        method: str,
+        file_path: str,
+        tmp_path: Path,
+        percent_complete: DeliverablePercentComplete,
+    ):
+        """The parent directory should be created if it doesn't already exist."""
+        expected_path = tmp_path / "new_folder" / file_path
+        assert expected_path.parent.exists() is False  # doesn't yet exist
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(percent_complete, method)
+        output = func(expected_path)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()

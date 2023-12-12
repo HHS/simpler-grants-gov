@@ -64,28 +64,28 @@ class BaseMetric:
         """Create a plotly chart that visually represents the results."""
         raise NotImplementedError
 
-    def export_results(self) -> Path:
+    def export_results(self, output_path: Path | None = None) -> Path:
         """Export the self.results dataframe to a csv file."""
         # make sure the parent directory exists
-        output_path = Path(self.RESULTS_CSV)
+        output_path = output_path or Path(self.RESULTS_CSV)
         output_path.parent.mkdir(exist_ok=True, parents=True)
         # export results dataframe to a csv
         self.results.to_csv(output_path)
         return output_path
 
-    def export_chart_to_html(self) -> Path:
+    def export_chart_to_html(self, output_path: Path | None = None) -> Path:
         """Export the plotly chart in self.chart to a png file."""
         # make sure the parent directory exists
-        output_path = Path(self.CHART_HTML)
+        output_path = output_path or Path(self.CHART_HTML)
         output_path.parent.mkdir(exist_ok=True, parents=True)
         # export chart to a png
         self.chart.write_html(output_path)
         return output_path
 
-    def export_chart_to_png(self) -> Path:
+    def export_chart_to_png(self, output_path: Path | None = None) -> Path:
         """Export the plotly chart in self.chart to a png file."""
         # make sure the parent directory exists
-        output_path = Path(self.CHART_PNG)
+        output_path = output_path or Path(self.CHART_PNG)
         output_path.parent.mkdir(exist_ok=True, parents=True)
         # export chart to a png
         self.chart.write_image(output_path, width=900)
