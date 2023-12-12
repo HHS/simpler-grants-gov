@@ -280,6 +280,7 @@ class TestExportMethods:
         [
             ("export_results", "output.csv"),
             ("export_chart_to_html", "output.html"),
+            ("export_chart_to_png", "output.png"),
         ],
     )
     def test_export_results_to_correct_file_path(
@@ -306,6 +307,7 @@ class TestExportMethods:
         [
             ("export_results", "output.csv"),
             ("export_chart_to_html", "output.html"),
+            ("export_chart_to_png", "output.png"),
         ],
     )
     def test_create_parent_dir_if_it_does_not_exists(
