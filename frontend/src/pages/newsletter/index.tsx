@@ -15,9 +15,58 @@ import {
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../../components/FullWidthAlert";
+import { useState } from "react";
 
 const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
+
+  const [formData, setFormData] = useState({
+    name: "",
+    LastName: "",
+    email: "",
+    list: "A2zerhEC59Ea6mzTgzdTgw",
+    subform: "yes"
+  });
+
+  const handleInput = (e: any) => {
+    const fieldName = e.target.name;
+    const fieldValue = e.target.value;
+  
+    setFormData((prevState) => ({
+      ...prevState,
+      [fieldName]: fieldValue
+    }));
+  }
+
+  // const submitForm = (e: any) => {
+  //   e.preventDefault()
+  
+  //   const formURL = e.target.action
+  //   const data = new FormData()
+  
+  //   Object.entries(formData).forEach(([key, value]) => {
+  //     data.append(key, value);
+  //   })
+  
+  //   fetch(formURL, {
+  //     method: "POST",
+  //     body: data,
+  //     headers: {
+  //       'accept': 'application/json',
+  //       'Access-Control-Allow-Origin': 'http://localhost:3000',
+  //       'Access-Control-Allow-Credentials': 'true',
+  //     },
+  //   }).then((res) => {
+  //     console.log("response: ", res)
+  //     setFormData({
+  //       name: "",
+  //       LastName: "",
+  //       email: "",
+  //       list: "A2zerhEC59Ea6mzTgzdTgw",
+  //       subform: "yes"
+  //     })
+  //   })
+  // }
 
   return (
     <>
@@ -66,17 +115,18 @@ const Newsletter: NextPage = () => {
               action="https://communications.grants.gov/app/subscribe"
               method="POST"
               acceptCharset="utf-8"
+              // onSubmit={submitForm}
             >
               <Label htmlFor="name">First Name</Label>
-              <TextInput type="text" name="name" id="name" required />
+              <TextInput type="text" name="name" id="name" value={formData.name} required onChange={handleInput}/>
               <Label htmlFor="LastName">Last Name</Label>
-              <TextInput type="text" name="LastName" id="LastName" />
+              <TextInput type="text" name="LastName" id="LastName" value={formData.LastName} onChange={handleInput}/>
+              <Label htmlFor="email">Email</Label>
+              <TextInput type="email" name="email" id="email" required value={formData.email} onChange={handleInput}/>
               <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
                 <TextInput type="text" name="hp" id="hp" />
               </div>
-              <Label htmlFor="email">Email</Label>
-              <TextInput type="email" name="email" id="email" required />
               <input type="hidden" name="list" value="A2zerhEC59Ea6mzTgzdTgw" />
               <input type="hidden" name="subform" value="yes" />
               <Button
