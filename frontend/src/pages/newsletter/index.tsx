@@ -115,7 +115,6 @@ const Newsletter: NextPage = () => {
               action="https://communications.grants.gov/app/subscribe"
               method="POST"
               acceptCharset="utf-8"
-              // onSubmit={submitForm}
             >
               <Label htmlFor="name">First Name</Label>
               <TextInput type="text" name="name" id="name" value={formData.name} required onChange={handleInput}/>
