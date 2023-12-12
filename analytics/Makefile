@@ -8,6 +8,7 @@ ISSUE_FILE ?= data/issue-data.json
 SPRINT ?= @current
 UNIT ?= points
 ACTION ?= show-results
+MIN_TEST_COVERAGE ?= 80
 
 check-prereqs:
 	@echo "=> Checking for pre-requisites"
@@ -32,10 +33,20 @@ lint:
 	@echo "============================="
 	@echo "=> All checks succeeded"
 
-test:
-	@echo "=> Running tests"
+unit-test:
+	@echo "=> Running unit tests"
 	@echo "============================="
-	$(POETRY) run pytest
+	$(POETRY) run pytest --cov=src
+
+e2e-test:
+	@echo "=> Running end-to-end tests"
+	@echo "============================="
+	$(POETRY) run pytest tests/integrations --cov-append=src
+
+test-audit: unit-test e2e-test
+	@echo "=> Auditing test coverage"
+	@echo "============================="
+	$(POETRY) run coverage report --fail-under=$(MIN_TEST_COVERAGE)
 
 sprint-data-export:
 	@echo "=> Exporting project data from the sprint board"
