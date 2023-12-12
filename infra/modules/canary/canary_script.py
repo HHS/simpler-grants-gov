@@ -5,7 +5,7 @@ from aws_synthetics.common import synthetics_logger as logger
 
 def main():
 
-    url = "https://simpler.grants.gov"
+    url = "https://frontend-dev-143463875.us-east-1.elb.amazonaws.com/"
 
     # Set screenshot option
     takeScreenshot = True
