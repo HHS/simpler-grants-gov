@@ -69,3 +69,10 @@ ignore = [
 ]
 line-length = 100
 select = ["ALL"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  # kaleido is throwing a Deprecation warning in one of its dependencies
+  # TODO(widal001): 2022-12-12 - Try removing after Kaleido issues a new release
+  'ignore:.*setDaemon\(\) is deprecated.*:DeprecationWarning',
+]
