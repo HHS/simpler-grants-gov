@@ -2,7 +2,7 @@ import type { GetStaticProps, NextPage } from "next";
 import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import ResearchIntro from "src/pages/content/ResearchIntro";
 
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
