@@ -24,7 +24,7 @@ def task_row(
     }
 
 
-@pytest.fixture(name="percent_complete")
+@pytest.fixture(name="percent_complete", scope="module")
 def sample_percent_complete() -> DeliverablePercentComplete:
     """Create a sample burndown to simplify test setup."""
     # setup - create test data

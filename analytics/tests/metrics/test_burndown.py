@@ -35,7 +35,7 @@ def result_row(
     }
 
 
-@pytest.fixture(name="sample_burndown")
+@pytest.fixture(name="sample_burndown", scope="module")
 def sample_burndown_by_points_fixture() -> SprintBurndown:
     """Create a sample burndown to simplify test setup."""
     # setup - create test data
