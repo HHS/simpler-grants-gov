@@ -21,9 +21,11 @@ const ProcessAndResearchContent = () => {
         </p>
         <Link href="/process" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
-            {t("process_and_research.cta_1")}{" "}
+            <span className="margin-right-5">
+              {t("process_and_research.cta_1")}
+            </span>
             <Icon.ArrowForward
-              className="text-middle"
+              className="text-middle margin-left-neg-4"
               size={4}
               aria-label="arrow-forward"
             />
@@ -39,9 +41,11 @@ const ProcessAndResearchContent = () => {
         </p>
         <Link href="research" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
-            {t("process_and_research.cta_2")}{" "}
+            <span className="margin-right-5">
+              {t("process_and_research.cta_2")}
+            </span>
             <Icon.ArrowForward
-              className="text-middle"
+              className="text-middle margin-left-neg-4"
               size={4}
               aria-label="arrow-forward"
             />
