@@ -1,4 +1,4 @@
-# We are limiting this to 3 engineers and choosing not to select "Require review from Code Owners."
+# We are limiting this to 4 engineers and choosing not to select "Require review from Code Owners."
 @acouch @aplybeah @chouinar @SammySteiner
 
 documentation/* @sumiat @widal001 @andycochran @acouch @SammySteiner
