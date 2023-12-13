@@ -208,6 +208,7 @@
     }
   },
   "Newsletter": {
+    "page_title": "Newsletter | Simpler Grants.gov",
     "alert_title": "Simpler Grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "title": "Newsletter signup",
@@ -248,6 +249,7 @@
     "nav_link_home": "Home",
     "nav_link_process": "Process",
     "nav_link_research": "Research",
+    "nav_link_newsletter": "Newsletter",
     "nav_menu_toggle": "Menu",
     "title": "Simpler Grants.gov"
   },

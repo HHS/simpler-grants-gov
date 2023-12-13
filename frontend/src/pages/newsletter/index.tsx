@@ -4,6 +4,7 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useState } from "react";
 import {
   Button,
   Grid,
@@ -15,7 +16,6 @@ import {
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import FullWidthAlert from "../../components/FullWidthAlert";
-import { useState } from "react";
 
 const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
@@ -25,48 +25,19 @@ const Newsletter: NextPage = () => {
     LastName: "",
     email: "",
     list: "A2zerhEC59Ea6mzTgzdTgw",
-    subform: "yes"
+    subform: "yes",
+    hp: "",
   });
 
-  const handleInput = (e: any) => {
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fieldName = e.target.name;
     const fieldValue = e.target.value;
-  
+
     setFormData((prevState) => ({
       ...prevState,
-      [fieldName]: fieldValue
+      [fieldName]: fieldValue,
     }));
-  }
-
-  // const submitForm = (e: any) => {
-  //   e.preventDefault()
-  
-  //   const formURL = e.target.action
-  //   const data = new FormData()
-  
-  //   Object.entries(formData).forEach(([key, value]) => {
-  //     data.append(key, value);
-  //   })
-  
-  //   fetch(formURL, {
-  //     method: "POST",
-  //     body: data,
-  //     headers: {
-  //       'accept': 'application/json',
-  //       'Access-Control-Allow-Origin': 'http://localhost:3000',
-  //       'Access-Control-Allow-Credentials': 'true',
-  //     },
-  //   }).then((res) => {
-  //     console.log("response: ", res)
-  //     setFormData({
-  //       name: "",
-  //       LastName: "",
-  //       email: "",
-  //       list: "A2zerhEC59Ea6mzTgzdTgw",
-  //       subform: "yes"
-  //     })
-  //   })
-  // }
+  };
 
   return (
     <>
@@ -116,15 +87,55 @@ const Newsletter: NextPage = () => {
               method="POST"
               acceptCharset="utf-8"
             >
-              <Label htmlFor="name">First Name</Label>
-              <TextInput type="text" name="name" id="name" value={formData.name} required onChange={handleInput}/>
-              <Label htmlFor="LastName">Last Name</Label>
-              <TextInput type="text" name="LastName" id="LastName" value={formData.LastName} onChange={handleInput}/>
-              <Label htmlFor="email">Email</Label>
-              <TextInput type="email" name="email" id="email" required value={formData.email} onChange={handleInput}/>
+              <Label htmlFor="name">
+                First Name{" "}
+                <span title="required" className="usa-hint usa-hint--required ">
+                  (required)
+                </span>
+              </Label>
+              <TextInput
+                aria-required
+                type="text"
+                name="name"
+                id="name"
+                value={formData.name}
+                required
+                onChange={handleInput}
+              />
+              <Label htmlFor="LastName" hint=" (optional)">
+                Last Name
+              </Label>
+              <TextInput
+                type="text"
+                name="LastName"
+                id="LastName"
+                value={formData.LastName}
+                onChange={handleInput}
+              />
+              <Label htmlFor="email">
+                Email{" "}
+                <span title="required" className="usa-hint usa-hint--required ">
+                  (required)
+                </span>
+              </Label>
+              <TextInput
+                aria-required
+                type="email"
+                name="email"
+                id="email"
+                required
+                value={formData.email}
+                onChange={handleInput}
+              />
               <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
-                <TextInput type="text" name="hp" id="hp" />
+                <TextInput
+                  type="text"
+                  name="hp"
+                  id="hp"
+                  value={formData.hp}
+                  onChange={handleInput}
+                />
               </div>
               <input type="hidden" name="list" value="A2zerhEC59Ea6mzTgzdTgw" />
               <input type="hidden" name="subform" value="yes" />
