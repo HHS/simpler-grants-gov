@@ -5,6 +5,7 @@ import pytest
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
+from tests.conftest import MockSlackbot
 
 
 def task_row(
@@ -331,3 +332,20 @@ class TestExportMethods:
         assert output == expected_path
         assert expected_path.exists()
 
+
+def test_post_to_slack(
+    mock_slackbot: MockSlackbot,
+    tmp_path: Path,
+    percent_complete: DeliverablePercentComplete,
+):
+    """Test the steps required to post the results to slack, without actually posting."""
+    # execution
+    percent_complete.post_results_to_slack(
+        mock_slackbot,
+        channel_id="test_channel",
+        output_dir=tmp_path,
+    )
+    # validation - check that output files exist
+    for output in ["RESULTS_CSV", "CHART_PNG", "CHART_HTML"]:
+        output_path = tmp_path / getattr(percent_complete, output)
+        assert output_path.exists() is True
