@@ -137,7 +137,7 @@ once it has reached 100 occurrences, only every 100th. This count will only
 consider the 128 most recently logged scenarios where a scenario is based on the
 call + arguments (ie. calls to the request library for different URLs are treated separately)
 
-### Testing
+### Audit Logging Tests
 
 The audit logging unit tests that we have written are run separately
 from the rest of the tests as enabling audit logging causes several hundred
