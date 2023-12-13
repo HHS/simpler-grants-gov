@@ -72,7 +72,7 @@ class SprintBoard(BaseDataset):
     @property
     def current_sprint(self) -> str | None:
         """Return the name of the current sprint, if a sprint is currently active."""
-        return self.get_sprint_name_from_date(pd.Timestamp.today())
+        return self.get_sprint_name_from_date(pd.Timestamp.today().floor("d"))
 
     def get_sprint_name_from_date(self, date: pd.Timestamp) -> str | None:
         """Get the name of a sprint from a given date, if that date falls in a sprint."""
