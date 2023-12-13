@@ -73,7 +73,7 @@ sprint-burndown:
 	poetry run analytics calculate sprint_burndown \
 	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
-	--sprint  $(SPRINT) \
+	--sprint  "$(SPRINT)" \
 	--unit $(UNIT) \
 	--$(ACTION)
 
