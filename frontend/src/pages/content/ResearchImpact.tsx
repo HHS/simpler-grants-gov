@@ -19,9 +19,6 @@ const ResearchImpact = () => {
 
   const boxes: ImpactBoxes[] = t("impact.boxes", { returnObjects: true });
 
-  // Do not render if translations aren't ready as returnObjects and map causes the prerender to fail
-  // if (!ready) return <></>;
-
   return (
     <ContentLayout
       title={t("impact.title")}
