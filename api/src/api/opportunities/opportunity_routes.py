@@ -39,10 +39,12 @@ def opportunity_search(
     with db_session.begin():
         opportunities, pagination_info = search_opportunities(db_session, search_params)
 
-    add_extra_data_to_current_request_logs({
-        "response.pagination.total_pages": pagination_info.total_pages,
-        "response.pagination.total_records": pagination_info.total_records
-    })
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
     logger.info("Successfully fetched opportunities")
 
     return response.ApiResponse(
