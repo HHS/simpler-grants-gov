@@ -164,6 +164,10 @@ db-migrate-heads: ## Show migrations marked as a head
 db-seed-local:
 	$(PY_RUN_CMD) db-seed-local
 
+create-erds: # Create ERD diagrams for our DB schema
+	$(PY_RUN_CMD) create-erds
+	mv bin/*.png ../documentation/api/database/erds
+
 ##################################################
 # Testing
 ##################################################
@@ -190,22 +194,22 @@ test-coverage-report: ## Open HTML test coverage report
 ##################################################
 
 format: ## Format files
-	$(PY_RUN_CMD) isort --atomic src tests
-	$(PY_RUN_CMD) black src tests
+	$(PY_RUN_CMD) isort --atomic src tests bin
+	$(PY_RUN_CMD) black src tests bin
 
 format-check: ## Check file formatting
-	$(PY_RUN_CMD) isort --atomic --check-only src tests
-	$(PY_RUN_CMD) black --check src tests
+	$(PY_RUN_CMD) isort --atomic --check-only src tests bin
+	$(PY_RUN_CMD) black --check src tests bin
 
 lint: lint-py ## Lint
 
 lint-py: lint-flake lint-mypy
 
 lint-flake:
-	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests
+	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests bin
 
 lint-mypy:
-	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src $(MYPY_POSTPROC)
+	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv

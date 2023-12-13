@@ -1,16 +1,16 @@
 import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
 
 const HOME: Breadcrumb = { title: "Home", path: "/" };
-const RESEARCH: Breadcrumb = { title: "Research", path: "research/" };
-const PROCESS: Breadcrumb = { title: "Process", path: "process/" };
-const NEWSLETTER: Breadcrumb = { title: "Newsletter", path: "newsletter/" };
+const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
+const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
+const NEWSLETTER: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
 const NEWSLETTER_CONFIRMATION: Breadcrumb = {
   title: "Confirmation",
-  path: "newsletter-confirmation/",
+  path: "/newsletter/confirmation/",
 };
 const NEWSLETTER_UNSUBSCRIBE: Breadcrumb = {
   title: "Unsubscribe",
-  path: "newsletter-unsubscribe/",
+  path: "/newsletter/unsubscribe/",
 };
 
 export const RESEARCH_CRUMBS: BreadcrumbList = [HOME, RESEARCH];
