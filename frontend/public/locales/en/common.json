@@ -218,6 +218,7 @@
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_confirmation": {
+    "page_title": "Newsletter Confirmation | Simpler Grants.gov",
     "alert_title": "Simpler Grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "title": "You’re subscribed",
@@ -228,6 +229,7 @@
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_unsubscribe": {
+    "page_title": "Newsletter Unsubscribe | Simpler Grants.gov",
     "alert_title": "Simpler Grants.gov is a work in progress.",
     "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "title": "You have unsubscribed",
