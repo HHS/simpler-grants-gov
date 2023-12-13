@@ -22,7 +22,7 @@ concurrency:
 
 
 jobs:
-  update-openapi-docs:
+  update-database-erd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
