@@ -185,13 +185,13 @@ class TestSprintBurndownByTasks:
             SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.issues)
 
     def test_calculate_burndown_for_current_sprint(self):
-        """A ValueError should be raised if the sprint argument isn't valid."""
+        """Use the current sprint if the date falls in the middle of a sprint."""
         # setup - create test data
         today = pd.Timestamp.today().floor("d")
-        day_1 = today.strftime("%Y-%m-%d")
-        day_2 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
-        day_3 = (today + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
-        sprint_data = [
+        day_1 = (today + pd.Timedelta(days=-1)).strftime("%Y-%m-%d")
+        day_2 = today.strftime("%Y-%m-%d")
+        day_3 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        sprint_data = [  # note sprint duration is 2 days by default
             sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
             sprint_row(issue=1, sprint_start=day_1, created=day_1),
         ]

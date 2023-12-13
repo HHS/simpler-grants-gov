@@ -78,8 +78,8 @@ class SprintBoard(BaseDataset):
         """Get the name of a sprint from a given date, if that date falls in a sprint."""
         # fmt: off
         date_filter = (
-            (self.sprints[self.sprint_start_col] <= date)  # after sprint start
-            & (self.sprints[self.sprint_end_col] > date)  # before sprint end
+            (self.sprints[self.sprint_start_col] < date)  # after sprint start
+            & (self.sprints[self.sprint_end_col] >= date)  # before sprint end
         )
         # fmt: on
         matching_sprints = self.sprints.loc[date_filter, self.sprint_col]
