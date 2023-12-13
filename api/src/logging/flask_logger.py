@@ -18,7 +18,7 @@ Usage:
 """
 import logging
 import time
-
+import uuid
 import flask
 
 logger = logging.getLogger(__name__)
@@ -154,6 +154,9 @@ def _get_request_context_info(request: flask.Request) -> dict:
         "request.method": request.method,
         "request.path": request.path,
         "request.url_rule": str(request.url_rule),
+        # A backup ID in case the x-amzn-requestid isn't passed in
+        # doesn't help with tracing across systems, but at least links within a request
+        "request.internal_id": str(uuid.uuid4())
     }
 
     # Add query parameter data in the format request.query.<key> = <value>
