@@ -19,6 +19,7 @@ const primaryLinks: PrimaryLinks = [
   { i18nKey: "nav_link_home", href: "/" },
   { i18nKey: "nav_link_process", href: "/process" },
   { i18nKey: "nav_link_research", href: "/research" },
+  { i18nKey: "nav_link_newsletter", href: "/newsletter" },
 ];
 
 type Props = {
