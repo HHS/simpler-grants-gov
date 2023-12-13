@@ -32,4 +32,10 @@ jobs:
         run: make lint
 
       - name: Run tests
-        run: make test
+        run: make test-audit
+
+      - name: Export GitHub data
+        run: make gh-data-export
+
+      - name: Run reports
+        run: make sprint-reports
