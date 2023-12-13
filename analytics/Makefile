@@ -43,10 +43,10 @@ e2e-test:
 	@echo "============================="
 	$(POETRY) run pytest tests/integrations --cov-append=src
 
-test-audit: unit-test e2e-test
+test-audit: unit-test
 	@echo "=> Auditing test coverage"
 	@echo "============================="
-	$(POETRY) run coverage report --fail-under=$(MIN_TEST_COVERAGE)
+	$(POETRY) run coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
 
 sprint-data-export:
 	@echo "=> Exporting project data from the sprint board"
