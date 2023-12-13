@@ -276,54 +276,58 @@ class TestExportMethods:
     """Test the export methods method for SprintBurndown."""
 
     @pytest.mark.parametrize(
-        ("method", "file_path"),
+        ("method", "file_name"),
         [
-            ("export_results", "output.csv"),
-            ("export_chart_to_html", "output.html"),
-            ("export_chart_to_png", "output.png"),
+            ("export_results", "RESULTS_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
         ],
     )
     def test_export_results_to_correct_file_path(
         self,
         method: str,
-        file_path: str,
+        file_name: str,
         tmp_path: Path,
         percent_complete: DeliverablePercentComplete,
     ):
         """The file should be exported to the correct location."""
         # setup - check that file doesn't exist at output location
-        expected_path = tmp_path / file_path
+        file_name = getattr(percent_complete, file_name)
+        expected_path = tmp_path / file_name
         assert expected_path.parent.exists() is True
         assert expected_path.exists() is False
         # execution
         func = getattr(percent_complete, method)
-        output = func(expected_path)
+        output = func(output_dir=expected_path.parent)
         # validation - check that output path matches expected and file exists
         assert output == expected_path
         assert expected_path.exists()
 
     @pytest.mark.parametrize(
-        ("method", "file_path"),
+        ("method", "file_name"),
         [
-            ("export_results", "output.csv"),
-            ("export_chart_to_html", "output.html"),
-            ("export_chart_to_png", "output.png"),
+            ("export_results", "RESULTS_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
         ],
     )
     def test_create_parent_dir_if_it_does_not_exists(
         self,
         method: str,
-        file_path: str,
+        file_name: str,
         tmp_path: Path,
         percent_complete: DeliverablePercentComplete,
     ):
         """The parent directory should be created if it doesn't already exist."""
-        expected_path = tmp_path / "new_folder" / file_path
+        # setup - check that file and parent directory don't exist
+        file_name = getattr(percent_complete, file_name)
+        expected_path = tmp_path / "new_folder" / file_name
         assert expected_path.parent.exists() is False  # doesn't yet exist
         assert expected_path.exists() is False
         # execution
         func = getattr(percent_complete, method)
-        output = func(expected_path)
+        output = func(output_dir=expected_path.parent)
         # validation - check that output path matches expected and file exists
         assert output == expected_path
         assert expected_path.exists()
+
