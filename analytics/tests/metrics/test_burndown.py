@@ -1,6 +1,5 @@
 """Test the analytics.metrics.burndown module."""
-from datetime import datetime, timedelta, timezone  # noqa: I001
-from pathlib import Path
+from pathlib import Path  # noqa: I001
 
 import pandas as pd
 import pytest
@@ -187,10 +186,10 @@ class TestSprintBurndownByTasks:
     def test_calculate_burndown_for_current_sprint(self):
         """A ValueError should be raised if the sprint argument isn't valid."""
         # setup - create test data
-        now = datetime.now(tz=timezone.utc)
-        day_1 = now.strftime("%Y-%m-%d")
-        day_2 = (now + timedelta(days=1)).strftime("%Y-%m-%d")
-        day_3 = (now + timedelta(days=2)).strftime("%Y-%m-%d")
+        today = pd.Timestamp.today().floor("d")
+        day_1 = today.strftime("%Y-%m-%d")
+        day_2 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        day_3 = (today + pd.Timedelta(days=2)).strftime("%Y-%m-%d")
         sprint_data = [
             sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
             sprint_row(issue=1, sprint_start=day_1, created=day_1),
