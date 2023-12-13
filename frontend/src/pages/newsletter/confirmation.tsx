@@ -1,6 +1,5 @@
 import type { GetStaticProps, NextPage } from "next";
 import { NEWSLETTER_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
-import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -9,7 +8,7 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import FullWidthAlert from "../../components/FullWidthAlert";
+import BetaAlert from "../../components/BetaAlert";
 
 const NewsletterConfirmation: NextPage = () => {
   const { t } = useTranslation("common", {
@@ -19,21 +18,7 @@ const NewsletterConfirmation: NextPage = () => {
   return (
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <FullWidthAlert type="info" heading={t("alert_title")}>
-        <Trans
-          t={t}
-          i18nKey="alert"
-          components={{
-            LinkToGrants: (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={ExternalRoutes.GRANTS_HOME}
-              />
-            ),
-          }}
-        />
-      </FullWidthAlert>
+      <BetaAlert />
       <Breadcrumbs breadcrumbList={NEWSLETTER_CONFIRMATION_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
