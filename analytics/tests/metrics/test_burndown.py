@@ -13,6 +13,7 @@ from tests.conftest import (
     DAY_2,
     DAY_3,
     DAY_4,
+    MockSlackbot,
     sprint_row,
 )
 
@@ -518,3 +519,21 @@ class TestExportMethods:
         # validation - check that output path matches expected and file exists
         assert output == expected_path
         assert expected_path.exists()
+
+
+def test_post_to_slack(
+    mock_slackbot: MockSlackbot,
+    tmp_path: Path,
+    sample_burndown: SprintBurndown,
+):
+    """Test the steps required to post the results to slack, without actually posting."""
+    # execution
+    sample_burndown.post_results_to_slack(
+        mock_slackbot,
+        channel_id="test_channel",
+        output_dir=tmp_path,
+    )
+    # validation - check that output files exist
+    for output in ["RESULTS_CSV", "CHART_PNG", "CHART_HTML"]:
+        output_path = tmp_path / getattr(sample_burndown, output)
+        assert output_path.exists() is True
