@@ -35,6 +35,15 @@ class OpportunitySchema(Schema):
             "example": OpportunityCategory.DISCRETIONARY,
         },
     )
+    category_explanation = fields.String(
+        metadata={
+            "description": "TODO",
+            "example": "TODO as well"
+        }
+    )
+
+    revision_number = fields.Integer()
+    modified_comments = fields.String()
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
