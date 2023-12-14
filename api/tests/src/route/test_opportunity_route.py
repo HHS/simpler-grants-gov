@@ -373,15 +373,16 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 # GET /opportunities/<opportunity_id>
 #####################################
 
-@pytest.mark.parametrize("opportunity_params", [
-    # Whatever defaults we have in the factory
-    {},
-    # Set several values that can be null
-    {
-        "revision_number": 5,
-        "modified_comments": "I changed it"
-    },
-])
+
+@pytest.mark.parametrize(
+    "opportunity_params",
+    [
+        # Whatever defaults we have in the factory
+        {},
+        # Set several values that can be null
+        {"revision_number": 5, "modified_comments": "I changed it"},
+    ],
+)
 def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params):
     opportunity = OpportunityFactory.create(**opportunity_params)
 

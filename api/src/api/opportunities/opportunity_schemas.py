@@ -36,10 +36,7 @@ class OpportunitySchema(Schema):
         },
     )
     category_explanation = fields.String(
-        metadata={
-            "description": "TODO",
-            "example": "TODO as well"
-        }
+        metadata={"description": "TODO", "example": "TODO as well"}
     )
 
     revision_number = fields.Integer()
