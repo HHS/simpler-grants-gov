@@ -86,11 +86,11 @@ data "aws_iam_policy_document" "canary-reports" {
   }
 }
 
-# Canary code
+# # Canary code
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "canary_script.py"
-  output_path = "canary_script_payload.zip"
+  output_path = "python/canary_script.zip"
 }
 
 # Canary
@@ -99,7 +99,7 @@ resource "aws_synthetics_canary" "canary" {
   artifact_s3_location = "s3://${aws_s3_bucket.canary-reports.id}/"
   execution_role_arn   = aws_iam_role.canary-role.arn
   runtime_version      = "syn-python-selenium-2.0"
-  handler              = "canary_script.handler" # fix this
+  handler              = "canary_script.handler"
   start_canary         = true
   zip_file             = data.archive_file.lambda.output_path
 
