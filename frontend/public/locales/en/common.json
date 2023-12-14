@@ -1,9 +1,11 @@
 {
+  "Beta_alert": {
+    "alert_title": "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for awards.",
+    "alert": "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website."
+  },
   "Index": {
     "page_title": "Simpler.Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
-    "alert_title": "Beta! Simpler Grants.gov is a work in progress.",
-    "alert": "To search and apply for grants, please continue using <LinkToGrants>www.grants.gov</LinkToGrants> as we add new functionality to Simpler.Grants.gov.",
     "goal": {
       "title": "The goal",
       "paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
@@ -39,8 +41,6 @@
   "Research": {
     "page_title": "Research | Simpler Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "intro": {
       "title": "Our existing research",
       "content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
@@ -150,8 +150,6 @@
   "Process": {
     "page_title": "Process | Simpler Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
     "intro": {
       "title": "Our open process",
       "content": "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we regularly release new versions of Simpler.Grants.gov, you'll see what we're building and prioritizing. With each iteration, you'll be able to try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
@@ -208,8 +206,7 @@
     }
   },
   "Newsletter": {
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "page_title": "Newsletter | Simpler Grants.gov",
     "title": "Newsletter signup",
     "intro": "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     "paragraph_1": "If you sign up for the Simpler.Grants.gov newsletter, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
@@ -217,8 +214,7 @@
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_confirmation": {
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "page_title": "Newsletter Confirmation | Simpler Grants.gov",
     "title": "You’re subscribed",
     "intro": "You are signed up to receive project updates from Simpler.Grants.gov.",
     "paragraph_1": "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
@@ -227,8 +223,7 @@
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_unsubscribe": {
-    "alert_title": "Simpler Grants.gov is a work in progress.",
-    "alert": "To search for funding opportunities and apply, go to <LinkToGrants>www.grants.gov</LinkToGrants>.",
+    "page_title": "Newsletter Unsubscribe | Simpler Grants.gov",
     "title": "You have unsubscribed",
     "intro": "You will no longer receive project updates from Simpler.Grants.gov. ",
     "paragraph_1": "Did you unsubscribe by accident? Sign up again.",
@@ -248,6 +243,7 @@
     "nav_link_home": "Home",
     "nav_link_process": "Process",
     "nav_link_research": "Research",
+    "nav_link_newsletter": "Newsletter",
     "nav_menu_toggle": "Menu",
     "title": "Simpler Grants.gov"
   },

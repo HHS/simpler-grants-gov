@@ -110,7 +110,8 @@ class DeliverableTasks(BaseDataset):
         )
         # calculate task status
         df_all["status"] = "open"
-        is_closed = df_all["closed_date"].isna()
+        # tasks are closed if they DO have a closed_date
+        is_closed = ~df_all["closed_date"].isna()  # ~ is negation
         df_all.loc[is_closed, "status"] = "closed"
         # isolate 30k deliverable issues and rename their cols
         df_all["labels"] = df_all["labels"].apply(pluck_label_name)
