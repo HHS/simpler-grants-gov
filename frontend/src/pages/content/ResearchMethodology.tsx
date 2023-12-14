@@ -46,9 +46,10 @@ const ResearchMethodology = () => {
         </p>
         <Link href="/newsletter" passHref>
           <Button className="margin-bottom-4" type="button" outline>
-            {t("methodology.cta")}{" "}
+            <span className="margin-right-4">{t("methodology.cta")}</span>
             <Icon.ArrowForward
-              className="text-middle"
+              className="text-middle margin-left-neg-3"
+              size={3}
               aria-label="arror-forward"
             />
           </Button>

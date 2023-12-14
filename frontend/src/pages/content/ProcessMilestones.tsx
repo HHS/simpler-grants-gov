@@ -100,9 +100,9 @@ const ProcessMilestones = () => {
           </p>
           <Link href={ExternalRoutes.MILESTONES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
-              {t("milestones.cta_1")}{" "}
+              <span className="margin-right-5">{t("milestones.cta_1")}</span>
               <Icon.Launch
-                className="text-middle"
+                className="text-middle margin-left-neg-4"
                 size={4}
                 aria-label="launch"
               />
@@ -150,9 +150,9 @@ const ProcessMilestones = () => {
           </p>
           <Link href={ExternalRoutes.MILESTONES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
-              {t("milestones.cta_2")}{" "}
+              <span className="margin-right-5">{t("milestones.cta_2")}</span>
               <Icon.Launch
-                className="text-middle"
+                className="text-middle margin-left-neg-4"
                 size={4}
                 aria-label="launch"
               />
