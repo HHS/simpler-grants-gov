@@ -20,8 +20,7 @@ install: check-prereqs
 	@echo "=> Installing python dependencies"
 	$(POETRY) install
 
-setup:
-	$(MAKE) install
+setup: install
 	$(GITHUB) auth login
 
 lint:

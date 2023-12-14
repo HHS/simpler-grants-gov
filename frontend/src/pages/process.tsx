@@ -1,14 +1,15 @@
 import type { GetStaticProps, NextPage } from "next";
 import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
-import { ExternalRoutes } from "src/constants/routes";
 
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import FullWidthAlert from "../components/FullWidthAlert";
-import ProcessContent from "../components/ProcessContent";
+import BetaAlert from "../components/BetaAlert";
+import ProcessContent from "./content/ProcessIntro";
+import ProcessInvolved from "./content/ProcessInvolved";
+import ProcessMilestones from "./content/ProcessMilestones";
 
 const Process: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Process" });
@@ -16,23 +17,13 @@ const Process: NextPage = () => {
   return (
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <FullWidthAlert type="info" heading={t("alert_title")}>
-        <Trans
-          t={t}
-          i18nKey="alert"
-          components={{
-            LinkToGrants: (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={ExternalRoutes.GRANTS_HOME}
-              />
-            ),
-          }}
-        />
-      </FullWidthAlert>
+      <BetaAlert />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessContent />
+      <div className="padding-top-4 bg-gray-5">
+        <ProcessMilestones />
+      </div>
+      <ProcessInvolved />
     </>
   );
 };

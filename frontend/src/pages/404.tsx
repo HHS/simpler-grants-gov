@@ -5,17 +5,24 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import BetaAlert from "../components/BetaAlert";
+
 const PageNotFound: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "ErrorPages" });
 
   return (
-    <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 border-bottom-2px border-base-lightest">
-      <h1 className="nj-h1">{t("page_not_found.title")}</h1>
-      <p className="margin-bottom-2">{t("page_not_found.message_content_1")}</p>
-      <Link className="usa-button" href="/" key="returnToHome">
-        {t("page_not_found.visit_homepage_button")}
-      </Link>
-    </GridContainer>
+    <>
+      <BetaAlert />
+      <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15">
+        <h1 className="nj-h1">{t("page_not_found.title")}</h1>
+        <p className="margin-bottom-2">
+          {t("page_not_found.message_content_1")}
+        </p>
+        <Link className="usa-button" href="/" key="returnToHome">
+          {t("page_not_found.visit_homepage_button")}
+        </Link>
+      </GridContainer>
+    </>
   );
 };
 

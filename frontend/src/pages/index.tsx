@@ -1,15 +1,13 @@
 import type { GetStaticProps, NextPage } from "next";
-import { ExternalRoutes } from "src/constants/routes";
 
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import PageSEO from "src/components/PageSEO";
-import FullWidthAlert from "../components/FullWidthAlert";
+import BetaAlert from "../components/BetaAlert";
 import Hero from "../components/Hero";
 import IndexGoalContent from "./content/IndexGoalContent";
-import IndexProcessContent from "./content/IndexProcessContent";
-import IndexResearchContent from "./content/IndexResearchContent";
+import ProcessAndResearchContent from "./content/ProcessAndResearchContent";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
@@ -18,24 +16,9 @@ const Home: NextPage = () => {
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
       <Hero />
-      <FullWidthAlert type="info" heading={t("alert_title")}>
-        <Trans
-          t={t}
-          i18nKey="alert"
-          components={{
-            LinkToGrants: (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={ExternalRoutes.GRANTS_HOME}
-              />
-            ),
-          }}
-        />
-      </FullWidthAlert>
+      <BetaAlert />
       <IndexGoalContent />
-      <IndexProcessContent />
-      <IndexResearchContent />
+      <ProcessAndResearchContent />
     </>
   );
 };

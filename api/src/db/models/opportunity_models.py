@@ -6,22 +6,34 @@ from src.db.models.base import Base, TimestampMixin
 
 
 class Opportunity(Base, TimestampMixin):
-    # NOTE: Keeping all names lower-case versions of the Oracle DBs naming
-    # to follow the usual convention of Postgres.
-    # names are automatically lowercased in all queries unless you quote them.
-    # Once we've setup the replicated DB, we can adjust the naming here if needed.
+    __tablename__ = "opportunity"
 
-    __tablename__ = "topportunity"
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column("opportunity_id", primary_key=True)
+    opportunity_number: Mapped[str | None]
+    opportunity_title: Mapped[str | None] = mapped_column(index=True)
 
-    opportunity_number: Mapped[str | None] = mapped_column("oppnumber")
-    opportunity_title: Mapped[str | None] = mapped_column("opptitle")
-
-    agency: Mapped[str | None] = mapped_column("owningagency")
+    agency: Mapped[str | None]
 
     category: Mapped[OpportunityCategory | None] = mapped_column(
-        "oppcategory", StrEnumColumn(OpportunityCategory)
+        StrEnumColumn(OpportunityCategory), index=True
     )
+    category_explanation: Mapped[str | None]
 
-    is_draft: Mapped[bool] = mapped_column("is_draft")
+    is_draft: Mapped[bool] = mapped_column(index=True)
+
+    revision_number: Mapped[int | None]
+    modified_comments: Mapped[str | None]
+
+    # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
+    # although the legacy DB does not have them setup as foreign keys
+    publisher_user_id: Mapped[int | None]
+    publisher_profile_id: Mapped[int | None]
+
+    """
+    Not ported over from legacy system
+
+    listed CHAR(1) - everything in the existing system is set to "L" for listed, so not any value
+    initial_opportunity_id NUMBER(20) - existing docs say this field isn't used
+    flag_2006 CHAR(1) (boolean) - a flag for presumably a prior migration, no use to us
+    """

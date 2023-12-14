@@ -1,13 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import ResearchArchetypes from "src/pages/content/ResearchArchetypes";
 
-import ProcessContent from "src/components/ProcessContent";
-
-describe("Process Content", () => {
+describe("Research Content", () => {
   it("Renders without errors", () => {
-    render(<ProcessContent />);
+    render(<ResearchArchetypes />);
     const ProcessH1 = screen.getByRole("heading", {
-      level: 1,
-      name: /Our open process/i,
+      level: 2,
+      name: /Applicant archetypes/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();
