@@ -2,12 +2,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import Process from "src/pages/process";
 
-describe("Index", () => {
+describe("Process", () => {
   it("renders alert with grants.gov link", () => {
     render(<Process />);
 
     const alert = screen.getByTestId("alert");
-    const link = screen.getByRole("link", { name: /grants\.gov/i });
+    // There are multiple links to grants.gov
+    const link = screen.getAllByText("www.grants.gov")[0];
 
     expect(alert).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "https://www.grants.gov");

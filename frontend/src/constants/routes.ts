@@ -1,7 +1,7 @@
 export const ExternalRoutes = {
   ABOUT_HHS: "https://www.hhs.gov/about/index.html",
   ACCESSIBILITY_COMPLIANCE: "https://www.grants.gov/accessibility-compliance",
-  EMAIL_SIMPLERGRANTSGOV: "simplergrantsgov@hhs.gov",
+  EMAIL_SIMPLERGRANTSGOV: "simpler@grants.gov",
   EMAIL_SUPPORT: "support@grants.gov",
   FOIA: "https://www.hhs.gov/foia/index.html",
   GITHUB_REPO: "https://github.com/HHS/simpler-grants-gov",
@@ -10,6 +10,8 @@ export const ExternalRoutes = {
   GITHUB_REPO_GOALS:
     "https://github.com/HHS/simpler-grants-gov/blob/main/documentation/goals.md",
   GITHUB_REPO_ROADMAP: "https://github.com/orgs/HHS/projects/12/views/2",
+  GITHUB_ADR:
+    "https://github.com/HHS/simpler-grants-gov/tree/main/documentation/decisions",
   GRANTS_HOME: "https://www.grants.gov",
   GRANTS_NEWSLETTER:
     "https://www.grants.gov/web/grants/connect/newsletter-archive.html",

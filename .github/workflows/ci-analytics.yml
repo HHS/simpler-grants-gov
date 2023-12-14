@@ -15,6 +15,11 @@ jobs:
   lint-test:
     name: Analytics Lint, Format & Tests
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      ANALYTICS_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ANALYTICS_REPORTING_CHANNEL_ID: ${{ secrets.REPORTING_CHANNEL_ID }}
+      ACTION: show-results # show results, but don't post them to slack
     steps:
       # set up python
       - uses: actions/checkout@v3
@@ -33,3 +38,9 @@ jobs:
 
       - name: Run tests
         run: make test
+
+      - name: Export GitHub data
+        run: make gh-data-export
+
+      - name: Run reports
+        run: make sprint-reports
