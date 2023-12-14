@@ -64,6 +64,10 @@ We can use Sendy to send to individuals and also for a separate subscription lis
    
 A Brand can be created under the existing Sendy account which allows users who subscribe through that form to be added to a separate list specific to Simpler.Grants.gov. This list will be distinct from the other lists within the Sendy account.
 
+6. For the long term solution, there are certain requirements and considerations that we should consider?
+- Currently when users unsubscribe, a script needs to be run to remove them from the list. We should consider a system that automatically updates the system.
+- The new platform should have an API that is robust enough to allow users to subscribe, unsubscribe, and check for existing users. 
+
 
 
 ## Comparison Matrix
