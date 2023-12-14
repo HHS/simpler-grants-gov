@@ -36,11 +36,24 @@ class OpportunitySchema(Schema):
         },
     )
     category_explanation = fields.String(
-        metadata={"description": "TODO", "example": "TODO as well"}
+        metadata={
+            "description": "Explanation of the category when the category is 'O' (other)",
+            "example": None,
+        }
     )
 
-    revision_number = fields.Integer()
-    modified_comments = fields.String()
+    revision_number = fields.Integer(
+        metadata={
+            "description": "The current revision number of the opportunity, counting starts at 0",
+            "example": 0,
+        }
+    )
+    modified_comments = fields.String(
+        metadata={
+            "description": "Details regarding what modification was last made",
+            "example": None,
+        }
+    )
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
