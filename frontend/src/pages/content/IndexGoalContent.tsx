@@ -17,9 +17,9 @@ const IndexGoalContent = () => {
         <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
         <Link href="/newsletter" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
-            {t("goal.cta")}{" "}
+            <span className="margin-right-5">{t("goal.cta")}</span>
             <Icon.ArrowForward
-              className="text-middle"
+              className="text-middle margin-left-neg-4"
               size={4}
               aria-label="arrow-forward"
             />
