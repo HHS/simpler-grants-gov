@@ -98,7 +98,7 @@ const ProcessMilestones = () => {
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
             {t("milestones.sub_paragraph_2")}
           </p>
-          <Link href={ExternalRoutes.MILESTONES} passHref>
+          <Link href={ExternalRoutes.MILESTONE_GET_OPPORTUNITIES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
               {t("milestones.cta_1")}{" "}
               <Icon.Launch
@@ -148,7 +148,7 @@ const ProcessMilestones = () => {
               }}
             />
           </p>
-          <Link href={ExternalRoutes.MILESTONES} passHref>
+          <Link href={ExternalRoutes.MILESTONE_SEARCH_MVP} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
               {t("milestones.cta_2")}{" "}
               <Icon.Launch
