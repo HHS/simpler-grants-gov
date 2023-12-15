@@ -91,15 +91,15 @@ data "aws_acm_certificate" "cert" {
 }
 
 data "aws_ssm_parameter" "sendy_api_key" {
-  name = module.app_config.sendy_api_key
+  name = local.environment_config.sendy_api_key
 }
 
 data "aws_ssm_parameter" "sendy_api_url" {
-  name = module.app_config.sendy_api_key
+  name = local.environment_config.sendy_api_url
 }
 
 data "aws_ssm_parameter" "sendy_list_id" {
-  name = module.app_config.sendy_api_key
+  name = local.environment_config.sendy_list_id
 }
 
 output "environment_name" {
