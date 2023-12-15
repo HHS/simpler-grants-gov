@@ -1,10 +1,15 @@
 import type { GetStaticProps, NextPage } from "next";
-import { NEWSLETTER_CRUMBS } from "src/constants/breadcrumbs";
+import {
+  NEWSLETTER_CONFIRMATION,
+  NEWSLETTER_CRUMBS,
+} from "src/constants/breadcrumbs";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import {
+  Alert,
   Button,
   Grid,
   GridContainer,
@@ -15,18 +20,20 @@ import {
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import BetaAlert from "../../components/BetaAlert";
+import { Data } from "../api/subscribe";
 
 const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
     LastName: "",
     email: "",
-    list: "A2zerhEC59Ea6mzTgzdTgw",
-    subform: "yes",
     hp: "",
   });
+
+  const [sendyError, setSendyError] = useState("");
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fieldName = e.target.name;
@@ -36,6 +43,38 @@ const Newsletter: NextPage = () => {
       ...prevState,
       [fieldName]: fieldValue,
     }));
+  };
+
+  const submitForm = async () => {
+    const formURL = "api/subscribe";
+
+    const res = await fetch(formURL, {
+      method: "POST",
+      body: JSON.stringify(formData),
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (res.ok) {
+      const { message } = (await res.json()) as Data;
+      await router.push({
+        pathname: NEWSLETTER_CONFIRMATION.path,
+        query: { sendy: message },
+      });
+      return setSendyError("");
+    } else {
+      const { error }: Data = (await res.json()) as Data;
+      console.error("client error", error);
+      return setSendyError(error || "");
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submitForm().catch((err) => {
+      console.error("catch block", err);
+    });
   };
 
   return (
@@ -68,10 +107,19 @@ const Newsletter: NextPage = () => {
           <Grid tabletLg={{ col: 6 }}>
             <form
               data-testid="sendy-form"
-              action="https://communications.grants.gov/app/subscribe"
-              method="POST"
-              acceptCharset="utf-8"
+              onSubmit={handleSubmit}
             >
+              {sendyError ? (
+                <Alert
+                  type="error"
+                  heading="An error occurred"
+                  headingLevel="h3"
+                >
+                  Your subscription was not successful. {sendyError}
+                </Alert>
+              ) : (
+                <></>
+              )}
               <Label htmlFor="name">
                 First Name{" "}
                 <span title="required" className="usa-hint usa-hint--required ">
