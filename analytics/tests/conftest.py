@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 # skips the integration tests in tests/integrations/
 # to run the integration tests, invoke them directly: pytest tests/integrations/
@@ -19,6 +20,28 @@ DAY_2 = "2023-11-02"
 DAY_3 = "2023-11-03"
 DAY_4 = "2023-11-04"
 DAY_5 = "2023-11-05"
+
+
+class MockSlackbot:
+    """Create a mock slackbot issue for unit tests."""
+
+    def upload_files_to_slack_channel(
+        self,
+        channel_id: str,
+        files: list,
+        message: str,
+    ) -> None:
+        """Stubs the corresponding method on the main SlackBot class."""
+        assert isinstance(channel_id, str)
+        print("Fake posting the following files to Slack with this message:")
+        print(message)
+        print(files)
+
+
+@pytest.fixture(name="mock_slackbot")
+def mock_slackbot_fixture():
+    """Create a mock slackbot instance to stub post_to_slack() method."""
+    return MockSlackbot()
 
 
 def write_test_data_to_file(data: dict, output_file: str):

@@ -21,9 +21,14 @@ class BaseDataset:
         """Load the dataset from a list of python dictionaries representing records."""
         return cls(df=pd.DataFrame(data))
 
-    def to_csv(self, output_file: str) -> None:
+    def to_csv(
+        self,
+        output_file: str,
+        *,  # force include_index to be passed as keyword instead of positional arg
+        include_index: bool = False,
+    ) -> None:
         """Export the dataset to a csv."""
-        return self.df.to_csv(output_file)
+        return self.df.to_csv(output_file, index=include_index)
 
     def to_dict(self) -> list[dict]:
         """Export the dataset to a list of python dictionaries representing records."""

@@ -26,6 +26,7 @@ black = "^23.7.0"
 mypy = "^1.4.1"
 pylint = "^3.0.2"
 pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
 ruff = "^0.0.278"
 safety = "^2.3.5"
 
@@ -49,6 +50,7 @@ disable = [
   "W0511", # fix-me
   "R0913", # too-many-arguments
   "R0902", # too-many-instance-attributes
+  "R0903", # too-few-public-methods
 ]
 
 [tool.ruff]
@@ -67,3 +69,10 @@ ignore = [
 ]
 line-length = 100
 select = ["ALL"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  # kaleido is throwing a Deprecation warning in one of its dependencies
+  # TODO(widal001): 2022-12-12 - Try removing after Kaleido issues a new release
+  'ignore:.*setDaemon\(\) is deprecated.*:DeprecationWarning',
+]
