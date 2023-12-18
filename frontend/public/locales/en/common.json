@@ -8,18 +8,18 @@
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "goal": {
       "title": "The goal",
-      "paragraph_1": "We want Grants.gov to be the simplest, most inclusive, and most gratifying tool ever built for posting, finding, sharing, and applying for financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
+      "paragraph_1": "We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
       "title_2": "For applicants",
-      "paragraph_2": "We’re building a one‑stop shop for all federal discretionary funding that makes it easy for you to discover, understand, and apply for opportunities.",
+      "paragraph_2": "We’re improving the way you to search for and discover funding opportunities, making it easier to find and apply.",
       "title_3": "For grantmakers",
-      "paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities (including underserved communities) to find the funding they need.",
+      "paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities to find the funding they need.",
       "cta": "Sign up for project updates"
     },
     "process_and_research": {
       "title_1": "The process",
       "title_2": "The research",
       "paragraph_1": "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
-      "paragraph_2": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together.",
+      "paragraph_2": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
       "cta_1": "Learn about what’s happening",
       "cta_2": "Read the research findings"
     },
@@ -39,11 +39,11 @@
     "wtgi_paragraph_2": "<strong>Questions?</strong> Contact us at <email>{{email}}</email>."
   },
   "Research": {
-    "page_title": "Research | Simpler Grants.gov",
+    "page_title": "Research | Simpler.Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "intro": {
       "title": "Our existing research",
-      "content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants gov together."
+      "content": "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together."
     },
     "methodology": {
       "title": "The methodology",
@@ -94,7 +94,7 @@
       "paragraph_1": "The most burden is on the Novice to become an expert on the grants process and system. In order to execute our mission, there is a need to improve awareness, access, and choice. This requires reaching out to those who are unfamiliar with the grant application process.",
       "paragraph_2": "There are many common barriers that users face:",
       "title_2": "Are there challenges you’ve experienced that aren’t captured here?",
-      "paragraph_3": "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <email>simpler@grants.gov</email> or <newsletter>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></newsletter>. to be notified of upcoming user research efforts.",
+      "paragraph_3": "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><newsletter>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></newsletter></strong> to be notified of upcoming user research efforts.",
       "boxes": [
         {
           "title": "Digital connectivity",
@@ -148,7 +148,7 @@
     }
   },
   "Process": {
-    "page_title": "Process | Simpler Grants.gov",
+    "page_title": "Process | Simpler.Grants.gov",
     "meta_description": "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     "intro": {
       "title": "Our open process",
@@ -185,7 +185,7 @@
         }
       ],
       "title_1": "Milestone 1: Laying the foundation with a modern Application Programming Interface (API)",
-      "paragraph_1": "We’re starting with a new modern API to make grants data more accessible. Our API-first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd-party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications.",
+      "paragraph_1": "To make it easier to discover funding opportunities, we’re starting with a new modern API to make grants data more accessible. Our API‑first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with  grants in new ways, like SMS, phone, email, chat, and notifications.",
       "sub_title_1": "What’s an API?",
       "sub_paragraph_1": "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
       "sub_title_2": "Are you interested in the tech?",
@@ -200,13 +200,13 @@
     },
     "involved": {
       "title_1": "Do you have data expertise?",
-      "paragraph_1": "We're spending time up-front collaborating with stakeholders on API design and data standards. If you have subject matter expertise with grants data, we want to talk. Reach out to us at <email>simpler@grants.gov</email>.",
+      "paragraph_1": "We're spending time up-front collaborating with stakeholders on API design and data standards. If you have subject matter expertise with grants data, we want to talk. Contact us at <strong><email>simpler@grants.gov</email></strong>.",
       "title_2": "Are you code-savvy?",
-      "paragraph_2": "If you’re interested in contributing to the open-source project or exploring the details of exactly what we’re building, check out the project at <github>https://github.com/HHS/simpler-grants-gov</github>."
+      "paragraph_2": "If you’re interested in contributing to the open-source project or exploring the details of exactly what we’re building, check out the project at <strong><github>https://github.com/HHS/simpler-grants-gov</github></strong>."
     }
   },
   "Newsletter": {
-    "page_title": "Newsletter | Simpler Grants.gov",
+    "page_title": "Newsletter | Simpler.Grants.gov",
     "title": "Newsletter signup",
     "intro": "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     "paragraph_1": "If you sign up for the Simpler.Grants.gov newsletter, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
@@ -214,22 +214,22 @@
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_confirmation": {
-    "page_title": "Newsletter Confirmation | Simpler Grants.gov",
+    "page_title": "Newsletter Confirmation | Simpler.Grants.gov",
     "title": "You’re subscribed",
     "intro": "You are signed up to receive project updates from Simpler.Grants.gov.",
     "paragraph_1": "Thank you for subscribing. We’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     "heading": "Learn more",
-    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work.",
+    "paragraph_2": "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "Newsletter_unsubscribe": {
-    "page_title": "Newsletter Unsubscribe | Simpler Grants.gov",
+    "page_title": "Newsletter Unsubscribe | Simpler.Grants.gov",
     "title": "You have unsubscribed",
     "intro": "You will no longer receive project updates from Simpler.Grants.gov. ",
     "paragraph_1": "Did you unsubscribe by accident? Sign up again.",
     "button_resub": "Re-subscribe",
     "heading": "Learn more",
-    "paragraph_2": "You can read all about our <process-link>transparent process</process-link> and what we’re doing now, or explore <research-link>our existing user research</research-link> and the findings that are guiding our work.",
+    "paragraph_2": "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
   },
   "ErrorPages": {
@@ -245,7 +245,7 @@
     "nav_link_research": "Research",
     "nav_link_newsletter": "Newsletter",
     "nav_menu_toggle": "Menu",
-    "title": "Simpler Grants.gov"
+    "title": "Simpler.Grants.gov"
   },
   "Hero": {
     "title": "We're building a simpler Grants.gov!",

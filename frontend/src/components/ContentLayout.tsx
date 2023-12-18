@@ -23,7 +23,7 @@ const ContentLayout = ({
         : "tablet-lg:font-sans-l desktop-lg:font-sans-xl";
     return (
       <h2
-        className={`margin-bottom-0 ${size} ${
+        className={`margin-bottom-0 maxw-tablet-lg ${size} ${
           !paddingTop ? "margin-top-0" : ""
         }`}
       >
