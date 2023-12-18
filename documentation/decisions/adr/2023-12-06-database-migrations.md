@@ -1,16 +1,16 @@
 # Database Migrations
 
-- **Status:** Active
+- **Status:** Accepted
 - **Last Modified:** 2023-12-06
 - **Related Issue:** [#779](https://github.com/HHS/simpler-grants-gov/issues/779)
-- **Deciders:** Aaron Couch, TODO?
+- **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Michael Chouinard
 - **Tags:** Database, Backend
 
 ## Context and Problem Statement
 
-We need a tool that can help manage the schema of our database, as well as make updates to the schema as we add more to it
+We need a tool that can help manage the schema of our database, as well as make updates to the schema as we add more to it.
 
-NOTE: At the time of writing this, the API already uses Alembic, and this document is more to describe why we use it, rather than to make a decision
+NOTE: At the time of writing this, the API already uses Alembic, and this document is more to describe why we use it, rather than to make a decision.
 
 ## Decision Drivers
 
@@ -29,7 +29,7 @@ NOTE: At the time of writing this, the API already uses Alembic, and this docume
 
 ## Decision Outcome
 
-Chosen option: Alembic, because it handles our known use cases, has minimal overhead, and is the go-to framework for the ORM we also use
+Chosen option: Alembic, because it handles our known use cases, has minimal overhead, and is the go-to framework for the ORM we also use.
 
 Any other option requires us to create migrations through a process that requires significantly more work,
 either by manually making those files, or generating them with another tool. Alembic just reads the ORM models
@@ -71,7 +71,7 @@ See [database-management.md](/documentation/api/database/database-management.md)
 
 ### AWS Database Migration Service
 
-[AWS Database Migration Service](https://aws.amazon.com/dms/) (DMS) is a tool for copying and converting your database
+[AWS Database Migration Service](https://aws.amazon.com/dms/) (DMS) is a tool for copying and converting your database.
 
 - **Pros**
   - We already will be using DMS to copy data from the existing Oracle DB to our new Postgres DB which will require schema configuration to work
@@ -92,7 +92,7 @@ The Django framework comes with its own [migration process](https://docs.djangop
 
 ### Flyway
 
-[Flyway](https://flywaydb.org/) is a Java-based application that manages running SQL migrations
+[Flyway](https://flywaydb.org/) is a Java-based application that manages running SQL migrations.
 
 - **Pros**
   - [Supports](https://documentation.red-gate.com/flyway/flyway-desktop/database-devops-practices) a variety of deployment approaches, and version controls
@@ -102,7 +102,7 @@ The Django framework comes with its own [migration process](https://docs.djangop
 
 ### Liquibase
 
-[Liquibase](https://www.liquibase.com/) is Java-based application that manages running SQL migrations
+[Liquibase](https://www.liquibase.com/) is Java-based application that manages running SQL migrations.
 
 - **Pros**
   - Allows you to configure your migrations in XML, JSON, or YAML, not just raw SQL
