@@ -75,7 +75,12 @@ class OpportunityFactory(BaseFactory):
     agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
 
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
-    category_explanation = factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}")
+    # only set the category explanation if category is Other
+    category_explanation = factory.Maybe(
+        decider=factory.LazyAttribute(lambda o: o.category == OpportunityCategory.OTHER),
+        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        no_declaration=None,
+    )
 
     is_draft = False  # Because we filter out drafts, just default these to False
 

@@ -44,7 +44,8 @@ const ProcessMilestones = () => {
         title={t("milestones.tag")}
         data-test-id="process-high-level-content"
         titleSize="m"
-        bottomBorder="none"
+        bottomBorder="dark"
+        gridGap={6}
       >
         {!Array.isArray(iconList)
           ? ""
@@ -54,7 +55,7 @@ const ProcessMilestones = () => {
                   <IconList className="usa-icon-list--size-lg">
                     <IconListItem className="margin-top-4">
                       <IconListIcon>{getIcon(index)}</IconListIcon>
-                      <IconListContent>
+                      <IconListContent className="tablet-lg:padding-right-3 desktop-lg:padding-right-105">
                         <IconListTitle className="margin-bottom-2" type="h3">
                           {box.title}
                         </IconListTitle>
@@ -65,6 +66,13 @@ const ProcessMilestones = () => {
                             p: (
                               <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"></p>
                             ),
+                            chevron: (
+                              <Icon.NavigateNext
+                                className="display-none tablet-lg:display-block text-base-lighter position-absolute right-0 top-0 margin-right-neg-5"
+                                size={9}
+                                aria-label="launch"
+                              />
+                            ),
                           }}
                         />
                       </IconListContent>
@@ -74,13 +82,24 @@ const ProcessMilestones = () => {
               );
             })}
       </ContentLayout>
-      <div className="padding-2 tablet:padding-1" />
       <ContentLayout
-        title={t("milestones.title_1")}
+        title={
+          <>
+            <small className="display-block font-sans-lg margin-bottom-105">
+              {t("milestones.roadmap_1")}
+              <Icon.NavigateNext
+                className="text-middle text-base-light"
+                size={4}
+                aria-label="launch"
+              />
+              {t("milestones.title_1")}
+            </small>
+            {t("milestones.name_1")}
+          </>
+        }
         data-testid="process-methodology-content"
         titleSize="m"
         bottomBorder="none"
-        paddingTop={false}
       >
         <Grid tabletLg={{ col: 6 }}>
           <p className="usa-intro">{t("milestones.paragraph_1")}</p>
@@ -111,7 +130,20 @@ const ProcessMilestones = () => {
         </Grid>
       </ContentLayout>
       <ContentLayout
-        title={t("milestones.title_2")}
+        title={
+          <>
+            <small className="display-block font-sans-lg margin-bottom-105">
+              {t("milestones.roadmap_2")}
+              <Icon.NavigateNext
+                className="text-middle text-base-light"
+                size={4}
+                aria-label="launch"
+              />
+              {t("milestones.title_2")}
+            </small>
+            {t("milestones.name_2")}
+          </>
+        }
         data-testid="process-methodology-content"
         paddingTop={false}
         titleSize="m"

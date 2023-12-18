@@ -374,8 +374,17 @@ def test_opportunity_search_feature_flag_invalid_value_422(
 #####################################
 
 
-def test_get_opportunity_200(client, api_auth_token, enable_factory_create):
-    opportunity = OpportunityFactory.create()
+@pytest.mark.parametrize(
+    "opportunity_params",
+    [
+        # Whatever defaults we have in the factory
+        {},
+        # Set several values that can be null
+        {"revision_number": 5, "modified_comments": "I changed it"},
+    ],
+)
+def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params):
+    opportunity = OpportunityFactory.create(**opportunity_params)
 
     resp = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
@@ -388,6 +397,9 @@ def test_get_opportunity_200(client, api_auth_token, enable_factory_create):
     assert response_data["opportunity_title"] == opportunity.opportunity_title
     assert response_data["agency"] == opportunity.agency
     assert response_data["category"] == opportunity.category
+    assert response_data["category_explanation"] == opportunity.category_explanation
+    assert response_data["revision_number"] == opportunity.revision_number
+    assert response_data["modified_comments"] == opportunity.modified_comments
 
 
 def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportunities):

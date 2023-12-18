@@ -173,25 +173,29 @@
       "icon_list": [
         {
           "title": "Find",
-          "content": "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>"
+          "content": "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p><chevron/>"
         },
         {
           "title": "Advanced reporting",
-          "content": "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>"
+          "content": "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p><chevron/>"
         },
         {
           "title": "Apply",
           "content": "<p>Streamline the application process to make it easier for all applicants to apply for funding opportunities.</p>"
         }
       ],
-      "title_1": "Milestone 1: Laying the foundation with a modern Application Programming Interface (API)",
+      "roadmap_1": "Find",
+      "title_1": "Milestone 1",
+      "name_1": "Laying the foundation with a modern Application Programming Interface (API)",
       "paragraph_1": "To make it easier to discover funding opportunities, we’re starting with a new modern API to make grants data more accessible. Our API‑first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with  grants in new ways, like SMS, phone, email, chat, and notifications.",
       "sub_title_1": "What’s an API?",
       "sub_paragraph_1": "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
       "sub_title_2": "Are you interested in the tech?",
       "sub_paragraph_2": "We’re building a RESTful API. And we’re starting with an initial endpoint that allows API users to retrieve basic information about each funding opportunity.",
       "cta_1": "View the API milestone on GitHub",
-      "title_2": "Milestone 2: A new search interface accessible to everyone",
+      "roadmap_2": "Find",
+      "title_2": "Milestone 2",
+      "name_2": "A new search interface accessible to everyone",
       "paragraph_2": "Once our new API is in place, we’ll begin focusing on how applicants most commonly access grants data. Our first user-facing milestone will be a simple search interface that makes data from our modern API accessible to anyone who wants to try out new ways to search for funding opportunities.",
       "sub_title_3": "Can’t wait to try out the new search?",
       "sub_paragraph_3": "Search will be the first feature on Simpler.Grants.gov that you’ll be able to test. It’ll be quite basic at first, and you’ll need to continue using <LinkToGrants>www.grants.gov</LinkToGrants> as we iterate. But your feedback will inform what happens next.",
