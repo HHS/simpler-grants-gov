@@ -38,7 +38,7 @@ Our recommended strategy for assigning issues to a given 30k deliverable should 
 
 ### Limiting the 30k deliverables included in reporting
 
-Our recommended approach to limiting the deliverables that are included in reporting :
+Our recommended approach to limiting the deliverables that are included in reporting should consider the following criteria:
 
 - The logic for including a 30k deliverable in reporting should be clear and easy to understand
 - Users should be able to add or remove a given 30k deliverable from reports without having to change the underlying logic
