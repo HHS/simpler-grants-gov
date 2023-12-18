@@ -44,7 +44,7 @@ e2e-test:
 	$(POETRY) run pytest tests/integrations --cov-append=src
 
 test-audit: unit-test
-	@echo "=> Auditing test coverage"
+	@echo "=> Running test coverage report"
 	@echo "============================="
 	$(POETRY) run coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
 
