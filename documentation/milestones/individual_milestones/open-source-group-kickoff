@@ -9,15 +9,22 @@
 
 ## Short description
 
--**What:** This 30k effort marks the initiation of our open source project and the establishment of essential communication tools, processes, and documentation to lay the foundation for a thriving open source community.
--**Why:** Ensure that both open source contributors and the wider public can swiftly and effortlessly participate in the project, fostering a vibrant open source community.
--**Who:** Any public members who want to contribute to the open source project
+-**What:** Set up the tools and processes needed to build an open source community around the Simpler Grants.gov initiative
+-**Why:** Ensures that open source contributors and the general public can easily participate in the project and provide input and code
+-**Who:** Any public members who want to contribute to the open source project. Focus is on: 
+- Open source contributors
+- Other external stakeholders
 
 ## Goals
 
 ### Business description & value
 
 Launch an open source community with a primary emphasis on critical components that lay the groundwork for future expansion and productive collaboration, ensuring streamlined community management, fostering a vibrant open source community, and promoting project transparency.
+
+- Set up the foundational set of communication channels for continuous user input, feedback, and engagement for an open source project
+- Ensure that public code contributions meet code quality and security standards
+- Build stakeholder trust in our product roadmap and our approach to development
+- Establish an ongoing Participant Advisory Council to guide future development
 
 ### User stories
 
