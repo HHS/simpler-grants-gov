@@ -9,9 +9,16 @@ describe("ContentLayout", () => {
     expect(content).toBeInTheDocument();
   });
 
-  it("Renders a title if passed", () => {
-    render(<ContentLayout title="test title">This is a test</ContentLayout>);
-    const content = screen.getByText("test title");
+  it("Renders a title if a string is passed", () => {
+    render(<ContentLayout title="string title">This is a test</ContentLayout>);
+    const content = screen.getByText("string title");
+    expect(content).toBeInTheDocument();
+  });
+
+  it("Renders a title if an element is passed", () => {
+    const title = <>This is a node test.</>;
+    render(<ContentLayout title={title}>This is a test</ContentLayout>);
+    const content = screen.getByText("This is a node test.");
     expect(content).toBeInTheDocument();
   });
 });

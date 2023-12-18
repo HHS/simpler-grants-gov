@@ -1,19 +1,21 @@
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 type Props = {
-  titleSize?: "l" | "m";
-  title?: string;
-  children: React.ReactNode;
   bottomBorder?: "light" | "dark" | "none";
+  children: React.ReactNode;
+  gridGap?: true | "sm" | "md" | "lg" | "2px" | "05" | 1 | 2 | 3 | 4 | 5 | 6;
   paddingTop?: boolean;
+  title?: string | React.ReactNode;
+  titleSize?: "l" | "m";
 };
 
 const ContentLayout = ({
-  children,
-  title,
-  paddingTop = true,
-  titleSize = "l",
   bottomBorder = "none",
+  children,
+  gridGap = true,
+  paddingTop = true,
+  title,
+  titleSize = "l",
 }: Props) => {
   const formattedTitle = () => {
     if (!title) return "";
@@ -48,7 +50,7 @@ const ContentLayout = ({
       } ${bborder}`}
     >
       {formattedTitle()}
-      <Grid row gap>
+      <Grid row gap={gridGap}>
         {children}
       </Grid>
     </GridContainer>
