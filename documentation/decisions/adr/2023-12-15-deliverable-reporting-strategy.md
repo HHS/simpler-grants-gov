@@ -5,10 +5,11 @@
 - **Related Issue:** [#854](https://github.com/HHS/simpler-grants-gov/issues/854) <!-- RECOMMENDED -->
 - **Deciders:** <!-- REQUIRED -->
   - Lucas Brown
-  - Billy Daly
   - Sarah Knopp
   - Sumi Thaiveettil
   - Aaron Couch
+  - Esther Oke
+  - Billy Daly
 - **Tags:** analytics, github
 
 ## Context and Problem Statement
@@ -58,19 +59,29 @@ Our recommended approach to limiting the deliverables that are included in repor
 - **Status:** Use the status of the deliverable in the provisional roadmap project
 - **GitHub action:** Explicitly list the deliverables to include in the GitHub action for reporting
 
-## Decision outcome <!-- REQUIRED -->
+## Decision outcomes <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+### Assigning issues to deliverables
 
-### Positive Consequences <!-- OPTIONAL -->
+TODO: Trying to decide between the labels option and the deliverable column option.
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- **Positive outcomes**
+  - {e.g., improved performance on quality metric, new capability enabled, ...}
+  - ...
+- **Negative outcomes**
+  - {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
+  - ...
 
-### Negative Consequences <!-- OPTIONAL -->
+### Limiting the 30k deliverables included in reporting
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+TODO: Trying to decide between the label option and the status option.
+
+- **Positive outcomes**
+  - {e.g., improved performance on quality metric, new capability enabled, ...}
+  - ...
+- **Negative outcomes**
+  - {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
+  - ...
 
 ## Evaluation - Assigning issues to deliverables <!-- OPTIONAL -->
 
