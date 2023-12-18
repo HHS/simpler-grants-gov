@@ -1,8 +1,9 @@
 """Test the analytics.metrics.burndown module."""
-from datetime import datetime, timedelta, timezone
+from pathlib import Path  # noqa: I001
 
 import pandas as pd
 import pytest
+
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.burndown import SprintBurndown, Unit
 
@@ -12,6 +13,7 @@ from tests.conftest import (
     DAY_2,
     DAY_3,
     DAY_4,
+    MockSlackbot,
     sprint_row,
 )
 
@@ -31,6 +33,19 @@ def result_row(
         "delta": delta,
         "total_open": total,
     }
+
+
+@pytest.fixture(name="sample_burndown", scope="module")
+def sample_burndown_by_points_fixture() -> SprintBurndown:
+    """Create a sample burndown to simplify test setup."""
+    # setup - create test data
+    sprint_data = [
+        sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+        sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+    ]
+    test_data = SprintBoard.from_dict(sprint_data)
+    # return sprint burndown by points
+    return SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
 
 
 class TestSprintBurndownByTasks:
@@ -170,19 +185,19 @@ class TestSprintBurndownByTasks:
             SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.issues)
 
     def test_calculate_burndown_for_current_sprint(self):
-        """A ValueError should be raised if the sprint argument isn't valid."""
+        """Use the current sprint if the date falls in the middle of a sprint."""
         # setup - create test data
-        now = datetime.now(tz=timezone.utc)
-        day_1 = now.strftime("%Y-%m-%d")
-        day_2 = (now + timedelta(days=1)).strftime("%Y-%m-%d")
-        day_3 = (now + timedelta(days=2)).strftime("%Y-%m-%d")
-        sprint_data = [
+        today = pd.Timestamp.today().floor("d")
+        day_1 = (today + pd.Timedelta(days=-1)).strftime("%Y-%m-%d")
+        day_2 = today.strftime("%Y-%m-%d")
+        day_3 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        sprint_data = [  # note sprint duration is 2 days by default
             sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
             sprint_row(issue=1, sprint_start=day_1, created=day_1),
         ]
         test_data = SprintBoard.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(test_data, sprint="@current", unit=Unit.issues)
         df = output.results
         # validation - check burndown output
         expected = [
@@ -427,3 +442,98 @@ class TestFormatSlackMessage:
         title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.points.value in title
+
+
+class TestPlotResults:
+    """Test the SprintBurndown.show_results() method."""
+
+    def test_plot_results_output_stored_in_chart_property(self):
+        """SprintBurndown.chart should contain the output of plot_results()."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        # validation - check that the chart attribute matches output of plot_results()
+        assert output.chart == output.plot_results()
+
+
+class TestExportMethods:
+    """Test the export methods method for SprintBurndown."""
+
+    @pytest.mark.parametrize(
+        ("method", "file_name"),
+        [
+            ("export_results", "RESULTS_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
+        ],
+    )
+    def test_export_results_to_correct_file_path(
+        self,
+        method: str,
+        file_name: str,
+        tmp_path: Path,
+        sample_burndown: SprintBurndown,
+    ):
+        """The file should be exported to the correct location."""
+        # setup - check that file doesn't exist at output location
+        file_name = getattr(sample_burndown, file_name)
+        expected_path = tmp_path / file_name
+        assert expected_path.parent.exists() is True
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(sample_burndown, method)
+        output = func(output_dir=expected_path.parent)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()
+
+    @pytest.mark.parametrize(
+        ("method", "file_name"),
+        [
+            ("export_results", "RESULTS_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
+        ],
+    )
+    def test_create_parent_dir_if_it_does_not_exists(
+        self,
+        method: str,
+        file_name: str,
+        tmp_path: Path,
+        sample_burndown: SprintBurndown,
+    ):
+        """The parent directory should be created if it doesn't already exist."""
+        # setup - check that file and parent directory don't exist
+        file_name = getattr(sample_burndown, file_name)
+        expected_path = tmp_path / "new_folder" / file_name
+        assert expected_path.parent.exists() is False  # doesn't yet exist
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(sample_burndown, method)
+        output = func(output_dir=expected_path.parent)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()
+
+
+def test_post_to_slack(
+    mock_slackbot: MockSlackbot,
+    tmp_path: Path,
+    sample_burndown: SprintBurndown,
+):
+    """Test the steps required to post the results to slack, without actually posting."""
+    # execution
+    sample_burndown.post_results_to_slack(
+        mock_slackbot,
+        channel_id="test_channel",
+        output_dir=tmp_path,
+    )
+    # validation - check that output files exist
+    for output in ["RESULTS_CSV", "CHART_PNG", "CHART_HTML"]:
+        output_path = tmp_path / getattr(sample_burndown, output)
+        assert output_path.exists() is True
