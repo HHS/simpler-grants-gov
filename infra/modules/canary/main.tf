@@ -8,6 +8,10 @@ data "aws_region" "current" {}
 # Logging Bucket 
 resource "aws_s3_bucket" "canary-reports" {
   # contains the zip and the canary logs
+  # checkov:skip=CKV_AWS_144: CORS access not relevant to this bucket
+  # checkov:skip=CKV2_AWS_62:S3 bucket does not need notifications enabled
+  # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
+  # checkov:skip=CKV2_AWS_61:No need to define S3 bucket lifecycle configuration to expire. Stored files are screenshots and a JSON with a small file size 
   bucket = "s3-canaries-reports-${data.aws_caller_identity.current.account_id}"
 }
 resource "aws_s3_bucket_versioning" "canary-reports" {
@@ -24,6 +28,26 @@ resource "aws_s3_bucket_public_access_block" "canary-reports" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "canary-reports" {
+  bucket = aws_s3_bucket.canary-reports.id
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.canary-reports.arn
+      sse_algorithm     = "aws:kms"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+# KMS Key to encrypt bucket
+resource "aws_kms_key" "canary-reports" {
+  description = "KMS key for Synthetics Canary"
+  # The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key.
+  deletion_window_in_days = "10"
+  # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
+  enable_key_rotation = "true"
 }
 
 # Assume role for the canary
