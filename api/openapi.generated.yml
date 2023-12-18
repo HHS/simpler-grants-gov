@@ -337,6 +337,19 @@ components:
           - O
           type:
           - string
+        category_explanation:
+          type: string
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        revision_number:
+          type: integer
+          description: The current revision number of the opportunity, counting starts
+            at 0
+          example: 0
+        modified_comments:
+          type: string
+          description: Details regarding what modification was last made
+          example: null
         created_at:
           type: string
           format: date-time
