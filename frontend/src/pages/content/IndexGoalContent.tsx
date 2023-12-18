@@ -13,20 +13,20 @@ const IndexGoalContent = () => {
       data-testid="goal-content"
       bottomBorder="light"
     >
-      <Grid tabletLg={{ col: 6 }} desktop={{ col: 5 }} desktopLg={{ col: 6 }}>
+      <Grid tabletLg={{ col: 6 }}>
         <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
         <Link href="/newsletter" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
-            {t("goal.cta")}{" "}
+            <span className="margin-right-5">{t("goal.cta")}</span>
             <Icon.ArrowForward
-              className="text-middle"
+              className="text-middle margin-left-neg-4"
               size={4}
               aria-label="arrow-forward"
             />
           </Button>
         </Link>
       </Grid>
-      <Grid tabletLg={{ col: 6 }} desktop={{ col: 7 }} desktopLg={{ col: 6 }}>
+      <Grid tabletLg={{ col: 6 }}>
         <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
           {t("goal.title_2")}
         </h3>

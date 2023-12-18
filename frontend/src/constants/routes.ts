@@ -21,7 +21,9 @@ export const ExternalRoutes = {
   GRANTS_BLOG: "https://grantsgovprod.wordpress.com/",
   HHS: "https://www.hhs.gov",
   INSPECTOR_GENERAL: "https://oig.hhs.gov/",
-  MILESTONES: "https://github.com/orgs/HHS/projects/12",
+  MILESTONE_SEARCH_MVP: "https://github.com/HHS/simpler-grants-gov/issues/89",
+  MILESTONE_GET_OPPORTUNITIES:
+    "https://github.com/HHS/simpler-grants-gov/issues/70",
   NO_FEAR: "https://www.hhs.gov/about/agencies/asa/eeo/no-fear-act/index.html",
   PERFORMANCE_REPORTS: "https://www.hhs.gov/about/budget/index.html",
   PRIVACY_POLICY: "https://www.grants.gov/privacy-policy",
