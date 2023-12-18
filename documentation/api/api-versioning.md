@@ -28,7 +28,7 @@ However, that approach has a few complexities due to the libraries we use for de
 
 * [webargs](https://webargs.readthedocs.io/en/latest/index.html) - a generic framework for parsing HTTP requests, and can serialize/deserialize using Marshmallow schemas.
 * [apispec](https://apispec.readthedocs.io/en/latest/) - a tool that can generate OpenAPI specifications from Marshmallow schemas.
-* [APIFlask](https://apiflask.com/) is the framework we use that connects Flask, webargs, and apispec together for us.
+* [APIFlask](https://apiflask.com/) - the framework we use that connects Flask, webargs, and apispec together for us.
 
 When we construct a route, we specify the input & output Marshmallow schemas, which APIFlask passes to webargs & apispec. The OpenAPI specification is generated entirely at app start-up, and
 is a static file (we also generate the [file statically](https://github.com/HHS/simpler-grants-gov/blob/main/api/openapi.generated.yml) in our repo using the same underlying code).
