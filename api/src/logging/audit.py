@@ -13,7 +13,6 @@ from typing import Any, Hashable, Sequence
 logger = logging.getLogger(__name__)
 
 AUDIT = 32
-logging.INFO
 logging.addLevelName(AUDIT, "AUDIT")
 
 
