@@ -173,11 +173,11 @@
       "icon_list": [
         {
           "title": "Find",
-          "content": "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>"
+          "content": "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p><chevron/>"
         },
         {
           "title": "Advanced reporting",
-          "content": "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>"
+          "content": "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p><chevron/>"
         },
         {
           "title": "Apply",
