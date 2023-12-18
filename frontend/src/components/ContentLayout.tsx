@@ -5,7 +5,7 @@ type Props = {
   children: React.ReactNode;
   gridGap?: true | "sm" | "md" | "lg" | "2px" | "05" | 1 | 2 | 3 | 4 | 5 | 6;
   paddingTop?: boolean;
-  title?: string;
+  title?: string | React.ReactNode;
   titleSize?: "l" | "m";
 };
 
