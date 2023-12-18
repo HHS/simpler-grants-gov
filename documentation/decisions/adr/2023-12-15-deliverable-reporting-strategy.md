@@ -32,7 +32,7 @@ Our recommended strategy for assigning issues to a given 30k deliverable should 
 
 - Users assigning an issue to a 30k deliverable should only need to update that value in one place
 - Users should be able to search or filter for the issues assigned to a given 30k deliverable
-- Users should be able to group by 30k deliverables in the sprint board and in GitHub insights reporting
+- Users should be able to group by 30k deliverables in the sprint board and in [GitHub insights reporting][github-insights]
 - The relationship between issues and 30k deliverables should be consistently represented across all reports
 
 ### Limiting the 30k deliverables included in reporting
@@ -132,43 +132,53 @@ This option involves tagging a 30k deliverable from the body of each issue using
 
 ### Label
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+This option involves creating a label that indicates when a deliverable should be included in reporting (e.g. "add to report") and then filtering for this label in our custom reporting.
+
+> [!NOTE]
+> The code should be configured to accept an arbitrary set of labels as filters, so that if the label changes, we only need to change the top-level configuration and not several lines of the source code.
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Makes the choice to include a deliverable in a report explicit and easy to understand.
+  - Enables users to add or remove deliverables from reporting without changing the logic or the source code.
+  - Makes it easy to change the logic that determines which issue labels are used to include/exclude issues from reporting.
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Decouples reporting logic from the status of ongoing deliverables. **Note:** this could be a pro or a con depending on how tightly coupled we want reporting and delivery management to be.
+  - Adds to the already long list of labels in the repository.
 
 ### Status
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+This option involves filtering the deliverables that are included in reporting based on their status in the provisional roadmap project. For example, we may only want to report on deliverables that have the status "In progress" or "Planning".
+
+> [!NOTE]
+> The code should be configured to accept an arbitrary set of statuses as filters, so that if we want to change which statuses are included, we only need to change the top-level configuration and not several lines of the source code.
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Enables users to add or remove deliverables from reporting without changing the logic or the source code.
+  - Makes it easy to change the logic that determines which statuses are used to include/exclude issues from reporting.
+  - Keeps the reporting and delivery management in sync.
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Logic behind which deliverables are included in reporting is not as explicit as having a dedicated label.
+  - Requires the reporting logic to be tightly coupled with the rules for assigning deliverable status.
 
 ### GitHub action
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+This option involves specifying the deliverables we want to include in the reporting within the GitHub action itself, either by name or by issue number.
+
+> [!NOTE]
+> The code should be configured to accept an arbitrary list of issue titles or numbers, so that if we want to change which deliverables are included, we only need to change the top-level configuration and not several lines of the source code.
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Makes the choice to include a deliverable in a report explicit and easy to understand.
+  - Prevents someone from accidentally removing a deliverable from reporting by changing a label or status.
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Decouples reporting logic from the status of ongoing deliverables. **Note:** this could be a pro or a con depending on how tightly coupled we want reporting and delivery management to be.
+  - Does not allow users to add or remove deliverables from reporting without changing a configuration file.
+  - Prone to error if users enter the wrong issue title or number.
 
 ## Links <!-- OPTIONAL -->
 
-- [{Link name}](link to external resource)
-- ...
+- [Linking pull requests to issues][linking-pull-requests]
+- [GitHub insights reporting][github-insights]
 
-[linking pull requests]: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests#linking-a-pull-request-to-an-issue
+[linking-pull-requests]: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests#linking-a-pull-request-to-an-issue
+[github-insights]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/viewing-insights-from-your-project/about-insights-for-projects
