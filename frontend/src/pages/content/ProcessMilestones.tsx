@@ -83,7 +83,20 @@ const ProcessMilestones = () => {
             })}
       </ContentLayout>
       <ContentLayout
-        title={t("milestones.title_1")}
+        title={
+          <>
+            <small className="display-block font-sans-lg margin-bottom-105">
+              {t("milestones.roadmap_1")}
+              <Icon.NavigateNext
+                className="text-middle text-base-light"
+                size={4}
+                aria-label="launch"
+              />
+              {t("milestones.title_1")}
+            </small>
+            {t("milestones.name_1")}
+          </>
+        }
         data-testid="process-methodology-content"
         titleSize="m"
         bottomBorder="none"
@@ -117,7 +130,20 @@ const ProcessMilestones = () => {
         </Grid>
       </ContentLayout>
       <ContentLayout
-        title={t("milestones.title_2")}
+        title={
+          <>
+            <small className="display-block font-sans-lg margin-bottom-105">
+              {t("milestones.roadmap_2")}
+              <Icon.NavigateNext
+                className="text-middle text-base-light"
+                size={4}
+                aria-label="launch"
+              />
+              {t("milestones.title_2")}
+            </small>
+            {t("milestones.name_2")}
+          </>
+        }
         data-testid="process-methodology-content"
         paddingTop={false}
         titleSize="m"
