@@ -21,7 +21,7 @@ To support you as a grants.gov user and stakeholder, we on the grants.gov team m
 ### Make grants.gov inclusive & collaborative
 * Ensure that all communities are equitably served by the grantmaking process
 * Ensure that communities with limited financial resources are better able to discover and apply for the opportunities for which they're qualified
-* Connect federal opportunities to more eligible applicants from underserved and overburdened communities
+* Connect federal opportunities to more eligible applicants from all communities
 * Promote collaboration and build trust between the federal government and the public
 
 ### Make grants.gov transparent & participatory
