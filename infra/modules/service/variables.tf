@@ -97,3 +97,9 @@ variable "min_capacity" {
   type        = number
   default     = 2
 }
+
+variable "api_auth_token" {
+  type        = string
+  default     = null
+  description = "Auth token for connecting to the API"
+}
