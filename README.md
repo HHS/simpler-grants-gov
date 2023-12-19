@@ -4,7 +4,7 @@ A modernization effort for [Grants.gov](https://grants.gov/)
 
 ## About the Project
 
-We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone We’re improving the way applicants search for and discover funding opportunities, making it easier to find and apply. For federal grantmaking agencies, we’re making it easier for their communities to find the funding they need.
+We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone. We’re improving the way applicants search for and discover funding opportunities, making it easier to find and apply. For federal grantmaking agencies, we’re making it easier for their communities to find the funding they need.
 
 Go to [Simpler.Grants.gov](https://simpler.grants.gov/) to learn about our transparent process and what we’re doing now, or explore our existing user research and the findings that are guiding our work.
 
