@@ -3,7 +3,7 @@
 | Field              | Value                                                      |
 | ------------------ | ---------------------------------------------------------- |
 | Document Status    | Completed                                                  |
-| Deliverable ticket | [Issue 89](https://github.com/HHS/grants-equity/issues/89) |
+| Deliverable ticket | [Issue 89](https://github.com/HHS/simpler-grants-gov/issues/89) |
 | Roadmap dashboard  | [Product roadmap](https://github.com/orgs/HHS/projects/12) |
 | Product owner      | Lucas Brown                                                |
 | Document owner     | Billy Daly                                                 |
@@ -114,7 +114,7 @@ The primary page we'll need to deliver for the user interface (UI) is a search p
 ### Destination for live updating metrics
 <!-- Required -->
 
-Page on the public wiki. **Note:** This will likely change once we deliver the [Public Measurement Dashboard milestone](https://github.com/HHS/grants-equity/issues/65)
+Page on the public wiki. **Note:** This will likely change once we deliver the [Public Measurement Dashboard milestone](https://github.com/HHS/simpler-grants-gov/issues/65)
 
 ## Planning
 
@@ -123,22 +123,22 @@ Page on the public wiki. **Note:** This will likely change once we deliver the [
 
 What functionality do we expect to be in place ***before*** work starts on this deliverable?
 
-- **Front-end:** The search UI will build on the front-end work completed in both the [initial static site launch](https://github.com/HHS/grants-equity/issues/62) and the [subsequent improvements](https://github.com/HHS/grants-equity/issues/568) that created the following functionality:
-  - **[Front-end CI/CD](https://github.com/HHS/grants-equity/issues/58):** Automatically tests and deploys front-end code
-  - **[Foundational UI](https://github.com/HHS/grants-equity/issues/60):** Enforces a consistent user interface and web design system across the frontend
-  - **[Translation Process](https://github.com/HHS/grants-equity/issues/81):** Facilitates and publishes translations of front-end content in multiple languages
-- **API:** The search API will build on the existing backend work completed to launch the [GET Opportunities endpoint](https://github.com/HHS/grants-equity/issues/70) which delivered the following functionality:
-  - **[Backend CI/CD](https://github.com/HHS/grants-equity/issues/57):** Automatically tests and deploys backend code
-  - **[Database Replica](https://github.com/HHS/grants-equity/issues/54):** Maintains eventual consistency (with low latency) between the data in grants.gov and simpler.grants.gov and ensures that simpler.grants.gov services remain available when grants.gov services experience downtime
-  - **[Data Architecture](https://github.com/HHS/grants-equity/issues/125):** Enables simpler.grants.gov to read data from an updated (and simplified) data model
-  - **[API Docs](https://github.com/HHS/grants-equity/issues/71):** Documents the API endpoints released with each deliverable
+- **Front-end:** The search UI will build on the front-end work completed in both the [initial static site launch](https://github.com/HHS/simpler-grants-gov/issues/62) and the [subsequent improvements](https://github.com/HHS/simpler-grants-gov/issues/568) that created the following functionality:
+  - **[Front-end CI/CD](https://github.com/HHS/simpler-grants-gov/issues/58):** Automatically tests and deploys front-end code
+  - **[Foundational UI](https://github.com/HHS/simpler-grants-gov/issues/60):** Enforces a consistent user interface and web design system across the frontend
+  - **[Translation Process](https://github.com/HHS/simpler-grants-gov/issues/81):** Facilitates and publishes translations of front-end content in multiple languages
+- **API:** The search API will build on the existing backend work completed to launch the [GET Opportunities endpoint](https://github.com/HHS/simpler-grants-gov/issues/70) which delivered the following functionality:
+  - **[Backend CI/CD](https://github.com/HHS/simpler-grants-gov/issues/57):** Automatically tests and deploys backend code
+  - **[Database Replica](https://github.com/HHS/simpler-grants-gov/issues/54):** Maintains eventual consistency (with low latency) between the data in grants.gov and simpler.grants.gov and ensures that simpler.grants.gov services remain available when grants.gov services experience downtime
+  - **[Data Architecture](https://github.com/HHS/simpler-grants-gov/issues/125):** Enables simpler.grants.gov to read data from an updated (and simplified) data model
+  - **[API Docs](https://github.com/HHS/simpler-grants-gov/issues/71):** Documents the API endpoints released with each deliverable
 
 What functionality do we expect to be in place by ***the end*** of work on this deliverable?
 
-- **[Incident Response](https://github.com/HHS/grants-equity/issues/373):** Ensures that we have a robust incident response plan in place when simpler.grants.gov services are interrupted
-- **[Search API](https://github.com/HHS/grants-equity/issues/90):** Enables system-to-system users to access the search features through the API
-- **[Search Page](https://github.com/HHS/grants-equity/issues/576):** Enables all other users to access the search features through the user interface
-- **[User Research Incentives](https://github.com/HHS/grants-equity/issues/84):** Enables us to engage stakeholders for user testing of the new search functionality
+- **[Incident Response](https://github.com/HHS/simpler-grants-gov/issues/373):** Ensures that we have a robust incident response plan in place when simpler.grants.gov services are interrupted
+- **[Search API](https://github.com/HHS/simpler-grants-gov/issues/90):** Enables system-to-system users to access the search features through the API
+- **[Search Page](https://github.com/HHS/simpler-grants-gov/issues/576):** Enables all other users to access the search features through the user interface
+- **[User Research Incentives](https://github.com/HHS/simpler-grants-gov/issues/84):** Enables us to engage stakeholders for user testing of the new search functionality
 
 Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
@@ -150,11 +150,11 @@ Is there any notable functionality we do ***not*** expect to be in place before 
 
 #### Does the metadata and the text of the opportunity need to be translated?
 
-We will determine if individual fields from the search results can be easily translated in this effort but opportunity listings and all search results will _**not**_ be translated in this 30k ft deliverable. 
+We will determine if individual fields from the search results can be easily translated in this effort but opportunity listings and all search results will _**not**_ be translated in this 30k ft deliverable.
 
 #### What metadata is currently available about each opportunity?
 
-Metadata is being determined in the [GET Opportunity 30k deliverable](https://github.com/HHS/simpler-grants-gov/issues/70). We plan to use publicly available data only. For example, `is_draft` state will not be used in this Search feature. 
+Metadata is being determined in the [GET Opportunity 30k deliverable](https://github.com/HHS/simpler-grants-gov/issues/70). We plan to use publicly available data only. For example, `is_draft` state will not be used in this Search feature.
 
 ### Not doing
 <!-- Optional -->
@@ -198,15 +198,15 @@ Are there multiple services that are being connected for the first time in PROD?
 
 _Are there any fields being shared publicly that have never been shared in PROD before?_
 
-The search data and text will be shared for the first time on the site. 
+The search data and text will be shared for the first time on the site.
 
 ### Security considerations
 <!-- Required -->
 
 _Does this 30k ft deliverable expose any new attack vectors or expand the attack surface of the product?_
 
-We're exposing new endpoints that are all read-only this limits vulnerabilities. 
+We're exposing new endpoints that are all read-only this limits vulnerabilities.
 
 _If so, how are we addressing these risks?_
 
-We plan to complete a security review and set up any mitigation strategies as needed. 
+We plan to complete a security review and set up any mitigation strategies as needed.
