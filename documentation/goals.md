@@ -6,7 +6,7 @@ The following are currently very draft and not finalized goals for the grants.go
 
 Our vision is for the following to become true:
 
-Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government.
+We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.
 
 ## Mission
 
@@ -18,8 +18,8 @@ To support you as a grants.gov user and stakeholder, we on the grants.gov team m
 * Make it as easy as possible for applicants to apply for opportunities, through all aspects of the application including forms and attachments
 * Provide frictionless functionality and help users when they get stuck
 
-### Make grants.gov inclusive & collaborative
-* Ensure that all communities are equitably served by the grantmaking process
+### Make grants.gov accessible & collaborative
+* Ensure that all communities have access to the grantmaking process
 * Ensure that communities with limited financial resources are better able to discover and apply for the opportunities for which they're qualified
 * Connect federal opportunities to more eligible applicants from all communities
 * Promote collaboration and build trust between the federal government and the public
