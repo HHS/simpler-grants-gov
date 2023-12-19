@@ -12,7 +12,7 @@ resource "aws_vpc_security_group_egress_rule" "vpc_egress_from_dms" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "vpc_ingress_from_dms" {
-  security_group_id = aws_security_group.db.id
+  security_group_id = aws_security_group.vpc.id
   description       = "VPC Endpoint security group inress rules for DMS"
 
   from_port                    = 443
