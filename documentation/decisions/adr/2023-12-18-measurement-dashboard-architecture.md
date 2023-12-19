@@ -36,14 +36,14 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 
 ## Options Considered
 
-- Analytics API + static site
-- Custom dashboard application (e.g. Dash or R Shiny)
-- SaaS dashboard solution (e.g. PowerBI or Tableau)
-- Open source dashboard solution (e.g. Metabase or Superset)
+- Analytics API + user interface
+- Custom dashboard application (e.g. [Dash][plotly-dash] or [R Shiny][r-shiny])
+- Open source dashboard solution (e.g. [Metabase][metabase] or [Redash][redash])
+- SaaS dashboard solution (e.g. [PowerBI][power-bi] or [Tableau][tableau])
 
 ## Decision Outcome <!-- REQUIRED -->
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+TODO: Decide between analytics API + UI and open source dashboard solution.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
@@ -57,9 +57,12 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
-### Analytics API + static site
+### Analytics API + user interface
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+This option involves building both a custom analytics API that will serve the data behind our key project metrics and a separate user interface to consume from that API and render these metrics as a dashboard for end users. Following this approach, we could choose to re-use our existing front-end and backend infrastructure or make slightly different tooling choices based on our needs.
+
+> [!TIP]
+> **Bottom line:** This option is best if we want to follow the architecture pattern of the rest of Simpler.Grants.gov and have maximum control over the structure and design of the public dashboard, but can dedicate more engineering resources to building and hosting this dashboard and don't need or plan to update or change the analytics endpoints or dashboards frequently.
 
 - **Pros**
   - Good, because {argument a}
@@ -71,9 +74,9 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ### Custom dashboard app
 
-This option involves building a custom dashboard app using an existing framework, such as Dash (python) or R Shiny. This custom built application would be hosted as its own application and be slightly more integrated than a separate analytics API + static site, but it would be more customizable than using an open source or proprietary dashboard solution.
+This option involves building a custom dashboard app using an existing framework, such as [Dash][plotly-dash] (python) or [R Shiny][r-shiny]. This custom built application would be hosted as its own application and be slightly more integrated than a separate analytics API + dashboard UI, but it would be more customizable than using an open source or proprietary dashboard solution.
 
-> [!NOTE]
+> [!TIP]
 > **Bottom line:** This option would be best if we want to retain control over the look and feel of the dashboard and manage the backend and frontend of the dashboard together, but can dedicate more engineering resources to building and hosting it and don't need to expose analytics data via API.
 
 - **Pros**
@@ -89,9 +92,9 @@ This option involves building a custom dashboard app using an existing framework
 
 ### Open source dashboard solution
 
-This option involves selected and hosting an open source dashboard solution, such as Metabase or Redash. This solution would most likely be self-hosted and connect directly to our data warehouse, and enable business analysts to build adhoc reporting and dashboards with SQL and a drag-and-drop interface. Individual dashboards can then be configured for broader publication to external stakeholders.
+This option involves selecting and hosting an open source dashboard solution, such as [Metabase][metabase] or [Redash][redash]. This solution would most likely be self-hosted and connect directly to our data warehouse, and enable business analysts to build adhoc reporting and dashboards with SQL and a drag-and-drop interface. Individual dashboards can then be configured for broader publication to external stakeholders.
 
-> [!NOTE]
+> [!TIP]
 > **Bottom line:** This option would be best if we want to adopt an open source solution that enables business analysts to build and host dashboards with minimal support from engineers, but are willing to compromise on the amount of control we have over the look and feel of those dashboards and don't need to expose analytics data via API.
 
 - **Pros**
@@ -107,9 +110,9 @@ This option involves selected and hosting an open source dashboard solution, suc
 
 ### SaaS dashboard solution
 
-{example | description | pointer to more information | ...} <!-- OPTIONAL -->
+This solution involves adopting a Software-as-a-Service dashboard solution, such as Tableau or PowerBI, and using this solution to enable business analysts to build adhoc reporting and dashboards with a drag-and-drop interface. Individual dashboards can then be configured for broader publication for external stakeholders.
 
-> [!NOTE]
+> [!TIP]
 > **Bottom line:** This option would be best if we want to adopt an externally hosted solution that enables business analysts to build dashboards with no direct support from engineers, but are willing to accept a higher per-user cost, closed-source tool, and fewer options for customization.
 
 - **Pros**
@@ -126,5 +129,16 @@ This option involves selected and hosting an open source dashboard solution, suc
 
 ## Links <!-- OPTIONAL -->
 
-- [{Link name}](link to external resource)
-- ...
+- [Dash][plotly-dash]
+- [Shiny][r-shiny]
+- [Metabase][metabase]
+- [Redash][redash]
+- [Tableau][tableau]
+- [PowerBI][power-bi]
+
+[plotly-dash]: https://dash.plotly.com/
+[r-shiny]: https://shiny.posit.co/
+[metabase]: https://www.metabase.com/
+[redash]: https://redash.io/
+[tableau]: https://www.tableau.com/trial/tableau-software
+[power-bi]: https://www.microsoft.com/en-us/power-platform/products/power-bi
