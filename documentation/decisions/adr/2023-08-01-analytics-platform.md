@@ -45,7 +45,7 @@ DAP cannot be used for authenticated pages. We recommend Google Analytics with a
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- **Data-Driven Decision Making**: With an analytics platform, our project can gather valuable data and insights about usage and identify where there are shortfalls to our product. It can allow us to ensure we are building an equitable solution for the public. This data-driven approach enables informed decision-making and allows teams to identify trends, opportunities, and areas for improvement.
+- **Data-Driven Decision Making**: With an analytics platform, our project can gather valuable data and insights about usage and identify where there are shortfalls to our product. It can allow us to ensure we are building an accessible solution for the public. This data-driven approach enables informed decision-making and allows teams to identify trends, opportunities, and areas for improvement.
 - **Improved Performance**: Analytics platforms help track key performance indicators (KPIs) and measure the success of various initiatives and deliverables. By monitoring these metrics, we can optimize our strategies and improve overall performance.
 - **Enhanced User Experience**: Understanding user behavior through analytics helps tailor products, services, and content to meet users' needs and preferences leading to a better user experience.
 
