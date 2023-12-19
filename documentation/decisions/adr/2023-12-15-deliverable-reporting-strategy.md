@@ -92,6 +92,12 @@ This option involves creating a milestone for each 30k deliverable and assigning
 > [!NOTE]
 > This is a slightly different use of milestones than the project currently supports. Right now, the engineering team can create multiple milestones for a given 30k deliverable and reporting is driven by tagging the parent 30k deliverable in the description of the milestone. This new approach would require a *single* milestone per 30k deliverable and all tickets associated with that deliverable would need to be added to the milestone to be included in reporting.
 
+> [!TIP]
+> **Bottom line:** This is the best option if we:
+> - want a consistent way to filter and group issues by deliverable across all GitHub projects and reporting as well as within the repository
+> - but are okay with preventing the engineering team from using milestones to organize issues into smaller units of work
+
+
 - **Pros**
   - Ensures that there is just one source of truth for the list of issues associated with a given 30k deliverable.
   - Supports filtering both within the repository and within GitHub projects (e.g. roadmap and sprint board).
@@ -105,6 +111,11 @@ This option involves creating a milestone for each 30k deliverable and assigning
 
 This option involves creating a label for each 30k deliverable with a consistent prefix (e.g. `30k: Public launch`) and then applying this label to each of the issues required for delivery of that 30k.
 
+> [!TIP]
+> **Bottom line:** This is the best option if:
+> - we want a consistent way to filter issues by deliverable in the repository and across GitHub projects
+> - but can compromise on being able to **group** by deliverable in GitHub projects or reporting
+
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
   - Supports filtering both within the repository and within GitHub projects (e.g. roadmap and sprint board).
@@ -115,6 +126,11 @@ This option involves creating a label for each 30k deliverable with a consistent
 ### Deliverable column
 
 This option involves creating a single select "deliverable" column in the GitHub projects, with values for each 30k deliverable, and then selecting the corresponding "deliverable" value for each issue added to the project.
+
+> [!TIP]
+> **Bottom line:** This is the best option if:
+> - we want a consistent way of filtering, grouping, and sorting issues by deliverable in GitHub projects and reporting
+> - but can compromise on being able to filter by deliverable in the **repository**
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
@@ -129,6 +145,9 @@ This option involves creating a single select "deliverable" column in the GitHub
 ### Reserved phrase
 
 This option involves tagging a 30k deliverable from the body of each issue using a reserved phrase (e.g. "30k deliverable: #123"). It would function much like [linking a pull request to an issue][linking pull requests] does in GitHub.
+
+> [!TIP]
+> **Bottom line:** Probably not the best option unless we only cared about grouping issues by deliverable in custom reporting.
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
@@ -148,6 +167,11 @@ This option involves creating a label that indicates when a deliverable should b
 > [!NOTE]
 > The code should be configured to accept an arbitrary set of labels as filters, so that if the label changes, we only need to change the top-level configuration and not several lines of the source code.
 
+> [!TIP]
+> **Bottom line:** This is the best option if we:
+> - want an easy way to explicitly indicate when a deliverable should be included or excluded from reporting
+> - and are okay with decoupling the reporting logic from the business logic around deliverable status
+
 - **Pros**
   - Makes the choice to include a deliverable in a report explicit and easy to understand.
   - Enables users to add or remove deliverables from reporting without changing the logic or the source code.
@@ -163,6 +187,11 @@ This option involves filtering the deliverables that are included in reporting b
 > [!NOTE]
 > The code should be configured to accept an arbitrary set of statuses as filters, so that if we want to change which statuses are included, we only need to change the top-level configuration and not several lines of the source code.
 
+> [!TIP]
+> **Bottom line:** This is the best option if we:
+> - want deliverables to automatically be included in reporting once they enter a specific status (e.g. "in progress")
+> - and we don't anticipate edge cases that require including or excluding deliverables from reporting despite their status
+
 - **Pros**
   - Enables users to add or remove deliverables from reporting without changing the logic or the source code.
   - Makes it easy to change the logic that determines which statuses are used to include/exclude issues from reporting.
@@ -177,6 +206,9 @@ This option involves specifying the deliverables we want to include in the repor
 
 > [!NOTE]
 > The code should be configured to accept an arbitrary list of issue titles or numbers, so that if we want to change which deliverables are included, we only need to change the top-level configuration and not several lines of the source code.
+
+> [!TIP]
+> **Bottom line:** This is probably not a good option unless we want to version control when we add or remove deliverables from reporting.
 
 - **Pros**
   - Makes the choice to include a deliverable in a report explicit and easy to understand.
