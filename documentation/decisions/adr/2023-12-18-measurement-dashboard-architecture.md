@@ -62,15 +62,19 @@ TODO: Decide between analytics API + UI and open source dashboard solution.
 This option involves building both a custom analytics API that will serve the data behind our key project metrics and a separate user interface to consume from that API and render these metrics as a dashboard for end users. Following this approach, we could choose to re-use our existing front-end and backend infrastructure or make slightly different tooling choices based on our needs.
 
 > [!TIP]
-> **Bottom line:** This option is best if we want to follow the architecture pattern of the rest of Simpler.Grants.gov and have maximum control over the structure and design of the public dashboard, but can dedicate more engineering resources to building and hosting this dashboard and don't need or plan to update or change the analytics endpoints or dashboards frequently.
+> **Bottom line:** This option is best if we want to follow the existing architecture pattern of Simpler.Grants.gov and have maximum control over the structure and design of the public dashboard, but can dedicate more engineering resources to building and hosting this dashboard and don't need to update the analytics endpoints or dashboards frequently.
 
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Provides the most fine-grained control over the look and feel of the dashboard application.
+  - Enables us to combine multiple dashboards into a single application.
+  - Enables S2S users to access underlying analytics data via API.
+  - Allows us to include narrative text that explains the metrics we publish.
+  - Enables open source contributors to host local versions of our dashboard or easily create their own dashboards.
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Building or modifying dashboards is quite technical, not something a business analyst could do on their own.
+  - Publishing new charts or dashboards requires making changes both to the API and to the dashboard UI separately.
+  - Hardest to maintain of all of the options considered.
+  - Does not easily support adhoc reports or dashboards without using a separate tool.
 
 ### Custom dashboard app
 
@@ -84,6 +88,7 @@ This option involves building a custom dashboard app using an existing framework
   - Allows a single engineer familiar with Python (or R if we use Shiny) to manage both the backend (e.g. analytics) and frontend (visualization and design of the dashboard).
   - Faster to implement new charts and dashboards than an analytics API and separate frontend.
   - Enables us to combine multiple dashboards into a single application.
+  - Allows open source contributors to host local versions of our dashboards.
 - **Cons**
   - Building or modifying dashboards is still quite technical, not something a business analyst could do on their own.
   - Harder to implement new charts or dashboards than SaaS or open source dashboard solution.
