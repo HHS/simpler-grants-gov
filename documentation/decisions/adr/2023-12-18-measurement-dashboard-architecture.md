@@ -24,8 +24,7 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 
 - Members of the public can access the dashboard without a login
 - Multiple related dashboards can be combined into a single "application" for external users
-- New charts can be added to existing dashboards relatively easily
-- New dashboards can be created and published relatively easily
+- New charts and dashboards are easy to implement
 - Users can export or download the data behind a given dashboard
 - Open source contributors can host a local version of our dashboards using exported data
 
@@ -38,7 +37,7 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 ## Options Considered
 
 - Analytics API + static site
-- Dashboard application (e.g. Dash or R Shiny)
+- Custom dashboard application (e.g. Dash or R Shiny)
 - SaaS dashboard solution (e.g. PowerBI or Tableau)
 - Open source dashboard solution (e.g. Metabase or Superset)
 
@@ -58,7 +57,7 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
-### {option 1}
+### Analytics API + static site
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
@@ -70,17 +69,60 @@ Chosen option: "{option 1}", because {justification. e.g., only option which mee
   - Bad, because {argument c}
   - ...
 
-### {option 2}
+### Custom dashboard app
+
+This option involves building a custom dashboard app using an existing framework, such as Dash (python) or R Shiny. This custom built application would be hosted as its own application and be slightly more integrated than a separate analytics API + static site, but it would be more customizable than using an open source or proprietary dashboard solution.
+
+> [!NOTE]
+> **Bottom line:** This option would be best if we want to retain control over the look and feel of the dashboard and manage the backend and frontend of the dashboard together, but can dedicate more engineering resources to building and hosting it and don't need to expose analytics data via API.
+
+- **Pros**
+  - Provides more fine-grained control over the look and feel of the dashboard application, on par with option 1.
+  - Allows a single engineer familiar with Python (or R if we use Shiny) to manage both the backend (e.g. analytics) and frontend (visualization and design of the dashboard).
+  - Faster to implement new charts and dashboards than an analytics API and separate frontend.
+  - Enables us to combine multiple dashboards into a single application.
+- **Cons**
+  - Building or modifying dashboards is still quite technical, not something a business analyst could do on their own.
+  - Harder to implement new charts or dashboards than SaaS or open source dashboard solution.
+  - Does not easily support adhoc reports or dashboards in the same tool.
+  - Does not easily support exposing analytics data to S2S users via API.
+
+### Open source dashboard solution
+
+This option involves selected and hosting an open source dashboard solution, such as Metabase or Redash. This solution would most likely be self-hosted and connect directly to our data warehouse, and enable business analysts to build adhoc reporting and dashboards with SQL and a drag-and-drop interface. Individual dashboards can then be configured for broader publication to external stakeholders.
+
+> [!NOTE]
+> **Bottom line:** This option would be best if we want to adopt an open source solution that enables business analysts to build and host dashboards with minimal support from engineers, but are willing to compromise on the amount of control we have over the look and feel of those dashboards and don't need to expose analytics data via API.
+
+- **Pros**
+  - Enables a business analyst or engineer with basic SQL experience to build and manage dashboards.
+  - Faster and easier to implement new charts and dashboards than options 1 or 2.
+  - Supports adhoc reports and dashboards in the same tool.
+  - Allows open source contributors to host local versions of our dashboards (depending on the tool we choose).
+- **Cons**
+  - Harder to control the look and feel of the resulting dashboards.
+  - Harder to combine multiple dashboards into a single "application".
+  - Does not easily support exposing analytics data to S2S users via API.
+  - Still somewhat harder to host and maintain than a fully SaaS dashboard solution.
+
+### SaaS dashboard solution
 
 {example | description | pointer to more information | ...} <!-- OPTIONAL -->
 
+> [!NOTE]
+> **Bottom line:** This option would be best if we want to adopt an externally hosted solution that enables business analysts to build dashboards with no direct support from engineers, but are willing to accept a higher per-user cost, closed-source tool, and fewer options for customization.
+
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Enables a business analyst to easily build and maintain dashboards, even with minimal SQL or programming experience.
+  - Faster and easier to implement new charts and dashboards than options 1 or 2.
+  - Supports adhoc reports and dashboards in the same tool.
+  - Easier to combine multiple dashboards into a single "application" than open source dashboard solution.
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Harder to control the look and feel of the resulting dashboards (depending on the tool).
+  - Harder to version control the structure and content of dashboards (depending on the tool).
+  - Does not easily support exposing analytics data to S2S users via API.
+  - Does not allow open source contributors to host local versions of our dashboards.
+  - Higher direct costs than all of the other options.
 
 ## Links <!-- OPTIONAL -->
 
