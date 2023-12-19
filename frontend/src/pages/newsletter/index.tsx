@@ -11,6 +11,8 @@ import { useState } from "react";
 import {
   Alert,
   Button,
+  ErrorMessage,
+  FormGroup,
   Grid,
   GridContainer,
   Label,
@@ -26,6 +28,8 @@ const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
   const router = useRouter();
 
+  const [formSubmitted, setFormSubmitted] = useState(false)
+
   const [formData, setFormData] = useState({
     name: "",
     LastName: "",
@@ -34,6 +38,15 @@ const Newsletter: NextPage = () => {
   });
 
   const [sendyError, setSendyError] = useState("");
+
+  const validateField = (fieldName: string) => {
+    const emailRegex = new RegExp(/^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g)
+    if (fieldName === 'name' && formData.name === "") return false
+    if (fieldName === 'email' && !emailRegex.test(formData.email)) return false
+    return true
+  }
+  
+  const showError = (fieldName: string): boolean => formSubmitted && !validateField(fieldName)
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fieldName = e.target.name;
@@ -47,6 +60,7 @@ const Newsletter: NextPage = () => {
 
   const submitForm = async () => {
     const formURL = "api/subscribe";
+    if(!validateField('email') || !validateField('name')) return
 
     const res = await fetch(formURL, {
       method: "POST",
@@ -72,6 +86,7 @@ const Newsletter: NextPage = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormSubmitted(true)
     submitForm().catch((err) => {
       console.error("catch block", err);
     });
@@ -108,6 +123,7 @@ const Newsletter: NextPage = () => {
             <form
               data-testid="sendy-form"
               onSubmit={handleSubmit}
+              noValidate
             >
               {sendyError ? (
                 <Alert
@@ -120,21 +136,23 @@ const Newsletter: NextPage = () => {
               ) : (
                 <></>
               )}
+              <FormGroup error={showError('name')}>
               <Label htmlFor="name">
                 First Name{" "}
                 <span title="required" className="usa-hint usa-hint--required ">
                   (required)
                 </span>
               </Label>
+              {showError('name') ? <ErrorMessage>Helpful error message</ErrorMessage> : <></>}
               <TextInput
                 aria-required
                 type="text"
                 name="name"
                 id="name"
                 value={formData.name}
-                required
                 onChange={handleInput}
               />
+              </FormGroup>
               <Label htmlFor="LastName" hint=" (optional)">
                 Last Name
               </Label>
@@ -145,21 +163,23 @@ const Newsletter: NextPage = () => {
                 value={formData.LastName}
                 onChange={handleInput}
               />
+              <FormGroup error={showError('email')}>
               <Label htmlFor="email">
                 Email{" "}
                 <span title="required" className="usa-hint usa-hint--required ">
                   (required)
                 </span>
               </Label>
+              {showError('email') ? <ErrorMessage>Helpful error message</ErrorMessage> : <></>}
               <TextInput
                 aria-required
-                type="email"
+                type="text"
                 name="email"
                 id="email"
-                required
                 value={formData.email}
                 onChange={handleInput}
               />
+              </FormGroup>
               <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
                 <TextInput
