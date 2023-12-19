@@ -15,6 +15,7 @@ resource "aws_security_group" "role_manager" {
 
 # We need to attach this security group to our DMS instance when created
 resource "aws_security_group" "dms" {
+  # checkov:skip= CKV2_AWS_5:DMS instance not created yet
   name_prefix = "${var.name}-dms"
   description = "Database DMS security group"
   vpc_id      = var.vpc_id
