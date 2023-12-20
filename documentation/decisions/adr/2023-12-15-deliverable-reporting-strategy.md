@@ -63,25 +63,33 @@ Our recommended approach to limiting the deliverables that are included in repor
 
 ### Assigning issues to deliverables
 
-TODO: Trying to decide between the labels option and the deliverable column option.
+We've decided to use a "deliverable" column to assign issues to a parent 30k deliverable. This involves:
+
+- creating a single select column in both the product roadmap and the sprint board
+- populating that column with options that represent each 30k deliverables in our roadmap
+- using that column to indicate the 30k deliverable that an issue is assigned to
 
 - **Positive outcomes**
-  - {e.g., improved performance on quality metric, new capability enabled, ...}
-  - ...
+  - We can filter, group, and sort issues by deliverable in GitHub projects and GitHub's automated insight reporting.
+  - The engineering team can continue to use GitHub milestones to organize issues into units of work that are smaller than a 30k deliverable.
 - **Negative outcomes**
-  - {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-  - ...
+  - We won't be able to filter for issues assigned to a given 30k deliverable within the GitHub repository.
+  - We'll have to make sure the list of options in the deliverable column is consistent across GitHub projects in order to join issues from different projects correctly in our custom reporting.
+  - We'll have to update the current logic in our custom reporting so that issues are joined to their parent deliverable using the value of this column.
+
+> [!NOTE]
+> If the team finds a consistent need to filter the list of issues by deliverable within the repository, we may revisit this decision and choose to use ***both*** a label and a deliverable column to assign an issue to a 30k deliverable. We've decided **not** to use both options for the time being to avoid having multiple (potentially conflicting) ways of assigning an issue to a given deliverable.
 
 ### Limiting the 30k deliverables included in reporting
 
-TODO: Trying to decide between the label option and the status option.
+We've decided to use the status of the deliverable in the product roadmap board to determine when deliverables are included or excluded from reporting.
 
 - **Positive outcomes**
-  - {e.g., improved performance on quality metric, new capability enabled, ...}
-  - ...
+  - Keeps our reporting strategy closed aligned with how we're monitoring our delivery progress.
+  - Avoids creating *another* field or label that needs to be maintained separately.
 - **Negative outcomes**
-  - {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-  - ...
+  - Tightly couples reporting logic with delivery management, which may introduce challenges if there are instances in which we want to report on some but not all deliverables in a given status.
+  - If stakeholders aren't familiar with the relationship between deliverable status and reporting, it may be harder for them to understand why certain deliverables appear in a given report but others do not.
 
 ## Evaluation - Assigning issues to deliverables <!-- OPTIONAL -->
 
