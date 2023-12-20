@@ -51,7 +51,7 @@ paths:
       tags:
       - Health
       summary: Health
-  /v1/opportunities/search:
+  /v0/opportunities/search:
     post:
       parameters:
       - in: header
@@ -106,6 +106,22 @@ paths:
       tags:
       - Opportunity
       summary: Opportunity Search
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
       requestBody:
         content:
           application/json:
@@ -113,7 +129,7 @@ paths:
               $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
-  /v1/opportunities/{opportunity_id}:
+  /v0/opportunities/{opportunity_id}:
     get:
       parameters:
       - in: path
@@ -165,6 +181,22 @@ paths:
       tags:
       - Opportunity
       summary: Opportunity Get
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
       security:
       - ApiKeyAuth: []
 openapi: 3.1.0
