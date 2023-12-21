@@ -56,7 +56,7 @@ This option has similar benefits as the chosen option. However, we decided that 
   - (See above chosen option)
 - **Cons**
   - (See above chosen option)
-  - Diffult to read
+  - Difficult to read
   - User may be confused as to why HHS is the TLD
   - This @hhs.gov email address is not easily accessible to comms staff
 
