@@ -34,7 +34,7 @@ Chosen option: **simpler@grants.gov**, because it is simple and accessible for e
 ### Positive Consequences
 
 - Simple email communication is a technology that most all users are fimiliar and comfortable with.
-- Since it does not require creation of accounts, or using 3rd-party ticketing dashboards, email is the most straightforward method by which users can sumbit their feedback.
+- Since it does not require creation of accounts, or using 3rd-party ticketing dashboards, email is the most straightforward method by which users can submit their feedback.
 - Provisioning an email address is fast/inexpensive and does not require procuring a service subscription.
 - simpler@grants.gov echoes the project domain
 - @grants.gov is an official/trusted TLD
