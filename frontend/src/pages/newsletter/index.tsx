@@ -3,6 +3,7 @@ import {
   NEWSLETTER_CONFIRMATION,
   NEWSLETTER_CRUMBS,
 } from "src/constants/breadcrumbs";
+import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -27,8 +28,9 @@ import { Data } from "../api/subscribe";
 const Newsletter: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
   const router = useRouter();
+  const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
 
-  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,15 +40,22 @@ const Newsletter: NextPage = () => {
   });
 
   const [sendyError, setSendyError] = useState("");
+  const [erroredEmail, setErroredEmail] = useState("");
 
   const validateField = (fieldName: string) => {
-    const emailRegex = new RegExp(/^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g)
-    if (fieldName === 'name' && formData.name === "") return false
-    if (fieldName === 'email' && !emailRegex.test(formData.email)) return false
-    return true
-  }
-  
-  const showError = (fieldName: string): boolean => formSubmitted && !validateField(fieldName)
+    // returns the string "valid" or the i18n key for the error message
+    const emailRegex = /^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g;
+    if (fieldName === "name" && formData.name === "")
+      return "errors.missing_name";
+    if (fieldName === "email" && formData.email === "")
+      return "errors.missing_email";
+    if (fieldName === "email" && !emailRegex.test(formData.email))
+      return "errors.invalid_email";
+    return "valid";
+  };
+
+  const showError = (fieldName: string): boolean =>
+    formSubmitted && validateField(fieldName) !== "valid";
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fieldName = e.target.name;
@@ -60,7 +69,8 @@ const Newsletter: NextPage = () => {
 
   const submitForm = async () => {
     const formURL = "api/subscribe";
-    if(!validateField('email') || !validateField('name')) return
+    if (validateField("email") !== "valid" || validateField("name") !== "valid")
+      return;
 
     const res = await fetch(formURL, {
       method: "POST",
@@ -80,13 +90,14 @@ const Newsletter: NextPage = () => {
     } else {
       const { error }: Data = (await res.json()) as Data;
       console.error("client error", error);
+      setErroredEmail(formData.email);
       return setSendyError(error || "");
     }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFormSubmitted(true)
+    setFormSubmitted(true);
     submitForm().catch((err) => {
       console.error("catch block", err);
     });
@@ -120,38 +131,63 @@ const Newsletter: NextPage = () => {
             />
           </Grid>
           <Grid tabletLg={{ col: 6 }}>
-            <form
-              data-testid="sendy-form"
-              onSubmit={handleSubmit}
-              noValidate
-            >
+            <form data-testid="sendy-form" onSubmit={handleSubmit} noValidate>
               {sendyError ? (
                 <Alert
                   type="error"
                   heading="An error occurred"
                   headingLevel="h3"
                 >
-                  Your subscription was not successful. {sendyError}
+                  <Trans
+                    t={t}
+                    i18nKey={
+                      sendyError === "Already subscribed."
+                        ? "errors.already_subscribed"
+                        : "errors.sendy"
+                    }
+                    values={{
+                      sendy_error: sendyError,
+                      email_address: erroredEmail,
+                    }}
+                    components={{
+                      email: (
+                        <a
+                          href={`mailto:${email}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      ),
+                    }}
+                  />
                 </Alert>
               ) : (
                 <></>
               )}
-              <FormGroup error={showError('name')}>
-              <Label htmlFor="name">
-                First Name{" "}
-                <span title="required" className="usa-hint usa-hint--required ">
-                  (required)
-                </span>
-              </Label>
-              {showError('name') ? <ErrorMessage>Helpful error message</ErrorMessage> : <></>}
-              <TextInput
-                aria-required
-                type="text"
-                name="name"
-                id="name"
-                value={formData.name}
-                onChange={handleInput}
-              />
+              <FormGroup error={showError("name")}>
+                <Label htmlFor="name">
+                  First Name{" "}
+                  <span
+                    title="required"
+                    className="usa-hint usa-hint--required "
+                  >
+                    (required)
+                  </span>
+                </Label>
+                {showError("name") ? (
+                  <ErrorMessage className="maxw-mobile-lg">
+                    {t(validateField("name"))}
+                  </ErrorMessage>
+                ) : (
+                  <></>
+                )}
+                <TextInput
+                  aria-required
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={formData.name}
+                  onChange={handleInput}
+                />
               </FormGroup>
               <Label htmlFor="LastName" hint=" (optional)">
                 Last Name
@@ -163,22 +199,31 @@ const Newsletter: NextPage = () => {
                 value={formData.LastName}
                 onChange={handleInput}
               />
-              <FormGroup error={showError('email')}>
-              <Label htmlFor="email">
-                Email{" "}
-                <span title="required" className="usa-hint usa-hint--required ">
-                  (required)
-                </span>
-              </Label>
-              {showError('email') ? <ErrorMessage>Helpful error message</ErrorMessage> : <></>}
-              <TextInput
-                aria-required
-                type="text"
-                name="email"
-                id="email"
-                value={formData.email}
-                onChange={handleInput}
-              />
+              <FormGroup error={showError("email")}>
+                <Label htmlFor="email">
+                  Email{" "}
+                  <span
+                    title="required"
+                    className="usa-hint usa-hint--required "
+                  >
+                    (required)
+                  </span>
+                </Label>
+                {showError("email") ? (
+                  <ErrorMessage className="maxw-mobile-lg">
+                    {t(validateField("email"))}
+                  </ErrorMessage>
+                ) : (
+                  <></>
+                )}
+                <TextInput
+                  aria-required
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleInput}
+                />
               </FormGroup>
               <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
@@ -190,8 +235,6 @@ const Newsletter: NextPage = () => {
                   onChange={handleInput}
                 />
               </div>
-              <input type="hidden" name="list" value="A2zerhEC59Ea6mzTgzdTgw" />
-              <input type="hidden" name="subform" value="yes" />
               <Button
                 type="submit"
                 name="submit"

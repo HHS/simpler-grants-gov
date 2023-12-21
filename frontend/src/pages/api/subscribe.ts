@@ -57,15 +57,13 @@ export default async function handler(
         return res
           .status(200)
           .json({ message: "User subscribed successfully." });
-      } else if (responseData === "Already subscribed.") {
-        return res.status(200).json({ message: "User already subscribed." });
       } else {
         return res.status(400).json({ error: responseData });
       }
     } else {
       return res.status(500).json({
         error:
-          "Failed to subscribe user due to a server error. Please try again later.",
+          "Failed to subscribe user due to a server error. Try again later.",
       });
     }
   } catch (error) {
