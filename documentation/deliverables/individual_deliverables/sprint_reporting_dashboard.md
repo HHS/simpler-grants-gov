@@ -3,7 +3,7 @@
 | Field           | Value                                                                |
 | --------------- | -------------------------------------------------------------------- |
 | Document Status | Accepted                                                             |
-| Issue Link      | [Issue 65](https://github.com/HHS/grants-equity/issues/65)           |
+| Issue Link      | [Issue 65](https://github.com/HHS/simpler-grants-gov/issues/65)           |
 | Product Roadmap | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12/views/4) |
 | Product Owner   | Lucas Brown                                                          |
 | Document Owner  | Billy Daly                                                           |
