@@ -37,7 +37,7 @@ Chosen option: **simpler@grants.gov**, because it is simple and accessible for e
 - Since it does not require creation of accounts, or using 3rd-party ticketing dashboards, email is the most straightforward method by which users can submit their feedback.
 - Provisioning an email address is fast/inexpensive and does not require procuring a service subscription.
 - simpler@grants.gov echoes the project domain
-- @grants.gov is an official/trusted TLD
+- @grants.gov is an official/trusted top-level domain (TLD)
 - This inbox can be easily triaged by the Simpler.Grants.gov project team via the "[Send emails to Slack](https://slack.com/help/articles/206819278-Send-emails-to-Slack)" feature.
 
 
