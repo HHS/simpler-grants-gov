@@ -44,6 +44,7 @@ Chosen option: **simpler@grants.gov**, because it is simple and accessible for e
 ### Negative Consequences
 
 - We do not yet know the volume of submissions that will come through this feedback channel. A more robust Help-Desk-type of solution may be warranted in the future. We should revisit this decision if/when managing this inbox becomes unwieldy.
+- There are no built-in, convenient ways to run analyses on an email inbox, or tag and filter messages by categories. It may be difficult to track metrics on common/recurring themes. This may become more of an issue as the number of submissions grows.
 
 ## Pros and cons of other options
 
