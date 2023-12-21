@@ -44,7 +44,8 @@ const Newsletter: NextPage = () => {
 
   const validateField = (fieldName: string) => {
     // returns the string "valid" or the i18n key for the error message
-    const emailRegex = /^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g;
+    const emailRegex =
+      /^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g;
     if (fieldName === "name" && formData.name === "")
       return "errors.missing_name";
     if (fieldName === "email" && formData.email === "")
