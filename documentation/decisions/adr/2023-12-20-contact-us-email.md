@@ -86,3 +86,4 @@ Tools like [Loop](https://www.intheloop.io/), [Front](https://front.com/), [Odoo
   - Metrics on user satisfaction
 - **Cons**
   - Additional costs and/or maintenance
+  - Ticketing system are typically used by large support teams and can sometimes feel like a black box or impersonal to users
