@@ -1,4 +1,5 @@
 import { ExternalRoutes } from "src/constants/routes";
+import { assetPath } from "src/utils/assetPath";
 
 import { useTranslation } from "next-i18next";
 import { ComponentType } from "react";
@@ -76,7 +77,7 @@ const Footer = () => {
       data-testid="footer"
       size="medium"
       returnToTop={
-        <GridContainer className="usa-footer__return-to-top">
+        <GridContainer className="usa-footer__return-to-top margin-top-5">
           <a href="#">{t("return_to_top")}</a>
         </GridContainer>
       }
@@ -87,7 +88,7 @@ const Footer = () => {
             <img
               className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
               alt={t("logo_alt")}
-              src={"/img/grants-gov-logo.png"}
+              src={assetPath("/img/grants-gov-logo.png")}
             />
           </Grid>
           <Grid
@@ -105,8 +106,8 @@ const Footer = () => {
                 <a key="telephone" href={`tel:${t("telephone")}`}>
                   {t("telephone")}
                 </a>,
-                <a key="email" href={ExternalRoutes.CONTACT_EMAIL}>
-                  {t("email")}
+                <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
+                  {ExternalRoutes.EMAIL_SUPPORT}
                 </a>,
               ]}
             />

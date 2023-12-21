@@ -41,6 +41,12 @@ variable "container_port" {
   default     = 8000
 }
 
+variable "hostname" {
+  type        = string
+  description = "The hostname to override the default AWS configuration"
+  default     = null
+}
+
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
@@ -54,8 +60,9 @@ variable "subnet_ids" {
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
-    security_group_ids = list(string)
-    access_policy_arn  = string
+    security_group_ids         = list(string)
+    app_access_policy_arn      = string
+    migrator_access_policy_arn = string
     connection_info = object({
       host        = string
       port        = string
@@ -65,4 +72,28 @@ variable "db_vars" {
     })
   })
   default = null
+}
+
+variable "cert_arn" {
+  description = "The ARN for the TLS certificate passed in from the app service layer"
+  type        = string
+  default     = null
+}
+
+variable "enable_autoscaling" {
+  description = "Flag to enable or disable auto-scaling"
+  type        = bool
+  default     = false
+}
+
+variable "max_capacity" {
+  description = "Maximum number of tasks for autoscaling"
+  type        = number
+  default     = 4
+}
+
+variable "min_capacity" {
+  description = "Minimum number of tasks for autoscaling"
+  type        = number
+  default     = 2
 }

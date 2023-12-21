@@ -39,19 +39,19 @@ echo "  BACKEND_CONFIG_NAME=$BACKEND_CONFIG_NAME"
 echo
 
 # Create output file from example file
-cp infra/example.s3.tfbackend $BACKEND_CONFIG_FILE
+cp infra/example.s3.tfbackend "$BACKEND_CONFIG_FILE"
 
 # Replace the placeholder values
-sed -i.bak "s/<TF_STATE_BUCKET_NAME>/$TF_STATE_BUCKET_NAME/g" $BACKEND_CONFIG_FILE
-sed -i.bak "s|<TF_STATE_KEY>|$TF_STATE_KEY|g" $BACKEND_CONFIG_FILE
-sed -i.bak "s/<TF_LOCKS_TABLE_NAME>/$TF_LOCKS_TABLE_NAME/g" $BACKEND_CONFIG_FILE
-sed -i.bak "s/<REGION>/$REGION/g" $BACKEND_CONFIG_FILE
+sed -i.bak "s/<TF_STATE_BUCKET_NAME>/$TF_STATE_BUCKET_NAME/g" "$BACKEND_CONFIG_FILE"
+sed -i.bak "s|<TF_STATE_KEY>|$TF_STATE_KEY|g" "$BACKEND_CONFIG_FILE"
+sed -i.bak "s/<TF_LOCKS_TABLE_NAME>/$TF_LOCKS_TABLE_NAME/g" "$BACKEND_CONFIG_FILE"
+sed -i.bak "s/<REGION>/$REGION/g" "$BACKEND_CONFIG_FILE"
 
 # Remove the backup file created by sed
-rm $BACKEND_CONFIG_FILE.bak
+rm "$BACKEND_CONFIG_FILE.bak"
 
 
 echo "Created file: $BACKEND_CONFIG_FILE"
 echo "------------------ file contents ------------------"
-cat $BACKEND_CONFIG_FILE
+cat "$BACKEND_CONFIG_FILE"
 echo "----------------------- end -----------------------"

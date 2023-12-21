@@ -28,9 +28,9 @@ describe("Header", () => {
       "href",
       "/"
     );
-    expect(screen.getByRole("link", { name: /health/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /process/i })).toHaveAttribute(
       "href",
-      "/health"
+      "/process"
     );
 
     await userEvent.click(menuButton);

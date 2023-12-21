@@ -1,0 +1,56 @@
+name: Internal - ADR
+description: Outline an architectural decision that needs to be recorded
+title: "[ADR]: "
+labels: ["project: grants.gov", "docs: adr"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe an architectural decision that needs to be recorded
+  - type: markdown
+    attributes:
+      value: |
+        **Example** [Wiki ADR](https://github.com/HHS/simpler-grants-gov/issues/30)
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: 1-2 sentence summary of the decision that needs to be made
+    validations:
+      required: true
+  - type: textarea
+    id: approvers
+    attributes:
+      label: Approvers
+      description: List individuals or groups that must approve this decision before the ADR is accepted
+    validations:
+      required: false
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: List of options to evaluate
+    validations:
+      required: false
+  - type: textarea
+    id: decision-criteria
+    attributes:
+      label: Decision Criteria
+      description: List of decision criteria to evaluate
+    validations:
+      required: false
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done
+      description: Leave the following acceptance criteria unchecked when the ticket is created then mark them as completed as you meet each criterion with the ADR
+      options:
+        - label: The approvers for this decision have been identified (ideally before work on the ADR starts)
+        - label: The ADR is created and stored in `documentation/decisions/adr` with status "Accepted"
+        - label: The ADR has been reviewed and approved by the approvers listed above
+        - label: The ADR satisfies requirements that are outlined in the ADR template
+        - label: Any follow-up tickets have been created (if necessary)
+    validations:
+      required: true

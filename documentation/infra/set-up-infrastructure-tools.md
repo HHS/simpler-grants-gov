@@ -22,7 +22,7 @@ Then install the version of Terraform you need.
 tfenv install 1.4.6
 ```
 
-If you are unfamiliar with Terraform, check out this [basic introduction to Terraform](./introduction-to-terraform.md).
+If you are unfamiliar with Terraform, check out this [basic introduction to Terraform](./intro-to-terraform.md).
 
 ### Install AWS CLI
 
@@ -36,10 +36,19 @@ The [Go programming language](https://go.dev/dl/) is required to run [Terratest]
 
 ### Install GitHub CLI
 
-The [GitHub CLI](https://cli.github.com/) is useful for automating certain operations for GitHub such as with GitHub actions.
+The [GitHub CLI](https://cli.github.com/) is useful for automating certain operations for GitHub such as with GitHub actions. This is needed to run [check-github-actions-auth.sh](/bin/check-github-actions-auth.sh)
 
 ```bash
 brew install gh
+```
+
+### Install linters
+
+[Shellcheck](https://github.com/koalaman/shellcheck) and [actionlint](https://github.com/rhysd/actionlint) are optional utilites for running infrastructure linters locally.
+
+```bash
+brew install shellcheck
+brew install actionlint
 ```
 
 ## AWS Authentication

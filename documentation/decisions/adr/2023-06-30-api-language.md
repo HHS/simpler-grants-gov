@@ -2,12 +2,12 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-06-30
-- **Related Issue:** [#27](https://github.com/HHS/grants-equity/issues/27)
+- **Related Issue:** [#27](https://github.com/HHS/simpler-grants-gov/issues/27)
 - **Deciders:** Lucas Brown, Aaron Couch, Sammy Steiner, Daphne Gold, Billy Daly
 
 ## Context and Problem Statement
 
-This ADR is to decide what programming language the API server for beta.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encompass all the back-end responsibilities of grants.gov
+This ADR is to decide what programming language the API server for simpler.grants.gov will use. This API server will initially be responsible for responding to queries to search a replicated database, but will grow to encompass all the back-end responsibilities of grants.gov
 
 In addition to the Nava and HHS teams ability to develop and maintain an API in the chosen language, it is also important that this language lends itself to open source engagement.
 
@@ -24,20 +24,20 @@ In addition to the Nava and HHS teams ability to develop and maintain an API in 
 - Javascript and Node
 - Java
 
-
 ## Decision Outcome <!-- REQUIRED -->
+
 Chosen option: Python, because it is free and open source and designed to be easy for anyone to learn quickly and contribute. Additionally, while all the languages can support the technical needs, Python in particular is optimized to handle the large and complex grants.gov dataset, and makes other parts of the project simpler, including ETL and data analysis for the analytics endpoints.
 
 ### Positive Consequences <!-- OPTIONAL -->
+
 - We're hopeful that this choice will lead to open source contribution and adoption
 - We can make use of python libraries designed for complex data queries to quickly deliver features and analytics
 
 ### Negative Consequences <!-- OPTIONAL -->
+
 - Will require some context switching when going from work on the API to the front-end
 
-
 ## Pros and Cons of the Options <!-- OPTIONAL -->
-
 
 ### Python
 
@@ -53,7 +53,6 @@ Because of its popularity in the open source community, Python makes it easy for
   - Ideal for data computation and complex database queries
 - **Cons**
   - Single threaded locking of GIL can make computationally expensive operations slower than other options
-
 
 ### Javascript and Node
 
@@ -71,7 +70,6 @@ Because of its popularity in the open source community, Javascript and Node make
   - Not as mature as other options
   - Responsiveness may be slowed by any CPU intensive computation
 
-
 ### Java
 
 Java is widely used for building enterprise-scale web applications as it is one of the most stable languages on the market. Java’s advantages include platform independence, multi-threaded processing, automatic garbage collection, and security.
@@ -85,7 +83,6 @@ Because of its proprietary nature, Java is not as popular with the open source c
   - Commercial use requires expensive licenses and not as open source friendly
   - Compilation and abstraction by the Java Virtual Machine makes performance slower
   - Nava team is not as familiar with Java as they are with the other options
-
 
 <!--
 ## Links

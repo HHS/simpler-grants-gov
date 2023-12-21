@@ -16,8 +16,9 @@ import faker
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
-import src.db.models.user_models as user_models
+import src.db.models.opportunity_models as opportunity_models
 import src.util.datetime_util as datetime_util
+from src.constants.lookup_constants import OpportunityCategory
 
 _db_session: Optional[db.Session] = None
 
@@ -45,7 +46,7 @@ def get_db_session() -> db.Session:
 
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
-# see https://docs.sqlalchemy.org/en/14/orm/contextual.html
+# see https://docs.sqlalchemy.org/en/20/orm/contextual.html
 Session = scoped_session(lambda: get_db_session(), scopefunc=lambda: get_db_session())
 
 
@@ -62,25 +63,25 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
-class RoleFactory(BaseFactory):
+class OpportunityFactory(BaseFactory):
     class Meta:
-        model = user_models.Role
+        model = opportunity_models.Opportunity
 
-    user_id = factory.LazyAttribute(lambda u: u.user.id)
-    user = factory.SubFactory("tests.src.db.models.factories.UserFactory", roles=[])
+    opportunity_id = factory.Sequence(lambda n: n)
 
-    type = factory.Iterator([r.value for r in user_models.RoleType])
+    opportunity_number = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
+    opportunity_title = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
 
+    agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
 
-class UserFactory(BaseFactory):
-    class Meta:
-        model = user_models.User
+    category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
+    # only set the category explanation if category is Other
+    category_explanation = factory.Maybe(
+        decider=factory.LazyAttribute(lambda o: o.category == OpportunityCategory.OTHER),
+        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        no_declaration=None,
+    )
 
-    id = Generators.UuidObj
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
-    phone_number = "123-456-7890"
-    date_of_birth = factory.Faker("date_object")
-    is_active = factory.Faker("boolean")
+    is_draft = False  # Because we filter out drafts, just default these to False
 
-    roles = factory.RelatedFactoryList(RoleFactory, size=2, factory_related_name="user")
+    revision_number = 0  # We'll want to consider how we handle this when we add history

@@ -1,18 +1,20 @@
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional, Tuple
 
-from apiflask import APIFlask
+from apiflask import APIFlask, exceptions
 from flask import g
 from werkzeug.exceptions import Unauthorized
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.opportunities import opportunity_blueprint
+from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
-from src.api.users import user_blueprint
 from src.auth.api_key_auth import User, get_app_security_scheme
 
 logger = logging.getLogger(__name__)
@@ -21,11 +23,10 @@ logger = logging.getLogger(__name__)
 def create_app() -> APIFlask:
     app = APIFlask(__name__)
 
-    src.logging.init(__package__)
-    flask_logger.init_app(logging.root, app)
+    setup_logging(app)
+    register_db_client(app)
 
-    db_client = db.PostgresDBClient()
-    flask_db.register_db_client(db_client, app)
+    feature_flag_config.initialize()
 
     configure_app(app)
     register_blueprints(app)
@@ -42,23 +43,37 @@ def current_user(is_user_expected: bool = True) -> Optional[User]:
     return current
 
 
+def setup_logging(app: APIFlask) -> None:
+    src.logging.init(__package__)
+    flask_logger.init_app(logging.root, app)
+
+
+def register_db_client(app: APIFlask) -> None:
+    db_client = db.PostgresDBClient()
+    flask_db.register_db_client(db_client, app)
+
+
 def configure_app(app: APIFlask) -> None:
     # Modify the response schema to instead use the format of our ApiResponse class
     # which adds additional details to the object.
     # https://apiflask.com/schema/#base-response-schema-customization
     app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
+    app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
 
     # Set a few values for the Swagger endpoint
-    app.config["OPENAPI_VERSION"] = "3.0.3"
+    app.config["OPENAPI_VERSION"] = "3.1.0"
+
+    app.json.compact = False  # type: ignore
 
     # Set various general OpenAPI config values
     app.info = {
-        "title": "Grants Equity API",
-        "description": "Back end API for grants.gov",
+        "title": "Simpler Grants API",
+        "description": "Back end API for simpler.grants.gov",
         "contact": {
-            "name": "Nava PBC Engineering",
-            "url": "https://www.navapbc.com",
-            "email": "engineering@navapbc.com",
+            "name": "Simpler Grants.gov",
+            "url": "https://simpler.grants.gov/",
+            "email": "simplergrantsgov@hhs.gov",
         },
     }
 
@@ -67,10 +82,14 @@ def configure_app(app: APIFlask) -> None:
     # See: https://apiflask.com/authentication/#use-external-authentication-library
     app.security_schemes = get_app_security_scheme()
 
+    @app.error_processor
+    def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:
+        return restructure_error_response(error)
+
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(user_blueprint)
+    app.register_blueprint(opportunity_blueprint)
 
 
 def get_project_root_dir() -> str:

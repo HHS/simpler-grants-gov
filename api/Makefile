@@ -2,7 +2,12 @@
 # Constants
 ##################################################
 
-APP_NAME := main-api
+APP_NAME := grants-api
+
+# Colors for output, can be used as:
+# 	echo -e "this text is the default color $(RED) this text is red $(NO_COLOR) everything here is the default color again"
+RED := \033[0;31m
+NO_COLOR := \033[0m
 
 # Adding this to the end of a script that outputs JSON will convert
 # it to a readable format with timestamps and color-coding.
@@ -103,7 +108,7 @@ clean-volumes: ## Remove project docker volumes (which includes the DB state)
 stop:
 	docker-compose down
 
-check: format-check lint test
+check: format-check lint db-check-migrations test
 
 ##################################################
 # DB & migrations
@@ -114,12 +119,12 @@ check: format-check lint test
 #########################
 
 # Docker starts the image for the DB but it's not quite
-# fully ready, so add a 5 second sleep so upgrade doesn't
-# fail because the DB hasn't started yet.
-init-db: start-db sleep-5 db-migrate
+# ready to accept connections so we add a brief wait script
+init-db: start-db db-migrate
 
 start-db:
-	docker-compose up --detach main-db
+	docker-compose up --detach grants-db
+	./bin/wait-for-local-db.sh
 
 ## Destroy current DB, setup new one
 db-recreate: clean-volumes init-db
@@ -161,6 +166,17 @@ db-migrate-history: ## Show migration history
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
+db-seed-local:
+	$(PY_RUN_CMD) db-seed-local
+
+db-check-migrations: ## Verify the DB schema matches the DB migrations generated
+	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
+
+create-erds: # Create ERD diagrams for our DB schema
+	$(PY_RUN_CMD) create-erds
+	mv bin/*.png ../documentation/api/database/erds
+
+
 ##################################################
 # Testing
 ##################################################
@@ -187,22 +203,22 @@ test-coverage-report: ## Open HTML test coverage report
 ##################################################
 
 format: ## Format files
-	$(PY_RUN_CMD) isort --atomic src tests
-	$(PY_RUN_CMD) black src tests
+	$(PY_RUN_CMD) isort --atomic src tests bin
+	$(PY_RUN_CMD) black src tests bin
 
 format-check: ## Check file formatting
-	$(PY_RUN_CMD) isort --atomic --check-only src tests
-	$(PY_RUN_CMD) black --check src tests
+	$(PY_RUN_CMD) isort --atomic --check-only src tests bin
+	$(PY_RUN_CMD) black --check src tests bin
 
 lint: lint-py ## Lint
 
 lint-py: lint-flake lint-mypy
 
 lint-flake:
-	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests
+	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests bin
 
 lint-mypy:
-	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src $(MYPY_POSTPROC)
+	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv

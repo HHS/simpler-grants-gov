@@ -7,10 +7,21 @@ variable "environment" {
   type        = string
 }
 
+variable "default_region" {
+  description = "default region for the project"
+  type        = string
+}
+
 variable "has_database" {
   type = bool
 }
 
 variable "has_incident_management_service" {
   type = bool
+}
+
+variable "domain" {
+  description = "Public domain for the website, which is managed by HHS ITS."
+  type        = string
+  default     = null
 }

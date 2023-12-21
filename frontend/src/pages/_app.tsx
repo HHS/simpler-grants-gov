@@ -9,15 +9,13 @@ import Layout from "../components/Layout";
 
 import "../styles/styles.scss";
 
+import { assetPath } from "src/utils/assetPath";
+
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <link
-          rel="icon"
-          href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/favicon.ico`}
-          sizes="any"
-        />
+        <link rel="icon" href={assetPath("/img/favicon.ico")} sizes="any" />
       </Head>
       <Script id="google-tag-manager">
         {`

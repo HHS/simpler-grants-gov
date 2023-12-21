@@ -2,12 +2,12 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-10 <!-- REQUIRED -->
-- **Related Issue:** [#96](https://github.com/HHS/grants-equity/issues/96) <!-- RECOMMENDED -->
+- **Related Issue:** [#96](https://github.com/HHS/simpler-grants-gov/issues/96) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner <!-- REQUIRED -->
 
 ## Context and Problem Statement
 
-The goal of this ADR is to select a language that we'll use to implement the front end for beta.grants.gov. The front end will only support static content at first, but will grow to include the new search, supported by the API and eventually the entire grants.gov functionality. Therefore, while a simple solution might work in the short term, it will quickly become insufficient to meet our needs.
+The goal of this ADR is to select a language that we'll use to implement the front end for simpler.grants.gov. The front end will only support static content at first, but will grow to include the new search, supported by the API and eventually the entire grants.gov functionality. Therefore, while a simple solution might work in the short term, it will quickly become insufficient to meet our needs.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -52,7 +52,6 @@ JavaScript is a lightweight, interpreted programming language with first-class f
 - **Cons**
   - Loosely typed
 
-
 ### TypeScript
 
 TypeScript is a syntactic superset of JavaScript which adds static typing and is transpiled down to regular JavaScript when building the application. While TypeScript is a relatively new "language" it's gaining popularity quickly as it's more of a enhancement to JavaScript than just another new language.
@@ -72,7 +71,6 @@ Python is a high-level, dynamically typed general-purpose programming language. 
 - **Cons**
   - Will still require JavaScript for client side functionality
   - Python is not as well supported for front-end tasks as it is for back-end tasks
-
 
 ### Java
 

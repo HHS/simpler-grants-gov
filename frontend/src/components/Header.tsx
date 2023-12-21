@@ -1,3 +1,5 @@
+import { assetPath } from "src/utils/assetPath";
+
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import {
@@ -13,12 +15,18 @@ type PrimaryLinks = {
   href: string;
 }[];
 
+const primaryLinks: PrimaryLinks = [
+  { i18nKey: "nav_link_home", href: "/" },
+  { i18nKey: "nav_link_process", href: "/process" },
+  { i18nKey: "nav_link_research", href: "/research" },
+  { i18nKey: "nav_link_newsletter", href: "/newsletter" },
+];
+
 type Props = {
   logoPath?: string;
-  primaryLinks?: PrimaryLinks;
 };
 
-const Header = ({ logoPath, primaryLinks }: Props) => {
+const Header = ({ logoPath }: Props) => {
   const { t, i18n } = useTranslation("common", {
     keyPrefix: "Header",
   });
@@ -28,12 +36,11 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const navItems = primaryLinks?.map((link) => (
+  const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
       {t(link.i18nKey)}
     </a>
   ));
-  const showMenu = !!navItems;
 
   return (
     <>
@@ -52,9 +59,7 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
                   <span className="margin-right-1">
                     <img
                       className="width-3 desktop:width-5 text-bottom margin-right-05"
-                      src={`${
-                        process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-                      }${logoPath}`}
+                      src={assetPath(logoPath)}
                       alt="Site logo"
                     />
                   </span>
@@ -62,20 +67,16 @@ const Header = ({ logoPath, primaryLinks }: Props) => {
                 <span className="font-sans-lg flex-fill">{t("title")}</span>
               </div>
             </Title>
-            {showMenu && (
-              <NavMenuButton
-                onClick={handleMobileNavToggle}
-                label={t("nav_menu_toggle")}
-              />
-            )}
+            <NavMenuButton
+              onClick={handleMobileNavToggle}
+              label={t("nav_menu_toggle")}
+            />
           </div>
-          {navItems && (
-            <PrimaryNav
-              items={navItems}
-              mobileExpanded={isMobileNavExpanded}
-              onToggleMobileNav={handleMobileNavToggle}
-            ></PrimaryNav>
-          )}
+          <PrimaryNav
+            items={navItems}
+            mobileExpanded={isMobileNavExpanded}
+            onToggleMobileNav={handleMobileNavToggle}
+          ></PrimaryNav>
         </div>
       </USWDSHeader>
     </>
