@@ -13,8 +13,11 @@ How might we give users an alternative to public comments (GitHub, Google Groups
 
 ## Decision Drivers
 
-- The "Contact Us" method should not be (or feel) like a black box
-- Incoming messages should be easy/simple to triage, respond to, and escalate to the appropriate channels
+- The "Contact Us" method should not be (or feel) like a black box.
+- Incoming messages should be easy/simple to triage, respond to, and escalate to the appropriate channels.
+- Users should have clarity on how their messages are received, processed, and addressed.
+- To maintain transparency, it should be possible to implement a feedback loop that keeps users informed of the status of their inquiries (e.g. providing confirmation of receipt, updates on the progress, and resolutions).
+
 
 ## Options Considered
 
