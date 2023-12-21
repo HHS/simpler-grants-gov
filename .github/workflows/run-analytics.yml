@@ -1,0 +1,39 @@
+# TODO(@widal001): 2023-11-20 - Update this file to run on a schedule: https://github.com/HHS/simpler-grants-gov/issues/742
+name: Run analytics package
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 5 * * 1-5"
+
+defaults:
+  run:
+    working-directory: ./analytics # ensures that this job runs from the analytics sub-directory
+
+jobs:
+  run-reports:
+    name: Run sprint reports and deliverable reports
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      ANALYTICS_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ANALYTICS_REPORTING_CHANNEL_ID: ${{ secrets.REPORTING_CHANNEL_ID }}
+      ACTION: post-results # post results to slack
+    steps:
+      # set up python
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # install poetry
+      - uses: Gr1N/setup-poetry@v8
+
+      - name: Install analytics package using poetry
+        run: make install
+
+      - name: Export GitHub data
+        run: make gh-data-export
+
+      - name: Run reports
+        run: make sprint-reports

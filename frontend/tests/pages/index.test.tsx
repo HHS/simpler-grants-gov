@@ -18,7 +18,7 @@ describe("Index", () => {
 
     const goalH2 = screen.getByRole("heading", {
       level: 2,
-      name: /What's the goal?/i,
+      name: /The goal?/i,
     });
 
     expect(goalH2).toBeInTheDocument();

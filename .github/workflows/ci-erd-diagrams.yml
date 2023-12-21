@@ -1,0 +1,43 @@
+# Update database ERD diagrams so that they remain up to date with the application
+name: Update Database ERD Diagrams
+
+on:
+  pull_request:
+    paths:
+      - api/src/db/models/**
+      - api/bin/create_erds.py
+      - Makefile
+      - .github/workflows/ci-erd-diagrams.yml
+
+defaults:
+  run:
+    working-directory: ./api
+
+# Only trigger one update of the ERD diagrams at a time on the branch.
+# If new commits are pushed to the branch, cancel in progress runs and start
+# a new one.
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  update-database-erd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Checkout the feature branch associated with the pull request
+          ref: ${{ github.head_ref }}
+
+      - name: Update OpenAPI spec
+        run: make create-erds
+
+      - name: Push changes
+        run: |
+          git config user.name nava-platform-bot
+          git config user.email platform-admins@navapbc.com
+          git add --all
+          # Commit changes (if no changes then no-op)
+          git diff-index --quiet HEAD || git commit -m "Update database ERD diagrams"
+          git push

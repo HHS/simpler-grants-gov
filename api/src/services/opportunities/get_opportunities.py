@@ -6,10 +6,11 @@ from src.db.models.opportunity_models import Opportunity
 
 
 def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
-    # TODO - issue-642 - figure out if we want to filter by is_draft here as well
-
+    # For now, only non-drafts can be fetched
     opportunity: Opportunity | None = db_session.execute(
-        select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
+        select(Opportunity)
+        .where(Opportunity.opportunity_id == opportunity_id)
+        .where(Opportunity.is_draft.is_(False))
     ).scalar_one_or_none()
 
     if opportunity is None:

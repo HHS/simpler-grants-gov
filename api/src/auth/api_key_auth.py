@@ -74,7 +74,7 @@ def process_token(token: str) -> User:
     expected_auth_token = os.getenv("API_AUTH_TOKEN", None)
 
     if not expected_auth_token:
-        logger.info(
+        logger.error(
             "Authentication is not setup, please add an API_AUTH_TOKEN environment variable."
         )
         abort(401, "Authentication is not setup properly and the user cannot be authenticated")

@@ -12,11 +12,10 @@ const Hero = () => {
   return (
     <div data-testid="hero" className="usa-dark-background bg-primary">
       <GridContainer className="padding-y-1 tablet:padding-y-3 tablet-lg:padding-y-10 desktop-lg:padding-y-15 position-relative">
-        <h1 className="tablet:font-sans-2xl desktop-lg:font-sans-3xl text-ls-neg-2">
+        <h1 className="text-ls-neg-2 tablet:font-sans-2xl desktop-lg:font-sans-3xl desktop-lg:margin-top-2">
           <span>{t("title")}</span>
         </h1>
-        <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl">
-          <span className="text-yellow text-bold">{t("beta")}</span>&nbsp;
+        <p className="usa-intro line-height-sans-3 font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl desktop-lg:margin-bottom-0">
           {t("content")}
         </p>
         <Link
