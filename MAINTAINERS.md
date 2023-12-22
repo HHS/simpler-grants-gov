@@ -12,15 +12,16 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 ## Engineering
 
 * Aaron Couch
-* Daphne Gold
+* Alsia Plybeah
+* Michael Chouinard
 * Sammy Steiner
 
 ## Product and Project Management
 
 * Billy Daly
+* Esther Oke
 * Sumit Haiveettil
 * Sarah Knopp
-* Esther Oke
 
 ## Content and Design
 
