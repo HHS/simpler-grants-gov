@@ -15,8 +15,8 @@ export default async function handler(
   }
 
   const {
-    name,
-    email,
+    name = "",
+    email = "",
     LastName = "",
     hp = "",
   } = JSON.parse(req.body as string) as SendySubscribeForm;

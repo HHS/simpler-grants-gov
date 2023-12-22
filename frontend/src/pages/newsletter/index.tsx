@@ -136,7 +136,9 @@ const Newsletter: NextPage = () => {
               {sendyError ? (
                 <Alert
                   type="error"
-                  heading="An error occurred"
+                  heading={ sendyError === "Already subscribed."
+                  ? "You’re already signed up!"
+                  : "An error occurred"}
                   headingLevel="h3"
                 >
                   <Trans

@@ -1,6 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { useRouter } from 'next/router'
 import { axe } from "jest-axe";
 import Newsletter from "src/pages/newsletter";
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn()
+}))
 
 describe("Newsletter", () => {
   it("renders signup form with a submit button", () => {

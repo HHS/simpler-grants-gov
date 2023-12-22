@@ -220,7 +220,7 @@
       "missing_name": "Enter your first name.",
       "missing_email": "Enter your email address.",
       "invalid_email": "Enter an email address in the correct format, like name@example.com.",
-      "already_subscribed": "The email address, {{email_address}}, is already subscribed. If you're not recieving our newsletter, check your spam folder and add no-reply@grants.gov to your email contacts or safe senders list.",
+      "already_subscribed": "{{email_address}} is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
       "sendy": "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: {{sendy_error}}"
     }
   },
