@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import * as nodeFetch from "node-fetch";
 import handler, { Data } from "src/pages/api/subscribe";
 import { SendySubscribeForm } from "src/types/sendy";
 
 jest.mock("node-fetch");
 
-const fetchMock = require("node-fetch") as jest.MockedFunction<typeof fetch>;
+const fetchMock = nodeFetch as unknown as jest.MockedFunction<typeof fetch>;
 globalThis.fetch = fetchMock;
 
 const mockRequest = {
