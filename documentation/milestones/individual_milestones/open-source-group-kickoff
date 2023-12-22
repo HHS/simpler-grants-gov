@@ -19,7 +19,11 @@
 
 ### Business description & value
 
-Launch an open source community with a primary emphasis on critical components that lay the groundwork for future expansion and productive collaboration, ensuring streamlined community management, fostering a vibrant open source community, and promoting project transparency.
+**Problem statement:** Currently, the Simpler.Grants.gov project lacks a ready-to-use onboarding experience for individuals interested in joining the open-source community. The absence of essential tools, processes, onboarding steps, and guidelines poses a challenge to meeting business goals and mission alignment. 
+
+**Value:** We seek to build stakeholder trust, promote project transparency, and establish a dynamic, participant-driven advisory council Launch an open source community with a primary emphasis on critical components that lay the groundwork for future expansion and productive collaboration, ensuring streamlined community management, fostering a vibrant open source community, and promoting project transparency.
+
+This effort allows us to... 
 
 - Set up the foundational set of communication channels for continuous user input, feedback, and engagement for an open source project
 - Ensure that public code contributions meet code quality and security standards
@@ -39,17 +43,17 @@ Launch an open source community with a primary emphasis on critical components t
 
 ## Technical description
 
-### Communication Tools Configuration  
+### Communication tools onboarding   
 
-The details of configuring communications tools such as a chat tool, shared calendars, wikis, or other collaboration platforms. It should specify the platforms, integration methods, user access levels, and any technical considerations for making these tools fully operational for the community.  
+There are some basic communication tools that are required for a good onboarding experience for an open source contributor. Configuration and setting up an obboarding experinece for communications and contributing tools such as a Github and Slack are required. Specify the platforms, integration methods, user access levels, onboarding experience, and any technical considerations for making these tools fully operational for the community. 
 
-### Team Scrum Meetings  
+### Team meetings and open source events
 
 Detail the aspects of scheduling and conducting team scrum meetings. This can include information about the chosen video conferencing tools, meeting frequency, methods for the general public to join open meetings, and any requirements for ensuring effective remote communication during these meetings. 
 
 ### Getting Started Guide Development  
 
-There is clear documentation and guidelines for the general public to get started and contribute. Documentation typically should include project overviews, installation instructions, usage guidelines, contribution procedures, and community engagement details, fostering a collaborative and informed open source community.
+There is clear documentation and guidelines for the general public to get started and contribute. Documentation typically should include project overviews, installation instructions, usage guidelines, contribution procedures, and community engagement details, fostering a collaborative and informed open source community. 
 
 ### Developer Tools Setup  
 
@@ -72,6 +76,8 @@ Provide technical instructions for setting up developer tools and environments. 
 
 What capabilities / milestones do we expect to be in place at the beginning of work
 on this milestone?
+
+- Procurement of the tools should be in place as the procurement process can delay delivery. Zoom, Slack, and Github are already licensed on the project. 
 
 Are there any notable capabilities / milestones do NOT we expect to be in place at the
 beginning of work on this milestone?
@@ -103,15 +109,8 @@ The following work will *not* be completed as part of this milestone:
 
 Yes the following tools will be deployed:
 
-1. Chat
-2. Ticket tracking
-3. Shared calendar
-4. Video conference
-5. Wiki
-6. Document sharing
-7. Sprint retro
-8. Email listserv
-9. Contact us tool
+- Zoom for video conferencing. Only internal teams will have a Zoom license, but the public will join Zoom   
+
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
