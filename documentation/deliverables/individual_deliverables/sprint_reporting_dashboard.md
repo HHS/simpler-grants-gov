@@ -40,17 +40,32 @@
 ### User Stories
 <!-- Required -->
 
-- As a **member of HHS staff**, I want:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
-- As an **open source contributor**, I want to:
-  - {perform action 1}, so that {goal or motivation for action}
-  - {perform action 2}, so that {goal or motivation for action}
+- As a **project maintainer**, I want:
+  - to be able to provide input on which metrics we publish and how they are presented in the dashboard, so that I can use the dashboard to meaningfully plan and manage delivery on the project.
+  - to be able to provide additional details about the metrics included in the dashboard, so that other stakeholders know how to interpret these metrics correctly in the context of the project.
+- As an **internal stakeholder**, I want:
+  - the dashboard's key insights to be easy to understand at a glance, so that I don't need to spend a lot of time learning how to interpret the metrics correctly.
+  - to be able to access the dashboard from the HHS network, so that I can easily monitor our metrics when I'm in the office.
+  - to understand how the metrics are calculated, so that I can explain them to other stakeholders.
+  - the data behind the dashboard to be updated regularly, so that I'm not sharing outdated information with other stakeholders.
+- As a **member of the public**, I want:
+  - to be able to easily navigate between the dashboard and other project resources (e.g. Simpler.Grants.gov or GitHub), so that I don't have to bookmark or remember the links for each resource separately.
+  - all of the key project dashboards to be accessible in a central location, so that I don't have bookmark or remember multiple links to view all of the metrics.
+- As an **open source contributor**, I want:
+  - to have access to the data behind the dashboard, so that I can explore and analyze the data myself.
+  - to access the source code behind the dashboard, so that I can use this dashboard for my own project or submit code to improve upon the existing dashboard.
 
 ## Technical description
 
+### ETL pipeline
+
+{List requirements specific to this sub-deliverable, options to consider, etc.}
+
 ### Dashboard
-<!-- Optional -->
+
+{List requirements specific to this sub-deliverable, options to consider, etc.}
+
+### Data warehouse
 
 {List requirements specific to this sub-deliverable, options to consider, etc.}
 
@@ -127,15 +142,6 @@ TODO
 
 TODO
 
-#### We have this data separate and users could access those data points separately, but it would be good to understand how the users will be using that information?
-
-TODO
-
-#### With this first iteration of this, are we looking to validate a platform that can take multiple data sources?
-
-TODO
-
-
 ### Not doing
 <!-- Optional -->
 
@@ -150,35 +156,48 @@ The following work will *not* be completed as part of this milestone:
 
 Does this milestone involve delivering any content that needs translation?
 
+1. **Metric explanations:** If we include explanations of the metrics included in the dashboard, those explanations should be translated. The ability to translate this content will depend on the architecture we choose for the dashboard.
+
 If so, when will English-language content be locked? Then when will translation be
 started and completed?
+
+1. **Translations after launch:** The content will be finalized by when the dashboard is launched. We will create tickets that represent the translations need them and complete them as part of the translation process created for the static site.
 
 ### Services going into PROD for the first time
 <!-- Required -->
 
 This can include services going into PROD behind a feature flag that is not turned on.
 
-1. [to be added]
+1. **Dashboard:** This deliverable includes deploying the first public dashboard to PROD.
+2. **Data warehouse:** This deliverable will also likely include setting up a data warehouse for the project.
+3. **ETL pipeline:** This deliverable also includes creating a simple ETL pipeline to load data into the data warehouse.
 
 ### Services being integrated in PROD for the first time
 <!-- Required -->
 
 Are there multiple services that are being connected for the first time in PROD?
 
-1. [to be added]
+1. **ETL pipeline + GitHub:** We'll need to connect the ETL pipeline to GitHub in order to extract the data needed for sprint and delivery metrics.
+2. **ETL pipeline + data warehouse:** We'll also need to connect the ETL pipeline to the data warehouse where it will load the data for analysis.
+3. **Dashboard + static site:** The static site will, at a minimum, link to the dashboard. Depending on the architectural pattern we choose, the dashboard *may* be embedded directly within the static site.
+4. **Dashboard + API:** Depending on the architectural pattern we choose, the dashboard *may* retrieve its data directly from a set of API endpoints.
+5. **Data warehouse + API:** If we choose to populate the dashboard with data fetched from the API, then we'll also need to connect the API to the data warehouse.
 
 ### Data being shared publicly for the first time
 <!-- Required -->
 
 Are there any fields being shared publicly that have never been shared in PROD before?
 
-1. [to be added]
+1. All of the data needed to calculate sprint and delivery metrics is *already* publicly available on GitHub, though we may be sharing that data in a format that is more conducive to analysis.
 
 ### Security considerations
 <!-- Required -->
 
 Does this milestone expose any new attack vectors or expand the attack surface of the product?
 
+1. **API keys or tokens:** In order to connect the ETL pipeline to GitHub and our data warehouse, we'll need to maintain a set of secrets (e.g. API tokens, database connection URI, etc.) that enable these integrations. Securely managing these secrets and integrations increases the attack surface of the product.
+
 If so, how are we addressing these risks?
 
-1. [to be added]
+1. **Secrets manager:** We'll use the appropriate secrets manager for the tool we choose to orchestrate our ETL pipeline. For example, if we are using GitHub actions as a lightweight scheduler, we'll use [GitHub secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). If we're using a more mature orchestration tool, like Airflow, we'll use its [secrets backend](https://airflow.apache.org/docs/apache-airflow-providers/core-extensions/secrets-backends.html) feature.
+2. **Least privilege:** In addition to managing these secrets securely, we'll also follow the principle of least privilege when creating and managing the scopes or roles associated with these integrations.
