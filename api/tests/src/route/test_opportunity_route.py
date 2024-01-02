@@ -169,7 +169,7 @@ def test_opportunity_search_200(
     expected_values,
 ):
     resp = client.post(
-        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        "/v0/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
 
     search_response = resp.get_json()
@@ -237,7 +237,7 @@ def test_opportunity_search_paging_and_sorting_200(
     OpportunityFactory.create_batch(size=25)
 
     resp = client.post(
-        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        "/v0/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
 
     search_response = resp.get_json()
@@ -320,7 +320,7 @@ def test_opportunity_search_invalid_request_422(
     client, api_auth_token, search_request, expected_response_data
 ):
     resp = client.post(
-        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        "/v0/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
     assert resp.status_code == 422
 
@@ -338,7 +338,7 @@ def test_opportunity_search_feature_flag_200(
     if enable_opportunity_log_msg is not None:
         headers["FF-Enable-Opportunity-Log-Msg"] = enable_opportunity_log_msg
 
-    client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
+    client.post("/v0/opportunities/search", json=get_search_request(), headers=headers)
 
     # Verify the header override works, and if not set the default of False is used
     if enable_opportunity_log_msg is True:
@@ -356,7 +356,7 @@ def test_opportunity_search_feature_flag_invalid_value_422(
         "FF-Enable-Opportunity-Log-Msg": enable_opportunity_log_msg,
     }
 
-    resp = client.post("/v1/opportunities/search", json=get_search_request(), headers=headers)
+    resp = client.post("/v0/opportunities/search", json=get_search_request(), headers=headers)
     assert resp.status_code == 422
 
     response_data = resp.get_json()["errors"]
@@ -387,7 +387,7 @@ def test_get_opportunity_200(client, api_auth_token, enable_factory_create, oppo
     opportunity = OpportunityFactory.create(**opportunity_params)
 
     resp = client.get(
-        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+        f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
     )
     assert resp.status_code == 200
 
@@ -403,7 +403,7 @@ def test_get_opportunity_200(client, api_auth_token, enable_factory_create, oppo
 
 
 def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportunities):
-    resp = client.get("/v1/opportunities/1", headers={"X-Auth": api_auth_token})
+    resp = client.get("/v0/opportunities/1", headers={"X-Auth": api_auth_token})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
 
@@ -413,7 +413,7 @@ def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_f
     opportunity = OpportunityFactory.create(is_draft=True)
 
     resp = client.get(
-        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+        f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
     )
     assert resp.status_code == 404
     assert (
@@ -424,7 +424,7 @@ def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_f
 
 def test_get_opportunity_invalid_id_404(client, api_auth_token):
     # with how the route naming resolves, this won't be an invalid request, but instead a 404
-    resp = client.get("/v1/opportunities/text", headers={"X-Auth": api_auth_token})
+    resp = client.get("/v0/opportunities/text", headers={"X-Auth": api_auth_token})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == "Not Found"
 
@@ -435,8 +435,8 @@ def test_get_opportunity_invalid_id_404(client, api_auth_token):
 @pytest.mark.parametrize(
     "method,url,body",
     [
-        ("POST", "/v1/opportunities/search", get_search_request()),
-        ("GET", "/v1/opportunities/1", None),
+        ("POST", "/v0/opportunities/search", get_search_request()),
+        ("GET", "/v0/opportunities/1", None),
     ],
 )
 def test_opportunity_unauthorized_401(client, api_auth_token, method, url, body):
