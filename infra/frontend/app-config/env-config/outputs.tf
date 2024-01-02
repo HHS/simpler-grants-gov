@@ -28,7 +28,7 @@ output "domain" {
 }
 
 output "sendy_api_key" {
-  value = var.sendy_api_key
+  value     = var.sendy_api_key
   sensitive = true
 }
 
