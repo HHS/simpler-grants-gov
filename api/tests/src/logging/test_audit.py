@@ -59,12 +59,12 @@ test_audit_hook_data = [
     ),
     pytest.param(
         subprocess.Popen,
-        (["/usr/bin/git", "commit", "-m", "Fixes a bug."],),
+        (["/usr/bin/git", "log", "HEAD~1..HEAD"],),
         [
             {
                 "msg": "subprocess.Popen",
                 "audit.args.executable": "/usr/bin/git",
-                "audit.args.args": ["/usr/bin/git", "commit", "-m", "Fixes a bug."],
+                "audit.args.args": ["/usr/bin/git", "log", "HEAD~1..HEAD"],
             }
         ],
         id="subprocess.Popen",
