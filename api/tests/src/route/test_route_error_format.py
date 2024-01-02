@@ -19,7 +19,7 @@ from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
 from src.auth.api_key_auth import api_key_auth
 from src.util.dict_util import flatten_dict
-from tests.api.schemas.schema_validation_utils import (
+from tests.src.schemas.schema_validation_utils import (
     FieldTestSchema,
     get_expected_validation_errors,
     get_invalid_field_test_schema_req,
