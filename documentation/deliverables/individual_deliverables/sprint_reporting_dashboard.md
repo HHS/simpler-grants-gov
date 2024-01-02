@@ -70,7 +70,14 @@ Some options to consider include:
 
 The criteria that should inform this decision include:
 
-1. TODO
+- Can members of the public access a dashboard without a login?
+- How much control do we have over the look and feel of the dashboard?
+- How easy is it to add new charts and metrics?
+- Can users can export or download the data behind a given dashboard?
+- Can system-to-system users access the data via API?
+- Can open source contributors host the dashboard locally?
+- Does the platform used to build the dashboard also support ad hoc data analysis?
+- Can the dashboard include narrative text that explains how the metrics are calculated?
 
 ### ETL pipeline
 
@@ -84,7 +91,11 @@ Some options to consider include:
 
 The criteria that should inform this decision include:
 
-1. TODO
+- How easy is it to build and maintain new ETL pipelines?
+- How easy is it to connect to new sources or targets?
+- Can the ETL pipeline execute transformations written in different languages (e.g. Python, SQL, Node.js)?
+- What options are supported for scheduling, retries, and dependencies between steps?
+- Can open source contributors host and execute their own version of this pipeline?
 
 ### Data warehouse
 
@@ -92,14 +103,17 @@ This deliverable should also implement a strategy for storing the data needed to
 
 Some options to consider include:
 
-1. Files stored in S3 buckets (e.g. csv)
+1. Files stored in S3 buckets (e.g. json, csv)
 2. Separate schema in our existing Postgres database
 3. Self-hosted OLAP database (e.g. ClickHouse)
 4. Third-party managed data warehouse (e.g. Snowflake)
 
 The criteria that should inform this decision include:
 
-1. TODO
+- Can the warehouse support both structured and unstructured data?
+- How easy is it to query the data for ad hoc reporting and analysis?
+- What kind of access controls does the warehouse provide?
+- Can open source contributors host their own version of this data warehouse?
 
 ### Definition of done
 <!-- Required -->
@@ -168,11 +182,24 @@ Is there any notable functionality we do ***not*** expect to be in place before 
 
 #### Who are the intended users for the dashboard?
 
-TODO
+The dashboard will be publicly available, so any member of the public could be a user, but the primary audience includes:
+
+- Project maintainers who need to monitor team capacity and delivery velocity to help plan upcoming sprints
+- Internal and external stakeholders who want to monitor our progress toward key deliverables in the roadmap
 
 #### What kinds of questions are these users trying to answer?
 
-TODO
+These stakeholders will likely be asking the following questions:
+
+- About sprints:
+  - How many tickets/points are completed per sprint on average?
+  - How well are we estimating capacity in a given sprint?
+  - How often are tickets added mid sprint?
+  - Which deliverables or bodies of work are we focused on in a given sprint?
+- About deliverables:
+  - How many tickets/points are needed to complete a deliverable?
+  - How have the tickets/points required to complete a deliverable grown over time?
+  - How close are we to completing that deliverable?
 
 ### Not doing
 <!-- Optional -->
