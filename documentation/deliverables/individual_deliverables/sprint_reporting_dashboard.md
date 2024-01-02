@@ -57,17 +57,49 @@
 
 ## Technical description
 
-### ETL pipeline
-
-{List requirements specific to this sub-deliverable, options to consider, etc.}
-
 ### Dashboard
 
-{List requirements specific to this sub-deliverable, options to consider, etc.}
+This deliverable should implement the architecture to build and host dashboards that enables us to iteratively publish operational metrics related to the project.
+
+Some options to consider include:
+
+1. Analytics API + separate dashboard UI
+2. Custom dashboard application (e.g. Plotly Dash or R Shiny app)
+3. Open source dashboard solution (e.g. Metabase or Redash)
+4. Software as a Service (SaaS) dashboard solutions (e.g. PowerBI or Tableau)
+
+The criteria that should inform this decision include:
+
+1. TODO
+
+### ETL pipeline
+
+This deliverable should implement a strategy for extracting, transforming, and loading the data needed to calculate the operational metrics being published.
+
+Some options to consider include:
+
+1. GitHub actions + custom scripts
+2. Orchestration tool (e.g. Airflow, Prefect, Dagster, etc.)
+3. SaaS ETL tools (e.g. Talend, Informatica, etc.)
+
+The criteria that should inform this decision include:
+
+1. TODO
 
 ### Data warehouse
 
-{List requirements specific to this sub-deliverable, options to consider, etc.}
+This deliverable should also implement a strategy for storing the data needed to calculate operational metrics and (potentially) the results of those calculations.
+
+Some options to consider include:
+
+1. Files stored in S3 buckets (e.g. csv)
+2. Separate schema in our existing Postgres database
+3. Self-hosted OLAP database (e.g. ClickHouse)
+4. Third-party managed data warehouse (e.g. Snowflake)
+
+The criteria that should inform this decision include:
+
+1. TODO
 
 ### Definition of done
 <!-- Required -->
@@ -102,6 +134,7 @@
 - [ ] Open source contributors can host a copy of the dashboard locally
 - [ ] The data that populates the dashboard is available via API
 - [ ] The dashboard supports interactivity, such as drill-downs or filters
+- [ ] The metrics included in the dashboard are accompanied by explanations of how they are calculated
 
 ### Proposed metrics for measuring goals/value/definition of done
 <!-- Required -->
@@ -121,15 +154,14 @@ The metrics described above will not be immediately available in the dashboard w
 ### Assumptions & dependencies
 <!-- Required -->
 
-What capabilities / milestones do we expect to be in place at the beginning of work
-on this milestone?
+What functionality do we expect to be in place ***before*** work starts on this deliverable?
 
-- [ ] [to be added]
+- [x] **Static site:** Depending on the architectural pattern we follow, we'll either need to embed the dashboard directly in the static site or, at a minimum, link to the dashboard from the site. As a result, the static site needs to be launched before we can complete work on this dashboard.
+- [ ] **API:** If we want to populate the dashboard with data from a set of analytics API endpoints, the API will also need to be launched prior to completion of this dashboard.
 
-Are there any notable capabilities / milestones do NOT we expect to be in place at the
-beginning of work on this milestone?
+Is there any notable functionality we do ***not*** expect to be in place before works starts on this deliverable?
 
-- [ ] [to be added]
+- [ ] **Translation process:** While including written explanations of how the dashboard metrics are calculated is a stretch goal of this deliverable, we do not expect to have the translation process in place to translate those explanations into other supported metrics.
 
 ### Open questions
 <!-- Optional -->
@@ -147,7 +179,8 @@ TODO
 
 The following work will *not* be completed as part of this milestone:
 
-1. [to be added]
+1. **Additional metrics:** While the goal of this deliverable is to create the infrastructure for publishing operational and program metrics for the public, only sprint and delivery metrics are in scope for this initial deliverable. Additional metrics or dashboards will need to be added in future deliverables.
+2. **Additional ETL pipelines:** While other aspects of the project, e.g. transforming the current transactional data model to the new transactional data model, will likely require a similar ETL pipeline, this deliverable is only focused on building out the data pipeline needed for sprint and delivery metrics. That being said, the selection and implementation of an ETL infrastructure for this deliverable should take these future needs and use cases into consideration.
 
 ## Integrations
 
@@ -161,7 +194,7 @@ Does this milestone involve delivering any content that needs translation?
 If so, when will English-language content be locked? Then when will translation be
 started and completed?
 
-1. **Translations after launch:** The content will be finalized by when the dashboard is launched. We will create tickets that represent the translations need them and complete them as part of the translation process created for the static site.
+1. **Translations after launch:** The content will be finalized by when the dashboard is launched. We will create tickets that represent the translations need them and complete them as part of the translation process created for the static site, once that translation process is launched.
 
 ### Services going into PROD for the first time
 <!-- Required -->
