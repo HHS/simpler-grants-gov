@@ -1,11 +1,24 @@
 info:
-  title: Simpler Grants API
-  description: Back end API for simpler.grants.gov
+  description: '
+
+    Back end API for simpler.grants.gov.
+
+
+    This API is an ALPHA VERSION! Its current form is primarily for testing and feedback.
+    Features are still under heavy development, and subject to change. Not for production
+    use.
+
+
+    See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+    for further details.
+
+    '
   contact:
     name: Simpler Grants.gov
     url: https://simpler.grants.gov/
     email: simplergrantsgov@hhs.gov
-  version: 0.1.0
+  title: Simpler Grants API
+  version: v0
 tags:
 - name: Health
 - name: Opportunity
