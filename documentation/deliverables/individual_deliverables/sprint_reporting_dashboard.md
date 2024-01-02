@@ -208,6 +208,7 @@ The following work will *not* be completed as part of this milestone:
 
 1. **Additional metrics:** While the goal of this deliverable is to create the infrastructure for publishing operational and program metrics for the public, only sprint and delivery metrics are in scope for this initial deliverable. Additional metrics or dashboards will need to be added in future deliverables.
 2. **Additional ETL pipelines:** While other aspects of the project, e.g. transforming the current transactional data model to the new transactional data model, will likely require a similar ETL pipeline, this deliverable is only focused on building out the data pipeline needed for sprint and delivery metrics. That being said, the selection and implementation of an ETL infrastructure for this deliverable should take these future needs and use cases into consideration.
+3. **Email campaign:** While the dashboard will be publicly available, this deliverable does not include sending an email campaign to public stakeholders publicizing the dashboard. Email communications around the dashboard will likely be scoped into a future deliverable, for example, once program-related metrics are added to the dashboard (e.g. place of performance data).
 
 ## Integrations
 
