@@ -38,7 +38,7 @@ services:
       # Add your non-secret environment variables to this file:
       - ./frontend/.env.development
       # If you have secrets, add them to this file and uncomment this line:
-      # - ./frontend/.env.local
+      - ./frontend/.env.local
     volumes:
       - ./frontend/src:/frontend/src
       - ./frontend/public:/frontend/public

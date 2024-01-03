@@ -12,11 +12,14 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
+  sendy_api_key           = var.sendy_api_key != null ? [{ name = "SENDY_API_KEY", value = var.sendy_api_key }] : []
+  sendy_api_url           = var.sendy_api_url != null ? [{ name = "SENDY_API_URL", value = var.sendy_api_url }] : []
+  sendy_list_id           = var.sendy_list_id != null ? [{ name = "SENDY_LIST_ID", value = var.sendy_list_id }] : []
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
-  ], local.hostname)
+  ], local.hostname, local.sendy_api_key, local.sendy_api_url, local.sendy_list_id)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
