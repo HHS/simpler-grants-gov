@@ -14,7 +14,7 @@ on:
       environment:
         description: "The environment where the build will be deployed. eg. dev, stage, prod. Will default to dev."
         default: dev
-        required: true
+        required: false
         type: string
   workflow_dispatch:
     inputs:
@@ -29,7 +29,7 @@ on:
       environment:
         description: "The environment where the build will be deployed. eg. dev, stage, prod. Will default to dev."
         default: dev
-        required: true
+        required: false
         type: string
 
 jobs:
