@@ -48,7 +48,8 @@ Our recommended approach to limiting the deliverables that are included in repor
 
 ### Assigning issues to deliverables
 
-- **Milestones:** Add the issue to a milestone that represents a 30k deliverable
+- **Milestones per 10k:** Add the issue to a milestone that represents a 10k deliverable and tag the 30k deliverable in the body of the milestone
+- **Milestones per 30k:** Add the issue to a milestone that represents a 30k deliverable
 - **Labels:** Tag the issue with a label that represents a 30k deliverable
 - **Deliverable column:** Add a custom "deliverable" column to the GitHub projects with values representing each 30k deliverable
 - **Reserved phrase:** Use a reserved phrase to tag a 30k deliverable in the body of the issue
@@ -93,7 +94,22 @@ We've decided to use the status of the deliverable in the product roadmap board 
 
 ## Evaluation - Assigning issues to deliverables <!-- OPTIONAL -->
 
-### Milestone
+### Milestones per 10k deliverable
+
+This option involves creating GitHub milestones that loosely map to the 10k deliverables under a given 30k deliverable. Each milestone then uses a key phrase `maps to 30k ft deliverable: #{issue number}` to indicate which 30k deliverable it rolls up to, and each issue assigned to that milestone is counted toward the 30k deliverable that is tagged.
+
+> [!TIP]
+> **Bottom line:** This option works for custom reporting, but is probably not the best option moving forward because it doesn't allow us to easily group, search, and filter issues by 30k deliverable in GitHub projects or reporting.
+
+- **Pros**
+  - Most closely aligns with our current strategy for assigning issues to 30k deliverables.
+  - Only requires users to associate milestones to 30k deliverables, instead of each individual issue.
+- **Cons**
+  - Does not support filtering or searching by 30k deliverable within the GitHub repository.
+  - Does not support filtering or searching by 30k deliverable within GitHub projects (e.g. roadmap or sprint board).
+  - Does not support grouping by 30k deliverable within GitHub projects or GitHub insight reporting.
+
+### Milestone per 30k deliverable
 
 This option involves creating a milestone for each 30k deliverable and assigning issues to that milestone if they are required for delivery of that 30k.
 
