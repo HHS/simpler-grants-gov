@@ -34,9 +34,7 @@ jobs:
         run: make lint-security
 
       - name: Start tests
-        run: |
-          make test-audit
-          make test-coverage
+        run: make test-coverage
 
   vulnerability-scans:
     name: Run API Vulnerability Scans

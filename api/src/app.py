@@ -19,9 +19,19 @@ from src.auth.api_key_auth import User, get_app_security_scheme
 
 logger = logging.getLogger(__name__)
 
+TITLE = "Simpler Grants API"
+API_OVERALL_VERSION = "v0"
+API_DESCRIPTION = """
+Back end API for simpler.grants.gov.
+
+This API is an ALPHA VERSION! Its current form is primarily for testing and feedback. Features are still under heavy development, and subject to change. Not for production use.
+
+See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
+"""
+
 
 def create_app() -> APIFlask:
-    app = APIFlask(__name__)
+    app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
     register_db_client(app)
@@ -60,6 +70,7 @@ def configure_app(app: APIFlask) -> None:
     app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
     app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    app.config["DOCS_FAVICON"] = "https://simpler.grants.gov/img/favicon.ico"
 
     # Set a few values for the Swagger endpoint
     app.config["OPENAPI_VERSION"] = "3.1.0"
@@ -68,8 +79,7 @@ def configure_app(app: APIFlask) -> None:
 
     # Set various general OpenAPI config values
     app.info = {
-        "title": "Simpler Grants API",
-        "description": "Back end API for simpler.grants.gov",
+        "description": API_DESCRIPTION,
         "contact": {
             "name": "Simpler Grants.gov",
             "url": "https://simpler.grants.gov/",

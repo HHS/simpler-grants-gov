@@ -13,6 +13,10 @@ MISSING_DATA = MarshmallowErrorContainer(
     ValidationErrorType.REQUIRED, "Missing data for required field."
 )
 INVALID_INTEGER = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid integer.")
+INVALID_INTEGER_32BIT = MarshmallowErrorContainer(
+    ValidationErrorType.MIN_OR_MAX_VALUE,
+    "Must be greater than or equal to -2147483648 and less than or equal to 2147483647.",
+)
 INVALID_STRING = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid string.")
 INVALID_STRING_PATTERN = MarshmallowErrorContainer(
     ValidationErrorType.FORMAT, "String does not match expected pattern."
@@ -138,6 +142,7 @@ class FieldTestSchema(Schema):
     field_int = fields.Integer()
     field_int_required = fields.Integer(required=True)
     field_int_strict = fields.Integer(strict=True)
+    field_int_32bit = fields.Integer(restrict_to_32bit_int=True)
 
     field_bool = fields.Boolean()
     field_bool_required = fields.Boolean(required=True)
@@ -195,6 +200,7 @@ def get_valid_field_test_schema_req():
         "field_int": 1,
         "field_int_required": 2,
         "field_int_strict": 3,
+        "field_int_32bit": 4,
         "field_bool": True,
         "field_bool_required": False,
         "field_decimal": "2.5",
@@ -246,6 +252,7 @@ def get_invalid_field_test_schema_req():
         "field_int": {},
         # field_int_required not present
         "field_int_strict": "123",
+        "field_int_32bit": 1_000_000_000_000_000,
         "field_bool": 1234,
         # field_bool_required not present
         "field_decimal": "hello",
@@ -296,6 +303,7 @@ def get_expected_validation_errors():
         "field_int": [INVALID_INTEGER],
         "field_int_required": [MISSING_DATA],
         "field_int_strict": [INVALID_INTEGER],
+        "field_int_32bit": [INVALID_INTEGER_32BIT],
         "field_bool": [INVALID_BOOLEAN],
         "field_bool_required": [MISSING_DATA],
         "field_decimal": [INVALID_DECIMAL],
