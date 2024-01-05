@@ -2,8 +2,8 @@
 
 - **Status:** Accepted <!-- REQUIRED -->
 - **Last Modified:** 2023-07-11 <!-- REQUIRED -->
-- **Related Issue:** [#98](https://github.com/HHS/grants-equity/issues/98) <!-- RECOMMENDED -->
-- **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly 
+- **Related Issue:** [#98](https://github.com/HHS/simpler-grants-gov/issues/98) <!-- RECOMMENDED -->
+- **Deciders:** Lucas Brown, Esther Oke, Sumi Thaiveettil, Sarah Knopp, Aaron Couch, Billy Daly
 - **Tags:** communications, sprint planning, agile <!-- OPTIONAL -->
 
 ## Context and Problem Statement
@@ -16,14 +16,14 @@ The goal of this ADR is to evaluate a series of ticket tracking systems and sele
 
 #### Must Have
 
-- **Ticket Tracking:** Tickets can be organized into sprints and tracked as part of larger milestones or epics
+- **Ticket Tracking:** Tickets can be organized into sprints and tracked as part of larger deliverables
 - **Public Access:** Without logging in, members of the public can see tickets that are being worked on
 - **Public Requests:** Members of the public can submit bug reports and feature requests and track how that work is being prioritized
 - **Templates:** The system supports default templates for different types of tickets which prompts the person creating the ticket for a specific set of information
 - **Authority to Operate (ATO):** The platform already must be authorized under the Grants.gov ATO (Authority to Operate) or ATO coverage must be requested
 - **Reporting:** Users can report on the following key metrics:
   - Sprint burndown -- % of tickets and/or points remaining over the course of the sprint
-  - Milestone burdown -- % of tickets and/or points remaining per milestone over time
+  - Deliverable burdown -- % of tickets and/or points remaining per deliverable over time
   - Sprint allocation -- # of tickets and/or points allocated to each team member per sprint
   - Sprint completion -- # of tickets and/or points created vs planned per sprint
   - Sprint velocity -- Average # of tickets and/or points completed per sprint
@@ -61,7 +61,7 @@ We are planning to use **GitHub issues with GitHub projects** because it is the 
 
 - We will need to develop custom reports to track some of the same metrics that Jira or Confluence offers out of the box. Our current proposed strategy for doing so is to create a Python script that exports the tickets and produces the following charts at the end of each sprint:
   - Sprint burndown -- % of tickets and/or points remaining over the course of the sprint
-  - Milestone burdown -- % of tickets and/or points remaining per milestone over time
+  - Deliverable burdown -- % of tickets and/or points remaining per deliverable over time
   - Sprint allocation -- # of tickets and/or points allocated to each team member per sprint
   - Sprint completion -- # of tickets and/or points created vs planned per sprint
   - Sprint velocity -- Average # of tickets and/or points completed per sprint
@@ -80,17 +80,17 @@ We are planning to use **GitHub issues with GitHub projects** because it is the 
 | Factor                    |    Zenhub     | GitHub Projects |     Jira      |  OpenProject  |
 | ------------------------- | :-----------: | :-------------: | :-----------: | :-----------: |
 | Cost                      | $8.33/user/mo |      Free       | $7.75/user/mo | $7.25/user/mo |
-| Ticket Tracking           |      ✅       |       ✅         |      ✅       |      ✅       |
-| Public Access             |      🔄       |       ✅         |      🔄       |      ❌       |
-| Public Requests           |      ✅       |       ✅         |      ❌       |      ❌       |
-| Issue Templates           |      🔄       |       ✅         |      ✅       |      ❌       |
-| Reporting                 |      ✅       |       🔄         |      ✅       |      ✅       |
-| Authority to Operate      |      🔄       |       ✅         |      ✅       |      ✅       |
-| Level of Effort Estimates |      ✅       |       ✅         |      ✅       |      ✅       |
-| Custom Views              |      🔄       |       ✅         |      ✅       |      🔄       |
-| Custom Fields             |      ❌       |       ✅         |      ✅       |      🔄       |
-| Automation                |      🔄       |       ✅         |      ✅       |      ❌       |
-| Open Source               |      ❌       |       ❌         |      ❌       |      ✅       |
+| Ticket Tracking           |      ✅       |       ✅        |      ✅       |      ✅       |
+| Public Access             |      🔄       |       ✅        |      🔄       |      ❌       |
+| Public Requests           |      ✅       |       ✅        |      ❌       |      ❌       |
+| Issue Templates           |      🔄       |       ✅        |      ✅       |      ❌       |
+| Reporting                 |      ✅       |       🔄        |      ✅       |      ✅       |
+| Authority to Operate      |      🔄       |       ✅        |      ✅       |      ✅       |
+| Level of Effort Estimates |      ✅       |       ✅        |      ✅       |      ✅       |
+| Custom Views              |      🔄       |       ✅        |      ✅       |      🔄       |
+| Custom Fields             |      ❌       |       ✅        |      ✅       |      🔄       |
+| Automation                |      🔄       |       ✅        |      ✅       |      ❌       |
+| Open Source               |      ❌       |       ❌        |      ❌       |      ✅       |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -198,16 +198,22 @@ Use the open source project management tool [OpenProject](open-project) for both
 [github-insights]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/viewing-insights-from-your-project/about-insights-for-projects
 [github-project-views]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view
 [github-project-fields]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-text-and-number-fields
+
 <!-- Zenhub -->
+
 [zenhub]: https://www.zenhub.com/
 [zenhub-epics]: https://help.zenhub.com/support/solutions/articles/43000500733-getting-started-with-epics
 [zenhub-story-points]: https://help.zenhub.com/support/solutions/articles/43000010347-estimate-work-using-story-points
 [zenhub-reporting]: https://www.zenhub.com/reporting
+
 <!-- Jira -->
+
 [jira]: https://www.atlassian.com/software/jira
 [jira-reporting]: https://www.atlassian.com/software/jira/features/reports
 [jira-automation]: https://www.atlassian.com/software/jira/features/automation
 [jira-custom-fields]: https://support.atlassian.com/jira-cloud-administration/docs/create-a-custom-field/
 [jira-public-access]: https://marketplace.atlassian.com/apps/1220441/external-share-for-jira?tab=overview&hosting=cloud
+
 <!-- OpenProject -->
+
 [open-project]: https://www.openproject.org/

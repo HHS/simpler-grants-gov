@@ -6,10 +6,15 @@ locals {
   has_database                    = false
   has_incident_management_service = false
   enable_autoscaling              = true
+  hostname                        = "0.0.0.0"
 
-  environment_configs = { for environment in local.environments : environment => module.env_config[environment] }
   build_repository_config = {
     region = module.project_config.default_region
+  }
+
+  environment_configs = {
+    dev  = module.dev_config
+    prod = module.prod_config
   }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
@@ -41,23 +46,12 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared = "grants-equity"
-    dev    = "grants-equity"
-    prod   = "grants-equity"
+    shared = "simpler-grants-gov"
+    dev    = "simpler-grants-gov"
+    prod   = "simpler-grants-gov"
   }
 }
 
 module "project_config" {
   source = "../../project-config"
-}
-
-module "env_config" {
-  for_each = toset(local.environments)
-
-  source                          = "./env-config"
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = each.key
-  has_database                    = local.has_database
-  has_incident_management_service = local.has_incident_management_service
 }

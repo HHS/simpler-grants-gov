@@ -1,6 +1,6 @@
 <!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
-# Development and Software Delivery Lifecycle 
+# Development and Software Delivery Lifecycle
 
 The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that externabl contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contribributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
 
@@ -16,11 +16,11 @@ Each application has its own linting and testing guidelines. Lint and code tests
 
 This project follows [trunk-based development](https://trunkbaseddevelopment.com/), which means:
 
-* Make small changes in [short-lived feature branches](https://trunkbaseddevelopment.com/short-lived-feature-branches/) and merge to `main` frequently.
-* Be open to submitting multiple small pull requests for a single ticket (i.e. reference the same ticket across multiple pull requests).
-* Treat each change you merge to `main` as immediately deployable to production. Do not merge changes that depend on subsequent changes you plan to make, even if you plan to make those changes shortly.
-* Ticket any unfinished or partially finished work.
-* Tests should be written for changes introduced, and adhere to the text percentage threshold determined by the project.
+- Make small changes in [short-lived feature branches](https://trunkbaseddevelopment.com/short-lived-feature-branches/) and merge to `main` frequently.
+- Be open to submitting multiple small pull requests for a single ticket (i.e. reference the same ticket across multiple pull requests).
+- Treat each change you merge to `main` as immediately deployable to production. Do not merge changes that depend on subsequent changes you plan to make, even if you plan to make those changes shortly.
+- Ticket any unfinished or partially finished work.
+- Tests should be written for changes introduced, and adhere to the text percentage threshold determined by the project.
 
 This project uses **continuous deployment** using [Github Actions](https://github.com/features/actions) which is configured in the [./github/worfklows](.github/workflows) directory.
 
@@ -69,26 +69,26 @@ All changes, including small ones, should have an issue. If they don't `[Hotfix]
 
 This project takes a very collaborative and [agile](https://agilemanifesto.org/) approach to code reviews. Working versions of code, self-organizing, and individuals are prioritized When reviewing pull requests:
 
-* **Be prompt**. Aim to respond to a review within 24 hours (although sooner is preferable), and if you cannot do so, be sure to communicate delays to the code author.
-* **Be kind and respectful** when leaving comments and maintain a collaborative tone. Don’t use language that disparages or embarrasses the author (name calling, insults to intelligence, etc). Direct any negative feedback towards the code rather than towards the author.
-* **Present suggestions as requests rather than demands**; instead of “Move this function to file B” try “Would this function fit better in file B?” This allows the author to push back on the suggestion by answering a question rather than rejecting a demand, which helps keep things from getting combative.
-* **Praise and compliment** the good parts!
-* **Explain suggestions and recommendations**. These should be opportunities for learning/mentoring, not for criticism or giving orders.
-* **Offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
-* **Review the testing** as well as the code. You may think of edge cases or other things that the author’s testing plan might have missed.
-* **Clearly designate between required and optional changes**. This can take many forms, but as examples: “(optional) We might want to rename this variable to avoid confusion” and “(blocking) We don’t properly handle deadlocks here, so we’ll need to fix that.” It may also be helpful to clearly designate praises, questions, nits, etc to make a comment’s intention very clear.
-* Consider using **[conventional comments](https://conventionalcomments.org/)** for messages.
-* Use the **"Add a suggestion"** feature to suggest small changes in PRs.
-  
-![add a suggestion pop-up](https://github.com/HHS/grants-equity/assets/512243/e08efbd3-91de-43ce-a0d5-4529ccb1ac13)
+- **Be prompt**. Aim to respond to a review within 24 hours (although sooner is preferable), and if you cannot do so, be sure to communicate delays to the code author.
+- **Be kind and respectful** when leaving comments and maintain a collaborative tone. Don’t use language that disparages or embarrasses the author (name calling, insults to intelligence, etc). Direct any negative feedback towards the code rather than towards the author.
+- **Present suggestions as requests rather than demands**; instead of “Move this function to file B” try “Would this function fit better in file B?” This allows the author to push back on the suggestion by answering a question rather than rejecting a demand, which helps keep things from getting combative.
+- **Praise and compliment** the good parts!
+- **Explain suggestions and recommendations**. These should be opportunities for learning/mentoring, not for criticism or giving orders.
+- **Offer to chat in person** for more complex discussions, or to ensure understanding of new logic.
+- **Review the testing** as well as the code. You may think of edge cases or other things that the author’s testing plan might have missed.
+- **Clearly designate between required and optional changes**. This can take many forms, but as examples: “(optional) We might want to rename this variable to avoid confusion” and “(blocking) We don’t properly handle deadlocks here, so we’ll need to fix that.” It may also be helpful to clearly designate praises, questions, nits, etc to make a comment’s intention very clear.
+- Consider using **[conventional comments](https://conventionalcomments.org/)** for messages.
+- Use the **"Add a suggestion"** feature to suggest small changes in PRs.
 
-* **The "Request Changes"** feature *requires* the reviewer approve changes. This takes autonomy from the engineer, and should only be used if there is an urgent need.
+![add a suggestion pop-up](https://github.com/HHS/simpler-grants-gov/assets/512243/e08efbd3-91de-43ce-a0d5-4529ccb1ac13)
+
+- **The "Request Changes"** feature _requires_ the reviewer approve changes. This takes autonomy from the engineer, and should only be used if there is an urgent need.
 
 ## Releases
 
-Releases follow the [CalVer](https://calver.org/) versioning using a `YYY.MM.DD` format. Optionally include a `-N` if more than one releases are published in the same day.
+Releases follow the [CalVer](https://calver.org/) versioning using a `YYYY.MM.DD-N` format. Start with `-1` for a release, incrementing if there is another release on the same day.
 
-Releases should be [created in Github](https://github.com/HHS/grants-equity/releases) and include a log of changes.
+Releases should be [created in Github](https://github.com/HHS/simpler-grants-gov/releases) and include a log of changes.
 
 ## Documentation
 

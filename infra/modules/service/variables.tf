@@ -41,6 +41,30 @@ variable "container_port" {
   default     = 8000
 }
 
+variable "hostname" {
+  type        = string
+  description = "The hostname to override the default AWS configuration"
+  default     = null
+}
+
+variable "sendy_api_key" {
+  description = "Sendy API key to pass with requests for sendy subscriber endpoints."
+  type        = string
+  default     = null
+}
+
+variable "sendy_api_url" {
+  description = "Sendy API base url for requests to manage subscribers."
+  type        = string
+  default     = null
+}
+
+variable "sendy_list_id" {
+  description = "Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list."
+  type        = string
+  default     = null
+}
+
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
@@ -55,7 +79,6 @@ variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
     security_group_ids         = list(string)
-    access_policy_arn          = string
     app_access_policy_arn      = string
     migrator_access_policy_arn = string
     connection_info = object({

@@ -35,6 +35,8 @@ The application can be ran natively or in a Docker container.
 
 #### Native
 
+There are several secret environment variables necessary to submit the form related to the newsletter. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
+
 From the `frontend/` directory:
 
 1. Install dependencies
@@ -68,9 +70,14 @@ From the `frontend/` directory:
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-##### Other scripts
+##### Testing Release Target Locally
 
-- `make release-build` - Creates the Docker image for deployment to the cloud
+To test the release target locally, run:
+
+- `make release-build OPTS="--tag [IMAGE_NAME]"` or
+- `docker buildx build --target release --tag [IMAGE_NAME]` for a faster build on OSX
+
+to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
 
 ## 🖼️ Storybook
 
@@ -117,6 +124,19 @@ A subset of tests can be ran by passing a pattern to the script. For example, to
 ```sh
 npm run test-watch -- pages
 ```
+
+## Load Testing
+
+[Artillery.io](https://www.artillery.io/docs) is the open source tool used to load test the application. You can find the yml file for the frontend load test at [`/frontend/artillery-load-test.yml`](./artillery-load-test.yml).
+
+To run the load test:
+
+1. Install artillery locally if you haven't done so with `npm install -g artillery@latest`
+2. From the root directory run `make load-test-<env>` where env is either `local`, `staging`, or `production`
+
+- `make load-test-local`
+- `make load-test-staging`
+- `make load-test-production`
 
 ## 🤖 Type checking, linting, and formatting
 

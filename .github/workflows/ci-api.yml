@@ -18,19 +18,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Initialize the docker containers
+        run: make init
+
       - name: Run format check
         run: make format-check
 
       - name: Run linting
         run: make lint
 
+      - name: Check migrations up-to-date
+        run: make db-check-migrations
+
       - name: Run security linting
         run: make lint-security
 
       - name: Start tests
-        run: |
-          make test-audit
-          make test-coverage
+        run: make test-coverage
 
   vulnerability-scans:
     name: Run API Vulnerability Scans

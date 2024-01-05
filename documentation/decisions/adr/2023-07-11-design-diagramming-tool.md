@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-11
-- **Related Issue:** [#116](https://github.com/HHS/grants-equity/issues/116)
+- **Related Issue:** [#116](https://github.com/HHS/simpler-grants-gov/issues/116)
 - **Deciders:** Andy Cochran, Emily Ianacone, Sumi Thaiveettil, Aaron Couch, Billy Daly, Lucan Brown
 - **Tags:** design
 
@@ -112,7 +112,7 @@ Note: If in the use of Mural, it becomes evident that the project would benefit 
 ## ClickUp
 
 - **Pro**
-  - Includes project management features, tasks, whiteboards, dashboards, chat, wiki… 
+  - Includes project management features, tasks, whiteboards, dashboards, chat, wiki…
 - **Cons**
   - More of a suite of products trying to compete with Atlassian, 365, etc
   - "One app to replace them all" requires relying on whole suite to get the most of its features

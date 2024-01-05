@@ -2,12 +2,21 @@
 # -----------------------------------------------------------------------------
 # Run an application command using the application image
 #
+# Optional parameters:
+#   --environment-variables - a JSON list of environment variables to add to the
+#     the container. Each environment variable is an object with the "name" key
+#     specifying the name of the environment variable and the "value" key
+#     specifying the value of the environment variable.
+#     e.g. '[{ "name" : "DB_USER", "value" : "migrator" }]'
+#   --task-role-arn - the IAM role ARN that the task should assume. Overrides the
+#     task role specified in the task definition.
+#
 # Positional parameters:
-#   APP_NAME (required) – the name of subdirectory of /infra that holds the
+#   APP_NAME (required) - the name of subdirectory of /infra that holds the
 #     application's infrastructure code.
-#   ENVIRONMENT (required) – the name of the application environment (e.g. dev,
+#   ENVIRONMENT (required) - the name of the application environment (e.g. dev,
 #     staging, prod)
-#   COMMAND (required) – a JSON list representing the command to run
+#   COMMAND (required) - a JSON list representing the command to run
 #     e.g. To run the command `db-migrate-up` with no arguments, set
 #     COMMAND='["db-migrate-up"]'
 #     e.g. To run the command `echo "Hello, world"` set
@@ -15,13 +24,28 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-# TODO: Add ability to change task IAM Role. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
-# TODO: Change to keyword arguments. Part 3 of multipart update https://github.com/navapbc/template-infra/issues/354#issuecomment-1693973424
+# Parse optional parameters
+ENVIRONMENT_VARIABLES=""
+TASK_ROLE_ARN=""
+while :; do
+  case $1 in
+    --environment-variables)
+      ENVIRONMENT_VARIABLES=$2
+      shift 2
+      ;;
+    --task-role-arn)
+      TASK_ROLE_ARN=$2
+      shift 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 APP_NAME="$1"
 ENVIRONMENT="$2"
 COMMAND="$3"
-ENVIRONMENT_VARIABLES=${4:-""}
 
 echo "==============="
 echo "Running command"
@@ -30,7 +54,8 @@ echo "Input parameters"
 echo "  APP_NAME=$APP_NAME"
 echo "  ENVIRONMENT=$ENVIRONMENT"
 echo "  COMMAND=$COMMAND"
-echo "  ENVIRONMENT_VARIABLES=$ENVIRONMENT_VARIABLES"
+echo "  ENVIRONMENT_VARIABLES=${ENVIRONMENT_VARIABLES:-}"
+echo "  TASK_ROLE_ARN=${TASK_ROLE_ARN:-}"
 echo
 
 # Use the same cluster, task definition, and network configuration that the application service uses
@@ -51,16 +76,12 @@ NETWORK_CONFIG=$(aws ecs describe-services --no-cli-pager --cluster "$CLUSTER_NA
 CURRENT_REGION=$(./bin/current-region.sh)
 AWS_USER_ID=$(aws sts get-caller-identity --no-cli-pager --query UserId --output text)
 
-ENVIRONMENT_OVERRIDES=""
-if [ -n "$ENVIRONMENT_VARIABLES" ]; then
-  ENVIRONMENT_OVERRIDES="\"environment\": $ENVIRONMENT_VARIABLES,"
-fi
 CONTAINER_NAME=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" --query "taskDefinition.containerDefinitions[0].name" --output text)
+
 OVERRIDES=$(cat << EOF
 {
   "containerOverrides": [
     {
-      $ENVIRONMENT_OVERRIDES
       "name": "$CONTAINER_NAME",
       "command": $COMMAND
     }
@@ -68,6 +89,14 @@ OVERRIDES=$(cat << EOF
 }
 EOF
 )
+
+if [ -n "$ENVIRONMENT_VARIABLES" ]; then
+  OVERRIDES=$(echo "$OVERRIDES" | jq ".containerOverrides[0].environment |= $ENVIRONMENT_VARIABLES")
+fi
+
+if [ -n "$TASK_ROLE_ARN" ]; then
+  OVERRIDES=$(echo "$OVERRIDES" | jq ".taskRoleArn |= \"$TASK_ROLE_ARN\"")
+fi
 
 TASK_START_TIME=$(date +%s)
 TASK_START_TIME_MILLIS=$((TASK_START_TIME * 1000))
@@ -104,8 +133,17 @@ LOG_STREAM="$LOG_STREAM_PREFIX/$CONTAINER_NAME/$ECS_TASK_ID"
 # task that completes quickly can go from PENDING to STOPPED, causing the wait
 # command to error out.
 echo "Waiting for log stream to be created"
+echo "  TASK_ARN=$TASK_ARN"
+echo "  TASK_ID=$ECS_TASK_ID"
 echo "  LOG_STREAM=$LOG_STREAM"
+
+NUM_RETRIES_WAITIN_FOR_LOGS=0
 while true; do
+  NUM_RETRIES_WAITIN_FOR_LOGS=$((NUM_RETRIES_WAITIN_FOR_LOGS+1))
+  if [ $NUM_RETRIES_WAITIN_FOR_LOGS -eq 20 ]; then
+    echo "Timing out task $ECS_TASK_ID waiting for logs"
+    exit 1
+  fi
   IS_LOG_STREAM_CREATED=$(aws logs describe-log-streams --no-cli-pager --log-group-name "$LOG_GROUP" --query "length(logStreams[?logStreamName==\`$LOG_STREAM\`])")
   if [ "$IS_LOG_STREAM_CREATED" == "1" ]; then
     break
@@ -161,7 +199,13 @@ done
 echo "::endgroup::"
 echo
 
-CONTAINER_EXIT_CODE=$(aws ecs describe-tasks --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN" --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" --output text)
+CONTAINER_EXIT_CODE=$(
+  aws ecs describe-tasks \
+  --cluster "$CLUSTER_NAME" \
+  --tasks "$TASK_ARN" \
+  --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" \
+  --output text
+)
 
 if [[ "$CONTAINER_EXIT_CODE" == "null" || "$CONTAINER_EXIT_CODE" != "0" ]]; then
   echo "Task failed" >&2

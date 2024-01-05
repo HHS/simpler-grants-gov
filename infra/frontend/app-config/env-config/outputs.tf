@@ -22,3 +22,20 @@ output "incident_management_service_integration" {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
 }
+
+output "domain" {
+  value = var.domain
+}
+
+output "sendy_api_key" {
+  value     = var.sendy_api_key
+  sensitive = true
+}
+
+output "sendy_api_url" {
+  value = var.sendy_api_url
+}
+
+output "sendy_list_id" {
+  value = var.sendy_list_id
+}

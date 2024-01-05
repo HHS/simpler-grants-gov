@@ -1,0 +1,4 @@
+data
+
+# Ignore dynaconf secret files
+.secrets.*

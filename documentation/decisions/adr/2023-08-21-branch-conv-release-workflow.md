@@ -2,21 +2,21 @@
 
 - **Status:** Accepted. <!-- REQUIRED -->
 - **Last Modified:** 2023-08-21 <!-- REQUIRED -->
-- **Related Issue:** [#185](https://github.com/HHS/grants-equity/issues/185) <!-- RECOMMENDED -->
+- **Related Issue:** [#185](https://github.com/HHS/simpler-grants-gov/issues/185) <!-- RECOMMENDED -->
 - **Deciders:** Daphne Gold, Sammy Steiner, Billy Daly, Lucas Brown <!-- REQUIRED -->
 - **Tags:** process, workflow, change management <!-- OPTIONAL -->
 
 ## Context and Problem Statement
 
-This project needs standards for describing changes and introducing them into lower and production environments. 
+This project needs standards for describing changes and introducing them into lower and production environments.
 
 The items that encompass this are:
 
-* Git commit conventions
-* Branch naming conventions
-* Branch merge strategy
-* Branching model
-* Release workflow and naming convention
+- Git commit conventions
+- Branch naming conventions
+- Branch merge strategy
+- Branching model
+- Release workflow and naming convention
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -31,12 +31,11 @@ The standards should be:
 - make it easy to revert features
 - facilitate both internal and external contributions
 
-
 ## Options Considered
 
 ### Branch merge strategy
 
-#### [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits) 
+#### [squash and merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits)
 
 - **Pros**
   - A single commit for a PR makes it easier to see all changes introduced for an entire feature
@@ -111,7 +110,7 @@ This project will use `[github-username]/issue-[issue-number]-[feature-name]` co
 
 - **Pros**
   - Widely adopted in general and preferred by the supporting engineering organization
-  - Facilitates continuos integration 
+  - Facilitates continuos integration
   - Facilitates continuous delivery
   - Facilitates lean experiments
   - Simpler and more efficient than some other models
@@ -126,11 +125,11 @@ This project will use `[github-username]/issue-[issue-number]-[feature-name]` co
 
 The following conventions will be adopted:
 
-- Pull Requests (PRs) will be merged directly into `main`. 
+- Pull Requests (PRs) will be merged directly into `main`.
 - PRs will be titled `[Issue N] Short description`
   - PRs with no issue should use `[Fix] Short description`
 - PRs will follow, with small changes, the [Code Change Lifecycle / Contributing
-](https://docs.google.com/document/d/1EyLYuKCv8xjpY26zR8cODl6SEXy9Mx_yAuZ6vS8cPp8/edit?skip_itp2_check=true&pli=1) guidelines and be documented in `CONTRIBUTING.md`
+  ](https://docs.google.com/document/d/1EyLYuKCv8xjpY26zR8cODl6SEXy9Mx_yAuZ6vS8cPp8/edit?skip_itp2_check=true&pli=1) guidelines and be documented in `CONTRIBUTING.md`
 - Code reviews will follow, with small changes, the [Code Review Guidelines](https://docs.google.com/document/d/1pRtpg1ffLXcJn_yV_g90t1TlZjs7TLH2FfpS8DwW3_w/edit#heading=h.htn78a1hqoq)
 
 ### Release Workflow
@@ -147,5 +146,3 @@ This project will use:
 - git commit conventions will not be enforced individual PR commits
 - "squash and merge" stratey for merging PRs with a defined naming convention
 - contribution and development practices will be documented in `CONTRIBUTING.md`, `READM.md`, and other documents in the repository
-
-

@@ -1,7 +1,7 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 WORKDIR /frontend
 
 # Install dependencies
@@ -56,16 +56,20 @@ RUN npm run build -- --no-lint
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:20-alpine AS release
+FROM node:20-bullseye-slim AS release
 WORKDIR /frontend
 
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 
-# Install wget for health checks
-# no-cache removes need to rm cache dir
-# https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md#disabling-cache
-RUN apk add --no-cache wget=1.21.4-r0
+RUN apt-get update \
+  # Install security updates
+  # https://pythonspeed.com/articles/security-updates-in-docker/
+  && apt-get upgrade --yes \
+  # Install wget, required for health checks
+  wget \
+  # Reduce the image size by clearing apt cached lists
+  && rm -fr /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production
@@ -94,6 +98,14 @@ COPY --from=builder --chown=nextjs:nodejs /frontend/.next/static ./.next/static
 # ENV ENV_VARIABLE=${ENV_VARIABLE}
 # ARG NEXT_PUBLIC_ENV_VARIABLE
 # ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
+
+ARG SENDY_API_KEY
+ENV SENDY_API_KEY=${SENDY_API_KEY}
+ARG SENDY_API_URL
+ENV SENDY_API_URL=${SENDY_API_URL}
+ARG SENDY_LIST_ID
+ENV SENDY_LIST_ID=${SENDY_LIST_ID}
+
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV PORT 3000
 

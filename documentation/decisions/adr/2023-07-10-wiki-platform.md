@@ -2,13 +2,13 @@
 
 - **Status:** Accepted
 - **Last Modified:** 2023-07-10 <!-- REQUIRED -->
-- **Related Issue:** [#30](https://github.com/HHS/grants-equity/issues/30) <!-- RECOMMENDED -->
+- **Related Issue:** [#30](https://github.com/HHS/simpler-grants-gov/issues/30) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, wiki
 
 ## Context and Problem Statement
 
-The [communications platform milestone](milestone) identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is a wiki for storing notes, documents, and other content about the project. Ideally we would select a platform that balances ease of use and flexibility with the cost of implementing and maintaining the wiki.
+The communications platform deliverable identifies a series of platforms through which the Grants API project needs to engage both internal and external stakeholders. One of these platforms is a wiki for storing notes, documents, and other content about the project. Ideally we would select a platform that balances ease of use and flexibility with the cost of implementing and maintaining the wiki.
 
 The goal of this ADR is to evaluate a series of potential wiki platforms and determine which one best fits the needs and objectives of this project based on the decision criteria outlined below.
 
@@ -33,15 +33,15 @@ The goal of this ADR is to evaluate a series of potential wiki platforms and det
 - **Data Access:** Content generated and stored in the wiki should be accessible outside of the wiki platform, either through syncing content to an HHS owned repository or through an official API.
 - **Machine Readability:** The wiki platform should also support storing and exposing content in a machine-readable format so that certain types structured data can be managed within and accessed from the wiki without parsing.
 - **Open Source:** The tool used to manage and host the wiki content should be open source, if possible.
-- **Authority to Operate (ATO):** Because the wiki is a support tool rather than a production service, it doesn't *need* to be covered under the Grants.gov ATO. However, being covered under the existing ATO is an advantage if, in the future, we want to use it to support our production service (e.g. hosting training materials for grant applicants or grantors)
+- **Authority to Operate (ATO):** Because the wiki is a support tool rather than a production service, it doesn't _need_ to be covered under the Grants.gov ATO. However, being covered under the existing ATO is an advantage if, in the future, we want to use it to support our production service (e.g. hosting training materials for grant applicants or grantors)
 
 ## Options Considered
 
-- [Confluence](confluence) - *NOT chosen* because of limits around data access and content review
-- [Notion](notion) - *NOT chosen* because of limits on version history and content review
-- [GitHub Wiki](gh-wiki) - *NOT chosen* because of limited feature set and issues with usability
-- [GitBook](gitbook) - *Chosen* because of support for content review and GitHub syncing
-- [WikiJS](wiki-js) - *NOT chosen* because of issues with usability and requirements for ongoing maintenance
+- [Confluence](confluence) - _NOT chosen_ because of limits around data access and content review
+- [Notion](notion) - _NOT chosen_ because of limits on version history and content review
+- [GitHub Wiki](gh-wiki) - _NOT chosen_ because of limited feature set and issues with usability
+- [GitBook](gitbook) - _Chosen_ because of support for content review and GitHub syncing
+- [WikiJS](wiki-js) - _NOT chosen_ because of issues with usability and requirements for ongoing maintenance
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -76,21 +76,21 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 | Factor                      | Confluence | Notion | GitHub Wiki | GitBook | Wiki.js |
 | --------------------------- | :--------: | :----: | :---------: | :-----: | :-----: |
-| Usability                   |     3      |   2    |     1      |    2     |    1    |
-| Public Access               |     🔄     |   🔄   |     ✅      |    ✅    |    ✅    |
-| Content Review              |     🔄     |   ❌   |     ❌      |    ✅    |    🔄    |
-| Comments                    |     ✅     |   ✅   |     ❌      |    ✅    |    🔄    |
-| Version History             |     ✅     |   🔄   |     ✅      |    ✅    |    🔄    |
-| Multi-Media                 |     ✅     |   ✅   |     ❌      |    ✅    |    ✅    |
-| I18n                        |     🔄     |   🔄   |     ❌      |    ✅    |    ✅    |
-| Web Analytics               |     ✅     |   ✅   |     ❌      |    ✅    |    🔄    |
-| Onboarding Cost Efficiency  |     2      |   2   |      3      |    2     |    1    |
-| Maintenance Cost Efficiency |     2      |   2   |      3      |    2     |    1    |
-| External Contributions      |     ✅     |   ✅   |     🔄      |    🔄    |    🔄    |
-| Data Access                 |     🔄     |   🔄   |     ✅      |    ✅    |    ✅    |
-| Machine Readability         |     🔄     |   ✅   |     ❌      |    🔄    |    ✅    |
-| Open Source                 |     ❌     |   ❌   |     ❌      |    ❌    |    ✅    |
-| Authority to Operate        |     ❌     |   ❌   |     ✅      |    ❌    |    ✅    |
+| Usability                   |     3      |   2    |      1      |    2    |    1    |
+| Public Access               |     🔄     |   🔄   |     ✅      |   ✅    |   ✅    |
+| Content Review              |     🔄     |   ❌   |     ❌      |   ✅    |   🔄    |
+| Comments                    |     ✅     |   ✅   |     ❌      |   ✅    |   🔄    |
+| Version History             |     ✅     |   🔄   |     ✅      |   ✅    |   🔄    |
+| Multi-Media                 |     ✅     |   ✅   |     ❌      |   ✅    |   ✅    |
+| I18n                        |     🔄     |   🔄   |     ❌      |   ✅    |   ✅    |
+| Web Analytics               |     ✅     |   ✅   |     ❌      |   ✅    |   🔄    |
+| Onboarding Cost Efficiency  |     2      |   2    |      3      |    2    |    1    |
+| Maintenance Cost Efficiency |     2      |   2    |      3      |    2    |    1    |
+| External Contributions      |     ✅     |   ✅   |     🔄      |   🔄    |   🔄    |
+| Data Access                 |     🔄     |   🔄   |     ✅      |   ✅    |   ✅    |
+| Machine Readability         |     🔄     |   ✅   |     ❌      |   🔄    |   ✅    |
+| Open Source                 |     ❌     |   ❌   |     ❌      |   ❌    |   ✅    |
+| Authority to Operate        |     ❌     |   ❌   |     ✅      |   ❌    |   ✅    |
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
@@ -299,14 +299,14 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
 
 #### Cons
 
-- *Much* less intuitive than other wiki options
+- _Much_ less intuitive than other wiki options
 - Documentation for the tool is lacking
-- Requires *significant* investment of staff time for initial configuration and ongoing maintenance
+- Requires _significant_ investment of staff time for initial configuration and ongoing maintenance
 - Features are less mature than other SaaS offerings like Confluence or GitBook
 
 ## Links <!-- OPTIONAL -->
 
-- [Comms Tooling Milestone](milestone)
+- [Comms Tooling Deliverable](deliverable)
 - [Confluence](confluence)
   - [Confluence Pricing](confluence-pricing)
   - [Confluence Permissions](confluence-permissions)
@@ -325,25 +325,35 @@ If we can't get coverage for GitBook under the existing ATO, we should pursue on
   - [GitBook Internationalization](gitbook-i18n)
   - [GitBook Google Analytics](gitbook-ga)
 
-[milestone]: ../milestones/individual_milestones/communication_platforms.md
+[deliverable]: ../deliverables/individual_deliverables/communication_platforms.md
+
 <!-- Confluence links -->
+
 [confluence]: https://www.atlassian.com/software/confluence
 [confluence-pricing]: https://www.atlassian.com/software/confluence/pricing
 [confluence-public-spaces]: https://confluence.atlassian.com/doc/make-a-space-public-829076202.html
 [confluence-public-pages]: https://support.atlassian.com/confluence-cloud/docs/share-content-externally-with-public-links/
 [confluence-ga]: https://marketplace.atlassian.com/apps/1216936/google-analytics-in-confluence?tab=pricing&hosting=cloud
 [confluence-permissions]: https://community.atlassian.com/t5/Confluence-questions/Let-users-to-edit-but-restrict-for-publishing-changes-without/qaq-p/945993
+
 <!-- Notion links -->
+
 [notion]: https://www.notion.so
 [notion-pricing]: https://www.notion.so/pricing
 [notion-i18n]: https://store.crowdin.com/notion
+
 <!-- GitHub Wiki links -->
+
 [gh-wiki]: https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis
+
 <!-- GitBook links -->
+
 [gitbook]: https://www.gitbook.com/
 [gitbook-pricing]: https://www.gitbook.com/pricing
 [gitbook-oss]: https://docs.gitbook.com/account-management/plans/apply-for-the-non-profit-open-source-plan#criteria-for-open-source-projects
 [gitbook-i18n]: https://docs.gitbook.com/publishing/share/collection-publishing
 [gitbook-ga]: https://docs.gitbook.com/product-tour/integrations/google-analytics/configure
+
 <!-- Wiki.js links -->
+
 [wiki-js]: https://js.wiki/

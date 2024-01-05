@@ -11,3 +11,4 @@ Note that [PostgreSQL schemas](https://www.postgresql.org/docs/current/ddl-schem
 ## Test Factories
 
 The application uses [Factory Boy](https://factoryboy.readthedocs.io/en/stable/) to generate test data for the application. This can be used to create models `Factory.build` that can be used in any test, or to prepopulate the database with persisted models using `Factory.create`. In order to use `Factory.create` to create persisted database models, include the `enable_factory_create` fixture in the test.
+

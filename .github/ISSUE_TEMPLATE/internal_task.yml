@@ -1,0 +1,22 @@
+name: Internal - Task
+description: Describes an individual task that needs to be completed
+title: "[Task]: "
+labels: ["project: grants.gov"]
+assignees:
+  - octocat
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear and concise summary of the task
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: A clear and concise checklist of expectations including definition of done.
+      placeholder: Explain the steps to success!
+    validations:
+      required: false

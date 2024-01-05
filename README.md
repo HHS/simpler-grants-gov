@@ -1,14 +1,12 @@
-# Grants Equity
+# [Simpler.Grants.gov](https://simpler.grants.gov/)
 
-A modernization effort for Grants.gov.
+A modernization effort for [Grants.gov](https://grants.gov/)
 
 ## About the Project
 
-Our vision is for the following to become true:
+We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone. We’re improving the way applicants search for and discover funding opportunities, making it easier to find and apply. For federal grantmaking agencies, we’re making it easier for their communities to find the funding they need.
 
-_**Grants.gov is the simplest, most inclusive, and most gratifying way to find and apply for financial assistance ever built, inside or outside the federal government.**_
-
-Grants.gov helps ensure that no communities are underserved by the federal government.
+Go to [Simpler.Grants.gov](https://simpler.grants.gov/) to learn about our transparent process and what we’re doing now, or explore our existing user research and the findings that are guiding our work.
 
 See [goals.md](./documentation/goals.md) for more information about the vision and goals for the project.
 
@@ -16,7 +14,7 @@ See [goals.md](./documentation/goals.md) for more information about the vision a
 
 The core team on the grants.gov project is a small group of content strategists, designers, developers, and product managers working for and with the Department of Health and Human Services, and other federal agencies, and community volunteers.
 
-An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles. 
+An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles.
 
 ## Repository Structure
 
@@ -52,7 +50,7 @@ Disclosure Policies, see [SECURITY.md](SECURITY.md).
 
 For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
 
-A full list of [contributors](https://github.com/HHS/grants-equity/graphs/contributors) can be found on GitHub.
+A full list of [contributors](https://github.com/HHS/simpler-grants-gov/graphs/contributors) can be found on GitHub.
 
 ## Public domain
 
