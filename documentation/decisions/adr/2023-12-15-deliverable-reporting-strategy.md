@@ -72,7 +72,7 @@ We've decided to use a "deliverable" column to assign issues to a parent 30k del
 
 - **Positive outcomes**
   - We can filter, group, and sort issues by deliverable in GitHub projects and GitHub's automated insight reporting.
-  - The engineering team can continue to use GitHub milestones to organize issues into units of work that are smaller than a 30k deliverable.
+  - The engineering team can continue to use GitHub milestones to organize issues into units of work that are smaller than a 30k deliverable. **Note:** While enabling the engineering team to use milestones to organize issues into smaller units of work, we want to avoid situations in which a given milestone contains issues from multiple 30k deliverables -- we can enforce this with a linter as well as a view in the GitHub project.
   - The logic for grouping issues by deliverable will be consistent between GitHub insight reports and our custom-built reports.
 - **Negative outcomes**
   - We won't be able to filter for issues assigned to a given 30k deliverable within the GitHub repository.
@@ -166,7 +166,7 @@ This option involves creating a single select "deliverable" column in the GitHub
 - **Cons**
   - Does not support filtering or searching within the GitHub repository.
   - Will result in a large number of values for the deliverable column if not regularly maintained. And if we delete old deliverable values it will impact our ability to report on past deliverables.
-  - List of deliverable column values will have to be maintained separately across projects -- inconsistencies between these lists may introduce bugs in custom reporting.
+  - List of deliverable column values will have to be maintained separately across projects -- inconsistencies between these lists may introduce bugs in custom reporting. Though we could address this by creating a linter and the discrepancy would be easy to notice the next time the report is run.
 
 ### Reserved phrase
 
@@ -221,7 +221,7 @@ This option involves filtering the deliverables that are included in reporting b
 - **Pros**
   - Enables users to add or remove deliverables from reporting without changing the logic or the source code.
   - Makes it easy to change the logic that determines which statuses are used to include/exclude issues from reporting.
-  - Keeps the reporting and delivery management in sync.
+  - Keeps the reporting and delivery management aligned by automatically updating our reports to reflect the deliverables we're currently working on.
 - **Cons**
   - Logic behind which deliverables are included in reporting is not as explicit as having a dedicated label.
   - Requires the reporting logic to be tightly coupled with the rules for assigning deliverable status.
