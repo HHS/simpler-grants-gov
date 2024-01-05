@@ -103,6 +103,24 @@ This option involves creating GitHub milestones that loosely map to the 10k deli
 > [!TIP]
 > **Bottom line:** This option works for custom reporting, but is probably not the best option moving forward because it doesn't allow us to easily group, search, and filter issues by 30k deliverable in GitHub projects or reporting.
 
+#### Examples
+
+- Milestone mapped to 10k deliverable
+- Issue assigned to this milestone
+
+#### Steps to create a 30k deliverable and assign an issue to it
+
+1. Create a 30k deliverable issue
+2. Create a milestone that corresponds to a 10k deliverable.
+3. Tag the number of the 30k deliverable it rolls up to in the body of the milestone using the phrase "Maps to 30k ft deliverable: #{issue number}"
+4. Create an issue representing a task that is required for a given 30k deliverable
+5. Assign that issue to the same milestone
+
+#### Steps to rename a 30k deliverable
+
+1. Rename the 30k deliverable issue
+2. Rename the milestone that corresponds to the 30k deliverable
+
 - **Pros**
   - Most closely aligns with our current strategy for assigning issues to 30k deliverables.
   - Only requires users to associate milestones to 30k deliverables, instead of each individual issue.
@@ -115,14 +133,27 @@ This option involves creating GitHub milestones that loosely map to the 10k deli
 
 This option involves creating a milestone for each 30k deliverable and assigning issues to that milestone if they are required for delivery of that 30k.
 
-> [!NOTE]
-> This is a slightly different use of milestones than the project currently supports. Right now, the engineering team can create multiple milestones for a given 30k deliverable and reporting is driven by tagging the parent 30k deliverable in the description of the milestone. This new approach would require a *single* milestone per 30k deliverable and all tickets associated with that deliverable would need to be added to the milestone to be included in reporting.
-
 > [!TIP]
 > **Bottom line:** This is the best option if we:
 > - want a consistent way to filter and group issues by deliverable across all GitHub projects and reporting as well as within the repository
 > - but are okay with preventing the engineering team from using milestones to organize issues into smaller units of work
 
+#### Examples
+
+- Milestone mapped to 30k deliverable
+- Issue assigned to this milestone
+- Searching for issues with this milestone in the repo
+- Searching for issues with this milestone in the GitHub project
+- Grouping issues by milestone in the GitHub project
+- Grouping issues by milestone in GitHub insight reporting
+
+#### Steps to create a 30k deliverable and assign an issue to it
+
+1. Create a 30k deliverable issue
+2. Create a milestone that corresponds to this 30k deliverable
+3. Assign the 30k deliverable issue to that milestone
+4. Create an issue representing a task that is required for a given 30k deliverable
+5. Assign that issue to the same milestone
 
 - **Pros**
   - Ensures that there is just one source of truth for the list of issues associated with a given 30k deliverable.
@@ -142,6 +173,21 @@ This option involves creating a label for each 30k deliverable with a consistent
 > - we want a consistent way to filter issues by deliverable in the repository and across GitHub projects
 > - but can compromise on being able to **group** by deliverable in GitHub projects or reporting
 
+#### Examples
+
+- Issue with this label
+- Searching for issues with this label in the repo
+- Searching for issues with this label in the GitHub project
+- Attempting to group by label in GitHub insight reporting
+
+#### Steps to create a 30k deliverable and assign an issue to it
+
+1. Create a 30k deliverable issue
+2. Create a label that represents this 30k deliverable
+3. Apply that label to the 30k deliverable issue
+4. Create an issue representing a task that is required for a given 30k deliverable
+5. Apply that label to the task-level issue
+
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
   - Supports filtering both within the repository and within GitHub projects (e.g. roadmap and sprint board).
@@ -157,6 +203,23 @@ This option involves creating a single select "deliverable" column in the GitHub
 > **Bottom line:** This is the best option if:
 > - we want a consistent way of filtering, grouping, and sorting issues by deliverable in GitHub projects and reporting
 > - but can compromise on being able to filter by deliverable in the **repository**
+
+#### Examples
+
+- Issue with this deliverable value
+- Searching for issues with this deliverable in the GitHub project
+- Grouping issues by deliverable in GitHub project
+- Grouping issues by deliverable in GitHub insight reporting
+
+#### Steps to create a 30k deliverable and assign an issue to it
+
+1. Create a 30k deliverable issue
+2. Add a new value for this 30k deliverable to the deliverable columns in:
+   - The product roadmap GitHub project
+   - The sprint planning GitHub project
+3. Choose that deliverable value for the 30k deliverable issue in the product roadmap
+4. Create an issue representing a task that is required for a given 30k deliverable
+5. Choose that deliverable value for the task-level issue in the product roadmap
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
@@ -174,6 +237,19 @@ This option involves tagging a 30k deliverable from the body of each issue using
 
 > [!TIP]
 > **Bottom line:** Probably not the best option unless we only cared about grouping issues by deliverable in custom reporting.
+
+#### Examples
+
+- Issue with this deliverable value
+- Searching for issues with this deliverable in the GitHub project
+- Grouping issues by deliverable in GitHub project
+- Grouping issues by deliverable in GitHub insight reporting
+
+#### Steps to create a 30k deliverable and assign an issue to it
+
+1. Create a 30k deliverable issue
+2. Create an issue representing a task that is required for a given 30k deliverable
+3. Tag that 30k deliverable in the body of the task using a reserved phrase
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
