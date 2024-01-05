@@ -73,8 +73,10 @@ We've decided to use a "deliverable" column to assign issues to a parent 30k del
 - **Positive outcomes**
   - We can filter, group, and sort issues by deliverable in GitHub projects and GitHub's automated insight reporting.
   - The engineering team can continue to use GitHub milestones to organize issues into units of work that are smaller than a 30k deliverable.
+  - The logic for grouping issues by deliverable will be consistent between GitHub insight reports and our custom-built reports.
 - **Negative outcomes**
   - We won't be able to filter for issues assigned to a given 30k deliverable within the GitHub repository.
+  - Updating a field on a project can be done from the issue page itself, but the issue first needs to be added to the project before the field is updated. This requires an extra step compared to assigning a label or milestone.
   - We'll have to make sure the list of options in the deliverable column is consistent across GitHub projects in order to join issues from different projects correctly in our custom reporting.
   - We'll have to update the current logic in our custom reporting so that issues are joined to their parent deliverable using the value of this column.
 
@@ -145,7 +147,7 @@ This option involves creating a label for each 30k deliverable with a consistent
   - Supports filtering both within the repository and within GitHub projects (e.g. roadmap and sprint board).
 - **Cons**
   - Does not easily support grouping in GitHub projects or GitHub insights reporting.
-  - Will result in a large number of labels if 30k labels aren't deleted once a 30k deliverable is complete.
+  - Will result in a large number of labels if 30k labels aren't deleted once a 30k deliverable is complete. And if we delete old deliverable labels, it will impact our ability to report on past deliverables.
 
 ### Deliverable column
 
@@ -163,7 +165,7 @@ This option involves creating a single select "deliverable" column in the GitHub
   - Supports customizing the order of groups on the sprint board when grouping by deliverable -- for example we can make "Static site public launch" appear above "GET Opportunities" even though GET opportunities would be first alphabetically.
 - **Cons**
   - Does not support filtering or searching within the GitHub repository.
-  - Will result in a large number of values for the deliverable column if not regularly maintained.
+  - Will result in a large number of values for the deliverable column if not regularly maintained. And if we delete old deliverable values it will impact our ability to report on past deliverables.
   - List of deliverable column values will have to be maintained separately across projects -- inconsistencies between these lists may introduce bugs in custom reporting.
 
 ### Reserved phrase
