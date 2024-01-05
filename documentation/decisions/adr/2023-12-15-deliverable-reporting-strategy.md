@@ -96,6 +96,20 @@ We've decided to use the status of the deliverable in the product roadmap board 
 
 ## Evaluation - Assigning issues to deliverables <!-- OPTIONAL -->
 
+### Comparison matrix
+
+| Factor                                | Milestone per 10k | Milestone per 30k | Label | Deliverable column | Reserved phrase |
+| ------------------------------------- | :---------------: | :---------------: | :---: | :----------------: | :-------------: |
+| Supports filtering in repo            |        ❌         |        ✅          |  ✅   |         ❌         |        ❌        |
+| Supports filtering in GH project      |        ❌         |        ✅          |  ✅   |         ✅         |        ❌        |
+| Supports grouping in GH project       |        ❌         |        ✅          |  ❌   |         ✅         |        ❌        |
+| Supports grouping in GH reporting     |        ❌         |        ✅          |  ❌   |         ✅         |        ❌        |
+| Supports custom sorting in GH project |        ❌         |        ✅          |  ❌   |         ✅         |        ❌        |
+| Supports custom reporting             |        ✅         |        ✅          |  ✅   |         ✅         |        ✅        |
+| Enables engineers to organize issues  |        ✅         |        ❌          |  ✅   |         ✅         |        ✅        |
+| # of steps to create a deliverable    |         5         |        5          |   5   |         6          |        3        |
+| # of steps to rename a deliverable    |         1         |        2          |   2   |         3          |        1        |
+
 ### Milestones per 10k deliverable
 
 This option involves creating GitHub milestones that loosely map to the 10k deliverables under a given 30k deliverable. Each milestone then uses a key phrase `maps to 30k ft deliverable: #{issue number}` to indicate which 30k deliverable it rolls up to, and each issue assigned to that milestone is counted toward the 30k deliverable that is tagged.
@@ -105,8 +119,8 @@ This option involves creating GitHub milestones that loosely map to the 10k deli
 
 #### Examples
 
-- Milestone mapped to 10k deliverable
-- Issue assigned to this milestone
+- [Milestone mapped to 10k deliverable](https://github.com/widal001/project-demo/milestone/11)
+- [Issue assigned to this milestone](https://github.com/widal001/project-demo/issues/59) (see milestone section on the right side)
 
 #### Steps to create a 30k deliverable and assign an issue to it
 
@@ -119,7 +133,8 @@ This option involves creating GitHub milestones that loosely map to the 10k deli
 #### Steps to rename a 30k deliverable
 
 1. Rename the 30k deliverable issue
-2. Rename the milestone that corresponds to the 30k deliverable
+
+#### Pros and cons
 
 - **Pros**
   - Most closely aligns with our current strategy for assigning issues to 30k deliverables.
@@ -140,12 +155,12 @@ This option involves creating a milestone for each 30k deliverable and assigning
 
 #### Examples
 
-- Milestone mapped to 30k deliverable
-- Issue assigned to this milestone
-- Searching for issues with this milestone in the repo
-- Searching for issues with this milestone in the GitHub project
-- Grouping issues by milestone in the GitHub project
-- Grouping issues by milestone in GitHub insight reporting
+- [Milestone mapped to 30k deliverable](https://github.com/widal001/project-demo/milestone/10)
+- [Issue assigned to this milestone](https://github.com/widal001/project-demo/issues/70)
+- [Searching for issues with this milestone in the repo](https://github.com/widal001/project-demo/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22API+soft+launch%22)
+- [Searching for issues with this milestone in the GitHub project](https://github.com/users/widal001/projects/3/views/1?filterQuery=milestone%3A%22API+soft+launch%22)
+- [Grouping issues by milestone in the GitHub project](https://github.com/users/widal001/projects/3/views/6)
+- [Grouping issues by milestone in GitHub insight reporting](https://github.com/users/widal001/projects/3/insights/3)
 
 #### Steps to create a 30k deliverable and assign an issue to it
 
@@ -154,6 +169,13 @@ This option involves creating a milestone for each 30k deliverable and assigning
 3. Assign the 30k deliverable issue to that milestone
 4. Create an issue representing a task that is required for a given 30k deliverable
 5. Assign that issue to the same milestone
+
+#### Steps to rename a 30k deliverable
+
+1. Rename the 30k deliverable issue
+2. Rename the milestone that corresponds to the 30k deliverable
+
+#### Pros and cons
 
 - **Pros**
   - Ensures that there is just one source of truth for the list of issues associated with a given 30k deliverable.
@@ -175,10 +197,10 @@ This option involves creating a label for each 30k deliverable with a consistent
 
 #### Examples
 
-- Issue with this label
-- Searching for issues with this label in the repo
-- Searching for issues with this label in the GitHub project
-- Attempting to group by label in GitHub insight reporting
+- [Issue with this label](https://github.com/widal001/project-demo/issues/75)
+- [Searching for issues with this label in the repo](https://github.com/widal001/project-demo/issues?q=is%3Aissue+is%3Aopen+label%3A%2230k%3A+API+soft+launch%22)
+- [Searching for issues with this label in the GitHub project](https://github.com/users/widal001/projects/3/views/1?filterQuery=label%3A%2230k%3A+API+soft+launch%22)
+- [Attempting to group by label in GitHub insight reporting](https://github.com/users/widal001/projects/3/insights/5)
 
 #### Steps to create a 30k deliverable and assign an issue to it
 
@@ -187,6 +209,13 @@ This option involves creating a label for each 30k deliverable with a consistent
 3. Apply that label to the 30k deliverable issue
 4. Create an issue representing a task that is required for a given 30k deliverable
 5. Apply that label to the task-level issue
+
+#### Steps to rename a 30k deliverable
+
+1. Rename the 30k deliverable issue
+2. Rename the label that corresponds to the 30k deliverable
+
+#### Pros and cons
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
@@ -206,10 +235,11 @@ This option involves creating a single select "deliverable" column in the GitHub
 
 #### Examples
 
-- Issue with this deliverable value
-- Searching for issues with this deliverable in the GitHub project
-- Grouping issues by deliverable in GitHub project
-- Grouping issues by deliverable in GitHub insight reporting
+- [Issue with this deliverable value](https://github.com/widal001/project-demo/issues/65) (Click to expand the down arrow to expand the "Demo sprint board" project details)
+- [Searching for issues with this deliverable in the GitHub project](https://github.com/users/widal001/projects/3/views/1?filterQuery=deliverable%3A%22Static+site+launch%22)
+- [Grouping issues by deliverable in GitHub project](https://github.com/users/widal001/projects/3/views/7)
+- [Grouping issues by deliverable in GitHub insight reporting](https://github.com/users/widal001/projects/3/insights/2)
+- [Slicing by deliverable and grouping by milestone](https://github.com/users/widal001/projects/3/views/8?sliceBy%5Bvalue%5D=Open+source+group+kickoff)
 
 #### Steps to create a 30k deliverable and assign an issue to it
 
@@ -220,6 +250,15 @@ This option involves creating a single select "deliverable" column in the GitHub
 3. Choose that deliverable value for the 30k deliverable issue in the product roadmap
 4. Create an issue representing a task that is required for a given 30k deliverable
 5. Choose that deliverable value for the task-level issue in the product roadmap
+
+#### Steps to rename a 30k deliverable
+
+1. Rename the 30k deliverable issue
+2. Rename the deliverable value that corresponds to the 30k deliverable in:
+   - The product roadmap GitHub project
+   - The sprint planning GitHub project
+
+#### Pros and cons
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
@@ -240,16 +279,19 @@ This option involves tagging a 30k deliverable from the body of each issue using
 
 #### Examples
 
-- Issue with this deliverable value
-- Searching for issues with this deliverable in the GitHub project
-- Grouping issues by deliverable in GitHub project
-- Grouping issues by deliverable in GitHub insight reporting
+- [Issue with reserved phrase](https://github.com/widal001/project-demo/issues/73)
 
 #### Steps to create a 30k deliverable and assign an issue to it
 
 1. Create a 30k deliverable issue
 2. Create an issue representing a task that is required for a given 30k deliverable
 3. Tag that 30k deliverable in the body of the task using a reserved phrase
+
+#### Steps to rename a 30k deliverable
+
+1. Rename the 30k deliverable issue
+
+#### Pros and cons
 
 - **Pros**
   - Allows the engineering team to continue to use GitHub milestones to organize issues into units of work that make sense to them.
