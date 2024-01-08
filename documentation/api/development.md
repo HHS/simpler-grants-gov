@@ -25,13 +25,13 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 
 ## Run the application
 
-1. In your terminal, `cd` to the `api` directory of this repo.
+1. Run `cp frontend/.env.development frontend/.env.local` to create your local copy of the frontend environment variables
 2. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed & running.
-3. Run `make setup-local` to install dependencies
-4. Run `make init start` to build the image and start the container.
+3. Run `make -C api setup-local` to install dependencies
+4. Run `make -C api init start` to build the image and start the container.
 5. Navigate to `localhost:8080/docs` to access the Swagger UI.
-6. Run `make run-logs` to see the logs of the running API container
-7. Run `make stop` when you are done to delete the container.
+6. Run `make -C api run-logs` to see the logs of the running API container
+7. Run `make -C api stop` when you are done to delete the container.
 
 ## Some Useful Commands
 
