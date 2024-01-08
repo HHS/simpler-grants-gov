@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       environment:
-        description: "The environment where the build will be deployed. eg. dev, stage, prod. Will default to dev."
+        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
         default: dev
         required: false
         type: string
@@ -27,7 +27,7 @@ on:
         required: true
         type: string
       environment:
-        description: "The environment where the build will be deployed. eg. dev, stage, prod. Will default to dev."
+        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
         default: dev
         required: false
         type: string
