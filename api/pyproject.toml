@@ -112,7 +112,22 @@ markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests"]
 
 [tool.coverage.run]
-omit = ["src/db/migrations/*.py"]
+omit = [
+  # Decodelog is only used for formatting logs locally
+  "src/logging/decodelog.py",
+  # app_config only runs via the gunicorn script which doens't happen locally
+  "src/app_config.py",
+  # Migrations aren't run in tests
+  "src/db/migrations/**"
+]
 
 [tool.coverage.report]
 fail_under = 80
+
+exclude_lines = [
+  # Exclude abstract & overloaad methods from
+  # code coverage reports as they won't ever directly run
+  "@abc.abstractmethod",
+  "@abstractmethod",
+  "@typing.overload"
+]

@@ -27,7 +27,8 @@ output "build_repository_config" {
 }
 
 output "environment_configs" {
-  value = local.environment_configs
+  value     = local.environment_configs
+  sensitive = true
 }
 
 output "enable_autoscaling" {
