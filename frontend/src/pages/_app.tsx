@@ -16,11 +16,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <link rel="icon" href={assetPath("/img/favicon.ico")} sizes="any" />
-        {process.env.NEXT_PUBLIC_APP_ENV !== "prod" && (
+        {process.env.NEXT_PUBLIC_ENVIRONMENT !== "prod" && (
           <meta name="robots" content="noindex,nofollow" />
         )}
       </Head>
-      {process.env.NEXT_PUBLIC_APP_ENV === "prod" && (
+      {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
         <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_ID} />
       )}
       <Layout>

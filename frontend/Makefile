@@ -33,7 +33,7 @@ release-build:
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
 		--build-arg RUN_UID=$(RUN_UID) \
-		--build-arg NEXT_PUBLIC_APP_ENV=${ENVIRONMENT} \
+		--build-arg NEXT_PUBLIC_ENVIRONMENT=${ENVIRONMENT} \
 		$(OPTS) \
 		.
 
