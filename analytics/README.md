@@ -1,10 +1,37 @@
 # Simpler Grants Analytics
 
-This sub-directory enables users to run analytics on data generated within the Simpler Grants project.
+## Introduction
+
+This a command line interface (CLI) tool written in python that is used to run analytics on operational data for the Simpler.Grants.gov initiative. For a more in depth discussion of tools used and the structure of the codebase, view the technical details for the analytics package.
+
+## Project directory structure
+
+Outlines the structure of the analytics codebase, with the simpler-grants-gov repo as
+
+```text
+root
+├── analytics
+│   └── src
+│       └── analytics
+│           └── datasets      Create re-usable data interfaces for calculating metrics
+│           └── etl           Integrate with external systems used to export data or metrics
+│           └── metrics       Calculate the project's operational metrics
+│   └── tests
+│       └── integrations      Integration tests, mostly for src/analytics/etl
+│       └── datasets          Unit tests for src/analytics/datasets
+│       └── metrics           Unit tests for src/analytics/metrics
+|
+│   └── config.py             Load configurations from environment vars or local .toml files
+│   └── settings.toml         Default configuration settings, tracked by git
+│   └── .secrets.toml         Gitignored file for secrets and configuration management
+│   └── Makefile              Frequently used commands for setup, development, and CLI usage
+│   └── pyproject.toml        Python project configuration file
+```
 
 ## Getting started
 
-> Note: The following guide will focus on interacting with our analytics package through GitHub and Slack. If you'd like to run this package locally skip to the section on [how to install it locally](#installing-the-analytics-package-locally).
+> [!NOTE]
+> The following guide will focus on interacting with our analytics package through GitHub and Slack. If you'd like to run this package locally skip to the section on [how to install it locally](#installing-the-analytics-package-locally).
 
 ### See the daily reports
 
