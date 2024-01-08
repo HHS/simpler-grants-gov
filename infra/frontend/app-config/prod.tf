@@ -6,4 +6,7 @@ module "prod_config" {
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   domain                          = "simpler.grants.gov"
+  sendy_api_key                   = "/${local.app_name}/prod/sendy-api-key"
+  sendy_api_url                   = "/${local.app_name}/prod/sendy-api-url"
+  sendy_list_id                   = "/${local.app_name}/prod/sendy-list-id"
 }

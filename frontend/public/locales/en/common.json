@@ -164,7 +164,7 @@
         },
         {
           "title": "Agile",
-          "content": "We’re building a simpler Grants.gov with you, not for you. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements."
+          "content": "We’re building a simpler Grants.gov <italics>with you</italics>, not <italics>for you</italics>. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements."
         }
       ]
     },
@@ -215,7 +215,14 @@
     "intro": "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     "paragraph_1": "If you sign up for the Simpler.Grants.gov newsletter, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     "list": "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
-    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
+    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+    "errors": {
+      "missing_name": "Enter your first name.",
+      "missing_email": "Enter your email address.",
+      "invalid_email": "Enter an email address in the correct format, like name@example.com.",
+      "already_subscribed": "{{email_address}} is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
+      "sendy": "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: {{sendy_error}}"
+    }
   },
   "Newsletter_confirmation": {
     "page_title": "Newsletter Confirmation | Simpler.Grants.gov",
