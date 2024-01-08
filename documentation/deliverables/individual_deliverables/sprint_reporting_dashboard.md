@@ -43,6 +43,7 @@
 - As a **project maintainer**, I want:
   - to be able to provide input on which metrics we publish and how they are presented in the dashboard, so that I can use the dashboard to meaningfully plan and manage delivery on the project.
   - to be able to provide additional details about the metrics included in the dashboard, so that other stakeholders know how to interpret these metrics correctly in the context of the project.
+  - to easily add new charts and metrics to the dashboard, so that we can continue to take a data-driven approach to the project and publicly report on the measures of success defined for each deliverable.
 - As an **internal stakeholder**, I want:
   - the dashboard's key insights to be easy to understand at a glance, so that I don't need to spend a lot of time learning how to interpret the metrics correctly.
   - to be able to access the dashboard from the HHS network, so that I can easily monitor our metrics when I'm in the office.
@@ -63,14 +64,15 @@ This deliverable should implement the architecture to build and host dashboards 
 
 Some options to consider include:
 
-1. Analytics API + separate dashboard UI
-2. Custom dashboard application (e.g. Plotly Dash or R Shiny app)
-3. Open source dashboard solution (e.g. Metabase or Redash)
-4. Software as a Service (SaaS) dashboard solutions (e.g. PowerBI or Tableau)
+1. S3 bucket (or database connection) + Jupyter notebook
+2. Analytics API + separate dashboard UI
+3. Custom dashboard application (e.g. Plotly Dash or R Shiny app)
+4. Open source dashboard solution (e.g. Metabase or Redash)
+5. Software as a Service (SaaS) dashboard solutions (e.g. PowerBI or Tableau)
 
 The criteria that should inform this decision include:
 
-- Can members of the public access a dashboard without a login?
+- How will members of the public access this dashboard? **Note:** This a core requirement for this deliverable.
 - How much control do we have over the look and feel of the dashboard?
 - How easy is it to add new charts and metrics?
 - Can users can export or download the data behind a given dashboard?
@@ -132,6 +134,8 @@ The criteria that should inform this decision include:
   - [ ] Members of the public can view the dashboard without a login
   - [ ] Members of the public can access the data that populates the dashboard
   - [ ] The data within the dashboard is refreshed *at least* once per day
+  - [ ] The dashboard can be accessed from the static site and GitHub
+  - [ ] The dashboard links to both the static site and GitHub
   - [ ] The dashboard displays the following metrics (at a minimum):
     - [ ] Sprint metrics
       - [ ] Sprint velocity - Number of tickets/points completed per sprint
