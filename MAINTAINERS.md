@@ -5,9 +5,13 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 <!-- Note: team members listed in alphabetical order by last name -->
 
 
-## Project Leadership
+## Product and Delivery
 
 * Lucas Brown
+* Julius Chang
+* Sarah Knopp
+* Billy Daly
+* Eric Valenzuela
 
 ## Engineering
 
@@ -18,10 +22,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 
 ## Product and Project Management
 
-* Billy Daly
 * Esther Oke
 * Sumit Haiveettil
-* Sarah Knopp
 
 ## Content and Design
 
