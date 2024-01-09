@@ -1,6 +1,6 @@
 {
   "Beta_alert": {
-    "alert_title": "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for awards.",
+    "alert_title": "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
     "alert": "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website."
   },
   "Index": {
@@ -10,7 +10,7 @@
       "title": "The goal",
       "paragraph_1": "We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
       "title_2": "For applicants",
-      "paragraph_2": "We’re improving the way you to search for and discover funding opportunities, making it easier to find and apply.",
+      "paragraph_2": "We’re improving the way you search for and discover funding opportunities, making it easier to find and apply.",
       "title_3": "For grantmakers",
       "paragraph_3": "If you work for a federal grantmaking agency, we’re making it easier for your communities to find the funding they need.",
       "cta": "Sign up for project updates"
@@ -164,7 +164,7 @@
         },
         {
           "title": "Agile",
-          "content": "We’re building a simpler Grants.gov with you, not for you. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements."
+          "content": "We’re building a simpler Grants.gov <italics>with you</italics>, not <italics>for you</italics>. Our process gives us the flexibility to swiftly respond to feedback and adapt to changing priorities and requirements."
         }
       ]
     },
@@ -187,7 +187,7 @@
       "roadmap_1": "Find",
       "title_1": "Milestone 1",
       "name_1": "Laying the foundation with a modern Application Programming Interface (API)",
-      "paragraph_1": "To make it easier to discover funding opportunities, we’re starting with a new modern API to make grants data more accessible. Our API‑first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with  grants in new ways, like SMS, phone, email, chat, and notifications.",
+      "paragraph_1": "To make it easier to discover funding opportunities, we’re starting with a new modern API to make grants data more accessible. Our API‑first approach will prioritize data at the beginning, and make sure data remains a priority as we iterate. It’s crucial that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data. Our new API will foster innovation and be a foundation for interacting with grants in new ways, like SMS, phone, email, chat, and notifications.",
       "sub_title_1": "What’s an API?",
       "sub_paragraph_1": "Think of the API as a liaison between the Grants.gov website and the information and services that power it. It’s software that allows two applications to talk to each other or sends data back and forth between a website and a user.",
       "sub_title_2": "Are you interested in the tech?",
@@ -215,7 +215,14 @@
     "intro": "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     "paragraph_1": "If you sign up for the Simpler.Grants.gov newsletter, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     "list": "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
-    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. "
+    "disclaimer": "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+    "errors": {
+      "missing_name": "Enter your first name.",
+      "missing_email": "Enter your email address.",
+      "invalid_email": "Enter an email address in the correct format, like name@example.com.",
+      "already_subscribed": "{{email_address}} is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
+      "sendy": "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: {{sendy_error}}"
+    }
   },
   "Newsletter_confirmation": {
     "page_title": "Newsletter Confirmation | Simpler.Grants.gov",

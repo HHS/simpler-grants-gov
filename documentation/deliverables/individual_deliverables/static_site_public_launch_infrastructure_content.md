@@ -14,11 +14,11 @@
 ## Short description
 <!-- Required -->
 
-- **What:** We want to make a series of updates to the content and the infrastructure to the static site so that we are prepared to launch to a wider audience publicly and effectively communicate the project's goals, ways of working, and ongoing efforts.  
-- **Why:** Continues to improve front-end infrastructure, demonstrate ongoing value both internally and publicly, and begins to build public excitement for the Simpler Grants.gov initiative. These updates underscore our agile methodology of releasing often, even with minimal updates. We also want to ensure that our site can handle an increase in traffic. 
-- **Who:** The site will be announced directly with a small group of applicants, grantors, and internal stakeholders. These include: 
+- **What:** We want to make a series of updates to the content and the infrastructure to the static site so that we are prepared to launch to a wider audience publicly and effectively communicate the project's goals, ways of working, and ongoing efforts.
+- **Why:** Continues to improve front-end infrastructure, demonstrate ongoing value both internally and publicly, and begins to build public excitement for the Simpler Grants.gov initiative. These updates underscore our agile methodology of releasing often, even with minimal updates. We also want to ensure that our site can handle an increase in traffic.
+- **Who:** The site will be announced directly with a small group of applicants, grantors, and internal stakeholders. These include:
     - Federal Demonstration Partnership (mostly applicants)
-    - S2S Federal User Group (grantors) 
+    - S2S Federal User Group (grantors)
     - Grantor S2S CGMO (Grants Management Officers and others within HHS)
     - Internal content managers
 
@@ -28,7 +28,7 @@
 <!-- Required -->
 **Problem statement:** In our initial static site release, we released quickly to get learnings and release iteratively. We have limited content on our site that does not properly communicate enough about our project to the public. We also have room for improvement on the infrastructure and operations so that we can confidently handle more traffic.
 
-**Value:** We want to build on our initial release and enhance the site to provide a more comprehensive communication about our project's efforts, ongoing initiatives, and avenues for public involvement. We also aim to validate and reinforce our infrastructure and operations, ensuring they are robust enough to effectively handle the anticipated surge in site traffic. 
+**Value:** We want to build on our initial release and enhance the site to provide a more comprehensive communication about our project's efforts, ongoing initiatives, and avenues for public involvement. We also aim to validate and reinforce our infrastructure and operations, ensuring they are robust enough to effectively handle the anticipated surge in site traffic.
 
 This allows us to continue to deliver iteratively, improve the site's infrastructure for sustained maintenance, and communicate our project vision, principles, and the way we work more clearly to anyone coming to the site.
 
@@ -207,7 +207,7 @@ The following work will *not* be completed as part of this deliverable:
 
 - **Translations:** Because translating the content of the site depends on formalizing the translation process, translating site contents into multiple languages is out of scope for this deliverable.
 - **User survey:** Because a feedback mechanism won't be adopted during this deliverable, a user survey will also be descoped from the public launch.
-- **Testable features from users:** The site will functionally remain a static site. There will be methods for the public to get involved with the project and follow our progress but there is currently no API or functionality on the site for users to engage with in this release. 
+- **Testable features from users:** The site will functionally remain a static site. There will be methods for the public to get involved with the project and follow our progress but there is currently no API or functionality on the site for users to engage with in this release.
 
 ## Integrations
 
@@ -220,7 +220,7 @@ Does this deliverable involve delivering any content that needs translation?
 
 If so, when will English-language content be locked? Then when will translation be started and completed?
 
-1. The site contents will be translated when we complete the [static site improvements deliverable](https://github.com/HHS/grants-equity/issues/568)
+1. The site contents will be translated when we complete the [static site improvements deliverable](https://github.com/HHS/simpler-grants-gov/issues/568)
 
 ### Services going into PROD for the first time
 <!-- Required -->

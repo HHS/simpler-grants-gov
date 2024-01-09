@@ -2,13 +2,13 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-12-04 <!-- REQUIRED -->
-- **Related Issue:** [#590](https://github.com/HHS/grants-equity/issues/590) <!-- RECOMMENDED -->
+- **Related Issue:** [#590](https://github.com/HHS/simpler-grants-gov/issues/590) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sarah Knopp, Sumi Thaiveettil
 - **Tags:** communucations, open source, email marketing
 
 ## Context and Problem Statement
 
-An email marketing tool is primarily used for creating, sending, and tracking email campaigns to a list of subscribers. It allows for us to engage with our audience, push notifications and newsletters to our users, share information, and build customer relationships through email. 
+An email marketing tool is primarily used for creating, sending, and tracking email campaigns to a list of subscribers. It allows for us to engage with our audience, push notifications and newsletters to our users, share information, and build customer relationships through email.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -21,7 +21,7 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 - **Analytics:** The platform should provide support for tracking open rates, click-through-rate and other other web analytics.
 - **Onboarding Costs:** Onboarding new members to the platform should be relatively inexpensive, both in terms of staff time/resources and direct costs (e.g. licensing fees).
 - **Maintenance Costs:** It should not be prohibitively expensive to maintain the email marketing tool, both in terms of staff time/resources and direct costs (e.g. hosting fees).
-- **Authority to Operate (ATO):** The tool should be FedRAMPed or have an Authority to Operate as it will have names and email addresses of public users. 
+- **Authority to Operate (ATO):** The tool should be FedRAMPed or have an Authority to Operate as it will have names and email addresses of public users.
 
 #### Nice to Have
 
@@ -32,8 +32,8 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 ## Options Considered
 
 
-- [Sendy](https://sendy.co/) 
-- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) 
+- [Sendy](https://sendy.co/)
+- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/)
 - [MailChimp](https://mailchimp.com/)
 - [Hubspot](https://www.hubspot.com/)
 - [Mautic](https://www.mautic.org/)
@@ -41,32 +41,32 @@ An email marketing tool is primarily used for creating, sending, and tracking em
 
 ## Decision Outcome <!-- REQUIRED -->
 
-The suggested approach is to utilize Sendy and create a campaign for Simpler Grants.gov within the existing main account for the near-term, leveraging existing knowledge and allowing for faster use. This allows for a faster initiation of the process. One of the most important criteria given by users of the tool, the Grants.gov Communications team, is the need to be able to send an email to the current 1M current subscribers quickly which Sendy cannot do. There are other limitations of this solution so we recommend that we select a back-up option email marketing solution for our long-term needs. 
+The suggested approach is to utilize Sendy and create a campaign for Simpler Grants.gov within the existing main account for the near-term, leveraging existing knowledge and allowing for faster use. This allows for a faster initiation of the process. One of the most important criteria given by users of the tool, the Grants.gov Communications team, is the need to be able to send an email to the current 1M current subscribers quickly which Sendy cannot do. There are other limitations of this solution so we recommend that we select a back-up option email marketing solution for our long-term needs.
 
-There are limitations to Sendy and the recommendation is to move to another email marketing tool that is a better long-term solution that works for HHS and the larger communications strategy for Simpler Grants.gov, current Grants.gov, and NOFO. This makes it easier and consistent to implement and manage one tool. 
+There are limitations to Sendy and the recommendation is to move to another email marketing tool that is a better long-term solution that works for HHS and the larger communications strategy for Simpler Grants.gov, current Grants.gov, and NOFO. This makes it easier and consistent to implement and manage one tool.
 
 
 ### Open Questions <!-- OPTIONAL -->
 
 1. Can we transfer the Simpler Grants.gov email list from Sendy to a different tool in the future?
 
-Yes, we are able to transfer the list created in Sendy to a new tool in the future. 
+Yes, we are able to transfer the list created in Sendy to a new tool in the future.
 
 2. What is the long-term tool that we should use?
 
-As we're determining the brand identity and communications strategy and how the different HHS teams will work together, we will determine the long-term solution at a later time. 
+As we're determining the brand identity and communications strategy and how the different HHS teams will work together, we will determine the long-term solution at a later time.
 
 3. Can we send to individual lists?
-   
+
 We can use Sendy to send to individuals and also for a separate subscription lists which is called a "Brand" in Sendy.
 
 5. How can we integrate with the current implementation of Sendy?
-   
+
 A Brand can be created under the existing Sendy account which allows users who subscribe through that form to be added to a separate list specific to Simpler.Grants.gov. This list will be distinct from the other lists within the Sendy account.
 
 6. For the long term solution, there are certain requirements and considerations that we should consider?
 - Currently when users unsubscribe, a script needs to be run to remove them from the list. We should consider a system that automatically updates the system.
-- The new platform should have an API that is robust enough to allow users to subscribe, unsubscribe, and check for existing users. 
+- The new platform should have an API that is robust enough to allow users to subscribe, unsubscribe, and check for existing users.
 
 
 
@@ -114,7 +114,7 @@ Sendy is a self-hosted email marketing application that allows users to send new
 
 #### Cons
 
-- Campaigns with larger audiences or number of emails take a long time to send and a user cannot use the tool while an email is being sent. Currently, we have 1M subscribers and it takes a long time to send to that many subscribers. There are methods that could be done to improve this. 
+- Campaigns with larger audiences or number of emails take a long time to send and a user cannot use the tool while an email is being sent. Currently, we have 1M subscribers and it takes a long time to send to that many subscribers. There are methods that could be done to improve this.
 - Lacks some advanced features present in other platforms.
 - It requires technical knowledge for setup and maintenance.
 - Limited customer support compared to premium services.
@@ -222,8 +222,8 @@ Adobe Campaign is a marketing automation tool that forms part of the Adobe Exper
 
 ## Links <!-- OPTIONAL -->
 
-- [Sendy](https://sendy.co/) 
-- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/) 
+- [Sendy](https://sendy.co/)
+- [Salesforce Marketing](https://www.salesforce.com/products/engagement-marketing/)
 - [MailChimp](https://mailchimp.com/)
 - [Hubspot](https://www.hubspot.com/)
 - [Mautic](https://www.mautic.org/)

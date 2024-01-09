@@ -85,7 +85,7 @@ setup-local:
 	poetry config virtualenvs.in-project true
 
 	# Install dependencies
-	poetry install --no-root
+	poetry install --no-root --all-extras --with dev
 
 ##################################################
 # API Build & Run
@@ -192,6 +192,8 @@ test-watch: ## Run tests continually and watch for changes
 
 test-coverage: ## Run tests and generate coverage report
 	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
+	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
+	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report
@@ -231,9 +233,6 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-cmd-user-create-csv: ## Create a CSV of the useres in the database (Run `make cli-user-create-csv args="--help"` to see the command's options)
-	$(FLASK_CMD) user create-csv $(args)
-
 # Set init-db as pre-requisite since there seems to be a race condition
 # where the DB can't yet receive connections if it's starting from a
 # clean state (e.g. after make stop, make clean-volumes, make openapi-spec)
@@ -247,10 +246,6 @@ openapi-spec: init-db ## Generate OpenAPI spec
 
 login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
-
-# Pauses for 5 seconds
-sleep-5:
-	sleep 5
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
