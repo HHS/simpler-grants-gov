@@ -1,13 +1,13 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 # This script creates SSM parameter for storing integration URL for incident management
-# services. Script creates new SSM attribute or updates existing. 
+# services. Script creates new SSM attribute or updates existing.
 #
 # Positional parameters:
 #   APP_NAME (required) – the name of subdirectory of /infra that holds the
 #     application's infrastructure code.
 #   ENVIRONMENT is the name of the application environment (e.g. dev, staging, prod)
-#   INTEGRATION_ENDPOINT_URL is the url for the integration endpoint for external 
+#   INTEGRATION_ENDPOINT_URL is the url for the integration endpoint for external
 #   incident management services (e.g. Pagerduty, Splunk-On-Call)
 # -----------------------------------------------------------------------------
 set -euo pipefail
@@ -32,7 +32,7 @@ echo "Setting up SSM secret"
 echo "====================="
 echo "APPLICATION_NAME=$APP_NAME"
 echo "ENVIRONMENT=$ENVIRONMENT"
-echo "INTEGRATION_URL=$INTEGRATION_ENDPOINT_URL" 
+echo "INTEGRATION_URL=$INTEGRATION_ENDPOINT_URL"
 echo
 echo "Creating SSM secret: $SECRET_NAME"
 
@@ -41,4 +41,3 @@ aws ssm put-parameter \
     --value "$INTEGRATION_ENDPOINT_URL" \
     --type SecureString \
     --overwrite
-
