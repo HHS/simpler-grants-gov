@@ -30,7 +30,7 @@ runs:
         echo "GITHUB_ACTIONS_ROLE_NAME=$GITHUB_ACTIONS_ROLE_NAME"
 
         terraform -chdir=infra/${{ inputs.app_name }}/app-config init > /dev/null
-        terraform -chdir=infra/${{ inputs.app_name }}/app-config apply -refresh-only -auto-approve> /dev/null
+        terraform -chdir=infra/${{ inputs.app_name }}/app-config apply -refresh-only -auto-approve> /dev/null 
         ACCOUNT_NAME=$(terraform -chdir=infra/${{ inputs.app_name }}/app-config output -json account_names_by_environment | jq -r .${{ inputs.environment }})
         echo "ACCOUNT_NAME=$ACCOUNT_NAME"
 

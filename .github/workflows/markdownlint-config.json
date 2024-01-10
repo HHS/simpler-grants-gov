@@ -1,0 +1,19 @@
+{
+    "ignorePatterns" : [
+        {
+            "pattern": "0005-example.md"
+        },
+        {
+            "pattern": "localhost"
+        },
+        {
+            "pattern": "127.0.0.1"
+        }
+    ],
+    "replacementPatterns": [
+        {
+            "pattern": "^/",
+            "replacement": "{{BASEURL}}/"
+        }
+  ]
+}

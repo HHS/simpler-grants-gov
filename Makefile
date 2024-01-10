@@ -51,6 +51,7 @@ __check_defined = \
 	infra-update-current-account \
 	infra-update-network \
 	infra-validate-modules \
+	lint-markdown \
 	release-build \
 	release-deploy \
 	release-image-name \
@@ -64,8 +65,9 @@ infra-set-up-account: ## Configure and create resources for current AWS profile 
 	@:$(call check_defined, ACCOUNT_NAME, human readable name for account e.g. "prod" or the AWS account alias)
 	./bin/set-up-current-account.sh $(ACCOUNT_NAME)
 
-infra-configure-network: ## Configure default network
-	./bin/create-tfbackend.sh infra/networks default
+infra-configure-network: ## Configure network $NETWORK_NAME
+	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
+	./bin/create-tfbackend.sh infra/networks $(NETWORK_NAME)
 
 infra-configure-app-build-repository: ## Configure infra/$APP_NAME/build-repository tfbackend and tfvars files
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -90,8 +92,10 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 infra-update-current-account: ## Update infra resources for current AWS profile
 	./bin/terraform-init-and-apply.sh infra/accounts `./bin/current-account-config-name.sh`
 
-infra-update-network: ## Update default network
-	./bin/terraform-init-and-apply.sh infra/networks default
+infra-update-network: ## Update network
+	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
+	terraform -chdir="infra/networks" init -input=false -reconfigure -backend-config="$(NETWORK_NAME).s3.tfbackend"
+	terraform -chdir="infra/networks" apply -var="network_name=$(NETWORK_NAME)"
 
 infra-update-app-build-repository: ## Create or update $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -109,7 +113,6 @@ infra-update-app-database-roles: ## Create or update database roles and schemas 
 	./bin/create-or-update-database-roles.sh $(APP_NAME) $(ENVIRONMENT)
 
 infra-update-app-service: ## Create or update $APP_NAME's web service module
-	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
@@ -137,7 +140,7 @@ infra-check-compliance-checkov: ## Run checkov compliance checks
 infra-check-compliance-tfsec: ## Run tfsec compliance checks
 	tfsec infra
 
-infra-lint: infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
+infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
 
 infra-lint-scripts: ## Lint shell scripts
 	shellcheck bin/**
@@ -152,8 +155,10 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test-service: ## Run service layer infra test suite
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	cd infra/test && go test -run TestService -v -timeout 30m -app_name=$(APP_NAME)
+	cd infra/test && go test -run TestService -v -timeout 30m
+
+lint-markdown: ## Lint Markdown docs for broken links
+	./bin/lint-markdown.sh
 
 ########################
 ## Release Management ##
@@ -180,7 +185,7 @@ INFO_TAG := $(DATE).$(USER)
 release-build: ## Build release for $APP_NAME and tag it with current git hash
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	cd $(APP_NAME) && $(MAKE) release-build \
-		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) --load -t $(IMAGE_NAME):$(IMAGE_TAG) $(OPTIONAL_BUILD_FLAGS)"
+		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG)"
 
 release-publish: ## Publish release to $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

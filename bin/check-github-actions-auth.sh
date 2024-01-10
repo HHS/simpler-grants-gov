@@ -23,7 +23,7 @@ echo "Get workflow run id"
 # The current implementation involves getting the create time of the previous
 # run. Then continuously checking the list of workflow runs until we see a
 # newly created run. Then we get the id of this new run.
-#
+# 
 # References:
 # * This stack overflow article suggests a complicated overengineered approach:
 # https://stackoverflow.com/questions/69479400/get-run-id-after-triggering-a-github-workflow-dispatch-event
@@ -33,7 +33,7 @@ echo "Get workflow run id"
 echo "Previous workflow run created at $PREV_RUN_CREATE_TIME"
 echo "Check workflow run create time until we find a newer workflow run"
 while : ; do
-  echo -n "."
+  echo -n "."  
   RUN_CREATE_TIME=$(gh run list --workflow check-infra-auth.yml --limit 1 --json createdAt --jq ".[].createdAt")
   [[ $RUN_CREATE_TIME > $PREV_RUN_CREATE_TIME ]] && break
 done

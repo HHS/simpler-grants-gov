@@ -1,0 +1,50 @@
+name: CI Infra Service Checks
+
+on:
+  # !! Uncomment to trigger automated infra tests once dev environment is set up
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - infra/*/service/**
+  #     - infra/modules/**
+  #     - infra/test/**
+  #     - .github/workflows/ci-infra-service.yml
+  # pull_request:
+  #   paths:
+  #     - infra/*/service/**
+  #     - infra/modules/**
+  #     - infra/test/**
+  #     - .github/workflows/ci-infra-service.yml
+  workflow_dispatch:
+
+jobs:
+  infra-test-e2e:
+    name: Test service
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.1
+          terraform_wrapper: false
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.19.0"
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: app
+          # Run infra CI on dev environment
+          environment: dev
+
+      - name: Run Terratest
+        run: make infra-test-service
