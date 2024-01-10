@@ -9,11 +9,11 @@
 
 ## Short description
 
--**What:** Set up the tools and processes needed to build an open source community around the Simpler Grants.gov initiative
--**Why:** Ensures that open source contributors and the general public can easily participate in the project and provide input and code
--**Who:** Any public members who want to contribute to the open source project. Focus is on: 
-- Open source contributors
-- Other external stakeholders
+- **What:** Set up the tools and processes needed to build an open source community around the Simpler Grants.gov initiative
+- **Why:** Ensures that open source contributors and the general public can easily participate in the project and provide input and code
+- **Who:** Any public members who want to contribute to the open source project. Focus is on: 
+  - Open source contributors
+  - Other external stakeholders
 
 ## Goals
 
