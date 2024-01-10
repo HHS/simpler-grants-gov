@@ -2,16 +2,18 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    "group:allNonMajor",
-    "schedule:weekly"
+    "group:allNonMajor"
   ],
+  "schedule": ["on the 2nd and 4th day instance on sunday after 9pm"],
   "ignoreUnstable": true,
   "labels": ["dependencies"],
   "branchPrefix": "renovate/",
   "reviewers": [
     "sammysteiner",
     "acouch",
-    "daphnegold"
+    "jamesbursa",
+    "coilysiren",
+    "aplybeah"
   ],
   "rangeStrategy": "update-lockfile",
   "timezone": "America/New_York",
