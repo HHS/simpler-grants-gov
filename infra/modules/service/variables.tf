@@ -41,38 +41,30 @@ variable "container_port" {
   default     = 8000
 }
 
-variable "hostname" {
-  type        = string
-  description = "The hostname to override the default AWS configuration"
-  default     = null
-}
-
-variable "sendy_api_key" {
-  description = "Sendy API key to pass with requests for sendy subscriber endpoints."
-  type        = string
-  default     = null
-}
-
-variable "sendy_api_url" {
-  description = "Sendy API base url for requests to manage subscribers."
-  type        = string
-  default     = null
-}
-
-variable "sendy_list_id" {
-  description = "Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list."
-  type        = string
-  default     = null
-}
-
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
 }
 
-variable "subnet_ids" {
+variable "public_subnet_ids" {
   type        = list(any)
-  description = "Private subnet id from vpc module"
+  description = "Public subnet ids in VPC"
+}
+
+variable "private_subnet_ids" {
+  type        = list(any)
+  description = "Private subnet ids in VPC"
+}
+
+variable "aws_services_security_group_id" {
+  type        = string
+  description = "Security group ID for VPC endpoints that access AWS Services"
+}
+
+variable "extra_environment_variables" {
+  type        = list(object({ name = string, value = string }))
+  description = "Additional environment variables to pass to the service container"
+  default     = []
 }
 
 variable "db_vars" {
@@ -92,32 +84,8 @@ variable "db_vars" {
   default = null
 }
 
-variable "cert_arn" {
-  description = "The ARN for the TLS certificate passed in from the app service layer"
-  type        = string
-  default     = null
-}
-
-variable "enable_autoscaling" {
-  description = "Flag to enable or disable auto-scaling"
-  type        = bool
-  default     = false
-}
-
-variable "max_capacity" {
-  description = "Maximum number of tasks for autoscaling"
-  type        = number
-  default     = 4
-}
-
-variable "min_capacity" {
-  description = "Minimum number of tasks for autoscaling"
-  type        = number
-  default     = 2
-}
-
-variable "api_auth_token" {
-  type        = string
-  default     = null
-  description = "Auth token for connecting to the API"
+variable "extra_policies" {
+  description = "Map of extra IAM policies to attach to the service's task role. The map's keys define the resource name in terraform."
+  type        = map(string)
+  default     = {}
 }

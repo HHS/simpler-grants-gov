@@ -1,7 +1,7 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 # Run an application command using the application image
-#
+# 
 # Optional parameters:
 #   --environment-variables - a JSON list of environment variables to add to the
 #     the container. Each environment variable is an object with the "name" key

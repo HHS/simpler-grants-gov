@@ -11,11 +11,6 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
-      environment:
-        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
-        default: dev
-        required: false
-        type: string
   workflow_dispatch:
     inputs:
       app_name:
@@ -26,16 +21,12 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
-      environment:
-        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
-        default: dev
-        required: false
-        type: string
 
 jobs:
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    concurrency: ${{ github.action }}-${{ inputs.ref }}
 
     permissions:
       contents: read
@@ -47,7 +38,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Build release
-        run: make APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} release-build
+        run: make APP_NAME=${{ inputs.app_name }} release-build
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials

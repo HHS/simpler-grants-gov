@@ -69,3 +69,10 @@ resource "aws_iam_role_policy" "task_executor" {
   role   = aws_iam_role.task_executor.id
   policy = data.aws_iam_policy_document.task_executor.json
 }
+
+resource "aws_iam_role_policy_attachment" "extra_policies" {
+  for_each = var.extra_policies
+
+  role       = aws_iam_role.app_service.name
+  policy_arn = each.value
+}

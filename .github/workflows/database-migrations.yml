@@ -21,7 +21,6 @@ jobs:
     with:
       app_name: ${{ inputs.app_name }}
       ref: ${{ github.ref }}
-      environment: ${{ inputs.environment }}
   run-migrations:
     name: Run migrations
     runs-on: ubuntu-latest
