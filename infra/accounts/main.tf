@@ -8,7 +8,7 @@ locals {
   # Choose the region where this infrastructure should be deployed.
   region = module.project_config.default_region
 
-  # Set project tags that will be used to tag all resources. 
+  # Set project tags that will be used to tag all resources.
   tags = merge(module.project_config.default_tags, {
     description = "Backend resources required for terraform state management and GitHub authentication with AWS."
   })

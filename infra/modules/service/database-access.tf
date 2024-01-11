@@ -1,5 +1,5 @@
 #-----------------
-# Database Access 
+# Database Access
 #-----------------
 
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
