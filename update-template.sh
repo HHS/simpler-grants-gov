@@ -7,14 +7,13 @@
 #   TARGET_VERSION (optional) – the version of template-infra to upgrade to.
 #     Defaults to main.
 # -----------------------------------------------------------------------------
-set -xeuo pipefail
+set -euox pipefail
 
 TARGET_VERSION=${1:-"main"}
 
 CURRENT_VERSION=$(cat .template-version)
 
 echo "Clone template-infra"
-rm -rf template-infra
 git clone https://github.com/navapbc/template-infra.git
 
 echo "Creating patch"
