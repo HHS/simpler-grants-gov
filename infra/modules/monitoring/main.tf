@@ -1,10 +1,10 @@
-
+gt
 # Create SNS topic for all email and external incident management tools notifications
 
 resource "aws_sns_topic" "this" {
   name = "${var.service_name}-monitoring"
 
-  # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary 
+  # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
 }
 
 # Create CloudWatch alarms for the service
