@@ -7,6 +7,11 @@ variable "name" {
   }
 }
 
+variable "access_policy_name" {
+  description = "name of the IAM policy to create that will be provide the ability to connect to the database as a user that will have read/write access."
+  type        = string
+}
+
 variable "app_access_policy_name" {
   description = "name of the IAM policy to create that will provide the service the ability to connect to the database as a user that will have read/write access."
   type        = string
@@ -49,11 +54,6 @@ variable "database_name" {
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
-}
-
-variable "database_subnet_group_name" {
-  type        = string
-  description = "Name of database subnet group"
 }
 
 variable "private_subnet_ids" {

@@ -1,6 +1,15 @@
 # Set up GitHub's OpenID Connect provider in AWS account
-data "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
+resource "aws_iam_openid_connect_provider" "github" {
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
+
+  # AWS already trusts the GitHub OIDC identity provider's library of root certificate authorities
+  # so no thumbprints from intermediate certificates are needed
+  # At the time of writing (July 12, 2023), the thumbprint_list parameter
+  # is required to be a non-empty array, so we are passing an array with a dummy string that passes validation
+  # TODO(https://github.com/navapbc/template-infra/issues/350) Remove this parameter thumbprint_list is no
+  # longer required (see https://github.com/hashicorp/terraform-provider-aws/issues/32480)
+  thumbprint_list = ["0000000000000000000000000000000000000000"]
 }
 
 # Create IAM role for GitHub Actions
@@ -31,7 +40,7 @@ data "aws_iam_policy_document" "github_assume_role" {
 
     principals {
       type        = "Federated"
-      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
     }
 
     condition {

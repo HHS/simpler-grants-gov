@@ -41,7 +41,7 @@ resource "aws_backup_selection" "db_backup" {
 
 # Role that AWS Backup uses to authenticate when backing up the target resource
 resource "aws_iam_role" "db_backup_role" {
-  name_prefix        = "${var.name}-db-backup-"
+  name_prefix        = "${var.name}-db-backup-role-"
   assume_role_policy = data.aws_iam_policy_document.db_backup_policy.json
 }
 

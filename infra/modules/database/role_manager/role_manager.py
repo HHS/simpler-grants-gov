@@ -2,7 +2,6 @@ import boto3
 import itertools
 from operator import itemgetter
 import os
-import json
 import logging
 from pg8000.native import Connection, identifier
 
@@ -12,6 +11,9 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     if event == "check":
         return check()
+    elif event == "password_ts":
+        connect_as_master_user()
+        return "Succeeded"
     else:
         return manage()
 
@@ -59,7 +61,7 @@ def check():
     schema_name = os.environ.get("DB_SCHEMA")
     app_conn = connect_using_iam(app_username)
     migrator_conn = connect_using_iam(migrator_username)
-    
+
     check_search_path(migrator_conn, schema_name)
     check_migrator_create_table(migrator_conn, app_username)
     check_app_use_table(app_conn)
@@ -77,14 +79,14 @@ def check_migrator_create_table(migrator_conn: Connection, app_username: str):
     logger.info("Checking that migrator is able to create tables and grant access to app user: %s", app_username)
     migrator_conn.run("CREATE TABLE IF NOT EXISTS temporary(created_at TIMESTAMP)")
     migrator_conn.run(f"GRANT ALL PRIVILEGES ON temporary TO {identifier(app_username)}")
-    
+
 
 def check_app_use_table(app_conn: Connection):
     logger.info("Checking that app is able to read and write from the table")
     app_conn.run("INSERT INTO temporary (created_at) VALUES (NOW())")
     app_conn.run("SELECT * FROM temporary")
-    
-    
+
+
 def cleanup_migrator_drop_table(migrator_conn: Connection):
     logger.info("Cleaning up the table that migrator created")
     migrator_conn.run("DROP TABLE IF EXISTS temporary")
@@ -113,9 +115,9 @@ def connect_using_iam(user: str) -> Connection:
     return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
-    ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
+    ssm = boto3.client("ssm")
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from parameter store:\n%s"%param_name)
+    logger.info("Fetching password from parameter store")
     result = json.loads(ssm.get_parameter(
         Name=param_name,
         WithDecryption=True,
@@ -136,7 +138,7 @@ def get_roles_with_groups(conn: Connection) -> dict[str, str]:
                             INNER JOIN pg_auth_members a ON u.oid = a.member \
                             INNER JOIN pg_roles g ON g.oid = a.roleid \
                             ORDER BY user ASC")
-    
+
     result = {}
     for user, groups in itertools.groupby(roles_groups, itemgetter(0)):
         result[user] = ",".join(map(itemgetter(1), groups))
