@@ -22,7 +22,7 @@ jobs:
       ACTION: show-results # show results, but don't post them to slack
     steps:
       # set up python
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
