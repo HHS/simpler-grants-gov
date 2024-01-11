@@ -11,6 +11,7 @@ javascript: ["**/*.js", "**/*.jsx"]
 typescript: ["**/*.ts", "**/*.tsx"]
 python: "**/*.py"
 terraform: "**/*.tf"
+shell: "**/*.sh"
 
 
 # Labels for components or parts of the code.
