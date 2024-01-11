@@ -10,7 +10,7 @@
 set -xeuo pipefail
 
 TARGET_VERSION=${1:-"main"}
-TARGET_FILES=${1:-".github bin docs infra Makefile .dockleconfig .grype.yml .hadolint.yaml .trivyignore"}
+TARGET_FILES=${2:-".github bin docs infra Makefile .dockleconfig .grype.yml .hadolint.yaml .trivyignore"}
 
 CURRENT_VERSION=$(cat .template-version)
 
