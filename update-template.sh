@@ -7,7 +7,7 @@
 #   TARGET_VERSION (optional) – the version of template-infra to upgrade to.
 #     Defaults to main.
 # -----------------------------------------------------------------------------
-set -euo pipefail
+set -xeuo pipefail
 
 TARGET_VERSION=${1:-"main"}
 
