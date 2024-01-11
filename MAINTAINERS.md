@@ -14,6 +14,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Aaron Couch
 * Alsia Plybeah
 * Michael Chouinard
+* Kai Siren
 * Sammy Steiner
 
 ## Product and Project Management
