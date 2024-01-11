@@ -1,4 +1,4 @@
-gt
+
 # Create SNS topic for all email and external incident management tools notifications
 
 resource "aws_sns_topic" "this" {
