@@ -13,6 +13,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 
 * Aaron Couch
 * Alsia Plybeah
+* Kai Siren
 * Michael Chouinard
 * Sammy Steiner
 
