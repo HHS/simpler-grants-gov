@@ -1,7 +1,27 @@
-# Development
+# Development <!-- omit in toc -->
 
 > [!NOTE]
 > All of the steps on this page should be run from the root of the [`analytics/`](../../analytics/) sub-directory
+
+<details>
+   <summary>Table of contents</summary>
+
+- [Setting up the tool locally](#setting-up-the-tool-locally)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuring secrets](#configuring-secrets)
+    - [Prerequisites](#prerequisites-1)
+    - [Finding reporting channel ID](#finding-reporting-channel-id)
+    - [Finding slackbot token](#finding-slackbot-token)
+- [Running the tool locally](#running-the-tool-locally)
+  - [Using the `make` commands](#using-the-make-commands)
+  - [Using the CLI tool](#using-the-cli-tool)
+- [Common development tasks](#common-development-tasks)
+  - [Adding a new dataset](#adding-a-new-dataset)
+  - [Adding a new metric](#adding-a-new-metric)
+  - [Adding a new CLI entrypoint](#adding-a-new-cli-entrypoint)
+
+</details>
 
 ## Setting up the tool locally
 
@@ -81,7 +101,30 @@ Additional guidance on working with the CLI tool can be found in the [usage guid
 
 ## Common development tasks
 
+### Adding a new dataset
+
+1. Create a new python file in `src/analytics/datasets/`.
+2. In that file, create a new class that inherits from the `BaseDataset`.
+3. Store the names of key columns as either class or instance attributes.
+4. If you need to combine multiple source files (or other datasets) to produce this dataset, consider creating a class method that can be used to instantiate this dataset from those sources.
+5. Create **at least** one unit test for each method that is implemented with the new class.
+
 ### Adding a new metric
 
+1. Create a new python file in `src/analytics/metrics/`.
+2. In that file, create a new class that inherits from the `BaseMetric`.
+3. Determine which dataset class this metric requires as an input. **Note:** If the metric requires a dataset that doesn't exist, review the steps to [add a dataset](#adding-a-new-dataset).
+4. Implement the following methods on that class.:
+   - `__init__()` - Instantiates the metric class and accepts any inputs needed to calculate the metric (e.g. `sprint` for `SprintBurndown`)
+   - `calculate()` - Calculates the metric and stores the output to a `self.results` attribute. **Tip:** It's often helpful to break the steps involved in calculating the metric int a series of private methods (i.e. methods that begin with an underscore, e.g. `_get_and_validate_sprint_name()`) that can be called from the main `calculate()` method.
+   - `get_stats()` - Calculates and returns key stats about the metric or input dataset. **Note:** Stats are different from metrics in that they represent single values and aren't meant to be visualized in a chart.
+   - `format_slack_message()` - Generate a string that will be included if the results are posted to Slack. This often includes a list of stats as well as the title of the metric.
+5. Create *at least* one unit test for each of these methods to test them against a simplified input dataset to ensure the function has been implemented correctly. For more information review the [docs on testing](../../documentation/analytics/testing.md)
+6. Follow the steps in [adding a new CLI entrypoint](#adding-a-new-cli-entrypoint) to expose this metric via the CLI.
 
-### Adding a new dataset
+### Adding a new CLI entrypoint
+
+1. Add a new function to [`cli.py`](../../analytics/src/analytics/cli.py)
+2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/). For example if you want to calculate sprint burndown with the entrypoint `analytics calculate sprint_burndown`, you'd use the decorator: `metrics_app.command(name="sprint_burndown")`
+3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/).
+4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint.
