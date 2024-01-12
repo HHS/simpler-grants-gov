@@ -7,6 +7,8 @@ locals {
     #
     # You can can confirm the ranges with a tool like:
     # https://www.ipaddressguide.com/cidr
+    #
+    # The `/20` CIDR block was chosen because most of the existing subnets are `/20`.
     "us-east-1a" = "172.31.144.0/20", # /20 = 4096 IPs, last address is 172.31.159.255
     "us-east-1b" = "172.31.160.0/20", # /20 = 4096 IPs, last address is	172.31.175.255
     "us-east-1c" = "172.31.176.0/20", # /20 = 4096 IPs, last address is 172.31.191.255
