@@ -26,7 +26,7 @@ If you're a project maintainer and want to run the reports outside of the daily 
 <img alt="Screenshot triggering a GitHub action manually" src="../../analytics/static/screenshot-trigger-gh-action.png" width=750>
 
 
-## Using the `make` commands
+## Trigger a report from the command line
 
 > [!NOTE]
 > The following sections require you to have the tool running locally. For more information about how to install and run the analytics package, visit our [development guide](development.md).

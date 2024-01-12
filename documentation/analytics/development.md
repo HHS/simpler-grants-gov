@@ -77,13 +77,7 @@ The `analytics` package comes with a built-in CLI that you can use to discover t
 
 ![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
 
-Discover the arguments required for a particular command by appending the `--help` flag to that command:
-
-```bash
-poetry run analytics export gh_issue_data --help
-```
-
-![Screenshot of passing the --help flag to a specific command](../../analytics/static/screenshot-command-help.png)
+Additional guidance on working with the CLI tool can be found in the [usage guide](usage.md#using-the-command-line-interface).
 
 ## Common development tasks
 
