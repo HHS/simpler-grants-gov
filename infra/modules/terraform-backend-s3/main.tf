@@ -22,9 +22,10 @@ resource "aws_kms_key" "tf_backend" {
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {
-  name         = local.tf_locks_table_name
-  hash_key     = "LockID"
-  billing_mode = "PAY_PER_REQUEST"
+  name                        = local.tf_locks_table_name
+  hash_key                    = "LockID"
+  billing_mode                = "PAY_PER_REQUEST"
+  deletion_protection_enabled = true
 
   attribute {
     name = "LockID"
