@@ -18,7 +18,13 @@
     "allowJs": false,
     "checkJs": false,
     // Help speed up type checking in larger applications
-    "incremental": true
+    "incremental": true,
+    // next version 14.0.4 (the latest) has a bundler bug, if GoogleTagManager breaks in the future, remove this path
+    "paths": {
+      "@next/third-parties/google": [
+        "./node_modules/@next/third-parties/dist/google"
+      ]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "__mocks__/styleMock.js"],
   "exclude": ["node_modules"]

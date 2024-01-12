@@ -22,3 +22,9 @@ output "incident_management_service_integration" {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
 }
+
+output "api_auth_token" {
+  value = {
+    api_auth_token_param_name = "/api/${var.environment}/api-auth-token"
+  }
+}
