@@ -33,6 +33,7 @@ resource "aws_subnet" "backfill_private" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip
 resource "aws_eip" "backfill_private" {
+  # checkov:skip=CKV2_AWS_19: These EIPs are attached to NAT gateways
   count  = length(local.backfill_subnet_cidrs)
   domain = "vpc"
   tags = {
