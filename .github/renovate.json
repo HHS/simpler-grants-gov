@@ -2,11 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    "group:allNonMajor"
+    "group:monorepos"
   ],
-  "schedule": ["on the 2nd and 4th day instance on sunday after 9pm"],
+  "schedule": [
+    "on the 2nd and 4th day instance on sunday after 9pm"
+  ],
   "ignoreUnstable": true,
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "branchPrefix": "renovate/",
   "reviewers": [
     "sammysteiner",
@@ -25,6 +29,41 @@
   },
   "packageRules": [
     {
+      "description": "Group all dependencies from the api directory",
+      "matchFileNames": [
+        "api/**"
+      ],
+      "groupName": "Api"
+    },
+    {
+      "description": "Group all dependencies from the frontend directory",
+      "matchFileNames": [
+        "frontend/**"
+      ],
+      "groupName": "Frontend"
+    },
+    {
+      "description": "Group all dependencies from the infra directory",
+      "matchFileNames": [
+        "infra/**"
+      ],
+      "groupName": "Infra"
+    },
+    {
+      "description": "Group all dependencies from the analytics directory",
+      "matchFileNames": [
+        "analytics/**"
+      ],
+      "groupName": "Analytics"
+    },
+    {
+      "description": "Group all dependencies from the .github directory",
+      "matchFileNames": [
+        ".github/**"
+      ],
+      "groupName": "CI/CD"
+    },
+    {
       "description": "Group React packages together",
       "packageNames": [
         "react",
@@ -36,24 +75,32 @@
     },
     {
       "description": "Group Storybook packages together",
-      "matchPackagePatterns": ["storybook"],
+      "matchPackagePatterns": [
+        "storybook"
+      ],
       "groupName": "Storybook"
     },
     {
-        "description": "Group I18next packages together",
-        "matchPackagePatterns": ["i18next"],
-        "groupName": "I18next"
+      "description": "Group I18next packages together",
+      "matchPackagePatterns": [
+        "i18next"
+      ],
+      "groupName": "I18next"
     },
     {
-        "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated.",
-        "enabled": false,
-        "matchPackagePatterns": ["@uswds/uswds"],
-        "groupName": "USWDS core"
+      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated.",
+      "enabled": false,
+      "matchPackagePatterns": [
+        "@uswds/uswds"
+      ],
+      "groupName": "USWDS core"
     },
     {
-        "description": "Leave peer dependencies alone",
-        "depTypeList": ["peerDependencies"],
-        "enabled": false
+      "description": "Leave peer dependencies alone",
+      "depTypeList": [
+        "peerDependencies"
+      ],
+      "enabled": false
     }
   ]
 }
