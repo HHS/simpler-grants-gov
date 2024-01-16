@@ -60,8 +60,6 @@ There is clear documentation and guidelines for the general public to get starte
 
 Provide technical instructions for setting up developer tools and environments. This can encompass version control systems, code review tools, and any collaborative platforms for coding and testing.
 
-
-
 ### Definition of done
 
 - [ ] Onboarding experience ready for the public this includes:
