@@ -104,6 +104,7 @@ resource "aws_vpc_security_group_ingress_rule" "aws_services" {
   cidr_ipv4         = data.aws_vpc.default.cidr_block
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
 resource "aws_vpc_endpoint" "aws_service" {
   for_each = local.aws_service_integrations
 
@@ -115,6 +116,7 @@ resource "aws_vpc_endpoint" "aws_service" {
   private_dns_enabled = true
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
 resource "aws_vpc_endpoint" "gateway" {
   for_each = local.gateway_vpc_endpoints
 
