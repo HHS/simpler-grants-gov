@@ -51,11 +51,11 @@ resource "aws_eip" "backfill_private" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway
 resource "aws_nat_gateway" "backfill_private" {
-  count         = length(local.backfill_subnet_cidrs)
-  allocation_id = aws_eip.backfill_private[count.index].allocation_id
-  subnet_id     = aws_subnet.backfill_private[count.index].id
+  for_each      = local.backfill_subnet_cidrs
+  allocation_id = aws_eip.backfill_private[each.key].allocation_id
+  subnet_id     = aws_subnet.backfill_private[each.key].id
   tags = {
-    Name = "backfill-private-${count.index}"
+    Name = "backfill-private-${each.key}"
   }
 }
 
