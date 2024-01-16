@@ -43,7 +43,7 @@
 - As a **project maintainer**, I want:
   - to be able to provide input on which metrics we publish and how they are presented in the dashboard, so that I can use the dashboard to meaningfully plan and manage delivery on the project.
   - to be able to provide additional details about the metrics included in the dashboard, so that other stakeholders know how to interpret these metrics correctly in the context of the project.
-  - to easily add new charts and metrics to the dashboard, so that we can continue to take a data-driven approach to the project and publicly report on the measures of success defined for each deliverable.
+  - to be able to easily add new charts and metrics to the dashboard, so that we can continue to take a data-driven approach to the project and publicly report on the measures of success defined for each deliverable.
 - As an **internal stakeholder**, I want:
   - the dashboard's key insights to be easy to understand at a glance, so that I don't need to spend a lot of time learning how to interpret the metrics correctly.
   - to be able to access the dashboard from the HHS network, so that I can easily monitor our metrics when I'm in the office.
