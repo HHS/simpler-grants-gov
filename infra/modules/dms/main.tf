@@ -1,9 +1,29 @@
 # Put IAM Roles here
 
-resource "aws_iam_role_policy" "dms_access" {
+resource "aws_iam_policy" "dms_access" {
   name   = "DMS Access"
-  policy = ""
-  role   = ""
+  policy = data.aws_iam_policy_document.dms_access.json
+}
+resource "aws_iam_role" "dms_access" {
+  name               = "dms-access-role"
+  assume_role_policy = data.aws_iam_policy_document.dms-assume-role-policy.json
+}
+data "aws_iam_policy_document" "dms-assume-role-policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      identifiers = ["dms.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+# Attach access policies to role
+resource "aws_iam_role_policy_attachment" "dms_access" {
+  role       = aws_iam_role.dms_access.name
+  policy_arn = aws_iam_policy.dms_access.arn
 }
 
 # Rough draft of IAM policies
@@ -11,8 +31,8 @@ data "aws_iam_policy_document" "dms_access" {
   statement {
     sid       = "AllowDMSAccess"
     effect    = "Allow"
-    actions   = [] # try to narrow this down from dms:*
-    resources = [] # arn for the actual dms service goes here
+    actions   = ["dms:*"] # TODO: try to narrow this down from dms:*
+    resources = [""]      # arn for the actual dms service goes here
   }
 
   statement {
@@ -25,7 +45,7 @@ data "aws_iam_policy_document" "dms_access" {
       "iam:CreateRole",
       "iam:AttachRolePolicy"
     ]
-    resources = [] # DMS arn here
+    resources = [""] # DMS arn here
   }
   statement {
     # Allow DMS to configure the network it needs
@@ -41,14 +61,14 @@ data "aws_iam_policy_document" "dms_access" {
       "ec2:CreateNetworkInterface",
       "ec2:DeleteNetworkInterface"
     ]
-    resources = [] # DMS or EC2 arn?
+    resources = [""] # DMS or EC2 arn?
   }
   statement {
     # View replication metrics
     sid       = "AllowCloudwatchMetrics"
     effect    = "Allow"
     actions   = ["cloudwatch:Get*", "cloudwatch:List*"]
-    resources = []
+    resources = [""]
   }
   statement {
     # View replication logs
@@ -60,6 +80,6 @@ data "aws_iam_policy_document" "dms_access" {
       "logs:ilterLogEvents",
       "logs:GetLogEvents"
     ]
-    resources = [] # DMS arn
+    resources = [""] # DMS arn
   }
 }
