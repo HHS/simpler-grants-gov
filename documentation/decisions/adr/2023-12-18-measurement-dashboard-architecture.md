@@ -73,6 +73,7 @@ This option involves building both a custom analytics API that will serve the da
   - Enables S2S users to access underlying analytics data via API.
   - Allows us to include narrative text that explains the metrics we publish.
   - Enables open source contributors to host local versions of our dashboard or easily create their own dashboards.
+  - Data endpoints are simple and easy to understand.
 - **Cons**
   - Building or modifying dashboards is quite technical, not something a business analyst could do on their own.
   - Publishing new charts or dashboards requires making changes both to the API and to the dashboard UI separately.
