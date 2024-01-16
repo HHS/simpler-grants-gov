@@ -116,7 +116,9 @@ The following work will *not* be completed as part of this milestone:
 
 Yes the following tools will be deployed:
 
-- Zoom for video conferencing. Only internal teams will have a Zoom license, but the public will join Zoom   
+- Zoom for video conferencing. Only internal teams will have a Zoom license, but the public will join Zoom
+- **Google group:** We'll use this for email-based communication with our open source community.
+- **Public wiki:** We'll be using this to share public information about the project, such as onboarding guides, presentations, and meeting notes for public meetings.
 
 
 ### Services being integrated in PROD for the first time
