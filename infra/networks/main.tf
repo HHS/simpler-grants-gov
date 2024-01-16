@@ -93,12 +93,11 @@ resource "aws_security_group" "aws_services" {
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule
-#
-# purpose: Allow all traffic from the VPC's CIDR block to the VPC endpoint security group
 resource "aws_vpc_security_group_ingress_rule" "aws_services" {
   count = length(local.aws_service_integrations) > 0 ? 1 : 0
 
   security_group_id = aws_security_group.aws_services[0].id
+  description       = "Allow all traffic from the VPC's CIDR block to the VPC endpoint security group"
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
