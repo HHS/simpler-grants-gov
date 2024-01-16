@@ -42,10 +42,10 @@ resource "aws_subnet" "backfill_private" {
 #          via means of a NAT gateway.
 resource "aws_eip" "backfill_private" {
   # checkov:skip=CKV2_AWS_19: These EIPs are attached to NAT gateways
-  count  = length(local.backfill_subnet_cidrs)
+  for_each = local.backfill_subnet_cidrs
   domain = "vpc"
   tags = {
-    Name = "backfill-private-${count.index}"
+    Name = "backfill-private-${each.key}"
   }
 }
 
