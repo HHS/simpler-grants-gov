@@ -7,7 +7,7 @@ from slack_sdk import WebClient
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.etl import github, slack
+from analytics.integrations import github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.percent_complete import DeliverablePercentComplete

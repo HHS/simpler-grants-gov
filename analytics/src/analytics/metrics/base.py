@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 from plotly.graph_objects import Figure
 
-from analytics.etl.slack import FileMapping, SlackBot
+from analytics.integrations.slack import FileMapping, SlackBot
 
 
 class Unit(Enum):
