@@ -36,6 +36,7 @@ This effort allows us to...
   -  have assurance that the open source channels and methods are configured in a way that eliminates security risks.
 - As a **member of an HHS contractor team**, I want to:
   -  have streamlined tools and processes for managing contributions, reviewing code, and ensuring code quality, so I can efficiently maintain and enhance the project while upholding its standards.
+  - to have a standardized process for onboarding new open source contributors, so that members of the public can be added to our communication channels smoothly and efficiently.
   - to have the ability to monitor the health and inclusivity of the project by tracking metrics like community engagement, issue resolution times, and the diversity of contributors, so I can make informed decisions for community growth and sustainability.
 - As a **member of the public**, I want to:
   -  have easy access to clear documentation and guidelines for joining, contributing, and engaging with the open source community so I can quickly become a productive contributor and understand the community's values and expectations.
