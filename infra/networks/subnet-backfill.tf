@@ -65,10 +65,10 @@ resource "aws_nat_gateway" "backfill_private" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table
 resource "aws_route_table" "backfill_private" {
-  count  = length(local.backfill_subnet_cidrs)
+  for_each = local.backfill_subnet_cidrs
   vpc_id = data.aws_vpc.default.id
   tags = {
-    Name = "backfill-private-${count.index}"
+    Name = "backfill-private-${each.key}"
   }
 }
 
@@ -76,17 +76,17 @@ resource "aws_route_table" "backfill_private" {
 #
 # purpose: Associate the private subnets with the private route table.
 resource "aws_route_table_association" "backfill_private" {
-  count          = length(local.backfill_subnet_cidrs)
-  subnet_id      = aws_subnet.backfill_private[count.index].id
-  route_table_id = aws_route_table.backfill_private[count.index].id
+  for_each       = local.backfill_subnet_cidrs
+  subnet_id      = aws_subnet.backfill_private[each.key].id
+  route_table_id = aws_route_table.backfill_private[each.key].id
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route
 #
 # purpose: Route external traffic through the NAT gateway.
 resource "aws_route" "backfill_private" {
-  count                  = length(local.backfill_subnet_cidrs)
-  route_table_id         = aws_route_table.backfill_private[count.index].id
+  for_each               = local.backfill_subnet_cidrs
+  route_table_id         = aws_route_table.backfill_private[each.key].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.backfill_private[count.index].id
+  nat_gateway_id         = aws_nat_gateway.backfill_private[each.key].id
 }
