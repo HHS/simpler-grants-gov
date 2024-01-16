@@ -28,7 +28,7 @@ This effort allows us to...
 - Set up the foundational set of communication channels for continuous user input, feedback, and engagement for an open source project
 - Ensure that public code contributions meet code quality and security standards
 - Build stakeholder trust in our product roadmap and our approach to development
-- Establish an ongoing Participant Advisory Council to guide future development
+- Streamline and standardize the onboarding process for new open source contributors
 
 ### User stories
 
