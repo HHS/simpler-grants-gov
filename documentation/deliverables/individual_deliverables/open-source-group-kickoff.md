@@ -1,4 +1,4 @@
-# Open Source Group Kickoff
+# Open Source Onboarding Process
 
 | Field           | Value                                                        |
 | --------------- | ------------------------------------------------------------ |
