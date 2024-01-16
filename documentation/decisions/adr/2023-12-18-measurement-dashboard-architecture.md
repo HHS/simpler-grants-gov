@@ -111,10 +111,11 @@ This option involves selecting and hosting an open source dashboard solution, su
   - Faster and easier to implement new charts and dashboards than options 1 or 2.
   - Supports adhoc reports and dashboards in the same tool.
   - Allows open source contributors to host local versions of our dashboards (depending on the tool we choose).
+  - No per user cost to grant edit access to self-hosted version of dashboard solution.
 - **Cons**
   - Harder to control the look and feel of the resulting dashboards.
   - Harder to combine multiple dashboards into a single "application".
-  - Does not easily support exposing analytics data to S2S users via API.
+  - Some solutions offer API access to underlying data, but endpoints are harder to understand and may not be publicly available. For example, here's the [Redash API docs][redash-api] and the [Metabase API docs][metabase-api].
   - Still somewhat harder to host and maintain than a fully SaaS dashboard solution.
 
 ### SaaS dashboard solution
@@ -132,7 +133,7 @@ This solution involves adopting a Software-as-a-Service dashboard solution, such
 - **Cons**
   - Harder to control the look and feel of the resulting dashboards (depending on the tool).
   - Harder to version control the structure and content of dashboards (depending on the tool).
-  - Does not easily support exposing analytics data to S2S users via API.
+  - Some solutions offer API access to underlying data, but endpoints are harder to understand and may not be publicly available. For example, here's the [Tableau API docs][tableau-api] and the [Looker API docs][looker-api].
   - Does not allow open source contributors to host local versions of our dashboards.
   - Higher direct costs than all of the other options.
 
@@ -151,9 +152,13 @@ This solution involves adopting a Software-as-a-Service dashboard solution, such
 [plotly-dash]: https://dash.plotly.com/
 [r-shiny]: https://shiny.posit.co/
 [metabase]: https://www.metabase.com/
+[metabase-api]: https://www.metabase.com/docs/latest/api-documentation#about-the-metabase-api
 [redash]: https://redash.io/
+[redash-api]: https://redash.io/help/user-guide/integrations-and-api/api
 [tableau]: https://www.tableau.com/trial/tableau-software
+[tableau-api]: https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_ref.htm
 [power-bi]: https://www.microsoft.com/en-us/power-platform/products/power-bi
 [looker]: https://cloud.google.com/looker
+[looker-api]: https://developers.looker.com/api/explorer/4.0/
 [quicksight]: https://aws.amazon.com/quicksight/
 [domo]: https://www.domo.com/business-intelligence
