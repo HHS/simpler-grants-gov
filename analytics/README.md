@@ -14,10 +14,10 @@ root
 │   └── src
 │       └── analytics
 │           └── datasets      Create re-usable data interfaces for calculating metrics
-│           └── etl           Integrate with external systems used to export data or metrics
+│           └── integrations  Integrate with external systems used to export data or metrics
 │           └── metrics       Calculate the project's operational metrics
 │   └── tests
-│       └── integrations      Integration tests, mostly for src/analytics/etl
+│       └── integrations      Integration tests, mostly for src/analytics/integrations
 │       └── datasets          Unit tests for src/analytics/datasets
 │       └── metrics           Unit tests for src/analytics/metrics
 |
