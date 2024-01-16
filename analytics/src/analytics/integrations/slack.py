@@ -1,4 +1,4 @@
-"""A series of ETL functions that allows us to read and write data to slack."""
+"""Integrate with Slack to post messages and get channel information."""
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass

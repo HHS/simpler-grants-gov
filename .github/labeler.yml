@@ -1,0 +1,28 @@
+#
+# Pull request label rules.
+#
+# Runs in action pull-request-labeler.yml.
+#
+# See https://github.com/marketplace/actions/labeler
+#
+
+# Labels for programming languages.
+javascript: ["**/*.js", "**/*.jsx"]
+typescript: ["**/*.ts", "**/*.tsx"]
+python: "**/*.py"
+terraform: "**/*.tf"
+shell: "**/*.sh"
+
+
+# Labels for components or parts of the code.
+api: api/**/*
+frontend: frontend/**/*
+analytics: analytics/**/*
+ci/cd: [".github/workflows/**/*", "bin/**/*", "**/*/Makefile"]
+documentation: ["documentation/**/*", "**/*.md"]
+infra: infra/**/*
+
+
+database: api/src/db/**/*
+openapi: api/openapi.generated.yaml
+storybook: ["frontend/stories/**/*", "frontend/.storybook/**/*"]

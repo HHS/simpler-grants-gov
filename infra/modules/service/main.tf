@@ -19,6 +19,7 @@ locals {
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
+    { name : "API_AUTH_TOKEN", value : var.api_auth_token },
   ], local.hostname, local.sendy_api_key, local.sendy_api_url, local.sendy_list_id)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },

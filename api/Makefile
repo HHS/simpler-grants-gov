@@ -85,7 +85,7 @@ setup-local:
 	poetry config virtualenvs.in-project true
 
 	# Install dependencies
-	poetry install --no-root
+	poetry install --no-root --all-extras --with dev
 
 ##################################################
 # API Build & Run
