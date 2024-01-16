@@ -2,12 +2,12 @@
 
 Burndown shows the total number of open issues or points per day over a given date range. Burndown charts are often used to answer the following questions:
 
-- *Have we planned work correctly?* For example, if a burndown chart shows several issues or points open by the end of a sprint, it could be a signal to re-examine how we're planning our sprints.
+- *Have we planned work correctly?* For example, if a burndown chart shows several issues or points open by the end of a sprint, it could signal the need to re-examine how we're planning our sprint capacity.
 - *Have we broken work into manageable chunks?* For example, if we see a long plateau where the number of open points remain steady, then suddenly drop, it could be a signal that the amount of work scoped into one ticket is too large.
 - *Are we encountering blockers?* Alternatively, a long plateau could also be a signal of external factors that are blocking forward progress.
 
 > [!NOTE]
-> While burndown can provide helpful signals in the cases above, these signals tell only part of the story. Burndown charts should prompt questions, not represent specific conclusions.
+> While burndown can provide helpful signals in the cases above, these signals tell only part of the story. Burndown charts should prompt questions, not represent definitive conclusions.
 
 ## Methodology
 
@@ -126,7 +126,7 @@ For burndown by points:
 | 2023-11-04 | 0      | 2      | -2    | 4          |
 | 2023-11-05 | 0      | 3      | -3    | 1          |
 
-For burndown by points:
+For burndown by issues:
 
 | date       | opened | closed | delta | total_open |
 | ---------- | ------ | ------ | ----- | ---------- |
