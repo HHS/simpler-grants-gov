@@ -39,7 +39,10 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 - Analytics API + user interface
 - Custom dashboard application (e.g. [Dash][plotly-dash] or [R Shiny][r-shiny])
 - Open source dashboard solution (e.g. [Metabase][metabase] or [Redash][redash])
-- SaaS dashboard solution (e.g. [PowerBI][power-bi] or [Tableau][tableau])
+- SaaS dashboard solution (e.g. [PowerBI][power-bi], [Tableau][tableau], [Looker][looker], [Amazon Quicksight][quicksight], or [Domo][domo])
+
+> [!NOTE]
+> This ADR does not aim to recommend a *specific* platform or tool, but rather a general architectural approach to building and publishing dashboards. Once we select an approach from the list above (e.g. open source dashboard solution), we'll need to create a separate ADR that evaluates the options available within that approach (e.g. Metabase vs Redash).
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -140,6 +143,9 @@ This solution involves adopting a Software-as-a-Service dashboard solution, such
 - [Redash][redash]
 - [Tableau][tableau]
 - [PowerBI][power-bi]
+- [Looker][looker]
+- [Amazon Quicksight][quicksight]
+- [Domo][domo]
 
 [plotly-dash]: https://dash.plotly.com/
 [r-shiny]: https://shiny.posit.co/
@@ -147,3 +153,6 @@ This solution involves adopting a Software-as-a-Service dashboard solution, such
 [redash]: https://redash.io/
 [tableau]: https://www.tableau.com/trial/tableau-software
 [power-bi]: https://www.microsoft.com/en-us/power-platform/products/power-bi
+[looker]: https://cloud.google.com/looker
+[quicksight]: https://aws.amazon.com/quicksight/
+[domo]: https://www.domo.com/business-intelligence
