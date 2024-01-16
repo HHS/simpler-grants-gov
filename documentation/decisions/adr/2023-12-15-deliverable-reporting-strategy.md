@@ -79,7 +79,7 @@ We've decided to use a "deliverable" column to assign issues to a parent 30k del
   - Updating a field on a project can be done from the issue page itself, but the issue first needs to be added to the project before the field is updated. This requires an extra step compared to assigning a label or milestone, making it more prone to be skipped. 
   - We'll have to make sure the list of options in the deliverable column is consistent across GitHub projects in order to join issues from different projects correctly in our custom reporting.
   - We'll have to update the current logic in our custom reporting so that issues are joined to their parent deliverable using the value of this column.
-- When creating a new Issue, it's not sufficient to add that Issue to a Milestone; it must also be added to the 30k deliverable for that Milestone for reporting purposes. We will need to monitor for Issues that do not have a 30k and triage them regularly. 
+  - When creating a new Issue, it's not sufficient to add that Issue to a Milestone; it must also be added to the 30k deliverable for that Milestone for reporting purposes. We will need to monitor for Issues that do not have a 30k and triage them regularly. 
 
 > [!NOTE]
 > If the team finds a consistent need to filter the list of issues by deliverable within the repository, we may revisit this decision and choose to use ***both*** a label and a deliverable column to assign an issue to a 30k deliverable. We've decided **not** to use both options for the time being to avoid having multiple (potentially conflicting) ways of assigning an issue to a given deliverable.
