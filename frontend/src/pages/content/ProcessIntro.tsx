@@ -1,4 +1,4 @@
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import { Grid } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";
@@ -40,7 +40,11 @@ const ProcessIntro = () => {
                   <div className="border radius-md border-base-lighter padding-x-205">
                     <h3 className="tablet-lg:font-serif-lg">{box.title}</h3>
                     <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-                      {box.content}
+                      <Trans
+                        t={t}
+                        i18nKey={box.content}
+                        components={{ italics: <em /> }}
+                      />
                     </p>
                   </div>
                 </Grid>

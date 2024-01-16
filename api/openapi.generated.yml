@@ -1,11 +1,24 @@
 info:
-  title: Simpler Grants API
-  description: Back end API for simpler.grants.gov
+  description: '
+
+    Back end API for simpler.grants.gov.
+
+
+    This API is an ALPHA VERSION! Its current form is primarily for testing and feedback.
+    Features are still under heavy development, and subject to change. Not for production
+    use.
+
+
+    See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+    for further details.
+
+    '
   contact:
     name: Simpler Grants.gov
     url: https://simpler.grants.gov/
     email: simplergrantsgov@hhs.gov
-  version: 0.1.0
+  title: Simpler Grants API
+  version: v0
 tags:
 - name: Health
 - name: Opportunity
@@ -30,14 +43,14 @@ paths:
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
-                    type:
+                    type: &id001
                     - object
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      type:
+                      type: &id002
                       - object
                       allOf:
                       - $ref: '#/components/schemas/ValidationIssue'
@@ -46,12 +59,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type: *id001
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                  warnings:
+                    type: array
+                    items:
+                      type: *id002
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Service Unavailable
       tags:
       - Health
       summary: Health
-  /v1/opportunities/search:
+  /v0/opportunities/search:
     post:
       parameters:
       - in: header
@@ -79,14 +112,14 @@ paths:
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
-                    type:
+                    type: &id003
                     - object
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      type:
+                      type: &id004
                       - object
                       allOf:
                       - $ref: '#/components/schemas/ValidationIssue'
@@ -95,17 +128,73 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type: *id003
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                  warnings:
+                    type: array
+                    items:
+                      type: *id004
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Validation error
         '401':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type: *id003
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                  warnings:
+                    type: array
+                    items:
+                      type: *id004
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Authentication error
       tags:
       - Opportunity
       summary: Opportunity Search
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
       requestBody:
         content:
           application/json:
@@ -113,7 +202,7 @@ paths:
               $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
-  /v1/opportunities/{opportunity_id}:
+  /v0/opportunities/{opportunity_id}:
     get:
       parameters:
       - in: path
@@ -138,14 +227,14 @@ paths:
                     description: The HTTP status code
                   pagination_info:
                     description: The pagination information for paginated endpoints
-                    type:
+                    type: &id005
                     - object
                     allOf:
                     - $ref: '#/components/schemas/PaginationInfo'
                   warnings:
                     type: array
                     items:
-                      type:
+                      type: &id006
                       - object
                       allOf:
                       - $ref: '#/components/schemas/ValidationIssue'
@@ -154,17 +243,73 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type: *id005
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                  warnings:
+                    type: array
+                    items:
+                      type: *id006
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Authentication error
         '404':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message to return
+                  data:
+                    $ref: '#/components/schemas/ErrorResponse'
+                  status_code:
+                    type: integer
+                    description: The HTTP status code
+                  pagination_info:
+                    description: The pagination information for paginated endpoints
+                    type: *id005
+                    allOf:
+                    - $ref: '#/components/schemas/PaginationInfo'
+                  warnings:
+                    type: array
+                    items:
+                      type: *id006
+                      allOf:
+                      - $ref: '#/components/schemas/ValidationIssue'
           description: Not found
       tags:
       - Opportunity
       summary: Opportunity Get
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
       security:
       - ApiKeyAuth: []
 openapi: 3.1.0

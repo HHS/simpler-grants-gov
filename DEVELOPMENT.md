@@ -86,7 +86,7 @@ This project takes a very collaborative and [agile](https://agilemanifesto.org/)
 
 ## Releases
 
-Releases follow the [CalVer](https://calver.org/) versioning using a `YYY.MM.DD` format. Optionally include a `-N` if more than one releases are published in the same day.
+Releases follow the [CalVer](https://calver.org/) versioning using a `YYYY.MM.DD-N` format. Start with `-1` for a release, incrementing if there is another release on the same day.
 
 Releases should be [created in Github](https://github.com/HHS/simpler-grants-gov/releases) and include a log of changes.
 

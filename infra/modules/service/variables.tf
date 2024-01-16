@@ -47,6 +47,24 @@ variable "hostname" {
   default     = null
 }
 
+variable "sendy_api_key" {
+  description = "Sendy API key to pass with requests for sendy subscriber endpoints."
+  type        = string
+  default     = null
+}
+
+variable "sendy_api_url" {
+  description = "Sendy API base url for requests to manage subscribers."
+  type        = string
+  default     = null
+}
+
+variable "sendy_list_id" {
+  description = "Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list."
+  type        = string
+  default     = null
+}
+
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
@@ -96,4 +114,10 @@ variable "min_capacity" {
   description = "Minimum number of tasks for autoscaling"
   type        = number
   default     = 2
+}
+
+variable "api_auth_token" {
+  type        = string
+  default     = null
+  description = "Auth token for connecting to the API"
 }
