@@ -1,10 +1,10 @@
-"""Test the code in analytics.etl.slack."""
+"""Test the code in analytics.integrations.slack."""
 from pathlib import Path  # noqa: I001
 
 import pytest
 from slack_sdk import WebClient
 
-from analytics.etl.slack import FileMapping, SlackBot
+from analytics.integrations.slack import FileMapping, SlackBot
 from config import settings
 
 client = WebClient(token=settings.slack_bot_token)

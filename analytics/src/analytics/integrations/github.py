@@ -1,4 +1,4 @@
-"""A series of ETL functions to export data from GitHub."""
+"""Integrate with GitHub to read and write data from projects and repos."""
 import shlex
 import subprocess
 from pathlib import Path
