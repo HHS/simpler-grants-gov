@@ -73,6 +73,7 @@ This option involves building both a custom analytics API that will serve the da
   - Enables S2S users to access underlying analytics data via API.
   - Allows us to include narrative text that explains the metrics we publish.
   - Enables open source contributors to host local versions of our dashboard or easily create their own dashboards.
+  - Aligns with the open source values and approach of the project.
   - Data endpoints are simple and easy to understand.
 - **Cons**
   - Building or modifying dashboards is quite technical, not something a business analyst could do on their own.
@@ -93,6 +94,7 @@ This option involves building a custom dashboard app using an existing framework
   - Faster to implement new charts and dashboards than an analytics API and separate frontend.
   - Enables us to combine multiple dashboards into a single application.
   - Allows open source contributors to host local versions of our dashboards.
+  - Aligns with the open source values and approach of the project.
 - **Cons**
   - Building or modifying dashboards is still quite technical, not something a business analyst could do on their own.
   - Harder to implement new charts or dashboards than SaaS or open source dashboard solution.
@@ -111,6 +113,7 @@ This option involves selecting and hosting an open source dashboard solution, su
   - Faster and easier to implement new charts and dashboards than options 1 or 2.
   - Supports adhoc reports and dashboards in the same tool.
   - Allows open source contributors to host local versions of our dashboards (depending on the tool we choose).
+  - Aligns with the open source values and approach of the project.
   - No per user cost to grant edit access to self-hosted version of dashboard solution.
 - **Cons**
   - Harder to control the look and feel of the resulting dashboards.
