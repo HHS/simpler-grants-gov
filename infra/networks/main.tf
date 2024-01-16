@@ -17,9 +17,17 @@ locals {
   # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
   #
   # The database module requires VPC access from private networks to SSM, KMS, and RDS
-  aws_service_integrations = toset(
-    module.app_config.has_database ? ["ssm", "kms"] : []
+  aws_service_integrations = setunion(
+    # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
+    ["ecr.api", "ecr.dkr", "s3", "logs"],
+
+    # AWS services used by the database's role manager
+    var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
   )
+
+  # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints
+  interface_vpc_endpoints = toset([for aws_service in local.aws_service_integrations : aws_service if !contains(["s3", "dynamodb"], aws_service)])
+  gateway_vpc_endpoints   = toset([for aws_service in local.aws_service_integrations : aws_service if contains(["s3", "dynamodb"], aws_service)])
 }
 
 terraform {
@@ -92,6 +100,15 @@ resource "aws_vpc_endpoint" "aws_service" {
   security_group_ids  = [aws_security_group.aws_services[0].id]
   subnet_ids          = data.aws_subnets.default.ids
   private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "gateway" {
+  for_each = local.gateway_vpc_endpoints
+
+  vpc_id            = data.aws_vpc.default.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [for table in aws_route_table.backfill_private : table.id]
 }
 
 # VPC Configuration for DMS

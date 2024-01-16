@@ -49,9 +49,7 @@ resource "aws_ecs_service" "app" {
   }
 
   network_configuration {
-    # TODO(https://github.com/navapbc/template-infra/issues/152) set assign_public_ip = false after using private subnets
-    # checkov:skip=CKV_AWS_333:Switch to using private subnets
-    assign_public_ip = true
+    assign_public_ip = false
     subnets          = var.subnet_ids
     security_groups  = [aws_security_group.app.id]
   }

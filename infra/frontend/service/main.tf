@@ -1,13 +1,15 @@
 # TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
 data "aws_vpc" "default" {
   default = true
 }
 
 # TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "default" {
   filter {
-    name   = "default-for-az"
-    values = [true]
+    name   = "tag:subnet_type"
+    values = ["private"]
   }
 }
 
