@@ -98,7 +98,7 @@ resource "aws_vpc_endpoint" "aws_service" {
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.aws_services[0].id]
-  subnet_ids          = data.aws_subnets.default.ids
+  subnet_ids          = [for subnet in aws_subnet.backfill_private : subnet.id]
   private_dns_enabled = true
 }
 
