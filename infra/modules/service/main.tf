@@ -28,7 +28,7 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
-  environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
+  environment_variables = concat(local.base_environment_variables, local.db_environment_variables, var.extra_environment_variables)
 }
 
 #-------------------
@@ -50,7 +50,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     assign_public_ip = false
-    subnets          = var.subnet_ids
+    subnets          = var.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
   }
 

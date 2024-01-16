@@ -4,15 +4,21 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
-data "aws_subnets" "default" {
+data "aws_subnets" "private" {
   filter {
     name   = "tag:subnet_type"
     values = ["private"]
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "public" {
+  filter {
+    name   = "tag:subnet_type"
+    values = ["public"]
+  }
+}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
@@ -113,7 +119,8 @@ module "service" {
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  public_subnet_ids     = data.aws_subnets.public.ids
+  private_subnet_ids    = data.aws_subnets.private.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
   cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
   hostname              = module.app_config.hostname
