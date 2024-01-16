@@ -88,7 +88,8 @@ on this milestone?
 Are there any notable capabilities / milestones we do NOT expect to be in place at the
 beginning of work on this milestone?
 
-
+- **Participant advisory council (PAC):** We will not have a participant advisory council in place when work begins on this deliverable. Instead, this deliverable will be required to onboard members of the PAC once we begin work on setting it up.
+- **Site content translations:** We will not yet have a process in place to translate the content of our static site or repository documents. That will be addressed in a future 30k ft deliverable.
 
 ### Open questions
 <!-- Optional -->
