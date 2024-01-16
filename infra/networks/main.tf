@@ -83,12 +83,26 @@ data "aws_subnets" "default" {
 # See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
 # See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 resource "aws_security_group" "aws_services" {
   count = length(local.aws_service_integrations) > 0 ? 1 : 0
 
   name_prefix = module.project_config.aws_services_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPCs private subnets"
   vpc_id      = data.aws_vpc.default.id
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule
+#
+# purpose: Allow all traffic from the VPC's CIDR block to the VPC endpoint security group
+resource "aws_vpc_security_group_ingress_rule" "aws_services" {
+  count = length(local.aws_service_integrations) > 0 ? 1 : 0
+
+  security_group_id = aws_security_group.aws_services[0].id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = data.aws_vpc.default.cidr_block
 }
 
 resource "aws_vpc_endpoint" "aws_service" {
