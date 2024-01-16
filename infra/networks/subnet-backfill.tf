@@ -21,13 +21,13 @@ locals {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet
 resource "aws_subnet" "backfill_private" {
-  count                   = length(local.backfill_subnet_cidrs)
+  for_each                = local.backfill_subnet_cidrs
   vpc_id                  = data.aws_vpc.default.id
-  availability_zone       = keys(local.backfill_subnet_cidrs)[count.index]
-  cidr_block              = values(local.backfill_subnet_cidrs)[count.index]
+  availability_zone       = each.key
+  cidr_block              = each.value
   map_public_ip_on_launch = false
   tags = {
-    Name        = "backfill-private-${count.index}"
+    Name        = "backfill-private-${each.key}"
     subnet_type = "private"
   }
 }
