@@ -11,11 +11,11 @@ The analytics package is written in Python, analyzes and visualizes data using p
 
 ## Integrations
 
-In order to export data for analysis and then share the results of that analysis, the analytics package integrates with multiple third-party tools. These integrations are managed in the `src/analytics/etl` sub-directory, with each integration managed by its own module.
+In order to export data for analysis and then share the results of that analysis, the analytics package integrates with multiple third-party tools. These integrations are managed in the `src/analytics/integrations` sub-directory, with each integration managed by its own module.
 
 ### GitHub
 
-- [GitHub module](../../analytics/src/analytics/etl/github.py)
+- [GitHub module](../../analytics/src/analytics/integrations/github.py)
 - [GitHub CLI][github-cli]
 
 Currently, we use a sub-process to invoke the [GitHub CLI][github-cli] to export data from GitHub. The reason we use the CLI instead of [PyGitHub][pygithub] or the GitHub GraphQL api is because the CLI has a dedicated set of [commands for GitHub projects][github-project-commands].
@@ -24,7 +24,7 @@ We *may* reopen that decision if GitHub adds a project-specific endpoint to thei
 
 ### Slack
 
-- [Slack module](../../analytics/src/analytics/etl/slack.py)
+- [Slack module](../../analytics/src/analytics/integrations/slack.py)
 - [Slack python SDK]
 
 We use [Slack's python SDK][slack-sdk] to post our the results of our analysis to Slack.
