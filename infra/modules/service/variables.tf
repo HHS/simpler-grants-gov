@@ -121,3 +121,8 @@ variable "api_auth_token" {
   default     = null
   description = "Auth token for connecting to the API"
 }
+
+variable "is_temporary" {
+  description = "Boolean value to determine if this resource should disable deletion protection. Needed for automated test cleanup"
+  type        = bool
+}
