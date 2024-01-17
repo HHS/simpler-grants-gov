@@ -1,33 +1,32 @@
-# TODO: This file is is a temporary implementation of the network layer
-# that currently just adds resources to the default VPC
-# The full network implementation is part of https://github.com/navapbc/template-infra/issues/152
-
-data "aws_region" "current" {}
-
 locals {
   tags = merge(module.project_config.default_tags, {
-    description = "VPC resources"
+    network_name = var.network_name
+    description  = "VPC resources"
   })
   region = module.project_config.default_region
 
-  # List of AWS services used by this VPC
-  # This list is used to create VPC endpoints so that the AWS services can
-  # be accessed without network traffic ever leaving the VPC's private network
-  # For a list of AWS services that integrate with AWS PrivateLink
-  # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
-  #
-  # The database module requires VPC access from private networks to SSM, KMS, and RDS
-  aws_service_integrations = setunion(
-    # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
-    ["ecr.api", "ecr.dkr", "s3", "logs"],
+  network_config = module.project_config.network_configs[var.network_name]
 
-    # AWS services used by the database's role manager
-    var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
-  )
+  # List of configuration for all applications, even ones that are not in the current network
+  # If project has multiple applications, add other app configs to this list
+  app_configs = [module.app_config]
 
-  # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints
-  interface_vpc_endpoints = toset([for aws_service in local.aws_service_integrations : aws_service if !contains(["s3", "dynamodb"], aws_service)])
-  gateway_vpc_endpoints   = toset([for aws_service in local.aws_service_integrations : aws_service if contains(["s3", "dynamodb"], aws_service)])
+  # List of configuration for applications that are in the current network
+  # An application is in the current network if at least one of its environments
+  # is mapped to the network
+  apps_in_network = [
+    for app in local.app_configs :
+    app
+    if anytrue([
+      for environment_config in app.environment_configs : true if environment_config.network_name == var.network_name
+    ])
+  ]
+
+  # Whether any of the applications in the network have a database
+  has_database = anytrue([for app in local.apps_in_network : app.has_database])
+
+  # Whether any of the applications in the network have dependencies on an external non-AWS service
+  has_external_non_aws_service = anytrue([for app in local.apps_in_network : app.has_external_non_aws_service])
 }
 
 terraform {
@@ -60,97 +59,15 @@ module "app_config" {
   source = "../api/app-config"
 }
 
-data "aws_vpc" "default" {
-  default = true
+module "network" {
+  source                                  = "../modules/network"
+  name                                    = var.network_name
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
+  database_subnet_group_name              = local.network_config.database_subnet_group_name
+  has_database                            = var.has_database
+  has_external_non_aws_service            = local.has_external_non_aws_service
 }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
-  }
-}
-
-# VPC Endpoints for accessing AWS Services
-# ----------------------------------------
-#
-# Since the role manager Lambda function is in the VPC (which is needed to be
-# able to access the database) we need to allow the Lambda function to access
-# AWS Systems Manager Parameter Store (to fetch the database password) and
-# KMS (to decrypt SecureString parameters from Parameter Store). We can do
-# this by either allowing internet access to the Lambda, or by using a VPC
-# endpoint. The latter is more secure.
-# See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
-# See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
-resource "aws_security_group" "aws_services" {
-  count = length(local.aws_service_integrations) > 0 ? 1 : 0
-
-  name_prefix = module.project_config.aws_services_security_group_name_prefix
-  description = "VPC endpoints to access AWS services from the VPCs private subnets"
-  vpc_id      = data.aws_vpc.default.id
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule
-resource "aws_vpc_security_group_ingress_rule" "aws_services" {
-  count = length(local.aws_service_integrations) > 0 ? 1 : 0
-
-  security_group_id = aws_security_group.aws_services[0].id
-  description       = "Allow all traffic from the VPCs CIDR block to the VPC endpoint security group"
-  from_port         = 443
-  to_port           = 443
-  ip_protocol       = "tcp"
-  cidr_ipv4         = data.aws_vpc.default.cidr_block
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
-resource "aws_vpc_endpoint" "aws_service" {
-  for_each = local.aws_service_integrations
-
-  vpc_id              = data.aws_vpc.default.id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.aws_services[0].id]
-  subnet_ids          = [for subnet in aws_subnet.backfill_private : subnet.id]
-  private_dns_enabled = true
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
-resource "aws_vpc_endpoint" "gateway" {
-  for_each = local.gateway_vpc_endpoints
-
-  vpc_id            = data.aws_vpc.default.id
-  service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = [for table in aws_route_table.backfill_private : table.id]
-}
-
-# VPC Configuration for DMS
-# ----------------------------------------
-
-data "aws_ssm_parameter" "dms_peer_owner_id" {
-  name = "/network/dms/peer-owner-id"
-}
-
-data "aws_ssm_parameter" "dms_peer_vpc_id" {
-  name = "/network/dms/peer-vpc-id"
-}
-
-resource "aws_vpc_peering_connection" "dms" {
-  peer_owner_id = data.aws_ssm_parameter.dms_peer_owner_id.value
-  peer_vpc_id   = data.aws_ssm_parameter.dms_peer_vpc_id.value
-  vpc_id        = data.aws_vpc.default.id
-  peer_region   = "us-east-2"
-
-  tags = {
-    Name = "DMS VPC Peering"
-  }
-}
-
-resource "aws_route" "dms" {
-  route_table_id = data.aws_vpc.default.main_route_table_id
-  # MicroHealth VPC CIDR block
-  destination_cidr_block    = "10.220.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
+module "dms" {
+  source = "../modules/dms"
 }
