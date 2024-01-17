@@ -140,7 +140,7 @@ Yes, we expect there to be some integrations between the following tools in prod
 <!-- Required -->
 
 *Are there any fields being shared publicly that have never been shared in PROD before?*
-
+- No, this 30k deliverable does not involve sharing any new production data.
 
 ### Security considerations
 <!-- Required -->
