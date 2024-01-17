@@ -102,7 +102,7 @@ data "aws_ssm_parameter" "api_auth_token" {
 module "service" {
   source                = "../../modules/service"
   service_name          = local.service_name
-  isTemporary           = local.is_temporary
+  is_temporary           = local.is_temporary
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.default.id
