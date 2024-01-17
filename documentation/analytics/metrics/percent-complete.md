@@ -8,7 +8,14 @@ Percent complete shows the percentage of all issues or points assigned to a give
 
 ## Methodology
 
-### Sample input
+### Summary
+
+Divide the number of closed issues (or points) by the total number of issues (or points) per deliverable.
+
+### Step-by-step example: Percent complete by deliverable
+
+<details>
+<summary>Sample input</summary>
 
 | deliverable | issue_title | status | story_points |
 | ----------- | ----------- | ------ | ------------ |
@@ -21,7 +28,10 @@ Percent complete shows the percentage of all issues or points assigned to a give
 | API launch  | Issue 7     | open   | 2            |
 | API launch  | Issue 8     | closed | 1            |
 
-### Step 1: Count the total number of issues/points deliverable
+</details>
+
+<details>
+<summary>Step 1: Count the total number of issues/points deliverable</summary>
 
 By points:
 
@@ -37,7 +47,10 @@ By issues:
 | Site launch | 4     |
 | API launch  | 4     |
 
-### Step 2: Count the number of *closed* issues/points deliverable
+</details>
+
+<details>
+<summary>Step 2: Count the number of *closed* issues/points deliverable</summary>
 
 By points:
 
@@ -53,8 +66,10 @@ By issues:
 | Site launch | 2      |
 | API launch  | 3      |
 
+</details>
 
-### Step 3: Join on deliverable and calculate issues/points open
+<details>
+<summary>Step 3: Join on deliverable and calculate issues/points open</summary>
 
 By points:
 
@@ -70,7 +85,10 @@ By issues:
 | Site launch | 4     | 2      | 2    |
 | API launch  | 4     | 3      | 1    |
 
-### Step 3: Calculate percent complete
+</details>
+
+<details>
+<summary>Step 3: Calculate percent complete</summary>
 
 > [!NOTE]
 > While we leave the full decimal in the results dataframe, when we visualize the results, we round to the nearest percentage point and display as a percentage rather than as a decimal.
@@ -88,3 +106,5 @@ By issues:
 | ----------- | ----- | ------ | ---- | ---------------- |
 | Site launch | 4     | 2      | 2    | 0.5              |
 | API launch  | 4     | 3      | 1    | 0.75             |
+
+</details>

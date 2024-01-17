@@ -11,7 +11,19 @@ Burndown shows the total number of open issues or points per day over a given da
 
 ## Methodology
 
-### Sample input
+### Summary
+
+In order to calculate burndown there are a few key steps:
+
+1. Isolate the set of issues assigned to the sprint (or deliverable) for which we're calculating burndown.
+2. Get the number of issues (or points) opened and closed per day over the date range we care about.
+3. Subtract the number closed from the number opened to get the delta, i.e. the total number of issues/points opened or closed each day.
+4. Cumulatively sum the deltas over the date range to find the running total of open issues (or points) per day.
+
+### Step-by-step example: Sprint burndown
+
+<details>
+<summary>Sample input</summary>
 
 | sprint   | issue_title | story_points | opened_date | closed_date | sprint_start | sprint_end |
 | -------- | ----------- | ------------ | ----------- | ----------- | ------------ | ---------- |
@@ -23,7 +35,10 @@ Burndown shows the total number of open issues or points per day over a given da
 | Sprint 1 | Issue 6     | 2            | 2023-11-02  | 2023-11-04  | 2023-11-01   | 2023-11-05 |
 | Sprint 2 | Issue 7     | 1            | 2023-11-03  | None        | 2023-11-06   | 2023-11-10 |
 
-### Step 1: Isolate sprint records
+</details>
+
+<details>
+<summary>Step 1: Isolate sprint records</summary>
 
 | sprint   | issue_title | story_points | opened_date | closed_date | sprint_start | sprint_end |
 | -------- | ----------- | ------------ | ----------- | ----------- | ------------ | ---------- |
@@ -33,7 +48,10 @@ Burndown shows the total number of open issues or points per day over a given da
 | Sprint 1 | Issue 4     | 3            | 2023-11-01  | 2023-11-05  | 2023-11-01   | 2023-11-05 |
 | Sprint 1 | Issue 6     | 2            | 2023-11-02  | 2023-11-04  | 2023-11-01   | 2023-11-05 |
 
-### Step 2: Create date range for burndown
+</details>
+
+<details>
+<summary>Step 2: Create date range for burndown</summary>
 
 Create a date range that runs from the earliest date a ticket was opened to the latest date a ticket was closed *or* to the end of the sprint, whichever is later.
 
@@ -47,12 +65,15 @@ Create a date range that runs from the earliest date a ticket was opened to the 
 | 2023-11-04 |
 | 2023-11-05 |
 
-### Step 3: Group issues/points by date opened
+</details>
+
+<details>
+<summary>Step 3: Group issues/points by date opened</summary>
 
 > [!NOTE]
 > If an issue is unpointed, it still counts toward total *issues* opened but not total points opened.
 
-For burndown by points:
+By points:
 
 | date       | opened |
 | ---------- | ------ |
@@ -60,7 +81,7 @@ For burndown by points:
 | 2023-11-01 | 4      |
 | 2023-11-02 | 2      |
 
-For burndown by issues:
+By issues:
 
 | date       | opened |
 | ---------- | ------ |
@@ -68,9 +89,12 @@ For burndown by issues:
 | 2023-11-01 | 3      |
 | 2023-11-02 | 1      |
 
-### Step 4: Group issues/points by date closed
+</details>
 
-For burndown by points:
+<details>
+<summary>Step 4: Group issues/points by date closed</summary>
+
+By points:
 
 | date       | closed |
 | ---------- | ------ |
@@ -78,7 +102,7 @@ For burndown by points:
 | 2023-11-04 | 2      |
 | 2023-11-05 | 3      |
 
-For burndown by issues:
+By issues:
 
 | date       | closed |
 | ---------- | ------ |
@@ -86,9 +110,12 @@ For burndown by issues:
 | 2023-11-04 | 2      |
 | 2023-11-05 | 1      |
 
-### Step 5: Join on date and calculate the delta
+</details>
 
-For burndown by points:
+<details>
+<summary>Step 5: Join on date and calculate the delta</summary>
+
+By points:
 
 | date       | opened | closed | delta |
 | ---------- | ------ | ------ | ----- |
@@ -100,7 +127,7 @@ For burndown by points:
 | 2023-11-04 | 0      | 2      | -2    |
 | 2023-11-05 | 0      | 3      | -3    |
 
-For burndown by issues:
+By issues:
 
 | date       | opened | closed | delta |
 | ---------- | ------ | ------ | ----- |
@@ -112,9 +139,12 @@ For burndown by issues:
 | 2023-11-04 | 0      | 2      | -2    |
 | 2023-11-05 | 0      | 1      | -1    |
 
-### Step 6: Calculate the running total by cumulatively summing the deltas
+</details>
 
-For burndown by points:
+<details>
+<summary>Step 6: Calculate the running total by cumulatively summing the deltas</summary>
+
+By points:
 
 | date       | opened | closed | delta | total_open |
 | ---------- | ------ | ------ | ----- | ---------- |
@@ -126,7 +156,7 @@ For burndown by points:
 | 2023-11-04 | 0      | 2      | -2    | 4          |
 | 2023-11-05 | 0      | 3      | -3    | 1          |
 
-For burndown by issues:
+By issues:
 
 | date       | opened | closed | delta | total_open |
 | ---------- | ------ | ------ | ----- | ---------- |
@@ -137,3 +167,5 @@ For burndown by issues:
 | 2023-11-03 | 0      | 0      | 0     | 4          |
 | 2023-11-04 | 0      | 2      | -2    | 2          |
 | 2023-11-05 | 0      | 1      | -1    | 1          |
+
+</details>
