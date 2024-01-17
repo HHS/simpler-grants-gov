@@ -1,11 +1,14 @@
-# Open Source Onboarding Process
+# Open source onboarding process
 
-| Field           | Value                                                        |
-| --------------- | ------------------------------------------------------------ |
-| Document Status | Draft                                                        |
-| Epic Link       | [Issue 72](https://github.com/HHS/grants-equity/issues/72)   |
-| Epic Dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12) |
-
+| Field              | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| Document status    | Draft                                                             |
+| Deliverable ticket | [Issue 72](https://github.com/HHS/grants-equity/issues/72)        |
+| Roadmap dashboard  | [Milestone Roadmap](https://github.com/orgs/HHS/projects/12)      |
+| Product owner      | Lucas Brown, Billy Daly                                           |
+| Document owner     | Sumi Thaiveettil                                                  |
+| Lead developer     | Aaron Couch                                                       |
+| Lead designer      | Andy Cochran                                                      |
 
 ## Short description
 
@@ -65,9 +68,23 @@ Provide technical instructions for setting up developer tools and environments. 
 - [ ] Onboarding experience ready for the public this includes:
     - [ ] onboarding to the selected chat tool, Slack
     - [ ] onboarding to Github
+    - [ ] onboarding to Google Groups
     - [ ] materials such as a deck or another format for getting started with the project
     - [ ] onboarding guidance for developer tools and environments
-- [ ] The selected video conference tool, Zoom, is procured and ready for use for webinars, office hours, or other open source events. 
+- [ ] The selected video conference tool, Zoom, is procured and ready for use for webinars, office hours, or other open source events.
+- [ ] The following conditions have been satisfied for all tools:
+  - [ ] At least 3 members of the general public have been onboarded.
+  - [ ] New members of the public can be onboarded to the tool for no cost to the user in a process that takes less than 2 days.
+  - [ ] Services are accessible to all people on the HHS network, public internet, and _preferably_ the White House network and most or all agency networks
+  - [ ] Onboarding instructions for new users are clearly and accessibly documented in a public place.
+  - [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in our internal wiki.
+  - [ ] Code for managing and deploying these services is deployed to `main` & PROD (if necessary)
+  - [ ] An ADR has been recorded which documents the tool chosen and the reasons for selecting it
+- [ ] We have 3 onboarded members of the general public to the following communication tools:
+  - [ ] Slack
+  - [ ] Google Group
+  - [ ] Public wiki
+
 
 ### Proposed metrics for measuring goals/value/definition of done
 
@@ -95,13 +112,14 @@ beginning of work on this milestone?
 <!-- Optional -->
 
 - [ ] Is it important to have a public wiki available and ready in this deliverable?
-- [ ] Is it important to have a public API documentation ready for consumption in this deliverable? 
+Yes, there should be a minimal version of the public wiki available to share with the general public.
+
+- [ ] Is it important to have a public API documentation ready for consumption in this deliverable?
+No, we will handle public API documentation in another 30k deliverable. 
 
 ### Not doing
 <!-- Optional -->
 
-The following work will *not* be completed as part of this milestone:
-- tools that are not stated as required (Google Groups, public wiki, etc) 
 
 ## Integrations
 
@@ -130,11 +148,8 @@ Yes, we expect there to be some integrations between the following tools in prod
 
 1. **Chat + Ticket tracking:** Option to receive updates on key tickets in chat
 2. **Wiki + Chat:** Option to receive updates on key document changes in chat
-3. **Document Sharing + Chat:** Option to show previews of documents shared in chat
-4. **Sprint Retro + Chat:** Option to share retro takeaways and action items in chat
-5. **Video Conference + Shared Calendar:** Option to add video conference details to events
-6. **Document Sharing + Wiki:** Option to embed public documents in wiki
-7. **Shared Calendar + Wiki:** Option to embed public calendar events in the wiki
+3. **Video Conference + Shared Calendar:** Option to add video conference details to events
+4. **Shared Calendar + Wiki:** Option to embed public calendar events in the wiki
 
 ### Data being shared publicly for the first time
 <!-- Required -->
@@ -146,5 +161,10 @@ Yes, we expect there to be some integrations between the following tools in prod
 <!-- Required -->
 
 *Does this milestone expose any new attack vectors or expand the attack surface of the product?*
-
+- Adding members of the public to Slack, Google Groups, Zoom, and Gitbook. Each tool contains their own risks. Slack contains a mix of public and private channels. Google Groups, Zoom, and Gitbook requires the public to sign up by giving their name and email address and we will need to verify that we can collect that data with the security team.
+- Mitigation strategies:
+  - We have policy guidelines around where to post sensitive content for all forums where the general public can post.
+  - We've trained internal staff on those policies
+  - We'll review public channels for sensitive content and remove that content prior to inviting open source contributors.
+  - We will review with the security team to ensure that we can collect data using these tools before we do so. 
 
