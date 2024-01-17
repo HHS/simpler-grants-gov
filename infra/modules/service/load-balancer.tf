@@ -9,7 +9,7 @@ resource "aws_lb" "alb" {
   idle_timeout    = "120"
   internal        = false
   security_groups = [aws_security_group.alb.id]
-  subnets         = var.subnet_ids
+  subnets         = var.public_subnet_ids
 
   # checkov:skip=CKV_AWS_150:Allow deletion for automated tests
   enable_deletion_protection = !var.is_temporary

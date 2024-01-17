@@ -28,7 +28,7 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
-  environment_variables = concat(local.base_environment_variables, local.db_environment_variables)
+  environment_variables = concat(local.base_environment_variables, local.db_environment_variables, var.extra_environment_variables)
 }
 
 #-------------------
@@ -49,10 +49,8 @@ resource "aws_ecs_service" "app" {
   }
 
   network_configuration {
-    # TODO(https://github.com/navapbc/template-infra/issues/152) set assign_public_ip = false after using private subnets
-    # checkov:skip=CKV_AWS_333:Switch to using private subnets
-    assign_public_ip = true
-    subnets          = var.subnet_ids
+    assign_public_ip = false
+    subnets          = var.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
   }
 

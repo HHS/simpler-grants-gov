@@ -1,16 +1,24 @@
 # TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
 data "aws_vpc" "default" {
   default = true
 }
 
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
-data "aws_subnets" "default" {
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "private" {
   filter {
-    name   = "default-for-az"
-    values = [true]
+    name   = "tag:subnet_type"
+    values = ["private"]
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "public" {
+  filter {
+    name   = "tag:subnet_type"
+    values = ["public"]
+  }
+}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
@@ -98,7 +106,8 @@ module "service" {
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  public_subnet_ids     = data.aws_subnets.public.ids
+  private_subnet_ids    = data.aws_subnets.private.ids
   cpu                   = 1024
   memory                = 2048
 
