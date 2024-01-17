@@ -20,6 +20,9 @@ In order to calculate burndown there are a few key steps:
 3. Subtract the number closed from the number opened to get the delta, i.e. the total number of issues/points opened or closed each day.
 4. Cumulatively sum the deltas over the date range to find the running total of open issues (or points) per day.
 
+> [!NOTE]
+> If an issue is unpointed, it *does* count toward burndown by issues, but *does not* count toward burndown by points.
+
 ### Step-by-step example: Sprint burndown
 
 <details>
@@ -69,9 +72,6 @@ Create a date range that runs from the earliest date a ticket was opened to the 
 
 <details>
 <summary>Step 3: Group issues/points by date opened</summary>
-
-> [!NOTE]
-> If an issue is unpointed, it still counts toward total *issues* opened but not total points opened.
 
 By points:
 

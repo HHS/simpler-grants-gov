@@ -12,6 +12,9 @@ Percent complete shows the percentage of all issues or points assigned to a give
 
 Divide the number of closed issues (or points) by the total number of issues (or points) per deliverable.
 
+> [!NOTE]
+> If an issue is unpointed, it *does* count toward percent complete by issues, but *does not* count toward percent complete by points.
+
 ### Step-by-step example: Percent complete by deliverable
 
 <details>
@@ -90,8 +93,7 @@ By issues:
 <details>
 <summary>Step 3: Calculate percent complete</summary>
 
-> [!NOTE]
-> While we leave the full decimal in the results dataframe, when we visualize the results, we round to the nearest percentage point and display as a percentage rather than as a decimal.
+> **Note:** While we leave the full decimal in the results dataframe, when we visualize the results, we round to the nearest percentage point and display as a percentage rather than as a decimal.
 
 By points:
 
