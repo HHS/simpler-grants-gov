@@ -47,17 +47,40 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 
 ## Decision Outcome <!-- REQUIRED -->
 
-TODO: Decide between analytics API + UI and open source dashboard solution.
+### Long-term
+
+Our recommendation for a long-term dashboard architecture is to combine **analytics API + dashboard UI** with an **open source dashboard solution** in a way that allows us to quickly iterate on and test the value of new metrics or charts, then "promote" the ones we find most helpful to an official public dashboard.
+
+The steps for this promotion strategy would likely include:
+
+1. **ETL:** Write the data needed to calculate operational and program metrics to a data warehouse via an ETL pipeline.
+2. **Ad hoc report:** Prototype a new metric by building an ad hoc SQL report in an open source dashboard solution (e.g. Metabase or Redash) connected to that data warehouse.
+3. **Temporary dashboard:** If that ad hoc report is useful to stakeholders, then incorporate it into a temporary dashboard within the open source dashboard tool.
+4. **Public dashboard and endpoint:** Once we get feedback on this temporary dashboard, formalize the metric in a new (or modified) API endpoint that is consumed by a new (or modified) page in the public-facing dashboard application.
+
+### Short-term
+
+Because setting up the infrastructure for the long-term dashboard architecture will take a significant amount of time and resources, in the short-term, we recommend following the **s3 bucket + dashboard UI** option. This approach reduces the upfront infrastructure investment needed to publish an initial dashboard, while still laying the foundation for parts of the long-term approach.
+
+The steps for publishing a dashboard using this short-term strategy would likely include:
+
+1. **ETL:** Use a simple ETL pipeline (e.g. scheduled GitHub action) to:
+   1. Extract data needed to calculate operational and program metrics from external sources.
+   2. Calculate the metrics we want to add to a dashboard.
+   3. Load both the source data and the metrics results to s3 buckets.
+2. **Dashboard UI:** Load the metrics from s3 and visualize them in a static UI (e.g. Jupyter notebook, static site, GitBook page) that gets refreshed with new data after the ETL pipeline runs.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- {e.g., improved performance on quality metric, new capability enabled, ...}
-- ...
+- Minimizes the upfront investment in infrastructure needed to publish our first dashboard publicly.
+- Enables us to experiment with different ETL and dashboard UI options that will help narrow the decision for the long-term architecture.
+- In the long-term, provides a pipeline for testing and getting feedback on a new metric before "promoting" it to our public dashboard.
 
 ### Negative Consequences <!-- OPTIONAL -->
 
-- {e.g., decreased performance on quality metric, risk, follow-up decisions required, ...}
-- ...
+- In the short-term, requires a higher level technical expertise to build even basic dashboards.
+- In the short-term, does not easily support ad hoc reporting that is accessible to non-engineers.
+- Once the long-term approach has been adopted, it may require reimplementing some ETL pipelines and/or dashboards that were built in the short-term.
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
