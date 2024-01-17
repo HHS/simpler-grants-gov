@@ -36,7 +36,8 @@ The goal of this ADR is to evaluate and recommend an architectural approach for 
 
 ## Options Considered
 
-- Analytics API + user interface
+- S3 bucket + dashboard user interface
+- Analytics API + dashboard user interface
 - Custom dashboard application (e.g. [Dash][plotly-dash] or [R Shiny][r-shiny])
 - Open source dashboard solution (e.g. [Metabase][metabase] or [Redash][redash])
 - SaaS dashboard solution (e.g. [PowerBI][power-bi], [Tableau][tableau], [Looker][looker], [Amazon Quicksight][quicksight], or [Domo][domo])
@@ -60,12 +61,38 @@ TODO: Decide between analytics API + UI and open source dashboard solution.
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
 
+### S3 bucket + user interface
+
+This option involves running an analytics pipeline on a regular basis (likely once per day) then writing the results of the analysis to an s3 bucket as a static file (e.g. JSON, csv, etc.). That same pipeline, or a separate pipeline, could also refresh a standalone dashboard UI (e.g. Jupyter notebook, static site, etc.) which reads data from that s3 bucket and visualizes the results in a series of charts.
+
+> [!TIP]
+> **Bottom line:** This option is best if:
+> - we want an easy-to-implement solution that gives us control over the look and feel of the dashboard *and* enables users to access the underlying data,
+> - but we are willing to wait to adopt a more sustainable long-term solution that provides support for adhoc reporting and/or a more robust analytics API.
+
+- **Pros**
+  - Requires the least amount of upfront investment in infrastructure to build and publish a dashboard.
+  - Provides more fine-grained control over the look and feel of the dashboard.
+  - Enables S2S users to access underlying analytics data from the S3 bucket.
+  - Allows us to include narrative text that explains the metrics we publish.
+  - Enables open source contributors to host local versions of our dashboard or easily create their own dashboards.
+  - Aligns with the open source values and approach of the project.
+  - Creates a foundation for other options, such as the Analytics API + dashboard UI.
+- **Cons**
+  - Building or modifying dashboards is still quite technical, not something a business analyst could do on their own.
+  - Harder to implement new charts or dashboards than SaaS or open source dashboard solution.
+  - Sharing data via s3 bucket does not provide as good a developer experience as sharing data via a well-designed analytics API.
+  - Does not easily support adhoc reports or dashboards in the same tool.
+  - Not a sustainable option for a long-term data and analytics platform.
+
 ### Analytics API + user interface
 
 This option involves building both a custom analytics API that will serve the data behind our key project metrics and a separate user interface to consume from that API and render these metrics as a dashboard for end users. Following this approach, we could choose to re-use our existing front-end and backend infrastructure or make slightly different tooling choices based on our needs.
 
 > [!TIP]
-> **Bottom line:** This option is best if we want to follow the existing architecture pattern of Simpler.Grants.gov and have maximum control over the structure and design of the public dashboard, but can dedicate more engineering resources to building and hosting this dashboard and don't need to update the analytics endpoints or dashboards frequently.
+> **Bottom line:** This option is best if:
+> - we want to follow the existing architecture pattern of Simpler.Grants.gov *and* have maximum control over the structure and design of the public dashboard,
+> - but we are willing to dedicate more engineering resources to building and hosting this dashboard *and* don't need to update the analytics endpoints or dashboards frequently.
 
 - **Pros**
   - Provides the most fine-grained control over the look and feel of the dashboard application.
@@ -86,7 +113,9 @@ This option involves building both a custom analytics API that will serve the da
 This option involves building a custom dashboard app using an existing framework, such as [Dash][plotly-dash] (python) or [R Shiny][r-shiny]. This custom built application would be hosted as its own application and be slightly more integrated than a separate analytics API + dashboard UI, but it would be more customizable than using an open source or proprietary dashboard solution.
 
 > [!TIP]
-> **Bottom line:** This option would be best if we want to retain control over the look and feel of the dashboard and manage the backend and frontend of the dashboard together, but can dedicate more engineering resources to building and hosting it and don't need to expose analytics data via API.
+> **Bottom line:** This option would be best if:
+> - we want to retain control over the look and feel of the dashboard *and* to manage the backend and frontend of the dashboard together,
+> - but we are willing to commit more engineering resources to building and hosting it *and* don't need to expose analytics data via API.
 
 - **Pros**
   - Provides more fine-grained control over the look and feel of the dashboard application, on par with option 1.
@@ -106,7 +135,9 @@ This option involves building a custom dashboard app using an existing framework
 This option involves selecting and hosting an open source dashboard solution, such as [Metabase][metabase] or [Redash][redash]. This solution would most likely be self-hosted and connect directly to our data warehouse, and enable business analysts to build adhoc reporting and dashboards with SQL and a drag-and-drop interface. Individual dashboards can then be configured for broader publication to external stakeholders.
 
 > [!TIP]
-> **Bottom line:** This option would be best if we want to adopt an open source solution that enables business analysts to build and host dashboards with minimal support from engineers, but are willing to compromise on the amount of control we have over the look and feel of those dashboards and don't need to expose analytics data via API.
+> **Bottom line:** This option would be best if:
+> - we want to adopt an open source solution that enables business analysts to build *and* host dashboards with minimal support from engineers,
+> - but we are willing to commit the upfront resources needed to set up the infrastructure *and* can compromise on the amount of control we have over the look and feel of those dashboards.
 
 - **Pros**
   - Enables a business analyst or engineer with basic SQL experience to build and manage dashboards.
@@ -126,7 +157,9 @@ This option involves selecting and hosting an open source dashboard solution, su
 This solution involves adopting a Software-as-a-Service dashboard solution, such as Tableau or PowerBI, and using this solution to enable business analysts to build adhoc reporting and dashboards with a drag-and-drop interface. Individual dashboards can then be configured for broader publication for external stakeholders.
 
 > [!TIP]
-> **Bottom line:** This option would be best if we want to adopt an externally hosted solution that enables business analysts to build dashboards with no direct support from engineers, but are willing to accept a higher per-user cost, closed-source tool, and fewer options for customization.
+> **Bottom line:** This option would be best if:
+> - we want to adopt an externally hosted solution that enables business analysts to build dashboards with no direct support from engineers,
+> - but we are willing to accept a higher per-user cost, closed-source tool, and fewer options for customization.
 
 - **Pros**
   - Enables a business analyst to easily build and maintain dashboards, even with minimal SQL or programming experience.
