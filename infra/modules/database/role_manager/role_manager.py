@@ -2,8 +2,13 @@ import boto3
 import itertools
 from operator import itemgetter
 import os
+import json
 import logging
 from pg8000.native import Connection, identifier
+
+logging.basicConfig()
+logging.getLogger('botocore').setLevel(logging.DEBUG)
+logging.getLogger('boto3').setLevel(logging.DEBUG)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -115,9 +120,9 @@ def connect_using_iam(user: str) -> Connection:
     return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
 def get_password() -> str:
-    ssm = boto3.client("ssm")
+    ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
     param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
-    logger.info("Fetching password from parameter store")
+    logger.info("Fetching password from parameter store:\n%s"%param_name)
     result = json.loads(ssm.get_parameter(
         Name=param_name,
         WithDecryption=True,

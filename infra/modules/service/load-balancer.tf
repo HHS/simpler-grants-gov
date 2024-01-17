@@ -9,7 +9,7 @@ resource "aws_lb" "alb" {
   idle_timeout    = "120"
   internal        = false
   security_groups = [aws_security_group.alb.id]
-  subnets         = var.subnet_ids
+  subnets         = var.public_subnet_ids
 
   # TODO(https://github.com/navapbc/template-infra/issues/163) Implement HTTPS
   # checkov:skip=CKV2_AWS_20:Redirect HTTP to HTTPS as part of implementing HTTPS support
