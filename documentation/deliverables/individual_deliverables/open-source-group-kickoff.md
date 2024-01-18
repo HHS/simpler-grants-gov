@@ -120,6 +120,7 @@ No, we will handle public API documentation in another 30k deliverable.
 ### Not doing
 <!-- Optional -->
 
+- We will not be hosting an open source kickoff within this effort. 
 
 ## Integrations
 
