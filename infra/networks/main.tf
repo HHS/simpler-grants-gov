@@ -1,7 +1,3 @@
-# TODO: This file is is a temporary implementation of the network layer
-# that currently just adds resources to the default VPC
-# The full network implementation is part of https://github.com/navapbc/template-infra/issues/152
-
 data "aws_region" "current" {}
 
 locals {
@@ -62,13 +58,6 @@ module "app_config" {
 
 data "aws_vpc" "default" {
   default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
-  }
 }
 
 # VPC Endpoints for accessing AWS Services

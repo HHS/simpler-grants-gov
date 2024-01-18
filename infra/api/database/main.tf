@@ -1,16 +1,18 @@
-# TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
-data "aws_subnets" "default" {
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
+data "aws_vpc" "network" {
   filter {
-    name   = "default-for-az"
-    values = [true]
+    name   = "tag:Name"
+    values = [var.environment_name]
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "database" {
+  filter {
+    name   = "tag:subnet_type"
+    values = ["database"]
+  }
+}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
