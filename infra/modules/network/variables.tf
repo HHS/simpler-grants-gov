@@ -3,11 +3,6 @@ variable "name" {
   description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
 }
 
-variable "cidr_second_octet" {
-  type        = string
-  description = "For a given example CIDR of 10.x.0.0/16, this variable would be 'x'."
-}
-
 variable "aws_services_security_group_name_prefix" {
   type        = string
   description = "Prefix for the name of the security group attached to VPC endpoints"
