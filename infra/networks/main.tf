@@ -60,6 +60,11 @@ module "app_config" {
   source = "../api/app-config"
 }
 
+module "dms_networking" {
+  source = "../modules/dms-networking"
+  vpc_id = data.aws_vpc.default.id
+}
+
 data "aws_vpc" "default" {
   default = true
 }
