@@ -88,8 +88,3 @@ module "database" {
   private_subnet_ids             = data.aws_subnets.default.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 }
-
-module "dms" {
-  source = "../../modules/dms"
-  vpc_id = data.aws_vpc.default.id
-}
