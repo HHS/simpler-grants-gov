@@ -24,7 +24,7 @@
 
 **Problem statement:** Currently, the Simpler.Grants.gov project lacks a ready-to-use onboarding experience for individuals interested in joining the open source community. The absence of essential tools, processes, onboarding steps, and guidelines poses a challenge to meeting business goals and mission alignment. 
 
-**Value:** We seek to build stakeholder trust, promote project transparency, and establish a dynamic, participant-driven advisory council Launch an open source community with a primary emphasis on critical components that lay the groundwork for future expansion and productive collaboration, ensuring streamlined community management, fostering a vibrant open source community, and promoting project transparency.
+**Value:** We seek to build stakeholder trust, enhance project transparency, and establish a dynamic open source community. Our focus is on foundational components that facilitate future expansion and productive collaboration, ensuring efficient community management and promoting transparency in project development.
 
 This effort allows us to... 
 
