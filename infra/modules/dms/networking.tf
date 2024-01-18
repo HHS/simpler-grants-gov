@@ -1,46 +1,21 @@
-# Add Security Groups for VPC -> DMS here
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# We need to attach this security group to our DMS instance when created
-resource "aws_security_group" "dms" {
-  name_prefix = "dms"
-  description = "Database DMS security group"
-  vpc_id      = var.vpc_id
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_peering_connection
+resource "aws_vpc_peering_connection" "dms" {
+  peer_owner_id = data.aws_ssm_parameter.dms_peer_owner_id.value
+  peer_vpc_id   = data.aws_ssm_parameter.dms_peer_vpc_id.value
+  vpc_id        = var.vpc_id
+  peer_region   = "us-east-2"
+
+  tags = {
+    Name = "DMS VPC Peering"
+  }
 }
 
-resource "aws_vpc_security_group_egress_rule" "postgres_egress_from_dms" {
-  description       = "Allow outbound requests to database from DMS"
-  cidr_ipv4         = local.our_target_cidr_block
-  from_port         = 5432 # postgres default port
-  to_port           = 5432
-  ip_protocol       = "tcp"
-  security_group_id = aws_security_group.dms.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "postgres_ingress_from_dms" {
-  description       = "Allow inbound requests to database from DMS"
-  cidr_ipv4         = local.our_target_cidr_block
-  from_port         = 5432 # postgres default port
-  to_port           = 5432
-  ip_protocol       = "tcp"
-  security_group_id = aws_security_group.dms.id
-}
-
-resource "aws_vpc_security_group_egress_rule" "oracle_egress_from_dms" {
-  description       = "Allow outbound requests to database from DMS"
-  cidr_ipv4         = local.their_source_cidr_block
-  from_port         = 1521 # oracle default port
-  to_port           = 1521
-  ip_protocol       = "tcp"
-  security_group_id = aws_security_group.dms.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "oracle_ingress_from_dms" {
-  description       = "Allow inbound requests to database from DMS"
-  cidr_ipv4         = local.their_source_cidr_block
-  from_port         = 1521 # oracle default port
-  to_port           = 1521
-  ip_protocol       = "tcp"
-  security_group_id = aws_security_group.dms.id
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route
+resource "aws_route" "dms" {
+  route_table_id            = data.aws_vpc.main.main_route_table_id
+  destination_cidr_block    = local.their_source_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
 }
