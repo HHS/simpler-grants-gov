@@ -9,6 +9,10 @@ data "aws_vpc" "network" {
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "private" {
   filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+  filter {
     name   = "tag:subnet_type"
     values = ["private"]
   }
@@ -16,6 +20,10 @@ data "aws_subnets" "private" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
   filter {
     name   = "tag:subnet_type"
     values = ["public"]

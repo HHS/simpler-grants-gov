@@ -9,6 +9,10 @@ data "aws_vpc" "network" {
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "database" {
   filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+  filter {
     name   = "tag:subnet_type"
     values = ["database"]
   }

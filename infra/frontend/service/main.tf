@@ -6,16 +6,24 @@ data "aws_vpc" "network" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+# docs: https://registry.terraform.io/providers/hashicorp/aws/4.67.0/docs/data-sources/subnets
 data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
   filter {
     name   = "tag:subnet_type"
     values = ["private"]
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+# docs: https://registry.terraform.io/providers/hashicorp/aws/4.67.0/docs/data-sources/subnets
 data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
   filter {
     name   = "tag:subnet_type"
     values = ["public"]
@@ -120,7 +128,7 @@ module "service" {
   service_name          = local.service_name
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
+  vpc_id                = data.aws_vpc.network.id
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
