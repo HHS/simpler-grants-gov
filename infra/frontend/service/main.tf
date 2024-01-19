@@ -44,6 +44,8 @@ locals {
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
+  is_temporary = startswith(terraform.workspace, "t-")
+
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
@@ -126,6 +128,7 @@ output "environment_name" {
 module "service" {
   source                = "../../modules/service"
   service_name          = local.service_name
+  is_temporary          = local.is_temporary
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.network.id
