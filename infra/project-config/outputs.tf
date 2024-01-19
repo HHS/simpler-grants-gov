@@ -38,3 +38,7 @@ output "github_actions_role_name" {
 output "aws_services_security_group_name_prefix" {
   value = local.aws_services_security_group_name_prefix
 }
+
+output "network_configs" {
+  value = local.network_configs
+}

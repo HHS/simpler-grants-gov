@@ -1,14 +1,16 @@
-# TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
-data "aws_vpc" "default" {
-  default = true
+data "aws_vpc" "network" {
+  filter {
+    name   = "tag:Name"
+    values = module.project_config.network_configs[var.environment_name].vpc_name
+  }
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.network.id]
   }
   filter {
     name   = "tag:subnet_type"
