@@ -71,6 +71,15 @@ resource "aws_security_group" "aws_services" {
   vpc_id      = module.aws_vpc.vpc_id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_vpc_cidr" {
+  security_group_id = aws_security_group.aws_services.id
+  description       = "Allow inbound requests to VPC endpoints from the VPC cidr block"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = local.vpc_cidr
+}
+
 resource "aws_vpc_endpoint" "interface" {
   for_each = local.interface_vpc_endpoints
 
