@@ -17,9 +17,17 @@ locals {
   # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
   #
   # The database module requires VPC access from private networks to SSM, KMS, and RDS
-  aws_service_integrations = toset(
-    module.app_config.has_database ? ["ssm", "kms"] : []
+  aws_service_integrations = setunion(
+    # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
+    ["ecr.api", "ecr.dkr", "s3", "logs"],
+
+    # AWS services used by the database's role manager
+    var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
   )
+
+  # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints
+  interface_vpc_endpoints = toset([for aws_service in local.aws_service_integrations : aws_service if !contains(["s3", "dynamodb"], aws_service)])
+  gateway_vpc_endpoints   = toset([for aws_service in local.aws_service_integrations : aws_service if contains(["s3", "dynamodb"], aws_service)])
 }
 
 terraform {
@@ -52,6 +60,11 @@ module "app_config" {
   source = "../api/app-config"
 }
 
+module "dms_networking" {
+  source = "../modules/dms-networking"
+  vpc_id = data.aws_vpc.default.id
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -75,6 +88,7 @@ data "aws_subnets" "default" {
 # See https://repost.aws/knowledge-center/lambda-vpc-parameter-store
 # See https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html#create-interface-endpoint
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 resource "aws_security_group" "aws_services" {
   count = length(local.aws_service_integrations) > 0 ? 1 : 0
 
@@ -83,6 +97,19 @@ resource "aws_security_group" "aws_services" {
   vpc_id      = data.aws_vpc.default.id
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule
+resource "aws_vpc_security_group_ingress_rule" "aws_services" {
+  count = length(local.aws_service_integrations) > 0 ? 1 : 0
+
+  security_group_id = aws_security_group.aws_services[0].id
+  description       = "Allow all traffic from the VPCs CIDR block to the VPC endpoint security group"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = data.aws_vpc.default.cidr_block
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
 resource "aws_vpc_endpoint" "aws_service" {
   for_each = local.aws_service_integrations
 
@@ -90,35 +117,16 @@ resource "aws_vpc_endpoint" "aws_service" {
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.aws_services[0].id]
-  subnet_ids          = data.aws_subnets.default.ids
+  subnet_ids          = [for subnet in aws_subnet.backfill_private : subnet.id]
   private_dns_enabled = true
 }
 
-# VPC Configuration for DMS
-# ----------------------------------------
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+resource "aws_vpc_endpoint" "gateway" {
+  for_each = local.gateway_vpc_endpoints
 
-data "aws_ssm_parameter" "dms_peer_owner_id" {
-  name = "/network/dms/peer-owner-id"
-}
-
-data "aws_ssm_parameter" "dms_peer_vpc_id" {
-  name = "/network/dms/peer-vpc-id"
-}
-
-resource "aws_vpc_peering_connection" "dms" {
-  peer_owner_id = data.aws_ssm_parameter.dms_peer_owner_id.value
-  peer_vpc_id   = data.aws_ssm_parameter.dms_peer_vpc_id.value
-  vpc_id        = data.aws_vpc.default.id
-  peer_region   = "us-east-2"
-
-  tags = {
-    Name = "DMS VPC Peering"
-  }
-}
-
-resource "aws_route" "dms" {
-  route_table_id = data.aws_vpc.default.main_route_table_id
-  # MicroHealth VPC CIDR block
-  destination_cidr_block    = "10.220.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.dms.id
+  vpc_id            = data.aws_vpc.default.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [for table in aws_route_table.backfill_private : table.id]
 }
