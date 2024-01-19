@@ -40,6 +40,8 @@ resource "aws_rds_cluster" "db" {
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
+  backup_retention_period = 35
+
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
