@@ -27,7 +27,7 @@ resource "aws_subnet" "backfill_private" {
   cidr_block              = each.value
   map_public_ip_on_launch = false
   tags = {
-    Name        = "backfill-private-${each.key}"
+    Name        = "default-private-${each.key}"
     subnet_type = "private"
   }
 }
@@ -45,7 +45,7 @@ resource "aws_eip" "backfill_private" {
   for_each = local.backfill_subnet_cidrs
   domain   = "vpc"
   tags = {
-    Name = "backfill-private-${each.key}"
+    Name = "default-private-${each.key}"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_nat_gateway" "backfill_private" {
   allocation_id = aws_eip.backfill_private[each.key].allocation_id
   subnet_id     = aws_subnet.backfill_private[each.key].id
   tags = {
-    Name = "backfill-private-${each.key}"
+    Name = "default-private-${each.key}"
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_route_table" "backfill_private" {
   for_each = local.backfill_subnet_cidrs
   vpc_id   = data.aws_vpc.default.id
   tags = {
-    Name = "backfill-private-${each.key}"
+    Name = "default-private-${each.key}"
   }
 }
 
