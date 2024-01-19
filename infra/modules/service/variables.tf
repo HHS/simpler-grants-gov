@@ -140,6 +140,6 @@ variable "api_auth_token" {
 }
 
 variable "is_temporary" {
-  description = "Boolean value to determine if this resource should disable deletion protection. Needed for automated test cleanup"
+  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
   type        = bool
 }
