@@ -11,12 +11,11 @@ resource "aws_lb" "alb" {
   security_groups = [aws_security_group.alb.id]
   subnets         = var.public_subnet_ids
 
+  # checkov:skip=CKV_AWS_150:Allow deletion for automated tests
+  enable_deletion_protection = !var.is_temporary
+
   # TODO(https://github.com/navapbc/template-infra/issues/163) Implement HTTPS
   # checkov:skip=CKV2_AWS_20:Redirect HTTP to HTTPS as part of implementing HTTPS support
-
-  # TODO(https://github.com/navapbc/template-infra/issues/161) Prevent deletion protection
-  # checkov:skip=CKV_AWS_150:Allow deletion until we can automate deletion for automated tests
-  # enable_deletion_protection = true
 
   # TODO(https://github.com/navapbc/template-infra/issues/165) Protect ALB with WAF
   # checkov:skip=CKV2_AWS_28:Implement WAF in issue #165
