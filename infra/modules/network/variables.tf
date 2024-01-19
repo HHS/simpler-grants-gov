@@ -16,11 +16,11 @@ variable "database_subnet_group_name" {
 variable "has_database" {
   type        = bool
   description = "Whether the application(s) in this network have a database. Determines whether to create VPC endpoints needed by the database layer."
-  default     = false
+  default     = true
 }
 
 variable "has_external_non_aws_service" {
   type        = bool
   description = "Whether the application(s) in this network need to call external non-AWS services. Determines whether or not to create NAT gateways."
-  default     = false
+  default     = true
 }
