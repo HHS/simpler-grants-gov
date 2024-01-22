@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_opportunity
+    columns:
+      - name: opportunity_id
+        description: (integer) Auto Increment
+        tests:
+          - not_null
+          - unique
+      - name: opportunity_number
+        tests:
+          - unique
+      - name: opportunity_title
+      - name: agency	
+      - name: category
+      - name: is_draft
+        tests:
+          - accepted_values:
+              values: ['t', 'f']
+      - name: created_at
+      - name: updated_at
+      - name: category_explanation
+      - name: revision_id
+        description: Formerly revision_number
+      - name: modified_comments
+      - name: publisher_user_id	
+      - name: publisher_profile_id
+      - name: order_id
+        description: Order number taken from category_explanation

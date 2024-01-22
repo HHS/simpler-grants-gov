@@ -1,0 +1,12 @@
+simplerapi:
+  outputs:
+    dev:
+      dbname: app
+      host: grants-db
+      pass: secret123
+      port: 5432
+      schema: public
+      threads: 1
+      type: postgres
+      user: app
+  target: dev
