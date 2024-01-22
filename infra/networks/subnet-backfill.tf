@@ -31,6 +31,17 @@ resource "aws_subnet" "backfill_private" {
     subnet_type = "private"
   }
 }
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "tag:subnet_type"
+    values = ["public"]
+  }
+}
 
 # ----------- #
 # NAT GATEWAY #
@@ -50,12 +61,25 @@ resource "aws_eip" "backfill_private" {
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway
-resource "aws_nat_gateway" "backfill_private" {
-  for_each      = local.backfill_subnet_cidrs
-  allocation_id = aws_eip.backfill_private[each.key].allocation_id
-  subnet_id     = aws_subnet.backfill_private[each.key].id
+resource "aws_nat_gateway" "backfill_private_0" {
+  allocation_id = aws_eip.backfill_private["us-east-1a"].allocation_id
+  subnet_id     = data.aws_subnets.public.ids[0]
   tags = {
-    Name = "backfill-private-${each.key}"
+    Name = "backfill-private-us-east-1a"
+  }
+}
+resource "aws_nat_gateway" "backfill_private_1" {
+  allocation_id = aws_eip.backfill_private["us-east-1b"].allocation_id
+  subnet_id     = data.aws_subnets.public.ids[1]
+  tags = {
+    Name = "backfill-private-us-east-1b"
+  }
+}
+resource "aws_nat_gateway" "backfill_private_2" {
+  allocation_id = aws_eip.backfill_private["us-east-1c"].allocation_id
+  subnet_id     = data.aws_subnets.public.ids[2]
+  tags = {
+    Name = "backfill-private-us-east-1c"
   }
 }
 
@@ -84,9 +108,18 @@ resource "aws_route_table_association" "backfill_private" {
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route
 #
 # purpose: Route external traffic through the NAT gateway.
-resource "aws_route" "backfill_private" {
-  for_each               = local.backfill_subnet_cidrs
-  route_table_id         = aws_route_table.backfill_private[each.key].id
+resource "aws_route" "backfill_private_0" {
+  route_table_id         = aws_route_table.backfill_private["us-east-1a"].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.backfill_private[each.key].id
+  nat_gateway_id         = aws_nat_gateway.backfill_private_0.id
+}
+resource "aws_route" "backfill_private_1" {
+  route_table_id         = aws_route_table.backfill_private["us-east-1b"].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.backfill_private_1.id
+}
+resource "aws_route" "backfill_private_2" {
+  route_table_id         = aws_route_table.backfill_private["us-east-1c"].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.backfill_private_2.id
 }
