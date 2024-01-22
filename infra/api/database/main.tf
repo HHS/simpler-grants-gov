@@ -2,7 +2,7 @@
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
-    values = module.project_config.network_configs[var.environment_name].vpc_name
+    values = [module.project_config.network_configs[var.environment_name].vpc_name]
   }
 }
 
