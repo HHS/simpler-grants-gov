@@ -11,8 +11,9 @@ data "aws_subnets" "private" {
     values = [data.aws_vpc.default.id]
   }
   filter {
-    name   = "tag:subnet_type"
-    values = ["private"]
+    name = "tag:subnet_type"
+    # TODO: change back to "private" when the private subnets are actually working
+    values = ["public"]
   }
 }
 
