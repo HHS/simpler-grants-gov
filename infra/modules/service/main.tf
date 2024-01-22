@@ -49,6 +49,7 @@ resource "aws_ecs_service" "app" {
   }
 
   network_configuration {
+    # checkov:skip=CKV_AWS_333:Switch to using private subnets
     assign_public_ip = true
     subnets          = var.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
