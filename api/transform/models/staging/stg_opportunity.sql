@@ -1,7 +1,6 @@
 with source as (
-    select * from {{ source('app', 'opportunity') }}
-),
-
+    select * from {{ source('public', 'opportunity') }}
+)
 select
     opportunity_id,
     opportunity_number,
@@ -15,5 +14,5 @@ select
     publisher_user_id,
     publisher_profile_id,
     revision_number as revision_id,
-    REGEXP_MATCHES(category_explanation,'[0-9]+') as order_id
+    (select array_to_string(REGEXP_MATCHES(category_explanation,'#([0-9]+)'), ';')) as order_id
 from source

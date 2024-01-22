@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: prod_opp_table
+  - name: publisher

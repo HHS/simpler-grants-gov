@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: app
+  - name: public
     description: These are the tables replicated from grants.gov
     tables:
       - name: opportunity

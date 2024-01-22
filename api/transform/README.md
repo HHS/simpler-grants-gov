@@ -1,15 +1,13 @@
-Welcome to your new dbt project!
+# DBT Test for Transforms
 
-### Using the starter project
+This shows a basic setup with manipulating the opportunity table. It shows just basic examples, but this could be used for complex transforms as the data model expands.
 
-Try running the following commands:
-- dbt run
-- dbt test
+To test:
 
+* Run `make db-seed-local`
+* Run `docker compose exec grants-dbt dbt run`
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+## What this does
+
+* Creates `stg_opportunity` table which shows basic renaming which is a typical function for [staging in dbt](https://docs.getdbt.com/best-practices/how-we-structure/2-staging). This might not be necessary with our limited use-case, but would be appropriate if we are building final tables off of initial models.
+* Creates `prod_opp_table` and `publisher` table which would be the final hypothetical version of transforms to prod tables.

@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  grants-dbt:
+    build:
+      context: ./api/transform
+    working_dir: /usr/app
+    command: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ./api/transform:/usr/app
+    depends_on:
+      - grants-db
 
   grants-db:
     image: postgres:14-alpine
