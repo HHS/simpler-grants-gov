@@ -2,7 +2,7 @@
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
-    values = module.project_config.network_configs[var.environment_name].vpc_name
+    values = [module.project_config.network_configs[var.environment_name].vpc_name]
   }
 }
 
@@ -115,7 +115,7 @@ module "service" {
   is_temporary          = local.is_temporary
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
+  vpc_id                = data.aws_vpc.network.id
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
   cpu                   = 1024

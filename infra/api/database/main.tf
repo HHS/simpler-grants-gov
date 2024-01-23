@@ -2,7 +2,7 @@
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
-    values = module.project_config.network_configs[var.environment_name].vpc_name
+    values = [module.project_config.network_configs[var.environment_name].vpc_name]
   }
 }
 
@@ -72,7 +72,7 @@ data "aws_security_groups" "aws_services" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.network.id]
   }
 }
 
@@ -90,7 +90,7 @@ module "database" {
   migrator_username = local.database_config.migrator_username
   schema_name       = local.database_config.schema_name
 
-  vpc_id                         = data.aws_vpc.default.id
-  private_subnet_ids             = data.aws_subnets.default.ids
+  vpc_id                         = data.aws_vpc.network.id
+  private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 }
