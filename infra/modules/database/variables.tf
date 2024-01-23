@@ -51,6 +51,16 @@ variable "database_name" {
   }
 }
 
+variable "instance_count" {
+  description = "Number of instances in the cluster. Defaults to 1 (writer only). Use 2+ for production."
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.instance_count >= 1
+    error_message = "The instance_count must be at least 1."
+  }
+}
+
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."

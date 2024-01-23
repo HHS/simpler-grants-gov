@@ -16,6 +16,12 @@ variable "has_database" {
   type = bool
 }
 
+variable "database_instance_count" {
+  description = "Number of database instances. Should be 2+ for production environments."
+  type        = number
+  default     = 1
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
