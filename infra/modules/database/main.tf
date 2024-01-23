@@ -61,14 +61,17 @@ resource "aws_rds_cluster" "db" {
 resource "aws_rds_cluster_instance" "instance" {
   count = var.instance_count
 
-  identifier                 = "${var.name}-instance-${count.index}"
-  cluster_identifier         = aws_rds_cluster.db.id
-  instance_class             = "db.serverless"
-  engine                     = aws_rds_cluster.db.engine
-  engine_version             = aws_rds_cluster.db.engine_version
-  auto_minor_version_upgrade = true
-  monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval        = 30
+  identifier                            = "${var.name}-instance-${count.index}"
+  cluster_identifier                    = aws_rds_cluster.db.id
+  instance_class                        = "db.serverless"
+  engine                                = aws_rds_cluster.db.engine
+  engine_version                        = aws_rds_cluster.db.engine_version
+  promotion_tier                        = 0
+  auto_minor_version_upgrade            = true
+  monitoring_role_arn                   = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval                   = 30
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 93
 }
 
 resource "aws_kms_key" "db" {
