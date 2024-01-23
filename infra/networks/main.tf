@@ -37,15 +37,14 @@ module "app_config" {
   source = "../api/app-config"
 }
 
+module "dms_networking" {
+  source = "../modules/dms-networking"
+  vpc_id = module.network.vpc_id
+}
+
 module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name
   database_subnet_group_name              = var.environment_name
   aws_services_security_group_name_prefix = var.environment_name
 }
-
-module "dms_networking" {
-  source = "../modules/dms-networking"
-  vpc_id = module.network.vpc_id
-}
-
