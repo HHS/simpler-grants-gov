@@ -42,6 +42,17 @@ module "dms_networking" {
   vpc_id = module.network.vpc_id
 }
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "default-for-az"
+    values = [true]
+  }
+}
+
 module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name
