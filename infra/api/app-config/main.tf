@@ -7,8 +7,9 @@ locals {
   has_incident_management_service = false
 
   environment_configs = {
-    dev  = module.dev_config
-    prod = module.prod_config
+    dev     = module.dev_config
+    staging = module.staging_config
+    prod    = module.prod_config
   }
 
   build_repository_config = {
@@ -44,9 +45,10 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared = "simpler-grants-gov"
-    dev    = "simpler-grants-gov"
-    prod   = "simpler-grants-gov"
+    shared  = "simpler-grants-gov"
+    dev     = "simpler-grants-gov"
+    staging = "simpler-grants-gov"
+    prod    = "simpler-grants-gov"
   }
 }
 
