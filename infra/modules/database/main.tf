@@ -1,10 +1,11 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# Generate a random username for the RDS superuser. RDS allows 16 alphanumeric characters.
+# Generate a random username for the RDS superuser.
+# For Aurora PostgreSQL, it must contain 1–63 alphanumeric characters.
 resource "random_id" "db_superuser" {
   prefix      = "root" # Fixed 4 character prefix for identification in logs
-  byte_length = 6      # 12 hexadecimal digits
+  byte_length = 16     # 32 hexadecimal digits
 }
 
 locals {
