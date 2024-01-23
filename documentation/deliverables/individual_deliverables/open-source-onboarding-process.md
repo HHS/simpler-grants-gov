@@ -162,7 +162,7 @@ Yes, we expect there to be some integrations between the following tools in prod
 <!-- Required -->
 
 *Does this milestone expose any new attack vectors or expand the attack surface of the product?*
-- Adding members of the public to Slack, Google Groups, Zoom, and Gitbook. Each tool contains their own risks. Slack contains a mix of public and private channels. Google Groups, Zoom, and Gitbook requires the public to sign up by giving their name and email address and we will need to verify that we can collect that data with the security team.
+- Adding members of the public to Slack, Google Groups, Zoom, and Gitbook can pose a risk. Each tool contains their own risks. Slack contains a mix of public and private channels. Google Groups, Zoom, and Gitbook requires the public to sign up by giving their name and email address and we will need to verify that we can collect that data with the security team. 
 - Mitigation strategies:
   - We have policy guidelines around where to post sensitive content for all forums where the general public can post.
   - We've trained internal staff on those policies
