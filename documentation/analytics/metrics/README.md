@@ -6,3 +6,4 @@ This section of the documentation contains descriptions of the metrics we calcul
 
 1. [Burndown](burndown.md)
 2. [Percent complete](percent-complete.md)
+3. [Burnup](burnup.md)
