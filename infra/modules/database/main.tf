@@ -1,8 +1,14 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+# Generate a random username for the RDS superuser. RDS allows 16 alphanumeric characters.
+resource "random_id" "db_superuser" {
+  prefix      = "root" # Fixed 4 character prefix for identification in logs
+  byte_length = 6      # 12 hexadecimal digits
+}
+
 locals {
-  master_username       = "postgres"
+  master_username       = random_id.db_superuser.hex
   primary_instance_name = "${var.name}-primary"
   role_manager_name     = "${var.name}-role-manager"
   role_manager_package  = "${path.root}/role_manager.zip"
