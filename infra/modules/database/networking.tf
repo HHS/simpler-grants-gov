@@ -65,6 +65,7 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_dms" {
 
 # security group for the source DB
 data "aws_security_group" "source_db" {
-  name = "dms"
+  name   = "dms"
+  vpc_id = var.vpc_id
 }
 
