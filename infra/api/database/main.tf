@@ -90,6 +90,7 @@ module "database" {
   app_username      = local.database_config.app_username
   migrator_username = local.database_config.migrator_username
   schema_name       = local.database_config.schema_name
+  instance_count    = local.database_config.instance_count
 
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
