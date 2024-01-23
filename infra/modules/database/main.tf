@@ -1,11 +1,17 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+# Generate a random username for the RDS superuser.
+# For Aurora PostgreSQL, it must contain 1–63 alphanumeric characters.
+resource "random_id" "db_superuser" {
+  prefix      = "root" # Fixed 4 character prefix for identification in logs
+  byte_length = 16     # 32 hexadecimal digits
+}
+
 locals {
-  master_username       = "postgres"
-  primary_instance_name = "${var.name}-primary"
-  role_manager_name     = "${var.name}-role-manager"
-  role_manager_package  = "${path.root}/role_manager.zip"
+  master_username      = random_id.db_superuser.hex
+  role_manager_name    = "${var.name}-role-manager"
+  role_manager_package = "${path.root}/role_manager.zip"
 
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
@@ -40,6 +46,8 @@ resource "aws_rds_cluster" "db" {
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
+  backup_retention_period = 35
+
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
     min_capacity = 0.5
@@ -50,15 +58,20 @@ resource "aws_rds_cluster" "db" {
   enabled_cloudwatch_logs_exports = ["postgresql"]
 }
 
-resource "aws_rds_cluster_instance" "primary" {
-  identifier                 = local.primary_instance_name
-  cluster_identifier         = aws_rds_cluster.db.id
-  instance_class             = "db.serverless"
-  engine                     = aws_rds_cluster.db.engine
-  engine_version             = aws_rds_cluster.db.engine_version
-  auto_minor_version_upgrade = true
-  monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval        = 30
+resource "aws_rds_cluster_instance" "instance" {
+  count = var.instance_count
+
+  identifier                            = "${var.name}-instance-${count.index}"
+  cluster_identifier                    = aws_rds_cluster.db.id
+  instance_class                        = "db.serverless"
+  engine                                = aws_rds_cluster.db.engine
+  engine_version                        = aws_rds_cluster.db.engine_version
+  promotion_tier                        = 0
+  auto_minor_version_upgrade            = true
+  monitoring_role_arn                   = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval                   = 30
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 93
 }
 
 resource "aws_kms_key" "db" {
