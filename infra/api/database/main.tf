@@ -18,6 +18,7 @@ data "aws_subnets" "database" {
   }
 }
 
+
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
   # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
