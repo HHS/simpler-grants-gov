@@ -4,7 +4,7 @@
 - **Last Modified:** 2024-01-24
 - **Related Issue:** [#1055](https://github.com/HHS/simpler-grants-gov/issues/1055)
 - **Author:** Kai Siren
-- **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa
+- **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa, Michael Chouinard, Sammy Steiner
 
 ## Context and Problem Statement
 
