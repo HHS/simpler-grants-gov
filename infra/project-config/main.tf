@@ -16,4 +16,11 @@ locals {
 
   github_actions_role_name                = "${local.project_name}-github-actions"
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
+
+  network_configs = {
+    # TODO(https://github.com/HHS/simpler-grants-gov/issues/1051) deploy to a non-default VPC in every environment
+    dev     = { vpc_name = "default" }
+    staging = { vpc_name = "staging" }
+    prod    = { vpc_name = "default" }
+  }
 }

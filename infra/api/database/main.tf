@@ -1,17 +1,20 @@
-# TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
-data "aws_vpc" "default" {
-  default = true
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
+data "aws_vpc" "network" {
+  filter {
+    name   = "tag:Name"
+    values = [module.project_config.network_configs[var.environment_name].vpc_name]
+  }
 }
 
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
-data "aws_subnets" "default" {
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "database" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.network.id]
   }
   filter {
-    name   = "default-for-az"
-    values = [true]
+    name   = "tag:subnet_type"
+    values = ["database"]
   }
 }
 
@@ -70,7 +73,7 @@ data "aws_security_groups" "aws_services" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.network.id]
   }
 }
 
@@ -87,8 +90,9 @@ module "database" {
   app_username      = local.database_config.app_username
   migrator_username = local.database_config.migrator_username
   schema_name       = local.database_config.schema_name
+  instance_count    = local.database_config.instance_count
 
-  vpc_id                         = data.aws_vpc.default.id
-  private_subnet_ids             = data.aws_subnets.default.ids
+  vpc_id                         = data.aws_vpc.network.id
+  private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 }
