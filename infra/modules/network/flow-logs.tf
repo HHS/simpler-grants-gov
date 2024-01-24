@@ -8,8 +8,14 @@ resource "random_pet" "this" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
 resource "aws_cloudwatch_log_group" "flow_log" {
-  name              = "vpc-flow-logs-to-cloudwatch-${random_pet.this.id}"
-  retention_in_days = 1827 # 5 years
+  name = "vpc-flow-logs-to-cloudwatch-${random_pet.this.id}"
+
+  # Conservatively retain logs for 5 years.
+  # Looser requirements may allow shorter retention periods
+  retention_in_days = 1827
+
+  # TODO(https://github.com/navapbc/template-infra/issues/164) Encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
