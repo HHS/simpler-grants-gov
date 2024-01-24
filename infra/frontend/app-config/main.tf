@@ -1,6 +1,6 @@
 locals {
   app_name                        = "frontend"
-  environments                    = ["dev", "prod"]
+  environments                    = ["dev", "staging", "prod"]
   project_name                    = module.project_config.project_name
   image_repository_name           = "${local.project_name}-${local.app_name}"
   has_database                    = false
@@ -13,8 +13,9 @@ locals {
   }
 
   environment_configs = {
-    dev  = module.dev_config
-    prod = module.prod_config
+    dev     = module.dev_config
+    staging = module.staging_config
+    prod    = module.prod_config
   }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
@@ -46,9 +47,10 @@ locals {
   #     prod    = "prod"
   #   }
   account_names_by_environment = {
-    shared = "simpler-grants-gov"
-    dev    = "simpler-grants-gov"
-    prod   = "simpler-grants-gov"
+    shared  = "simpler-grants-gov"
+    dev     = "simpler-grants-gov"
+    staging = "simpler-grants-gov"
+    prod    = "simpler-grants-gov"
   }
 }
 

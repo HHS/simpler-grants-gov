@@ -1,16 +1,34 @@
-# TODO(https://github.com/navapbc/template-infra/issues/152) use non-default VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
-# TODO(https://github.com/navapbc/template-infra/issues/152) use private subnets
-data "aws_subnets" "default" {
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
+data "aws_vpc" "network" {
   filter {
-    name   = "default-for-az"
-    values = [true]
+    name   = "tag:Name"
+    values = [module.project_config.network_configs[var.environment_name].vpc_name]
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+  filter {
+    name   = "tag:subnet_type"
+    values = ["private"]
+  }
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+  filter {
+    name   = "tag:subnet_type"
+    values = ["public"]
+  }
+}
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
@@ -25,6 +43,8 @@ locals {
   })
 
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
+
+  is_temporary = startswith(terraform.workspace, "t-")
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
@@ -108,10 +128,12 @@ output "environment_name" {
 module "service" {
   source                = "../../modules/service"
   service_name          = local.service_name
+  is_temporary          = local.is_temporary
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.default.id
-  subnet_ids            = data.aws_subnets.default.ids
+  vpc_id                = data.aws_vpc.network.id
+  public_subnet_ids     = data.aws_subnets.public.ids
+  private_subnet_ids    = data.aws_subnets.private.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
   cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
   hostname              = module.app_config.hostname
