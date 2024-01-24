@@ -24,7 +24,8 @@ resource "aws_iam_role" "vpc_flow_log_cloudwatch" {
   assume_role_policy = data.aws_iam_policy_document.flow_log_cloudwatch_assume_role.json
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+# terraform docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+# aws docs: https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-cwl.html
 data "aws_iam_policy_document" "flow_log_cloudwatch_assume_role" {
   statement {
     principals {
@@ -48,7 +49,8 @@ resource "aws_iam_policy" "vpc_flow_log_cloudwatch" {
   policy      = data.aws_iam_policy_document.vpc_flow_log_cloudwatch.json
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+# terraform docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
+# aws docs: https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-cwl.html
 data "aws_iam_policy_document" "vpc_flow_log_cloudwatch" {
   statement {
     sid = "AWSVPCFlowLogsPushToCloudWatch"
@@ -61,6 +63,7 @@ data "aws_iam_policy_document" "vpc_flow_log_cloudwatch" {
       "logs:DescribeLogStreams",
     ]
 
+    # checkov:skip=CKV_AWS_111:This is literally the AWS reccomended way to do this. Also its just logs.
     resources = ["*"]
   }
 }
