@@ -34,6 +34,7 @@ class BaseMetric(Generic[Dataset]):
     CHART_PNG = "chart-static.png"
     CHART_HTML = "chart-interactive.html"
     RESULTS_CSV = "results.csv"
+    DATASET_CSV = "source-data.csv"
 
     def __init__(self, dataset: Dataset) -> None:
         """Initialize and calculate the metric from the input dataset."""
@@ -77,6 +78,15 @@ class BaseMetric(Generic[Dataset]):
         self.results.to_csv(output_path)
         return output_path
 
+    def export_dataset(self, output_dir: Path = Path("data")) -> Path:
+        """Export self.dataset to a csv file."""
+        # make sure the parent directory exists
+        output_dir.mkdir(exist_ok=True, parents=True)
+        output_path = output_dir / self.DATASET_CSV
+        # export results dataframe to a csv
+        self.dataset.to_csv(output_path)
+        return output_path
+
     def export_chart_to_html(self, output_dir: Path = Path("data")) -> Path:
         """Export the plotly chart in self.chart to a png file."""
         # make sure the parent directory exists
@@ -111,10 +121,12 @@ class BaseMetric(Generic[Dataset]):
     ) -> None:
         """Upload copies of the results and chart to a slack channel."""
         results_csv = self.export_results(output_dir)
+        dataset_csv = self.export_dataset(output_dir)
         chart_png = self.export_chart_to_png(output_dir)
         chart_html = self.export_chart_to_html(output_dir)
         files = [
             FileMapping(path=str(results_csv), name=results_csv.name),
+            FileMapping(path=str(dataset_csv), name=dataset_csv.name),
             FileMapping(path=str(chart_png), name=chart_png.name),
             FileMapping(path=str(chart_html), name=chart_html.name),
         ]
