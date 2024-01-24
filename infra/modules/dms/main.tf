@@ -8,10 +8,10 @@ resource "aws_iam_policy" "dms_access" {
 }
 resource "aws_iam_role" "dms_access" {
   name               = "dms-access-role"
-  assume_role_policy = data.aws_iam_policy_document.dms-assume-role-policy.json
+  assume_role_policy = data.aws_iam_policy_document.dms_assume_role_policy.json
 }
 
-data "aws_iam_policy_document" "dms-assume-role-policy" {
+data "aws_iam_policy_document" "dms_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
