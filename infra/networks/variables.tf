@@ -3,3 +3,8 @@ variable "has_database" {
   description = "whether the application has a database"
   default     = true
 }
+
+variable "environment_name" {
+  type        = string
+  description = "name of the application environment"
+}
