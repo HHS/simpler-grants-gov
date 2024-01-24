@@ -1,10 +1,8 @@
 import logging
 import os
-from typing import Any, Optional, Tuple
+from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
-from flask import g
-from werkzeug.exceptions import Unauthorized
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -15,7 +13,7 @@ from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities import opportunity_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
-from src.auth.api_key_auth import User, get_app_security_scheme
+from src.auth.api_key_auth import get_app_security_scheme
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +41,6 @@ def create_app() -> APIFlask:
     register_index(app)
 
     return app
-
-
-def current_user(is_user_expected: bool = True) -> Optional[User]:
-    current = g.get("current_user")
-    if is_user_expected and current is None:
-        logger.error("No current user found for request")
-        raise Unauthorized
-    return current
 
 
 def setup_logging(app: APIFlask) -> None:
