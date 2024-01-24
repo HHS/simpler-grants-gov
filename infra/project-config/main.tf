@@ -19,7 +19,7 @@ locals {
 
   network_configs = {
     # TODO(https://github.com/HHS/simpler-grants-gov/issues/1051) deploy to a non-default VPC in every environment
-    dev     = { vpc_name = "default" }
+    dev     = { vpc_name = "dev" }
     staging = { vpc_name = "staging" }
     prod    = { vpc_name = "default" }
   }
