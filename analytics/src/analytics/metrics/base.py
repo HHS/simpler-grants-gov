@@ -2,12 +2,15 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 import pandas as pd
 from plotly.graph_objects import Figure
 
+from analytics.datasets.base import BaseDataset
 from analytics.integrations.slack import FileMapping, SlackBot
+
+Dataset = TypeVar("Dataset", bound=BaseDataset)
 
 
 class Unit(Enum):
@@ -25,15 +28,16 @@ class Statistic:
     suffix: str = ""
 
 
-class BaseMetric:
+class BaseMetric(Generic[Dataset]):
     """Base class for all metrics."""
 
     CHART_PNG = "chart-static.png"
     CHART_HTML = "chart-interactive.html"
     RESULTS_CSV = "results.csv"
 
-    def __init__(self) -> None:
+    def __init__(self, dataset: Dataset) -> None:
         """Initialize and calculate the metric from the input dataset."""
+        self.dataset = dataset
         self.results = self.calculate()
         self.stats = self.get_stats()
         self._chart: Figure | None = None
