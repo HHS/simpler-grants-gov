@@ -468,6 +468,7 @@ class TestExportMethods:
         ("method", "file_name"),
         [
             ("export_results", "RESULTS_CSV"),
+            ("export_dataset", "DATASET_CSV"),
             ("export_chart_to_html", "CHART_HTML"),
             ("export_chart_to_png", "CHART_PNG"),
         ],
@@ -496,6 +497,7 @@ class TestExportMethods:
         ("method", "file_name"),
         [
             ("export_results", "RESULTS_CSV"),
+            ("export_dataset", "DATASET_CSV"),
             ("export_chart_to_html", "CHART_HTML"),
             ("export_chart_to_png", "CHART_PNG"),
         ],
@@ -534,6 +536,6 @@ def test_post_to_slack(
         output_dir=tmp_path,
     )
     # validation - check that output files exist
-    for output in ["RESULTS_CSV", "CHART_PNG", "CHART_HTML"]:
+    for output in ["RESULTS_CSV", "DATASET_CSV", "CHART_PNG", "CHART_HTML"]:
         output_path = tmp_path / getattr(sample_burndown, output)
         assert output_path.exists() is True
