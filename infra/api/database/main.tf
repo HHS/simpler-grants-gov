@@ -97,4 +97,5 @@ module "database" {
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  db_subnet_group_name           = var.environment_name
 }
