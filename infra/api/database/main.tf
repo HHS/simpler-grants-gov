@@ -65,18 +65,6 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
 module "database" {
   source = "../../modules/database"
 
@@ -92,7 +80,6 @@ module "database" {
   schema_name       = local.database_config.schema_name
   instance_count    = local.database_config.instance_count
 
-  vpc_id                         = data.aws_vpc.network.id
-  private_subnet_ids             = data.aws_subnets.database.ids
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  vpc_id             = data.aws_vpc.network.id
+  private_subnet_ids = data.aws_subnets.database.ids
 }

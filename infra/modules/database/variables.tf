@@ -70,8 +70,3 @@ variable "private_subnet_ids" {
   type        = list(any)
   description = "list of private subnet IDs to put the role provisioner and role checker lambda functions in"
 }
-
-variable "aws_services_security_group_id" {
-  type        = string
-  description = "Security group ID for VPC endpoints that access AWS Services"
-}
