@@ -29,4 +29,9 @@ module "aws_vpc" {
 
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  enable_flow_log                  = true
+  flow_log_destination_type        = "cloud-watch-logs"
+  flow_log_destination_arn         = aws_cloudwatch_log_group.flow_log.arn
+  flow_log_cloudwatch_iam_role_arn = aws_iam_role.vpc_flow_log_cloudwatch.arn
 }
