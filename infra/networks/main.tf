@@ -52,7 +52,7 @@ module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name
   database_subnet_group_name              = var.environment_name
-  aws_services_security_group_name_prefix = var.environment_name
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
   second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
 }
 
