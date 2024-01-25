@@ -10,6 +10,9 @@ locals {
     # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
     ["ecr.api", "ecr.dkr", "s3", "logs"],
 
+    # AWS service endpoint(s) reccommended by AWS for all VPCs
+    ["ec2"],
+
     # Feature flags with AWS Evidently
     ["evidently", "evidently-dataplane"],
 
