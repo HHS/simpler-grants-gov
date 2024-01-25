@@ -61,6 +61,12 @@ variable "instance_count" {
   }
 }
 
+variable "enable_http_endpoint" {
+  description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
+  type        = bool
+  default     = false
+}
+
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
