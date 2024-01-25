@@ -43,6 +43,7 @@ resource "aws_rds_cluster" "db" {
   iam_database_authentication_enabled = true
   deletion_protection                 = true
   copy_tags_to_snapshot               = true
+  enable_http_endpoint                = var.enable_http_endpoint
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
