@@ -1,14 +1,9 @@
 # File contents are based on the following example:
 # https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/vpc-flow-logs/main.tf
 
-# https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet
-resource "random_pet" "this" {
-  length = 3
-}
-
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
 resource "aws_cloudwatch_log_group" "flow_log" {
-  name = "vpc-flow-logs-to-cloudwatch-${random_pet.this.id}"
+  name_prefix = "vpc-flow-logs-to-cloudwatch"
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods
