@@ -17,6 +17,7 @@ from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.opportunity_models as opportunity_models
+import src.db.models.staging.staging_topportunity_models as staging_topportunity_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import OpportunityCategory
 
@@ -85,3 +86,39 @@ class OpportunityFactory(BaseFactory):
     is_draft = False  # Because we filter out drafts, just default these to False
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
+
+
+####################################
+# Staging Table Factories
+####################################
+
+
+class StagingTopportunityFactory(BaseFactory):
+    class Meta:
+        model = staging_topportunity_models.StagingTopportunity
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
+    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+
+    owningagency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
+
+    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategory)
+    # only set the category explanation if category is Other
+    category_explanation = factory.Maybe(
+        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategory.OTHER),
+        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        no_declaration=None,
+    )
+
+    is_draft = "N"  # Because we filter out drafts, just default these to False
+
+    revision_number = 0
+
+    # Make sure updated_at is after created_at just to make the data realistic
+    created_at = factory.Faker("date_time")
+    updated_at = factory.LazyAttribute(lambda o: fake.date_time_between(start_date=o.created_at, end_date="now"))
+
+    created_date = factory.LazyAttribute(lambda o: o.created_at.date())
+    last_upd_date = factory.LazyAttribute(lambda o: o.updated_at.date())

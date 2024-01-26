@@ -3,8 +3,8 @@ import dataclasses
 import pytest
 
 from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.opportunity_models import Opportunity
-from tests.src.db.models.factories import OpportunityFactory
+from src.db.models.staging.staging_topportunity_models import StagingTopportunity
+from tests.src.db.models.factories import StagingTopportunityFactory
 
 
 @dataclasses.dataclass
@@ -62,7 +62,7 @@ def validate_search_response(
 
 @pytest.fixture
 def truncate_opportunities(db_session):
-    db_session.query(Opportunity).delete()
+    db_session.query(StagingTopportunity).delete()
 
 
 @pytest.fixture
@@ -70,18 +70,20 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     # Create a handful of opportunities for testing
     # Once we've built out the endpoint more, we'll probably want to make this more robust.
 
-    OpportunityFactory.create(opportunity_title="Find me abc", category=OpportunityCategory.EARMARK)
-    OpportunityFactory.create(
-        opportunity_title="Find me xyz", category=OpportunityCategory.CONTINUATION
+    StagingTopportunityFactory.create(
+        opptitle="Find me abc", oppcategory=OpportunityCategory.EARMARK
+    )
+    StagingTopportunityFactory.create(
+        opptitle="Find me xyz", oppcategory=OpportunityCategory.CONTINUATION
     )
 
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
-    OpportunityFactory.create(category=OpportunityCategory.DISCRETIONARY)
+    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
+    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
 
-    OpportunityFactory.create(category=OpportunityCategory.MANDATORY)
+    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.MANDATORY)
 
     # Add a few opportunities with is_draft=True which should never be found
-    OpportunityFactory.create_batch(size=10, is_draft=True)
+    StagingTopportunityFactory.create_batch(size=10, is_draft="Y")
 
 
 #####################################
@@ -234,7 +236,7 @@ def test_opportunity_search_paging_and_sorting_200(
     truncate_opportunities,
 ):
     # This test is just focused on testing the sorting and pagination
-    OpportunityFactory.create_batch(size=25)
+    StagingTopportunityFactory.create_batch(size=25)
 
     resp = client.post(
         "/v0/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -384,7 +386,7 @@ def test_opportunity_search_feature_flag_invalid_value_422(
     ],
 )
 def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params):
-    opportunity = OpportunityFactory.create(**opportunity_params)
+    opportunity = StagingTopportunityFactory.create(**opportunity_params)
 
     resp = client.get(
         f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
@@ -394,9 +396,9 @@ def test_get_opportunity_200(client, api_auth_token, enable_factory_create, oppo
     response_data = resp.get_json()["data"]
 
     assert response_data["opportunity_id"] == opportunity.opportunity_id
-    assert response_data["opportunity_title"] == opportunity.opportunity_title
-    assert response_data["agency"] == opportunity.agency
-    assert response_data["category"] == opportunity.category
+    assert response_data["opportunity_title"] == opportunity.opptitle
+    assert response_data["agency"] == opportunity.owningagency
+    assert response_data["category"] == opportunity.oppcategory
     assert response_data["category_explanation"] == opportunity.category_explanation
     assert response_data["revision_number"] == opportunity.revision_number
     assert response_data["modified_comments"] == opportunity.modified_comments
@@ -410,7 +412,7 @@ def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportun
 
 def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_factory_create):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
-    opportunity = OpportunityFactory.create(is_draft=True)
+    opportunity = StagingTopportunityFactory.create(is_draft=True)
 
     resp = client.get(
         f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
