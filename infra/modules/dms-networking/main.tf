@@ -1,6 +1,6 @@
 locals {
-  our_target_cidr_block   = "172.31.0.0/16" # our [Nava] cidr block, where the target database for the DMS is located
-  their_source_cidr_block = "10.220.0.0/16" # their [MicroHealth] cidr block, where the origin database for the DMS is located
+  our_target_cidr_block   = var.dms_target_cidr_block # our [Nava] cidr block, where the target database for the DMS is located
+  their_source_cidr_block = var.dms_source_cidr_block # their [MicroHealth] cidr block, where the origin database for the DMS is located
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter
