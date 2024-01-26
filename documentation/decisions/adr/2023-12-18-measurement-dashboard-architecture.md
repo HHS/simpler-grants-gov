@@ -80,6 +80,7 @@ The steps for publishing a dashboard using this short-term strategy would likely
 
 - In the short-term, requires a higher level technical expertise to build even basic dashboards.
 - In the short-term, does not easily support ad hoc reporting that is accessible to non-engineers.
+- In the short-term, because s3 does not provide fine-tuned access control to publicly accessible buckets, we'll have to limit our metrics to non-sensitive data or post only the aggregated results of metrics calculated from sensitive data.
 - Once the long-term approach has been adopted, it may require reimplementing some ETL pipelines and/or dashboards that were built in the short-term.
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
