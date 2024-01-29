@@ -22,7 +22,7 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.6
+          terraform_version: 1.7.1
           terraform_wrapper: false
 
       - uses: actions/setup-go@v3
