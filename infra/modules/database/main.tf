@@ -55,6 +55,7 @@ resource "aws_rds_cluster" "db" {
   }
 
   vpc_security_group_ids = [aws_security_group.db.id]
+  db_subnet_group_name   = var.db_subnet_group_name
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
 }
@@ -65,6 +66,7 @@ resource "aws_rds_cluster_instance" "instance" {
   identifier                            = "${var.name}-instance-${count.index}"
   cluster_identifier                    = aws_rds_cluster.db.id
   instance_class                        = "db.serverless"
+  db_subnet_group_name                  = var.db_subnet_group_name
   engine                                = aws_rds_cluster.db.engine
   engine_version                        = aws_rds_cluster.db.engine_version
   promotion_tier                        = 0
