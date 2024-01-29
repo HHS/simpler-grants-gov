@@ -15,7 +15,7 @@ from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
-class SprintBurndown(BaseMetric):
+class SprintBurndown(BaseMetric[SprintBoard]):
     """Calculates the running total of open issues per day in the sprint."""
 
     def __init__(
@@ -33,7 +33,7 @@ class SprintBurndown(BaseMetric):
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
         self.unit = unit
-        super().__init__()
+        super().__init__(dataset)
 
     def calculate(self) -> pd.DataFrame:
         """
