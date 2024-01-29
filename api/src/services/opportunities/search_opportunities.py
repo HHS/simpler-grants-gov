@@ -8,6 +8,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.staging_topportunity_models import StagingTopportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.services.opportunities.opportunity_service_shared import convert_staging_opp_to_regular
 
 
 class SearchOpportunityParams(PaginationParams):
@@ -58,4 +59,4 @@ def search_opportunities(
     opportunities = paginator.page_at(page_offset=search_params.paging.page_offset)
     pagination_info = PaginationInfo.from_pagination_models(search_params, paginator)
 
-    return [opp.get_as_opportunity() for opp in opportunities], pagination_info
+    return [convert_staging_opp_to_regular(opp) for opp in opportunities], pagination_info

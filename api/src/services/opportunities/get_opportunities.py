@@ -4,6 +4,7 @@ import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.staging_topportunity_models import StagingTopportunity
+from src.services.opportunities.opportunity_service_shared import convert_staging_opp_to_regular
 
 
 def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
@@ -17,4 +18,4 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     if opportunity is None:
         raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
 
-    return opportunity.get_as_opportunity()
+    return convert_staging_opp_to_regular(opportunity)
