@@ -26,7 +26,6 @@ class StagingTopportunity(Base, TimestampMixin):
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None] = mapped_column(VARCHAR(length=4000))
 
-
     publisheruid: Mapped[str | None] = mapped_column(VARCHAR(length=1020))
     publisher_profile_id: Mapped[int | None]
 
@@ -34,7 +33,6 @@ class StagingTopportunity(Base, TimestampMixin):
     last_upd_date: Mapped[date | None]
     creator_id: Mapped[str | None] = mapped_column(VARCHAR(length=200))
     created_date: Mapped[date | None]
-
 
     def get_as_opportunity(self) -> Opportunity:
         # Using this table directly from our opportunity endpoint is temporary
@@ -52,8 +50,11 @@ class StagingTopportunity(Base, TimestampMixin):
             opportunity_category = OpportunityCategory(self.oppcategory)
 
         # convert the update/create dates to datetime at 00:00:00
-        created_at = datetime.combine(self.created_date, datetime.min.time())
-        updated_at = datetime.combine(self.last_upd_date, datetime.min.time())
+        created_at, updated_at = None, None
+        if self.created_date:
+            created_at = datetime.combine(self.created_date, datetime.min.time())
+        if self.last_upd_date:
+            updated_at = datetime.combine(self.last_upd_date, datetime.min.time())
 
         return Opportunity(
             opportunity_id=self.opportunity_id,
