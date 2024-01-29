@@ -17,7 +17,7 @@ from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
 import src.db.models.opportunity_models as opportunity_models
-import src.db.models.staging.staging_topportunity_models as staging_topportunity_models
+import src.db.models.transfer.transfer_topportunity_models as transfer_topportunity_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import OpportunityCategory
 
@@ -89,13 +89,13 @@ class OpportunityFactory(BaseFactory):
 
 
 ####################################
-# Staging Table Factories
+# Transfer Table Factories
 ####################################
 
 
-class StagingTopportunityFactory(BaseFactory):
+class TransferTopportunityFactory(BaseFactory):
     class Meta:
-        model = staging_topportunity_models.StagingTopportunity
+        model = transfer_topportunity_models.TransferTopportunity
 
     opportunity_id = factory.Sequence(lambda n: n)
 

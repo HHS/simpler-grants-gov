@@ -7,7 +7,7 @@ import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.staging.staging_topportunity_models import StagingTopportunity
+from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
@@ -27,12 +27,12 @@ def _build_opportunities(db_session: db.Session) -> None:
     factories.OpportunityFactory.create_batch(size=25)
 
     # Also seed the topportunity table for now in the same way
-    max_opportunity_id = db_session.query(func.max(StagingTopportunity.opportunity_id)).scalar()
+    max_opportunity_id = db_session.query(func.max(TransferTopportunity.opportunity_id)).scalar()
     if max_opportunity_id is None:
         max_opportunity_id = 0
 
-    factories.StagingTopportunityFactory.reset_sequence(value=max_opportunity_id + 1)
-    factories.StagingTopportunityFactory.create_batch(size=25)
+    factories.TransferTopportunityFactory.reset_sequence(value=max_opportunity_id + 1)
+    factories.TransferTopportunityFactory.create_batch(size=25)
 
 
 def seed_local_db() -> None:

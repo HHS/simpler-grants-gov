@@ -3,8 +3,8 @@ import dataclasses
 import pytest
 
 from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.staging.staging_topportunity_models import StagingTopportunity
-from tests.src.db.models.factories import StagingTopportunityFactory
+from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from tests.src.db.models.factories import TransferTopportunityFactory
 
 
 @dataclasses.dataclass
@@ -62,7 +62,7 @@ def validate_search_response(
 
 @pytest.fixture
 def truncate_opportunities(db_session):
-    db_session.query(StagingTopportunity).delete()
+    db_session.query(TransferTopportunity).delete()
 
 
 @pytest.fixture
@@ -70,20 +70,20 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     # Create a handful of opportunities for testing
     # Once we've built out the endpoint more, we'll probably want to make this more robust.
 
-    StagingTopportunityFactory.create(
+    TransferTopportunityFactory.create(
         opptitle="Find me abc", oppcategory=OpportunityCategory.EARMARK
     )
-    StagingTopportunityFactory.create(
+    TransferTopportunityFactory.create(
         opptitle="Find me xyz", oppcategory=OpportunityCategory.CONTINUATION
     )
 
-    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
-    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
 
-    StagingTopportunityFactory.create(oppcategory=OpportunityCategory.MANDATORY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.MANDATORY)
 
     # Add a few opportunities with is_draft=True which should never be found
-    StagingTopportunityFactory.create_batch(size=10, is_draft="Y")
+    TransferTopportunityFactory.create_batch(size=10, is_draft="Y")
 
 
 #####################################
@@ -236,7 +236,7 @@ def test_opportunity_search_paging_and_sorting_200(
     truncate_opportunities,
 ):
     # This test is just focused on testing the sorting and pagination
-    StagingTopportunityFactory.create_batch(size=25)
+    TransferTopportunityFactory.create_batch(size=25)
 
     resp = client.post(
         "/v0/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -386,7 +386,7 @@ def test_opportunity_search_feature_flag_invalid_value_422(
     ],
 )
 def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params):
-    opportunity = StagingTopportunityFactory.create(**opportunity_params)
+    opportunity = TransferTopportunityFactory.create(**opportunity_params)
 
     resp = client.get(
         f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
@@ -412,7 +412,7 @@ def test_get_opportunity_not_found_404(client, api_auth_token, truncate_opportun
 
 def test_get_opportunity_not_found_is_draft_404(client, api_auth_token, enable_factory_create):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
-    opportunity = StagingTopportunityFactory.create(is_draft=True)
+    opportunity = TransferTopportunityFactory.create(is_draft=True)
 
     resp = client.get(
         f"/v0/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}

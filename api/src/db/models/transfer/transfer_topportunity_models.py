@@ -6,8 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.db.models.base import Base, TimestampMixin
 
 
-class StagingTopportunity(Base, TimestampMixin):
-    __tablename__ = "staging_topportunity"
+class TransferTopportunity(Base, TimestampMixin):
+    __tablename__ = "transfer_topportunity"
 
     opportunity_id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
