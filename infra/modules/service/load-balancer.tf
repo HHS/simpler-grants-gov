@@ -33,7 +33,6 @@ resource "aws_lb" "alb" {
 
   lifecycle {
     create_before_destroy = true
-    prevent_destroy       = !var.is_temporary
   }
 }
 
