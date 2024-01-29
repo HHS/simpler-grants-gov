@@ -5,7 +5,7 @@
 # ALB for an app running in ECS
 resource "aws_lb" "alb" {
   depends_on      = [aws_s3_bucket_policy.access_logs]
-  name            = var.service_name
+  name            = "${var.service_name}-lb"
   idle_timeout    = "120"
   internal        = false
   security_groups = [aws_security_group.alb.id]
@@ -29,6 +29,11 @@ resource "aws_lb" "alb" {
     bucket  = aws_s3_bucket.access_logs.id
     prefix  = "${var.service_name}-lb"
     enabled = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    prevent_destroy       = true
   }
 }
 

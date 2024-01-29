@@ -11,6 +11,10 @@ resource "aws_security_group" "role_manager" {
   name_prefix = "${var.name}-role-manager"
   description = "Database role manager security group"
   vpc_id      = var.vpc_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
