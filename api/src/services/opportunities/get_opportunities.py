@@ -3,7 +3,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.services.opportunities.opportunity_service_shared import convert_transfer_opp_to_regular
 
 

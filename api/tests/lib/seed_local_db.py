@@ -7,7 +7,7 @@ import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)

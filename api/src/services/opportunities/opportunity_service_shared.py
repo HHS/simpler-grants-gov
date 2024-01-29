@@ -2,7 +2,7 @@ from datetime import datetime
 
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from src.db.models.transfer.topportunity_models import TransferTopportunity
 
 
 def convert_transfer_opp_to_regular(transfer_opportunity: TransferTopportunity) -> Opportunity:

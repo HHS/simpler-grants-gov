@@ -5,7 +5,7 @@ from sqlalchemy import asc, desc, select
 import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.services.opportunities.opportunity_service_shared import convert_transfer_opp_to_regular

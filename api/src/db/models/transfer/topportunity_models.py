@@ -5,6 +5,15 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.models.base import Base, TimestampMixin
 
+##########
+# NOTES
+##########
+"""
+These tables don't follow all of our normal conventions for tables as they
+aim to match the schema of the current Oracle database. So this means we
+use VARCHAR instead of TEXT at the moment, as well as have booleans stored as character columns.
+"""
+
 
 class TransferTopportunity(Base, TimestampMixin):
     __tablename__ = "transfer_topportunity"

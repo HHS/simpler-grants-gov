@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from src.constants.lookup_constants import OpportunityCategory
-from src.db.models.transfer.transfer_topportunity_models import TransferTopportunity
+from src.db.models.transfer.topportunity_models import TransferTopportunity
 from tests.src.db.models.factories import TransferTopportunityFactory
 
 
