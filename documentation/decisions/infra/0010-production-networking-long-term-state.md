@@ -65,7 +65,7 @@ Nava and MicroHealth coordinate a day where the new prod VPC load balancer will 
 This option:
 
 - Is an efficient use of both Nava and MicroHealth's time, but requires pre-planning.
-- Has a rather long downtime window.
+- Has a rather long downtime window of about 90 minutes max.
 
 #### 2b. Prepare A New Prod Load Balancer, Wait For DNS Changeover
 
