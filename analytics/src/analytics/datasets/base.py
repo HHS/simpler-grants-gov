@@ -1,4 +1,5 @@
 """Base class for all datasets which provides an interface for metrics."""
+from pathlib import Path
 from typing import Self
 
 import pandas as pd
@@ -23,7 +24,7 @@ class BaseDataset:
 
     def to_csv(
         self,
-        output_file: str,
+        output_file: Path,
         *,  # force include_index to be passed as keyword instead of positional arg
         include_index: bool = False,
     ) -> None:
