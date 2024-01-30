@@ -1,6 +1,5 @@
 # DMS replication instance and endpoint connections
 
-
 resource "aws_dms_replication_instance" "simpler_db" {
   allocated_storage            = 50
   apply_immediately            = true
@@ -19,15 +18,15 @@ resource "aws_dms_replication_instance" "simpler_db" {
 
 }
 
-# TODO: find way to pull credentials
 resource "aws_dms_endpoint" "target_endpoint" {
   certificate_arn                 = "arn:aws:dms:us-east-1:315341936575:cert:GWOIQRTIVQVRBL5ERMCKTUPHMM33MMDGIP57J4I"
   database_name                   = "app"
   endpoint_id                     = "api-dev-primary"
   endpoint_type                   = "source"
   engine_name                     = "aurora-postgresql"
-  secrets_manager_access_role_arn = "" # username, pw, server name and port should be pulled using this role
+  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
   ssl_mode                        = "verify-ca"
+  secrets_manager_arn             = data.aws_secretsmanager_secret.target_db.arn
 }
 
 resource "aws_dms_endpoint" "source_endpoint" {
@@ -36,5 +35,17 @@ resource "aws_dms_endpoint" "source_endpoint" {
   endpoint_type                   = "source"
   engine_name                     = "oracle"
   ssl_mode                        = "none"
-  secrets_manager_access_role_arn = "" # username, pw, server name and port should be pulled using this role
+  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
+  secrets_manager_arn             = data.aws_secretsmanager_secret.source_db.arn
+}
+
+data "aws_secretsmanager_secret" "target_db" {
+  # this secret was created and managed by RDS
+  name = "rds!cluster-c91a63ac-db0e-404e-84ce-525d6c841035"
+}
+data "aws_secretsmanager_secret" "source_db" {
+  name = "dev/grants_gov_source_db"
+}
+data "aws_iam_role" "dms_access" {
+  name = "dms-access-role"
 }
