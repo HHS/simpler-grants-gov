@@ -14,4 +14,9 @@ The diagrams generated are based on our SQLAlchemy models, and not the database 
 * Property fields are SQLAlchemy only and generally represent relationships (ie. values fetched via a foreign key `join`)
 
 # Files
+
+## Full Schema
 ![Postgres ERD](full-schema.png)
+
+## Transfer Table Schema
+![Transfer Table ERD](transfer-schema.png)
