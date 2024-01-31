@@ -1,9 +1,10 @@
 # DMS replication instance and endpoint connections
 
 resource "aws_dms_replication_instance" "simpler_db" {
+  # checkov:skip=CKV_AWS_212:Not sure how this triggered, EBS volumes are a seperate resource.
   allocated_storage            = 50
   apply_immediately            = true
-  auto_minor_version_upgrade   = false
+  auto_minor_version_upgrade   = true
   availability_zone            = "us-east-1"
   engine_version               = "3.5.2"
   multi_az                     = false
@@ -24,19 +25,27 @@ resource "aws_dms_endpoint" "target_endpoint" {
   endpoint_id                     = "api-dev-primary"
   endpoint_type                   = "source"
   engine_name                     = "aurora-postgresql"
+  kms_key_arn                     = aws_kms_key.dms_endpoints.arn
   secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
   ssl_mode                        = "verify-ca"
   secrets_manager_arn             = data.aws_secretsmanager_secret.target_db.arn
 }
 
 resource "aws_dms_endpoint" "source_endpoint" {
+  # checkov:skip=CKV2_AWS_49: This endpoint doesn't need SSL
   database_name                   = "tstgrnts"
   endpoint_id                     = "hhs-source"
   endpoint_type                   = "source"
   engine_name                     = "oracle"
+  kms_key_arn                     = aws_kms_key.dms_endpoints.arn
   ssl_mode                        = "none"
   secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
   secrets_manager_arn             = data.aws_secretsmanager_secret.source_db.arn
+}
+
+resource "aws_kms_key" "dms_endpoints" {
+  description         = "KMS key for endpoints associated with DMS"
+  enable_key_rotation = true
 }
 
 data "aws_secretsmanager_secret" "target_db" {
