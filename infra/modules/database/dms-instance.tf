@@ -2,10 +2,11 @@
 
 resource "aws_dms_replication_instance" "simpler_db" {
   # checkov:skip=CKV_AWS_212:Not sure how this triggered, EBS volumes are a seperate resource.
-  allocated_storage            = 50
-  apply_immediately            = true
-  auto_minor_version_upgrade   = true
-  availability_zone            = "us-east-1"
+  allocated_storage          = 50
+  apply_immediately          = true
+  auto_minor_version_upgrade = true
+  # needs to refer to the actual zone not whole region like it was before: https://github.com/hashicorp/terraform-provider-aws/issues/29198#issuecomment-1422457911
+  availability_zone            = "us-east-1a"
   engine_version               = "3.5.2"
   multi_az                     = false
   preferred_maintenance_window = "sun:10:30-sun:14:30"
