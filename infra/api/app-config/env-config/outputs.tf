@@ -9,6 +9,7 @@ output "database_config" {
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
     instance_count              = var.database_instance_count
+    enable_http_endpoint        = var.database_enable_http_endpoint
   } : null
 }
 

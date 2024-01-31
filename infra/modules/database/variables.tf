@@ -7,6 +7,11 @@ variable "name" {
   }
 }
 
+variable "db_subnet_group_name" {
+  description = "name of the database subnet group to create that will be used by the database cluster."
+  type        = string
+}
+
 variable "access_policy_name" {
   description = "name of the IAM policy to create that will be provide the ability to connect to the database as a user that will have read/write access."
   type        = string
@@ -59,6 +64,12 @@ variable "instance_count" {
     condition     = var.instance_count >= 1
     error_message = "The instance_count must be at least 1."
   }
+}
+
+variable "enable_http_endpoint" {
+  description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
+  type        = bool
+  default     = false
 }
 
 variable "vpc_id" {

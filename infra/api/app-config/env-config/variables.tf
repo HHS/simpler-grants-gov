@@ -22,6 +22,12 @@ variable "database_instance_count" {
   default     = 1
 }
 
+variable "database_enable_http_endpoint" {
+  description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
+  type        = bool
+  default     = false
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
