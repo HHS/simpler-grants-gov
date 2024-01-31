@@ -1,7 +1,7 @@
 # Production Networking Long Term State
 
 - **Status:** Active
-- **Last Modified:** 2024-01-29
+- **Last Modified:** 2024-01-31
 - **Related Issue:** [#1051](https://github.com/HHS/simpler-grants-gov/issues/1051)
 - **Author:** Kai Siren
 - **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa, + ???
@@ -76,3 +76,10 @@ Nava prepares a new production load balancer URL inside the prod VPC, by deployi
   - live
   - prod-0
 - The application would have no downtime.
+
+## Decison State `2024-01-31`
+
+After some time and feedback from Alsia Plybeah, the current plan is to go with option 2b. - with a new application called `prod-live`. This is meant to incorporate two conclusions:
+
+- The fact that we will eventually want a prod backup environment, and that we could call that environment `prod-backup` and place it in a different region.
+- Learnings from other collaborations between Nava and MicroHealth, with regards to the ability to coordinate technical projects between the two organizations.
