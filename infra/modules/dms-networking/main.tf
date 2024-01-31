@@ -17,3 +17,7 @@ data "aws_ssm_parameter" "dms_peer_vpc_id" {
 data "aws_vpc" "main" {
   id = var.vpc_id
 }
+
+data "aws_route_tables" "rts" {
+  vpc_id = var.vpc_id
+}
