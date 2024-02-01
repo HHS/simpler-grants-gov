@@ -6,8 +6,9 @@ resource "aws_iam_policy" "dms_access" {
   name   = "dms-access"
   policy = data.aws_iam_policy_document.dms_access.json
 }
+
 resource "aws_iam_role" "dms_access" {
-  name               = "dms-access-role"
+  name_prefix        = "dms-access-role"
   assume_role_policy = data.aws_iam_policy_document.dms_assume_role_policy.json
 }
 
@@ -17,8 +18,11 @@ data "aws_iam_policy_document" "dms_assume_role_policy" {
     effect  = "Allow"
 
     principals {
-      identifiers = ["dms.amazonaws.com"]
-      type        = "Service"
+      identifiers = [
+        "dms.amazonaws.com",
+        "dms.${data.aws_region.current.name}.amazonaws.com",
+      ]
+      type = "Service"
     }
   }
 }
@@ -35,7 +39,7 @@ data "aws_iam_policy_document" "dms_access" {
     sid       = "AllowDMSAccess"
     effect    = "Allow"
     actions   = ["dms:*"]
-    resources = [""] # arn for the actual dms service goes here
+    resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
   }
 
   statement {
@@ -85,6 +89,6 @@ data "aws_iam_policy_document" "dms_access" {
       "logs:ilterLogEvents",
       "logs:GetLogEvents"
     ]
-    resources = ["*"] # don't have log group yet
+    resources = ["*"]
   }
 }
