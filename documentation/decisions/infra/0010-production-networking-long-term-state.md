@@ -1,10 +1,10 @@
 # Production Networking Long Term State
 
 - **Status:** Active
-- **Last Modified:** 2024-01-31
+- **Last Modified:** 2024-02-01
 - **Related Issue:** [#1051](https://github.com/HHS/simpler-grants-gov/issues/1051)
 - **Author:** Kai Siren
-- **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa, + ???
+- **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa
 
 ## Context and Problem Statement
 
@@ -83,3 +83,7 @@ After some time and feedback from Alsia Plybeah, the current plan is to go with 
 
 - The fact that we will eventually want a prod backup environment, and that we could call that environment `prod-backup` and place it in a different region.
 - Learnings from other collaborations between Nava and MicroHealth, with regards to the ability to coordinate technical projects between the two organizations.
+
+## Decision State `2024-02-01`
+
+Given 2 pieces of feedback, the plan is now to do option 2a. That is, the "create the new load balancer on the same day" option. This requires more coordination, which will happen outside the direct scope of this ADR.
