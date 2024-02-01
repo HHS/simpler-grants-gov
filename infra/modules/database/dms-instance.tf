@@ -27,7 +27,7 @@ resource "aws_dms_endpoint" "target_endpoint" {
   endpoint_type                   = "source"
   engine_name                     = "aurora-postgresql"
   kms_key_arn                     = aws_kms_key.dms_endpoints.arn
-  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
+  secrets_manager_access_role_arn = aws_iam_role.dms_access.arn
   ssl_mode                        = "verify-ca"
   secrets_manager_arn             = data.aws_secretsmanager_secret.target_db.arn
 }
@@ -40,7 +40,7 @@ resource "aws_dms_endpoint" "source_endpoint" {
   engine_name                     = "oracle"
   kms_key_arn                     = aws_kms_key.dms_endpoints.arn
   ssl_mode                        = "none"
-  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
+  secrets_manager_access_role_arn = aws_iam_role.dms_access.arn
   secrets_manager_arn             = data.aws_secretsmanager_secret.source_db.arn
 }
 
