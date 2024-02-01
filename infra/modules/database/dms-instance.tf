@@ -24,7 +24,7 @@ resource "aws_dms_endpoint" "target_endpoint" {
   certificate_arn                 = "arn:aws:dms:us-east-1:315341936575:cert:GWOIQRTIVQVRBL5ERMCKTUPHMM33MMDGIP57J4I"
   database_name                   = "app"
   endpoint_id                     = "api-dev-primary"
-  endpoint_type                   = "source"
+  endpoint_type                   = "target"
   engine_name                     = "aurora-postgresql"
   kms_key_arn                     = aws_kms_key.dms_endpoints.arn
   secrets_manager_access_role_arn = aws_iam_role.dms_access.arn

@@ -1,10 +1,7 @@
 # Put IAM Roles here
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 resource "aws_iam_policy" "dms_access" {
-  name   = "dms-access"
-  policy = data.aws_iam_policy_document.dms_access.json
+  name_prefix = "dms-access"
+  policy      = data.aws_iam_policy_document.dms_access.json
 }
 
 resource "aws_iam_role" "dms_access" {
@@ -40,6 +37,7 @@ data "aws_iam_policy_document" "dms_access" {
     effect    = "Allow"
     actions   = ["dms:*"]
     resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
+    # TODO! arn for the actual dms service goes here
   }
 
   statement {
@@ -53,7 +51,7 @@ data "aws_iam_policy_document" "dms_access" {
       "iam:CreateRole",
       "iam:AttachRolePolicy"
     ]
-    resources = ["arn:aws:iam:*:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:*"]
   }
   statement {
     # Allow DMS to configure the network it needs
