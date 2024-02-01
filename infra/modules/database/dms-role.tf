@@ -39,7 +39,11 @@ data "aws_iam_policy_document" "dms_access" {
     resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
     # TODO! arn for the actual dms service goes here
   }
-
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [data.aws_secretsmanager_secret.db_password.arn]
+  }
   statement {
     # Allows DMS to create the roles it needs if not created beforehand
     # Actions List: https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsidentityandaccessmanagementiam.html
