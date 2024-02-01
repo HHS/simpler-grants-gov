@@ -8,6 +8,16 @@ resource "aws_security_group" "dms" {
   vpc_id      = var.vpc_id
 }
 
+# Allow all egrees traffic from DMS instance, which allows it to (for example)
+# request secrets from AWS Secrets Manager.
+resource "aws_vpc_security_group_egress_rule" "all_egress" {
+  from_port         = 0
+  to_port           = 0
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.dms.id
+}
+
 resource "aws_vpc_security_group_egress_rule" "postgres_egress_from_dms" {
   description       = "Allow outbound requests to database from DMS"
   cidr_ipv4         = local.our_target_cidr_block
