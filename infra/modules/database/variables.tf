@@ -7,6 +7,11 @@ variable "name" {
   }
 }
 
+variable "environment_name" {
+  type        = string
+  description = "name of the application environment"
+}
+
 variable "db_subnet_group_name" {
   description = "name of the database subnet group to create that will be used by the database cluster."
   type        = string
