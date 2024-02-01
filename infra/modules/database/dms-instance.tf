@@ -24,12 +24,12 @@ resource "aws_dms_endpoint" "target_endpoint" {
   certificate_arn                 = "arn:aws:dms:us-east-1:315341936575:cert:GWOIQRTIVQVRBL5ERMCKTUPHMM33MMDGIP57J4I"
   database_name                   = "app"
   endpoint_id                     = "api-dev-primary"
-  endpoint_type                   = "source"
+  endpoint_type                   = "target"
   engine_name                     = "aurora-postgresql"
   kms_key_arn                     = aws_kms_key.dms_endpoints.arn
-  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
+  secrets_manager_access_role_arn = aws_iam_role.dms_access.arn
   ssl_mode                        = "verify-ca"
-  secrets_manager_arn             = data.aws_secretsmanager_secret.target_db.arn
+  secrets_manager_arn             = data.aws_secretsmanager_secret.db_password.arn
 }
 
 resource "aws_dms_endpoint" "source_endpoint" {
@@ -40,7 +40,7 @@ resource "aws_dms_endpoint" "source_endpoint" {
   engine_name                     = "oracle"
   kms_key_arn                     = aws_kms_key.dms_endpoints.arn
   ssl_mode                        = "none"
-  secrets_manager_access_role_arn = data.aws_iam_role.dms_access.arn
+  secrets_manager_access_role_arn = aws_iam_role.dms_access.arn
   secrets_manager_arn             = data.aws_secretsmanager_secret.source_db.arn
 }
 
@@ -49,13 +49,6 @@ resource "aws_kms_key" "dms_endpoints" {
   enable_key_rotation = true
 }
 
-data "aws_secretsmanager_secret" "target_db" {
-  # this secret was created and managed by RDS
-  name = "rds!cluster-c91a63ac-db0e-404e-84ce-525d6c841035"
-}
 data "aws_secretsmanager_secret" "source_db" {
   name = "dev/grants_gov_source_db"
-}
-data "aws_iam_role" "dms_access" {
-  name = "dms-access-role"
 }
