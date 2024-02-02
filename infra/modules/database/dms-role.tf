@@ -40,9 +40,15 @@ data "aws_iam_policy_document" "dms_access" {
     # TODO! arn for the actual dms service goes here
   }
   statement {
-    effect    = "Allow"
-    actions   = ["secretsmanager:GetSecretValue"]
-    resources = [data.aws_secretsmanager_secret.db_password.arn]
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    ]
+    resources = [
+      data.aws_secretsmanager_secret.target_db.arn,
+      data.aws_secretsmanager_secret.source_db.arn,
+    ]
   }
   statement {
     # Allows DMS to create the roles it needs if not created beforehand
