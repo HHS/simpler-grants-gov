@@ -105,7 +105,7 @@
       "groupName": "Styling"
     },
     {
-      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated. If this isn't here, uswds updates will be included in frontend updates.",
+      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated. If this isn't here, uswds updates will be included in frontend updates. If a renovate PR fails because of the @uswds/uswds package version, manually update that package version in the PR and that should fix the issue.",
       "enabled": false,
       "matchPackagePatterns": ["@uswds/uswds"],
       "groupName": "USWDS core"
