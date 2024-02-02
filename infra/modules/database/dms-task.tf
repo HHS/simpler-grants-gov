@@ -5,6 +5,14 @@ resource "aws_dms_replication_task" "task" {
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "full-load"
   replication_task_id      = "${var.environment_name}-dms-replication-task"
+  replication_task_settings = jsonencode(
+    {
+      "Logging" : {
+        "EnableLogging" : true,
+        "EnableLogContext" : true,
+      },
+    }
+  )
   table_mappings = jsonencode(
     {
       "rules" : [
