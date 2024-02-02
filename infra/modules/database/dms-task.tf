@@ -1,8 +1,8 @@
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dms_replication_task
 resource "aws_dms_replication_task" "task" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
-  source_endpoint_arn      = aws_dms_endpoint.source_endpoint.arn
-  target_endpoint_arn      = aws_dms_endpoint.target_endpoint.arn
+  source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
+  target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "full-load"
   replication_task_id      = "${var.environment_name}-dms-replication-task"
   table_mappings = jsonencode(
@@ -112,7 +112,7 @@ resource "aws_dms_replication_task" "task" {
         {
           "rule-type" : "transformation",
           "rule-id" : "9",
-          "rule_name" : "Remove renamed column IS_DRAFT",
+          "rule-name" : "Remove renamed column IS_DRAFT",
           "rule-action" : "remove-column",
           "rule-target" : "column",
           "object-locator" : {
