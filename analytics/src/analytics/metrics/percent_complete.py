@@ -9,7 +9,7 @@ from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
-class DeliverablePercentComplete(BaseMetric):
+class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
     """Calculate the percentage of issues or points completed per deliverable."""
 
     def __init__(
@@ -21,8 +21,7 @@ class DeliverablePercentComplete(BaseMetric):
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
         self.unit = unit
-        self.dataset = dataset
-        super().__init__()
+        super().__init__(dataset)
 
     def calculate(self) -> pd.DataFrame:
         """

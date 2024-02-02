@@ -19,8 +19,20 @@ locals {
 
   network_configs = {
     # TODO(https://github.com/HHS/simpler-grants-gov/issues/1051) deploy to a non-default VPC in every environment
-    dev     = { vpc_name = "default" }
-    staging = { vpc_name = "staging" }
-    prod    = { vpc_name = "default" }
+    dev = {
+      vpc_name              = "dev"
+      second_octet          = 0               # The second octet our the VPC CIDR block
+      dms_source_cidr_block = "10.220.0.0/16" # MicroHealth cidr block, where the origin database for the DMS is located
+    }
+    staging = {
+      vpc_name              = "staging"
+      second_octet          = 1               # The second octet our the VPC CIDR block
+      dms_source_cidr_block = "10.220.0.0/16" # MicroHealth cidr block, where the origin database for the DMS is located
+    }
+    prod = {
+      vpc_name              = "prod"
+      second_octet          = 3               # The second octet our the VPC CIDR block
+      dms_source_cidr_block = "10.220.0.0/16" # !PLACEHOLDER! We haven't been provided with this yet
+    }
   }
 }

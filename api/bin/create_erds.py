@@ -10,6 +10,7 @@ import sadisplay
 
 import src.logging
 from src.db.models import opportunity_models
+from src.db.models.transfer import topportunity_models
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,9 @@ logger = logging.getLogger(__name__)
 ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 
 # If we want to generate separate files for more specific groups, we can set that up here
-ALL_MODULES = [opportunity_models]
+ALL_MODULES = (opportunity_models, topportunity_models)
+
+TRANSFER_TABLE_MODULES = (topportunity_models,)
 
 
 def create_erds(modules: Any, file_name: str) -> None:
@@ -57,3 +60,5 @@ def main() -> None:
         logger.info("Generating ERD diagrams")
 
         create_erds(ALL_MODULES, "full-schema")
+
+        create_erds(TRANSFER_TABLE_MODULES, "transfer-schema")

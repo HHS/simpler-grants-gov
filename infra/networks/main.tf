@@ -13,7 +13,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~>5.6.0"
+      version = "~> 5.34.0"
     }
   }
 
@@ -37,11 +37,6 @@ module "app_config" {
   source = "../api/app-config"
 }
 
-module "dms_networking" {
-  source = "../modules/dms-networking"
-  vpc_id = module.network.vpc_id
-}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -57,5 +52,13 @@ module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name
   database_subnet_group_name              = var.environment_name
-  aws_services_security_group_name_prefix = var.environment_name
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
+  second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
+}
+
+module "dms_networking" {
+  source                = "../modules/dms-networking"
+  vpc_id                = module.network.vpc_id
+  dms_target_cidr_block = module.network.vpc_cidr
+  dms_source_cidr_block = module.project_config.network_configs[var.environment_name].dms_source_cidr_block
 }
