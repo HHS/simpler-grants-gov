@@ -101,7 +101,10 @@ Step by step instructions for creating a release:
 - Click "Generate release notes" to auto-generate release notes
 - Click "Publish" to finalize this step
 - On Github.com, open the Actions page: https://github.com/HHS/simpler-grants-gov/actions
-- You should see Actions that correspond to your release. Follow their status to ensure that they succeed. Follow-up may be required if the Github Actions fail.
+- You should see Actions that correspond to your release. Follow their status to ensure that they succeed. Follow-up may be required if the Github Actions fail. Here's some places where you might see Github Actions status:
+  - https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-api.yml
+  - https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-frontend.yml
+  - https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-storybook.yml
 
 ## Documentation
 
