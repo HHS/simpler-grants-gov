@@ -11,6 +11,7 @@ resource "aws_security_group" "dms" {
 # Allow all egrees traffic from DMS instance, which allows it to (for example)
 # request secrets from AWS Secrets Manager.
 resource "aws_vpc_security_group_egress_rule" "all_egress" {
+  description       = "Allow all egress"
   from_port         = 0
   to_port           = 0
   ip_protocol       = "-1"
