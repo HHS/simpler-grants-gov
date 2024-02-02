@@ -86,7 +86,7 @@ This project takes a very collaborative and [agile](https://agilemanifesto.org/)
 
 ## Releases
 
-Releases follow the [CalVer](https://calver.org/) versioning using a `YYYY.MM.DD-N` format. Start with `-1` for a release, incrementing if there is another release on the same day.
+Releases follow the [CalVer](https://calver.org/) versioning using a `YYYY.MM.DD-N` format.
 
 Releases are [created in Github](https://github.com/HHS/simpler-grants-gov/releases) and with a log of changes.
 
@@ -94,6 +94,7 @@ Step by step instructions for creating a release:
 
 - In your terminal, `git switch main` and `git pull` to sync your local code with the latest main commit
 - In your terminal, `git tag YYYY.MM.DD-N` (FILLED IN!) and `git push --tags` to tag and push your CalVer tag
+  - Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, ths second release on that day would be `2000.10.10-2`, etc.
 - On Github.com, open the Releases page: https://github.com/HHS/simpler-grants-gov/releases
 - Click "Draft a new release"
 - Choose the tag you just pushed as the current tag, and the last CalVer release as the previous tag
