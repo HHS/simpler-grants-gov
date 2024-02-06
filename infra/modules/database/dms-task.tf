@@ -4,12 +4,90 @@ resource "aws_dms_replication_task" "task" {
   source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "full-load-and-cdc"
-  replication_task_id      = "${var.environment_name}-dms-replication-task"
+  replication_task_id      = "${var.environment_name}-task"
   replication_task_settings = jsonencode(
     {
       "Logging" : {
         "EnableLogging" : true,
         "EnableLogContext" : true,
+        "LogComponents" : [
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "TRANSFORMATION"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "SOURCE_UNLOAD"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "IO"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "TARGET_LOAD"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "PERFORMANCE"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "SOURCE_CAPTURE"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "SORTER"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "REST_SERVER"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "VALIDATOR_EXT"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "TARGET_APPLY"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "TASK_MANAGER"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "TABLES_MANAGER"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "METADATA_MANAGER"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "FILE_FACTORY"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "COMMON"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "ADDONS"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "DATA_STRUCTURE"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "COMMUNICATION"
+          },
+          {
+            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+            "Id" : "FILE_TRANSFER"
+          }
+        ],
       },
       "FullLoadSettings" : {
         "TargetTablePrepMode" : "DO_NOTHING"
@@ -20,8 +98,18 @@ resource "aws_dms_replication_task" "task" {
     {
       "rules" : [
         {
-          "rule-type" : "transformation",
+          "rule-type" : "selection",
           "rule-id" : "1",
+          "rule-name" : "Include TOPPORTUNITY table",
+          "object-locator" : {
+            "schema-name" : "EGRANTSADMIN",
+            "table-name" : "TOPPORTUNITY"
+          },
+          "rule-action" : "explicit"
+        },
+        {
+          "rule-type" : "transformation",
+          "rule-id" : "2",
           "rule-name" : "Rename schema",
           "rule-action" : "rename",
           "rule-target" : "schema",
@@ -29,16 +117,6 @@ resource "aws_dms_replication_task" "task" {
             "schema-name" : "EGRANTSADMIN"
           },
           "value" : "public"
-        },
-        {
-          "rule-type" : "selection",
-          "rule-id" : "2",
-          "rule-name" : "Include TOPPORTUNITY table",
-          "object-locator" : {
-            "schema-name" : "EGRANTSADMIN",
-            "table-name" : "TOPPORTUNITY"
-          },
-          "rule-action" : "explicit"
         },
         {
           "rule-type" : "transformation",
