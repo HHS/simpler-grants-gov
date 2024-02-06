@@ -100,7 +100,6 @@ resource "aws_dms_replication_task" "task" {
             "column-name" : "FLAG_2006"
           }
         },
-
       ]
     }
   )
