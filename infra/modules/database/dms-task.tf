@@ -11,6 +11,9 @@ resource "aws_dms_replication_task" "task" {
         "EnableLogging" : true,
         "EnableLogContext" : true,
       },
+      "FullLoadSettings" : {
+        "TargetTablePrepMode" : "DO_NOTHING"
+      },
     }
   )
   table_mappings = jsonencode(
