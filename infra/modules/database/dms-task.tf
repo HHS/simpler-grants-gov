@@ -181,6 +181,40 @@ resource "aws_dms_replication_task" "task" {
             "column-name" : "FLAG_2006"
           }
         },
+        {
+         "rule-type": "transformation",
+         "rule-id": "8",
+          "rule-name": "add time",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "EGRANTSADMIN",
+            "table-name": "TOPPORTUNITY"
+          },
+          "rule-action": "add-column",
+          "value": "created_at",
+          "expression": "datetime ()",
+          "data-type": {
+            "type": "datetime",
+            "precision": 6
+          }
+        },
+        {
+         "rule-type": "transformation",
+         "rule-id": "9",
+          "rule-name": "add time",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "EGRANTSADMIN",
+            "table-name": "TOPPORTUNITY"
+          },
+          "rule-action": "add-column",
+          "value": "updated_at",
+          "expression": "datetime ()",
+          "data-type": {
+            "type": "datetime",
+            "precision": 6
+          }
+    }
       ]
     }
   )
