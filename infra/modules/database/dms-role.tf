@@ -37,6 +37,7 @@ data "aws_iam_policy_document" "dms_access" {
     effect    = "Allow"
     actions   = ["dms:*"]
     resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
+    # TODO! arn for the actual dms service goes here
   }
   statement {
     effect = "Allow"
@@ -80,17 +81,22 @@ data "aws_iam_policy_document" "dms_access" {
     resources = ["arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:*"]
   }
   statement {
-    # Create metrics
+    # View replication metrics
     sid       = "AllowCloudwatchMetrics"
     effect    = "Allow"
-    actions   = ["cloudwatch:*"]
+    actions   = ["cloudwatch:Get*", "cloudwatch:List*"]
     resources = ["*"]
   }
   statement {
-    # Create logs
-    sid       = "AllowCloudwatchLogs"
-    effect    = "Allow"
-    actions   = ["logs:*"]
+    # View replication logs
+    sid    = "AllowCloudwatchLogs"
+    effect = "Allow"
+    actions = [
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:ilterLogEvents",
+      "logs:GetLogEvents"
+    ]
     resources = ["*"]
   }
 }
