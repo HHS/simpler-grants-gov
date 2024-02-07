@@ -22,6 +22,8 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
 
 class OpportunityCategory(StrEnum):
     # TODO - change these to full text once we build the next version of the API
+    # will do this when constructing that API as I'll need to make a second version of this
+    # to avoid breaking the existing API endpoint
     DISCRETIONARY = "D"
     MANDATORY = "M"
     CONTINUATION = "C"
