@@ -92,9 +92,9 @@ resource "aws_dms_replication_task" "task" {
       "ValidationSettings" : {
         "EnableValidation" : true,
       },
-      # "FullLoadSettings" : {
-      #   "TargetTablePrepMode" : "DO_NOTHING"
-      # },
+      "FullLoadSettings" : {
+        "TargetTablePrepMode" : "DO_NOTHING"
+      },
     }
   )
   table_mappings = jsonencode(
@@ -119,7 +119,7 @@ resource "aws_dms_replication_task" "task" {
           "object-locator" : {
             "schema-name" : "EGRANTSADMIN"
           },
-          "value" : "public"
+          "value" : "api"
         },
         {
           "rule-type" : "transformation",
