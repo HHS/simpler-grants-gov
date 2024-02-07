@@ -37,7 +37,6 @@ data "aws_iam_policy_document" "dms_access" {
     effect    = "Allow"
     actions   = ["dms:*"]
     resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
-    # TODO! arn for the actual dms service goes here
   }
   statement {
     effect = "Allow"
