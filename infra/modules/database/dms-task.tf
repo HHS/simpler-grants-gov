@@ -10,84 +10,84 @@ resource "aws_dms_replication_task" "task" {
       "Logging" : {
         "EnableLogging" : true,
         "EnableLogContext" : true,
-        "LogComponents" : [
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "TRANSFORMATION"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "SOURCE_UNLOAD"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "IO"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "TARGET_LOAD"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "PERFORMANCE"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "SOURCE_CAPTURE"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "SORTER"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "REST_SERVER"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "VALIDATOR_EXT"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "TARGET_APPLY"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "TASK_MANAGER"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "TABLES_MANAGER"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "METADATA_MANAGER"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "FILE_FACTORY"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "COMMON"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "ADDONS"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "DATA_STRUCTURE"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "COMMUNICATION"
-          },
-          {
-            "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
-            "Id" : "FILE_TRANSFER"
-          }
-        ],
+        # "LogComponents" : [
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "TRANSFORMATION"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "SOURCE_UNLOAD"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "IO"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "TARGET_LOAD"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "PERFORMANCE"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "SOURCE_CAPTURE"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "SORTER"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "REST_SERVER"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "VALIDATOR_EXT"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "TARGET_APPLY"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "TASK_MANAGER"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "TABLES_MANAGER"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "METADATA_MANAGER"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "FILE_FACTORY"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "COMMON"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "ADDONS"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "DATA_STRUCTURE"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "COMMUNICATION"
+        #   },
+        #   {
+        #     "Severity" : "LOGGER_SEVERITY_DETAILED_DEBUG",
+        #     "Id" : "FILE_TRANSFER"
+        #   }
+        # ],
       },
       "ValidationSettings" : {
         "EnableValidation" : true,
@@ -182,39 +182,39 @@ resource "aws_dms_replication_task" "task" {
           }
         },
         {
-         "rule-type": "transformation",
-         "rule-id": "8",
-          "rule-name": "add time",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "EGRANTSADMIN",
-            "table-name": "TOPPORTUNITY"
+          "rule-type" : "transformation",
+          "rule-id" : "8",
+          "rule-name" : "add time",
+          "rule-target" : "column",
+          "object-locator" : {
+            "schema-name" : "EGRANTSADMIN",
+            "table-name" : "TOPPORTUNITY"
           },
-          "rule-action": "add-column",
-          "value": "created_at",
-          "expression": "datetime ()",
-          "data-type": {
-            "type": "datetime",
-            "precision": 6
+          "rule-action" : "add-column",
+          "value" : "created_at",
+          "expression" : "datetime ()",
+          "data-type" : {
+            "type" : "datetime",
+            "precision" : 6
           }
         },
         {
-         "rule-type": "transformation",
-         "rule-id": "9",
-          "rule-name": "add time",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "EGRANTSADMIN",
-            "table-name": "TOPPORTUNITY"
+          "rule-type" : "transformation",
+          "rule-id" : "9",
+          "rule-name" : "add time",
+          "rule-target" : "column",
+          "object-locator" : {
+            "schema-name" : "EGRANTSADMIN",
+            "table-name" : "TOPPORTUNITY"
           },
-          "rule-action": "add-column",
-          "value": "updated_at",
-          "expression": "datetime ()",
-          "data-type": {
-            "type": "datetime",
-            "precision": 6
+          "rule-action" : "add-column",
+          "value" : "updated_at",
+          "expression" : "datetime ()",
+          "data-type" : {
+            "type" : "datetime",
+            "precision" : 6
           }
-    }
+        }
       ]
     }
   )
