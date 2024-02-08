@@ -1,10 +1,10 @@
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dms_replication_task
-resource "aws_dms_replication_task" "task-cdc" {
+resource "aws_dms_replication_task" "replication_task_cdc" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
   source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "cdc"
-  replication_task_id      = "${var.environment_name}-task-cdc"
+  replication_task_id      = "${var.environment_name}-cdc"
   replication_task_settings = jsonencode(
     {
       "Logging" : {
