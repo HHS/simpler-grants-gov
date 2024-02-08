@@ -64,9 +64,9 @@ class ApplicantType(StrEnum):
     OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS = "other_native_american_tribal_organizations"  # 11
     PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES = "public_and_indian_housing_authorities"  # 08
 
-    NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3 = "nonprofits_non_higher_educating_with_501c3"  # 12
+    NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3 = "nonprofits_non_higher_education_with_501c3"  # 12
     NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3 = (
-        "nonprofits_non_higher_educating_without_501c3"  # 13
+        "nonprofits_non_higher_education_without_501c3"  # 13
     )
 
     INDIVIDUALS = "individuals"  # 21

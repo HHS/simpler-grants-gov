@@ -93,8 +93,8 @@ class OpportunitySummary(Base, TimestampMixin):
 
     expected_number_of_awards: Mapped[int | None]
     estimated_total_program_funding: Mapped[int | None]
-    award_floor: Mapped[str | None]
-    award_ceiling: Mapped[str | None]
+    award_floor: Mapped[int | None]
+    award_ceiling: Mapped[int | None]
 
     additional_info_url: Mapped[str | None]
     additional_info_url_description: Mapped[str | None]
