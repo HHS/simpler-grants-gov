@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+# Prevent crawling of Next.js build files.
+Disallow: /_next/
+Disallow: /_next*
+Disallow: /img/
+Disallow: /*.json$
+Disallow: /*_buildManifest.js$
+Disallow: /*_middlewareManifest.js$
+Disallow: /*_ssgManifest.js$
+Disallow: /*.js$
+# Prevent crawling of Next.js api routes.
+Disallow: /api/
+# Prevent crawling of static assets in the public folder.
+Disallow: /public/
+
