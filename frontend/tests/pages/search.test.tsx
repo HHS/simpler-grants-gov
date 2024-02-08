@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import Search from "src/pages/search";
 
