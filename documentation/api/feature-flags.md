@@ -84,23 +84,23 @@ Because we added the post_load implementation, instead of receiving a dictionary
 
 ```py
 @opportunity_blueprint.post("/v1/opportunities/search")
-@opportunity_blueprint.input(opportunity_schemas.OpportunitySearchSchema, arg_name="search_params")
+@opportunity_blueprint.input(opportunity_schemas.OpportunitySearchV0Schema, arg_name="search_params")
 @opportunity_blueprint.input(
-    opportunity_schemas.OpportunitySearchHeaderSchema,
-    location="headers",
-    arg_name="feature_flag_config",
+      opportunity_schemas.OpportunitySearchHeaderV0Schema,
+      location="headers",
+      arg_name="feature_flag_config",
 )
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint.output(opportunity_schemas.OpportunitySchema(many=True))
+@opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema(many=True))
 @opportunity_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
 def opportunity_search(
-    db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig
+        db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig
 ) -> response.ApiResponse:
-    if feature_flag_config.enable_opportunity_log_msg:
-        logger.info("Feature flag enabled")
+      if feature_flag_config.enable_opportunity_log_msg:
+            logger.info("Feature flag enabled")
 
-    # ... the rest of the route implementation
+      # ... the rest of the route implementation
 ```
 
 # Current Feature Flags

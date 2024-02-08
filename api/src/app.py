@@ -12,7 +12,7 @@ import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
-from src.api.opportunities import opportunity_blueprint
+from src.api.opportunities import opportunity_blueprint_v0, opportunity_blueprint_v0_1
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import User, get_app_security_scheme
@@ -99,7 +99,8 @@ def configure_app(app: APIFlask) -> None:
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(opportunity_blueprint)
+    app.register_blueprint(opportunity_blueprint_v0)
+    app.register_blueprint(opportunity_blueprint_v0_1)
 
 
 def get_project_root_dir() -> str:
