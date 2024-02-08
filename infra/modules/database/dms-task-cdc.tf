@@ -3,7 +3,7 @@ resource "aws_dms_replication_task" "task-cdc" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
   source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
-  migration_type           = "full-load-and-cdc"
+  migration_type           = "cdc"
   replication_task_id      = "${var.environment_name}-task-cdc"
   replication_task_settings = jsonencode(
     {

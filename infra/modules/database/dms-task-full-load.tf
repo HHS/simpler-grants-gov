@@ -1,10 +1,10 @@
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dms_replication_task
-resource "aws_dms_replication_task" "task" {
+resource "aws_dms_replication_task" "task-full-load" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
   source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "full-load"
-  replication_task_id      = "${var.environment_name}-task"
+  replication_task_id      = "${var.environment_name}-task-full-load"
   replication_task_settings = jsonencode(
     {
       "Logging" : {
@@ -15,7 +15,7 @@ resource "aws_dms_replication_task" "task" {
         "EnableValidation" : true,
       },
       "FullLoadSettings" : {
-        "TargetTablePrepMode" : "DO_NOTHING"
+        "TargetTablePrepMode" : "TRUNCATE_BEFORE_LOAD"
       },
     }
   )
@@ -46,14 +46,14 @@ resource "aws_dms_replication_task" "task" {
         {
           "rule-type" : "transformation",
           "rule-id" : "3",
-          "rule-name" : "Rename table TOPPORTUNITY to transfer_topportunity",
+          "rule-name" : "Rename table TOPPORTUNITY to transfer_topportunity_temp",
           "rule-action" : "rename",
           "rule-target" : "table",
           "object-locator" : {
             "schema-name" : "EGRANTSADMIN",
             "table-name" : "TOPPORTUNITY"
           },
-          "value" : "transfer_topportunity"
+          "value" : "transfer_topportunity_temp"
         },
         {
           "rule-type" : "transformation",

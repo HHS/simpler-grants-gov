@@ -60,6 +60,7 @@ resource "aws_dms_endpoint" "source_endpoint" {
   ssl_mode                        = "none"
   secrets_manager_access_role_arn = aws_iam_role.dms_access.arn
   secrets_manager_arn             = data.aws_secretsmanager_secret.source_db.id
+  extra_connection_attributes     = "exposeViews=true"
 }
 
 resource "aws_kms_key" "dms_endpoints" {
