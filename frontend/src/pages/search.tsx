@@ -12,7 +12,7 @@ export const getStaticProps: GetStaticProps = async ({ locale }) => {
 
   // TODO: update the statement below with a feature flag check
   const hideSearchPage = true;
-  // redirects to default 404 page  
+  // redirects to default 404 page
   if (hideSearchPage) return { notFound: true };
 
   return { props: { ...translations } };
