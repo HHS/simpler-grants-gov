@@ -5,6 +5,7 @@ resource "aws_dms_replication_task" "replication_task_cdc" {
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "cdc"
   replication_task_id      = "${var.environment_name}-cdc"
+  # TODO explain defaults: https://betagrantsgov.slack.com/archives/C05TSL64VUH/p1707427008889219
   replication_task_settings = jsonencode(
     {
       "Logging" : {
