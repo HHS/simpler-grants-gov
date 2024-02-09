@@ -1,8 +1,10 @@
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.adapters.db.type_decorators.postgres_type_decorators import StrEnumColumn
+from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.base import Base, TimestampMixin
+from src.db.models.lookup_models import LkOpportunityCategory
 
 
 class Opportunity(Base, TimestampMixin):
@@ -16,7 +18,10 @@ class Opportunity(Base, TimestampMixin):
     agency: Mapped[str | None]
 
     category: Mapped[OpportunityCategory | None] = mapped_column(
-        StrEnumColumn(OpportunityCategory), index=True
+        "opportunity_category_id",
+        LookupColumn(LkOpportunityCategory),
+        ForeignKey(LkOpportunityCategory.opportunity_category_id),
+        index=True,
     )
     category_explanation: Mapped[str | None]
 

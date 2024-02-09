@@ -10,6 +10,9 @@ import sqlalchemy
 from alembic.config import Config
 from alembic.runtime import migration
 
+import src.logging
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
+
 logger = logging.getLogger(__name__)
 alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "./alembic.ini"))
 
@@ -19,6 +22,11 @@ alembic_cfg.set_main_option("script_location", os.path.dirname(__file__))
 
 def up(revision: str = "head") -> None:
     command.upgrade(alembic_cfg, revision)
+
+    # We want logging for the lookups, but alembic already sets
+    # it up in env.py, so set it up again separately for the syncing
+    with src.logging.init("sync_lookup_values"):
+        sync_lookup_values()
 
 
 def down(revision: str = "-1") -> None:
