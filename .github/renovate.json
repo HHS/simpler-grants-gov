@@ -81,6 +81,11 @@
       "groupName": "Storybook"
     },
     {
+      "description": "Group Next.js packages together",
+      "matchPackagePatterns": ["next"],
+      "groupName": "Next.js"
+    },
+    {
       "description": "Group I18next packages together",
       "matchPackagePatterns": [
         "i18next"
@@ -88,11 +93,21 @@
       "groupName": "I18next"
     },
     {
-      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated.",
+      "description": "Group test packages together",
       "enabled": false,
-      "matchPackagePatterns": [
-        "@uswds/uswds"
-      ],
+      "matchPackagePatterns": ["jest", "testing-library"],
+      "groupName": "Jest"
+    },
+    {
+      "description": "Group CSS-related packages together",
+      "enabled": false,
+      "matchPackagePatterns": ["postcss", "sass"],
+      "groupName": "Styling"
+    },
+    {
+      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated. If this isn't here, uswds updates will be included in frontend updates. If a renovate PR fails because of the @uswds/uswds package version, manually update that package version in the PR and that should fix the issue.",
+      "enabled": false,
+      "matchPackagePatterns": ["@uswds/uswds"],
       "groupName": "USWDS core"
     },
     {

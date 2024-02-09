@@ -1,7 +1,7 @@
 import dataclasses
 from abc import ABC, ABCMeta, abstractmethod
 from enum import IntEnum, StrEnum
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, Tuple, Type, TypeVar
 
 T = TypeVar("T", StrEnum, IntEnum)
 
@@ -43,11 +43,12 @@ class LookupConfig(Generic[T]):
     enums to lookup integers in the DB, and vice-versa.
     """
 
+    _enums: Tuple[Type[T], ...]
     _enum_to_lookup_map: dict[T, Lookup]
     _int_to_lookup_map: dict[int, Lookup]
 
     def __init__(self, lookups: list[Lookup]) -> None:
-        enum_types_seen = set()
+        enum_types_seen: set[Type[T]] = set()
         _enum_to_lookup_map: dict[T, Lookup] = {}
         _int_to_lookup_map: dict[int, Lookup] = {}
 
@@ -83,8 +84,12 @@ class LookupConfig(Generic[T]):
                 f"Lookup config must define a mapping for all enum values, the following were missing: {diff}"
             )
 
+        self._enums: Tuple[Type[T], ...] = tuple(enum_types_seen)
         self._enum_to_lookup_map: dict[T, Lookup] = _enum_to_lookup_map
         self._int_to_lookup_map: dict[int, Lookup] = _int_to_lookup_map
+
+    def get_enums(self) -> Tuple[Type[T], ...]:
+        return self._enums
 
     def get_lookups(self) -> list[Lookup]:
         return [lk for lk in self._enum_to_lookup_map.values()]

@@ -1,13 +1,11 @@
 # Put IAM Roles here
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 resource "aws_iam_policy" "dms_access" {
-  name   = "dms-access"
-  policy = data.aws_iam_policy_document.dms_access.json
+  name_prefix = "dms-access"
+  policy      = data.aws_iam_policy_document.dms_access.json
 }
+
 resource "aws_iam_role" "dms_access" {
-  name               = "dms-access-role"
+  name_prefix        = "dms-access-role"
   assume_role_policy = data.aws_iam_policy_document.dms_assume_role_policy.json
 }
 
@@ -17,8 +15,11 @@ data "aws_iam_policy_document" "dms_assume_role_policy" {
     effect  = "Allow"
 
     principals {
-      identifiers = ["dms.amazonaws.com"]
-      type        = "Service"
+      identifiers = [
+        "dms.amazonaws.com",
+        "dms.${data.aws_region.current.name}.amazonaws.com",
+      ]
+      type = "Service"
     }
   }
 }
@@ -35,9 +36,20 @@ data "aws_iam_policy_document" "dms_access" {
     sid       = "AllowDMSAccess"
     effect    = "Allow"
     actions   = ["dms:*"]
-    resources = [""] # arn for the actual dms service goes here
+    resources = ["arn:aws:dms:*:${data.aws_caller_identity.current.account_id}:*"]
+    # TODO! arn for the actual dms service goes here
   }
-
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    ]
+    resources = [
+      data.aws_secretsmanager_secret.target_db.arn,
+      data.aws_secretsmanager_secret.source_db.arn,
+    ]
+  }
   statement {
     # Allows DMS to create the roles it needs if not created beforehand
     # Actions List: https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsidentityandaccessmanagementiam.html
@@ -49,7 +61,7 @@ data "aws_iam_policy_document" "dms_access" {
       "iam:CreateRole",
       "iam:AttachRolePolicy"
     ]
-    resources = ["arn:aws:iam:*:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:*"]
   }
   statement {
     # Allow DMS to configure the network it needs
@@ -85,6 +97,6 @@ data "aws_iam_policy_document" "dms_access" {
       "logs:ilterLogEvents",
       "logs:GetLogEvents"
     ]
-    resources = ["*"] # don't have log group yet
+    resources = ["*"]
   }
 }

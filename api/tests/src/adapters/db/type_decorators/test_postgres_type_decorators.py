@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 import pytest
 from sqlalchemy import text
 
@@ -40,6 +42,14 @@ def test_lookup_column_bind_type_invalid():
     lookup_column = LookupColumn(LkOpportunityCategory)
     with pytest.raises(Exception, match="Cannot convert value of type"):
         lookup_column.process_bind_param("hello", None)
+
+    class TestEnum(StrEnum):
+        DISCRETIONARY = "D"
+
+    # Verify that just because an enum looks similar, if it's a different
+    # type it will also error
+    with pytest.raises(Exception, match="Cannot convert value of type"):
+        lookup_column.process_bind_param(TestEnum.DISCRETIONARY, None)
 
 
 def test_lookup_column_process_result_type_invalid():

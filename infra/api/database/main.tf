@@ -41,7 +41,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~>5.34.0"
+      version = "~> 5.34.0"
     }
   }
 
@@ -98,4 +98,5 @@ module "database" {
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
   db_subnet_group_name           = var.environment_name
+  environment_name               = var.environment_name
 }
