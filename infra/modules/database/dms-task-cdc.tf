@@ -51,14 +51,14 @@ resource "aws_dms_replication_task" "replication_task_cdc" {
         {
           "rule-type" : "transformation",
           "rule-id" : "3",
-          "rule-name" : "Rename table TOPPORTUNITY to transfer_topportunity_temp",
+          "rule-name" : "Rename table TOPPORTUNITY to transfer_topportunity",
           "rule-action" : "rename",
           "rule-target" : "table",
           "object-locator" : {
             "schema-name" : "EGRANTSADMIN",
             "table-name" : "TOPPORTUNITY"
           },
-          "value" : "transfer_topportunity_temp"
+          "value" : "transfer_topportunity"
         },
         {
           "rule-type" : "transformation",
