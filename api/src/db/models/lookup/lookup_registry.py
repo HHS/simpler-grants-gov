@@ -1,6 +1,7 @@
 import logging
 from enum import Enum, IntEnum, StrEnum
-from typing import Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Type, TypeVar
+
 
 from src.db.models.lookup.lookup import LookupConfig
 from src.db.models.lookup.lookup_table import LookupTable
@@ -49,8 +50,8 @@ class LookupRegistry:
 
     @classmethod
     def get_lookup_int_for_enum(
-        cls, lookup_table: Type[LookupTable], lookup_enum: Optional[StrEnum | IntEnum]
-    ) -> Optional[int]:
+        cls, lookup_table: Type[LookupTable], lookup_enum: StrEnum | IntEnum | None
+    ) -> int | None:
         """
         Given a Lookup Table + Enum, get the lookup int value to store in the DB
         """
@@ -63,8 +64,8 @@ class LookupRegistry:
 
     @classmethod
     def get_enum_for_lookup_int(
-        cls, lookup_table: Type[LookupTable], lookup_val: Optional[int]
-    ) -> Optional[Enum]:
+        cls, lookup_table: Type[LookupTable], lookup_val: int | None
+    ) -> Enum | None:
         """
         Given a Lookup Table + lookup int, get the enum that is mapped to it
         """
@@ -74,6 +75,24 @@ class LookupRegistry:
         lookup_config = cls._get_lookup_config(lookup_table)
 
         return lookup_config.get_enum_for_int(lookup_val)
+
+    @classmethod
+    def is_valid_type_for_table(
+        cls, lookup_table: Type[LookupTable], lookup_val: Any | None
+    ) -> bool:
+        """
+        Given a Lookup Table + a value, return whether it is of a type configured for the that table.
+
+        This makes sure we only try to write enums configured for a certain table to that table.
+        """
+
+        # None is always valid
+        if lookup_val is None:
+            return True
+
+        lookup_config = cls._get_lookup_config(lookup_table)
+
+        return isinstance(lookup_val, lookup_config.get_enums())
 
     @classmethod
     def get_sync_values(cls) -> dict[Type[LookupTable], LookupConfig]:

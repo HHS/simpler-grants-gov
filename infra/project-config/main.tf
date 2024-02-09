@@ -30,7 +30,7 @@ locals {
       dms_source_cidr_block = "10.220.0.0/16" # MicroHealth cidr block, where the origin database for the DMS is located
     }
     prod = {
-      vpc_name              = "default"
+      vpc_name              = "prod"
       second_octet          = 3               # The second octet our the VPC CIDR block
       dms_source_cidr_block = "10.220.0.0/16" # !PLACEHOLDER! We haven't been provided with this yet
     }

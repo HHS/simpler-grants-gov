@@ -1,4 +1,3 @@
-from enum import IntEnum, StrEnum
 from typing import Any, Type
 
 from sqlalchemy import Integer
@@ -29,7 +28,7 @@ class LookupColumn(TypeDecorator):
         if value is None:
             return None
 
-        if not isinstance(value, (StrEnum, IntEnum)):
+        if not LookupRegistry.is_valid_type_for_table(self.lookup_table, value):
             raise Exception(
                 f"Cannot convert value of type {type(value)} for binding column in table {self.lookup_table.get_table_name()}"
             )

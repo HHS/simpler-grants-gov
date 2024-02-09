@@ -2,7 +2,6 @@ from enum import StrEnum
 
 from src.db.models.lookup import LookupConfig, LookupStr
 
-
 class OpportunityStatus(StrEnum):
     FORECASTED = "forecasted"
     POSTED = "posted"
@@ -37,7 +36,6 @@ class OpportunityCategory(StrEnum):
     EARMARK = "earmark"
     OTHER = "other"
 
-
 OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     [
         LookupStr(OpportunityCategory.DISCRETIONARY, 1),
@@ -47,6 +45,26 @@ OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
         LookupStr(OpportunityCategory.OTHER, 5),
     ]
 )
+
+
+class OpportunityStatus(StrEnum):
+    FORECASTED = "forecasted"
+    POSTED = "posted"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
+OPPORTUNITY_STATUS_CONFIG = LookupConfig(
+    [
+        LookupStr(OpportunityStatus.FORECASTED, 1),
+        LookupStr(OpportunityStatus.POSTED, 2),
+        LookupStr(OpportunityStatus.CLOSED, 3),
+        LookupStr(OpportunityStatus.ARCHIVED, 4),
+    ]
+)
+
+
+
 
 
 class ApplicantType(StrEnum):

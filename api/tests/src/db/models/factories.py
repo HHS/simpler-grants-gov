@@ -25,6 +25,7 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
     OpportunityCategoryLegacy,
+    OpportunityCategory,
     OpportunityStatus,
 )
 
@@ -83,10 +84,10 @@ class OpportunityFactory(BaseFactory):
 
     agency = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
 
-    category = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
+    category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
     # only set the category explanation if category is Other
     category_explanation = factory.Maybe(
-        decider=factory.LazyAttribute(lambda o: o.category == OpportunityCategoryLegacy.OTHER),
+        decider=factory.LazyAttribute(lambda o: o.category == OpportunityCategory.OTHER),
         yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
         no_declaration=None,
     )

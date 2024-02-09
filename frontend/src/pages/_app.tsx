@@ -20,11 +20,11 @@ function MyApp({ Component, pageProps }: AppProps) {
           <meta name="robots" content="noindex,nofollow" />
         )}
       </Head>
-      {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
-        <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_ID} />
-      )}
       <Layout>
         <Component {...pageProps} />
+        {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
+          <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_ID} />
+        )}
       </Layout>
     </>
   );

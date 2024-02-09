@@ -5,6 +5,7 @@ import boto3
 import flask.testing
 import moto
 import pytest
+from apiflask import APIFlask
 
 import src.adapters.db as db
 import src.app as app_entry
@@ -117,7 +118,7 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client) -> flask.Flask:
+def app(db_client) -> APIFlask:
     return app_entry.create_app()
 
 
@@ -132,9 +133,15 @@ def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
 
 
 @pytest.fixture
-def api_auth_token(monkeypatch):
-    auth_token = "abcd1234"
-    monkeypatch.setenv("API_AUTH_TOKEN", auth_token)
+def all_api_auth_tokens(monkeypatch):
+    all_auth_tokens = ["abcd1234", "wxyz7890", "lmno56"]
+    monkeypatch.setenv("API_AUTH_TOKEN", ",".join(all_auth_tokens))
+    return all_auth_tokens
+
+
+@pytest.fixture
+def api_auth_token(monkeypatch, all_api_auth_tokens):
+    auth_token = all_api_auth_tokens[0]
     return auth_token
 
 

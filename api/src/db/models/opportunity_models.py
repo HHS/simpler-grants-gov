@@ -81,6 +81,7 @@ class Opportunity(Base, TimestampMixin):
         # Helper method for serialization of the API response
         return [a.applicant_type for a in self.link_applicant_types]
 
+
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
