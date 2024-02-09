@@ -27,6 +27,7 @@ resource "aws_dms_replication_task" "replication_task_full_load" {
       },
     }
   )
+  # Circa Feb 9th 2023, the table_mappings are copy pasted from the CDC task to the full load task.
   table_mappings = jsonencode(
     {
       "rules" : [
