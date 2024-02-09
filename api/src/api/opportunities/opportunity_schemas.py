@@ -5,8 +5,8 @@ from marshmallow import post_load
 from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
 from src.api.schemas.extension import Schema, fields
-from src.constants.lookup_constants import OpportunityCategory, OpportunityStatus
-from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
+from src.constants.lookup_constants import OpportunityCategoryLegacy, OpportunityCategory, OpportunityStatus, FundingInstrument, ApplicantType, FundingCategory
+from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema, generate_pagination_schema
 
 
 class OpportunityV0Schema(Schema):
@@ -29,10 +29,10 @@ class OpportunityV0Schema(Schema):
     )
 
     category = fields.Enum(
-        OpportunityCategory,
+        OpportunityCategoryLegacy,
         metadata={
             "description": "The opportunity category",
-            "example": OpportunityCategory.DISCRETIONARY,
+            "example": OpportunityCategoryLegacy.DISCRETIONARY,
         },
     )
     category_explanation = fields.String(
@@ -67,10 +67,10 @@ class OpportunitySearchV0Schema(Schema):
         }
     )
     category = fields.Enum(
-        OpportunityCategory,
+        OpportunityCategoryLegacy,
         metadata={
             "description": "The opportunity category to search for",
-            "example": OpportunityCategory.DISCRETIONARY,
+            "example": OpportunityCategoryLegacy.DISCRETIONARY,
         },
     )
 
@@ -119,27 +119,108 @@ class OpportunitySearchHeaderV0Schema(Schema):
 
 class OpportunitySummaryV01Schema(Schema):
 
-    opportunity_status = fields.Enum(OpportunityStatus)
+    opportunity_status = fields.Enum(OpportunityStatus,
+        metadata={
+            "description": "The current status of the opportunity",
+            "example": OpportunityStatus.POSTED,
+        },)
 
-    summary_description = fields.String()
-    is_cost_sharing = fields.Boolean()
+    summary_description = fields.String(metadata={
+            "description": "The summary of the opportunity",
+            "example": "This opportunity aims to unravel the mysteries of the universe.",
+        })
+    is_cost_sharing = fields.Boolean(metadata={
+            "description": "Whether or not the opportunity has a cost sharing/matching requirement",
+        })
 
-    close_date = fields.Date()
-    close_date_description = fields.String()
+    close_date = fields.Date(metadata={
+            "description": "The date that the opportunity will close",
+        })
+    close_date_description = fields.String(metadata={
+            "description": "Optional details regarding the close date",
+            "example": "Proposals are due earlier than usual.",
+        })
 
-    post_date = fields.Date()
-    archive_date = fields.Date()
+    post_date = fields.Date(metadata={
+            "description": "The date the opportunity was posted",
+        })
+    archive_date = fields.Date(metadata={
+            "description": "When the opportunity will be archived",
+        })
     # not including unarchive date at the moment
 
-    expected_number_of_awards = fields.Integer()
-    estimated_total_program_funding = fields.Integer()
-    award_floor = fields.Integer()
-    award_ceiling = fields.Integer()
+    expected_number_of_awards = fields.Integer(metadata={
+            "description": "The number of awards the opportunity is expected to award",
+            "example": 10,
+        })
+    estimated_total_program_funding = fields.Integer(metadata={
+            "description": "The total program funding of the opportunity in US Dollars",
+            "example": 10_000_000,
+        })
+    award_floor = fields.Integer(metadata={
+            "description": "The minimum amount an opportunity would award",
+            "example": 10_000,
+        })
+    award_ceiling = fields.Integer(metadata={
+            "description": "The maximum amount an opportunity would award",
+            "example": 100_000,
+        })
+
+    additional_info_url = fields.String(metadata={
+            "description": "A URL to a website that can provide additional information about the opportunity",
+            "example": "grants.gov",
+        })
+    additional_info_url_description = fields.String(metadata={
+            "description": "The text to display for the additional_info_url link",
+            "example": "Click me for more info",
+        })
+
+    funding_category_description = fields.String(metadata={
+            "description": "Additional information about the funding category",
+            "example": "Economic Support",
+        })
+    applicant_eligibility_description = fields.String(metadata={
+            "description": "Additional information about the types of applicants that are eligible",
+            "example": "All types of domestic applicants are eligible to apply",
+        })
+
+    agency_code = fields.String(metadata={
+            "description": "The agency who owns the opportunity",
+            "example": "US-ABC",
+        })
+    agency_name = fields.String(metadata={
+            "description": "The name of the agency who owns the opportunity",
+            "example": "US Alphabetical Basic Corp",
+        })
+    agency_phone_number = fields.String(metadata={
+            "description": "The phone number of the agency who owns the opportunity",
+            "example": "123-456-7890",
+        })
+    agency_contact_description = fields.String(metadata={
+            "description": "Information regarding contacting the agency who owns the opportunity",
+            "example": "For more information, reach out to Jane Smith at agency US-ABC",
+        })
+    agency_email_address = fields.String(metadata={
+            "description": "The contact email of the agency who owns the opportunity",
+            "example": "fake_email@grants.gov",
+        })
+    agency_email_address_description = fields.String(metadata={
+            "description": "The text for the link to the agency email address",
+            "example": "Click me to email the agency",
+        })
+
+
 
 class OpportunityAssistanceListingV01Schema(Schema):
 
-    program_title = fields.String()
-    assistance_listing_number = fields.String()
+    program_title = fields.String(metadata={
+            "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
+            "example": "Space Technology",
+        })
+    assistance_listing_number = fields.String(metadata={
+            "description": "The assistance listing number, see https://sam.gov/content/assistance-listings for more detail",
+            "example": "43.012",
+        })
 
 class OpportunityV01Schema(Schema):
     opportunity_id = fields.Integer(
@@ -187,5 +268,19 @@ class OpportunityV01Schema(Schema):
         }
     )
 
+    opportunity_assistance_listings = fields.List(fields.Nested(OpportunityAssistanceListingV01Schema()))
+    summary = fields.Nested(OpportunitySummaryV01Schema())
+
+    funding_instruments = fields.List(fields.Enum(FundingInstrument))
+    funding_categories = fields.List(fields.Enum(FundingCategory))
+    applicant_types = fields.List(fields.Enum(ApplicantType))
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
+
+class OpportunitySearchRequestV01Schema(Schema):
+    # A follow-up ticket will add filters - for now just including
+    # the pagination parameters.
+
+    pagination = fields.Nested(generate_pagination_schema("OpportunityPaginationV01Schema", ["opportunity_id"]))

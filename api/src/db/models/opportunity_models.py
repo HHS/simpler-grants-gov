@@ -66,6 +66,20 @@ class Opportunity(Base, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    @property
+    def funding_instruments(self) -> list[FundingInstrument]:
+        # Helper method for serialization of the API response
+        return [f.funding_instrument for f in self.link_funding_instruments]
+
+    @property
+    def funding_categories(self) -> list[FundingCategory]:
+        # Helper method for serialization of the API response
+        return [f.funding_category for f in self.link_funding_categories]
+
+    @property
+    def applicant_types(self) -> list[ApplicantType]:
+        # Helper method for serialization of the API response
+        return [a.applicant_type for a in self.link_applicant_types]
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"

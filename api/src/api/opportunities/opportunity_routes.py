@@ -8,8 +8,8 @@ from src.api.feature_flags.feature_flag_config import FeatureFlagConfig
 from src.api.opportunities.opportunity_blueprint import opportunity_blueprint_v0, opportunity_blueprint_v0_1
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities.get_opportunities import get_opportunity
-from src.services.opportunities.search_opportunities import search_opportunities
+from src.services.opportunities.get_opportunities import get_opportunity, get_opportunity_v01
+from src.services.opportunities.search_opportunities import search_opportunities_v0, search_opportunities_v01
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def opportunity_search_v0(
         logger.info("Feature flag enabled")
 
     with db_session.begin():
-        opportunities, pagination_info = search_opportunities(db_session, search_params)
+        opportunities, pagination_info = search_opportunities_v0(db_session, search_params)
 
     add_extra_data_to_current_request_logs(
         {
@@ -83,21 +83,41 @@ def opportunity_get_v0(db_session: db.Session, opportunity_id: int) -> response.
 #########################
 
 @opportunity_blueprint_v0_1.post("/v0.1/opportunities/search")
-@opportunity_blueprint_v0_1.input(opportunity_schemas.OpportunitySearchV0Schema, arg_name="search_params")
-@opportunity_blueprint_v0_1.input(
-    opportunity_schemas.OpportunitySearchHeaderV0Schema,
-    location="headers",
-    arg_name="feature_flag_config",
-)
+@opportunity_blueprint_v0_1.input(opportunity_schemas.OpportunitySearchRequestV01Schema, arg_name="search_params")
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint_v0_1.output(opportunity_schemas.OpportunityV0Schema(many=True))
+@opportunity_blueprint_v0_1.output(opportunity_schemas.OpportunityV01Schema(many=True))
 @opportunity_blueprint_v0_1.auth_required(api_key_auth)
 @opportunity_blueprint_v0_1.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_search_v0_1(
-    db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig
+    db_session: db.Session, search_params: dict
 ) -> response.ApiResponse:
 
-    return response.ApiResponse(
-        message="Success", data=[]
+    with db_session.begin():
+        opportunities, pagination_info = search_opportunities_v01(db_session, search_params)
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
     )
+    logger.info("Successfully fetched opportunities")
+
+    return response.ApiResponse(
+        message="Success", data=opportunities, pagination_info=pagination_info
+    )
+
+
+@opportunity_blueprint_v0_1.get("/v0.1/opportunities/<int:opportunity_id>")
+@opportunity_blueprint_v0_1.output(opportunity_schemas.OpportunityV01Schema)
+@opportunity_blueprint_v0_1.auth_required(api_key_auth)
+@opportunity_blueprint_v0_1.doc(description=SHARED_ALPHA_DESCRIPTION)
+@flask_db.with_db_session()
+def opportunity_get_v0_1(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"request.path.opportunity_id": opportunity_id})
+    logger.info("GET /v0.1/opportunities/:opportunity_id")
+    with db_session.begin():
+        opportunity = get_opportunity_v01(db_session, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=opportunity)

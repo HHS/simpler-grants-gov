@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 import src.adapters.db as db
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.db.models.opportunity_models import Opportunity
 from tests.src.db.models.factories import OpportunityFactory
 
@@ -11,7 +11,7 @@ opportunity_params = {
     "opportunity_number": 100123456,
     "opportunity_title": "Study math",
     "agency": "Agency of Math",
-    "category": OpportunityCategory.CONTINUATION,
+    "category": OpportunityCategoryLegacy.CONTINUATION,
     "is_draft": False,
 }
 
