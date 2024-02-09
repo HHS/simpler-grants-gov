@@ -5,7 +5,14 @@ resource "aws_dms_replication_task" "replication_task_cdc" {
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
   migration_type           = "cdc"
   replication_task_id      = "${var.environment_name}-cdc"
-  # TODO explain defaults: https://betagrantsgov.slack.com/archives/C05TSL64VUH/p1707427008889219
+  # The following settings are our modifications from the default settings.
+  # Terraform will merge these settings with the default settings.
+  #
+  # Because we don't explicitly specify all ~200 of the default settings,
+  # terraform will show a diff that includes all of the default settings.
+  # You can safely ignore that diff.
+  #
+  # Example diff here: https://betagrantsgov.slack.com/archives/C05TSL64VUH/p1707427008889219
   replication_task_settings = jsonencode(
     {
       "Logging" : {
