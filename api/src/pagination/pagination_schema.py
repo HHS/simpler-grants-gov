@@ -61,6 +61,7 @@ def generate_sorting_schema(
     }
     return Schema.from_dict(ordering_schema_fields, name=cls_name)  # type: ignore
 
+
 def generate_pagination_schema(cls_name: str, order_by_fields: list[str]) -> Type[Schema]:
     """
     Generate a schema that describes the pagination for a pagination endpoint.
@@ -113,10 +114,14 @@ def generate_pagination_schema(cls_name: str, order_by_fields: list[str]) -> Typ
         "page_offset": fields.Integer(
             required=True,
             validate=[validators.Range(min=1)],
-            metadata={"description": "The page number to fetch, starts counting from 1", "example": 1},
-        )
+            metadata={
+                "description": "The page number to fetch, starts counting from 1",
+                "example": 1,
+            },
+        ),
     }
     return Schema.from_dict(pagination_schema_fields, name=cls_name)  # type: ignore
+
 
 class PaginationInfoSchema(Schema):
     # This is part of the response schema to provide all pagination information back to a user

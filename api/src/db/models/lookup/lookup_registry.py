@@ -2,7 +2,6 @@ import logging
 from enum import Enum, IntEnum, StrEnum
 from typing import Any, Callable, Type, TypeVar
 
-
 from src.db.models.lookup.lookup import LookupConfig
 from src.db.models.lookup.lookup_table import LookupTable
 

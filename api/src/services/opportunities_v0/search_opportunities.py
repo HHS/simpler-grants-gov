@@ -1,19 +1,17 @@
 from typing import Sequence, Tuple
 
 from sqlalchemy import asc, desc, select
-from sqlalchemy.orm import joinedload
-from pydantic import BaseModel
 
 import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
-from src.pagination.pagination_models import PaginationInfo, PaginationParamsV0, PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParamsV0
 from src.pagination.paginator import Paginator
-from src.services.opportunities.opportunity_service_shared import convert_transfer_opp_to_regular
+from src.services.opportunities_v0.opportunity_service_shared import convert_transfer_opp_to_regular
 
 
-class SearchOpportunityParamsV0(PaginationParamsV0):
+class SearchOpportunityParams(PaginationParamsV0):
     opportunity_title: str | None = None
     category: OpportunityCategoryLegacy | None = None
 
@@ -31,10 +29,10 @@ def _get_order_by_field_name_for_transfer_table(order_by: str) -> str:
     return order_by
 
 
-def search_opportunities_v0(
+def search_opportunities(
     db_session: db.Session, search_opportunity_dict: dict
 ) -> Tuple[Sequence[Opportunity], PaginationInfo]:
-    search_params = SearchOpportunityParamsV0.model_validate(search_opportunity_dict)
+    search_params = SearchOpportunityParams.model_validate(search_opportunity_dict)
 
     sort_fn = asc if search_params.sorting.is_ascending else desc
 
@@ -64,28 +62,3 @@ def search_opportunities_v0(
     pagination_info = PaginationInfo.from_pagination_models(search_params, paginator)
 
     return [convert_transfer_opp_to_regular(opp) for opp in opportunities], pagination_info
-
-class SearchOpportunityParamsV01(BaseModel):
-    # Filters will be added in a subsequent ticket
-
-    pagination: PaginationParams
-
-def search_opportunities_v01(db_session: db.Session, search_params: dict) -> Tuple[Sequence[Opportunity], PaginationInfo]:
-    search_params = SearchOpportunityParamsV01.model_validate(search_params)
-
-    sort_fn = asc if search_params.pagination.is_ascending else desc
-    stmt = (
-        select(Opportunity)
-        # TODO - when we want to sort by non-opportunity table fields we'll need to change this
-        .order_by(sort_fn(getattr(Opportunity, search_params.pagination.order_by)))
-        .where(Opportunity.is_draft.is_(False))  # Only ever return non-drafts
-        .options(joinedload("*")) # Automatically load all relationships
-    )
-
-    paginator: Paginator[Opportunity] = Paginator(
-        stmt, db_session, page_size=search_params.pagination.page_size
-    )
-    opportunities = paginator.page_at(page_offset=search_params.pagination.page_offset)
-    pagination_info = PaginationInfo.from_pagination_params(search_params.pagination, paginator)
-
-    return opportunities, pagination_info

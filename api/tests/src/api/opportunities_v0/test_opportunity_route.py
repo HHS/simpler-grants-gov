@@ -139,7 +139,9 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
         ),
         # A mix of filters
         (
-            get_search_request(opportunity_title="find me", category=OpportunityCategoryLegacy.EARMARK),
+            get_search_request(
+                opportunity_title="find me", category=OpportunityCategoryLegacy.EARMARK
+            ),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (

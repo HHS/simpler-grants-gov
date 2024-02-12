@@ -3,6 +3,7 @@ import os
 from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
+from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -10,10 +11,12 @@ import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
-from src.api.opportunities import opportunity_blueprint_v0, opportunity_blueprint_v0_1
+from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
+from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import get_app_security_scheme
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,17 @@ This API is an ALPHA VERSION! Its current form is primarily for testing and feed
 
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
+
+
+class EndpointConfig(PydanticBaseEnvConfig):
+    """
+    Class which holds environments variables for enabling/disabling API
+    endpoint blueprints. Useful while we develop new endpoints that we want
+    to keep hidden in production (or other) environments temporarily while
+    we build out the features.
+    """
+
+    enable_v_0_1_endpoints: bool = Field(False, alias="ENABLE_V_0_1_ENDPOINTS")
 
 
 def create_app() -> APIFlask:
@@ -88,9 +102,16 @@ def configure_app(app: APIFlask) -> None:
 
 
 def register_blueprints(app: APIFlask) -> None:
+    endpoint_config = EndpointConfig()
+
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(opportunity_blueprint_v0)
-    app.register_blueprint(opportunity_blueprint_v0_1)
+    app.register_blueprint(opportunities_v0_blueprint)
+
+    if endpoint_config.enable_v_0_1_endpoints:
+        logger.info("Enabling v0.1 endpoints")
+        app.register_blueprint(opportunities_v0_1_blueprint)
+    else:
+        logger.info("v0.1 endpoints are not enabled")
 
 
 def get_project_root_dir() -> str:

@@ -30,6 +30,7 @@ class PaginationParamsV0(BaseModel):
     sorting: SortingParamsV0
     paging: PagingParamsV0
 
+
 class PaginationParams(BaseModel):
     page_offset: int
     page_size: int
@@ -54,7 +55,9 @@ class PaginationInfo:
     total_pages: int
 
     @classmethod
-    def from_pagination_params(cls, pagination_params: PaginationParams, paginator: Paginator) -> Self:
+    def from_pagination_params(
+        cls, pagination_params: PaginationParams, paginator: Paginator
+    ) -> Self:
         return cls(
             page_offset=pagination_params.page_offset,
             page_size=pagination_params.page_size,
