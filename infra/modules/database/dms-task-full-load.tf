@@ -19,9 +19,6 @@ resource "aws_dms_replication_task" "replication_task_full_load" {
         "EnableLogging" : true,
         "EnableLogContext" : true,
       },
-      "ValidationSettings" : {
-        "EnableValidation" : true,
-      },
       "FullLoadSettings" : {
         "TargetTablePrepMode" : "TRUNCATE_BEFORE_LOAD"
       },

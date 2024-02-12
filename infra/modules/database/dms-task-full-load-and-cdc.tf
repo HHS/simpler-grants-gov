@@ -1,10 +1,10 @@
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dms_replication_task
-resource "aws_dms_replication_task" "replication_task_cdc" {
+resource "aws_dms_replication_task" "replication_task_full_load_and_cdc" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
   source_endpoint_arn      = aws_dms_endpoint.source_endpoint.endpoint_arn
   target_endpoint_arn      = aws_dms_endpoint.target_endpoint.endpoint_arn
-  migration_type           = "cdc"
-  replication_task_id      = "${var.environment_name}-cdc"
+  migration_type           = "full-load-and-cdc"
+  replication_task_id      = "${var.environment_name}-full-load-and-cdc"
   # The following settings are our modifications from the default settings.
   # Terraform will merge these settings with the default settings.
   #
@@ -18,6 +18,9 @@ resource "aws_dms_replication_task" "replication_task_cdc" {
       "Logging" : {
         "EnableLogging" : true,
         "EnableLogContext" : true,
+      },
+      "FullLoadSettings" : {
+        "TargetTablePrepMode" : "TRUNCATE_BEFORE_LOAD"
       },
     }
   )
