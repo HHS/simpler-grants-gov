@@ -7,6 +7,7 @@ that are persisted to the database.
 The factories are based on the `factory_boy` library. See
 https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
+import random
 from datetime import datetime
 from typing import Optional
 
@@ -19,7 +20,13 @@ import src.adapters.db as db
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.util.datetime_util as datetime_util
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+    OpportunityStatus,
+)
 
 _db_session: Optional[db.Session] = None
 
@@ -55,6 +62,7 @@ class Generators:
     Now = factory.LazyFunction(datetime.now)
     UtcNow = factory.LazyFunction(datetime_util.utcnow)
     UuidObj = factory.Faker("uuid4", cast_to=None)
+    PhoneNumber = factory.Sequence(lambda n: f"123-456-{n:04}")
 
 
 class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -86,6 +94,150 @@ class OpportunityFactory(BaseFactory):
     is_draft = False  # Because we filter out drafts, just default these to False
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
+
+    summary = factory.RelatedFactory(
+        "tests.src.db.models.factories.OpportunitySummaryFactory",
+        factory_related_name="opportunity",
+    )
+    opportunity_assistance_listings = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.OpportunityAssistanceListingFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+    link_funding_instruments = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.LinkFundingInstrumentOpportunityFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+    link_funding_categories = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.LinkFundingCategoryOpportunityFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+    link_applicant_types = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.LinkApplicantTypeOpportunityFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+
+
+class OpportunitySummaryFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunitySummary
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    opportunity_status = factory.fuzzy.FuzzyChoice(OpportunityStatus)
+
+    summary_description = factory.LazyFunction(lambda: f"Example summary - {fake.paragraph()}")
+    is_cost_sharing = factory.Faker("boolean")
+
+    # Use the opportunity status to determine a reasonable due date
+    close_date = factory.Maybe(
+        decider=factory.LazyAttribute(
+            lambda s: s.opportunity_status in [OpportunityStatus.CLOSED, OpportunityStatus.ARCHIVED]
+        ),
+        # If closed/archived, choose an old date
+        yes_declaration=factory.Faker("date_between", start_date="-3w", end_date="-2w"),
+        # otherwise a future date
+        no_declaration=factory.Faker("date_between", start_date="+2w", end_date="+3w"),
+    )
+    close_date_description = factory.Faker("paragraph", nb_sentences=1)
+
+    # Just a random recent post date
+    post_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+
+    archive_date = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: s.opportunity_status == OpportunityStatus.ARCHIVED),
+        # If archived, choose an old date
+        yes_declaration=factory.Faker("date_between", start_date="-3w", end_date="-2w"),
+        # otherwise a future date
+        no_declaration=factory.Faker("date_between", start_date="+2w", end_date="+3w"),
+    )
+    unarchive_date = None
+
+    expected_number_of_awards = factory.Faker("random_int", min=1, max=25)
+    estimated_total_program_funding = factory.Faker(
+        "random_int", min=10_000, max=10_000_000, step=5_000
+    )
+    award_floor = factory.LazyAttribute(
+        lambda s: s.estimated_total_program_funding / s.expected_number_of_awards
+    )
+    award_ceiling = factory.LazyAttribute(lambda s: s.estimated_total_program_funding)
+
+    additional_info_url = factory.Iterator(["google.com", "grants.gov"])
+    additional_info_url_description = "Click me for additional info"
+
+    funding_category_description = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        yes_declaration=factory.Faker("paragraph", nb_sentences=1),
+        no_declaration=None,
+    )
+    applicant_eligibility_description = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        yes_declaration=factory.Faker("paragraph", nb_sentences=5),
+        no_declaration=None,
+    )
+
+    agency_code = factory.Iterator(["US-ABC", "US-XYZ", "US-123"])
+    agency_name = factory.Iterator(
+        ["US Alphabetical Basic Corp", "US Xylophone Yak Zoo", "US Number Department"]
+    )
+    agency_phone_number = Generators.PhoneNumber
+    agency_contact_description = factory.LazyFunction(
+        lambda: f"For more information contact us at - {fake.paragraph()}"
+    )
+    agency_email_address = factory.Faker("email")
+    agency_email_address_description = factory.LazyAttribute(
+        lambda s: f"Contact {s.agency_name} via email"
+    )
+
+
+class OpportunityAssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAssistanceListing
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
+
+    program_title = factory.Faker("company")
+    assistance_listing_number = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
+    )
+
+
+class LinkFundingInstrumentOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.LinkFundingInstrumentOpportunity
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda f: f.opportunity.opportunity_id)
+
+    # We use an iterator here to keep the values unique when generated by the opportunity factory
+    funding_instrument = factory.Iterator(FundingInstrument)
+
+
+class LinkFundingCategoryOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.LinkFundingCategoryOpportunity
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda f: f.opportunity.opportunity_id)
+
+    # We use an iterator here to keep the values unique when generated by the opportunity factory
+    funding_category = factory.Iterator(FundingCategory)
+
+
+class LinkApplicantTypeOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.LinkApplicantTypeOpportunity
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda f: f.opportunity.opportunity_id)
+
+    # We use an iterator here to keep the values unique when generated by the opportunity factory
+    applicant_type = factory.Iterator(ApplicantType)
 
 
 ####################################
