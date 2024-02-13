@@ -14,3 +14,6 @@ CVE-2023-5869
 CVE-2023-39418
 CVE-2023-5868
 CVE-2023-5870
+# 2/12/2024 - libgnutls30 in node:20-bullseye-slim not updated with latest fix. Check again after 2/20/2024 to remove
+CVE-2024-0567
+CVE-2023-5981
