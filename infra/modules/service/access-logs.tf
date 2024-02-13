@@ -52,6 +52,25 @@ data "aws_iam_policy_document" "access_logs_put_access" {
       identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
     }
   }
+
+  statement {
+    sid    = "AllowSSLRequestsOnly"
+    effect = "Deny"
+    resources = [
+      aws_s3_bucket.access_logs.arn,
+      "${aws_s3_bucket.access_logs.arn}/*"
+    ]
+    actions = ["s3:*"]
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = [false]
+    }
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+  }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
