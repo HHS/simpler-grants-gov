@@ -140,3 +140,6 @@ dmypy.json
 
 # asdf
 .tool-versions
+
+# vscode
+.vscode*
