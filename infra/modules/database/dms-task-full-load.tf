@@ -20,7 +20,9 @@ resource "aws_dms_replication_task" "replication_task_full_load" {
         "EnableLogContext" : true,
       },
       "FullLoadSettings" : {
-        "TargetTablePrepMode" : "DO_NOTHING"
+        # !IMPORTANT! This setting will delete all data in the target table before loading new data.
+        # This should generally not be used in production. It's here for the sake of dev / test environments.
+        "TargetTablePrepMode" : "TRUNCATE_BEFORE_LOAD"
       },
     }
   )
