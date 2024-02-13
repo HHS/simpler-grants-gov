@@ -10,13 +10,13 @@ locals {
           "table-name" : "TOPPORTUNITY"
         },
         "rule-action" : "include",
-        "filters": [{
-          "filter-type": "source",
-          "column-name": "IS_DRAFT",
-          "filter-conditions": [{
-                 "filter-operator": "eq",
-                 "value": "N"
-             }]
+        "filters" : [{
+          "filter-type" : "source",
+          "column-name" : "IS_DRAFT",
+          "filter-conditions" : [{
+            "filter-operator" : "eq",
+            "value" : "N"
+          }]
         }]
       },
       {
