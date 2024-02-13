@@ -1,3 +1,6 @@
+# PURPOSE:
+# This is a standalone CDC task used for testing purposes.
+
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dms_replication_task
 resource "aws_dms_replication_task" "replication_task_cdc" {
   replication_instance_arn = aws_dms_replication_instance.instance.replication_instance_arn
