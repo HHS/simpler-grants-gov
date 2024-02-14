@@ -14,6 +14,7 @@ from src.api.opportunities import opportunity_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import get_app_security_scheme
+from src.data_migration.data_migration_blueprint import data_migration_blueprint
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,8 @@ def configure_app(app: APIFlask) -> None:
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunity_blueprint)
+
+    app.register_blueprint(data_migration_blueprint)
 
 
 def get_project_root_dir() -> str:
