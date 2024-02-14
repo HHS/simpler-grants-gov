@@ -44,7 +44,7 @@ else
 PY_RUN_CMD := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
 endif
 
-FLASK_CMD := $(PY_RUN_CMD) flask --env-file local.env
+FLASK_CMD := $(PY_RUN_CMD) flask
 
 # Docker user configuration
 # This logic is to avoid issues with permissions and mounting local volumes,
@@ -239,6 +239,9 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
+
+copy-oracle-data:
+	$(FLASK_CMD) data-migration copy-oracle-data
 
 ##################################################
 # Miscellaneous Utilities
