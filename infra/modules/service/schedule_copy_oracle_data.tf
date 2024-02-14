@@ -1,3 +1,4 @@
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
 resource "aws_cloudwatch_log_group" "copy_oracle_data" {
   name = "${var.service_name}-copy-oracle-data"
 
@@ -57,18 +58,26 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group
 resource "aws_scheduler_schedule_group" "copy_oracle_data" {
   name = "${var.service_name}-copy-oracle-data"
 }
 
-# resource "aws_scheduler_schedule" "copy_oracle_data" {
-#   name                         = "${var.service_name}-copy-oracle-data"
-#   state                        = "ENABLED"
-#   group_name                   = aws_scheduler_schedule_group.copy_oracle_data.id
-#   schedule_expression          = "rate(5 minutes)"
-#   schedule_expression_timezone = "US/Eastern"
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule
+resource "aws_scheduler_schedule" "copy_oracle_data" {
+  name                         = "${var.service_name}-copy-oracle-data"
+  state                        = "ENABLED"
+  group_name                   = aws_scheduler_schedule_group.copy_oracle_data.id
+  schedule_expression          = "rate(5 minutes)"
+  schedule_expression_timezone = "US/Eastern"
 
-#   flexible_time_window {
-#     mode = "OFF"
-#   }
-# }
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  # target is the state machine
+  target {
+    arn      = aws_sfn_state_machine.copy_oracle_data[0].arn
+    role_arn = aws_iam_role.task_executor.arn
+  }
+}
