@@ -144,8 +144,8 @@ module "service" {
         "data-migration",
         "copy-oracle-data",
       ]
-      schedule_expression          = "rate(1 minutes)" // Change to every 5 minutes when not testing
-      maximum_event_age_in_seconds = 300
+      schedule_expression          = "rate(1 minutes)"
+      maximum_event_age_in_seconds = 60
       maximum_retry_attempts       = 0
     }
   ]
