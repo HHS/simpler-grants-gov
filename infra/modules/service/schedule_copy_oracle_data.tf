@@ -20,6 +20,7 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
     "States" : {
       "ExecuteECSTask" : {
         "Type" : "Task",
+        # docs: https://docs.aws.amazon.com/step-functions/latest/dg/connect-ecs.html
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
         "Parameters" : {
           "Cluster" : aws_ecs_cluster.cluster.arn,
@@ -28,6 +29,7 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
               "Subnets" : var.private_subnet_ids,
+              "SecurityGroups" : [aws_security_group.app.id],
             }
           },
           "Overrides" : {
