@@ -162,7 +162,10 @@ export class FeatureFlagsManager {
       FeatureFlagsManager.FEATURE_FLAGS_KEY
     );
 
-    const featureFlags = paramValue === "reset" ? this.defaultFeatureFlags : this.parseFeatureFlagsFromString(paramValue);
+    const featureFlags =
+      paramValue === "reset"
+        ? this.defaultFeatureFlags
+        : this.parseFeatureFlagsFromString(paramValue);
     if (Object.keys(featureFlags).length === 0) {
       // No valid feature flags specified
       return response;
@@ -188,7 +191,7 @@ export class FeatureFlagsManager {
         const splitValue = value.split(":");
         if (splitValue.length < 2 || splitValue.length > 2) {
           return false;
-        } 
+        }
         return true;
       })
       // Convert 'key:value' to ['key', 'value']

@@ -1,33 +1,33 @@
-import { useFeatureFlags } from 'src/hooks/useFeatureFlags'
-import { NextPage } from 'next'
+import { NextPage } from "next";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
-import Head from 'next/head'
-import React from 'react'
-import { Button, Table } from '@trussworks/react-uswds'
+import Head from "next/head";
+import React from "react";
+import { Button, Table } from "@trussworks/react-uswds";
 
 /**
  * Disable this page in production
  */
 export function getStaticProps() {
-  if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'prod') {
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === "prod") {
     return {
       notFound: true,
-    }
+    };
   }
 
   return {
     props: {},
-  }
+  };
 }
 
 /**
  * View for managing feature flags
  */
 const FeatureFlags: NextPage = () => {
-  const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags()
+  const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags();
 
   if (!mounted) {
-    return null
+    return null;
   }
 
   return (
@@ -51,9 +51,9 @@ const FeatureFlags: NextPage = () => {
                 <tr key={featureName}>
                   <td
                     data-testid={`${featureName}-status`}
-                    style={{ background: enabled ? '#81cc81' : '#fc6a6a' }}
+                    style={{ background: enabled ? "#81cc81" : "#fc6a6a" }}
                   >
-                    {enabled ? 'Enabled' : 'Disabled'}
+                    {enabled ? "Enabled" : "Disabled"}
                   </td>
                   <th scope="row">{featureName}</th>
                   <td>
@@ -81,7 +81,7 @@ const FeatureFlags: NextPage = () => {
         </Table>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default FeatureFlags
+export default FeatureFlags;
