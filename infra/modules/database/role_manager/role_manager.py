@@ -102,7 +102,8 @@ def connect_as_master_user() -> Connection:
     host = os.environ["DB_HOST"]
     port = os.environ["DB_PORT"]
     database = os.environ["DB_NAME"]
-    password = get_password()
+    param_name = os.environ["DB_PASSWORD_PARAM_NAME"] # move this to caller
+    password = get_password(param_name)
 
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
     return Connection(user=user, host=host, port=port, database=database, password=password, ssl_context=True)
@@ -119,9 +120,8 @@ def connect_using_iam(user: str) -> Connection:
     logger.info("Connecting to database: user=%s host=%s port=%s database=%s", user, host, port, database)
     return Connection(user=user, host=host, port=port, database=database, password=token, ssl_context=True)
 
-def get_password() -> str:
+def get_password(param_name: str ) -> str: 
     ssm = boto3.client("ssm",region_name=os.environ["AWS_REGION"])
-    param_name = os.environ["DB_PASSWORD_PARAM_NAME"]
     logger.info("Fetching password from parameter store:\n%s"%param_name)
     result = json.loads(ssm.get_parameter(
         Name=param_name,
@@ -159,13 +159,15 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
                                                  WHERE nspname NOT LIKE 'pg_%' \
                                                  AND nspname <> 'information_schema'")]
 
-
+# manually create secret for DMS
 def configure_database(conn: Connection) -> None:
     logger.info("Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
     schema_name = os.environ.get("DB_SCHEMA")
     database_name = os.environ.get("DB_NAME")
+    dms_username = os.environ.get("DMS_USER")
+    param_name = os.environ.get("DB_PASSWORD_PARAM_NAME")
 
     logger.info("Revoking default access on public schema")
     conn.run("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
@@ -174,15 +176,25 @@ def configure_database(conn: Connection) -> None:
     logger.info("Setting default search path to schema=%s", schema_name)
     conn.run(f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}")
 
-    configure_roles(conn, [migrator_username, app_username], database_name)
+    roles = [ DatabaseRole(migrator_username, true, None), DatabaseRole(app_username, True, None), DatabaseRole(dms_username, False, get_password(param_name))]
+
+    get_password(param_name)
+    configure_roles(conn, roles, database_name)
     configure_schema(conn, schema_name, migrator_username, app_username)
 
 
-def configure_roles(conn: Connection, roles: list[str], database_name: str) -> None:
+def configure_roles(conn: Connection, roles: list[DatabaseRole], database_name: str) -> None:
     logger.info("Configuring roles")
     for role in roles:
         configure_role(conn, role, database_name)
 
+
+# Create python obj for DB credentials 
+@dataclasses.dataclass
+class DatabaseRole:
+    username: str
+    useIamAuth: bool
+    password: str | None
 
 def configure_role(conn: Connection, username: str, database_name: str) -> None:
     logger.info("Configuring role: username=%s", username)
@@ -198,6 +210,7 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
         $$;
         """
     )
+    # add logic to add pw or auth with IAM
     conn.run(f"GRANT {identifier(role)} TO {identifier(username)}")
     conn.run(f"GRANT CONNECT ON DATABASE {identifier(database_name)} TO {identifier(username)}")
 
