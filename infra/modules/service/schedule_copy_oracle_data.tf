@@ -1,14 +1,3 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
-resource "aws_cloudwatch_log_group" "copy_oracle_data" {
-  name = "${var.service_name}-copy-oracle-data"
-
-  # Conservatively retain logs for 5 years.
-  # Looser requirements may allow shorter retention periods
-  retention_in_days = 1827
-
-  # checkov:skip=CKV_AWS_158:Encrypt service logs with customer key in future work
-}
-
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine
 resource "aws_sfn_state_machine" "copy_oracle_data" {
   count = var.schedule_copy_oracle_data ? 1 : 0
@@ -37,7 +26,15 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
             "ContainerOverrides" : [
               {
                 "Name" : var.service_name,
+                "Environment" : [
+                  {
+                    "Name" : "FLASK_APP",
+                    "Value" : "src.app:create_app()",
+                  }
+                ]
                 "Command" : [
+                  "poetry",
+                  "run",
                   "flask",
                   "data-migration",
                   "copy-oracle-data",
@@ -52,7 +49,7 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
   })
 
   logging_configuration {
-    log_destination        = "${aws_cloudwatch_log_group.copy_oracle_data.arn}:*"
+    log_destination        = "${aws_cloudwatch_log_group.service_logs.arn}:*"
     include_execution_data = true
     level                  = "ERROR"
   }
@@ -60,14 +57,16 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group
 resource "aws_scheduler_schedule_group" "copy_oracle_data" {
-  name = "${var.service_name}-copy-oracle-data"
+  count = var.schedule_copy_oracle_data ? 1 : 0
+  name  = "${var.service_name}-copy-oracle-data"
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule
 resource "aws_scheduler_schedule" "copy_oracle_data" {
+  count                        = var.schedule_copy_oracle_data ? 1 : 0
   name                         = "${var.service_name}-copy-oracle-data"
   state                        = "ENABLED"
-  group_name                   = aws_scheduler_schedule_group.copy_oracle_data.id
+  group_name                   = aws_scheduler_schedule_group.copy_oracle_data[0].id
   schedule_expression          = "rate(5 minutes)"
   schedule_expression_timezone = "US/Eastern"
 
