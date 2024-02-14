@@ -161,7 +161,8 @@ export class FeatureFlagsManager {
     const paramValue = request.nextUrl.searchParams.get(
       FeatureFlagsManager.FEATURE_FLAGS_KEY
     );
-    const featureFlags = this.parseFeatureFlagsFromString(paramValue);
+
+    const featureFlags = paramValue === "reset" ? this.defaultFeatureFlags : this.parseFeatureFlagsFromString(paramValue);
     if (Object.keys(featureFlags).length === 0) {
       // No valid feature flags specified
       return response;
@@ -214,15 +215,13 @@ export class FeatureFlagsManager {
   /**
    * Toggle feature flag
    */
-  setFeatureFlag(featureName: string, enabled: boolean | "reset"): void {
+  setFeatureFlag(featureName: string, enabled: boolean): void {
     if (!this.isValidFeatureFlag(featureName)) {
       throw new Error(`\`${featureName}\` is not a valid feature flag`);
     }
-    // TODO: Add reset for an individual flag here. get the value of the default
-    const updatedFlag = enabled === "reset" ? this.defaultFeatureFlags[featureName] : enabled
     const featureFlags = {
       ...this.featureFlags,
-      [featureName]: updatedFlag,
+      [featureName]: enabled,
     };
 
     this.setCookie(JSON.stringify(featureFlags));
@@ -256,5 +255,3 @@ export class FeatureFlagsManager {
     }
   }
 }
-
-// TODO: add reset function for individual flag and for all flags?

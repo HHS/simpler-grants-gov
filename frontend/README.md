@@ -178,4 +178,5 @@ It's recommended that developers configure their code editor to auto run these t
 ## Other topics
 
 - [Internationalization](../documentation/frontend/internationalization.md)
+- [Feature Flags](../documentation/frontend/featureFlags.md)
 - Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.
