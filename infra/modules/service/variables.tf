@@ -88,7 +88,8 @@ variable "extra_environment_variables" {
 
 variable "scheduler_inputs" {
   type = list(object({
-    command                      = string
+    name                         = string
+    command                      = list(string)
     schedule_expression          = string
     maximum_event_age_in_seconds = number
     maximum_retry_attempts       = number

@@ -1,8 +1,16 @@
+resource "aws_scheduler_schedule_group" "group" {
+  name = var.service_name
+}
+
 resource "aws_scheduler_schedule" "scheduler" {
-  for_each                     = toset(var.scheduler_inputs)
-  name                         = "${var.service_name}-schedule"
+  for_each = {
+    for index, input in var.scheduler_inputs :
+    input.name => input
+  }
+
+  name                         = "${var.service_name}-${each.value.name}-schedule"
   state                        = "ENABLED"
-  group_name                   = var.service_name
+  group_name                   = aws_scheduler_schedule_group.group.id
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = "US/Eastern"
 

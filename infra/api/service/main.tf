@@ -138,12 +138,13 @@ module "service" {
 
   scheduler_inputs = [
     {
+      name = "copy-oracle-data"
       command = [
         "flask",
         "data-migration",
         "copy-oracle-data",
       ]
-      schedule_expression          = "cron(0/5 * * * ? *)" // every 5 minutes
+      schedule_expression          = "rate(1 minutes)" // Change to every 5 minutes when not testing
       maximum_event_age_in_seconds = 300
       maximum_retry_attempts       = 0
     }
