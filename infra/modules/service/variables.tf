@@ -86,6 +86,17 @@ variable "extra_environment_variables" {
   default     = []
 }
 
+variable "scheduler_inputs" {
+  type = list(object({
+    command                      = string
+    schedule_expression          = string
+    maximum_event_age_in_seconds = number
+    maximum_retry_attempts       = number
+  }))
+  description = "List of scheduler inputs to create event bridge schedules for the service"
+  default     = []
+}
+
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({

@@ -135,6 +135,19 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  scheduler_inputs = [
+    {
+      command = [
+        "flask",
+        "data-migration",
+        "copy-oracle-data",
+      ]
+      schedule_expression          = "cron(0/5 * * * ? *)" // every 5 minutes
+      maximum_event_age_in_seconds = 300
+      maximum_retry_attempts       = 0
+    }
+  ]
 }
 
 module "monitoring" {
