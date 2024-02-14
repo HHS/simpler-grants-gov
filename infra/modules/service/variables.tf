@@ -143,3 +143,8 @@ variable "is_temporary" {
   description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
   type        = bool
 }
+
+variable "schedule_copy_oracle_data" {
+  type    = bool
+  default = false
+}
