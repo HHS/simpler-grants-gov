@@ -44,11 +44,11 @@ describe("Feature flags page", () => {
     });
   });
 
-  it("is disabled in production", async () => {
+  it("is disabled in production", () => {
     expect(getStaticProps().notFound).toBeUndefined();
     const oldEnv = { ...process.env };
     process.env.NEXT_PUBLIC_ENVIRONMENT = "prod";
-    await expect(getStaticProps().notFound).toBe(true);
+    expect(getStaticProps().notFound).toBe(true);
     process.env = oldEnv; // Restore old environment
   });
 });

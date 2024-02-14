@@ -49,7 +49,6 @@ export class FeatureFlagsManager {
   // browser, once a default is defined here.
   private _defaultFeatureFlags = {
     hideSearch: true,
-    useMockData: false,
   };
 
   private _cookies;

@@ -7,6 +7,14 @@ and 2. links can be sent to individuals with customized query parameters to cust
 For codebase/deployment level feature flagging that isn't meant for users to be able to configure, those continue to be
 implemented using `process.env`.
 
+## Feature flags in use
+
+As of February 2024, the following feature flags are set in the project:
+1. hideSearch - 
+  * Defaults to true
+  * This is for hiding the search page as it is being developed and user tested
+  * This should be removed when the search page goes live, before May 2024
+
 ## Non-developer usage
 
 There are two ways to manage feature flags.
