@@ -33,6 +33,8 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "task_executor" {
+  # checkov:skip=CKV_AWS_111:Ignore some IAM policy checks for the task executor role
+
   # Allow ECS to log to Cloudwatch.
   statement {
     actions = [
@@ -59,6 +61,18 @@ data "aws_iam_policy_document" "task_executor" {
       "logs:PutResourcePolicy",
       "logs:DescribeResourcePolicies",
       "logs:DescribeLogGroups",
+    ]
+    resources = ["*"]
+  }
+
+  # via https://docs.aws.amazon.com/step-functions/latest/dg/xray-iam.html
+  statement {
+    sid = "StepFunctionsXRay"
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets"
     ]
     resources = ["*"]
   }

@@ -53,6 +53,10 @@ resource "aws_sfn_state_machine" "copy_oracle_data" {
     include_execution_data = true
     level                  = "ERROR"
   }
+
+  tracing_configuration {
+    enabled = true
+  }
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group
@@ -63,7 +67,7 @@ resource "aws_scheduler_schedule_group" "copy_oracle_data" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule
 resource "aws_scheduler_schedule" "copy_oracle_data" {
-  # checkov:skip=CKV_AWS_158:Ignore the managed customer KMS key requirement for now
+  # checkov:skip=CKV_AWS_297:Ignore the managed customer KMS key requirement for now
 
   count                        = var.schedule_copy_oracle_data ? 1 : 0
   name                         = "${var.service_name}-copy-oracle-data"
