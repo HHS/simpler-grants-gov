@@ -135,8 +135,6 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
-
-  schedule_copy_oracle_data = true
 }
 
 module "monitoring" {
