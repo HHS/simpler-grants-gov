@@ -2,14 +2,14 @@ import logging
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-import src.api.opportunities.opportunity_schemas as opportunity_schemas
+import src.api.opportunities_v0.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig
-from src.api.opportunities.opportunity_blueprint import opportunity_blueprint
+from src.api.opportunities_v0.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities.get_opportunities import get_opportunity
-from src.services.opportunities.search_opportunities import search_opportunities
+from src.services.opportunities_v0.get_opportunities import get_opportunity
+from src.services.opportunities_v0.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 """
 
 
-@opportunity_blueprint.post("/v0/opportunities/search")
+@opportunity_blueprint.post("/opportunities/search")
 @opportunity_blueprint.input(opportunity_schemas.OpportunitySearchSchema, arg_name="search_params")
 @opportunity_blueprint.input(
     opportunity_schemas.OpportunitySearchHeaderSchema,
@@ -34,7 +34,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
     arg_name="feature_flag_config",
 )
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint.output(opportunity_schemas.OpportunitySchema(many=True))
+@opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema(many=True))
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
@@ -64,8 +64,8 @@ def opportunity_search(
     )
 
 
-@opportunity_blueprint.get("/v0/opportunities/<int:opportunity_id>")
-@opportunity_blueprint.output(opportunity_schemas.OpportunitySchema)
+@opportunity_blueprint.get("/opportunities/<int:opportunity_id>")
+@opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()

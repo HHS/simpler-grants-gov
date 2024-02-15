@@ -5,11 +5,13 @@ from marshmallow import post_load
 from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
 from src.api.schemas.extension import Schema, fields
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
 
 
-class OpportunitySchema(Schema):
+class OpportunityV0Schema(Schema):
+    # NOTE: This schema is named with V0 as schema names need to be globally unique
+
     opportunity_id = fields.Integer(
         dump_only=True,
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
@@ -29,10 +31,10 @@ class OpportunitySchema(Schema):
     )
 
     category = fields.Enum(
-        OpportunityCategory,
+        OpportunityCategoryLegacy,
         metadata={
             "description": "The opportunity category",
-            "example": OpportunityCategory.DISCRETIONARY,
+            "example": OpportunityCategoryLegacy.DISCRETIONARY,
         },
     )
     category_explanation = fields.String(
@@ -67,10 +69,10 @@ class OpportunitySearchSchema(Schema):
         }
     )
     category = fields.Enum(
-        OpportunityCategory,
+        OpportunityCategoryLegacy,
         metadata={
             "description": "The opportunity category to search for",
-            "example": OpportunityCategory.DISCRETIONARY,
+            "example": OpportunityCategoryLegacy.DISCRETIONARY,
         },
     )
 

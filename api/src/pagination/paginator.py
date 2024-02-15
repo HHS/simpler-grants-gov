@@ -60,7 +60,10 @@ class Paginator(Generic[T]):
         offset = self.page_size * (page_offset - 1)
 
         return (
-            self.db_session.execute(self.stmt.offset(offset).limit(self.page_size)).scalars().all()
+            self.db_session.execute(self.stmt.offset(offset).limit(self.page_size))
+            .unique()
+            .scalars()
+            .all()
         )
 
 

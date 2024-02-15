@@ -2,7 +2,7 @@ import dataclasses
 
 import pytest
 
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from tests.src.db.models.factories import TransferTopportunityFactory
 
@@ -71,16 +71,16 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
     # Once we've built out the endpoint more, we'll probably want to make this more robust.
 
     TransferTopportunityFactory.create(
-        opptitle="Find me abc", oppcategory=OpportunityCategory.EARMARK
+        opptitle="Find me abc", oppcategory=OpportunityCategoryLegacy.EARMARK
     )
     TransferTopportunityFactory.create(
-        opptitle="Find me xyz", oppcategory=OpportunityCategory.CONTINUATION
+        opptitle="Find me xyz", oppcategory=OpportunityCategoryLegacy.CONTINUATION
     )
 
-    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
-    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.DISCRETIONARY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategoryLegacy.DISCRETIONARY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategoryLegacy.DISCRETIONARY)
 
-    TransferTopportunityFactory.create(oppcategory=OpportunityCategory.MANDATORY)
+    TransferTopportunityFactory.create(oppcategory=OpportunityCategoryLegacy.MANDATORY)
 
     # Add a few opportunities with is_draft=True which should never be found
     TransferTopportunityFactory.create_batch(size=10, is_draft="Y")
@@ -122,41 +122,43 @@ def setup_opportunities(enable_factory_create, truncate_opportunities):
         ),
         # category filter
         (
-            get_search_request(category=OpportunityCategory.DISCRETIONARY),
+            get_search_request(category=OpportunityCategoryLegacy.DISCRETIONARY),
             SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
         ),
         (
-            get_search_request(category=OpportunityCategory.EARMARK),
+            get_search_request(category=OpportunityCategoryLegacy.EARMARK),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
-            get_search_request(category=OpportunityCategory.CONTINUATION),
+            get_search_request(category=OpportunityCategoryLegacy.CONTINUATION),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
-            get_search_request(category=OpportunityCategory.OTHER),
+            get_search_request(category=OpportunityCategoryLegacy.OTHER),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
         # A mix of filters
         (
-            get_search_request(opportunity_title="find me", category=OpportunityCategory.EARMARK),
+            get_search_request(
+                opportunity_title="find me", category=OpportunityCategoryLegacy.EARMARK
+            ),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
-            get_search_request(category=OpportunityCategory.DISCRETIONARY),
+            get_search_request(category=OpportunityCategoryLegacy.DISCRETIONARY),
             SearchExpectedValues(total_pages=1, total_records=2, response_record_count=2),
         ),
         (
             get_search_request(
                 opportunity_title="find me",
-                category=OpportunityCategory.CONTINUATION,
+                category=OpportunityCategoryLegacy.CONTINUATION,
             ),
             SearchExpectedValues(total_pages=1, total_records=1, response_record_count=1),
         ),
         (
             get_search_request(
                 opportunity_title="something else",
-                category=OpportunityCategory.OTHER,
+                category=OpportunityCategoryLegacy.OTHER,
             ),
             SearchExpectedValues(total_pages=0, total_records=0, response_record_count=0),
         ),
