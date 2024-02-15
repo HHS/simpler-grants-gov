@@ -3,6 +3,7 @@
  */
 
 import { CookiesStatic } from "js-cookie";
+import { featureFlags } from "src/constants/featureFlags";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -47,9 +48,7 @@ export class FeatureFlagsManager {
 
   // Define all feature flags here! You can override these in your
   // browser, once a default is defined here.
-  private _defaultFeatureFlags = {
-    hideSearch: true,
-  };
+  private _defaultFeatureFlags = featureFlags;
 
   private _cookies;
 
