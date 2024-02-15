@@ -7,7 +7,7 @@ import src.api.response as response
 from src.api.opportunities_v0_1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities_v0_1.get_opportunities import get_opportunity
+from src.services.opportunities_v0_1.get_opportunity import get_opportunity
 from src.services.opportunities_v0_1.search_opportunities import search_opportunities
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ def opportunity_search(db_session: db.Session, search_params: dict) -> response.
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"request.path.opportunity_id": opportunity_id})
+    add_extra_data_to_current_request_logs({"opportunity.opportunity_id": opportunity_id})
     logger.info("GET /v0.1/opportunities/:opportunity_id")
     with db_session.begin():
         opportunity = get_opportunity(db_session, opportunity_id)
