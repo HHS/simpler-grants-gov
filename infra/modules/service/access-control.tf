@@ -94,6 +94,14 @@ data "aws_iam_policy_document" "task_executor" {
     resources = ["*"]
   }
 
+  statement {
+    sid = "StepFunctionsStartExecution"
+    actions = [
+      "states:StartExecution",
+    ]
+    resources = ["arn:aws:states:*:*:stateMachine:*"]
+  }
+
   # Allow ECS to authenticate with ECR
   statement {
     sid = "ECRAuth"

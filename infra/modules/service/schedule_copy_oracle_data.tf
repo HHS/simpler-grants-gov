@@ -67,7 +67,7 @@ resource "aws_scheduler_schedule" "copy_oracle_data" {
   name                         = "${var.service_name}-copy-oracle-data"
   state                        = "ENABLED"
   group_name                   = aws_scheduler_schedule_group.copy_oracle_data[0].id
-  schedule_expression          = "rate(5 minutes)"
+  schedule_expression          = "rate(2 minutes)"
   schedule_expression_timezone = "US/Eastern"
 
   flexible_time_window {
@@ -78,5 +78,9 @@ resource "aws_scheduler_schedule" "copy_oracle_data" {
   target {
     arn      = aws_sfn_state_machine.copy_oracle_data[0].arn
     role_arn = aws_iam_role.task_executor.arn
+
+    retry_policy {
+      maximum_retry_attempts = 0 # dont retry, just wait for the next execution
+    }
   }
 }
