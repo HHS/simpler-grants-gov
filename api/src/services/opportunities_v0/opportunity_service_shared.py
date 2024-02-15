@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 
@@ -18,7 +18,7 @@ def convert_transfer_opp_to_regular(transfer_opportunity: TransferTopportunity) 
 
     opportunity_category = None
     if transfer_opportunity.oppcategory:
-        opportunity_category = OpportunityCategory(transfer_opportunity.oppcategory)
+        opportunity_category = OpportunityCategoryLegacy(transfer_opportunity.oppcategory)
 
     # convert the update/create dates to datetime at 00:00:00
     created_at, updated_at = None, None

@@ -3,17 +3,17 @@ from typing import Sequence, Tuple
 from sqlalchemy import asc, desc, select
 
 import src.adapters.db as db
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParamsV0
 from src.pagination.paginator import Paginator
-from src.services.opportunities.opportunity_service_shared import convert_transfer_opp_to_regular
+from src.services.opportunities_v0.opportunity_service_shared import convert_transfer_opp_to_regular
 
 
-class SearchOpportunityParams(PaginationParams):
+class SearchOpportunityParams(PaginationParamsV0):
     opportunity_title: str | None = None
-    category: OpportunityCategory | None = None
+    category: OpportunityCategoryLegacy | None = None
 
 
 def _get_order_by_field_name_for_transfer_table(order_by: str) -> str:
