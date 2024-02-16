@@ -123,6 +123,13 @@ module "service" {
 
   api_auth_token = data.aws_ssm_parameter.api_auth_token.value
 
+  extra_environment_variables = merge({
+    FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
+    BUCKET_NAME           = local.storage_config.bucket_name
+  }, local.service_config.extra_environment_variables)
+
+  secrets = local.service_config.secrets
+
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
     app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn

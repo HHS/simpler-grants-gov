@@ -86,6 +86,15 @@ variable "extra_environment_variables" {
   default     = []
 }
 
+variable "secrets" {
+  type = set(object({
+    name           = string
+    ssm_param_name = string
+  }))
+  description = "List of configurations for defining environment variables that pull from SSM parameter store"
+  default     = []
+}
+
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
