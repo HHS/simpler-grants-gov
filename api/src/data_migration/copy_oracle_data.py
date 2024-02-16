@@ -9,6 +9,42 @@ from src.data_migration.data_migration_blueprint import data_migration_blueprint
 logger = logging.getLogger(__name__)
 
 
+class SqlCommands:
+    """
+    Constants class for holding all of the commands we run below
+    so that the code itself doesn't need to contain these massive walls of text
+    """
+
+    #################################
+    # TOPPORTUNITY queries
+    #################################
+
+    OPPORTUNITY_DELETE_QUERY = """
+        delete from transfer_topportunity
+    """
+    OPPORTUNITY_INSERT_QUERY = """
+        insert into transfer_topportunity
+            select
+                opportunity_id,
+                oppnumber,
+                opptitle,
+                owningagency,
+                oppcategory,
+                category_explanation,
+                is_draft,
+                revision_number,
+                modified_comments,
+                publisheruid,
+                publisher_profile_id,
+                last_upd_id,
+                last_upd_date,
+                creator_id,
+                created_date
+            from foreign_topportunity
+            where is_draft = 'N'
+    """
+
+
 @data_migration_blueprint.cli.command(
     "copy-oracle-data", help="Copy data form the legacy Oracle data to the new Postgres database"
 )
@@ -16,10 +52,16 @@ logger = logging.getLogger(__name__)
 def copy_oracle_data(db_session: db.Session) -> None:
     logger.info("Beginning copy of data from Oracle database")
 
-    # TODO - in a follow-up ticket we'll implement the actual SQL commands
-    # we want to run for copying data - likely building out a few reusable utilities
     with db_session.begin():
-        count = db_session.scalar(text("SELECT count(*) from transfer_topportunity"))
-        logger.info(f"Found {count} records in transfer_topportunity")
+        _run_copy_commands(db_session)
 
     logger.info("Successfully ran copy-oracle-data")
+
+
+def _run_copy_commands(db_session: db.Session) -> None:
+    logger.info("Running copy commands for TOPPORTUNITY")
+
+    db_session.execute(text(SqlCommands.OPPORTUNITY_DELETE_QUERY))
+    db_session.execute(text(SqlCommands.OPPORTUNITY_INSERT_QUERY))
+    count = db_session.scalar(text("SELECT count(*) from transfer_topportunity"))
+    logger.info(f"Loaded {count} records into transfer_topportunity")
