@@ -91,3 +91,7 @@ variable "aws_services_security_group_id" {
   type        = string
   description = "Security group ID for VPC endpoints that access AWS Services"
 }
+
+variable "grants_gov_oracle_cidr_block" {
+  type = string
+}
