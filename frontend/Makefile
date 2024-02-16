@@ -40,6 +40,9 @@ release-build:
 ##################################################
 # Local development
 ##################################################
+build: # Build the Next.js local dev server in Docker
+	docker-compose build --no-cache nextjs
+
 dev: # Run the Next.js local dev server in Docker
 	docker compose up --detach nextjs
 	docker compose logs --follow nextjs
@@ -54,6 +57,9 @@ stop:
 ##################################################
 # Load testing
 ##################################################
+
+build
+
 load-test-local: # Load test the local environment at localhost:3000
 	artillery run -e local artillery-load-test.yml
 
