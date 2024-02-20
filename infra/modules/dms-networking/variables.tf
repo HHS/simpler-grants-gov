@@ -6,6 +6,6 @@ variable "dms_target_cidr_block" {
   type = string
 }
 
-variable "dms_source_cidr_block" {
+variable "grants_gov_oracle_cidr_block" {
   type = string
 }

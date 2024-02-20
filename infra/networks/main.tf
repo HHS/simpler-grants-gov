@@ -57,8 +57,8 @@ module "network" {
 }
 
 module "dms_networking" {
-  source                = "../modules/dms-networking"
-  vpc_id                = module.network.vpc_id
-  dms_target_cidr_block = module.network.vpc_cidr
-  dms_source_cidr_block = module.project_config.network_configs[var.environment_name].dms_source_cidr_block
+  source                       = "../modules/dms-networking"
+  vpc_id                       = module.network.vpc_id
+  dms_target_cidr_block        = module.network.vpc_cidr
+  grants_gov_oracle_cidr_block = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
 }
