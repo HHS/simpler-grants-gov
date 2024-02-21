@@ -1,4 +1,4 @@
-import BaseApi, { JSONRequestBody } from "./BaseApi"; // Adjust the import path as needed
+import BaseApi, { JSONRequestBody } from "./BaseApi";
 
 export interface SearchResponseData {
   opportunities: unknown[];
