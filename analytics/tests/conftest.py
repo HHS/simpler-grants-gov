@@ -75,8 +75,9 @@ def json_issue_row(
 
 
 def json_roadmap_row(
+    issue: int,
     deliverable: int,
-    status: str,
+    status: str = "In Progress",
     labels: list[str] | None = None,
 ) -> dict:
     """
@@ -88,11 +89,11 @@ def json_roadmap_row(
         "assignees": ["mickeymouse"],
         "content": {
             "type": "Issue",
-            "body": f"Description of test deliverable {deliverable}",
-            "title": f"Deliverable {deliverable}",
-            "number": deliverable,
+            "body": f"Description of test deliverable {issue}",
+            "title": f"Deliverable {issue}",
+            "number": issue,
             "repository": "HHS/simpler-grants-gov",
-            "url": f"https://github.com/HHS/simpler-grants-gov/issues/{deliverable}",
+            "url": f"https://github.com/HHS/simpler-grants-gov/issues/{issue}",
         },
         "id": "PVTI_lADOABZxns4ASDf3zgJhmCk",
         "labels": labels or [LABEL_30K],
@@ -105,7 +106,7 @@ def json_roadmap_row(
         "repository": "https://github.com/HHS/simpler-grants-gov",
         "status": status,
         "deliverable": f"Deliverable {deliverable}",
-        "title": f"Deliverable {deliverable}",
+        "title": f"Deliverable {issue}",
     }
 
 
