@@ -5,6 +5,6 @@ module "prod_config" {
   environment                     = "prod"
   has_database                    = local.has_database
   database_instance_count         = 2
-  database_enable_http_endpoint   = false
+  database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
 }
