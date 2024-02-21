@@ -1,4 +1,4 @@
-import { Opportunity } from "../../types/search";
+import { Opportunity } from "../../types/searchTypes";
 import { SearchFetcher } from "./SearchFetcher";
 
 // TODO: Just a placeholder URL to display some data while we build search

@@ -7,7 +7,7 @@ import {
 
 import { APISearchFetcher } from "../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../services/searchfetcher/MockSearchFetcher";
-import { Opportunity } from "../types/search";
+import { Opportunity } from "../types/searchTypes";
 import PageNotFound from "./404";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";

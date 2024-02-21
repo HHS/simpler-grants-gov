@@ -1,4 +1,4 @@
-import { Opportunity } from "../../types/search";
+import { Opportunity } from "../../types/searchTypes";
 
 export abstract class SearchFetcher {
   abstract fetchOpportunities(): Promise<Opportunity[]>;
