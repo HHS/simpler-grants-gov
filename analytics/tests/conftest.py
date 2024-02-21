@@ -44,7 +44,7 @@ def mock_slackbot_fixture():
     return MockSlackbot()
 
 
-def write_test_data_to_file(data: dict, output_file: str):
+def write_test_data_to_file(data: dict | list[dict], output_file: str):
     """Write test JSON data to a file for use in a test."""
     parent_dir = Path(output_file).parent
     parent_dir.mkdir(exist_ok=True, parents=True)
@@ -55,8 +55,8 @@ def write_test_data_to_file(data: dict, output_file: str):
 def json_issue_row(
     issue: int,
     labels: list[str] | None = None,
-    created_at: str = "2023-11-01T00:00:00Z",
-    closed_at: str = "2023-11-01T00:00:00Z",
+    created_at: str | None = "2023-11-01T00:00:00Z",
+    closed_at: str | None = "2023-11-01T00:00:00Z",
 ) -> dict:
     """Generate a row of JSON issue data for testing."""
     new_labels = (
