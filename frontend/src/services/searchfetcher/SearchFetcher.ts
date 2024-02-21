@@ -1,10 +1,4 @@
-// TODO: change to the actual API response
-export interface Opportunity {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-}
+import { Opportunity } from "../../types/search";
 
 export abstract class SearchFetcher {
   abstract fetchOpportunities(): Promise<Opportunity[]>;

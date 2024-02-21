@@ -1,4 +1,4 @@
-import { Opportunity } from "../../types/search/searchfetcher";
+import { Opportunity } from "../../types/search";
 import { SearchFetcher } from "./SearchFetcher";
 
 export const MOCKOPPORTUNITIES: Opportunity[] = [

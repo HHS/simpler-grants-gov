@@ -1,5 +1,7 @@
-import { Opportunity, SearchFetcher } from "./SearchFetcher";
+import { Opportunity } from "../../types/search";
+import { SearchFetcher } from "./SearchFetcher";
 
+// TODO: Just a placeholder URL to display some data while we build search
 const URL = "https://jsonplaceholder.typicode.com/posts";
 
 // TODO: call BaseApi or extension to make the actual call
