@@ -1,4 +1,5 @@
-import { Opportunity, SearchFetcher } from "./SearchFetcher";
+import { Opportunity } from "../../types/search/searchfetcher";
+import { SearchFetcher } from "./SearchFetcher";
 
 export const MOCKOPPORTUNITIES: Opportunity[] = [
   {
@@ -31,6 +32,8 @@ export const MOCKOPPORTUNITIES: Opportunity[] = [
 export class MockSearchFetcher extends SearchFetcher {
   async fetchOpportunities(): Promise<Opportunity[]> {
     return await new Promise((resolve) => {
+
+      // Resolve mock data file with simulated delay
       setTimeout(() => {
         resolve(MOCKOPPORTUNITIES);
       }, 500);
