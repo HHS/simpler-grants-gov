@@ -1,13 +1,13 @@
 import type { GetStaticProps, NextPage } from "next";
+import React, { useState } from "react";
 import {
-  Opportunity,
   SearchFetcher,
   fetchSearchOpportunities,
 } from "../services/searchfetcher/SearchFetcher";
-import React, { useState } from "react";
 
 import { APISearchFetcher } from "../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../services/searchfetcher/MockSearchFetcher";
+import { Opportunity } from "../types/search";
 import PageNotFound from "./404";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
@@ -26,7 +26,8 @@ const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
   const [searchResults, setSearchResults] =
     useState<Opportunity[]>(initialOpportunities);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     performSearch().catch((e) => console.log(e));
   };
 
@@ -55,6 +56,8 @@ const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
+  // Always pre-render the initial search results
+  // TODO (1189): If the URL has query params - they will need to be included in the search here
   const initialOpportunities: Opportunity[] = await fetchSearchOpportunities(
     searchFetcher
   );
