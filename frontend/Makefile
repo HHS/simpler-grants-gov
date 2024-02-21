@@ -40,6 +40,12 @@ release-build:
 ##################################################
 # Local development
 ##################################################
+build-dev: # Build the Next.js local dev server in Docker
+	docker compose build --no-cache nextjs
+
+build-storybook: # Build Storybook in Docker
+	docker compose build --no-cache storybook
+
 dev: # Run the Next.js local dev server in Docker
 	docker compose up --detach nextjs
 	docker compose logs --follow nextjs
