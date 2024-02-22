@@ -38,11 +38,6 @@ with src.logging.init("migrations"):
     ) -> bool:
         if type_ == "schema" and getattr(object, "schema", None) is not None:
             return False
-        elif type_ == "table" and name == "awsdms_apply_exceptions":
-            # We make this table separately from SQLAlchemy - so ignore it in
-            # any auto-generation checks otherwise Alembic thinks the table should
-            # be deleted.
-            return False
         else:
             return True
 
