@@ -32,7 +32,6 @@ export const MOCKOPPORTUNITIES: Opportunity[] = [
 export class MockSearchFetcher extends SearchFetcher {
   async fetchOpportunities(): Promise<Opportunity[]> {
     return await new Promise((resolve) => {
-
       // Resolve mock data file with simulated delay
       setTimeout(() => {
         resolve(MOCKOPPORTUNITIES);
