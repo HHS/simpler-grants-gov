@@ -249,3 +249,79 @@ class TestLoadFromJsonFilesWithRoadmapData:
         # validation - confirm 10k was dropped and join didn't produce a fan out
         assert len(df) == 2
         assert list(df.index) == [1, 2]
+
+    def test_exclude_deliverables_without_labels(self):
+        """
+        Deliverables that don't have labels should also be excluded.
+
+        This test reproduces a bug that caused this function to break when row
+        didn't have labels.
+        """
+        # setup - create test data for two different sprints
+        sprint_data = [
+            json_sprint_row(issue=1, deliverable=3),
+            json_sprint_row(issue=2, deliverable=4),
+        ]
+        issue_data = [
+            json_issue_row(issue=1),
+            json_issue_row(issue=2),
+        ]
+        roadmap_data = [  # exclude the second item from final dataset
+            json_roadmap_row(issue=3, deliverable=3, labels=[self.LABEL_30K]),
+            json_roadmap_row(issue=4, deliverable=4, labels=[self.LABEL_30K]),
+        ]
+        # remove the labels for the second deliverable to reproduce bug
+        roadmap_data[1]["labels"] = np.nan
+        # setup - write test data to json files
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
+        write_test_data_to_file({"items": roadmap_data}, self.ROADMAP_FILE)
+        # execution
+        df = DeliverableTasks.load_from_json_files_with_roadmap_data(
+            deliverable_label=self.LABEL_30K,
+            sprint_file=self.SPRINT_FILE,
+            issue_file=self.ISSUE_FILE,
+            roadmap_file=self.ROADMAP_FILE,
+        ).df
+        df = df.set_index("issue_number")
+        # validation - assert the second deliverable was dropped
+        assert len(df) == 1
+        assert df.loc[1, "deliverable_number"] == 3
+
+    def test_exclude_deliverables_without_deliverable_col_set(self):
+        """
+        Deliverables that don't have the "deliverable" column set.
+
+        This test reproduces a bug that incorrectly joins on null values.
+        """
+        # setup - create test data for two different sprints
+        sprint_data = [
+            json_sprint_row(issue=1, deliverable=3),
+            json_sprint_row(issue=2, deliverable=4),
+        ]
+        issue_data = [
+            json_issue_row(issue=1),
+            json_issue_row(issue=2),
+        ]
+        roadmap_data = [  # exclude the second item from final dataset
+            json_roadmap_row(issue=3, deliverable=3),
+            json_roadmap_row(issue=4, deliverable=4),
+        ]
+        # set the deliverable column to None to reproduce bug
+        sprint_data[1]["deliverable"] = np.nan
+        roadmap_data[1]["deliverable"] = np.nan
+        # setup - write test data to json files
+        write_test_data_to_file(issue_data, self.ISSUE_FILE)
+        write_test_data_to_file({"items": sprint_data}, self.SPRINT_FILE)
+        write_test_data_to_file({"items": roadmap_data}, self.ROADMAP_FILE)
+        # execution
+        df = DeliverableTasks.load_from_json_files_with_roadmap_data(
+            deliverable_label=self.LABEL_30K,
+            sprint_file=self.SPRINT_FILE,
+            issue_file=self.ISSUE_FILE,
+            roadmap_file=self.ROADMAP_FILE,
+        ).df
+        df = df.set_index("issue_number")
+        # validation - assert the second deliverable was dropped
+        assert len(df) == 1
+        assert df.loc[1, "deliverable_number"] == 3

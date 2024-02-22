@@ -190,12 +190,7 @@ class DeliverableTasks(BaseDataset):
             key_for_nested_items="items",
         )
         # filter for 30k ft deliverables
-        print(df_roadmap[["deliverable_labels", "deliverable"]])
-        is_deliverable = df_roadmap["deliverable_labels"].apply(
-            lambda labels: deliverable_label in labels,
-        )
-        df_roadmap = df_roadmap[is_deliverable]
-        print(df_roadmap)
+        df_roadmap = cls._isolate_deliverables(df_roadmap, deliverable_label)
         # join the issues and sprint data and apply transformations
         df = df_issues.merge(df_sprints, on="issue_number", how="left")
         df = df_roadmap.merge(df, on="deliverable", how="left")
@@ -212,3 +207,19 @@ class DeliverableTasks(BaseDataset):
         is_closed = ~df["closed_date"].isna()  # ~ is negation
         df.loc[is_closed, "status"] = "closed"
         return df
+
+    @classmethod
+    def _isolate_deliverables(
+        cls,
+        df: pd.DataFrame,
+        deliverable_label: str,
+    ) -> pd.DataFrame:
+        """Apply column specific data transformations with roadmap data."""
+        # remove deliverables without labels or a deliverable column set
+        df = df[df["deliverable_labels"].notna()]
+        df = df[df["deliverable"].notna()]
+        # isolate deliverables with the correct label
+        is_deliverable = df["deliverable_labels"].apply(
+            lambda labels: deliverable_label in labels,
+        )
+        return df[is_deliverable]
