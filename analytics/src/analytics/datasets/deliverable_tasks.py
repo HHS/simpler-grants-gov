@@ -53,7 +53,6 @@ class DeliverableTasks(BaseDataset):
         "status": "deliverable_status",
         "deliverable": "deliverable",
     }
-    FINAL_COLUMNS_WITH_ROADMAP = []
     FINAL_COLUMNS = [
         "deliverable_number",
         "deliverable_title",
