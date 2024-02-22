@@ -5,15 +5,15 @@ resource "aws_security_group" "dms" {
   # checkov:skip= CKV2_AWS_5:DMS instance not created yet
   name        = "dms"
   description = "Database DMS security group"
-  vpc_id      = var.vpc_id
+  vpc_id      = var.our_vpc_id
 }
 
 # Allow all egrees traffic from DMS instance, which allows it to (for example)
 # request secrets from AWS Secrets Manager.
 resource "aws_vpc_security_group_egress_rule" "all_egress" {
   description       = "Allow all egress"
-  from_port         = 0
-  to_port           = 0
+  from_port         = "-1"
+  to_port           = "-1"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
   security_group_id = aws_security_group.dms.id

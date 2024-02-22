@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 resource "aws_vpc_peering_connection" "dms" {
   peer_owner_id = data.aws_ssm_parameter.dms_peer_owner_id.value
   peer_vpc_id   = data.aws_ssm_parameter.dms_peer_vpc_id.value
-  vpc_id        = var.vpc_id
+  vpc_id        = var.our_vpc_id
   peer_region   = "us-east-2"
 
   tags = {
