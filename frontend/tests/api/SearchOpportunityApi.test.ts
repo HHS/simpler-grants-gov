@@ -12,31 +12,13 @@ const mockFetch = ({
   });
 };
 
-const originalEnv = process.env;
-
 describe("SearchOpportunityAPI", () => {
   let searchApi: SearchOpportunityAPI;
   const baseRequestHeaders = {
     "Content-Type": "application/json",
   };
 
-  beforeAll(() => {
-    process.env = {
-      NODE_ENV: "development",
-      apiUrl: "http://localhost",
-    };
-  });
-
-  afterAll(() => {
-    delete process.env.apiUrl;
-  });
-
   beforeEach(() => {
-    jest.resetModules();
-    process.env = {
-      ...originalEnv,
-    };
-
     jest.resetAllMocks();
 
     searchApi = new SearchOpportunityAPI();
