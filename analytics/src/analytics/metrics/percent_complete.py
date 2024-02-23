@@ -104,7 +104,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
         message = f"*:github: Percent of {self.unit.value} completed by deliverable*\n"
         if self.statuses_to_include:
             statuses = ", ".join(self.statuses_to_include)
-            message += f"Limited to deliverables with these statuses: {statuses}"
+            message += f"Limited to deliverables with these statuses: {statuses}\n\n"
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
