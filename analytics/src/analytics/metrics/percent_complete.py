@@ -16,11 +16,16 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
         self,
         dataset: DeliverableTasks,
         unit: Unit,
+        statuses_to_include: list[str] | None = None,
     ) -> None:
         """Initialize the DeliverablePercentComplete metric."""
+        self.dataset = dataset
         self.deliverable_col = "deliverable_title"
         self.status_col = "status"
+        self.deliverable_status_col = "deliverable_status"
         self.unit = unit
+        self.statuses_to_include = statuses_to_include
+        self.deliverable_data = self._isolate_deliverables_by_status()
         super().__init__(dataset)
 
     def calculate(self) -> pd.DataFrame:
@@ -72,7 +77,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
 
     def get_stats(self) -> dict[str, Statistic]:
         """Calculate stats for this metric."""
-        df_src = self.dataset.df
+        df_src = self.deliverable_data
         # get the total number of issues and the number of issues with points per deliverable
         is_pointed = df_src[Unit.points.value] >= 1
         issues_total = df_src.value_counts(self.deliverable_col).to_frame()
@@ -97,9 +102,22 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
     def format_slack_message(self) -> str:
         """Format the message that will be included with the charts posted to slack."""
         message = f"*:github: Percent of {self.unit.value} completed by deliverable*\n"
+        if self.statuses_to_include:
+            statuses = ", ".join(self.statuses_to_include)
+            message += f"Limited to deliverables with these statuses: {statuses}"
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
+
+    def _isolate_deliverables_by_status(self) -> pd.DataFrame:
+        """Isolate the deliverables to include in the report based on their status."""
+        df = self.dataset.df
+        # if statuses_to_include is provided, use it to filter the dataset
+        statuses_provided = self.statuses_to_include
+        if statuses_provided:
+            status_filter = df[self.deliverable_status_col].isin(statuses_provided)
+            df = df[status_filter]
+        return df
 
     def _get_count_by_deliverable(
         self,
@@ -107,7 +125,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
     ) -> pd.DataFrame:
         """Get the count of issues (or points) by deliverable and status."""
         # create local copies of the dataset and key column names
-        df = self.dataset.df.copy()
+        df = self.deliverable_data.copy()
         unit_col = self.unit.value
         key_cols = [self.deliverable_col, unit_col]
         # create a dummy column to sum per row if the unit is issues
