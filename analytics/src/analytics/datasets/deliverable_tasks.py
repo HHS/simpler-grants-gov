@@ -56,6 +56,7 @@ class DeliverableTasks(BaseDataset):
     FINAL_COLUMNS = [
         "deliverable_number",
         "deliverable_title",
+        "deliverable_status",
         "issue_title",
         "issue_number",
         "points",
@@ -142,6 +143,8 @@ class DeliverableTasks(BaseDataset):
         df_deliverable = df_deliverable.rename(columns=deliverable_cols)
         # left join to df on "deliverable_number" to get the deliverable title
         df = df_deliverable.merge(df_all, on="deliverable_number", how="left")
+        # add placeholder col to support filtering on deliverable status
+        df["deliverable_status"] = None
         return df[cls.FINAL_COLUMNS]
 
     @classmethod

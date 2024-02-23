@@ -41,6 +41,7 @@ class TestLoadFromJsonFile:
         assert list(tasks.df.columns) == [
             "deliverable_number",
             "deliverable_title",
+            "deliverable_status",
             "issue_title",
             "issue_number",
             "points",
@@ -176,6 +177,7 @@ class TestLoadFromJsonFilesWithRoadmapData:
         assert list(df.columns) == [
             "deliverable_number",
             "deliverable_title",
+            "deliverable_status",
             "issue_title",
             "issue_number",
             "points",
