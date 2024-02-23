@@ -25,7 +25,9 @@ SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating b
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
 SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
 POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
-STATUS_ARG = typer.Option(help="Deliverable status to include in reports, can be passed multiple times")  # noqa: E501
+STATUS_ARG = typer.Option(
+    help="Deliverable status to include in report, can be passed multiple times",
+)
 # fmt: on
 
 # instantiate the main CLI entrypoint
