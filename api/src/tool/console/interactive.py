@@ -7,20 +7,20 @@
 #   poetry run python3 -i -m src.tool.console.interactive
 #
 
-import logging
-from typing import Union
+from types import ModuleType
 
 import rich
 import rich.panel
 import rich.pretty
-import sqlalchemy
 
+import src.adapters.db as db
 import src.db
 import src.db.models
 import src.logging
 import src.util
 import tests.src.db.models.factories
-from src.adapters.db.clients.postgres_config import PostgresDBConfig, get_db_config
+from src.adapters.db.clients.postgres_client import PostgresDBClient
+from src.adapters.db.clients.postgres_config import get_db_config
 
 INTRO = """
 Simpler Grants Gov Python console
@@ -42,7 +42,7 @@ Tips:
 def interactive_console() -> dict:
     """Set up variables and print a introduction message for the interactive console."""
 
-    db = connect_to_database()
+    db_session = connect_to_database()
 
     print(INTRO.format(**locals()))
 
@@ -55,11 +55,12 @@ def interactive_console() -> dict:
     # variables.update(locals())
 
     # DB Factories
-    # factories_module = tests.src.db.models.factories
+    factories_module = tests.src.db.models.factories
 
-    # if isinstance(db, sqlalchemy.orm.scoped_session):
-    #     factories_module.db_session = db
+    if isinstance(db_session, db.Session):
+        factories_module._db_session = db_session
 
+    variables["db_session"] = db_session
     variables["f"] = tests.src.db.models.factories
 
     # Easy access to utilities
@@ -76,16 +77,19 @@ def interactive_console() -> dict:
     return variables
 
 
-def connect_to_database() -> PostgresDBConfig:
+def connect_to_database() -> db.Session | Exception:
     db_config = get_db_config()
-    db_config.hide_sql_parameter_logs = False
-    db: Union[sqlalchemy.orm.scoped_session, Exception]
-    try:
-        db = tests.src.db.init(config=db_config, sync_lookups=True)
-    except Exception as err:
-        db = err
 
-    return db
+    # errors sometimes dump sensitive info
+    # (since we're doing locally, we don't need to hide)
+    db_config.hide_sql_parameter_logs = False
+    db_session: db.Session | Exception
+    try:
+        db_session = PostgresDBClient(db_config).get_session()
+    except Exception as err:
+        db_session = err
+
+    return db_session
 
 
 def reload_repl() -> None:
@@ -114,7 +118,7 @@ def reload_repl() -> None:
             pass
 
 
-def reload_module(m) -> None:
+def reload_module(m: ModuleType) -> None:
     import importlib
 
     importlib.reload(m)
