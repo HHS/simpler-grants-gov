@@ -85,7 +85,6 @@ def connect_to_database() -> PostgresDBConfig:
     except Exception as err:
         db = err
 
-    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)  # noqa: B1
     return db
 
 
@@ -122,6 +121,7 @@ def reload_module(m) -> None:
 
 
 if __name__ == "__main__":
-    interactive_variables = interactive_console()
-    globals().update(interactive_variables)
-    rich.pretty.install(indent_guides=True, max_length=20, max_string=400)
+    with src.logging.init(__package__):
+        interactive_variables = interactive_console()
+        globals().update(interactive_variables)
+        rich.pretty.install(indent_guides=True, max_length=20, max_string=400)
