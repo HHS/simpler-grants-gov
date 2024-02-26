@@ -75,6 +75,11 @@ def configure_app(app: APIFlask) -> None:
     app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
     app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    app.config["SWAGGER_UI_CSS"] = '/static/swagger-ui.min.css'
+    app.config["SWAGGER_UI_BUNDLE_JS"] = "/static/swagger-ui-bundle.js"
+    app.config["SWAGGER_UI_STANDALONE_PRESET_JS"] = "/static/swagger-ui-standalone-preset.js"
+    # Removing because the server dropdown has accessibility issues.
+    app.config["SERVERS"] = "."
     app.config["DOCS_FAVICON"] = "https://simpler.grants.gov/img/favicon.ico"
 
     # Set a few values for the Swagger endpoint
