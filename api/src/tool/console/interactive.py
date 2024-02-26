@@ -14,14 +14,13 @@ import rich
 import rich.panel
 import rich.pretty
 import sqlalchemy
+
 import src.db
 import src.db.models
 import src.logging
 import src.util
 import tests.src.db.models.factories
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from src.adapters.db.clients.postgres_config import get_db_config
+from src.adapters.db.clients.postgres_config import PostgresDBConfig, get_db_config
 
 INTRO = """
 Simpler Grants Gov Python console
@@ -56,10 +55,10 @@ def interactive_console() -> dict:
     # variables.update(locals())
 
     # DB Factories
-    factories_module = tests.src.db.models.factories
+    # factories_module = tests.src.db.models.factories
 
-    if isinstance(db, sqlalchemy.orm.scoped_session):
-        factories_module.db_session = db
+    # if isinstance(db, sqlalchemy.orm.scoped_session):
+    #     factories_module.db_session = db
 
     variables["f"] = tests.src.db.models.factories
 
@@ -77,7 +76,7 @@ def interactive_console() -> dict:
     return variables
 
 
-def connect_to_database():
+def connect_to_database() -> PostgresDBConfig:
     db_config = get_db_config()
     db_config.hide_sql_parameter_logs = False
     db: Union[sqlalchemy.orm.scoped_session, Exception]
@@ -90,7 +89,7 @@ def connect_to_database():
     return db
 
 
-def reload_repl():
+def reload_repl() -> None:
     import importlib
     from sys import modules
 
@@ -116,7 +115,7 @@ def reload_repl():
             pass
 
 
-def reload_module(m):
+def reload_module(m) -> None:
     import importlib
 
     importlib.reload(m)
