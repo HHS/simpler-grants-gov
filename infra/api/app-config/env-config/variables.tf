@@ -31,3 +31,9 @@ variable "database_enable_http_endpoint" {
 variable "has_incident_management_service" {
   type = bool
 }
+
+variable "enable_v01_endpoints" {
+  description = "determines whether the v0.1 endpoints are available in the API"
+  type        = bool
+  default     = false
+}
