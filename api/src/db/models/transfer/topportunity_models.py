@@ -40,4 +40,3 @@ class TransferTopportunity(Base, TimestampMixin):
     last_upd_date: Mapped[date | None]
     creator_id: Mapped[str | None] = mapped_column(VARCHAR(length=200))
     created_date: Mapped[date | None]
-
