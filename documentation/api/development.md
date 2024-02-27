@@ -41,6 +41,8 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 See the [Makefile](../../api/Makefile) for a full list of commands you can run.
 
 The `make console` command initializes a Python REPL environment pre-configured with database connectivity. This allows developers to perform database queries, utilize factories for data generation, and interact with the application's models directly.
+- Writing a query: `dbs.query(Opportunity).all()`
+- Saving some factory generated data to the db: `f.OpportunityFactory.create()`
 
 ## Docker and Native Development
 
