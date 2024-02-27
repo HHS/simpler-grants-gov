@@ -37,17 +37,6 @@ module "app_config" {
   source = "../api/app-config"
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
-  }
-}
-
 module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name

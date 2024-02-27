@@ -139,6 +139,12 @@ variable "api_auth_token" {
   description = "Auth token for connecting to the API"
 }
 
+variable "enable_v01_endpoints" {
+  description = "determines whether the v0.1 endpoints are available in the API"
+  type        = bool
+  default     = false
+}
+
 variable "is_temporary" {
   description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
   type        = bool

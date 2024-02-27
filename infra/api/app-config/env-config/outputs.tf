@@ -30,3 +30,7 @@ output "api_auth_token" {
     api_auth_token_param_name = "/api/${var.environment}/api-auth-token"
   }
 }
+
+output "enable_v01_endpoints" {
+  value = var.enable_v01_endpoints
+}
