@@ -15,12 +15,13 @@ locals {
   sendy_api_key           = var.sendy_api_key != null ? [{ name = "SENDY_API_KEY", value = var.sendy_api_key }] : []
   sendy_api_url           = var.sendy_api_url != null ? [{ name = "SENDY_API_URL", value = var.sendy_api_url }] : []
   sendy_list_id           = var.sendy_list_id != null ? [{ name = "SENDY_LIST_ID", value = var.sendy_list_id }] : []
+  enable_v01_endpoints    = var.enable_v01_endpoints == true ? [{ name = "ENABLE_V_0_1_ENDPOINTS", value = "true" }] : []
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "API_AUTH_TOKEN", value : var.api_auth_token },
-  ], local.hostname, local.sendy_api_key, local.sendy_api_url, local.sendy_list_id)
+  ], local.hostname, local.sendy_api_key, local.sendy_api_url, local.sendy_list_id, local.enable_v01_endpoints)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
