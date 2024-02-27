@@ -4,7 +4,7 @@
 - **Last Modified:** 2024-01-24
 - **Related Issue:** [#1055](https://github.com/HHS/simpler-grants-gov/issues/1055)
 - **Author:** Kai Siren
-- **Deciders:** Aaron Couch, Alsia Plybeah, James Bursa, Michael Chouinard, Sammy Steiner
+- **Deciders:** -Aaron Couch, Alsia Plybeah, James Bursa, Michael Chouinard, Sammy Steiner
 
 ## Context and Problem Statement
 
@@ -27,9 +27,8 @@ Not having a dedicated environment that's always up to date with `main` (and doe
 What does it mean for a `dev` to be the "wild west"? Well, specifically:
 
 - Any given engineer can "reserve" a part of dev that is not currently in use. Reserving dev looks like posting to #topic-engineering and saying _"Hi all, I'm going to be deploying `infra/api/database` this sprint to work on ticket 999"_. This sets the understanding that you will be repeatedly deploying to dev, from your laptop, for the duration of the sprint.
-- When you initially reserve dev, you should assume that it is broken and must be "repaired" in some way before you can properly utilize it. You might be able to use it "as-is" if you are lucky, but that should not be relied upon.
-- Dev can be left as-is when you are done with it. You are not obligated to "cleanup" after yourself when using dev.
 - Dev should not contain anything of any great importance. If you were to wake up Monday morning to your special dev setup having been accidentally deleted, it should not represent a major setback in your plans.
+- Dev should be "reset" to the `main` branch when you are done with it. Which is to say, you should deploy `main` to dev after you are done testing a batch of changes.
 
 ## Out of Scope (for this ADR)
 
