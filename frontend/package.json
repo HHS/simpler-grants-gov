@@ -2,6 +2,9 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -23,6 +26,8 @@
     "@trussworks/react-uswds": "^5.0.0",
     "@uswds/uswds": "^3.6.0",
     "i18next": "^23.0.0",
+    "js-cookie": "^3.0.5",
+    "lodash": "^4.17.21",
     "next": "^13.5.2",
     "next-i18next": "^15.0.0",
     "react": "^18.2.0",
@@ -41,6 +46,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/jest-axe": "^3.5.5",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.8.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

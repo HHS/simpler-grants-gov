@@ -23,6 +23,26 @@ resource "aws_vpc_security_group_egress_rule" "role_manager_egress_to_db" {
   referenced_security_group_id = aws_security_group.db.id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "ingress_from_oracle" {
+  security_group_id = aws_security_group.db.id
+  description       = "Allow Orcale I/O into database"
+
+  from_port   = 1521
+  to_port     = 1521
+  ip_protocol = "tcp"
+  cidr_ipv4   = var.grants_gov_oracle_cidr_block
+}
+
+resource "aws_vpc_security_group_egress_rule" "egress_to_oracle" {
+  security_group_id = aws_security_group.db.id
+  description       = "Allow Orcale I/O into database"
+
+  from_port   = 1521
+  to_port     = 1521
+  ip_protocol = "tcp"
+  cidr_ipv4   = var.grants_gov_oracle_cidr_block
+}
+
 resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_role_manager" {
   security_group_id = aws_security_group.db.id
   description       = "Allow inbound requests to database from role manager"
@@ -60,12 +80,11 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_dms" {
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "tcp"
-  referenced_security_group_id = data.aws_security_group.source_db.id
+  referenced_security_group_id = data.aws_security_group.dms.id
 }
 
-# security group for the source DB
-data "aws_security_group" "source_db" {
+# security group for the DMS
+data "aws_security_group" "dms" {
   name   = "dms"
   vpc_id = var.vpc_id
 }
-

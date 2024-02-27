@@ -11,6 +11,7 @@ import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.db import models
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 
@@ -82,6 +83,8 @@ def db_client(monkeypatch_session) -> db.DBClient:
     with db_testing.create_isolated_db(monkeypatch_session) as db_client:
         with db_client.get_connection() as conn, conn.begin():
             models.metadata.create_all(bind=conn)
+
+        sync_lookup_values(db_client)
         yield db_client
 
 

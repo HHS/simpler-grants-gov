@@ -70,6 +70,8 @@ From the `frontend/` directory:
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
+- If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
+
 ##### Testing Release Target Locally
 
 To test the release target locally, run:
@@ -178,4 +180,5 @@ It's recommended that developers configure their code editor to auto run these t
 ## Other topics
 
 - [Internationalization](../documentation/frontend/internationalization.md)
+- [Feature Flags](../documentation/frontend/featureFlags.md)
 - Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.

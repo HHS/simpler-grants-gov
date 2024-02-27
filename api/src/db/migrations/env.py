@@ -6,8 +6,9 @@ import sqlalchemy
 
 import src.adapters.db as db
 import src.logging
-from src.adapters.db.type_decorators.postgres_type_decorators import StrEnumColumn
 from src.db.models import metadata
+
+from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -41,11 +42,11 @@ with src.logging.init("migrations"):
             return True
 
     def render_item(type_: str, obj: Any, autogen_context: Any) -> Any:
-        # Alembic tries to set the type of the column as StrEnumColumn
-        # despite it being derived from the Text column type,
-        # so force it to be Text during it's generation process
-        if type_ == "type" and isinstance(obj, StrEnumColumn):
-            return "sa.Text()"
+        # Alembic tries to set the type of the column as LookupColumn
+        # despite it being derived from the Integer column type,
+        # so force it to be Integer during it's generation process
+        if type_ == "type" and isinstance(obj, LookupColumn):
+            return "sa.Integer()"
 
         # False means to use the default processing
         return False

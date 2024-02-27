@@ -20,6 +20,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Kai Siren
 * Michael Chouinard
 * Sammy Steiner
+* Brett Rosenblatt
+* Brandon Tabaska
 
 ## Product and Project Management
 

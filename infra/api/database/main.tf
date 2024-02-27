@@ -98,4 +98,6 @@ module "database" {
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
   db_subnet_group_name           = var.environment_name
+  environment_name               = var.environment_name
+  grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
 }

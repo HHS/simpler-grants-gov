@@ -7,6 +7,11 @@ variable "name" {
   }
 }
 
+variable "environment_name" {
+  type        = string
+  description = "name of the application environment"
+}
+
 variable "db_subnet_group_name" {
   description = "name of the database subnet group to create that will be used by the database cluster."
   type        = string
@@ -85,4 +90,8 @@ variable "private_subnet_ids" {
 variable "aws_services_security_group_id" {
   type        = string
   description = "Security group ID for VPC endpoints that access AWS Services"
+}
+
+variable "grants_gov_oracle_cidr_block" {
+  type = string
 }

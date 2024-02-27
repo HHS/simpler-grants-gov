@@ -37,17 +37,6 @@ module "app_config" {
   source = "../api/app-config"
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = [true]
-  }
-}
-
 module "network" {
   source                                  = "../modules/network"
   name                                    = var.environment_name
@@ -57,8 +46,9 @@ module "network" {
 }
 
 module "dms_networking" {
-  source                = "../modules/dms-networking"
-  vpc_id                = module.network.vpc_id
-  dms_target_cidr_block = module.network.vpc_cidr
-  dms_source_cidr_block = module.project_config.network_configs[var.environment_name].dms_source_cidr_block
+  source                       = "../modules/dms-networking"
+  environment_name             = var.environment_name
+  our_vpc_id                   = module.network.vpc_id
+  our_cidr_block               = module.network.vpc_cidr
+  grants_gov_oracle_cidr_block = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
 }

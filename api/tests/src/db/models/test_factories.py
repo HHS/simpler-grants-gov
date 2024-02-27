@@ -54,9 +54,6 @@ def test_factory_create_uninitialized_db_session():
 
 
 def test_opportunity_factory_create(enable_factory_create, db_session: db.Session):
-    # Delete any opportunity created by other tests
-    db_session.query(Opportunity).delete()
-
     # Create actually writes a record to the DB when run
     # so we'll check the DB directly as well.
     opportunity = OpportunityFactory.create()
@@ -85,6 +82,3 @@ def test_opportunity_factory_create(enable_factory_create, db_session: db.Sessio
     null_params = {"agency": None}
     opportunity = OpportunityFactory.create(**null_params)
     validate_opportunity_record(opportunity, null_params)
-
-    all_db_records = db_session.query(Opportunity).all()
-    assert len(all_db_records) == 3

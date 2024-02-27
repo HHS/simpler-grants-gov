@@ -2,6 +2,7 @@ import pytest
 from apiflask import HTTPError
 from flask import g
 
+import src.app as app_entry
 from src.auth.api_key_auth import api_key_auth, verify_token
 
 
@@ -24,9 +25,13 @@ def test_verify_token_other_tokens(app, all_api_auth_tokens):
             assert g.get("current_user") == user
 
 
-def test_username_logging(app, caplog, all_api_auth_tokens):
+def test_username_logging(caplog, all_api_auth_tokens):
     # Create a quick endpoint to test that the username gets attached.
     # We don't use an existing one to avoid breaking this test as we implement other endpoints
+    # We can't use the app from the tests as you can't make a new endpoint after
+    # any endpoint is called
+    app = app_entry.create_app()
+
     @app.get("/dummy_auth_endpoint")
     @app.auth_required(api_key_auth)
     def dummy_endpoint():
