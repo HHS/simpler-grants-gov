@@ -19,6 +19,7 @@ import src.db.models
 import src.logging
 import src.util
 import tests.src.db.models.factories
+from tests.src.db.models.factories import OpportunityFactory, OpportunitySummaryFactory, OpportunityAssistanceListingFactory
 from src.adapters.db.clients.postgres_client import PostgresDBClient
 from src.adapters.db.clients.postgres_config import get_db_config
 
@@ -64,6 +65,9 @@ def interactive_console() -> dict:
     if isinstance(db_session, db.Session):
         factories_module._db_session = db_session
     variables["f"] = tests.src.db.models.factories
+    variables["OpportunityFactory"] = OpportunityFactory
+    variables["OpportunitySummaryFactory"] = OpportunitySummaryFactory
+    variables["OpportunityAssistanceListingFactory"] = OpportunityAssistanceListingFactory
 
     # Easy access to utilities
     variables["u"] = src.util
