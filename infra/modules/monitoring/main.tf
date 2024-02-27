@@ -66,6 +66,19 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   }
 }
 
+# Alarm if logs aren't being created for the containers
+resource "aws_cloudwatch_metric_alarm" "container_log_failure" {
+  alarm_name          = "${var.service_name}-logs-missing"
+  alarm_description   = "Logs failing for containers"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 5
+  metric_name         = "DeliveryErrors"
+  namespace           = "AWS/Logs"
+  statistic           = "Sum"
+  treat_missing_data  = "ignore"
+  alarm_actions       = [aws_sns_topic.this.arn]
+}
+
 #email integration
 
 resource "aws_sns_topic_subscription" "email_integration" {
