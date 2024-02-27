@@ -27,7 +27,7 @@ Simpler Grants Gov Python console
 
 Useful things:
 
-│ db = database session (Not yet working)
+│ db = database session
 │ f = DB factories module
 │ u = utilities module
 │ r = function to reload REPL
@@ -48,11 +48,12 @@ def interactive_console() -> dict:
 
     variables = dict()
     variables.update(vars(src.db.models.opportunity_models))
+    variables.update(vars(src.db.models.lookup_models))
 
     # This goes after the imports of entire modules, so the console reserved
     # names (db, fineos, etc) take precedence. This might break some modules
     # that expect something different under those names.
-    # variables.update(locals())
+    variables.update(locals())
 
     # DB Factories
     factories_module = tests.src.db.models.factories
@@ -71,7 +72,6 @@ def interactive_console() -> dict:
     # code change without dropping out of REPL
     variables["r"] = reload_repl
     variables["reload"] = reload_repl
-
     variables["reload_module"] = reload_module
 
     return variables
