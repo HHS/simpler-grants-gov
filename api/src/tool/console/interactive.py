@@ -55,13 +55,14 @@ def interactive_console() -> dict:
     # that expect something different under those names.
     variables.update(locals())
 
+    # DB
+    variables["db_session"] = db_session
+    variables["dbs"] = db_session
+
     # DB Factories
     factories_module = tests.src.db.models.factories
-
     if isinstance(db_session, db.Session):
         factories_module._db_session = db_session
-
-    variables["db_session"] = db_session
     variables["f"] = tests.src.db.models.factories
 
     # Easy access to utilities
