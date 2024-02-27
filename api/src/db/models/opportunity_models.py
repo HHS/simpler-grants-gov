@@ -81,6 +81,11 @@ class Opportunity(Base, TimestampMixin):
         # Helper method for serialization of the API response
         return [a.applicant_type for a in self.link_applicant_types]
 
+    def __repr__(self):
+        return (f"<Opportunity(opportunity_id={self.opportunity_id}, "
+                f"opportunity_number='{self.opportunity_number}', "
+                f"opportunity_title='{self.opportunity_title}', "
+                f"agency='{self.agency}', category='{self.category}', ")
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
@@ -133,6 +138,49 @@ class OpportunitySummary(Base, TimestampMixin):
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
+    def __repr__(self):
+        def format_attr(value):
+            """Format the attribute to display 'None' or slice if it's a string."""
+            if value is None:
+                return 'None'
+            elif isinstance(value, str):
+                return f"'{value[:25]}...'" if len(value) > 25 else f"'{value}'"
+            else:
+                return value
+
+        return (f"<OpportunitySummary("
+                f"opportunity_id={format_attr(self.opportunity_id)}, "
+                f"opportunity_status='{format_attr(self.opportunity_status)}', "
+                f"summary_description={format_attr(self.summary_description)}, "
+                f"is_cost_sharing={format_attr(self.is_cost_sharing)}, "
+                f"close_date={format_attr(self.close_date)}, "
+                f"close_date_description={format_attr(self.close_date_description)}, "
+                f"post_date={format_attr(self.post_date)}, "
+                f"archive_date={format_attr(self.archive_date)}, "
+                f"unarchive_date={format_attr(self.unarchive_date)}, "
+                f"expected_number_of_awards={format_attr(self.expected_number_of_awards)}, "
+                f"estimated_total_program_funding={format_attr(self.estimated_total_program_funding)}, "
+                f"award_floor={format_attr(self.award_floor)}, "
+                f"award_ceiling={format_attr(self.award_ceiling)}, "
+                f"additional_info_url={format_attr(self.additional_info_url)}, "
+                f"additional_info_url_description={format_attr(self.additional_info_url_description)}, "
+                f"version_number={format_attr(self.version_number)}, "
+                f"modification_comments={format_attr(self.modification_comments)}, "
+                f"funding_category_description={format_attr(self.funding_category_description)}, "
+                f"applicant_eligibility_description={format_attr(self.applicant_eligibility_description)}, "
+                f"agency_code={format_attr(self.agency_code)}, "
+                f"agency_name={format_attr(self.agency_name)}, "
+                f"agency_phone_number={format_attr(self.agency_phone_number)}, "
+                f"agency_contact_description={format_attr(self.agency_contact_description)}, "
+                f"agency_email_address={format_attr(self.agency_email_address)}, "
+                f"agency_email_address_description={format_attr(self.agency_email_address_description)}, "
+                f"can_send_mail={format_attr(self.can_send_mail)}, "
+                f"publisher_profile_id={format_attr(self.publisher_profile_id)}, "
+                f"publisher_user_id={format_attr(self.publisher_user_id)}, "
+                f"updated_by={format_attr(self.updated_by)}, "
+                f"created_by={format_attr(self.created_by)})"
+                f">")
+
 
 class OpportunityAssistanceListing(Base, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
@@ -149,6 +197,14 @@ class OpportunityAssistanceListing(Base, TimestampMixin):
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
+    def __repr__(self):
+        return (f"<OpportunityAssistanceListing("
+                f"opportunity_assistance_listing_id={self.opportunity_assistance_listing_id}, "
+                f"opportunity_id={self.opportunity_id}, "
+                f"assistance_listing_number='{self.assistance_listing_number}', "
+                f"program_title='{self.program_title}', "
+                f"updated_by='{self.updated_by}', "
+                f"created_by='{self.created_by}')>")
 
 class LinkFundingInstrumentOpportunity(Base, TimestampMixin):
     __tablename__ = "link_funding_instrument_opportunity"
@@ -167,6 +223,12 @@ class LinkFundingInstrumentOpportunity(Base, TimestampMixin):
 
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
+
+    def __repr__(self):
+        return (f"<LinkFundingInstrumentOpportunity(opportunity_id={self.opportunity_id}, "
+                f"funding_instrument='{self.funding_instrument}', "
+                f"updated_by='{self.updated_by}', created_by='{self.created_by}')>")
+
 
 
 class LinkFundingCategoryOpportunity(Base, TimestampMixin):
@@ -187,6 +249,10 @@ class LinkFundingCategoryOpportunity(Base, TimestampMixin):
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
+    def __repr__(self):
+        return (f"<LinkFundingCategoryOpportunity(opportunity_id={self.opportunity_id}, "
+                f"funding_category='{self.funding_category}', "
+                f"updated_by='{self.updated_by}', created_by='{self.created_by}')>")
 
 class LinkApplicantTypeOpportunity(Base, TimestampMixin):
     __tablename__ = "link_applicant_type_opportunity"
@@ -205,3 +271,8 @@ class LinkApplicantTypeOpportunity(Base, TimestampMixin):
 
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
+
+    def __repr__(self):
+        return (f"<LinkApplicantTypeOpportunity(opportunity_id={self.opportunity_id}, "
+                f"applicant_type='{self.applicant_type}', "
+                f"updated_by='{self.updated_by}', created_by='{self.created_by}')>")
