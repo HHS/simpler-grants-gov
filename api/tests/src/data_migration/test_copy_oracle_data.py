@@ -47,7 +47,9 @@ def build_foreign_opportunity(db_session, opp_params: dict):
     values = [convert_value_for_insert(opp[column]) for column in columns]
 
     db_session.execute(
-        text(f"INSERT INTO foreign_topportunity ({','.join(columns)}) VALUES ({','.join(values)})")
+        text(
+            f"INSERT INTO foreign_topportunity ({','.join(columns)}) VALUES ({','.join(values)})"  # nosec
+        )
     )
 
     return opp
