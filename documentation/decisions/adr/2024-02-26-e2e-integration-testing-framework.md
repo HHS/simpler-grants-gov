@@ -1,9 +1,9 @@
 # E2E / Integration Testing Framework
 
-- **Status:** {Accepted}
+- **Status:** Accepted
 - **Last Modified:** 2024-02-26
 - **Related Issue:** [#1337](https://github.com/HHS/simpler-grants-gov/issues/1337)
-- **Deciders:** {other collaborators}
+- **Deciders:** Billy Daly, Ryan Lewis
 - **Tags:** e2e, integration, testing
 
 ## Context and Problem Statement
