@@ -72,19 +72,3 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.role_manager.id
 }
-
-resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_dms" {
-  security_group_id = aws_security_group.db.id
-  description       = "Allow inbound requests to database from DMS"
-
-  from_port                    = 5432
-  to_port                      = 5432
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = data.aws_security_group.dms.id
-}
-
-# security group for the DMS
-data "aws_security_group" "dms" {
-  name   = "dms"
-  vpc_id = var.vpc_id
-}
