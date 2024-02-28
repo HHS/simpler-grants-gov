@@ -21,13 +21,11 @@ class Column:
     column_name: str
     postgres_type: str
 
-    is_nullable: bool = False
+    is_nullable: bool = True
     is_primary_key: bool = False
 
 
 class Constants:
-    OPTIONS = "SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TOPPORTUNITY')"  # TODO - format for table name
-
     OPPORTUNITY_COLUMNS: list[Column] = [
         Column("OPPORTUNITY_ID", "numeric(20)", is_nullable=False, is_primary_key=True),
         Column("OPPNUMBER", "character varying (40)"),
@@ -64,16 +62,38 @@ def setup_foreign_tables(db_session: db.Session) -> None:
 
 
 def build_sql(table_name: str, columns: list[Column], is_local: bool) -> str:
+    """
+    Build the SQL for creating a possibly foreign data table. If running
+    with is_local, it instead creates a regular table.
+
+    Assume you have a table with two columns, an "ID" primary key column, and a "description" text column,
+    you would call this as::
+
+        build_sql("EXAMPLE_TABLE", [Column("ID", "integer", is_nullable=False, is_primary_key=True), Column("DESCRIPTION", "text")], is_local)
+
+    Depending on whether the is_local bool is true or false would give two different outputs.
+
+    is_local is True::
+
+        CREATE TABLE IF NOT EXISTS foreign_example_table (ID integer CONSTRAINT EXAMPLE_TABLE_pkey PRIMARY KEY NOT NULL,DESCRIPTION text)
+
+    is_local is False::
+
+        CREATE FOREIGN TABLE IF NOT EXISTS foreign_example_table (ID integer OPTIONS (key 'true') NOT NULL,DESCRIPTION text) SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'EXAMPLE_TABLE')
+    """
+
     column_sql_parts = []
     for column in columns:
         column_sql = f"{column.column_name} {column.postgres_type}"
 
+        # Primary keys are defined as constraints in a regular table
+        # and as options in a foreign data table
         if column.is_primary_key and is_local:
             column_sql += f" CONSTRAINT {table_name}_pkey PRIMARY KEY"
         elif column.is_primary_key and not is_local:
             column_sql += " OPTIONS (key 'true')"
 
-        if column.is_nullable:
+        if not column.is_nullable:
             column_sql += " NOT NULL"
 
         column_sql_parts.append(column_sql)
