@@ -11,6 +11,7 @@ from tests.conftest import MockSlackbot
 def task_row(
     deliverable: int,
     task: int | None,
+    deliverable_status: str | None = "In Progress",
     points: int | None = 1,
     status: str | None = "open",
 ) -> dict:
@@ -18,6 +19,7 @@ def task_row(
     return {
         "deliverable_number": deliverable,
         "deliverable_title": f"Deliverable {deliverable}",
+        "deliverable_status": deliverable_status,
         "issue_number": task,
         "issue_title": f"Task {task}" if task else None,
         "points": points,
@@ -149,6 +151,78 @@ class TestDeliverablePercentComplete:
         assert df.loc["Deliverable 2", "percent_complete"] == 0.0
 
 
+class TestFilteringReportByDeliverableStatus:
+    """Test the metric when we limit the set of deliverable statuses to include."""
+
+    TEST_ROWS = [
+        task_row(deliverable=1, task=1, status="closed", deliverable_status="Done"),
+        task_row(deliverable=2, task=2, status="closed", deliverable_status="Open"),
+        task_row(deliverable=2, task=3, status="open", deliverable_status="Open"),
+    ]
+
+    def test_filter_out_deliverables_with_excluded_status(self):
+        """The results should exclude deliverables with a status that wasn't passed."""
+        # setup - create test dataset
+        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        # execution
+        df = DeliverablePercentComplete(
+            test_data,
+            unit=Unit.issues,
+            statuses_to_include=["Open"],
+        ).results
+        df = df.set_index("deliverable_title")
+        # validation
+        assert len(df) == 1
+        assert "Deliverable 1" not in df.index  # confirm deliverable 1 was dropped
+        assert df.loc["Deliverable 2", "percent_complete"] == 0.5
+
+    def test_invert_statuses_selected(self):
+        """We should filter out the other deliverable if invert statuses selected."""
+        # setup - create test dataset
+        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        # execution
+        df = DeliverablePercentComplete(
+            test_data,
+            unit=Unit.issues,
+            statuses_to_include=["Done"],  # changed
+        ).results
+        df = df.set_index("deliverable_title")
+        # validation
+        assert len(df) == 1
+        assert "Deliverable 2" not in df.index  # confirm deliverable 2 was dropped
+        assert df.loc["Deliverable 1", "percent_complete"] == 1
+
+    def test_list_selected_statuses_in_slack_message(self):
+        """If we filter on status, those statuses should be listed in the slack message."""
+        # setup - create test dataset
+        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        # execution
+        metric = DeliverablePercentComplete(
+            test_data,
+            unit=Unit.issues,
+            statuses_to_include=["Open"],
+        )
+        output = metric.format_slack_message()
+        # validation
+        expected = "Limited to deliverables with these statuses: Open"
+        assert expected in output
+
+    def test_stats_also_filter_out_deliverables_with_excluded_status(self):
+        """Filtered deliverables should also be excluded from get_stats()."""
+        # setup - create test dataset
+        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        # execution
+        metric = DeliverablePercentComplete(
+            test_data,
+            unit=Unit.issues,
+            statuses_to_include=["Open"],  # exclude deliverable 1
+        )
+        output = metric.get_stats()
+        # validation
+        assert len(output) == 1
+        assert output.get("Deliverable 1") is None
+
+
 class TestGetStats:
     """Test the DeliverablePercentComplete.get_stats() method."""
 
@@ -168,6 +242,7 @@ class TestGetStats:
         assert len(output.stats) == 2
         for deliverable in ["Deliverable 1", "Deliverable 2"]:
             stat = output.stats.get(deliverable)
+            assert stat is not None
             assert stat.value == 100
             assert stat.suffix == f"% of {Unit.issues.value} pointed"
 
@@ -187,6 +262,7 @@ class TestGetStats:
         assert len(output.stats) == 2
         for deliverable in ["Deliverable 1", "Deliverable 2"]:
             stat = output.stats.get(deliverable)
+            assert stat is not None
             assert stat.value == 50
             assert stat.suffix == f"% of {Unit.issues.value} pointed"
 
@@ -203,8 +279,8 @@ class TestGetStats:
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         # validation
         assert len(output.stats) == 2
-        assert output.stats.get("Deliverable 1").value == 100
-        assert output.stats.get("Deliverable 2").value == 0
+        assert output.stats["Deliverable 1"].value == 100
+        assert output.stats["Deliverable 2"].value == 0
 
 
 class TestFormatSlackMessage:
@@ -341,7 +417,7 @@ def test_post_to_slack(
     """Test the steps required to post the results to slack, without actually posting."""
     # execution
     percent_complete.post_results_to_slack(
-        mock_slackbot,
+        mock_slackbot,  # type: ignore noqa: PGH003
         channel_id="test_channel",
         output_dir=tmp_path,
     )
