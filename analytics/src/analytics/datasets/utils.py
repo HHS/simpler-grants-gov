@@ -7,7 +7,7 @@ import pandas as pd
 def load_json_data_as_df(
     file_path: str,
     column_map: dict,
-    date_cols: list[str],
+    date_cols: list[str] | None = None,
     key_for_nested_items: str | None = None,
 ) -> pd.DataFrame:
     """
@@ -47,7 +47,8 @@ def load_json_data_as_df(
     df = df[column_map.keys()]
     df = df.rename(columns=column_map)
     # convert datetime columns to date
-    for col in date_cols:
-        # strip off the timestamp portion of the date
-        df[col] = pd.to_datetime(df[col]).dt.floor("d")
+    if date_cols:
+        for col in date_cols:
+            # strip off the timestamp portion of the date
+            df[col] = pd.to_datetime(df[col]).dt.floor("d")
     return df
