@@ -81,6 +81,13 @@ class Base(DeclarativeBase):
         copy = self.__class__(**data)
         return copy
 
+    def __repr__(self) -> str:
+        values = []
+        for k, v in self.for_json().items():
+            values.append(f"{k}={v!r}")
+
+        return f"<{self.__class__.__name__}({','.join(values)})"
+
 
 @declarative_mixin
 class IdMixin:
