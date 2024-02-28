@@ -69,9 +69,6 @@ def interactive_console() -> dict:
     if isinstance(db_session, db.Session):
         factories_module._db_session = db_session
     variables["f"] = tests.src.db.models.factories
-    variables["OpportunityFactory"] = OpportunityFactory
-    variables["OpportunitySummaryFactory"] = OpportunitySummaryFactory
-    variables["OpportunityAssistanceListingFactory"] = OpportunityAssistanceListingFactory
 
     # Easy access to utilities
     variables["u"] = src.util
