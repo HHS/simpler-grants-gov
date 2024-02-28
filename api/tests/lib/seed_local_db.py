@@ -43,7 +43,7 @@ def seed_local_db() -> None:
         db_client = PostgresDBClient()
 
         db_session = db_client.get_session()
-        #with db_client.get_session() as db_session:
+        # with db_client.get_session() as db_session:
         factories._db_session = db_session
 
         _build_opportunities(db_session)

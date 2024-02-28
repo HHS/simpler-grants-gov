@@ -283,6 +283,7 @@ class TransferTopportunityFactory(BaseFactory):
 # Foreign Table Factories
 ####################################
 
+
 class ForeignTopportunityFactory(factory.DictFactory):
     """
     NOTE: This generates a dictionary - and does not connect to the database directly
