@@ -96,13 +96,13 @@ const Footer = () => {
           >
             <SocialLinks links={links} />
             <h2 className="usa-footer__contact-heading">
-              {"agency_contact_center"}
+              {"Grants.gov Program Management Office"}
             </h2>
             <Address
               size="medium"
               items={[
                 <a key="telephone" href={`tel:${"telephone"}`}>
-                  {"telephone"}
+                  {"1-877-696-6775"}
                 </a>,
                 <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
                   {ExternalRoutes.EMAIL_SUPPORT}

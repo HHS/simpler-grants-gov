@@ -28,31 +28,31 @@ const GrantsIdentifier = () => {
   const IdentifierLinkList = [
     {
       href: ExternalRoutes.ABOUT_HHS,
-      text: "link_about",
+      text: "About HHS",
     },
     {
       href: ExternalRoutes.ACCESSIBILITY_COMPLIANCE,
-      text: "link_accessibility",
+      text: "Accessibility support",
     },
     {
       href: ExternalRoutes.FOIA,
-      text: "link_foia",
+      text: "FOIA requests",
     },
     {
       href: ExternalRoutes.NO_FEAR,
-      text: "link_fear",
+      text: "EEO/No Fear Act",
     },
     {
       href: ExternalRoutes.INSPECTOR_GENERAL,
-      text: "link_ig",
+      text: "Office of the Inspector General",
     },
     {
       href: ExternalRoutes.PERFORMANCE_REPORTS,
-      text: "link_performance",
+      text: "Performance reports",
     },
     {
       href: ExternalRoutes.PRIVACY_POLICY,
-      text: "link_privacy",
+      text: "Privacy Policy",
     },
   ].map(({ text, href }) => (
     <IdentifierLinkItem key={text}>
@@ -69,6 +69,7 @@ const GrantsIdentifier = () => {
           <IdentifierLogo href="#">{logoImage}</IdentifierLogo>
         </IdentifierLogos>
         <IdentifierIdentity domain="HHS.gov">
+          An official website of the U.S. Department of Health and Human Services
         </IdentifierIdentity>
       </IdentifierMasthead>
       <IdentifierLinks navProps={{ "aria-label": "Important links" }}>

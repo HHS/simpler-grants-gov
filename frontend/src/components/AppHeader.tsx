@@ -62,7 +62,7 @@ const Header = ({ logoPath }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{"title"}</span>
+                <span className="font-sans-lg flex-fill">{"Simpler.Grants.gov"}</span>
               </div>
             </Title>
             <NavMenuButton

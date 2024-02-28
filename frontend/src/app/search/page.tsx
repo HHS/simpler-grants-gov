@@ -1,17 +1,20 @@
-import type { GetStaticProps, NextPage } from "next";
+"use client";
+
+import { getTranslations } from "next-intl/server";
+import type { GetStaticProps, NextPage, Metadata } from "next";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React, { useState } from "react";
 
-import { APISearchFetcher } from "../services/searchfetcher/APISearchFetcher";
-import { MockSearchFetcher } from "../services/searchfetcher/MockSearchFetcher";
+import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
+import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
 import {
   fetchSearchOpportunities,
   SearchFetcher,
-} from "../services/searchfetcher/SearchFetcher";
-import { Opportunity } from "../types/searchTypes";
-import PageNotFound from "./404";
+} from "../../services/searchfetcher/SearchFetcher";
+import { Opportunity } from "../../types/searchTypes";
+import PageNotFound from "../../pages/404";
 
 const useMockData = true;
 const searchFetcher: SearchFetcher = useMockData
@@ -20,6 +23,10 @@ const searchFetcher: SearchFetcher = useMockData
 
 interface SearchProps {
   initialOpportunities: Opportunity[];
+}
+
+interface RouteParams {
+  locale: string;
 }
 
 const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
@@ -54,22 +61,6 @@ const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
       </ul>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  // Always pre-render the initial search results
-  // TODO (1189): If the URL has query params - they will need to be included in the search here
-  const initialOpportunities: Opportunity[] = await fetchSearchOpportunities(
-    searchFetcher
-  );
-  const translations = await serverSideTranslations(locale ?? "en");
-
-  return {
-    props: {
-      initialOpportunities,
-      ...translations,
-    },
-  };
 };
 
 export default Search;
