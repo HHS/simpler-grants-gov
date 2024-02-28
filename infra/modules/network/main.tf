@@ -14,9 +14,12 @@ module "aws_vpc" {
   azs  = local.availability_zones
   cidr = local.vpc_cidr
 
-  public_subnets             = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
-  private_subnets            = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
-  database_subnets           = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
+  # The 4th subnet in each set should be reserved exclusively for security purposes, by MicroHealth's request.
+  # The 4th subnet's CIDR blocks are 10.${var.second_octet}.20.0/24, 10.${var.second_octet}.21.0/24, 10.${var.second_octet}.22.0/24
+
+  public_subnets             = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24", "10.${var.second_octet}.20.0/24"]
+  private_subnets            = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24", "10.${var.second_octet}.21.0/24"]
+  database_subnets           = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24", "10.${var.second_octet}.22.0/24"]
   public_subnet_tags         = { subnet_type = "public" }
   private_subnet_tags        = { subnet_type = "private" }
   database_subnet_tags       = { subnet_type = "database" }
