@@ -6,4 +6,5 @@
 resource "aws_kms_key" "dms_endpoints" {
   description         = "NO LONGER IN USE"
   enable_key_rotation = true
+  is_enabled          = false
 }
