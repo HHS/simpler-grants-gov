@@ -4,6 +4,7 @@
 # For future historians: this KMS key was used in service of AWS DMS.
 # It it no longer in use because we have a new way to sync data between our databases.
 resource "aws_kms_key" "dms_endpoints" {
+  # checkov:skip=CKV_AWS_227: KMS key is intentionally disabled
   description         = "NO LONGER IN USE"
   enable_key_rotation = true
   is_enabled          = false
