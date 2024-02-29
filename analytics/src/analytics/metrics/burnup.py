@@ -52,8 +52,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         # get the number of tix opened and closed each day
         df_opened = self._get_daily_tix_counts_by_status(df_sprint, "opened")
         df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
-        # NOT SURE IF THIS STEP NEEDS TO BE CHANGED
-        # combine the daily opened and closed counts to get total open per day
+          # NOT SURE IF THIS STEP NEEDS TO BE CHANGED
+        # combine the daily opened and closed counts to get total open and closed per day
         return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
     def plot_results(self) -> Figure:
@@ -72,8 +72,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         chart = px.line(
             data_frame=df,
             x=self.date_col,
-            y="total_open",
-            title=f"{self.sprint} burndown by {self.unit.value}",
+            y=["total_open", "total_closed"],
+            title=f"{self.sprint} Burnup by {self.unit.value}",
             labels={"total_open": f"total {self.unit.value} open"},
         )
         # set the scale of the y axis to start at 0
@@ -220,7 +220,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             .fillna(0)
         )
         # calculate the difference between opened and closed each day
-        df["delta"] = df["opened"] - df["closed"]
+        # df["delta"] = df["opened"] - df["closed"]
         # cumulatively sum the deltas to get the running total
-        df["total_open"] = df["delta"].cumsum()
+        df["total_open"] = df["opened"].cumsum()
+        df["total_closed"] = df["closed"].cumsum()
         return df
