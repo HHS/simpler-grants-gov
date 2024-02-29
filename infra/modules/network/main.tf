@@ -68,15 +68,6 @@ resource "aws_subnet" "security_private" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route_table
-data "aws_route_table" "security_public" {
-  vpc_id = module.aws_vpc.vpc_id
-  filter {
-    name   = "tag:Name"
-    values = ["${var.name}-public"]
-  }
-}
-
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
 resource "aws_route_table_association" "security_public" {
   subnet_id      = aws_subnet.security_public.id
