@@ -8,7 +8,7 @@ describe("AppLayout", () => {
     render(
       <AppLayout>
         <h1>child</h1>
-      </AppLayout>
+      </AppLayout>,
     );
 
     const header = screen.getByRole("heading", { name: /child/i, level: 1 });
@@ -20,7 +20,7 @@ describe("AppLayout", () => {
     const { container } = render(
       <AppLayout>
         <h1>child</h1>
-      </AppLayout>
+      </AppLayout>,
     );
     const results = await axe(container);
 
