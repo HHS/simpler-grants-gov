@@ -41,9 +41,9 @@ unit-test:
 e2e-test:
 	@echo "=> Running end-to-end tests"
 	@echo "============================="
-	$(POETRY) run pytest tests/integrations --cov-append=src
+	$(POETRY) run pytest tests/integrations --cov=src --cov-append
 
-test-audit: unit-test
+test-audit: unit-test e2e-test
 	@echo "=> Running test coverage report"
 	@echo "============================="
 	$(POETRY) run coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
