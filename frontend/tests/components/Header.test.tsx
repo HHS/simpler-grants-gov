@@ -25,11 +25,11 @@ describe("Header", () => {
     expect(menuButton).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /home/i })).toHaveAttribute(
       "href",
-      "/"
+      "/",
     );
     expect(screen.getByRole("link", { name: /process/i })).toHaveAttribute(
       "href",
-      "/process"
+      "/process",
     );
 
     await userEvent.click(menuButton);

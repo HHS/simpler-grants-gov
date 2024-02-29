@@ -22,7 +22,7 @@ interface SearchProps {
   initialOpportunities: Opportunity[];
 }
 
-// TODO: use for 
+// TODO: use for
 // interface RouteParams {
 //   locale: string;
 // }

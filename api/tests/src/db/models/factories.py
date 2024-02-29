@@ -277,3 +277,36 @@ class TransferTopportunityFactory(BaseFactory):
 
     created_date = factory.LazyAttribute(lambda o: o.created_at.date())
     last_upd_date = factory.LazyAttribute(lambda o: o.updated_at.date())
+
+
+####################################
+# Foreign Table Factories
+####################################
+
+
+class ForeignTopportunityFactory(factory.DictFactory):
+    """
+    NOTE: This generates a dictionary - and does not connect to the database directly
+    """
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    oppnumber = factory.Sequence(lambda n: f"F-ABC-{n}-XYZ-001")
+    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+
+    owningagency = factory.Iterator(["F-US-ABC", "F-US-XYZ", "F-US-123"])
+
+    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
+    # only set the category explanation if category is Other
+    category_explanation = factory.Maybe(
+        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
+        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        no_declaration=None,
+    )
+
+    is_draft = "N"  # Because we filter out drafts, just default these to False
+
+    revision_number = 0
+
+    created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
+    last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")

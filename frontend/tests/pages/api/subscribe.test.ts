@@ -30,7 +30,7 @@ describe("Your API Route", () => {
   it("should return 405 if method is not POST", async () => {
     await handler(
       { ...mockRequest, method: "GET" } as NextApiRequest,
-      mockResponse
+      mockResponse,
     );
     expect(mockResponse.status).toHaveBeenCalledWith(405);
     expect(mockResponse.json).toHaveBeenCalledWith({
@@ -41,7 +41,7 @@ describe("Your API Route", () => {
   it("should return 400 if name or email is missing", async () => {
     await handler(
       { ...mockRequest, body: JSON.stringify({}) } as NextApiRequest,
-      mockResponse
+      mockResponse,
     );
     expect(mockResponse.status).toHaveBeenCalledWith(400);
     expect(mockResponse.json).toHaveBeenCalledWith({
@@ -59,7 +59,7 @@ describe("Your API Route", () => {
     });
     expect(console.error).toHaveBeenCalledWith(
       "Error subscribing user:",
-      "Some fetch error"
+      "Some fetch error",
     );
   });
 

@@ -23,7 +23,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     const response = await this.request<SearchResponseData>(
       "GET",
       subPath,
-      queryParams
+      queryParams,
     );
 
     return response;
