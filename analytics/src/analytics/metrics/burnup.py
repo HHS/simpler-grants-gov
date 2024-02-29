@@ -42,7 +42,10 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         Notes
         -----
         Sprint burnup is calculated with the following algorithm:
-        FILL IN NEW ALGORITHM
+        1. Isolate Sprint records
+        2. Create data range for burnup 
+        3. Group issues/points by date opened and date closed 
+        4. Join on date
         """
         # make a copy of columns and rows we need to calculate burndown for this sprint
         burnup_cols = [self.opened_col, self.closed_col, self.points_col]
@@ -202,7 +205,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         closed: pd.DataFrame,
     ) -> pd.DataFrame:
         """
-        Get the cumulative sum of open issues per day.
+        Get the cumulative sum of open issues and closed issues per day.
 
         Notes
         -----
@@ -210,8 +213,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         - Left joining the full date range to the daily open and closed counts
           so that we have a row for each day of the range, with a column for tix
           opened and a column for tix closed on that day
-        - Subtracting closed from opened to get the "delta" on each day in the range
-        - Cumulatively summing the deltas to get the running total of open tix
+        - getting the cumulative sum of open and closed issues
         """
         # left join the full date range to open and closed counts
         df = (
