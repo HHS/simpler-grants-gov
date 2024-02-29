@@ -15,7 +15,7 @@ from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
-class SprintBurndown(BaseMetric[SprintBoard]):
+class SprintBurnup(BaseMetric[SprintBoard]):
     """Calculates the running total of open issues per day in the sprint."""
 
     def __init__(
@@ -24,7 +24,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         sprint: str,
         unit: Unit,
     ) -> None:
-        """Initialize the SprintBurndown metric."""
+        """Initialize the SprintBurnup metric."""
         self.dataset = dataset
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.sprint_data = self._isolate_data_for_this_sprint()
