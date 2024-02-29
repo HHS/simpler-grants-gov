@@ -30,6 +30,10 @@ What does it mean for a `dev` to be the "wild west"? Well, specifically:
 - Dev should not contain anything of any great importance. If you were to wake up Monday morning to your special dev setup having been accidentally deleted, it should not represent a major setback in your plans.
 - Dev should be "reset" to the `main` branch when you are done with it. Which is to say, you should deploy `main` to dev after you are done testing a batch of changes.
 
+## Creating a "stable" `dev` Environment
+
+Sometimes you want a dev environment, but to keep to yourself without the threat of it being reset to `main`. For example, if you expect to be working on the same project for several weeks. In that case you would want to create a temporary new environment, and call it `dev-${topic}`, like `dev-vpc` or `dev-airflow`. This would give you your own isolated sandbox to test with. Just make sure to delete the environment when you are done with it.
+
 ## Out of Scope (for this ADR)
 
 - Preview builds / branch builds, wherein every Github PR creates its only small application in dev
