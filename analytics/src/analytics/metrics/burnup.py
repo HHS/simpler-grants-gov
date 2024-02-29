@@ -90,7 +90,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
 
         Notes
         -----
-        TODO(@widal001): 2023-12-04 - Should stats be calculated in separate private methods?
+        TODO(@AlexanderStephensonUSDS): 2024-02-29 - Should stats be calculated in separate private methods?
         """
         df = self.results
         # get sprint start and end dates
