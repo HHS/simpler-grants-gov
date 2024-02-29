@@ -64,6 +64,7 @@ stop:
 ##################################################
 # Load testing
 ##################################################
+
 load-test-local: # Load test the local environment at localhost:3000
 	artillery run artillery-load-test.yml
 
