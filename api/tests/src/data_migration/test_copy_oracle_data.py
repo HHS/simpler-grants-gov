@@ -4,19 +4,14 @@ import pytest
 from sqlalchemy import text
 
 from src.data_migration.copy_oracle_data import _run_copy_commands
-from src.data_migration.setup_foreign_tables import _run_create_table_commands
+from src.data_migration.setup_foreign_tables import ForeignTableConfig, _run_create_table_commands
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from tests.src.db.models.factories import ForeignTopportunityFactory, TransferTopportunityFactory
 
 
 @pytest.fixture(autouse=True)
-def setup_env_vars(monkeypatch):
-    monkeypatch.setenv("IS_LOCAL_FOREIGN_TABLE", "true")
-
-
-@pytest.fixture(autouse=True)
 def setup_foreign_tables(db_session):
-    _run_create_table_commands(db_session)
+    _run_create_table_commands(db_session, ForeignTableConfig(is_local_foreign_table=True))
 
 
 @pytest.fixture(autouse=True, scope="function")

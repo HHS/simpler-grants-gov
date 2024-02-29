@@ -25,27 +25,26 @@ class Column:
     is_primary_key: bool = False
 
 
-class Constants:
-    OPPORTUNITY_COLUMNS: list[Column] = [
-        Column("OPPORTUNITY_ID", "numeric(20)", is_nullable=False, is_primary_key=True),
-        Column("OPPNUMBER", "character varying (40)"),
-        Column("REVISION_NUMBER", "numeric(20)"),
-        Column("OPPTITLE", "character varying (255)"),
-        Column("OWNINGAGENCY", "character varying (255)"),
-        Column("PUBLISHERUID", "character varying (255)"),
-        Column("LISTED", "CHAR(1)"),
-        Column("OPPCATEGORY", "CHAR(1)"),
-        Column("INITIAL_OPPORTUNITY_ID", "numeric(20)"),
-        Column("MODIFIED_COMMENTS", "character varying (2000)"),
-        Column("CREATED_DATE", "DATE"),
-        Column("LAST_UPD_DATE", "DATE"),
-        Column("CREATOR_ID", "character varying (50)"),
-        Column("LAST_UPD_ID", "character varying (50)"),
-        Column("FLAG_2006", "CHAR(1)"),
-        Column("CATEGORY_EXPLANATION", "character varying (255)"),
-        Column("PUBLISHER_PROFILE_ID", "numeric(20)"),
-        Column("IS_DRAFT", "character varying (1)"),
-    ]
+OPPORTUNITY_COLUMNS: list[Column] = [
+    Column("OPPORTUNITY_ID", "numeric(20)", is_nullable=False, is_primary_key=True),
+    Column("OPPNUMBER", "character varying (40)"),
+    Column("REVISION_NUMBER", "numeric(20)"),
+    Column("OPPTITLE", "character varying (255)"),
+    Column("OWNINGAGENCY", "character varying (255)"),
+    Column("PUBLISHERUID", "character varying (255)"),
+    Column("LISTED", "CHAR(1)"),
+    Column("OPPCATEGORY", "CHAR(1)"),
+    Column("INITIAL_OPPORTUNITY_ID", "numeric(20)"),
+    Column("MODIFIED_COMMENTS", "character varying (2000)"),
+    Column("CREATED_DATE", "DATE"),
+    Column("LAST_UPD_DATE", "DATE"),
+    Column("CREATOR_ID", "character varying (50)"),
+    Column("LAST_UPD_ID", "character varying (50)"),
+    Column("FLAG_2006", "CHAR(1)"),
+    Column("CATEGORY_EXPLANATION", "character varying (255)"),
+    Column("PUBLISHER_PROFILE_ID", "numeric(20)"),
+    Column("IS_DRAFT", "character varying (1)"),
+]
 
 
 @data_migration_blueprint.cli.command(
@@ -55,8 +54,10 @@ class Constants:
 def setup_foreign_tables(db_session: db.Session) -> None:
     logger.info("Beginning setup of foreign Oracle tables")
 
+    config = ForeignTableConfig()
+
     with db_session.begin():
-        _run_create_table_commands(db_session)
+        _run_create_table_commands(db_session, config)
 
     logger.info("Successfully ran setup-foreign-tables")
 
@@ -113,11 +114,7 @@ def build_sql(table_name: str, columns: list[Column], is_local: bool) -> str:
     return f"{create_table_command} foreign_{table_name.lower()} ({','.join(column_sql_parts)}){create_command_suffix}"
 
 
-def _run_create_table_commands(db_session: db.Session) -> None:
-    config = ForeignTableConfig()
-
+def _run_create_table_commands(db_session: db.Session, config: ForeignTableConfig) -> None:
     db_session.execute(
-        text(
-            build_sql("TOPPORTUNITY", Constants.OPPORTUNITY_COLUMNS, config.is_local_foreign_table)
-        )
+        text(build_sql("TOPPORTUNITY", OPPORTUNITY_COLUMNS, config.is_local_foreign_table))
     )
