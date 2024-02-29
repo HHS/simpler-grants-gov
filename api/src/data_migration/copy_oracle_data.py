@@ -52,8 +52,12 @@ class SqlCommands:
 def copy_oracle_data(db_session: db.Session) -> None:
     logger.info("Beginning copy of data from Oracle database")
 
-    with db_session.begin():
-        _run_copy_commands(db_session)
+    try:
+        with db_session.begin():
+            _run_copy_commands(db_session)
+    except Exception:
+        logger.exception("Failed to run copy-oracle-data command")
+        raise
 
     logger.info("Successfully ran copy-oracle-data")
 

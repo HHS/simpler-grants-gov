@@ -45,7 +45,7 @@ export default abstract class BaseApi {
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
-    } = {}
+    } = {},
   ) {
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(method, this.basePath, subPath, body);
@@ -70,7 +70,7 @@ export default abstract class BaseApi {
    */
   private async sendRequest<TResponseData>(
     url: string,
-    fetchOptions: RequestInit
+    fetchOptions: RequestInit,
   ) {
     let response: Response;
     let responseBody: ApiResponseBody<TResponseData>;
@@ -92,7 +92,7 @@ export default abstract class BaseApi {
         response,
         errors,
         this.namespace,
-        data
+        data,
       );
 
       throw new Error("Not OK response received");
@@ -111,7 +111,7 @@ export function createRequestUrl(
   method: ApiMethod,
   basePath: string,
   subPath: string,
-  body?: JSONRequestBody
+  body?: JSONRequestBody,
 ) {
   // Remove leading slash from apiPath if it has one
   const cleanedPaths = compact([basePath, subPath]).map(removeLeadingSlash);

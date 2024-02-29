@@ -45,7 +45,7 @@ describe("SearchOpportunityAPI", () => {
           method: "GET",
           headers: baseRequestHeaders,
           body: null,
-        }
+        },
       );
       expect(response.data).toEqual({ opportunities: [] });
       expect(1).toBe(1);

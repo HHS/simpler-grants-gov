@@ -243,6 +243,9 @@ openapi-spec: init-db ## Generate OpenAPI spec
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
 
+setup-foreign-tables:
+	$(FLASK_CMD) data-migration setup-foreign-tables
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################
