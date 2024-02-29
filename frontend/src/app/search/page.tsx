@@ -1,20 +1,17 @@
 "use client";
 
-import { getTranslations } from "next-intl/server";
-import type { GetStaticProps, NextPage, Metadata } from "next";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React, { useState } from "react";
+import {
+  SearchFetcher,
+  fetchSearchOpportunities,
+} from "../../services/searchfetcher/SearchFetcher";
 
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import {
-  fetchSearchOpportunities,
-  SearchFetcher,
-} from "../../services/searchfetcher/SearchFetcher";
+import type { NextPage } from "next";
 import { Opportunity } from "../../types/searchTypes";
 import PageNotFound from "../../pages/404";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 const useMockData = true;
 const searchFetcher: SearchFetcher = useMockData
@@ -25,9 +22,10 @@ interface SearchProps {
   initialOpportunities: Opportunity[];
 }
 
-interface RouteParams {
-  locale: string;
-}
+// TODO: use for 
+// interface RouteParams {
+//   locale: string;
+// }
 
 const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
   const { featureFlagsManager, mounted } = useFeatureFlags();
