@@ -4,10 +4,11 @@ import Header from "./Header";
 
 type Props = {
   children: React.ReactNode;
-  locale?: string;
+  // TODO: pass locale into Layout when we setup i18n
+  // locale?: string;
 };
 
-const Layout = ({ children, locale }: Props) => {
+const Layout = ({ children }: Props) => {
   return (
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
