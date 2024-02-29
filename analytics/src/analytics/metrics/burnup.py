@@ -77,11 +77,18 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             x=self.date_col,
             y=["total_open", "total_closed"],
             title=f"{self.sprint} Burnup by {self.unit.value}",
-            labels={"total_open": f"total {self.unit.value} open"},
+            labels={"total_open": f"total {self.unit.value} open",
+                    "total_closed": f"total {self.unit.value} closed"},
+
         )
         # set the scale of the y axis to start at 0
         chart.update_yaxes(range=[0, df["total_open"].max() + 2])
         chart.update_xaxes(range=[sprint_start, sprint_end])
+        chart.update_layout(xaxis_title="Date",
+                            yaxis_title=f"Total {self.unit.value.capitalize()}",
+                            legend_title=f"{self.unit.value.capitalize()}"
+
+        )
         return chart
 
     def get_stats(self) -> dict[str, Statistic]:
