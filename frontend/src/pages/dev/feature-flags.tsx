@@ -75,7 +75,7 @@ const FeatureFlags: NextPage = () => {
                     </Button>
                   </td>
                 </tr>
-              )
+              ),
             )}
           </tbody>
         </Table>
