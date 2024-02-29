@@ -8,6 +8,10 @@ resource "aws_vpc_peering_connection" "dms" {
   vpc_id        = var.our_vpc_id
   peer_region   = "us-east-2"
 
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
+
   tags = {
     Name = "DMS VPC Peering"
   }

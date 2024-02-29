@@ -57,6 +57,7 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   statistic           = "Average"
   threshold           = 0.2
   alarm_description   = "High target latency alert"
+  treat_missing_data  = "ignore"
   alarm_actions       = [aws_sns_topic.this.arn]
   ok_actions          = [aws_sns_topic.this.arn]
 

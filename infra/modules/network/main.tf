@@ -35,3 +35,47 @@ module "aws_vpc" {
   flow_log_destination_arn         = aws_cloudwatch_log_group.flow_log.arn
   flow_log_cloudwatch_iam_role_arn = aws_iam_role.vpc_flow_log_cloudwatch.arn
 }
+
+####################
+# SECURITY SUBNETS #
+####################
+
+# The configuration below creates "security subnets" with are used exclusively for
+# MicroHealth's security tooling. They were created by MicroHealth's request to confirm
+# to their standard architecture.
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet
+resource "aws_subnet" "security_public" {
+  vpc_id                  = module.aws_vpc.vpc_id
+  availability_zone       = local.availability_zones[0]
+  cidr_block              = "10.${var.second_octet}.14.0/24"
+  map_public_ip_on_launch = false
+  tags = {
+    Name        = "${var.name}-security-public"
+    subnet_type = "security-public"
+  }
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet
+resource "aws_subnet" "security_private" {
+  vpc_id                  = module.aws_vpc.vpc_id
+  availability_zone       = local.availability_zones[0]
+  cidr_block              = "10.${var.second_octet}.15.0/24"
+  map_public_ip_on_launch = false
+  tags = {
+    Name        = "${var.name}-security-private"
+    subnet_type = "security-private"
+  }
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
+resource "aws_route_table_association" "security_public" {
+  subnet_id      = aws_subnet.security_public.id
+  route_table_id = module.aws_vpc.public_route_table_ids[0]
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association
+resource "aws_route_table_association" "security_private" {
+  subnet_id      = aws_subnet.security_private.id
+  route_table_id = module.aws_vpc.private_route_table_ids[0]
+}

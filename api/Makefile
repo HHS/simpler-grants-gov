@@ -243,12 +243,18 @@ openapi-spec: init-db ## Generate OpenAPI spec
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
 
+setup-foreign-tables:
+	$(FLASK_CMD) data-migration setup-foreign-tables
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################
 
 login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
+
+console: ## Start interactive Python console
+	$(PY_RUN_CMD) python3 -i -m src.tool.console.interactive
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -38,6 +38,10 @@ with src.logging.init("migrations"):
     ) -> bool:
         if type_ == "schema" and getattr(object, "schema", None) is not None:
             return False
+        if type_ == "table" and name is not None and name.startswith("foreign_"):
+            # We create foreign tables to an Oracle database, if we see those locally
+            # just ignore them as they aren't something we want included in Alembic
+            return False
         else:
             return True
 
