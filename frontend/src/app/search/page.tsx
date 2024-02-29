@@ -28,8 +28,7 @@ const searchFetcher: SearchFetcher = useMockData
 
 export default function Search() {
   const { featureFlagsManager, mounted } = useFeatureFlags();
-  const [searchResults, setSearchResults] =
-    useState<Opportunity[]>([]);
+  const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
 
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
