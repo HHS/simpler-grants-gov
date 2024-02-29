@@ -18,7 +18,7 @@ config:
       maxVusers: 1000
       name: Spike phase
   environments:
-    production:
+    prod:
       target: http://api-prod-342430507.us-east-1.elb.amazonaws.com
     staging:
       target: http://api-staging-770293556.us-east-1.elb.amazonaws.com

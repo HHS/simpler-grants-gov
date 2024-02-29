@@ -119,7 +119,7 @@ To run the load test:
 3. `$ make load-test-<env>` where env is either `local`, `dev`, `staging`, or `production`
 
 - `make load-test-local`
-  - requires running a local container in another console tab
+  - requires running a local container in another console
 - `make load-test-dev`
 - `make load-test-staging`
-- `make load-test-production`
+- `make load-test-prod`

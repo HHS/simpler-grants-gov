@@ -18,7 +18,7 @@ config:
       maxVusers: 1000
       name: Spike phase
   environments:
-    production:
+    prod:
       target: https://simpler.grants.gov
     staging:
       target: http://frontend-staging-1506108424.us-east-1.elb.amazonaws.com

@@ -272,5 +272,5 @@ load-test-dev: # Load test the dev environment in aws
 load-test-staging: # Load test the staging environment in aws
 	artillery run -e staging artillery-load-test.yml
 
-load-test-production: # Load test the production environment in aws. Please test responsibly
-	artillery run -e production artillery-load-test.yml
+load-test-prod: # Load test the production environment in aws. Please test responsibly
+	artillery run -e prod artillery-load-test.yml
