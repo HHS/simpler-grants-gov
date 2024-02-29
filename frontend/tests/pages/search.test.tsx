@@ -10,7 +10,7 @@ const setFeatureFlag = (flag: string, value: boolean) => {
   (useFeatureFlags as jest.Mock).mockReturnValue({
     featureFlagsManager: {
       isFeatureEnabled: jest.fn((featureName: string) =>
-        featureName === flag ? value : false
+        featureName === flag ? value : false,
       ),
     },
     mounted: true,
@@ -43,8 +43,8 @@ describe("Search", () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            /The page you have requested cannot be displayed because it does not exist, has been moved/i
-          )
+            /The page you have requested cannot be displayed because it does not exist, has been moved/i,
+          ),
         ).toBeInTheDocument();
       });
     });
