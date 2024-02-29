@@ -120,6 +120,11 @@ Once you've exported the sprint and issue data from GitHub, you can start calcul
 poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint @current --unit points --show-results
 ```
 
+If on a Windows machine: 
+
+```bash
+poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "@current" --unit points --show-results
+```
 A couple of important notes about this command:
 
 - `--sprint @current` In order to calculate burndown, you'll need to specify either `@current` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
