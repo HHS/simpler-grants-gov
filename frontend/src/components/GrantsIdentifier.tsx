@@ -1,3 +1,5 @@
+"use client";
+
 import { ExternalRoutes } from "src/constants/routes";
 
 import { Trans, useTranslation } from "next-i18next";

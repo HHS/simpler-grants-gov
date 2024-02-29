@@ -1,9 +1,6 @@
-
-import { GovBanner, Grid, GridContainer } from "@trussworks/react-uswds";
-
-import AppFooter from "./AppFooter";
-import GrantsIdentifier from "./AppGrantsIdentifier";
-import Header from "./AppHeader";
+import Footer from "./Footer";
+import GrantsIdentifier from "./GrantsIdentifier";
+import Header from "./Header";
 
 type Props = {
   children: React.ReactNode;
@@ -11,7 +8,6 @@ type Props = {
 };
 
 const Layout = ({ children, locale }: Props) => {
-
   return (
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
@@ -20,7 +16,7 @@ const Layout = ({ children, locale }: Props) => {
       </a>
       <Header />
       <main id="main-content">{children}</main>
-      <AppFooter />
+      <Footer />
       <GrantsIdentifier />
     </div>
   );
