@@ -20,7 +20,7 @@ def test_fetch_slack_channels(slackbot: SlackBot):
     """The fetch_slack_channels() function should execute correctly."""
     result = slackbot.fetch_slack_channel_info(channel_id=settings.reporting_channel_id)
     assert result["ok"] is True
-    assert result["channel"]["name"] == "z_bot-sprint-reporting-test"
+    assert result["channel"]["name"] == "z_bot-analytics-ci-test"
 
 
 def test_upload_files_to_slack_channel(slackbot: SlackBot):

@@ -73,7 +73,7 @@ The `analytics` package comes with a built-in CLI that you can use to discover t
 
 Start by simply typing `poetry run analytics --help` which will print out a list of available commands:
 
-![Screenshot of passing the --help flag to CLI entry point](static/screenshot-cli-help.png)
+![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
 
 Discover the arguments required for a particular command by appending the `--help` flag to that command:
 
@@ -81,7 +81,7 @@ Discover the arguments required for a particular command by appending the `--hel
 poetry run analytics export gh_issue_data --help
 ```
 
-![Screenshot of passing the --help flag to a specific command](static/screenshot-command-help.png)
+![Screenshot of passing the --help flag to a specific command](../../analytics/static/screenshot-command-help.png)
 
 ### Exporting GitHub data
 
@@ -126,7 +126,7 @@ A couple of important notes about this command:
 - `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `issues`
 - `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
-![Screenshot of burndown for sprint 10](static/screenshot-sprint-burndown.png)
+![Screenshot of burndown for sprint 10](../../analytics/static/screenshot-sprint-burndown.png)
 
 You can also post the results of this metric to a Slack channel:
 
@@ -136,7 +136,7 @@ poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.js
 
 > **NOTE:** This requires you to have the `.secrets.toml` configured according to the directions in step 5 of the [installation section](#installation)
 
-![Screenshot of burndown report in slack](static/screenshot-slack-burndown.png)
+![Screenshot of burndown report in slack](../../analytics/static/screenshot-slack-burndown.png)
 
 ### Calculating deliverable percent complete
 
@@ -148,7 +148,7 @@ For example, here we're calculating percentage completion based on the number of
 ```bash
 poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit issues
 ```
-![Screenshot of deliverable percent complete by issues](static/screenshot-deliverable-pct-complete-tasks.png)
+![Screenshot of deliverable percent complete by issues](../../analytics/static/screenshot-deliverable-pct-complete-tasks.png)
 
 And here we're calculating it based on the total story point value of those tickets.
 
@@ -156,6 +156,27 @@ And here we're calculating it based on the total story point value of those tick
 poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit points
 ```
 
-![Screenshot of deliverable percent complete by points](static/screenshot-deliverable-pct-complete-points.png)
+![Screenshot of deliverable percent complete by points](../../analytics/static/screenshot-deliverable-pct-complete-points.png)
 
 The `deliverable_pct_complete` sub-command also supports the `--post-results` flag if you want to post this data to slack.
+
+
+### Experimental features
+
+We also have some flags that enable experimental features for the deliverables. The currently supported flags for `calculate deliverable_percent_complete` are:
+
+- `--roadmap-file` Accepts a path to a file that loads data exported from the Product roadmap GitHub project. This also uses a different join path to associate issues with their parent deliverables.
+- `--include-status` Accepts the name of a status to include in the report. Can be passed multiple times to include multiple statuses.
+
+Here's an example of how to use these in practice:
+
+```bash
+poetry run analytics calculate deliverable_percent_complete \
+  --sprint-file data/sprint-data.json \
+  --issue-file data/issue-data.json \
+  --roadmap-file data/roadmap-data.json \
+  --include-status "In Progress" \
+  --include-status "Planning" \
+  --show-results \
+  --unit points
+```
