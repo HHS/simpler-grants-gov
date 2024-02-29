@@ -19,11 +19,11 @@ config:
       name: Spike phase
   environments:
     production:
-      target: https://api-prod-342430507.us-east-1.elb.amazonaws.com
+      target: http://api-prod-342430507.us-east-1.elb.amazonaws.com
     staging:
-      target: https://api-staging-770293556.us-east-1.elb.amazonaws.com
+      target: http://api-staging-770293556.us-east-1.elb.amazonaws.com
     dev:
-      target: https://api-dev-1839587515.us-east-1.elb.amazonaws.com
+      target: http://api-dev-1839587515.us-east-1.elb.amazonaws.com
   plugins:
     expect:
       outputFormat: prettyError

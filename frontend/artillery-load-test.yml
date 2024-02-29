@@ -21,9 +21,9 @@ config:
     production:
       target: https://simpler.grants.gov
     staging:
-      target: https://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
+      target: http://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
     dev:
-      target: https://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
+      target: http://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
   plugins:
     expect:
       outputFormat: prettyError
