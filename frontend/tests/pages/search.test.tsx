@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import Search from "src/pages/search";
 
+import Search from "../../src/app/search/page";
 import { MOCKOPPORTUNITIES } from "../../src/services/searchfetcher/MockSearchFetcher";
 
 jest.mock("src/hooks/useFeatureFlags");
