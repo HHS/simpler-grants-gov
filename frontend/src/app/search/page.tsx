@@ -8,7 +8,6 @@ import {
 
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import type { NextPage } from "next";
 import { Opportunity } from "../../types/searchTypes";
 import PageNotFound from "../../pages/404";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
@@ -18,19 +17,19 @@ const searchFetcher: SearchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
-interface SearchProps {
-  initialOpportunities: Opportunity[];
-}
-
 // TODO: use for i18n when ready
 // interface RouteParams {
 //   locale: string;
 // }
 
-const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
+// interface SearchProps {
+//   initialOpportunities: Opportunity[];
+// }
+
+export default function Search() {
   const { featureFlagsManager, mounted } = useFeatureFlags();
   const [searchResults, setSearchResults] =
-    useState<Opportunity[]>(initialOpportunities);
+    useState<Opportunity[]>([]);
 
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -59,6 +58,4 @@ const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
       </ul>
     </>
   );
-};
-
-export default Search;
+}
