@@ -21,6 +21,9 @@ DAY_3 = "2023-11-03"
 DAY_4 = "2023-11-04"
 DAY_5 = "2023-11-05"
 
+LABEL_30K = "deliverable: 30k ft"
+LABEL_10K = "deliverable: 10k ft"
+
 
 class MockSlackbot:
     """Create a mock slackbot issue for unit tests."""
@@ -44,7 +47,7 @@ def mock_slackbot_fixture():
     return MockSlackbot()
 
 
-def write_test_data_to_file(data: dict, output_file: str):
+def write_test_data_to_file(data: dict | list[dict], output_file: str):
     """Write test JSON data to a file for use in a test."""
     parent_dir = Path(output_file).parent
     parent_dir.mkdir(exist_ok=True, parents=True)
@@ -55,8 +58,8 @@ def write_test_data_to_file(data: dict, output_file: str):
 def json_issue_row(
     issue: int,
     labels: list[str] | None = None,
-    created_at: str = "2023-11-01T00:00:00Z",
-    closed_at: str = "2023-11-01T00:00:00Z",
+    created_at: str | None = "2023-11-01T00:00:00Z",
+    closed_at: str | None = "2023-11-01T00:00:00Z",
 ) -> dict:
     """Generate a row of JSON issue data for testing."""
     new_labels = (
@@ -71,6 +74,42 @@ def json_issue_row(
     }
 
 
+def json_roadmap_row(
+    issue: int,
+    deliverable: int,
+    status: str = "In Progress",
+    labels: list[str] | None = None,
+) -> dict:
+    """
+    Generate a row of JSON roadmap data for testing.
+
+    This is the format returned by the export_project_data() command
+    """
+    return {
+        "assignees": ["mickeymouse"],
+        "content": {
+            "type": "Issue",
+            "body": f"Description of test deliverable {issue}",
+            "title": f"Deliverable {issue}",
+            "number": issue,
+            "repository": "HHS/simpler-grants-gov",
+            "url": f"https://github.com/HHS/simpler-grants-gov/issues/{issue}",
+        },
+        "id": "PVTI_lADOABZxns4ASDf3zgJhmCk",
+        "labels": labels or [LABEL_30K],
+        "linked pull requests": [],
+        "milestone": {
+            "title": "Sample milestone",
+            "description": "Deliverable for milestone",
+            "dueOn": "2023-10-20T00:00:00Z",
+        },
+        "repository": "https://github.com/HHS/simpler-grants-gov",
+        "status": status,
+        "deliverable": f"Deliverable {deliverable}",
+        "title": f"Deliverable {issue}",
+    }
+
+
 def json_sprint_row(
     issue: int,
     parent_number: int = -99,
@@ -78,8 +117,13 @@ def json_sprint_row(
     sprint_date: str = "2023-11-01",
     status: str = "Done",
     points: int = 5,
+    deliverable: int = 1,
 ) -> dict:
-    """Generate a row of JSON sprint data for testing."""
+    """
+    Generate a row of JSON sprint data for testing.
+
+    This is the format returned by the export_project_data() function.
+    """
     return {
         "assignees": ["mickeymouse"],
         "content": {
@@ -102,7 +146,8 @@ def json_sprint_row(
         "sprint": {"title": sprint_name, "startDate": sprint_date, "duration": 14},
         "status": status,
         "story Points": points,
-        "title": "Test issue 1",
+        "deliverable": f"Deliverable {deliverable}",
+        "title": f"Issue {issue}",
     }
 
 
@@ -132,6 +177,7 @@ def sprint_row(
         "status": "Done" if closed else status,
         "assignees": "mickeymouse",
         "labels": [],
+        "deliverable": "Deliverable 1",
         "url": f"https://github.com/HHS/simpler-grants-gov/issues/{issue}",
         "points": points,
         "milestone": "Milestone 1",

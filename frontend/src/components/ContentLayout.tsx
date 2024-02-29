@@ -38,8 +38,8 @@ const ContentLayout = ({
     bottomBorder === "light"
       ? "border-bottom-2px border-base-lighter"
       : bottomBorder === "dark"
-      ? "border-bottom-2px border-base-light"
-      : "";
+        ? "border-bottom-2px border-base-light"
+        : "";
 
   return (
     <GridContainer

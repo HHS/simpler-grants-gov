@@ -13,7 +13,7 @@ class BaseDataset:
         self.df = df
 
     @classmethod
-    def from_csv(cls, file_path: str) -> Self:
+    def from_csv(cls, file_path: str | Path) -> Self:
         """Load and instantiate the dataset from a csv file."""
         return cls(df=pd.read_csv(file_path))
 

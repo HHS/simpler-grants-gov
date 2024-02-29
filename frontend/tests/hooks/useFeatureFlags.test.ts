@@ -19,13 +19,13 @@ describe("useFeatureFlags", () => {
     const { featureFlagsManager, setFeatureFlag } = result.current;
 
     expect(featureFlagsManager.isFeatureEnabled(MOCK_FEATURE_FLAG_NAME)).toBe(
-      MOCK_FEATURE_FLAG_INITIAL_VALUE
+      MOCK_FEATURE_FLAG_INITIAL_VALUE,
     );
     act(() => {
       setFeatureFlag(MOCK_FEATURE_FLAG_NAME, !MOCK_FEATURE_FLAG_INITIAL_VALUE);
     });
     expect(featureFlagsManager.isFeatureEnabled(MOCK_FEATURE_FLAG_NAME)).toBe(
-      !MOCK_FEATURE_FLAG_INITIAL_VALUE
+      !MOCK_FEATURE_FLAG_INITIAL_VALUE,
     );
   });
 });

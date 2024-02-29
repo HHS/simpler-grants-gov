@@ -39,7 +39,7 @@ describe("BaseApi", () => {
       expect.objectContaining({
         method,
         headers: expectedHeaders,
-      })
+      }),
     );
   });
 });

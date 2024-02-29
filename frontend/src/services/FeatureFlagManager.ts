@@ -53,7 +53,7 @@ export class FeatureFlagsManager {
   private _cookies;
 
   constructor(
-    cookies: NextRequest["cookies"] | CookiesStatic | NextServerSideCookies
+    cookies: NextRequest["cookies"] | CookiesStatic | NextServerSideCookies,
   ) {
     this._cookies = cookies;
   }
@@ -65,7 +65,7 @@ export class FeatureFlagsManager {
   // The SSR function getServerSideProps provides a Record type for cookie, which excludes
   // cookie methods like set or get.
   private isCookieARecord(
-    cookies?: typeof this._cookies | NextResponse["cookies"]
+    cookies?: typeof this._cookies | NextResponse["cookies"],
   ): cookies is NextServerSideCookies {
     return !(cookies && "get" in cookies && typeof cookies.get === "function");
   }
@@ -106,7 +106,7 @@ export class FeatureFlagsManager {
     return Object.fromEntries(
       Object.entries(parsedCookie).filter(([name, enabled]) => {
         return this.isValidFeatureFlag(name) && typeof enabled === "boolean";
-      })
+      }),
     );
   }
 
@@ -157,7 +157,7 @@ export class FeatureFlagsManager {
    */
   middleware(request: NextRequest, response: NextResponse): NextResponse {
     const paramValue = request.nextUrl.searchParams.get(
-      FeatureFlagsManager.FEATURE_FLAGS_KEY
+      FeatureFlagsManager.FEATURE_FLAGS_KEY,
     );
 
     const featureFlags =
@@ -234,7 +234,7 @@ export class FeatureFlagsManager {
    */
   private setCookie(
     value: string,
-    cookies?: CookiesStatic | NextRequest["cookies"] | NextResponse["cookies"]
+    cookies?: CookiesStatic | NextRequest["cookies"] | NextResponse["cookies"],
   ) {
     // 3 months
     const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 90);

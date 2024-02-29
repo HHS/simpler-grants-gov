@@ -59,9 +59,8 @@ const Search: NextPage<SearchProps> = ({ initialOpportunities = [] }) => {
 export const getStaticProps: GetStaticProps = async ({ locale }) => {
   // Always pre-render the initial search results
   // TODO (1189): If the URL has query params - they will need to be included in the search here
-  const initialOpportunities: Opportunity[] = await fetchSearchOpportunities(
-    searchFetcher
-  );
+  const initialOpportunities: Opportunity[] =
+    await fetchSearchOpportunities(searchFetcher);
   const translations = await serverSideTranslations(locale ?? "en");
 
   return {
