@@ -48,7 +48,7 @@ module "aws_vpc" {
 resource "aws_subnet" "security_public" {
   vpc_id                  = module.aws_vpc.vpc_id
   availability_zone       = local.availability_zones[0]
-  cidr_block              = "10.${var.second_octet}.13.0/24"
+  cidr_block              = "10.${var.second_octet}.15.0/24"
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.name}-security-public"
@@ -60,7 +60,7 @@ resource "aws_subnet" "security_public" {
 resource "aws_subnet" "security_private" {
   vpc_id                  = module.aws_vpc.vpc_id
   availability_zone       = local.availability_zones[0]
-  cidr_block              = "10.${var.second_octet}.14.0/24"
+  cidr_block              = "10.${var.second_octet}.16.0/24"
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.name}-security-private"
