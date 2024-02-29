@@ -36,7 +36,7 @@ describe("Newsletter", () => {
     await userEvent.type(screen.getByLabelText(/Last Name/i), "Doe");
     await userEvent.type(
       screen.getByLabelText(/Email/i),
-      "john.doe@example.com"
+      "john.doe@example.com",
     );
 
     // Submit the form
@@ -66,7 +66,7 @@ describe("Newsletter", () => {
     await userEvent.type(screen.getByLabelText(/Last Name/i), "Doe");
     await userEvent.type(
       screen.getByLabelText(/Email/i),
-      "john.doe@example.com"
+      "john.doe@example.com",
     );
 
     // Submit the form
@@ -83,7 +83,7 @@ describe("Newsletter", () => {
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith(
         "client error",
-        "Already subscribed."
+        "Already subscribed.",
       );
     });
   });

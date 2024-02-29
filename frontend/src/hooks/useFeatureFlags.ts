@@ -32,7 +32,7 @@ import { FeatureFlagsManager } from "../services/FeatureFlagManager";
  */
 export function useFeatureFlags() {
   const [featureFlagsManager, setFeatureFlagsManager] = useState(
-    new FeatureFlagsManager(Cookies)
+    new FeatureFlagsManager(Cookies),
   );
   const [mounted, setMounted] = useState(false);
 

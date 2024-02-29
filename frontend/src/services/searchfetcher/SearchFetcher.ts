@@ -5,7 +5,7 @@ export abstract class SearchFetcher {
 }
 
 export async function fetchSearchOpportunities(
-  searchFetcher: SearchFetcher
+  searchFetcher: SearchFetcher,
 ): Promise<Opportunity[]> {
   try {
     return await searchFetcher.fetchOpportunities();
