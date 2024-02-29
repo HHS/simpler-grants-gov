@@ -1,5 +1,5 @@
 config:
-  target: http://localhost:3000
+  target: http://localhost:8080
   tls:
     rejectUnauthorized: false
   http:
@@ -19,11 +19,11 @@ config:
       name: Spike phase
   environments:
     production:
-      target: https://simpler.grants.gov
+      target: https://api-prod-342430507.us-east-1.elb.amazonaws.com
     staging:
-      target: https://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
+      target: https://api-staging-770293556.us-east-1.elb.amazonaws.com
     dev:
-      target: https://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
+      target: https://api-dev-1839587515.us-east-1.elb.amazonaws.com
   plugins:
     expect:
       outputFormat: prettyError
@@ -45,9 +45,9 @@ scenarios:
           url: "/health"
           expect:
             - statusCode: 200
-  - name: hello
+  - name: docs
     flow:
       - get:
-          url: "/api/hello"
+          url: "/docs"
           expect:
             - statusCode: 200
