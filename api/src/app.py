@@ -3,6 +3,7 @@ import os
 from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
+from flask_cors import CORS
 from pydantic import Field
 
 import src.adapters.db as db
@@ -51,6 +52,7 @@ def create_app() -> APIFlask:
 
     feature_flag_config.initialize()
 
+    CORS(app)
     configure_app(app)
     register_blueprints(app)
     register_index(app)
