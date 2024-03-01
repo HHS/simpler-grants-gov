@@ -1,19 +1,18 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-
 import React, { useState } from "react";
+import {
+  SearchFetcher,
+  fetchSearchOpportunities,
+} from "../../services/searchfetcher/SearchFetcher";
 
-import PageNotFound from "../../pages/404";
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import {
-  fetchSearchOpportunities,
-  SearchFetcher,
-} from "../../services/searchfetcher/SearchFetcher";
 import { Opportunity } from "../../types/searchTypes";
+import PageNotFound from "../../pages/404";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
-const useMockData = true;
+const useMockData = false;
 const searchFetcher: SearchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
@@ -23,11 +22,10 @@ const searchFetcher: SearchFetcher = useMockData
 //   locale: string;
 // }
 
-// interface SearchProps {
-//   initialOpportunities: Opportunity[];
-// }
 
 export default function Search() {
+
+    console.log('process env NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
   const { featureFlagsManager, mounted } = useFeatureFlags();
   const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
 

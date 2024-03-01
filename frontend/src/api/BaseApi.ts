@@ -18,20 +18,21 @@ export interface HeadersDict {
 }
 
 export default abstract class BaseApi {
-  /**
-   * Root path of API resource without leading slash.
-   */
+
+  // Root path of API resource without leading slash.
   abstract get basePath(): string;
 
-  /**
-   * Namespace representing the API resource.
-   */
+  // API version
+  get version(){
+    return 'v0.1'
+  }
+
+  // Namespace representing the API resource
   abstract get namespace(): string;
 
-  /**
-   * Configuration of headers to send with all requests
-   * Can include feature flags in child classes
-   */
+
+  // Configuration of headers to send with all requests
+  // Can include feature flags in child classes
   get headers() {
     return {};
   }
@@ -41,14 +42,16 @@ export default abstract class BaseApi {
    */
   async request<TResponseData>(
     method: ApiMethod,
-    subPath = "",
+    basePath: string,
+    namespace:string,
+    subPath: string,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
     } = {},
   ) {
     const { additionalHeaders = {} } = options;
-    const url = createRequestUrl(method, this.basePath, subPath, body);
+    const url = createRequestUrl(method, basePath, this.version, namespace, subPath, body);
     const headers: HeadersDict = {
       ...additionalHeaders,
       ...this.headers,
@@ -110,13 +113,14 @@ export default abstract class BaseApi {
 export function createRequestUrl(
   method: ApiMethod,
   basePath: string,
+  version: string,
+  namespace:string,
   subPath: string,
   body?: JSONRequestBody,
 ) {
-  // Remove leading slash from apiPath if it has one
-  const cleanedPaths = compact([basePath, subPath]).map(removeLeadingSlash);
-  let url = [process.env.apiUrl, ...cleanedPaths].join("/");
-
+  // Remove leading slash
+  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(removeLeadingSlash);
+  let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const searchBody: { [key: string]: string } = {};

@@ -1,19 +1,22 @@
 import { Opportunity } from "../../types/searchTypes";
 import { SearchFetcher } from "./SearchFetcher";
+import SearchOpportunityAPI from "../../api/SearchOpportunityAPI";
 
-// TODO: Just a placeholder URL to display some data while we build search
-const URL = "https://jsonplaceholder.typicode.com/posts";
-
-// TODO: call BaseApi or extension to make the actual call
 export class APISearchFetcher extends SearchFetcher {
+  private searchApi: SearchOpportunityAPI;
+
+  constructor() {
+    super();
+    this.searchApi = new SearchOpportunityAPI(); // create an instance of SearchOpportunityAPI
+  }
+
   async fetchOpportunities(): Promise<Opportunity[]> {
     try {
-      const response = await fetch(URL);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await this.searchApi.searchOpportunities();
+      if (!response.data) {
+        throw new Error(`No data returned from API`);
       }
-      const data: Opportunity[] = (await response.json()) as Opportunity[];
-      return data;
+      return response.data.opportunities as Opportunity[];
     } catch (error) {
       console.error("Error fetching opportunities:", error);
       throw error;

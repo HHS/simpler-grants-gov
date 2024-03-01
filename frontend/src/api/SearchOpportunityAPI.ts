@@ -5,25 +5,37 @@ export interface SearchResponseData {
 }
 
 export default class SearchOpportunityAPI extends BaseApi {
-  get basePath(): string {
-    return "search/opportunities";
+  get basePath(): string  {
+    return process.env.NEXT_PUBLIC_API_URL || "";
   }
 
   get namespace(): string {
-    return "searchOpportunities";
+    return "opportunities";
   }
+
 
   get headers() {
     return {};
   }
 
-  async getSearchOpportunities(queryParams?: JSONRequestBody) {
-    const subPath = "";
+  async searchOpportunities(queryParams?: JSONRequestBody) {
+    const requestBody = {
+      pagination: {
+        order_by: "opportunity_id",
+        page_offset: 1,
+        page_size: 25,
+        sort_direction: "ascending",
+      },
+      ...queryParams,
+    };
 
+    const subPath = 'search';
     const response = await this.request<SearchResponseData>(
-      "GET",
+      "POST",
+      this.basePath,
+      this.namespace,
       subPath,
-      queryParams,
+      requestBody,
     );
 
     return response;
