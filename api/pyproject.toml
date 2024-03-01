@@ -21,6 +21,7 @@ marshmallow = "^3.20.1"
 gunicorn = "^21.2.0"
 psycopg = {extras = ["binary"], version = "^3.1.10"}
 pydantic-settings = "^2.0.3"
+flask-cors = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
