@@ -8,7 +8,7 @@ import Layout from "src/components/AppLayout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`],
+  icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/favicon.ico`],
 };
 
 interface LayoutProps {
