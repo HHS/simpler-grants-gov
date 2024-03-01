@@ -4,6 +4,8 @@ Calculates burnup for sprints.
 This is a subclass of the BaseMetric class that calculates the running total of
 open issues for each day in a sprint
 """
+from __future__ import annotations
+
 from typing import Literal
 
 import pandas as pd
@@ -43,9 +45,10 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         -----
         Sprint burnup is calculated with the following algorithm:
         1. Isolate Sprint records
-        2. Create data range for burnup 
-        3. Group issues/points by date opened and date closed 
+        2. Create data range for burnup
+        3. Group issues/points by date opened and date closed
         4. Join on date
+
         """
         # make a copy of columns and rows we need to calculate burndown for this sprint
         burnup_cols = [self.opened_col, self.closed_col, self.points_col]
@@ -55,7 +58,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         # get the number of tix opened and closed each day
         df_opened = self._get_daily_tix_counts_by_status(df_sprint, "opened")
         df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
-          # NOT SURE IF THIS STEP NEEDS TO BE CHANGED
+        # NOT SURE IF THIS STEP NEEDS TO BE CHANGED
         # combine the daily opened and closed counts to get total open and closed per day
         return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
@@ -70,35 +73,35 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             sprint_start,
             min(sprint_end, pd.Timestamp.today(tz="utc")),
         )
-        df = self.results[date_mask]
+        df = self.results[date_mask].melt(
+            id_vars = self.date_col,
+            value_vars = ["total_closed", "total_open"],
+            var_name="cols"
+        )
         # create a line chart from the data in self.results
-        chart = px.line(
+        chart = px.area(
             data_frame=df,
             x=self.date_col,
-            y=["total_open", "total_closed"],
+            y="value",
+            color = "cols",
             title=f"{self.sprint} Burnup by {self.unit.value}",
-            labels={"total_open": f"total {self.unit.value} open",
-                    "total_closed": f"total {self.unit.value} closed"},
-
+            # labels={
+            #     "total_open": f"total {self.unit.value} open",
+            #     "total_closed": f"total {self.unit.value} closed",
+            # },
         )
         # set the scale of the y axis to start at 0
-        chart.update_yaxes(range=[0, df["total_open"].max() + 2])
+        chart.update_yaxes(range=[0, df["value"].max()+ 2])
         chart.update_xaxes(range=[sprint_start, sprint_end])
-        chart.update_layout(xaxis_title="Date",
-                            yaxis_title=f"Total {self.unit.value.capitalize()}",
-                            legend_title=f"{self.unit.value.capitalize()}"
-
-        )
+        # chart.update_layout(
+        #     xaxis_title="Date",
+        #     yaxis_title=f"Total {self.unit.value.capitalize()}",
+        #     legend_title=f"{self.unit.value.capitalize()}",
+        # )
         return chart
 
     def get_stats(self) -> dict[str, Statistic]:
-        """
-        Calculate summary statistics for this metric.
-
-        Notes
-        -----
-        TODO(@AlexanderStephensonUSDS): 2024-02-29 - Should stats be calculated in separate private methods?
-        """
+        """Calculate summary statistics for this metric."""
         df = self.results
         # get sprint start and end dates
         sprint_start = self.dataset.sprint_start(self.sprint).strftime("%Y-%m-%d")
@@ -107,6 +110,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         total_opened = int(df["opened"].sum())
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
+        # For burnup, we want to know at a glance the pct_remaining
+        pct_remaining = round(100 - pct_closed, 2)
         # get the percentage of tickets that were ticketed
         is_pointed = self.sprint_data[Unit.points.value] >= 1
         issues_pointed = len(self.sprint_data[is_pointed])
@@ -118,8 +123,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             "Sprint end date": Statistic(value=sprint_end),
             "Total opened": Statistic(total_opened, suffix=f" {self.unit.value}"),
             "Total closed": Statistic(total_closed, suffix=f" {self.unit.value}"),
-            # SEE IF THESE ACTUALLY MATTER
             "Percent closed": Statistic(value=pct_closed, suffix="%"),
+            "Percent remaining": Statistic(value=pct_remaining, suffix="%"),
             "Percent pointed": Statistic(
                 value=pct_pointed,
                 suffix=f"% of {Unit.issues.value}",
@@ -128,9 +133,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
 
     def format_slack_message(self) -> str:
         """Format the message that will be included with the charts posted to slack."""
-        message = (
-            f"*:github: Burnup summary for {self.sprint} by {self.unit.value}*\n"
-        )
+        message = f"*:github: Burnup summary for {self.sprint} by {self.unit.value}*\n"
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
         return message
@@ -168,6 +171,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         It does this by:
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
+
         """
         # create local copies of the key column names
         agg_col = self.opened_col if status == "opened" else self.closed_col
@@ -193,6 +197,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         - Creating a row for each day between the earliest date a ticket was opened
           and either the sprint end _or_ the latest date an issue was closed,
           whichever is the later date.
+
         """
         # get earliest date an issue was opened and latest date one was closed
         sprint_end = self.dataset.sprint_end(self.sprint)
@@ -221,6 +226,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
           so that we have a row for each day of the range, with a column for tix
           opened and a column for tix closed on that day
         - getting the cumulative sum of open and closed issues
+
         """
         # left join the full date range to open and closed counts
         df = (
@@ -229,8 +235,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             .fillna(0)
         )
         # calculate the difference between opened and closed each day
-        # df["delta"] = df["opened"] - df["closed"]
         # cumulatively sum the deltas to get the running total
-        df["total_open"] = df["opened"].cumsum()
+        df["total_open"] = (df["opened"] - df["closed"]).cumsum()
         df["total_closed"] = df["closed"].cumsum()
         return df
