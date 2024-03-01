@@ -117,17 +117,13 @@ poetry run analytics export gh_project_data --owner HHS --project 13 --output-fi
 Once you've exported the sprint and issue data from GitHub, you can start calculating metrics. We'll begin with sprint burndown:
 
 ```bash
-poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint @current --unit points --show-results
-```
-
-If on a Windows machine: 
-
-```bash
 poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "@current" --unit points --show-results
 ```
+
+
 A couple of important notes about this command:
 
-- `--sprint @current` In order to calculate burndown, you'll need to specify either `@current` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
+- `--sprint @current` In order to calculate burndown, you'll need to specify either `"@current"` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
 - `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `issues`
 - `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
