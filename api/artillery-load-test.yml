@@ -1,5 +1,5 @@
 config:
-  target: http://localhost:3000
+  target: http://localhost:8080
   tls:
     rejectUnauthorized: false
   http:
@@ -19,11 +19,11 @@ config:
       name: Spike phase
   environments:
     prod:
-      target: https://simpler.grants.gov
+      target: http://api-prod-342430507.us-east-1.elb.amazonaws.com
     staging:
-      target: http://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
+      target: http://api-staging-770293556.us-east-1.elb.amazonaws.com
     dev:
-      target: http://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
+      target: http://api-dev-1839587515.us-east-1.elb.amazonaws.com
   plugins:
     expect:
       outputFormat: prettyError
@@ -33,21 +33,30 @@ config:
   apdex:
     threshold: 100
 scenarios:
-  - name: root
-    flow:
-      - get:
-          url: "/"
-          expect:
-            - statusCode: 200
   - name: health
     flow:
       - get:
           url: "/health"
           expect:
             - statusCode: 200
-  - name: hello
+  - name: docs
     flow:
       - get:
-          url: "/api/hello"
+          url: "/docs"
+          expect:
+            - statusCode: 200
+  - name: search
+    flow:
+      - post:
+          url: "/v0/opportunities/search"
+          headers:
+            X-Auth: "{{ $env.API_AUTH_TOKEN }}"
+          json:
+            paging:
+              page_offset: 1
+              page_size: 25
+            sorting:
+              order_by: opportunity_id
+              sort_direction: ascending
           expect:
             - statusCode: 200
