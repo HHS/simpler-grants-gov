@@ -58,7 +58,6 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         # get the number of tix opened and closed each day
         df_opened = self._get_daily_tix_counts_by_status(df_sprint, "opened")
         df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
-        # NOT SURE IF THIS STEP NEEDS TO BE CHANGED
         # combine the daily opened and closed counts to get total open and closed per day
         return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
@@ -84,13 +83,13 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             x=self.date_col,
             y="value",
             color = "cols",
-            color_discrete_sequence=["#FBF0FF", "#C4F0CE"],
+            color_discrete_sequence=["#EFE0FC", "#2DA34D"],
             markers = True,
             title=f"{self.sprint} Burnup by {self.unit.value}",
-            template="presentation",
+            template="none",
         )
         # set the scale of the y axis to start at 0
-        chart.update_yaxes(range=[0, df["value"].max()+ 2])
+        chart.update_yaxes(range=[0, df["value"].max()+ 10])
         chart.update_xaxes(range=[sprint_start, sprint_end])
         chart.update_layout(
             xaxis_title="Date",
