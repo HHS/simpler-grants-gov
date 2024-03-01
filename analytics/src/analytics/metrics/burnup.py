@@ -73,8 +73,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             min(sprint_end, pd.Timestamp.today(tz="utc")),
         )
         df = self.results[date_mask].melt(
-            id_vars = self.date_col,
-            value_vars = ["Total Closed", "Total Open"],
+            id_vars=self.date_col,
+            value_vars=["Total Closed", "Total Open"],
             var_name="cols",
         )
         # create a line chart from the data in self.results
@@ -82,14 +82,14 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             data_frame=df,
             x=self.date_col,
             y="value",
-            color = "cols",
+            color="cols",
             color_discrete_sequence=["#EFE0FC", "#2DA34D"],
-            markers = True,
+            markers=True,
             title=f"{self.sprint} Burnup by {self.unit.value}",
             template="none",
         )
         # set the scale of the y axis to start at 0
-        chart.update_yaxes(range=[0, df["value"].max()+ 10])
+        chart.update_yaxes(range=[0, df["value"].max() + 10])
         chart.update_xaxes(range=[sprint_start, sprint_end])
         chart.update_layout(
             xaxis_title="Date",
