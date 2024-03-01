@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  SearchFetcher,
-  fetchSearchOpportunities,
-} from "../../services/searchfetcher/SearchFetcher";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
+import React, { useState } from "react";
+
+import PageNotFound from "../../pages/404";
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
+import {
+  fetchSearchOpportunities,
+  SearchFetcher,
+} from "../../services/searchfetcher/SearchFetcher";
 import { Opportunity } from "../../types/searchTypes";
-import PageNotFound from "../../pages/404";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 const useMockData = true;
 const searchFetcher: SearchFetcher = useMockData
@@ -50,8 +51,8 @@ export default function Search() {
       <button onClick={handleButtonClick}>Update Results</button>
       <ul>
         {searchResults.map((opportunity) => (
-          <li key={opportunity.id}>
-            {opportunity.id}, {opportunity.title}
+          <li key={opportunity.agency}>
+            {opportunity.category}, {opportunity.opportunity_title}
           </li>
         ))}
       </ul>
