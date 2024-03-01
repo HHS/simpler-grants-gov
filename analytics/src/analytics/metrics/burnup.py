@@ -1,5 +1,5 @@
 """
-Calculates burndown for sprints.
+Calculates burnup for sprints.
 
 This is a subclass of the BaseMetric class that calculates the running total of
 open issues for each day in a sprint
