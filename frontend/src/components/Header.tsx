@@ -1,3 +1,5 @@
+"use client";
+
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslation } from "next-i18next";
