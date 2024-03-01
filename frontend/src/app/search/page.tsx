@@ -12,7 +12,6 @@ import { Opportunity } from "../../types/searchTypes";
 import PageNotFound from "../../pages/404";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
-
 const useMockData = false;
 const searchFetcher: SearchFetcher = useMockData
   ? new MockSearchFetcher()
@@ -22,7 +21,6 @@ const searchFetcher: SearchFetcher = useMockData
 // interface RouteParams {
 //   locale: string;
 // }
-
 
 export default function Search() {
   const { featureFlagsManager, mounted } = useFeatureFlags();
@@ -43,6 +41,8 @@ export default function Search() {
     return <PageNotFound />;
   }
 
+  console.log("searchResults => ", searchResults);
+
   return (
     <>
       <button onClick={handleButtonClick}>Update Results</button>
@@ -50,7 +50,6 @@ export default function Search() {
         {searchResults.map((opportunity) => (
           <li key={opportunity.agency}>
             {opportunity.category}, {opportunity.opportunity_title}
-
           </li>
         ))}
       </ul>

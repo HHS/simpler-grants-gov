@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 interface LayoutProps {
   children: React.ReactNode;
 
-
   // TODO: use for i18n when ready
   //   params: {
   //     locale: string;
