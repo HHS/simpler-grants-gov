@@ -14,7 +14,9 @@ export default class SearchOpportunityAPI extends BaseApi {
   }
 
   get headers() {
-    return {};
+    const baseHeaders = super.headers;
+    const searchHeaders = {};
+    return { ...baseHeaders, ...searchHeaders };
   }
 
   async searchOpportunities(queryParams?: JSONRequestBody) {

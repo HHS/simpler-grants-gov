@@ -31,8 +31,14 @@ export default abstract class BaseApi {
 
   // Configuration of headers to send with all requests
   // Can include feature flags in child classes
-  get headers() {
-    return {};
+  get headers(): HeadersDict {
+    const headers: HeadersDict = {};
+    if (
+      process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN
+    ) {
+      headers["X-AUTH"] = process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN;
+    }
+    return headers;
   }
 
   /**
@@ -63,7 +69,6 @@ export default abstract class BaseApi {
     };
 
     headers["Content-Type"] = "application/json";
-
     const response = await this.sendRequest<TResponseData>(url, {
       body: method === "GET" || !body ? null : createRequestBody(body),
       headers,
@@ -82,7 +87,6 @@ export default abstract class BaseApi {
   ) {
     let response: Response;
     let responseBody: ApiResponseBody<TResponseData>;
-
     try {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as ApiResponseBody<TResponseData>;
