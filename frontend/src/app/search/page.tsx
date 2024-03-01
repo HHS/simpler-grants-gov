@@ -12,6 +12,7 @@ import { Opportunity } from "../../types/searchTypes";
 import PageNotFound from "../../pages/404";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
+
 const useMockData = false;
 const searchFetcher: SearchFetcher = useMockData
   ? new MockSearchFetcher()
@@ -22,8 +23,8 @@ const searchFetcher: SearchFetcher = useMockData
 //   locale: string;
 // }
 
-export default function Search() {
 
+export default function Search() {
   const { featureFlagsManager, mounted } = useFeatureFlags();
   const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
 
@@ -49,6 +50,7 @@ export default function Search() {
         {searchResults.map((opportunity) => (
           <li key={opportunity.agency}>
             {opportunity.category}, {opportunity.opportunity_title}
+
           </li>
         ))}
       </ul>

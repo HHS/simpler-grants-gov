@@ -8,13 +8,14 @@ import Layout from "src/components/AppLayout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.svg`],
+  icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/favicon.ico`],
 };
 
 interface LayoutProps {
   children: React.ReactNode;
 
-  // TODO: Do we need this params
+
+  // TODO: use for i18n when ready
   //   params: {
   //     locale: string;
   //   };
