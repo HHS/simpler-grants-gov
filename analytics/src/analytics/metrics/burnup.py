@@ -75,8 +75,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         )
         df = self.results[date_mask].melt(
             id_vars = self.date_col,
-            value_vars = ["total_closed", "total_open"],
-            var_name="cols"
+            value_vars = ["Total Closed", "Total Open"],
+            var_name="cols",
         )
         # create a line chart from the data in self.results
         chart = px.area(
@@ -84,20 +84,19 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             x=self.date_col,
             y="value",
             color = "cols",
+            color_discrete_sequence=["#FBF0FF", "#C4F0CE"],
+            markers = True,
             title=f"{self.sprint} Burnup by {self.unit.value}",
-            # labels={
-            #     "total_open": f"total {self.unit.value} open",
-            #     "total_closed": f"total {self.unit.value} closed",
-            # },
+            template="presentation",
         )
         # set the scale of the y axis to start at 0
         chart.update_yaxes(range=[0, df["value"].max()+ 2])
         chart.update_xaxes(range=[sprint_start, sprint_end])
-        # chart.update_layout(
-        #     xaxis_title="Date",
-        #     yaxis_title=f"Total {self.unit.value.capitalize()}",
-        #     legend_title=f"{self.unit.value.capitalize()}",
-        # )
+        chart.update_layout(
+            xaxis_title="Date",
+            yaxis_title=f"Total {self.unit.value.capitalize()}",
+            legend_title=f"{self.unit.value.capitalize()}",
+        )
         return chart
 
     def get_stats(self) -> dict[str, Statistic]:
@@ -236,6 +235,6 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         )
         # calculate the difference between opened and closed each day
         # cumulatively sum the deltas to get the running total
-        df["total_open"] = (df["opened"] - df["closed"]).cumsum()
-        df["total_closed"] = df["closed"].cumsum()
+        df["Total Open"] = (df["opened"] - df["closed"]).cumsum()
+        df["Total Closed"] = df["closed"].cumsum()
         return df
