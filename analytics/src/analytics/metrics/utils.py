@@ -8,7 +8,7 @@ import pandas as pd
 def get_cum_sum_of_tix(
     dates: pd.DataFrame,
     opened: pd.DataFrame,
-    closed: pd.Dataframe,
+    closed: pd.DataFrame,
     date_col: str | None = None,
 ) -> pd.DataFrame:
     """
