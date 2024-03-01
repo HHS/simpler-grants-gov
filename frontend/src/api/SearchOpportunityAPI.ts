@@ -5,14 +5,13 @@ export interface SearchResponseData {
 }
 
 export default class SearchOpportunityAPI extends BaseApi {
-  get basePath(): string  {
+  get basePath(): string {
     return process.env.NEXT_PUBLIC_API_URL || "";
   }
 
   get namespace(): string {
     return "opportunities";
   }
-
 
   get headers() {
     return {};
@@ -29,7 +28,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       ...queryParams,
     };
 
-    const subPath = 'search';
+    const subPath = "search";
     const response = await this.request<SearchResponseData>(
       "POST",
       this.basePath,

@@ -22,10 +22,8 @@ const searchFetcher: SearchFetcher = useMockData
 //   locale: string;
 // }
 
-
 export default function Search() {
 
-    console.log('process env NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL)
   const { featureFlagsManager, mounted } = useFeatureFlags();
   const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
 

@@ -18,18 +18,16 @@ export interface HeadersDict {
 }
 
 export default abstract class BaseApi {
-
   // Root path of API resource without leading slash.
   abstract get basePath(): string;
 
   // API version
-  get version(){
-    return 'v0.1'
+  get version() {
+    return "v0.1";
   }
 
   // Namespace representing the API resource
   abstract get namespace(): string;
-
 
   // Configuration of headers to send with all requests
   // Can include feature flags in child classes
@@ -43,7 +41,7 @@ export default abstract class BaseApi {
   async request<TResponseData>(
     method: ApiMethod,
     basePath: string,
-    namespace:string,
+    namespace: string,
     subPath: string,
     body?: JSONRequestBody,
     options: {
@@ -51,7 +49,14 @@ export default abstract class BaseApi {
     } = {},
   ) {
     const { additionalHeaders = {} } = options;
-    const url = createRequestUrl(method, basePath, this.version, namespace, subPath, body);
+    const url = createRequestUrl(
+      method,
+      basePath,
+      this.version,
+      namespace,
+      subPath,
+      body,
+    );
     const headers: HeadersDict = {
       ...additionalHeaders,
       ...this.headers,
@@ -114,12 +119,14 @@ export function createRequestUrl(
   method: ApiMethod,
   basePath: string,
   version: string,
-  namespace:string,
+  namespace: string,
   subPath: string,
   body?: JSONRequestBody,
 ) {
   // Remove leading slash
-  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(removeLeadingSlash);
+  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
+    removeLeadingSlash,
+  );
   let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
