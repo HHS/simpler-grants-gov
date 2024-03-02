@@ -11,6 +11,6 @@ export async function fetchSearchOpportunities(
     return await searchFetcher.fetchOpportunities();
   } catch (error) {
     console.error("Failed to fetch opportunities:", error);
-    return []
+    return [];
   }
 }
