@@ -33,9 +33,7 @@ export default abstract class BaseApi {
   // Can include feature flags in child classes
   get headers(): HeadersDict {
     const headers: HeadersDict = {};
-    if (
-      process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN
-    ) {
+    if (process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN) {
       headers["X-AUTH"] = process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN;
     }
     return headers;
