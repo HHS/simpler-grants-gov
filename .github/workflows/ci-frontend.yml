@@ -46,6 +46,9 @@ jobs:
       - name: Run tests
         run: npm run test
 
+      - name: Run e2e tests
+        run: npm run test:e2e
+
   # Confirms the front end still builds successfully
   check-frontend-builds:
     name: FE Build Check
@@ -93,4 +96,4 @@ jobs:
     name: Run Frontend Vulnerability Scans
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
-      app_name: "frontend"
+      app_name: 'frontend'
