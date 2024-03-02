@@ -19,6 +19,8 @@
     "test": "jest --ci --coverage",
     "test-update": "jest --update-snapshot",
     "test-watch": "jest --watch",
+    "test:e2e": "npx playwright test --config ./tests/playwright.config.ts",
+    "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui",
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
