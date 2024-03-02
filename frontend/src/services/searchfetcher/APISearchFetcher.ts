@@ -7,7 +7,7 @@ export class APISearchFetcher extends SearchFetcher {
 
   constructor() {
     super();
-    this.searchApi = new SearchOpportunityAPI(); // create an instance of SearchOpportunityAPI
+    this.searchApi = new SearchOpportunityAPI();
   }
 
   async fetchOpportunities(): Promise<Opportunity[]> {
