@@ -1,8 +1,8 @@
 import BaseApi, { JSONRequestBody } from "./BaseApi";
 
-export interface SearchResponseData {
-  opportunities: unknown[];
-}
+import { Opportunity } from "../types/searchTypes";
+
+export type SearchResponseData = Opportunity[];
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {

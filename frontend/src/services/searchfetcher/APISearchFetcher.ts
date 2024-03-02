@@ -1,6 +1,8 @@
-import { Opportunity } from "../../types/searchTypes";
+import SearchOpportunityAPI, {
+  SearchResponseData,
+} from "../../api/SearchOpportunityAPI";
+
 import { SearchFetcher } from "./SearchFetcher";
-import SearchOpportunityAPI from "../../api/SearchOpportunityAPI";
 
 export class APISearchFetcher extends SearchFetcher {
   private searchApi: SearchOpportunityAPI;
@@ -10,13 +12,13 @@ export class APISearchFetcher extends SearchFetcher {
     this.searchApi = new SearchOpportunityAPI();
   }
 
-  async fetchOpportunities(): Promise<Opportunity[]> {
+  async fetchOpportunities(): Promise<SearchResponseData> {
     try {
       const response = await this.searchApi.searchOpportunities();
       if (!response.data) {
         throw new Error(`No data returned from API`);
       }
-      return response.data.opportunities as Opportunity[];
+      return response.data;
     } catch (error) {
       console.error("Error fetching opportunities:", error);
       throw error;

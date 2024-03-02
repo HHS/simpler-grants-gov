@@ -8,8 +8,8 @@ import {
 
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { Opportunity } from "../../types/searchTypes";
 import PageNotFound from "../../pages/404";
+import { SearchResponseData } from "../../api/SearchOpportunityAPI";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 const useMockData = false;
@@ -24,7 +24,7 @@ const searchFetcher: SearchFetcher = useMockData
 
 export default function Search() {
   const { featureFlagsManager, mounted } = useFeatureFlags();
-  const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResponseData>([]);
 
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -41,14 +41,17 @@ export default function Search() {
     return <PageNotFound />;
   }
 
-  console.log("searchResults => ", searchResults);
-
   return (
     <>
       <button onClick={handleButtonClick}>Update Results</button>
+      {searchFetcher instanceof APISearchFetcher ? (
+        <p>Live API</p>
+      ) : (
+        <p>Mock Call</p>
+      )}
       <ul>
         {searchResults.map((opportunity) => (
-          <li key={opportunity.agency}>
+          <li key={opportunity.opportunity_id}>
             {opportunity.category}, {opportunity.opportunity_title}
           </li>
         ))}

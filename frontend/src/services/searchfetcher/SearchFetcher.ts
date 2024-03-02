@@ -1,16 +1,16 @@
-import { Opportunity } from "../../types/searchTypes";
+import { SearchResponseData } from "../../api/SearchOpportunityAPI";
 
 export abstract class SearchFetcher {
-  abstract fetchOpportunities(): Promise<Opportunity[]>;
+  abstract fetchOpportunities(): Promise<SearchResponseData>;
 }
 
 export async function fetchSearchOpportunities(
   searchFetcher: SearchFetcher,
-): Promise<Opportunity[]> {
+): Promise<SearchResponseData> {
   try {
     return await searchFetcher.fetchOpportunities();
   } catch (error) {
     console.error("Failed to fetch opportunities:", error);
-    return [];
+    return []
   }
 }
