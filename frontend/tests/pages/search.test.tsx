@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { axe } from "jest-axe";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import Search from "../../src/app/search/page";
+import { axe } from "jest-axe";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 jest.mock("src/hooks/useFeatureFlags");
 
@@ -16,6 +16,45 @@ const setFeatureFlag = (flag: string, value: boolean) => {
     mounted: true,
   });
 };
+
+const mockData = [
+  {
+    agency: "firstagency",
+    category: "firstcategory",
+    opportunity_title: "firsttitle",
+  },
+  {
+    agency: "secondagency2",
+    category: "secondcategory",
+    opportunity_title: "secondtitle",
+  },
+];
+
+// Mock both search fetchers in case we switch
+// Could also switch on a feature flag
+jest.mock("../../src/services/searchfetcher/APISearchFetcher", () => {
+  return {
+    APISearchFetcher: jest.fn().mockImplementation(() => {
+      return {
+        fetchOpportunities: jest.fn().mockImplementation(() => {
+          return Promise.resolve(mockData);
+        }),
+      };
+    }),
+  };
+});
+
+jest.mock("../../src/services/searchfetcher/MockSearchFetcher", () => {
+  return {
+    MockSearchFetcher: jest.fn().mockImplementation(() => {
+      return {
+        fetchOpportunities: jest.fn().mockImplementation(() => {
+          return Promise.resolve(mockData);
+        }),
+      };
+    }),
+  };
+});
 
 describe("Search", () => {
   it("passes accessibility scan", async () => {
@@ -32,8 +71,9 @@ describe("Search", () => {
       fireEvent.click(screen.getByRole("button", { name: /update results/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/sunt aut/i)).toBeInTheDocument();
+        expect(screen.getByText(/firstcategory/i)).toBeInTheDocument();
       });
+      expect(screen.getByText(/secondcategory/i)).toBeInTheDocument();
     });
 
     it("renders PageNotFound when feature flag is off", async () => {
