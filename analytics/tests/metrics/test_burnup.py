@@ -18,8 +18,7 @@ from tests.conftest import (
 )
 
 
-# TODO(AlexanderStephensonUSDS: Update result rows for burnup metric
-
+# TODO(AlexanderStephensonUSDS): Update result rows for burnup metric
 
 def result_row(
     day: str,
@@ -81,7 +80,7 @@ class TestSprintBurnupByTasks:
         assert df.to_dict("records") == expected
 
     def test_count_tix_created_before_sprint_start(self):
-        """burnup should include tix opened before the sprint but closed during it."""
+        """Burnup should include tix opened before the sprint but closed during it."""
         # setup - create test data
         sprint_data = [
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
@@ -104,7 +103,7 @@ class TestSprintBurnupByTasks:
         assert df.to_dict("records") == expected
 
     def test_count_tix_closed_after_sprint_start(self):
-        """burnup should include tix closed after the sprint ended."""
+        """Burnup should include tix closed after the sprint ended."""
         # setup - create test data
         sprint_data = [
             sprint_row(  # closed before sprint end
@@ -139,7 +138,7 @@ class TestSprintBurnupByTasks:
         assert df.to_dict("records") == expected
 
     def test_count_tix_created_after_sprint_start(self):
-        """burnup should include tix opened and closed during the sprint."""
+        """Burnup should include tix opened and closed during the sprint."""
         # setup - create test data
         sprint_data = [
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
@@ -215,7 +214,7 @@ class TestSprintBurnupByPoints:
     """Test the SprintBurnup class with unit='points'."""
 
     def test_burnup_works_with_points(self):
-        """burnup should be calculated correctly with points."""
+        """Burnup should be calculated correctly with points."""
         # setup - create test data
         sprint_data = [
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
@@ -235,7 +234,7 @@ class TestSprintBurnupByPoints:
         assert df.to_dict("records") == expected
 
     def test_burnup_excludes_tix_without_points(self):
-        """burnup should exclude tickets that are not pointed."""
+        """Burnup should exclude tickets that are not pointed."""
         # setup - create test data
         sprint_data = [
             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
