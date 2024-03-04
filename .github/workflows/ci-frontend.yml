@@ -50,7 +50,7 @@ jobs:
         run: npm run test:e2e
 
       - uses: actions/upload-artifact@v3
-      if: always()
+        if: always()
         with:
           name: playwright-report
           path: playwright-report/
