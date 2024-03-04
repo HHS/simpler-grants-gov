@@ -243,6 +243,9 @@ openapi-spec: init-db ## Generate OpenAPI spec
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
 
+setup-foreign-tables:
+	$(FLASK_CMD) data-migration setup-foreign-tables
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################
@@ -250,5 +253,27 @@ copy-oracle-data:
 login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
 
+console: ## Start interactive Python console
+	$(PY_RUN_CMD) python3 -i -m src.tool.console.interactive
+
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+##################################################
+# Load testing
+##################################################
+
+load-test-local: # Load test the local environment at localhost:3000
+	artillery run artillery-load-test.yml
+
+load-test-dev: # Load test the dev environment in aws
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/dev/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e dev artillery-load-test.yml
+
+load-test-staging: # Load test the staging environment in aws
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/staging/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e staging artillery-load-test.yml
+
+load-test-prod: # Load test the production environment in aws. Please test responsibly
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml

@@ -1,6 +1,6 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 from slack_sdk import WebClient
@@ -16,6 +16,7 @@ from analytics.metrics.percent_complete import DeliverablePercentComplete
 # Instantiate typer options with help text for the commands below
 SPRINT_FILE_ARG = typer.Option(help="Path to file with exported sprint data")
 ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
+ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
 OWNER_ARG = typer.Option(help="GitHub handle of the repo or project owner")
 REPO_ARG = typer.Option(help="Name of the GitHub repo")
@@ -24,6 +25,9 @@ SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating b
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
 SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
 POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
+STATUS_ARG = typer.Option(
+    help="Deliverable status to include in report, can be passed multiple times",
+)
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -96,15 +100,29 @@ def calculate_deliverable_percent_complete(
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
+    roadmap_file: Annotated[Optional[str], ROADMAP_FILE_ARG] = None,  # noqa: UP007
+    include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
 ) -> None:
     """Calculate percentage completion by deliverable."""
-    # load the input data
-    task_data = DeliverableTasks.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
+    if roadmap_file:
+        # load the input data using the new join path with roadmap data
+        task_data = DeliverableTasks.load_from_json_files_with_roadmap_data(
+            sprint_file=sprint_file,
+            issue_file=issue_file,
+            roadmap_file=roadmap_file,
+        )
+    else:
+        # load the input data using the original join path without roadmap data
+        task_data = DeliverableTasks.load_from_json_files(
+            sprint_file=sprint_file,
+            issue_file=issue_file,
+        )
     # calculate percent complete
-    metric = DeliverablePercentComplete(task_data, unit=unit)
+    metric = DeliverablePercentComplete(
+        dataset=task_data,
+        unit=unit,
+        statuses_to_include=include_status,
+    )
     show_and_or_post_results(
         metric=metric,
         show_results=show_results,

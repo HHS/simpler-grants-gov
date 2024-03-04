@@ -1,5 +1,5 @@
 config:
-  target: https://frontend-dev-143463875.us-east-1.elb.amazonaws.com
+  target: http://localhost:3000
   tls:
     rejectUnauthorized: false
   http:
@@ -18,10 +18,12 @@ config:
       maxVusers: 1000
       name: Spike phase
   environments:
-    production:
+    prod:
       target: https://simpler.grants.gov
-    local:
-      target: http://localhost:3000
+    staging:
+      target: http://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
+    dev:
+      target: http://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
   plugins:
     expect:
       outputFormat: prettyError
