@@ -27,7 +27,7 @@ test("can view banner and return to top after scrolling to the bottom", async ({
   if (!isMobileSafari) {
     await returnToTopLink.scrollIntoViewIfNeeded();
   } else {
-    page.evaluate(() =>
+    await page.evaluate(() =>
       window.scrollTo(0, document.documentElement.scrollHeight),
     );
   }
