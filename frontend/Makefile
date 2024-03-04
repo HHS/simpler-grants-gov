@@ -64,11 +64,15 @@ stop:
 ##################################################
 # Load testing
 ##################################################
-load-test-local: # Load test the local environment at localhost:3000
-	artillery run -e local artillery-load-test.yml
 
-load-test-staging: # Load test the staging environment in aws
+load-test-local: # Load test the local environment at localhost:3000
 	artillery run artillery-load-test.yml
 
-load-test-production: # Load test the production environment in aws. Please test responsibly
-	artillery run -e production artillery-load-test.yml
+load-test-dev: # Load test the dev environment in aws
+	artillery run -e dev artillery-load-test.yml
+
+load-test-staging: # Load test the staging environment in aws
+	artillery run -e staging artillery-load-test.yml
+
+load-test-prod: # Load test the production environment in aws. Please test responsibly
+	artillery run -e prod artillery-load-test.yml

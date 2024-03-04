@@ -24,8 +24,19 @@
       "@next/third-parties/google": [
         "./node_modules/@next/third-parties/dist/google"
       ]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "__mocks__/styleMock.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "__mocks__/styleMock.js",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
