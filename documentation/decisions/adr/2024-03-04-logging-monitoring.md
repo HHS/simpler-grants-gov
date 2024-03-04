@@ -13,7 +13,7 @@ We want to decide on our long-term logging and monitoring platform. The platform
 
 - Platform UX: we want a platform that is easy to use and learn, for a variety of roles in the organization
 - Capabilities: we want a platform that satisfies a variety of production operations needs
-- Cost: we want a cost-effective platform
+- Cost: we want a cost-effective platform. Note that this ADR does not attempt to calculate the prices of various platforms directly.
 - (...?)
 
 ## Options
