@@ -15,10 +15,23 @@ test("has title", async ({ page }) => {
 
 test("can view banner and return to top after scrolling to the bottom", async ({
   page,
+}, {
+  project: {
+    use: { isMobile, defaultBrowserType },
+  },
 }) => {
+  const isMobileSafari = isMobile && defaultBrowserType === "webkit";
   const returnToTopLink = page.getByRole("link", { name: /return to top/i });
 
-  await returnToTopLink.scrollIntoViewIfNeeded();
+  // https://github.com/microsoft/playwright/issues/2179
+  if (!isMobileSafari) {
+    await returnToTopLink.scrollIntoViewIfNeeded();
+  } else {
+    page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight),
+    );
+  }
+
   await expect(
     page.getByRole("heading", {
       name: /Attention! Go to www.grants.gov to search and apply for grants./i,
