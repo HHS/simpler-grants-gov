@@ -34,6 +34,9 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Run lint
         run: npm run lint
 
