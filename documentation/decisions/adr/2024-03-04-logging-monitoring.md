@@ -31,12 +31,9 @@ Cloudwatch is a built-in monitoring platform that comes for free with AWS. As su
 
 - **Decision Status**: Not Recommended
 - **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
+  - Generous free tier
 - **Cons**
-  - Bad, because {argument c}
-  - ...
+  - Abysmal UX
 
 Links:
 - the first 3 social links for "Cloudwatch UX" are about how bad it is [1](https://news.ycombinator.com/item?id=18584679), [2](https://www.reddit.com/r/aws/comments/nmsapj/this_cloudwatch_ui_sucks/), [3](https://news.ycombinator.com/item?id=18550722)
@@ -50,7 +47,7 @@ Sentry is a frontend-focused APM (application performance monitoring) platform t
 - **Pros**
   - Great UX
 - **Cons**
-  - not a fully featured platform
+  - Not a fully featured platform
  
 ### Datadog
 
@@ -62,12 +59,12 @@ Grants.gov used Datadog in the past and then decided to move to Cloudwatch, due 
 
 - **Decision Status**: Top Choice
 - **Pros**
-  - well-known to our team
-  - fully featured platform (logs, metrics, APM)
-  - strong metrics product
-  - best for API-driven applications
+  - Well-known to our team
+  - Fully featured platform (logs, metrics, APM)
+  - Strong metrics product
+  - Best for API-driven applications
 - **Cons**
-  - likely more expensive than its closest competitor
+  - Likely more expensive than its closest competitor
  
 Links:
 - [Pricing](https://www.datadoghq.com/pricing/)
@@ -82,10 +79,10 @@ New Relic was built around its APM capability, so it will have better capabiliti
 
 - **Decision Status**: Top Choice
 - **Pros**
-  - well-known to our team
-  - fully featured platform (logs, metrics, APM)
-  - free tier, simpler pricing than the closest competitor
-  - strong APM product
+  - Well-known to our team
+  - Fully featured platform (logs, metrics, APM)
+  - Free tier, simpler pricing than the closest competitor
+  - Strong APM product
 
 Links:
 - [Pricing](https://newrelic.com/pricing)
@@ -96,9 +93,9 @@ Splunk is a fully featured platform with support for logging, metrics dashboards
 
 - **Decision Status**: Viable Option
 - **Pros**
-  - fully featured platform (logs, metrics, APM)
+  - Fully featured platform (logs, metrics, APM)
 - **Cons**
-  - platform features not designed for our use case
+  - Platform features not designed for our use case
 
 ### Grafana
 
@@ -106,10 +103,10 @@ Grafana is a fully open-source metrics platform that comes with other services t
 
 - **Decision Status**: Not Recommended (at this time)
 - **Pros**
-  - open source
+  - Open-source
 - **Cons**
-  - high maintenance and training burden
-  - mediocre UX
+  - High maintenance and training burden
+  - Mediocre UX
 
 ## Decision Status
 
