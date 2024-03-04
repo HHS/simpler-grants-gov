@@ -1,6 +1,8 @@
+import "server-only";
+
 import { SearchFetcher } from "./SearchFetcher";
-import { SearchResponseData } from "../../api/SearchOpportunityAPI";
-import mockData from "../../api/mock/APIMockResponse.json";
+import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+import mockData from "../../app/api/mock/APIMockResponse.json";
 
 export class MockSearchFetcher extends SearchFetcher {
   async fetchOpportunities(): Promise<SearchResponseData> {

@@ -1,61 +1,61 @@
-"use client";
-
-import React, { useState } from "react";
-import {
-  SearchFetcher,
-  fetchSearchOpportunities,
-} from "../../services/searchfetcher/SearchFetcher";
+// Disable to allow server actions to be called without warning
+/* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
+import React, { Suspense } from "react";
 
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
+import Loading from "./loading";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import PageNotFound from "../../pages/404";
-import { SearchResponseData } from "../../api/SearchOpportunityAPI";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { SubmitButton } from "../../components/SubmitButton";
+import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { revalidatePath } from "next/cache";
 
 const useMockData = false;
-const searchFetcher: SearchFetcher = useMockData
+const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
-// TODO: use for i18n when ready
-// interface RouteParams {
-//   locale: string;
-// }
+async function SearchResults() {
+  const results = await fetchSearchOpportunities(searchFetcher);
+  return (
+    <ul>
+      {results.map((opportunity) => (
+        <li key={opportunity.opportunity_id}>
+          {opportunity.category}, {opportunity.opportunity_title}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function Search() {
-  const { featureFlagsManager, mounted } = useFeatureFlags();
-  const [searchResults, setSearchResults] = useState<SearchResponseData>([]);
-
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    performSearch().catch((e) => console.log(e));
-  };
-
-  const performSearch = async () => {
-    const opportunities = await fetchSearchOpportunities(searchFetcher);
-    setSearchResults(opportunities);
-  };
-
-  if (!mounted) return null;
-  if (!featureFlagsManager.isFeatureEnabled("showSearchV0")) {
-    return <PageNotFound />;
+  async function updateResults(formData: FormData) {
+    // server action
+    "use server";
+    console.log(Object.fromEntries(formData.entries()));
+    // await fetchSearchOpportunities(searchFetcher);
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    revalidatePath("/search");
   }
 
   return (
     <>
-      <button onClick={handleButtonClick}>Update Results</button>
-      {searchFetcher instanceof APISearchFetcher ? (
-        <p>Live API</p>
-      ) : (
-        <p>Mock Call</p>
-      )}
-      <ul>
-        {searchResults.map((opportunity) => (
-          <li key={opportunity.opportunity_id}>
-            {opportunity.category}, {opportunity.opportunity_title}
-          </li>
-        ))}
-      </ul>
+       {/* This can also be a client component with useFormState,
+        and still be able to call server action */}
+      <form action={updateResults}>
+        <input type="text" name="mytext" />
+        <input type="checkbox" name="mycheckbox" />
+        <input type="hidden" name="hiddeninput" value={22} />
+        <select name="mydropdown" id="alphabet">
+          <option value="a">a</option>
+          <option value="b">b</option>
+        </select>
+        <SubmitButton />
+      </form>
+
+      {/* Allow for partial pre-rendering while fetching data */}
+      <Suspense fallback={<Loading />}>
+        <SearchResults />
+      </Suspense>
     </>
   );
 }

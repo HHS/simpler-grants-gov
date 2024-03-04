@@ -1,5 +1,5 @@
-import { JSONRequestBody } from "../../src/api/BaseApi";
-import SearchOpportunityAPI from "../../src/api/SearchOpportunityAPI";
+import { JSONRequestBody } from "../../src/app/api/BaseApi";
+import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
 
 const mockFetch = ({
   response = { data: { opportunities: [] }, errors: [], warnings: [] },
@@ -36,7 +36,7 @@ describe("SearchOpportunityAPI", () => {
       });
     });
 
-    it("sends GET request to search opportunities endpoint with query parameters", async () => {
+    it("sends POST request to search opportunities endpoint with query parameters", async () => {
       const queryParams = { keyword: "science" };
 
       const response = await searchApi.searchOpportunities(queryParams);
