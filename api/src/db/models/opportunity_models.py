@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -96,10 +96,11 @@ class OpportunitySummary(Base, TimestampMixin):
     archive_date: Mapped[date | None]
     unarchive_date: Mapped[date | None]
 
+    # The award amounts can be for several billion requiring us to use BigInteger
     expected_number_of_awards: Mapped[int | None]
-    estimated_total_program_funding: Mapped[int | None]
-    award_floor: Mapped[int | None]
-    award_ceiling: Mapped[int | None]
+    estimated_total_program_funding: Mapped[int | None] = mapped_column(BigInteger)
+    award_floor: Mapped[int | None] = mapped_column(BigInteger)
+    award_ceiling: Mapped[int | None] = mapped_column(BigInteger)
 
     additional_info_url: Mapped[str | None]
     additional_info_url_description: Mapped[str | None]
