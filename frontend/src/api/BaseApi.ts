@@ -18,22 +18,25 @@ export interface HeadersDict {
 }
 
 export default abstract class BaseApi {
-  /**
-   * Root path of API resource without leading slash.
-   */
+  // Root path of API resource without leading slash.
   abstract get basePath(): string;
 
-  /**
-   * Namespace representing the API resource.
-   */
+  // API version
+  get version() {
+    return "v0.1";
+  }
+
+  // Namespace representing the API resource
   abstract get namespace(): string;
 
-  /**
-   * Configuration of headers to send with all requests
-   * Can include feature flags in child classes
-   */
-  get headers() {
-    return {};
+  // Configuration of headers to send with all requests
+  // Can include feature flags in child classes
+  get headers(): HeadersDict {
+    const headers: HeadersDict = {};
+    if (process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN) {
+      headers["X-AUTH"] = process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN;
+    }
+    return headers;
   }
 
   /**
@@ -41,21 +44,29 @@ export default abstract class BaseApi {
    */
   async request<TResponseData>(
     method: ApiMethod,
-    subPath = "",
+    basePath: string,
+    namespace: string,
+    subPath: string,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
     } = {},
   ) {
     const { additionalHeaders = {} } = options;
-    const url = createRequestUrl(method, this.basePath, subPath, body);
+    const url = createRequestUrl(
+      method,
+      basePath,
+      this.version,
+      namespace,
+      subPath,
+      body,
+    );
     const headers: HeadersDict = {
       ...additionalHeaders,
       ...this.headers,
     };
 
     headers["Content-Type"] = "application/json";
-
     const response = await this.sendRequest<TResponseData>(url, {
       body: method === "GET" || !body ? null : createRequestBody(body),
       headers,
@@ -74,7 +85,6 @@ export default abstract class BaseApi {
   ) {
     let response: Response;
     let responseBody: ApiResponseBody<TResponseData>;
-
     try {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as ApiResponseBody<TResponseData>;
@@ -110,13 +120,16 @@ export default abstract class BaseApi {
 export function createRequestUrl(
   method: ApiMethod,
   basePath: string,
+  version: string,
+  namespace: string,
   subPath: string,
   body?: JSONRequestBody,
 ) {
-  // Remove leading slash from apiPath if it has one
-  const cleanedPaths = compact([basePath, subPath]).map(removeLeadingSlash);
-  let url = [process.env.apiUrl, ...cleanedPaths].join("/");
-
+  // Remove leading slash
+  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
+    removeLeadingSlash,
+  );
+  let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const searchBody: { [key: string]: string } = {};
