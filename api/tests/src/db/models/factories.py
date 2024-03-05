@@ -172,7 +172,7 @@ class OpportunitySummaryFactory(BaseFactory):
         "random_int", min=10_000, max=10_000_000, step=5_000
     )
     award_floor = factory.LazyAttribute(
-        lambda s: s.estimated_total_program_funding / s.expected_number_of_awards
+        lambda s: s.estimated_total_program_funding // s.expected_number_of_awards
     )
     award_ceiling = factory.LazyAttribute(lambda s: s.estimated_total_program_funding)
 
@@ -441,7 +441,7 @@ class ForeignTopportunityFactory(factory.DictFactory):
     opportunity_id = factory.Sequence(lambda n: n)
 
     oppnumber = factory.Sequence(lambda n: f"F-ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry".replace("'", ""))
 
     owningagency = factory.Iterator(["F-US-ABC", "F-US-XYZ", "F-US-123"])
 
