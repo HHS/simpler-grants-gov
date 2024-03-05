@@ -40,7 +40,6 @@ export default function Search() {
     revalidatePath("/search");
   }
 
-  
   return (
     <>
       <form action={updateResults}>
