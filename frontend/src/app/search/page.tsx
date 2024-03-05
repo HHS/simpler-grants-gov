@@ -26,15 +26,14 @@ async function SearchResults() {
   );
 }
 
-export async function updateResults(formData: FormData) {
-  // server action
-  "use server";
-  console.log(Object.fromEntries(formData.entries()));
-  await new Promise((resolve) => setTimeout(resolve, 750));
-  revalidatePath("/search");
-}
-
 export default function Search() {
+  async function updateResults(formData: FormData) {
+    // server action
+    "use server";
+    console.log(Object.fromEntries(formData.entries()));
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    revalidatePath("/search");
+  }
   return (
     <>
       {/* This can also be a client component with useFormState,

@@ -1,22 +1,22 @@
 "use client";
 
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
-import { updateResults } from "./page";
-import { useFormState } from "react-dom";
 
 interface SearchFormProps {
   searchResults: SearchResponseData;
 }
 
 export function SearchForm({ searchResults }: SearchFormProps) {
-  const [results, updateSearchResultAction] = useFormState(
-    updateResults,
-    searchResults,
-  );
-  console.log(results);
+    // TODO: switch the searchform to a client component with useFormState,
+    // retain code for future use
+
+//   const [results, updateSearchResultAction] = useFormState(
+//     updateResults,
+//     searchResults,
+//   );
   return (
     <>
-      <form action={updateSearchResultAction}>
+      {/* <form action={updateSearchResultAction}>
         <input type="text" name="mytext" />
         <input type="checkbox" name="mycheckbox" />
         <input type="hidden" name="hiddeninput" value={22} />
@@ -26,7 +26,7 @@ export function SearchForm({ searchResults }: SearchFormProps) {
           <option value="c">c</option>
         </select>
         <button type="submit" />
-      </form>
+      </form> */}
       <ul>
         {searchResults.map((opportunity) => (
           <li key={opportunity.opportunity_id}>
