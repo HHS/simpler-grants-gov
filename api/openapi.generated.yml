@@ -23,6 +23,7 @@ tags:
 - name: Health
 - name: Opportunity v0
 - name: Opportunity v0.1
+servers: .
 paths:
   /health:
     get:
