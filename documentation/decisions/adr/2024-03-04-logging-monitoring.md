@@ -111,3 +111,5 @@ Grafana is a fully open-source metrics platform that comes with other services t
 ## Decision Status
 
 Having collected all this information, it is the opinion of the author that both New Relic and Datadog would be strong choices. New Relic is the safer option due to its less complex pricing scheme. Datadog is more likely to have niche features that we find incredibly valuable (like public dashboards). We should move forward from here with a New Relic trial, and consider an additional Datadog trial if New Relic turns out non-ideal in some way.
+
+Here are some blog posts comparing Datadog with New Relic. This ADR is generally aligned with the contents of these posts. [1](https://betterstack.com/community/comparisons/datadog-vs-newrelic/) [2](https://sematext.com/blog/datadog-vs-new-relic/) [3](https://www.upguard.com/blog/datadog-vs-newrelic) [4](https://signoz.io/blog/datadog-vs-newrelic/) 
