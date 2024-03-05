@@ -39,10 +39,10 @@ export default function Search() {
     await new Promise((resolve) => setTimeout(resolve, 750));
     revalidatePath("/search");
   }
+
+  
   return (
     <>
-      {/* This can also be a client component with useFormState,
-        and still be able to call server action */}
       <form action={updateResults}>
         <input type="text" name="mytext" />
         <input type="checkbox" name="mycheckbox" />
