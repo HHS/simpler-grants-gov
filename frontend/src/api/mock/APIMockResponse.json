@@ -3,7 +3,7 @@
     {
       "agency": "US-ABC",
       "applicant_types": ["state_governments", "county_governments"],
-      "category": "discretionary",
+      "category": "<===========THIS IS MOCK DATA==============>",
       "category_explanation": null,
       "created_at": "2024-02-14T20:29:26.960670+00:00",
       "funding_categories": ["agriculture", "recovery_act"],
