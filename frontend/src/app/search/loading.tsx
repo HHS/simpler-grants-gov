@@ -1,5 +1,6 @@
 import React from "react";
 
+// Defines a loading component for the search feature
 export default function Loading() {
   const skeletonStyle = {
     backgroundColor: "#eee",
