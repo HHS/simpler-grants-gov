@@ -1,11 +1,10 @@
-// Disable to allow server actions to be called without warning
+// Disable rule to allow server actions to be called without warning
 /* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
 import React, { Suspense } from "react";
 
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import Loading from "./loading";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { SubmitButton } from "../../components/SubmitButton";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 import { revalidatePath } from "next/cache";
 
@@ -27,19 +26,18 @@ async function SearchResults() {
   );
 }
 
-export default function Search() {
-  async function updateResults(formData: FormData) {
-    // server action
-    "use server";
-    console.log(Object.fromEntries(formData.entries()));
-    // await fetchSearchOpportunities(searchFetcher);
-    await new Promise((resolve) => setTimeout(resolve, 750));
-    revalidatePath("/search");
-  }
+export async function updateResults(formData: FormData) {
+  // server action
+  "use server";
+  console.log(Object.fromEntries(formData.entries()));
+  await new Promise((resolve) => setTimeout(resolve, 750));
+  revalidatePath("/search");
+}
 
+export default function Search() {
   return (
     <>
-       {/* This can also be a client component with useFormState,
+      {/* This can also be a client component with useFormState,
         and still be able to call server action */}
       <form action={updateResults}>
         <input type="text" name="mytext" />
@@ -49,10 +47,10 @@ export default function Search() {
           <option value="a">a</option>
           <option value="b">b</option>
         </select>
-        <SubmitButton />
+        <input type="submit" />
       </form>
 
-      {/* Allow for partial pre-rendering while fetching data */}
+      {/* Allow for partial pre-rendering while doing the initial data fetch */}
       <Suspense fallback={<Loading />}>
         <SearchResults />
       </Suspense>

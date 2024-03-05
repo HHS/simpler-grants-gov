@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-commented-out-tests */
+
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 jest.mock("src/hooks/useFeatureFlags");
@@ -54,16 +56,17 @@ jest.mock("../../src/services/searchfetcher/MockSearchFetcher", () => {
 
 describe("Search", () => {
   it("should pass", () => {
+    setFeatureFlag("showSearchV0", true);
     expect(1).toBe(1);
   });
   // TODO (Issue #1393): Redo tests after converting search to server component. Save below for reference
 
-//   it("passes accessibility scan", async () => {
-//     setFeatureFlag("showSearchV0", true);
-//     const { container } = render(<Search />);
-//     const results = await waitFor(() => axe(container));
-//     expect(results).toHaveNoViolations();
-//   });
+  //   it("passes accessibility scan", async () => {
+  //     setFeatureFlag("showSearchV0", true);
+  //     const { container } = render(<Search />);
+  //     const results = await waitFor(() => axe(container));
+  //     expect(results).toHaveNoViolations();
+  //   });
 
   //   describe("Search feature flag", () => {
   //     it("renders search results when feature flag is on", async () => {

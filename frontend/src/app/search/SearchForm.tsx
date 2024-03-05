@@ -1,30 +1,19 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
-
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
-import { updateResults } from "./actions";
-
-export function SubmitButton() {
-  "use client";
-  const { pending } = useFormStatus();
-
-  return (
-    <button type="submit" aria-disabled={pending}>
-      {pending ? "Searching..." : "Search"}
-    </button>
-  );
-}
+import { updateResults } from "./page";
+import { useFormState } from "react-dom";
 
 interface SearchFormProps {
-  initialSearchResults: SearchResponseData;
+  searchResults: SearchResponseData;
 }
 
-export function SearchForm({ initialSearchResults }: SearchFormProps) {
+export function SearchForm({ searchResults }: SearchFormProps) {
   const [results, updateSearchResultAction] = useFormState(
     updateResults,
-    initialSearchResults,
+    searchResults,
   );
+  console.log(results);
   return (
     <>
       <form action={updateSearchResultAction}>
@@ -36,10 +25,10 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
           <option value="b">b</option>
           <option value="c">c</option>
         </select>
-        <SubmitButton />
+        <button type="submit" />
       </form>
       <ul>
-        {results.map((opportunity) => (
+        {searchResults.map((opportunity) => (
           <li key={opportunity.opportunity_id}>
             {opportunity.category}, {opportunity.opportunity_title}
           </li>
