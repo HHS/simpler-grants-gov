@@ -7,13 +7,13 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ searchResults }: SearchFormProps) {
-    // TODO: switch the searchform to a client component with useFormState,
-    // retain code for future use
+  // TODO: switch the searchform to a client component with useFormState,
+  // retain code for future use
 
-//   const [results, updateSearchResultAction] = useFormState(
-//     updateResults,
-//     searchResults,
-//   );
+  //   const [results, updateSearchResultAction] = useFormState(
+  //     updateResults,
+  //     searchResults,
+  //   );
   return (
     <>
       {/* <form action={updateSearchResultAction}>

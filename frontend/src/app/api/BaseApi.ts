@@ -2,7 +2,7 @@
 // It provides a build-time error if client-side code attempts to invoke the code here.
 // Since we're pulling in an API Auth Token here, this should be server only
 // https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
-import "server-only"
+import "server-only";
 
 import { compact } from "lodash";
 

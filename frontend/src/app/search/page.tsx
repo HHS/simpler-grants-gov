@@ -13,8 +13,6 @@ const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
-
-
 // TODO: use for i18n when ready
 // interface RouteParams {
 //   locale: string;
