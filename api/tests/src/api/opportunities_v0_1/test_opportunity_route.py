@@ -7,7 +7,7 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from tests.src.db.models.factories import OpportunityFactory
+from tests.src.db.models.factories import OpportunityFactory, OpportunitySummaryFactory, CurrentOpportunitySummaryFactory
 
 
 @pytest.fixture
@@ -84,8 +84,6 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
     assert db_opportunity.agency == resp_opportunity["agency"]
     assert db_opportunity.category == resp_opportunity["category"]
     assert db_opportunity.category_explanation == resp_opportunity["category_explanation"]
-    assert db_opportunity.revision_number == resp_opportunity["revision_number"]
-    assert db_opportunity.modified_comments == resp_opportunity["modified_comments"]
 
     validate_opportunity_summary(db_opportunity.summary, resp_opportunity["summary"])
     validate_assistance_listings(
@@ -93,11 +91,8 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
         resp_opportunity["opportunity_assistance_listings"],
     )
 
-    # TODO - these have been moved in the DB model - will be fixed in https://github.com/HHS/simpler-grants-gov/issues/1364
-    # assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
-    # assert set(db_opportunity.funding_instruments) == set(resp_opportunity["funding_instruments"])
-    # assert set(db_opportunity.funding_categories) == set(resp_opportunity["funding_categories"])
-    # assert set(db_opportunity.applicant_types) == set(resp_opportunity["applicant_types"])
+    assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
+
 
 
 def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: dict):
@@ -107,10 +102,11 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
 
     assert db_summary.summary_description == resp_summary["summary_description"]
     assert db_summary.is_cost_sharing == resp_summary["is_cost_sharing"]
-    assert str(db_summary.close_date) == resp_summary["close_date"]
+    assert db_summary.is_forecast == resp_summary["is_forecast"]
+    assert str(db_summary.close_date) == str(resp_summary["close_date"])
     assert db_summary.close_date_description == resp_summary["close_date_description"]
-    assert str(db_summary.post_date) == resp_summary["post_date"]
-    assert str(db_summary.archive_date) == resp_summary["archive_date"]
+    assert str(db_summary.post_date) == str(resp_summary["post_date"])
+    assert str(db_summary.archive_date) == str(resp_summary["archive_date"])
     assert db_summary.expected_number_of_awards == resp_summary["expected_number_of_awards"]
     assert (
         db_summary.estimated_total_program_funding
@@ -123,6 +119,14 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
         db_summary.additional_info_url_description
         == resp_summary["additional_info_url_description"]
     )
+
+    assert str(db_summary.forecasted_post_date) == str(resp_summary["forecasted_post_date"])
+    assert str(db_summary.forecasted_close_date) == str(resp_summary["forecasted_close_date"])
+    assert db_summary.forecasted_close_date_description == resp_summary["forecasted_close_date_description"]
+    assert str(db_summary.forecasted_award_date) == str(resp_summary["forecasted_award_date"])
+    assert str(db_summary.forecasted_project_start_date) == str(resp_summary["forecasted_project_start_date"])
+    assert db_summary.fiscal_year == resp_summary["fiscal_year"]
+
     assert db_summary.funding_category_description == resp_summary["funding_category_description"]
     assert (
         db_summary.applicant_eligibility_description
@@ -139,6 +143,9 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
         == resp_summary["agency_email_address_description"]
     )
 
+    assert set(db_summary.funding_instruments) == set(resp_summary["funding_instruments"])
+    assert set(db_summary.funding_categories) == set(resp_summary["funding_categories"])
+    assert set(db_summary.applicant_types) == set(resp_summary["applicant_types"])
 
 def validate_assistance_listings(
     db_assistance_listings: list[OpportunityAssistanceListing], resp_listings: list[dict]
@@ -283,22 +290,33 @@ def test_opportunity_search_invalid_request_422(
 
 
 @pytest.mark.parametrize(
-    "factory_params",
+    "opportunity_params,opportunity_summary_params",
     [
-        {},
-        # Set all the non-opportunity model objects to null/empty
-        {
-            "current_opportunity_summary": None,
+        ({}, {}),
+        # Only an opportunity exists, no other connected records
+        ({
             "opportunity_assistance_listings": [],
-            # TODO: https://github.com/HHS/simpler-grants-gov/issues/1364
-            # "link_funding_instruments": [],
-            # "link_funding_categories": [],
-            # "link_applicant_types": [],
-        },
+        }, None),
+        # Summary exists, but none of the list values set
+        ({}, {
+            "link_funding_instruments": [],
+            "link_funding_categories": [],
+            "link_applicant_types": [],
+        }),
+        # All possible values set to null/empty
+        # Note this uses traits on the factories to handle setting everything
+        ({
+            "all_fields_null": True
+        }, {"all_fields_null": True})
     ],
 )
-def test_get_opportunity_200(client, api_auth_token, enable_factory_create, factory_params):
-    db_opportunity = OpportunityFactory.create(**factory_params)
+def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params, opportunity_summary_params):
+    # Split the setup of the opportunity from the opportunity summary to simplify the factory usage a bit
+    db_opportunity = OpportunityFactory.create(**opportunity_params, current_opportunity_summary=None) # We'll set the current opportunity below
+
+    if opportunity_summary_params is not None:
+        db_opportunity_summary = OpportunitySummaryFactory.create(**opportunity_summary_params, opportunity=db_opportunity)
+        CurrentOpportunitySummaryFactory.create(opportunity=db_opportunity, opportunity_summary=db_opportunity_summary)
 
     resp = client.get(
         f"/v0.1/opportunities/{db_opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}

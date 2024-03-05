@@ -131,6 +131,10 @@ class OpportunityFactory(BaseFactory):
             current_opportunity_summary__is_archived_forecast_summary=True
         )
 
+        # Set all nullable fields to null
+        all_fields_null = factory.Trait(
+            current_opportunity_summary=None
+        )
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
