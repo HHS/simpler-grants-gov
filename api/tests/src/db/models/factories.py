@@ -96,7 +96,6 @@ class OpportunityFactory(BaseFactory):
 
     revision_number = 0  # We'll want to consider how we handle this when we add history
 
-
     opportunity_assistance_listings = factory.RelatedFactoryList(
         "tests.src.db.models.factories.OpportunityAssistanceListingFactory",
         factory_related_name="opportunity",
@@ -106,8 +105,10 @@ class OpportunityFactory(BaseFactory):
     # By default we'll add a current opportunity summary which will be POSTED
     # if you'd like to easily modify the values, see the possible traits below in the
     # Params class section
-    current_opportunity_summary = factory.RelatedFactory("tests.src.db.models.factories.CurrentOpportunitySummaryFactory", factory_related_name="opportunity")
-
+    current_opportunity_summary = factory.RelatedFactory(
+        "tests.src.db.models.factories.CurrentOpportunitySummaryFactory",
+        factory_related_name="opportunity",
+    )
 
     class Params:
         # These are common scenarios we might want for an opportunity.
@@ -118,11 +119,18 @@ class OpportunityFactory(BaseFactory):
         no_current_summary = factory.Trait(current_opportunity_summary=None)
 
         # We set a trait for the OpportunitySummaryFactory for each of these as well as set the opportunity status
-        is_posted = factory.Trait(current_opportunity_summary__opportunity_status=OpportunityStatus.POSTED, current_opportunity_summary__opportunity_summary__is_posted_summary=True)
-        is_forecasted = factory.Trait(current_opportunity_summary__opportunity_status=OpportunityStatus.FORECASTED, current_opportunity_summary__opportunity_summary__is_forecasted_summary=True)
-        is_closed = factory.Trait(current_opportunity_summary__opportunity_status=OpportunityStatus.CLOSED, current_opportunity_summary__opportunity_summary__is_closed_summary=True)
-        is_archived_non_forecast = factory.Trait(current_opportunity_summary__opportunity_status=OpportunityStatus.ARCHIVED, current_opportunity_summary__opportunity_summary__is_archived_non_forecast_summary=True)
-        is_archived_forecast = factory.Trait(current_opportunity_summary__opportunity_status=OpportunityStatus.ARCHIVED, current_opportunity_summary__opportunity_summary__is_archived_forecast_summary=True)
+        is_posted_summary = factory.Trait(current_opportunity_summary__is_posted_summary=True)
+        is_forecasted_summary = factory.Trait(
+            current_opportunity_summary__is_forecasted_summary=True
+        )
+        is_closed_summary = factory.Trait(current_opportunity_summary__is_closed_summary=True)
+        is_archived_non_forecast_summary = factory.Trait(
+            current_opportunity_summary__is_archived_non_forecast_summary=True
+        )
+        is_archived_forecast_summary = factory.Trait(
+            current_opportunity_summary__is_archived_forecast_summary=True
+        )
+
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
@@ -130,7 +138,6 @@ class OpportunitySummaryFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
 
     summary_description = factory.LazyFunction(lambda: f"Example summary - {fake.paragraph()}")
     is_cost_sharing = factory.Faker("boolean")
@@ -140,17 +147,17 @@ class OpportunitySummaryFactory(BaseFactory):
 
     # Forecasted records don't have a close date
     close_date = factory.Maybe(
-        decider=factory.LazyAttribute(
-            lambda s: s.is_forecast
-        ),
+        decider=factory.LazyAttribute(lambda s: s.is_forecast),
         # If forecasted, don't set a close date
         yes_declaration=None,
         # otherwise a future date
         no_declaration=factory.Faker("date_between", start_date="+2w", end_date="+3w"),
     )
-    close_date_description = factory.Maybe(decider=factory.LazyAttribute(lambda s: s.close_date is None),
-                                           yes_declaration=None,
-                                           no_declaration=factory.Faker("paragraph", nb_sentences=1))
+    close_date_description = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: s.close_date is None),
+        yes_declaration=None,
+        no_declaration=factory.Faker("paragraph", nb_sentences=1),
+    )
 
     # Just a random recent post date
     post_date = factory.Faker("date_between", start_date="-3w", end_date="now")
@@ -198,45 +205,41 @@ class OpportunitySummaryFactory(BaseFactory):
 
     # Forecasted values are only set if is_forecast=True
     forecasted_post_date = factory.Maybe(
-        decider=factory.LazyAttribute(
-            lambda s: s.is_forecast
-        ),
+        decider=factory.LazyAttribute(lambda s: s.is_forecast),
         # If forecasted, set it in the future
         yes_declaration=factory.Faker("date_between", start_date="+2w", end_date="+3w"),
         # otherwise don't set
         no_declaration=None,
     )
     forecasted_close_date = factory.Maybe(
-        decider=factory.LazyAttribute(
-            lambda s: s.is_forecast
-        ),
+        decider=factory.LazyAttribute(lambda s: s.is_forecast),
         # If forecasted, set it in the future
         yes_declaration=factory.Faker("date_between", start_date="+6w", end_date="+12w"),
         # otherwise don't set
         no_declaration=None,
     )
-    forecasted_close_date_description = factory.Maybe(decider=factory.LazyAttribute(lambda s: s.forecasted_close_date is None),
-                                           yes_declaration=None,
-                                           no_declaration=factory.Faker("paragraph", nb_sentences=1))
+    forecasted_close_date_description = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: s.forecasted_close_date is None),
+        yes_declaration=None,
+        no_declaration=factory.Faker("paragraph", nb_sentences=1),
+    )
     forecasted_award_date = factory.Maybe(
-        decider=factory.LazyAttribute(
-            lambda s: s.is_forecast
-        ),
+        decider=factory.LazyAttribute(lambda s: s.is_forecast),
         # If forecasted, set it in the future
         yes_declaration=factory.Faker("date_between", start_date="+26w", end_date="+30w"),
         # otherwise don't set
         no_declaration=None,
     )
     forecasted_project_start_date = factory.Maybe(
-        decider=factory.LazyAttribute(
-            lambda s: s.is_forecast
-        ),
+        decider=factory.LazyAttribute(lambda s: s.is_forecast),
         # If forecasted, set it in the future
         yes_declaration=factory.Faker("date_between", start_date="+30w", end_date="+52w"),
         # otherwise don't set
         no_declaration=None,
     )
-    fiscal_year = factory.LazyAttribute(lambda s: s.forecasted_project_start_date.year if s.forecasted_project_start_date else None)
+    fiscal_year = factory.LazyAttribute(
+        lambda s: s.forecasted_project_start_date.year if s.forecasted_project_start_date else None
+    )
 
     is_deleted = False
 
@@ -269,27 +272,70 @@ class OpportunitySummaryFactory(BaseFactory):
         is_posted_summary = factory.Trait(is_forecast=False)
         is_forecasted_summary = factory.Trait(is_forecast=True)
 
-        # Set the close date to the past
-        is_closed_summary = factory.Trait(is_forecast=False, close_date=factory.Faker("date_between", start_date="-3w", end_date="-1w"))
+        # For these scenarios, adjust a few dates to make more sense
+        is_closed_summary = factory.Trait(
+            is_forecast=False,
+            post_date=factory.Faker("date_between", start_date="-6w", end_date="-5w"),
+            close_date=factory.Faker("date_between", start_date="-3w", end_date="-1w"),
+        )
 
-        is_archived_non_forecast_summary = factory.Trait(is_forecast=False, close_date=factory.Faker("date_between", start_date="-3w", end_date="-2w"), archive_date=factory.Faker("date_between", start_date="-2w", end_date="-1w"))
-        is_archived_forecast_summary = factory.Trait(is_forecast=True, archive_date=factory.Faker("date_between", start_date="-2w", end_date="-1w"))
+        is_archived_non_forecast_summary = factory.Trait(
+            is_forecast=False,
+            post_date=factory.Faker("date_between", start_date="-6w", end_date="-5w"),
+            close_date=factory.Faker("date_between", start_date="-3w", end_date="-2w"),
+            archive_date=factory.Faker("date_between", start_date="-2w", end_date="-1w"),
+        )
+        is_archived_forecast_summary = factory.Trait(
+            is_forecast=True,
+            post_date=factory.Faker("date_between", start_date="-6w", end_date="-5w"),
+            archive_date=factory.Faker("date_between", start_date="-2w", end_date="-1w"),
+        )
 
-        is_non_public_non_forecast_summary = factory.Trait(is_forecast=False, post_date=factory.Faker("date_between", start_date="+3w", end_date="+4w"))
-        is_non_public_forecast_summary = factory.Trait(is_forecast=True, post_date=factory.Faker("date_between", start_date="+3w", end_date="+4w"))
+        is_non_public_non_forecast_summary = factory.Trait(
+            is_forecast=False,
+            post_date=factory.Faker("date_between", start_date="+3w", end_date="+4w"),
+        )
+        is_non_public_forecast_summary = factory.Trait(
+            is_forecast=True,
+            post_date=factory.Faker("date_between", start_date="+3w", end_date="+4w"),
+        )
+
 
 class CurrentOpportunitySummaryFactory(BaseFactory):
-
     class Meta:
         model = opportunity_models.CurrentOpportunitySummary
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
 
-    opportunity_summary = factory.SubFactory(OpportunitySummaryFactory, opportunity=factory.SelfAttribute("..opportunity"))
-    opportunity_summary_id = factory.LazyAttribute(lambda a: a.opportunity_summary.opportunity_summary_id)
+    opportunity_summary = factory.SubFactory(
+        OpportunitySummaryFactory, opportunity=factory.SelfAttribute("..opportunity")
+    )
+    opportunity_summary_id = factory.LazyAttribute(
+        lambda a: a.opportunity_summary.opportunity_summary_id
+    )
 
     opportunity_status = OpportunityStatus.POSTED
+
+    class Params:
+        is_posted_summary = factory.Trait(
+            opportunity_status=OpportunityStatus.POSTED, opportunity_summary__is_posted_summary=True
+        )
+        is_forecasted_summary = factory.Trait(
+            opportunity_status=OpportunityStatus.FORECASTED,
+            opportunity_summary__is_forecasted_summary=True,
+        )
+        is_closed_summary = factory.Trait(
+            opportunity_status=OpportunityStatus.CLOSED, opportunity_summary__is_closed_summary=True
+        )
+        is_archived_non_forecast_summary = factory.Trait(
+            opportunity_status=OpportunityStatus.ARCHIVED,
+            opportunity_summary__is_archived_non_forecast_summary=True,
+        )
+        is_archived_forecast_summary = factory.Trait(
+            opportunity_status=OpportunityStatus.ARCHIVED,
+            opportunity_summary__is_archived_forecast_summary=True,
+        )
 
 
 class OpportunityAssistanceListingFactory(BaseFactory):
@@ -310,7 +356,9 @@ class LinkFundingInstrumentSummaryFactory(BaseFactory):
         model = opportunity_models.LinkFundingInstrumentSummary
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
-    opportunity_summary_id = factory.LazyAttribute(lambda f: f.opportunity_summary.opportunity_summary_id)
+    opportunity_summary_id = factory.LazyAttribute(
+        lambda f: f.opportunity_summary.opportunity_summary_id
+    )
 
     # We use an iterator here to keep the values unique when generated by the opportunity factory
     funding_instrument = factory.Iterator(FundingInstrument)
@@ -321,7 +369,9 @@ class LinkFundingCategorySummaryFactory(BaseFactory):
         model = opportunity_models.LinkFundingCategorySummary
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
-    opportunity_summary_id = factory.LazyAttribute(lambda f: f.opportunity_summary.opportunity_summary_id)
+    opportunity_summary_id = factory.LazyAttribute(
+        lambda f: f.opportunity_summary.opportunity_summary_id
+    )
 
     # We use an iterator here to keep the values unique when generated by the opportunity factory
     funding_category = factory.Iterator(FundingCategory)
@@ -332,7 +382,9 @@ class LinkApplicantTypeSummaryFactory(BaseFactory):
         model = opportunity_models.LinkApplicantTypeSummary
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
-    opportunity_summary_id = factory.LazyAttribute(lambda f: f.opportunity_summary.opportunity_summary_id)
+    opportunity_summary_id = factory.LazyAttribute(
+        lambda f: f.opportunity_summary.opportunity_summary_id
+    )
 
     # We use an iterator here to keep the values unique when generated by the opportunity factory
     applicant_type = factory.Iterator(ApplicantType)
@@ -407,4 +459,3 @@ class ForeignTopportunityFactory(factory.DictFactory):
 
     created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
     last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
-

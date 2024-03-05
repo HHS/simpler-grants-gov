@@ -59,19 +59,24 @@ class Opportunity(Base, TimestampMixin):
 
     @property
     def summary(self) -> "OpportunitySummary | None":
+        """
+        Utility getter method for converting an Opportunity in our endpoints
+
+        This handles mapping the current opportunity summary to the "summary" object
+         in our API responses - handling nullablity as well.
+        """
         if self.current_opportunity_summary is None:
             return None
 
         return self.current_opportunity_summary.opportunity_summary
+
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
     opportunity_summary_id: Mapped[int] = mapped_column(primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column(
-        ForeignKey(Opportunity.opportunity_id)
-    )
+    opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id))
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     summary_description: Mapped[str | None]
@@ -146,6 +151,7 @@ class OpportunitySummary(Base, TimestampMixin):
     def applicant_types(self) -> list[ApplicantType]:
         # Helper method for serialization of the API response
         return [a.applicant_type for a in self.link_applicant_types]
+
 
 class OpportunityAssistanceListing(Base, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
@@ -228,13 +234,19 @@ class LinkApplicantTypeSummary(Base, TimestampMixin):
 class CurrentOpportunitySummary(Base, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
-    opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id), primary_key=True)
-    opportunity: Mapped[Opportunity] = relationship()
+    opportunity_id: Mapped[int] = mapped_column(
+        ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        single_parent=True, cascade="all, delete-orphan"
+    )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
-    opportunity_summary: Mapped[OpportunitySummary] = relationship()
+    opportunity_summary: Mapped[OpportunitySummary] = relationship(
+        single_parent=True, cascade="all, delete-orphan"
+    )
 
     opportunity_status: Mapped[OpportunityStatus] = mapped_column(
         "opportunity_status_id",

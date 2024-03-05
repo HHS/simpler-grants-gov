@@ -24,7 +24,14 @@ def _build_opportunities(db_session: db.Session) -> None:
         max_opportunity_id = 0
 
     factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
-    factories.OpportunityFactory.create_batch(size=25)
+
+    # Create a few opportunities in various scenarios
+    factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
 
     # Also seed the topportunity table for now in the same way
     max_opportunity_id = db_session.query(func.max(TransferTopportunity.opportunity_id)).scalar()
