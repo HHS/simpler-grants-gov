@@ -49,18 +49,20 @@ class Opportunity(Base, TimestampMixin):
     publisher_user_id: Mapped[int | None]
     publisher_profile_id: Mapped[int | None]
 
-
-
     opportunity_assistance_listings: Mapped[list["OpportunityAssistanceListing"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    """
-    TODO - when we actually set this up
-    current_summary: Mapped["OpportunitySummary | None"] = relationship(
+    current_opportunity_summary: Mapped["CurrentOpportunitySummary | None"] = relationship(
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
-    """
+
+    @property
+    def summary(self) -> "OpportunitySummary | None":
+        if self.current_opportunity_summary is None:
+            return None
+
+        return self.current_opportunity_summary.opportunity_summary
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
@@ -73,12 +75,13 @@ class OpportunitySummary(Base, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     summary_description: Mapped[str | None]
-    is_cost_sharing: Mapped[bool | None]
 
-    close_date: Mapped[date | None]
-    close_date_description: Mapped[str | None]
+    is_cost_sharing: Mapped[bool | None]
+    is_forecast: Mapped[bool | None]
 
     post_date: Mapped[date | None]
+    close_date: Mapped[date | None]
+    close_date_description: Mapped[str | None]
     archive_date: Mapped[date | None]
     unarchive_date: Mapped[date | None]
 
@@ -90,15 +93,15 @@ class OpportunitySummary(Base, TimestampMixin):
     additional_info_url: Mapped[str | None]
     additional_info_url_description: Mapped[str | None]
 
-    estimated_posting_date: Mapped[date | None]
-    estimated_response_date: Mapped[date | None]
-    estimated_response_date_description: Mapped[str | None]
-    estimated_award_date: Mapped[date | None]
-    estimated_project_start_date: Mapped[date | None]
+    # Only if the summary is forecasted
+    forecasted_post_date: Mapped[date | None]
+    forecasted_close_date: Mapped[date | None]
+    forecasted_close_date_description: Mapped[str | None]
+    forecasted_award_date: Mapped[date | None]
+    forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    is_legacy_forecast: Mapped[bool | None]
-    legacy_version_number: Mapped[int | None]
+    revision_number: Mapped[int | None]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]
@@ -110,6 +113,8 @@ class OpportunitySummary(Base, TimestampMixin):
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
+
+    is_deleted: Mapped[bool | None]
 
     can_send_mail: Mapped[bool | None]
     publisher_profile_id: Mapped[int | None]
@@ -150,9 +155,8 @@ class OpportunityAssistanceListing(Base, TimestampMixin):
     opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id), index=True)
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
-    program_title: Mapped[str | None]
-
     assistance_listing_number: Mapped[str | None]
+    program_title: Mapped[str | None]
 
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
@@ -225,12 +229,14 @@ class CurrentOpportunitySummary(Base, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
     opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id), primary_key=True)
+    opportunity: Mapped[Opportunity] = relationship()
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
+    opportunity_summary: Mapped[OpportunitySummary] = relationship()
 
-    opportunity_status: Mapped[OpportunityStatus | None] = mapped_column(
+    opportunity_status: Mapped[OpportunityStatus] = mapped_column(
         "opportunity_status_id",
         LookupColumn(LkOpportunityStatus),
         ForeignKey(LkOpportunityStatus.opportunity_status_id),

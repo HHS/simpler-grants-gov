@@ -82,3 +82,8 @@ def test_opportunity_factory_create(enable_factory_create, db_session: db.Sessio
     null_params = {"agency": None}
     opportunity = OpportunityFactory.create(**null_params)
     validate_opportunity_record(opportunity, null_params)
+
+
+def test_thing(enable_factory_create, db_session: db.Session):
+    x = OpportunityFactory.create(no_current_summary=True)
+    print(x)
