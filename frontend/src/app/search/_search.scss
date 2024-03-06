@@ -1,0 +1,36 @@
+@use "uswds-core" as *;
+
+// Define border color as a variable
+$border-color: #3b48d8;
+
+// Mixin for the border for reuse
+@mixin border-style {
+  border: 1px solid $border-color;
+}
+
+.grid-container {
+  @include border-style;
+
+  .grid-row {
+    @include border-style;
+
+    .grid-col {
+      @include border-style;
+    }
+  }
+}
+
+
+// Define tablet breakpoint
+$tablet: 640px;
+
+// Apply tablet-specific styles
+@include at-media("tablet") {
+  .tablet\:grid-col-4 {
+    width: 33.33%;
+  }
+
+  .tablet\:grid-col-8 {
+    width: 66.66%;
+  }
+}

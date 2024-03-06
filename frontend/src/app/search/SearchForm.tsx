@@ -1,8 +1,11 @@
 "use client";
 
+import "./_search.scss";
+
 import { useFormState, useFormStatus } from "react-dom";
 
 import Loading from "./loading";
+import React from "react";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
 import { updateResults } from "./actions";
 
@@ -13,21 +16,23 @@ interface SearchResultsListProps {
 const SearchResultsList: React.FC<SearchResultsListProps> = ({
   searchResults,
 }) => {
-  // useFormStatus only works here because this component's
-  // parent is the form
   const { pending } = useFormStatus();
+
   if (pending) {
     return <Loading />;
   }
 
   return (
-    <ul>
-      {searchResults.map((opportunity) => (
-        <li key={opportunity.opportunity_id}>
-          {opportunity.category}, {opportunity.opportunity_title}
-        </li>
-      ))}
-    </ul>
+    <>
+      <h4>{searchResults.length} Opportunities</h4>
+      <ul className="search-results-list">
+        {searchResults.map((opportunity) => (
+          <li key={opportunity.opportunity_id}>
+            {opportunity.category}, {opportunity.opportunity_title}
+          </li>
+        ))}
+      </ul>
+    </>
   );
 };
 
@@ -42,18 +47,32 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
   );
 
   return (
-    <>
-      <form action={updateSearchResultAction}>
-        <input type="text" name="mytext" />
-        <input type="checkbox" name="mycheckbox" />
-        <input type="hidden" name="hiddeninput" value={22} />
-        <select name="mydropdown" id="dog-names">
-          <option value="a">a</option>
-          <option value="b">b</option>
-        </select>
-        <input type="submit" value="Search" />
-        <SearchResultsList searchResults={searchResults} />
-      </form>
-    </>
+    <form action={updateSearchResultAction}>
+      <div className="grid-container">
+        <div id="search-bar" className="grid-row">
+          <input
+            className="usa-input"
+            id="search-input"
+            name="search"
+            type="search"
+            placeholder="Search a keyword"
+          />
+          <button className="usa-button" type="submit">
+            Search
+          </button>
+        </div>
+        <div className="grid-row grid-gap">
+          <aside className="tablet:grid-col-4">
+            <fieldset className="usa-fieldset">{/* Filter content */}</fieldset>
+            {/* More filters */}
+          </aside>
+          <main className="tablet:grid-col-8">
+            <SearchResultsList searchResults={searchResults} />
+
+            {/* Pagination */}
+          </main>
+        </div>
+      </div>
+    </form>
   );
 }
