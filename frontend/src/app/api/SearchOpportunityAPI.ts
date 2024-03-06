@@ -26,7 +26,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       pagination: {
         order_by: "opportunity_id",
         page_offset: 1,
-        page_size: Math.floor(Math.random() * 25) + 1,
+        page_size: 25,
         sort_direction: "ascending",
       },
       ...queryParams,
