@@ -62,8 +62,8 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
 
     def plot_results(self) -> Figure:
-        """Plot the sprint burnup using a plotly line chart."""
-        # Limit the data in the line chart to dates within the sprint
+        """Plot the sprint burnup using a plotly area chart."""
+        # Limit the data in the area chart to dates within the sprint
         # or through today, if the sprint hasn't yet ended
         # NOTE: This will *not* affect the running totals on those days
         sprint_start = self.dataset.sprint_start(self.sprint)
@@ -74,7 +74,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         )
         df = self.results[date_mask].melt(
             id_vars=self.date_col,
-            value_vars=["Total Closed", "Total Open"],
+            value_vars=["total_closed", "total_open"],
             var_name="cols",
         )
         # create a line chart from the data in self.results
@@ -234,6 +234,6 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         )
         # calculate the difference between opened and closed each day
         # cumulatively sum the deltas to get the running total
-        df["Total Open"] = (df["opened"] - df["closed"]).cumsum()
-        df["Total Closed"] = df["closed"].cumsum()
+        df["total_open"] = (df["opened"] - df["closed"]).cumsum()
+        df["total_closed"] = df["closed"].cumsum()
         return df
