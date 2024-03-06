@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Iterable
 from uuid import UUID
 
 from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
@@ -88,7 +88,7 @@ class Base(DeclarativeBase):
 
         return f"<{self.__class__.__name__}({','.join(values)})"
 
-    def __rich_repr__(self):
+    def __rich_repr__(self) -> Iterable[tuple[str, Any]]:
         """Rich repr for interactive console.
 
         See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
