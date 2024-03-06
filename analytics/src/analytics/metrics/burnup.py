@@ -77,7 +77,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             value_vars=["total_closed", "total_open"],
             var_name="cols",
         )
-        # create a line chart from the data in self.results
+        # create a area chart from the data in self.results
         chart = px.area(
             data_frame=df,
             x=self.date_col,
