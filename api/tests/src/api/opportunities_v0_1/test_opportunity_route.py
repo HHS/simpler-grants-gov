@@ -7,7 +7,11 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from tests.src.db.models.factories import OpportunityFactory, OpportunitySummaryFactory, CurrentOpportunitySummaryFactory
+from tests.src.db.models.factories import (
+    CurrentOpportunitySummaryFactory,
+    OpportunityFactory,
+    OpportunitySummaryFactory,
+)
 
 
 @pytest.fixture
@@ -94,7 +98,6 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
     assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
 
 
-
 def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: dict):
     if db_summary is None:
         assert resp_summary is None
@@ -122,9 +125,14 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
 
     assert str(db_summary.forecasted_post_date) == str(resp_summary["forecasted_post_date"])
     assert str(db_summary.forecasted_close_date) == str(resp_summary["forecasted_close_date"])
-    assert db_summary.forecasted_close_date_description == resp_summary["forecasted_close_date_description"]
+    assert (
+        db_summary.forecasted_close_date_description
+        == resp_summary["forecasted_close_date_description"]
+    )
     assert str(db_summary.forecasted_award_date) == str(resp_summary["forecasted_award_date"])
-    assert str(db_summary.forecasted_project_start_date) == str(resp_summary["forecasted_project_start_date"])
+    assert str(db_summary.forecasted_project_start_date) == str(
+        resp_summary["forecasted_project_start_date"]
+    )
     assert db_summary.fiscal_year == resp_summary["fiscal_year"]
 
     assert db_summary.funding_category_description == resp_summary["funding_category_description"]
@@ -146,6 +154,7 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
     assert set(db_summary.funding_instruments) == set(resp_summary["funding_instruments"])
     assert set(db_summary.funding_categories) == set(resp_summary["funding_categories"])
     assert set(db_summary.applicant_types) == set(resp_summary["applicant_types"])
+
 
 def validate_assistance_listings(
     db_assistance_listings: list[OpportunityAssistanceListing], resp_listings: list[dict]
@@ -294,29 +303,41 @@ def test_opportunity_search_invalid_request_422(
     [
         ({}, {}),
         # Only an opportunity exists, no other connected records
-        ({
-            "opportunity_assistance_listings": [],
-        }, None),
+        (
+            {
+                "opportunity_assistance_listings": [],
+            },
+            None,
+        ),
         # Summary exists, but none of the list values set
-        ({}, {
-            "link_funding_instruments": [],
-            "link_funding_categories": [],
-            "link_applicant_types": [],
-        }),
+        (
+            {},
+            {
+                "link_funding_instruments": [],
+                "link_funding_categories": [],
+                "link_applicant_types": [],
+            },
+        ),
         # All possible values set to null/empty
         # Note this uses traits on the factories to handle setting everything
-        ({
-            "all_fields_null": True
-        }, {"all_fields_null": True})
+        ({"all_fields_null": True}, {"all_fields_null": True}),
     ],
 )
-def test_get_opportunity_200(client, api_auth_token, enable_factory_create, opportunity_params, opportunity_summary_params):
+def test_get_opportunity_200(
+    client, api_auth_token, enable_factory_create, opportunity_params, opportunity_summary_params
+):
     # Split the setup of the opportunity from the opportunity summary to simplify the factory usage a bit
-    db_opportunity = OpportunityFactory.create(**opportunity_params, current_opportunity_summary=None) # We'll set the current opportunity below
+    db_opportunity = OpportunityFactory.create(
+        **opportunity_params, current_opportunity_summary=None
+    )  # We'll set the current opportunity below
 
     if opportunity_summary_params is not None:
-        db_opportunity_summary = OpportunitySummaryFactory.create(**opportunity_summary_params, opportunity=db_opportunity)
-        CurrentOpportunitySummaryFactory.create(opportunity=db_opportunity, opportunity_summary=db_opportunity_summary)
+        db_opportunity_summary = OpportunitySummaryFactory.create(
+            **opportunity_summary_params, opportunity=db_opportunity
+        )
+        CurrentOpportunitySummaryFactory.create(
+            opportunity=db_opportunity, opportunity_summary=db_opportunity_summary
+        )
 
     resp = client.get(
         f"/v0.1/opportunities/{db_opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}

@@ -77,6 +77,7 @@ class Opportunity(Base, TimestampMixin):
 
         return self.current_opportunity_summary.opportunity_status
 
+
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
