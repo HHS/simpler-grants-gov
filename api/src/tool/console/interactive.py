@@ -27,12 +27,18 @@ Simpler Grants Gov Python console
 
 Useful things:
 
-│ db = database session
+│ dbs = database session {db_session}
 │ f = DB factories module
 │ u = utilities module
 │ r = function to reload REPL
 
+Examples:
+
+│ dbs.query(Opportunity).first()
+| f.OpportunityFactory.create()
+
 Tips:
+
 ★ Tab-completion is available
 ★ History is available (use ↑↓ keys)
 ★ Use Ctrl+D to exit

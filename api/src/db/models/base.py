@@ -88,6 +88,13 @@ class Base(DeclarativeBase):
 
         return f"<{self.__class__.__name__}({','.join(values)})"
 
+    def __rich_repr__(self):
+        """Rich repr for interactive console.
+
+        See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
+        """
+        return self._dict().items()
+
 
 @declarative_mixin
 class IdMixin:
