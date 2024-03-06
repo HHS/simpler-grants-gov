@@ -20,11 +20,11 @@ from tests.conftest import (
 
 # TODO(AlexanderStephensonUSDS): Update result rows for burnup metric
 
+
 def result_row(
     day: str,
     opened: int,
     closed: int,
-    delta: int,
     total_open: int,
     total_closed: int,
 ) -> dict:
