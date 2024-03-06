@@ -40,14 +40,7 @@ export default abstract class BaseApi {
   get headers(): HeadersDict {
     const headers: HeadersDict = {};
 
-    if (
-      process.env.NODE_ENV === "development" &&
-      process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN
-    ) {
-      headers["X-AUTH"] = process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN;
-    }
-
-    if (process.env.NODE_ENV === "production" && process.env.API_AUTH_TOKEN) {
+    if (process.env.API_AUTH_TOKEN) {
       headers["X-AUTH"] = process.env.API_AUTH_TOKEN;
     }
     return headers;
