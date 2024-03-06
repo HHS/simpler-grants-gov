@@ -1,6 +1,8 @@
+import "server-only";
+
 import BaseApi, { JSONRequestBody } from "./BaseApi";
 
-import { Opportunity } from "../types/searchTypes";
+import { Opportunity } from "../../types/searchTypes";
 
 export type SearchResponseData = Opportunity[];
 

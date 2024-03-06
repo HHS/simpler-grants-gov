@@ -1,3 +1,9 @@
+// This server-only package is recommended by Next.js to ensure code is only run on the server.
+// It provides a build-time error if client-side code attempts to invoke the code here.
+// Since we're pulling in an API Auth Token here, this should be server only
+// https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
+import "server-only";
+
 import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -33,8 +39,9 @@ export default abstract class BaseApi {
   // Can include feature flags in child classes
   get headers(): HeadersDict {
     const headers: HeadersDict = {};
-    if (process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN) {
-      headers["X-AUTH"] = process.env.NEXT_PUBLIC_LOCAL_AUTH_TOKEN;
+
+    if (process.env.API_AUTH_TOKEN) {
+      headers["X-AUTH"] = process.env.API_AUTH_TOKEN;
     }
     return headers;
   }
