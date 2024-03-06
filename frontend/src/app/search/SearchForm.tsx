@@ -1,39 +1,59 @@
 "use client";
 
-import { SearchResponseData } from "../api/SearchOpportunityAPI";
+import { useFormState, useFormStatus } from "react-dom";
 
-interface SearchFormProps {
+import Loading from "./loading";
+import { SearchResponseData } from "../api/SearchOpportunityAPI";
+import { updateResults } from "./actions";
+
+interface SearchResultsListProps {
   searchResults: SearchResponseData;
 }
 
-export function SearchForm({ searchResults }: SearchFormProps) {
-  // TODO: switch the searchform to a client component with useFormState,
-  // retain code for future use
+const SearchResultsList: React.FC<SearchResultsListProps> = ({
+  searchResults,
+}) => {
+  // useFormStatus only works here because this component's
+  // parent is the form
+  const { pending } = useFormStatus();
+  if (pending) {
+    return <Loading />;
+  }
 
-  //   const [results, updateSearchResultAction] = useFormState(
-  //     updateResults,
-  //     searchResults,
-  //   );
+  return (
+    <ul>
+      {searchResults.map((opportunity) => (
+        <li key={opportunity.opportunity_id}>
+          {opportunity.category}, {opportunity.opportunity_title}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+interface SearchFormProps {
+  initialSearchResults: SearchResponseData;
+}
+
+export function SearchForm({ initialSearchResults }: SearchFormProps) {
+  const [searchResults, updateSearchResultAction] = useFormState(
+    updateResults,
+    initialSearchResults,
+  );
+
   return (
     <>
-      <form>
+      <form action={updateSearchResultAction}>
         <input type="text" name="mytext" />
         <input type="checkbox" name="mycheckbox" />
         <input type="hidden" name="hiddeninput" value={22} />
         <select name="mydropdown" id="dog-names">
           <option value="a">a</option>
           <option value="b">b</option>
-          <option value="c">c</option>
         </select>
-        <button type="submit" />
+        <input type="submit" value="Search" />
+        <SearchResultsList searchResults={searchResults} />
       </form>
-      <ul>
-        {searchResults.map((opportunity) => (
-          <li key={opportunity.opportunity_id}>
-            {opportunity.category}, {opportunity.opportunity_title}
-          </li>
-        ))}
-      </ul>
     </>
   );
 }
