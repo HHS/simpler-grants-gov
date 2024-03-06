@@ -235,6 +235,30 @@ def test_opportunity_search_paging_and_sorting_200(
     validate_search_pagination(search_response, search_request, expected_values)
 
 
+def test_opportunity_search_filters_when_no_current_summary(
+    client, api_auth_token, enable_factory_create, truncate_opportunities
+):
+    """
+    Verify only opportunities with a current_opportunity_summary are returned
+    """
+    expected_opportunities = OpportunityFactory.create_batch(size=3)
+    OpportunityFactory.create_batch(size=2, no_current_summary=True)
+
+    resp = client.post(
+        "/v0.1/opportunities/search", json=get_search_request(), headers={"X-Auth": api_auth_token}
+    )
+
+    search_response = resp.get_json()
+    assert resp.status_code == 200
+
+    # Just verify the 3 we created above are returned specifically
+    opportunities = search_response["data"]
+    assert len(opportunities) == 3
+    assert set([opp["opportunity_id"] for opp in opportunities]) == set(
+        [opp.opportunity_id for opp in expected_opportunities]
+    )
+
+
 @pytest.mark.parametrize(
     "search_request,expected_response_data",
     [

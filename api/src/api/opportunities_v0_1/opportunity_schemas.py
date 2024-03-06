@@ -100,7 +100,7 @@ class OpportunitySummarySchema(Schema):
             "description": "Forecasted opportunity only. The date the opportunity is expected to be close once posted."
         }
     )
-    forecasted_close_date_description = fields.Date(
+    forecasted_close_date_description = fields.String(
         metadata={
             "description": "Forecasted opportunity only. Optional details regarding the forecasted closed date.",
             "example": "Proposals will probably be due on this date",
