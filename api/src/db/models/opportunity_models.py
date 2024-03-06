@@ -82,7 +82,7 @@ class OpportunitySummary(Base, TimestampMixin):
     summary_description: Mapped[str | None]
 
     is_cost_sharing: Mapped[bool | None]
-    is_forecast: Mapped[bool | None]
+    is_forecast: Mapped[bool]
 
     post_date: Mapped[date | None]
     close_date: Mapped[date | None]
@@ -107,7 +107,7 @@ class OpportunitySummary(Base, TimestampMixin):
     forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    revision_number: Mapped[int | None]
+    revision_number: Mapped[int]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]
