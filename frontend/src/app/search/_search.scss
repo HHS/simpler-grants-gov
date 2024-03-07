@@ -21,8 +21,6 @@ main {
   }
 
   .search-submit-button {
-    // flex: none; // Ensures button size is based on its content
-    // align-items: center;
   }
 }
 
@@ -42,6 +40,24 @@ main {
   ul {
     list-style-position: inside;
   }
+}
+
+.checkbox-quadrant {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px; // adjust the space between checkboxes
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 // .grid-container {
