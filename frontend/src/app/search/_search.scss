@@ -20,12 +20,18 @@ main {
     // flex: 1; // Allows the input to grow and take up available space
     // margin-right: 1rem; // Adds margin to the right of the input
     // position: absolute;
+    width: 100%;
   }
 
   .search-submit-button {
     // flex: none; // Ensures button size is based on its content
     // align-items: center;
   }
+}
+
+.search-pagination {
+  align-items: center;
+  justify-content: center;
 }
 
 // .grid-container {
