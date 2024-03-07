@@ -1,7 +1,14 @@
 import React from "react";
 
-// Defines a loading component for the search feature
 export default function Loading() {
+  const listStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    height: "50vh",
+    listStyleType: "none",
+  };
+
   const skeletonStyle = {
     backgroundColor: "#eee",
     borderRadius: "4px",
@@ -11,8 +18,8 @@ export default function Loading() {
   };
 
   return (
-    <ul>
-      {Array.from({ length: 25 }).map((_, index) => (
+    <ul style={listStyle}>
+      {Array.from({ length: 10 }).map((_, index) => (
         <li key={index} style={skeletonStyle} />
       ))}
     </ul>

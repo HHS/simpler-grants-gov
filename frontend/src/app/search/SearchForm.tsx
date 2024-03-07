@@ -1,35 +1,16 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import "./_search.scss";
 
-import Loading from "./loading";
+import React from "react";
+import SearchBar from "../../components/search/SearchBar";
+import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
+import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
+import SearchResultsHeader from "../../components/search/SearchResultsHeader";
+import SearchResultsList from "../../components/search/SearchResultsList";
 import { updateResults } from "./actions";
-
-interface SearchResultsListProps {
-  searchResults: SearchResponseData;
-}
-
-const SearchResultsList: React.FC<SearchResultsListProps> = ({
-  searchResults,
-}) => {
-  // useFormStatus only works here because this component's
-  // parent is the form
-  const { pending } = useFormStatus();
-  if (pending) {
-    return <Loading />;
-  }
-
-  return (
-    <ul>
-      {searchResults.map((opportunity) => (
-        <li key={opportunity.opportunity_id}>
-          {opportunity.category}, {opportunity.opportunity_title}
-        </li>
-      ))}
-    </ul>
-  );
-};
+import { useFormState } from "react-dom";
 
 interface SearchFormProps {
   initialSearchResults: SearchResponseData;
@@ -42,18 +23,32 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
   );
 
   return (
-    <>
-      <form action={updateSearchResultAction}>
-        <input type="text" name="mytext" />
-        <input type="checkbox" name="mycheckbox" />
-        <input type="hidden" name="hiddeninput" value={22} />
-        <select name="mydropdown" id="dog-names">
-          <option value="a">a</option>
-          <option value="b">b</option>
-        </select>
-        <input type="submit" value="Search" />
-        <SearchResultsList searchResults={searchResults} />
-      </form>
-    </>
+    <form action={updateSearchResultAction}>
+      <div className="grid-container">
+        <div className="search-bar">
+          <SearchBar />
+        </div>
+        <div className="grid-row">
+          <aside className="tablet:grid-col-4">
+            <SearchOpportunityStatus />
+            <fieldset className="usa-fieldset">Filters</fieldset>
+          </aside>
+          <main className="tablet:grid-col-8">
+            <div className="grid-row" id="search-results-header">
+              <SearchResultsHeader searchResults={searchResults} />
+            </div>
+            <div className="search-pagination">
+              <SearchPagination />
+            </div>
+            <div id="search-results-list">
+              <SearchResultsList searchResults={searchResults} />
+            </div>
+            <div className="search-pagination">
+              <SearchPagination />
+            </div>
+          </main>
+        </div>
+      </div>
+    </form>
   );
 }
