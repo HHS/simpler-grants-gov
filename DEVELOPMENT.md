@@ -1,5 +1,3 @@
-<!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
-
 # Development and Software Delivery Lifecycle
 
 The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that externabl contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contribributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
@@ -109,3 +107,19 @@ Step by step instructions for creating a release:
 ## Documentation
 
 Any changes to features, tools, or workflows should include updates or additions to documentation.
+
+## Load Testing
+
+[Artillery.io](https://www.artillery.io/docs) is the open source tool used to load test the application. You can find the yml file for the frontend load test at [`/frontend/artillery-load-test.yml`](./frontend/artillery-load-test.yml). You can find the yml file for the backend API load test at [`/api/artillery-load-test.yml`](./api/artillery-load-test.yml).
+
+To run the load test:
+
+1. Install artillery locally if you haven't done so with `npm install -g artillery@latest`
+2. `$ cd api` or or `$ cd frontend`
+3. `$ make load-test-<env>` where env is either `local`, `dev`, `staging`, or `production`
+
+- `make load-test-local`
+  - requires running a local container in another console
+- `make load-test-dev`
+- `make load-test-staging`
+- `make load-test-prod`

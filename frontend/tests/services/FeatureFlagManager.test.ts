@@ -49,7 +49,7 @@ describe("FeatureFlagsManager", () => {
 
   test('`.featureFlagsCookie` getter loads feature flags with server-side NextRequest["cookies"]', () => {
     const serverFeatureFlagsManager = new FeatureFlagsManager(
-      MockServerCookiesModule
+      MockServerCookiesModule,
     );
     expect(serverFeatureFlagsManager.featureFlagsCookie).toEqual(COOKIE_VALUE);
   });
@@ -69,7 +69,7 @@ describe("FeatureFlagsManager", () => {
       value: "",
     });
     expect(Cookies.get(FeatureFlagsManager.FEATURE_FLAGS_KEY)).toEqual(
-      undefined
+      undefined,
     );
     expect(featureFlagsManager.featureFlagsCookie).toEqual({});
   });
@@ -82,7 +82,7 @@ describe("FeatureFlagsManager", () => {
     });
     expect(() => JSON.parse(invalidCookieValue) as string).toThrow();
     expect(Cookies.get(FeatureFlagsManager.FEATURE_FLAGS_KEY)).toEqual(
-      invalidCookieValue
+      invalidCookieValue,
     );
     expect(featureFlagsManager.featureFlagsCookie).toEqual({});
   });
@@ -90,7 +90,7 @@ describe("FeatureFlagsManager", () => {
   test("`.featureFlagsCookie` does not include invalid feature flags even if cookie value includes it", () => {
     const invalidFeatureFlag = "someInvalidFeatureFlagName";
     expect(featureFlagsManager.isValidFeatureFlag(invalidFeatureFlag)).toBe(
-      false
+      false,
     );
     Object.defineProperty(window.document, "cookie", {
       writable: true,
@@ -129,7 +129,7 @@ describe("FeatureFlagsManager", () => {
       expect(featureFlagsManager.isValidFeatureFlag(featureName)).toBe(true);
       mockFeatureFlagsCookie({ [featureName]: featureFlagValue as boolean });
       expect(featureFlagsManager.featureFlagsCookie).toEqual({});
-    }
+    },
   );
 
   test("`.featureFlags` getter loads cookie value and combines with default feature flags", () => {
@@ -144,14 +144,14 @@ describe("FeatureFlagsManager", () => {
     Cookies.set(FeatureFlagsManager.FEATURE_FLAGS_KEY, JSON.stringify({}));
     expect(featureFlagsManager.featureFlagsCookie).toEqual({});
     expect(featureFlagsManager.featureFlags).toEqual(
-      featureFlagsManager.defaultFeatureFlags
+      featureFlagsManager.defaultFeatureFlags,
     );
   });
 
   test("`.featureFlags` uses cookie values over default feature flags", () => {
     // Flip the value of all cookie values
     const defaultFeatureFlags = Object.fromEntries(
-      Object.entries(COOKIE_VALUE).map(([key, value]) => [key, !value])
+      Object.entries(COOKIE_VALUE).map(([key, value]) => [key, !value]),
     );
     jest
       .spyOn(FeatureFlagsManager.prototype, "defaultFeatureFlags", "get")
@@ -161,12 +161,12 @@ describe("FeatureFlagsManager", () => {
 
   test("`.isFeatureEnabled` correctly interprets values from `.featureFlags`", () => {
     expect(
-      Object.keys(featureFlagsManager.featureFlags).length
+      Object.keys(featureFlagsManager.featureFlags).length,
     ).toBeGreaterThanOrEqual(1);
     Object.entries(featureFlagsManager.featureFlags).forEach(
       ([name, enabled]) => {
         expect(featureFlagsManager.isFeatureEnabled(name)).toEqual(enabled);
-      }
+      },
     );
   });
 
@@ -174,11 +174,11 @@ describe("FeatureFlagsManager", () => {
     const currentFeatureFlags = featureFlagsManager.featureFlags;
 
     const featureFlagToSneakilyUpdateName = Object.keys(
-      featureFlagsManager.featureFlags
+      featureFlagsManager.featureFlags,
     )[0];
     const currentValue = currentFeatureFlags[featureFlagToSneakilyUpdateName];
     expect(
-      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName)
+      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName),
     ).toEqual(currentValue);
 
     // At this point, since the `FeatureFlagsManager` has already been instantiated, we can change the cookie
@@ -188,26 +188,26 @@ describe("FeatureFlagsManager", () => {
       JSON.stringify({
         ...currentFeatureFlags,
         [featureFlagToSneakilyUpdateName]: !currentValue,
-      })
+      }),
     );
     expect(
-      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName)
+      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName),
     ).toEqual(!currentValue);
   });
 
   test("`.isFeatureEnabled` throws an error if accessing an invalid feature flag", () => {
     const fakeFeatureFlag = "someFakeFeatureFlag-------------------";
     expect(
-      Object.keys(featureFlagsManager.featureFlags).includes(fakeFeatureFlag)
+      Object.keys(featureFlagsManager.featureFlags).includes(fakeFeatureFlag),
     ).toEqual(false);
     expect(() =>
-      featureFlagsManager.isFeatureEnabled(fakeFeatureFlag)
+      featureFlagsManager.isFeatureEnabled(fakeFeatureFlag),
     ).toThrow();
   });
 
   test("`.isFeatureDisabled` returns the opposite of `.isFeatureEnabled`", () => {
     expect(
-      Object.keys(featureFlagsManager.featureFlags).length
+      Object.keys(featureFlagsManager.featureFlags).length,
     ).toBeGreaterThanOrEqual(1);
     Object.keys(featureFlagsManager.featureFlags).forEach((name) => {
       const isEnabled = featureFlagsManager.isFeatureEnabled(name);
@@ -222,7 +222,7 @@ describe("FeatureFlagsManager", () => {
     });
     const invalidFeatureFlagName = "someInvalidFeatureFlag--------------";
     expect(
-      featureFlagsManager.isValidFeatureFlag(invalidFeatureFlagName)
+      featureFlagsManager.isValidFeatureFlag(invalidFeatureFlagName),
     ).toEqual(false);
   });
 
@@ -290,14 +290,14 @@ describe("FeatureFlagsManager", () => {
     };
     const validQueryParamString = "feature1:false;feature2:true";
     expect(
-      featureFlagsManager.parseFeatureFlagsFromString(validQueryParamString)
+      featureFlagsManager.parseFeatureFlagsFromString(validQueryParamString),
     ).toEqual(expectedFeatureFlags);
     const validQueryParamStringWithExtraCharacters =
       ";feature1: false; feature2 : true ;";
     expect(
       featureFlagsManager.parseFeatureFlagsFromString(
-        validQueryParamStringWithExtraCharacters
-      )
+        validQueryParamStringWithExtraCharacters,
+      ),
     ).toEqual(expectedFeatureFlags);
   });
 
@@ -321,7 +321,7 @@ describe("FeatureFlagsManager", () => {
       const featureFlags =
         featureFlagsManager.parseFeatureFlagsFromString(queryParamString);
       expect(featureFlags).toEqual({});
-    }
+    },
   );
 
   test.each([
@@ -335,7 +335,7 @@ describe("FeatureFlagsManager", () => {
       const featureFlags =
         featureFlagsManager.parseFeatureFlagsFromString(queryParamString);
       expect(Object.keys(featureFlags).includes(flagName)).toBe(isValid);
-    }
+    },
   );
 
   test("`.setFeatureflag` updates the feature flags", () => {
@@ -345,7 +345,7 @@ describe("FeatureFlagsManager", () => {
     const newFeatureFlagValue = !currentFeatureFlags[featureFlagToChangeName];
     featureFlagsManager.setFeatureFlag(
       featureFlagToChangeName,
-      newFeatureFlagValue
+      newFeatureFlagValue,
     );
 
     const expectedNewFeatureFlags = {
@@ -353,7 +353,7 @@ describe("FeatureFlagsManager", () => {
       [featureFlagToChangeName]: newFeatureFlagValue,
     };
     expect(featureFlagsManager.featureFlagsCookie).toEqual(
-      expectedNewFeatureFlags
+      expectedNewFeatureFlags,
     );
     expect(featureFlagsManager.featureFlags).toEqual(expectedNewFeatureFlags);
   });
@@ -362,11 +362,11 @@ describe("FeatureFlagsManager", () => {
     const someInvalidFeatureFlag = "someFakeFeatureFlag-------------------";
     expect(
       Object.keys(featureFlagsManager.featureFlags).includes(
-        someInvalidFeatureFlag
-      )
+        someInvalidFeatureFlag,
+      ),
     ).toEqual(false);
     expect(() =>
-      featureFlagsManager.setFeatureFlag(someInvalidFeatureFlag, true)
+      featureFlagsManager.setFeatureFlag(someInvalidFeatureFlag, true),
     ).toThrow();
   });
 
@@ -379,28 +379,28 @@ describe("FeatureFlagsManager", () => {
     // At this point, since the `FeatureFlagsManager` has already been instantiated, we can change the cookie
     // (without going through the manager) and check if it resiliently uses the updated values
     expect(
-      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName)
+      featureFlagsManager.isFeatureEnabled(featureFlagToSneakilyUpdateName),
     ).not.toEqual(newFeatureFlagToSneakilyUpdateValue);
     Cookies.set(
       FeatureFlagsManager.FEATURE_FLAGS_KEY,
       JSON.stringify({
         ...currentFeatureFlags,
         [featureFlagToSneakilyUpdateName]: newFeatureFlagToSneakilyUpdateValue,
-      })
+      }),
     );
 
     const featureFlagToChangeName = Object.keys(currentFeatureFlags)[1];
     const newFeatureFlagToChangeValue =
       !currentFeatureFlags[featureFlagToChangeName];
     expect(
-      featureFlagsManager.isFeatureEnabled(featureFlagToChangeName)
+      featureFlagsManager.isFeatureEnabled(featureFlagToChangeName),
     ).not.toEqual(newFeatureFlagToChangeValue);
     expect(featureFlagToChangeName).not.toEqual(
-      featureFlagToSneakilyUpdateName
+      featureFlagToSneakilyUpdateName,
     );
     featureFlagsManager.setFeatureFlag(
       featureFlagToChangeName,
-      newFeatureFlagToChangeValue
+      newFeatureFlagToChangeValue,
     );
 
     const expectedNewFeatureFlags = {
@@ -409,7 +409,7 @@ describe("FeatureFlagsManager", () => {
       [featureFlagToChangeName]: newFeatureFlagToChangeValue,
     };
     expect(featureFlagsManager.featureFlagsCookie).toEqual(
-      expectedNewFeatureFlags
+      expectedNewFeatureFlags,
     );
     expect(featureFlagsManager.featureFlags).toEqual(expectedNewFeatureFlags);
   });

@@ -11,7 +11,7 @@ describe("PdfContainer", () => {
         alt="test alt content"
         height={100}
         width={200}
-      />
+      />,
     );
     const alt = screen.getByAltText("test alt content");
     expect(alt).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("PdfContainer", () => {
         alt="test alt content"
         height={200}
         width={100}
-      />
+      />,
     );
     const alt = screen.getByAltText("test alt content");
     expect(alt).toBeInTheDocument();

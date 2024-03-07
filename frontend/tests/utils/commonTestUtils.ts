@@ -7,7 +7,7 @@
  */
 export async function mockProcessEnv(
   overrides: { [key: string]: string },
-  callback: () => Promise<void> | void
+  callback: () => Promise<void> | void,
 ) {
   const oldEnv = { ...process.env };
   Object.entries(overrides).forEach(([key, value]) => {

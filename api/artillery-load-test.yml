@@ -1,0 +1,62 @@
+config:
+  target: http://localhost:8080
+  tls:
+    rejectUnauthorized: false
+  http:
+    timeout: 10
+  phases:
+    - duration: 30
+      arrivalRate: 2
+      maxVusers: 50
+      name: Warm up phase
+    - duration: 30
+      arrivalRate: 28
+      maxVusers: 250
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 56
+      maxVusers: 1000
+      name: Spike phase
+  environments:
+    prod:
+      target: http://api-prod-342430507.us-east-1.elb.amazonaws.com
+    staging:
+      target: http://api-staging-770293556.us-east-1.elb.amazonaws.com
+    dev:
+      target: http://api-dev-1839587515.us-east-1.elb.amazonaws.com
+  plugins:
+    expect:
+      outputFormat: prettyError
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+scenarios:
+  - name: health
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+  - name: docs
+    flow:
+      - get:
+          url: "/docs"
+          expect:
+            - statusCode: 200
+  - name: search
+    flow:
+      - post:
+          url: "/v0/opportunities/search"
+          headers:
+            X-Auth: "{{ $env.API_AUTH_TOKEN }}"
+          json:
+            paging:
+              page_offset: 1
+              page_size: 25
+            sorting:
+              order_by: opportunity_id
+              sort_direction: ascending
+          expect:
+            - statusCode: 200

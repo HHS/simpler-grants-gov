@@ -52,7 +52,7 @@ resource "aws_subnet" "security_public" {
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.name}-security-public"
-    subnet_type = "public"
+    subnet_type = "security-public"
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_subnet" "security_private" {
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.name}-security-private"
-    subnet_type = "private"
+    subnet_type = "security-private"
   }
 }
 
