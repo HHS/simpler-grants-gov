@@ -18,16 +18,17 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
   }
 
   return (
-    <>
+    <div>
+      {/* <div id="search-results-list"> */}
       <h4>{searchResults.length} Opportunities</h4>
-      <ul className="search-results-list">
+      <ul>
         {searchResults.map((opportunity) => (
           <li key={opportunity.opportunity_id}>
             {opportunity.category}, {opportunity.opportunity_title}
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 };
 

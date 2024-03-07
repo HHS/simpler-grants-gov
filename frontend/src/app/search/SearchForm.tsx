@@ -3,6 +3,7 @@
 import "./_search.scss";
 
 import React from "react";
+import SearchBar from "../../components/search/SearchBar";
 import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
 import SearchResultsList from "../../components/search/SearchResultsList";
@@ -22,17 +23,8 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
   return (
     <form action={updateSearchResultAction}>
       <div className="grid-container">
-        <div className="grid-row search-bar">
-          <input
-            className="usa-input"
-            id="search-input-text"
-            name="search-input"
-            type="search"
-            placeholder="Search a keyword"
-          />
-          <button className="usa-button search-submit-button" type="submit">
-            Search
-          </button>
+        <div className="search-bar">
+          <SearchBar />
         </div>
 
         <div className="grid-row">
@@ -40,13 +32,13 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
             <fieldset className="usa-fieldset">Filters</fieldset>
           </aside>
           <main className="tablet:grid-col-8">
-            <div className="grid-row search-pagination">
+            <div className="search-pagination">
               <SearchPagination />
             </div>
-            {/* <div className="grid-row "> */}
+            <div id="search-results-list">
               <SearchResultsList searchResults={searchResults} />
-            {/* </div> */}
-            <div className="grid-row search-pagination">
+            </div>
+            <div className="search-pagination">
               <SearchPagination />
             </div>
           </main>

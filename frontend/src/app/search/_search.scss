@@ -12,14 +12,12 @@ main {
 }
 
 .search-bar {
-  display: flex; // Enables Flexbox
-  justify-content: center; // Spaces out the child elements
-  align-items: center; // Vertically centers the children
+  display: flex; 
+  justify-content: center;
+  align-items: center;
 
   #search-input-text {
-    // flex: 1; // Allows the input to grow and take up available space
-    // margin-right: 1rem; // Adds margin to the right of the input
-    // position: absolute;
+
     width: 100%;
   }
 
@@ -30,6 +28,11 @@ main {
 }
 
 .search-pagination {
+  align-items: center;
+  justify-content: center;
+}
+
+#search-results-list {
   align-items: center;
   justify-content: center;
 }
