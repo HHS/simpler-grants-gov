@@ -46,8 +46,8 @@ class Opportunity(Base, TimestampMixin):
 
     # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
     # although the legacy DB does not have them setup as foreign keys
-    publisher_user_id: Mapped[int | None]
-    publisher_profile_id: Mapped[int | None]
+    publisher_user_id: Mapped[str | None]
+    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
 
     opportunity_assistance_listings: Mapped[list["OpportunityAssistanceListing"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
@@ -123,7 +123,7 @@ class OpportunitySummary(Base, TimestampMixin):
     is_deleted: Mapped[bool | None]
 
     can_send_mail: Mapped[bool | None]
-    publisher_profile_id: Mapped[int | None]
+    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
     publisher_user_id: Mapped[str | None]
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
@@ -161,7 +161,9 @@ class OpportunityAssistanceListing(Base, TimestampMixin):
 
     opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Opportunity.opportunity_id), index=True)
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     assistance_listing_number: Mapped[str | None]
