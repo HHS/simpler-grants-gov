@@ -177,16 +177,36 @@ class TestSprintBurnupByTasks:
         # validation - check burnup output
         expected = [
             result_row(
-                day=DAY_1, opened=2, closed=0, delta=2, total_open=2, total_closed=0,
+                day=DAY_1,
+                opened=2,
+                closed=0,
+                delta=2,
+                total_open=2,
+                total_closed=0,
             ),
             result_row(
-                day=DAY_2, opened=0, closed=1, delta=-1, total_open=1, total_closed=1,
+                day=DAY_2,
+                opened=0,
+                closed=1,
+                delta=-1,
+                total_open=1,
+                total_closed=1,
             ),
             result_row(
-                day=DAY_3, opened=0, closed=0, delta=0, total_open=1, total_closed=1,
+                day=DAY_3,
+                opened=0,
+                closed=0,
+                delta=0,
+                total_open=1,
+                total_closed=1,
             ),
             result_row(
-                day=DAY_4, opened=0, closed=1, delta=-1, total_open=0, total_closed=2,
+                day=DAY_4,
+                opened=0,
+                closed=1,
+                delta=-1,
+                total_open=0,
+                total_closed=2,
             ),
         ]
         assert df.to_dict("records") == expected
@@ -205,116 +225,155 @@ class TestSprintBurnupByTasks:
         # validation - check burnup output
         expected = [
             result_row(
-                day=DAY_0, opened=1, closed=0, delta=1, total_open=1, total_closed=0,
+                day=DAY_0,
+                opened=1,
+                closed=0,
+                delta=1,
+                total_open=1,
+                total_closed=0,
             ),
             result_row(
-                day=DAY_1, opened=0, closed=0, delta=0, total_open=1, total_closed=0,
+                day=DAY_1,
+                opened=0,
+                closed=0,
+                delta=0,
+                total_open=1,
+                total_closed=0,
             ),
             result_row(
-                day=DAY_2, opened=1, closed=1, delta=0, total_open=1, total_closed=1,
+                day=DAY_2,
+                opened=1,
+                closed=1,
+                delta=0,
+                total_open=1,
+                total_closed=1,
             ),
             result_row(
-                day=DAY_3, opened=0, closed=1, delta=-1, total_open=0, total_closed=2,
+                day=DAY_3,
+                opened=0,
+                closed=1,
+                delta=-1,
+                total_open=0,
+                total_closed=2,
+            ),
+        ]
+        assert df.to_dict("records") == expected
+
+    def test_include_all_sprint_days_if_tix_closed_early(self):
+        """All days of the sprint should be included even if all tix were closed early."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
+        df = output.results
+        # validation - check max date is end of sprint not last closed date
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+
+    def test_raise_value_error_if_sprint_arg_not_in_dataset(self):
+        """A ValueError should be raised if the sprint argument isn't valid."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # validation
+        with pytest.raises(
+            ValueError,
+            match="Sprint value doesn't match one of the available sprints",
+        ):
+            SprintBurnup(test_data, sprint="Fake sprint", unit=Unit.issues)
+
+    def test_calculate_burnup_for_current_sprint(self):
+        """Use the current sprint if the date falls in the middle of a sprint."""
+        # setup - create test data
+        today = pd.Timestamp.today().floor("d")
+        day_1 = (today + pd.Timedelta(days=-1)).strftime("%Y-%m-%d")
+        day_2 = today.strftime("%Y-%m-%d")
+        day_3 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        sprint_data = [  # note sprint duration is 2 days by default
+            sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
+            sprint_row(issue=1, sprint_start=day_1, created=day_1),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="@current", unit=Unit.issues)
+        df = output.results
+        # validation - check burnup output
+        expected = [
+            result_row(
+                day=day_1, opened=2, closed=0, delta=2, total_open=2, total_closed=0,
+            ),
+            result_row(
+                day=day_2, opened=0, closed=1, delta=-1, total_open=1, total_closed=1,
+            ),
+            result_row(
+                day=day_3, opened=0, closed=0, delta=0, total_open=1, total_closed=1,
             ),
         ]
         assert df.to_dict("records") == expected
 
 
-#     def test_include_all_sprint_days_if_tix_closed_early(self):
-#         """All days of the sprint should be included even if all tix were closed early."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
-#         df = output.results
-#         # validation - check max date is end of sprint not last closed date
-#         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+class TestSprintBurnupByPoints:
+    """Test the SprintBurnup class with unit='points'."""
 
-#     def test_raise_value_error_if_sprint_arg_not_in_dataset(self):
-#         """A ValueError should be raised if the sprint argument isn't valid."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # validation
-#         with pytest.raises(
-#             ValueError,
-#             match="Sprint value doesn't match one of the available sprints",
-#         ):
-#             SprintBurnup(test_data, sprint="Fake sprint", unit=Unit.issues)
+    def test_burnup_works_with_points(self):
+        """Burnup should be calculated correctly with points."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
+        df = output.results
+        # validation
+        expected = [
+            result_row(
+                day=DAY_0, opened=2, closed=0, delta=2, total_open=2, total_closed=0,
+            ),
+            result_row(
+                day=DAY_1, opened=0, closed=0, delta=0, total_open=2, total_closed=0,
+            ),
+            result_row(
+                day=DAY_2, opened=3, closed=0, delta=3, total_open=5, total_closed=0,
+            ),
+            result_row(
+                day=DAY_3, opened=0, closed=0, delta=0, total_open=5, total_closed=0,
+            ),
+        ]
+        assert df.to_dict("records") == expected
 
-#     def test_calculate_burnup_for_current_sprint(self):
-#         """Use the current sprint if the date falls in the middle of a sprint."""
-#         # setup - create test data
-#         today = pd.Timestamp.today().floor("d")
-#         day_1 = (today + pd.Timedelta(days=-1)).strftime("%Y-%m-%d")
-#         day_2 = today.strftime("%Y-%m-%d")
-#         day_3 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
-#         sprint_data = [  # note sprint duration is 2 days by default
-#             sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
-#             sprint_row(issue=1, sprint_start=day_1, created=day_1),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="@current", unit=Unit.issues)
-#         df = output.results
-#         # validation - check burnup output
-#         expected = [
-#             result_row(day=day_1, opened=2, closed=0, delta=2, total=2),
-#             result_row(day=day_2, opened=0, closed=1, delta=-1, total=1),
-#             result_row(day=day_3, opened=0, closed=0, delta=0, total=1),
-#         ]
-#         assert df.to_dict("records") == expected
-
-
-# class TestSprintBurnupByPoints:
-#     """Test the SprintBurnup class with unit='points'."""
-
-#     def test_burnup_works_with_points(self):
-#         """Burnup should be calculated correctly with points."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
-#         df = output.results
-#         # validation
-#         expected = [
-#             result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
-#             result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
-#             result_row(day=DAY_2, opened=3, closed=0, delta=3, total=5),
-#             result_row(day=DAY_3, opened=0, closed=0, delta=0, total=5),
-#         ]
-#         assert df.to_dict("records") == expected
-
-#     def test_burnup_excludes_tix_without_points(self):
-#         """Burnup should exclude tickets that are not pointed."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=None),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
-#         df = output.results
-#         # validation
-#         expected = [
-#             result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
-#             result_row(day=DAY_2, opened=0, closed=0, delta=0, total=2),
-#             result_row(day=DAY_3, opened=0, closed=0, delta=0, total=2),
-#         ]
-#         assert df.to_dict("records") == expected
+    def test_burnup_excludes_tix_without_points(self):
+        """Burnup should exclude tickets that are not pointed."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=None),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
+        df = output.results
+        # validation
+        expected = [
+            result_row(
+                day=DAY_1, opened=2, closed=0, delta=2, total_open=2, total_closed=0,
+            ),
+            result_row(
+                day=DAY_2, opened=0, closed=0, delta=0, total_open=2, total_closed=0,
+            ),
+            result_row(
+                day=DAY_3, opened=0, closed=0, delta=0, total_open=2, total_closed=0,
+            ),
+        ]
+        assert df.to_dict("records") == expected
 
 
 # class TestGetStats:
