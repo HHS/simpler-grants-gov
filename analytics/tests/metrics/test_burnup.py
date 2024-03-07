@@ -1,9 +1,7 @@
 """Test the analytics.metrics.burnup module."""
-from pathlib import Path  # noqa: I001
 
 import pandas as pd
 import pytest
-
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.burnup import SprintBurnup, Unit
 
@@ -13,7 +11,6 @@ from tests.conftest import (
     DAY_2,
     DAY_3,
     DAY_4,
-    MockSlackbot,
     sprint_row,
 )
 
@@ -94,7 +91,7 @@ class TestSprintBurnupByTasks:
                 opened=0,
                 closed=1,
                 delta=-1,
-                total_open=1,
+                total_open=0,
                 total_closed=1,
             ),
         ]
