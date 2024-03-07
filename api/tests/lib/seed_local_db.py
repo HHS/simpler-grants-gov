@@ -23,6 +23,7 @@ def _build_opportunities(db_session: db.Session) -> None:
     if max_opportunity_id is None:
         max_opportunity_id = 0
 
+    logger.info(f"Creating opportunities starting with opportunity_id {max_opportunity_id + 1}")
     factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
 
     # Create a few opportunities in various scenarios
@@ -33,6 +34,9 @@ def _build_opportunities(db_session: db.Session) -> None:
     factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
     factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
 
+    logger.info("Finished creating opportunities")
+
+    logger.info("Creating records in the transfer_topportunity table")
     # Also seed the topportunity table for now in the same way
     max_opportunity_id = db_session.query(func.max(TransferTopportunity.opportunity_id)).scalar()
     if max_opportunity_id is None:
@@ -40,6 +44,7 @@ def _build_opportunities(db_session: db.Session) -> None:
 
     factories.TransferTopportunityFactory.reset_sequence(value=max_opportunity_id + 1)
     factories.TransferTopportunityFactory.create_batch(size=25)
+    logger.info("Finished creating records in the transfer_topportunity table")
 
 
 def seed_local_db() -> None:

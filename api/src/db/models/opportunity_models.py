@@ -24,7 +24,7 @@ from src.db.models.lookup_models import (
 class Opportunity(Base, TimestampMixin):
     __tablename__ = "opportunity"
 
-    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
@@ -41,13 +41,13 @@ class Opportunity(Base, TimestampMixin):
 
     is_draft: Mapped[bool] = mapped_column(index=True)
 
-    revision_number: Mapped[int | None]
+    revision_number: Mapped[str | None]
     modified_comments: Mapped[str | None]
 
     # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
     # although the legacy DB does not have them setup as foreign keys
-    publisher_user_id: Mapped[int | None]
-    publisher_profile_id: Mapped[int | None]
+    publisher_user_id: Mapped[str | None]
+    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
 
     opportunity_assistance_listings: Mapped[list["OpportunityAssistanceListing"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
@@ -81,9 +81,9 @@ class Opportunity(Base, TimestampMixin):
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
-    opportunity_summary_id: Mapped[int] = mapped_column(primary_key=True)
+    opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id))
+    opportunity_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Opportunity.opportunity_id))
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     summary_description: Mapped[str | None]
@@ -130,43 +130,47 @@ class OpportunitySummary(Base, TimestampMixin):
     is_deleted: Mapped[bool | None]
 
     can_send_mail: Mapped[bool | None]
-    publisher_profile_id: Mapped[int | None]
+    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
     publisher_user_id: Mapped[str | None]
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
-    link_funding_instruments: Mapped[list["LinkFundingInstrumentSummary"]] = relationship(
+    link_funding_instruments: Mapped[
+        list["LinkOpportunitySummaryFundingInstrument"]
+    ] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
-    link_funding_categories: Mapped[list["LinkFundingCategorySummary"]] = relationship(
+    link_funding_categories: Mapped[list["LinkOpportunitySummaryFundingCategory"]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
-    link_applicant_types: Mapped[list["LinkApplicantTypeSummary"]] = relationship(
+    link_applicant_types: Mapped[list["LinkOpportunitySummaryApplicantType"]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
 
     @property
-    def funding_instruments(self) -> list[FundingInstrument]:
+    def funding_instruments(self) -> set[FundingInstrument]:
         # Helper method for serialization of the API response
-        return [f.funding_instrument for f in self.link_funding_instruments]
+        return {f.funding_instrument for f in self.link_funding_instruments}
 
     @property
-    def funding_categories(self) -> list[FundingCategory]:
+    def funding_categories(self) -> set[FundingCategory]:
         # Helper method for serialization of the API response
-        return [f.funding_category for f in self.link_funding_categories]
+        return {f.funding_category for f in self.link_funding_categories}
 
     @property
-    def applicant_types(self) -> list[ApplicantType]:
+    def applicant_types(self) -> set[ApplicantType]:
         # Helper method for serialization of the API response
-        return [a.applicant_type for a in self.link_applicant_types]
+        return {a.applicant_type for a in self.link_applicant_types}
 
 
 class OpportunityAssistanceListing(Base, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
 
-    opportunity_assistance_listing_id: Mapped[int] = mapped_column(primary_key=True)
+    opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column(ForeignKey(Opportunity.opportunity_id), index=True)
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     assistance_listing_number: Mapped[str | None]
@@ -176,11 +180,11 @@ class OpportunityAssistanceListing(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkFundingInstrumentSummary(Base, TimestampMixin):
-    __tablename__ = "link_funding_instrument_summary"
+class LinkOpportunitySummaryFundingInstrument(Base, TimestampMixin):
+    __tablename__ = "link_opportunity_summary_funding_instrument"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -197,11 +201,11 @@ class LinkFundingInstrumentSummary(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkFundingCategorySummary(Base, TimestampMixin):
-    __tablename__ = "link_funding_category_summary"
+class LinkOpportunitySummaryFundingCategory(Base, TimestampMixin):
+    __tablename__ = "link_opportunity_summary_funding_category"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -218,11 +222,11 @@ class LinkFundingCategorySummary(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkApplicantTypeSummary(Base, TimestampMixin):
-    __tablename__ = "link_applicant_type_summary"
+class LinkOpportunitySummaryApplicantType(Base, TimestampMixin):
+    __tablename__ = "link_opportunity_summary_applicant_type"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -243,14 +247,14 @@ class CurrentOpportunitySummary(Base, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
     opportunity_id: Mapped[int] = mapped_column(
-        ForeignKey(Opportunity.opportunity_id), primary_key=True
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
     opportunity: Mapped[Opportunity] = relationship(
         single_parent=True, cascade="all, delete-orphan"
     )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(
         single_parent=True, cascade="all, delete-orphan"
