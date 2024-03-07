@@ -233,7 +233,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             .fillna(0)
         )
         # calculate the difference between opened and closed each day
-        # cumulatively sum the deltas to get the running total
+        # cumulatively sum the difference to get the running total
         df["total_open"] = (df["opened"] - df["closed"]).cumsum()
         df["total_closed"] = df["closed"].cumsum()
         return df

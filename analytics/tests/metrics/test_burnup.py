@@ -17,10 +17,6 @@ from tests.conftest import (
     sprint_row,
 )
 
-
-# TODO(AlexanderStephensonUSDS): Update result rows for burnup metric
-
-
 def result_row(
     day: str,
     opened: int,

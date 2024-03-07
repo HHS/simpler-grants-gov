@@ -106,7 +106,7 @@ def calculate_sprint_burnup(
         sprint_file=sprint_file,
         issue_file=issue_file,
     )
-    # calculate burnup 
+    # calculate burnup
     burnup = SprintBurnup(sprint_data, sprint=sprint, unit=unit)
     show_and_or_post_results(
         metric=burnup,
