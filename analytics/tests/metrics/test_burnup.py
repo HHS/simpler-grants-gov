@@ -23,7 +23,7 @@ def result_row(
     opened: int,
     closed: int,
     delta: int,
-    total_closed: int,
+    total: int,
 ) -> dict:
     """Create a sample result row."""
     return {
@@ -31,7 +31,7 @@ def result_row(
         "opened": opened,
         "closed": closed,
         "total_open": delta,
-        "total_closed": total_closed,
+        "total_closed": total,
     }
 
 
@@ -71,9 +71,9 @@ class TestSprintBurnupByTasks:
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
         # validation - check burnup output
         expected = [
-            result_row(day=DAY_1, opened=1, closed=0, total_open=1, total_closed=0),
-            result_row(day=DAY_2, opened=0, closed=0, total_open=0, total_closed=0),
-            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total_closed=1),
+            result_row(day=DAY_1, opened=1, closed=0, total_open=1, total=0),
+            result_row(day=DAY_2, opened=0, closed=0, total_open=0, total=0),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=1),
         ]
         assert df.to_dict("records") == expected
 
