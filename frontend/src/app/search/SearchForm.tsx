@@ -2,39 +2,12 @@
 
 import "./_search.scss";
 
-import { useFormState, useFormStatus } from "react-dom";
-
-import Loading from "./loading";
 import React from "react";
+import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
+import SearchResultsList from "../../components/search/SearchResultsList";
 import { updateResults } from "./actions";
-
-interface SearchResultsListProps {
-  searchResults: SearchResponseData;
-}
-
-const SearchResultsList: React.FC<SearchResultsListProps> = ({
-  searchResults,
-}) => {
-  const { pending } = useFormStatus();
-
-  if (pending) {
-    return <Loading />;
-  }
-
-  return (
-    <>
-      <h4>{searchResults.length} Opportunities</h4>
-      <ul className="search-results-list">
-        {searchResults.map((opportunity) => (
-          <li key={opportunity.opportunity_id}>
-            {opportunity.category}, {opportunity.opportunity_title}
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-};
+import { useFormState } from "react-dom";
 
 interface SearchFormProps {
   initialSearchResults: SearchResponseData;
@@ -50,8 +23,6 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
     <form action={updateSearchResultAction}>
       <div className="grid-container">
         <div className="grid-row search-bar">
-          {" "}
-          {/* Flex container */}
           <input
             className="usa-input"
             id="search-input-text"
@@ -64,14 +35,20 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
           </button>
         </div>
 
-        <div className="grid-row grid-gap">
+        <div className="grid-row">
           <aside className="tablet:grid-col-4">
             <fieldset className="usa-fieldset">Filters</fieldset>
           </aside>
           <main className="tablet:grid-col-8">
-            <SearchResultsList searchResults={searchResults} />
-
-            {/* Pagination */}
+            <div className="grid-row search-pagination">
+              <SearchPagination />
+            </div>
+            {/* <div className="grid-row "> */}
+              <SearchResultsList searchResults={searchResults} />
+            {/* </div> */}
+            <div className="grid-row search-pagination">
+              <SearchPagination />
+            </div>
           </main>
         </div>
       </div>
