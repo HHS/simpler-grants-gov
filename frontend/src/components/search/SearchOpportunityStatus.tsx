@@ -1,5 +1,7 @@
 import React from "react";
 
+// TODO: import uswds checkbox
+// There's a variant for checkbox to display it in a box
 export default function SearchOpportunityStatus() {
   return (
     <div className="checkbox-quadrant">
