@@ -1,8 +1,8 @@
 """Updates for summary tables
 
-Revision ID: 89cb2b016f84
+Revision ID: 9ed5d76e2a1c
 Revises: 81cb9c6033b3
-Create Date: 2024-03-05 12:15:57.820687
+Create Date: 2024-03-06 16:08:42.695941
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "89cb2b016f84"
+revision = "9ed5d76e2a1c"
 down_revision = "81cb9c6033b3"
 branch_labels = None
 depends_on = None
@@ -120,7 +120,7 @@ def upgrade():
         ),
     )
     op.create_table(
-        "link_applicant_type_summary",
+        "link_opportunity_summary_applicant_type",
         sa.Column("opportunity_summary_id", sa.Integer(), nullable=False),
         sa.Column("applicant_type_id", sa.Integer(), nullable=False),
         sa.Column("legacy_applicant_type_id", sa.Integer(), nullable=True),
@@ -141,23 +141,25 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["applicant_type_id"],
             ["lk_applicant_type.applicant_type_id"],
-            name=op.f("link_applicant_type_summary_applicant_type_id_lk_applicant_type_fkey"),
+            name=op.f(
+                "link_opportunity_summary_applicant_type_applicant_type_id_lk_applicant_type_fkey"
+            ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
             ["opportunity_summary.opportunity_summary_id"],
             name=op.f(
-                "link_applicant_type_summary_opportunity_summary_id_opportunity_summary_fkey"
+                "link_opportunity_summary_applicant_type_opportunity_summary_id_opportunity_summary_fkey"
             ),
         ),
         sa.PrimaryKeyConstraint(
             "opportunity_summary_id",
             "applicant_type_id",
-            name=op.f("link_applicant_type_summary_pkey"),
+            name=op.f("link_opportunity_summary_applicant_type_pkey"),
         ),
     )
     op.create_table(
-        "link_funding_category_summary",
+        "link_opportunity_summary_funding_category",
         sa.Column("opportunity_summary_id", sa.Integer(), nullable=False),
         sa.Column("funding_category_id", sa.Integer(), nullable=False),
         sa.Column("legacy_funding_category_id", sa.Integer(), nullable=True),
@@ -178,23 +180,25 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["funding_category_id"],
             ["lk_funding_category.funding_category_id"],
-            name=op.f("link_funding_category_summary_funding_category_id_lk_funding_category_fkey"),
+            name=op.f(
+                "link_opportunity_summary_funding_category_funding_category_id_lk_funding_category_fkey"
+            ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
             ["opportunity_summary.opportunity_summary_id"],
             name=op.f(
-                "link_funding_category_summary_opportunity_summary_id_opportunity_summary_fkey"
+                "link_opportunity_summary_funding_category_opportunity_summary_id_opportunity_summary_fkey"
             ),
         ),
         sa.PrimaryKeyConstraint(
             "opportunity_summary_id",
             "funding_category_id",
-            name=op.f("link_funding_category_summary_pkey"),
+            name=op.f("link_opportunity_summary_funding_category_pkey"),
         ),
     )
     op.create_table(
-        "link_funding_instrument_summary",
+        "link_opportunity_summary_funding_instrument",
         sa.Column("opportunity_summary_id", sa.Integer(), nullable=False),
         sa.Column("funding_instrument_id", sa.Integer(), nullable=False),
         sa.Column("legacy_funding_instrument_id", sa.Integer(), nullable=True),
@@ -216,64 +220,30 @@ def upgrade():
             ["funding_instrument_id"],
             ["lk_funding_instrument.funding_instrument_id"],
             name=op.f(
-                "link_funding_instrument_summary_funding_instrument_id_lk_funding_instrument_fkey"
+                "link_opportunity_summary_funding_instrument_funding_instrument_id_lk_funding_instrument_fkey"
             ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
             ["opportunity_summary.opportunity_summary_id"],
             name=op.f(
-                "link_funding_instrument_summary_opportunity_summary_id_opportunity_summary_fkey"
+                "link_opportunity_summary_funding_instrument_opportunity_summary_id_opportunity_summary_fkey"
             ),
         ),
         sa.PrimaryKeyConstraint(
             "opportunity_summary_id",
             "funding_instrument_id",
-            name=op.f("link_funding_instrument_summary_pkey"),
+            name=op.f("link_opportunity_summary_funding_instrument_pkey"),
         ),
     )
     op.drop_table("link_funding_category_opportunity")
-    op.drop_table("link_funding_instrument_opportunity")
     op.drop_table("link_applicant_type_opportunity")
+    op.drop_table("link_funding_instrument_opportunity")
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.create_table(
-        "link_applicant_type_opportunity",
-        sa.Column("opportunity_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column("applicant_type_id", sa.INTEGER(), autoincrement=False, nullable=False),
-        sa.Column("updated_by", sa.TEXT(), autoincrement=False, nullable=True),
-        sa.Column("created_by", sa.TEXT(), autoincrement=False, nullable=True),
-        sa.Column(
-            "created_at",
-            postgresql.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            autoincrement=False,
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            postgresql.TIMESTAMP(timezone=True),
-            server_default=sa.text("now()"),
-            autoincrement=False,
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["applicant_type_id"],
-            ["lk_applicant_type.applicant_type_id"],
-            name="link_applicant_type_opportunity_applicant_type_id_lk_ap_7903",
-        ),
-        sa.ForeignKeyConstraint(
-            ["opportunity_id"],
-            ["opportunity.opportunity_id"],
-            name="link_applicant_type_opportunity_opportunity_id_opportunity_fkey",
-        ),
-        sa.PrimaryKeyConstraint(
-            "opportunity_id", "applicant_type_id", name="link_applicant_type_opportunity_pkey"
-        ),
-    )
     op.create_table(
         "link_funding_instrument_opportunity",
         sa.Column("opportunity_id", sa.INTEGER(), autoincrement=False, nullable=False),
@@ -311,6 +281,40 @@ def downgrade():
         ),
     )
     op.create_table(
+        "link_applicant_type_opportunity",
+        sa.Column("opportunity_id", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column("applicant_type_id", sa.INTEGER(), autoincrement=False, nullable=False),
+        sa.Column("updated_by", sa.TEXT(), autoincrement=False, nullable=True),
+        sa.Column("created_by", sa.TEXT(), autoincrement=False, nullable=True),
+        sa.Column(
+            "created_at",
+            postgresql.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            postgresql.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            autoincrement=False,
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["applicant_type_id"],
+            ["lk_applicant_type.applicant_type_id"],
+            name="link_applicant_type_opportunity_applicant_type_id_lk_ap_7903",
+        ),
+        sa.ForeignKeyConstraint(
+            ["opportunity_id"],
+            ["opportunity.opportunity_id"],
+            name="link_applicant_type_opportunity_opportunity_id_opportunity_fkey",
+        ),
+        sa.PrimaryKeyConstraint(
+            "opportunity_id", "applicant_type_id", name="link_applicant_type_opportunity_pkey"
+        ),
+    )
+    op.create_table(
         "link_funding_category_opportunity",
         sa.Column("opportunity_id", sa.INTEGER(), autoincrement=False, nullable=False),
         sa.Column("funding_category_id", sa.INTEGER(), autoincrement=False, nullable=False),
@@ -344,9 +348,9 @@ def downgrade():
             "opportunity_id", "funding_category_id", name="link_funding_category_opportunity_pkey"
         ),
     )
-    op.drop_table("link_funding_instrument_summary")
-    op.drop_table("link_funding_category_summary")
-    op.drop_table("link_applicant_type_summary")
+    op.drop_table("link_opportunity_summary_funding_instrument")
+    op.drop_table("link_opportunity_summary_funding_category")
+    op.drop_table("link_opportunity_summary_applicant_type")
     op.drop_table("current_opportunity_summary")
     op.drop_table("opportunity_summary")
     # ### end Alembic commands ###

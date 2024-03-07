@@ -246,17 +246,17 @@ class OpportunitySummaryFactory(BaseFactory):
     revision_number = 1
 
     link_funding_instruments = factory.RelatedFactoryList(
-        "tests.src.db.models.factories.LinkFundingInstrumentSummaryFactory",
+        "tests.src.db.models.factories.LinkOpportunitySummaryFundingInstrumentFactory",
         factory_related_name="opportunity_summary",
         size=lambda: random.randint(1, 3),
     )
     link_funding_categories = factory.RelatedFactoryList(
-        "tests.src.db.models.factories.LinkFundingCategorySummaryFactory",
+        "tests.src.db.models.factories.LinkOpportunitySummaryFundingCategoryFactory",
         factory_related_name="opportunity_summary",
         size=lambda: random.randint(1, 3),
     )
     link_applicant_types = factory.RelatedFactoryList(
-        "tests.src.db.models.factories.LinkApplicantTypeSummaryFactory",
+        "tests.src.db.models.factories.LinkOpportunitySummaryApplicantTypeFactory",
         factory_related_name="opportunity_summary",
         size=lambda: random.randint(1, 3),
     )
@@ -351,9 +351,9 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     )
 
 
-class LinkFundingInstrumentSummaryFactory(BaseFactory):
+class LinkOpportunitySummaryFundingInstrumentFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.LinkFundingInstrumentSummary
+        model = opportunity_models.LinkOpportunitySummaryFundingInstrument
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
     opportunity_summary_id = factory.LazyAttribute(
@@ -364,9 +364,9 @@ class LinkFundingInstrumentSummaryFactory(BaseFactory):
     funding_instrument = factory.Iterator(FundingInstrument)
 
 
-class LinkFundingCategorySummaryFactory(BaseFactory):
+class LinkOpportunitySummaryFundingCategoryFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.LinkFundingCategorySummary
+        model = opportunity_models.LinkOpportunitySummaryFundingCategory
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
     opportunity_summary_id = factory.LazyAttribute(
@@ -377,9 +377,9 @@ class LinkFundingCategorySummaryFactory(BaseFactory):
     funding_category = factory.Iterator(FundingCategory)
 
 
-class LinkApplicantTypeSummaryFactory(BaseFactory):
+class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.LinkApplicantTypeSummary
+        model = opportunity_models.LinkOpportunitySummaryApplicantType
 
     opportunity_summary = factory.SubFactory(OpportunitySummaryFactory)
     opportunity_summary_id = factory.LazyAttribute(
