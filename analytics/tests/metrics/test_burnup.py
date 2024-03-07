@@ -97,29 +97,37 @@ class TestSprintBurnupByTasks:
         ]
         assert df.to_dict("records") == expected
 
+    def test_count_tix_created_before_sprint_start(self):
+        """Burnup should include tix opened before the sprint but closed during it."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
+        df = output.results
+        # validation - check min and max dates
+        assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+        # validation - check burnup output
+        expected = [
+            result_row(
+                day=DAY_0, opened=2, closed=0, delta=2, total_open=2, total_closed=0
+            ),
+            result_row(
+                day=DAY_1, opened=0, closed=0, delta=0, total_open=2, total_closed=0
+            ),
+            result_row(
+                day=DAY_2, opened=0, closed=1, delta=-1, total_open=1, total_closed=1
+            ),
+            result_row(
+                day=DAY_3, opened=0, closed=1, delta=-1, total_open=0, total_closed=2
+            ),
+        ]
+        assert df.to_dict("records") == expected
 
-#     def test_count_tix_created_before_sprint_start(self):
-#         """Burnup should include tix opened before the sprint but closed during it."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_3),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
-#         df = output.results
-#         # validation - check min and max dates
-#         assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
-#         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
-#         # validation - check burnup output
-#         expected = [
-#             result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
-#             result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
-#             result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
-#             result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
-#         ]
-#         assert df.to_dict("records") == expected
 
 #     def test_count_tix_closed_after_sprint_start(self):
 #         """Burnup should include tix closed after the sprint ended."""
