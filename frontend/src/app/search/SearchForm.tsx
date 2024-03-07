@@ -6,6 +6,7 @@ import React from "react";
 import SearchBar from "../../components/search/SearchBar";
 import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
+import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
 import { updateResults } from "./actions";
 import { useFormState } from "react-dom";
@@ -32,6 +33,9 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
             <fieldset className="usa-fieldset">Filters</fieldset>
           </aside>
           <main className="tablet:grid-col-8">
+            <div className="grid-row" id="search-results-header">
+              <SearchResultsHeader searchResults={searchResults} />
+            </div>
             <div className="search-pagination">
               <SearchPagination />
             </div>
