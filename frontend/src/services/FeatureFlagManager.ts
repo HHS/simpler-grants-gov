@@ -54,7 +54,11 @@ export class FeatureFlagsManager {
   private _cookies;
 
   constructor(
-    cookies: NextRequest["cookies"] | CookiesStatic | NextServerSideCookies | ReadonlyRequestCookies,
+    cookies:
+      | NextRequest["cookies"]
+      | CookiesStatic
+      | NextServerSideCookies
+      | ReadonlyRequestCookies,
   ) {
     this._cookies = cookies;
   }
