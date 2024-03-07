@@ -21,7 +21,7 @@ def result_row(
     day: str,
     opened: int,
     closed: int,
-    total_open: int,
+    delta: int,
     total_closed: int,
 ) -> dict:
     """Create a sample result row."""
@@ -29,7 +29,7 @@ def result_row(
         "date": pd.Timestamp(day, tz="UTC"),
         "opened": opened,
         "closed": closed,
-        "total_open": total_open,
+        "total_open": delta,
         "total_closed": total_closed,
     }
 
@@ -71,8 +71,8 @@ class TestSprintBurnupByTasks:
         # validation - check burnup output
         expected = [
             result_row(day=DAY_1, opened=1, closed=0, total_open=1, total_closed=0),
-            result_row(day=DAY_2, opened=0, closed=0, total_open=1, total_closed=0),
-            result_row(day=DAY_3, opened=0, closed=1, total_open=1, total_closed=1),
+            result_row(day=DAY_2, opened=0, closed=0, total_open=0, total_closed=0),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total_closed=1),
         ]
         assert df.to_dict("records") == expected
 
@@ -92,10 +92,10 @@ class TestSprintBurnupByTasks:
         assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
         # validation - check burnup output
         expected = [
-            result_row(day=DAY_0, opened=2, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_1, opened=0, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_2, opened=0, closed=1, total_open=2, total_closed=1),
-            result_row(day=DAY_3, opened=0, closed=1, total_open=2, total_closed=2),
+            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
         ]
         assert df.to_dict("records") == expected
 
@@ -127,10 +127,10 @@ class TestSprintBurnupByTasks:
         assert df[output.date_col].max() == pd.Timestamp(DAY_4, tz="UTC")
         # validation - check burnup output
         expected = [
-            result_row(day=DAY_1, opened=2, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_2, opened=0, closed=1, total_open=2, total_closed=1),
-            result_row(day=DAY_3, opened=0, closed=0, total_open=2, total_closed=1),
-            result_row(day=DAY_4, opened=0, closed=1, total_open=2, total_closed=2),
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=1),
+            result_row(day=DAY_4, opened=0, closed=1, delta=-1, total=0),
         ]
         assert df.to_dict("records") == expected
 
@@ -147,10 +147,10 @@ class TestSprintBurnupByTasks:
         df = output.results
         # validation - check burnup output
         expected = [
-            result_row(day=DAY_0, opened=1, closed=0, total_open=1, total_closed=0),
-            result_row(day=DAY_1, opened=0, closed=0, total_open=1, total_closed=0),
-            result_row(day=DAY_2, opened=1, closed=1, total_open=2, total_closed=1),
-            result_row(day=DAY_3, opened=0, closed=1, total_open=0, total_closed=2),
+            result_row(day=DAY_0, opened=1, closed=0, delta=1, total=1),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=1),
+            result_row(day=DAY_2, opened=1, closed=1, delta=0, total=1),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
         ]
         assert df.to_dict("records") == expected
 
@@ -200,9 +200,9 @@ class TestSprintBurnupByTasks:
         df = output.results
         # validation - check burnup output
         expected = [
-            result_row(day=day_1, opened=2, closed=0, total_open=2, total_closed=0),
-            result_row(day=day_2, opened=0, closed=1, total_open=2, total_closed=1),
-            result_row(day=day_3, opened=0, closed=0, total_open=2, total_closed=1),
+            result_row(day=day_1, opened=2, closed=0, delta=2, total=2),
+            result_row(day=day_2, opened=0, closed=1, delta=-1, total=1),
+            result_row(day=day_3, opened=0, closed=0, delta=0, total=1),
         ]
         assert df.to_dict("records") == expected
 
@@ -223,10 +223,10 @@ class TestSprintBurnupByPoints:
         df = output.results
         # validation
         expected = [
-            result_row(day=DAY_0, opened=2, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_1, opened=0, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_2, opened=3, closed=0, total_open=5, total_closed=0),
-            result_row(day=DAY_3, opened=0, closed=0, total_open=5, total_closed=0),
+            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_2, opened=3, closed=0, delta=3, total=5),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=5),
         ]
         assert df.to_dict("records") == expected
 
@@ -244,9 +244,9 @@ class TestSprintBurnupByPoints:
         df = output.results
         # validation
         expected = [
-            result_row(day=DAY_1, opened=2, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_2, opened=0, closed=0, total_open=2, total_closed=0),
-            result_row(day=DAY_3, opened=0, closed=0, total_open=2, total_closed=0),
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
+            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=2),
         ]
         assert df.to_dict("records") == expected
 
