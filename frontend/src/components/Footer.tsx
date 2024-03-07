@@ -1,3 +1,5 @@
+"use client";
+
 import { ExternalRoutes } from "src/constants/routes";
 import { assetPath } from "src/utils/assetPath";
 

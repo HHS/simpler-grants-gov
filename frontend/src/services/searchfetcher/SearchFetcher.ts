@@ -1,12 +1,14 @@
-import { Opportunity } from "../../types/searchTypes";
+import "server-only";
+
+import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
 
 export abstract class SearchFetcher {
-  abstract fetchOpportunities(): Promise<Opportunity[]>;
+  abstract fetchOpportunities(): Promise<SearchResponseData>;
 }
 
 export async function fetchSearchOpportunities(
-  searchFetcher: SearchFetcher
-): Promise<Opportunity[]> {
+  searchFetcher: SearchFetcher,
+): Promise<SearchResponseData> {
   try {
     return await searchFetcher.fetchOpportunities();
   } catch (error) {

@@ -35,7 +35,7 @@ describe("Footer", () => {
     expect(newsletter).toBeInTheDocument();
     expect(newsletter).toHaveAttribute(
       "href",
-      ExternalRoutes.GRANTS_NEWSLETTER
+      ExternalRoutes.GRANTS_NEWSLETTER,
     );
 
     expect(blog).toBeInTheDocument();

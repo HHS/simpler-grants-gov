@@ -1,14 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import Layout from "src/components/Layout";
+import AppLayout from "src/components/AppLayout";
 
-describe("Layout", () => {
+describe("AppLayout", () => {
   it("renders children in main section", () => {
     render(
-      <Layout>
+      <AppLayout>
         <h1>child</h1>
-      </Layout>,
+      </AppLayout>,
     );
 
     const header = screen.getByRole("heading", { name: /child/i, level: 1 });
@@ -18,9 +18,9 @@ describe("Layout", () => {
 
   it("passes accessibility scan", async () => {
     const { container } = render(
-      <Layout>
+      <AppLayout>
         <h1>child</h1>
-      </Layout>,
+      </AppLayout>,
     );
     const results = await axe(container);
 

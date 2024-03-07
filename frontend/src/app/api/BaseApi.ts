@@ -1,3 +1,9 @@
+// This server-only package is recommended by Next.js to ensure code is only run on the server.
+// It provides a build-time error if client-side code attempts to invoke the code here.
+// Since we're pulling in an API Auth Token here, this should be server only
+// https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
+import "server-only";
+
 import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -18,22 +24,26 @@ export interface HeadersDict {
 }
 
 export default abstract class BaseApi {
-  /**
-   * Root path of API resource without leading slash.
-   */
+  // Root path of API resource without leading slash.
   abstract get basePath(): string;
 
-  /**
-   * Namespace representing the API resource.
-   */
+  // API version
+  get version() {
+    return "v0.1";
+  }
+
+  // Namespace representing the API resource
   abstract get namespace(): string;
 
-  /**
-   * Configuration of headers to send with all requests
-   * Can include feature flags in child classes
-   */
-  get headers() {
-    return {};
+  // Configuration of headers to send with all requests
+  // Can include feature flags in child classes
+  get headers(): HeadersDict {
+    const headers: HeadersDict = {};
+
+    if (process.env.API_AUTH_TOKEN) {
+      headers["X-AUTH"] = process.env.API_AUTH_TOKEN;
+    }
+    return headers;
   }
 
   /**
@@ -41,21 +51,29 @@ export default abstract class BaseApi {
    */
   async request<TResponseData>(
     method: ApiMethod,
-    subPath = "",
+    basePath: string,
+    namespace: string,
+    subPath: string,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
-    } = {}
+    } = {},
   ) {
     const { additionalHeaders = {} } = options;
-    const url = createRequestUrl(method, this.basePath, subPath, body);
+    const url = createRequestUrl(
+      method,
+      basePath,
+      this.version,
+      namespace,
+      subPath,
+      body,
+    );
     const headers: HeadersDict = {
       ...additionalHeaders,
       ...this.headers,
     };
 
     headers["Content-Type"] = "application/json";
-
     const response = await this.sendRequest<TResponseData>(url, {
       body: method === "GET" || !body ? null : createRequestBody(body),
       headers,
@@ -70,11 +88,10 @@ export default abstract class BaseApi {
    */
   private async sendRequest<TResponseData>(
     url: string,
-    fetchOptions: RequestInit
+    fetchOptions: RequestInit,
   ) {
     let response: Response;
     let responseBody: ApiResponseBody<TResponseData>;
-
     try {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as ApiResponseBody<TResponseData>;
@@ -92,7 +109,7 @@ export default abstract class BaseApi {
         response,
         errors,
         this.namespace,
-        data
+        data,
       );
 
       throw new Error("Not OK response received");
@@ -110,13 +127,16 @@ export default abstract class BaseApi {
 export function createRequestUrl(
   method: ApiMethod,
   basePath: string,
+  version: string,
+  namespace: string,
   subPath: string,
-  body?: JSONRequestBody
+  body?: JSONRequestBody,
 ) {
-  // Remove leading slash from apiPath if it has one
-  const cleanedPaths = compact([basePath, subPath]).map(removeLeadingSlash);
-  let url = [process.env.apiUrl, ...cleanedPaths].join("/");
-
+  // Remove leading slash
+  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
+    removeLeadingSlash,
+  );
+  let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const searchBody: { [key: string]: string } = {};

@@ -34,6 +34,16 @@ def _build_opportunities(db_session: db.Session) -> None:
     factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
     factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
 
+    # generate a few opportunities with mostly null values
+    all_null_opportunities = factories.OpportunityFactory.create_batch(size=5, all_fields_null=True)
+    for all_null_opportunity in all_null_opportunities:
+        summary = factories.OpportunitySummaryFactory.create(
+            all_fields_null=True, opportunity=all_null_opportunity
+        )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=all_null_opportunity, opportunity_summary=summary
+        )
+
     logger.info("Finished creating opportunities")
 
     logger.info("Creating records in the transfer_topportunity table")
