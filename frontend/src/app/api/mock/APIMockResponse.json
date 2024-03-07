@@ -29,10 +29,7 @@
         "agency_name": "US Alphabetical Basic Corp",
         "agency_phone_number": "123-456-0000",
         "applicant_eligibility_description": "East statement travel cell car figure people. Must relationship room and artist wear. Focus almost report. Young down medical thing. Even computer magazine scientist deal. Particular message past commercial politics.",
-        "applicant_types": [
-          "state_governments",
-          "county_governments"
-        ],
+        "applicant_types": ["state_governments", "county_governments"],
         "archive_date": "2024-04-03",
         "award_ceiling": 5210000,
         "award_floor": 2605000,
@@ -46,14 +43,9 @@
         "forecasted_close_date_description": "Current least organization thought herself.",
         "forecasted_post_date": "2024-03-26",
         "forecasted_project_start_date": "2025-02-16",
-        "funding_categories": [
-          "recovery_act"
-        ],
+        "funding_categories": ["recovery_act"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "grant",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": true,
         "post_date": "2024-03-06",
@@ -108,9 +100,7 @@
         "forecasted_close_date_description": "Happen born space.",
         "forecasted_post_date": "2024-03-23",
         "forecasted_project_start_date": "2024-10-10",
-        "funding_categories": [
-          "agriculture"
-        ],
+        "funding_categories": ["agriculture"],
         "funding_category_description": null,
         "funding_instruments": [
           "procurement_contract",
@@ -175,15 +165,9 @@
         "forecasted_close_date_description": "Those strategy will.",
         "forecasted_post_date": "2024-03-27",
         "forecasted_project_start_date": "2025-02-13",
-        "funding_categories": [
-          "arts"
-        ],
+        "funding_categories": ["arts"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract",
-          "grant",
-          "other"
-        ],
+        "funding_instruments": ["procurement_contract", "grant", "other"],
         "is_cost_sharing": false,
         "is_forecast": true,
         "post_date": "2024-02-17",
@@ -224,9 +208,7 @@
         "agency_name": "US Alphabetical Basic Corp",
         "agency_phone_number": "123-456-0003",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "other_native_american_tribal_organizations"
-        ],
+        "applicant_types": ["other_native_american_tribal_organizations"],
         "archive_date": "2024-03-30",
         "award_ceiling": 5850000,
         "award_floor": 417857,
@@ -246,10 +228,7 @@
           "community_development"
         ],
         "funding_category_description": "Goal place friend risk suddenly.",
-        "funding_instruments": [
-          "grant",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "cooperative_agreement"],
         "is_cost_sharing": false,
         "is_forecast": true,
         "post_date": "2024-02-21",
@@ -300,13 +279,9 @@
         "forecasted_close_date_description": "Property ball forward people.",
         "forecasted_post_date": "2024-03-26",
         "forecasted_project_start_date": "2024-11-13",
-        "funding_categories": [
-          "disaster_prevention_and_relief"
-        ],
+        "funding_categories": ["disaster_prevention_and_relief"],
         "funding_category_description": "Resource education change.",
-        "funding_instruments": [
-          "procurement_contract"
-        ],
+        "funding_instruments": ["procurement_contract"],
         "is_cost_sharing": false,
         "is_forecast": true,
         "post_date": "2024-03-04",
@@ -347,9 +322,7 @@
         "agency_name": "US Number Department",
         "agency_phone_number": "123-456-0005",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "individuals"
-        ],
+        "applicant_types": ["individuals"],
         "archive_date": "2024-03-29",
         "award_ceiling": 1485000,
         "award_floor": 247500,
@@ -369,9 +342,7 @@
           "employment_labor_and_training"
         ],
         "funding_category_description": "Better him threat.",
-        "funding_instruments": [
-          "other"
-        ],
+        "funding_instruments": ["other"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-03-04",
@@ -422,15 +393,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "food_and_nutrition",
-          "environment"
-        ],
+        "funding_categories": ["food_and_nutrition", "environment"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "grant",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-02-26",
@@ -463,10 +428,7 @@
         "agency_name": "US Xylophone Yak Zoo",
         "agency_phone_number": "123-456-0007",
         "applicant_eligibility_description": "Follow probably simple threat. Like image new according like. Tv law on light fight. In successful even sometimes. Program toward child institution. Paper open their lot season treat quickly.",
-        "applicant_types": [
-          "state_governments",
-          "unrestricted"
-        ],
+        "applicant_types": ["state_governments", "unrestricted"],
         "archive_date": "2024-03-29",
         "award_ceiling": 7640000,
         "award_floor": 955000,
@@ -480,14 +442,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "health",
-          "housing"
-        ],
+        "funding_categories": ["health", "housing"],
         "funding_category_description": "Tend there friend open.",
-        "funding_instruments": [
-          "procurement_contract"
-        ],
+        "funding_instruments": ["procurement_contract"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-02-20",
@@ -520,9 +477,7 @@
         "agency_name": "US Number Department",
         "agency_phone_number": "123-456-0008",
         "applicant_eligibility_description": "Change as way second everyone. Not him as member actually line attack. Usually Mrs easy character local. Finally book suddenly address home discover attention fast.",
-        "applicant_types": [
-          "county_governments"
-        ],
+        "applicant_types": ["county_governments"],
         "archive_date": "2024-04-02",
         "award_ceiling": 4530000,
         "award_floor": 1510000,
@@ -536,15 +491,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "humanities"
-        ],
+        "funding_categories": ["humanities"],
         "funding_category_description": "Section everything think music hundred.",
-        "funding_instruments": [
-          "grant",
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "other", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-02-16",
@@ -604,10 +553,7 @@
           "information_and_statistics"
         ],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract",
-          "other"
-        ],
+        "funding_instruments": ["procurement_contract", "other"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-03-02",
@@ -671,9 +617,7 @@
           "natural_resources"
         ],
         "funding_category_description": "Traditional shoulder success may hard.",
-        "funding_instruments": [
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-01-25",
@@ -734,9 +678,7 @@
           "regional_development"
         ],
         "funding_category_description": null,
-        "funding_instruments": [
-          "grant"
-        ],
+        "funding_instruments": ["grant"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-01-31",
@@ -794,9 +736,7 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "transportation"
-        ],
+        "funding_categories": ["transportation"],
         "funding_category_description": "Energy call far hit recognize TV standard return.",
         "funding_instruments": [
           "procurement_contract",
@@ -853,15 +793,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "affordable_care_act"
-        ],
+        "funding_categories": ["affordable_care_act"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract",
-          "grant",
-          "other"
-        ],
+        "funding_instruments": ["procurement_contract", "grant", "other"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-01-31",
@@ -894,11 +828,7 @@
         "agency_name": "US Number Department",
         "agency_phone_number": "123-456-0014",
         "applicant_eligibility_description": "List need PM worry site issue begin. Include others necessary form minute miss moment degree. Teach forward think compare cell. Maintain half medical many hope. Quite authority enough pass fine spend. Coach future attorney degree effort sound north.",
-        "applicant_types": [
-          "state_governments",
-          "unrestricted",
-          "other"
-        ],
+        "applicant_types": ["state_governments", "unrestricted", "other"],
         "archive_date": "2024-04-02",
         "award_ceiling": 955000,
         "award_floor": 47750,
@@ -912,11 +842,7 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "agriculture",
-          "recovery_act",
-          "other"
-        ],
+        "funding_categories": ["agriculture", "recovery_act", "other"],
         "funding_category_description": "Challenge run develop leader life fund begin.",
         "funding_instruments": [
           "procurement_contract",
@@ -963,9 +889,7 @@
         "agency_name": "US Alphabetical Basic Corp",
         "agency_phone_number": "123-456-0015",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "county_governments"
-        ],
+        "applicant_types": ["county_governments"],
         "archive_date": "2024-02-28",
         "award_ceiling": 1670000,
         "award_floor": 278333,
@@ -979,15 +903,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "arts",
-          "business_and_commerce"
-        ],
+        "funding_categories": ["arts", "business_and_commerce"],
         "funding_category_description": "Indeed culture way determine appear.",
-        "funding_instruments": [
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["other", "cooperative_agreement"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-01-27",
@@ -1045,14 +963,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "community_development"
-        ],
+        "funding_categories": ["community_development"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract",
-          "grant"
-        ],
+        "funding_instruments": ["procurement_contract", "grant"],
         "is_cost_sharing": false,
         "is_forecast": false,
         "post_date": "2024-01-29",
@@ -1115,10 +1028,7 @@
           "consumer_protection"
         ],
         "funding_category_description": "Lose paper skill receive three.",
-        "funding_instruments": [
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["other", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-01-27",
@@ -1159,9 +1069,7 @@
         "agency_name": "US Alphabetical Basic Corp",
         "agency_phone_number": "123-456-0018",
         "applicant_eligibility_description": "Time collection state action key. Trade hard table statement eye marriage report threat. Today interview toward senior establish south. Would performance statement safe once ever.",
-        "applicant_types": [
-          "private_institutions_of_higher_education"
-        ],
+        "applicant_types": ["private_institutions_of_higher_education"],
         "archive_date": "2024-02-27",
         "award_ceiling": 7410000,
         "award_floor": 1482000,
@@ -1181,10 +1089,7 @@
           "employment_labor_and_training"
         ],
         "funding_category_description": "Me stop letter would huge.",
-        "funding_instruments": [
-          "procurement_contract",
-          "grant"
-        ],
+        "funding_instruments": ["procurement_contract", "grant"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-01-30",
@@ -1237,17 +1142,9 @@
         "forecasted_close_date_description": null,
         "forecasted_post_date": null,
         "forecasted_project_start_date": null,
-        "funding_categories": [
-          "health",
-          "food_and_nutrition",
-          "environment"
-        ],
+        "funding_categories": ["health", "food_and_nutrition", "environment"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "grant",
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "other", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": false,
         "post_date": "2024-01-29",
@@ -1284,9 +1181,7 @@
         "agency_name": "US Number Department",
         "agency_phone_number": "123-456-0020",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "other_native_american_tribal_organizations"
-        ],
+        "applicant_types": ["other_native_american_tribal_organizations"],
         "archive_date": "2024-02-23",
         "award_ceiling": 9150000,
         "award_floor": 915000,
@@ -1300,14 +1195,9 @@
         "forecasted_close_date_description": "Draw central generation term ability eye some.",
         "forecasted_post_date": "2024-03-25",
         "forecasted_project_start_date": "2024-11-09",
-        "funding_categories": [
-          "humanities",
-          "housing"
-        ],
+        "funding_categories": ["humanities", "housing"],
         "funding_category_description": "Season meeting effect sound help.",
-        "funding_instruments": [
-          "procurement_contract"
-        ],
+        "funding_instruments": ["procurement_contract"],
         "is_cost_sharing": true,
         "is_forecast": true,
         "post_date": "2024-01-27",
@@ -1340,9 +1230,7 @@
         "agency_name": "US Alphabetical Basic Corp",
         "agency_phone_number": "123-456-0021",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "public_and_indian_housing_authorities"
-        ],
+        "applicant_types": ["public_and_indian_housing_authorities"],
         "archive_date": "2024-02-22",
         "award_ceiling": 2165000,
         "award_floor": 98409,
@@ -1356,15 +1244,9 @@
         "forecasted_close_date_description": "Ago a environment.",
         "forecasted_post_date": "2024-03-22",
         "forecasted_project_start_date": "2025-02-07",
-        "funding_categories": [
-          "infrastructure_investment_and_jobs_act"
-        ],
+        "funding_categories": ["infrastructure_investment_and_jobs_act"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "grant",
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "other", "cooperative_agreement"],
         "is_cost_sharing": true,
         "is_forecast": true,
         "post_date": "2024-01-28",
@@ -1397,9 +1279,7 @@
         "agency_name": "US Xylophone Yak Zoo",
         "agency_phone_number": "123-456-0022",
         "applicant_eligibility_description": null,
-        "applicant_types": [
-          "nonprofits_non_higher_education_with_501c3"
-        ],
+        "applicant_types": ["nonprofits_non_higher_education_with_501c3"],
         "archive_date": "2024-02-25",
         "award_ceiling": 9305000,
         "award_floor": 516944,
@@ -1413,13 +1293,9 @@
         "forecasted_close_date_description": "Establish available represent experience subject alone window.",
         "forecasted_post_date": "2024-03-24",
         "forecasted_project_start_date": "2025-01-25",
-        "funding_categories": [
-          "information_and_statistics"
-        ],
+        "funding_categories": ["information_and_statistics"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract"
-        ],
+        "funding_instruments": ["procurement_contract"],
         "is_cost_sharing": false,
         "is_forecast": true,
         "post_date": "2024-01-30",
@@ -1456,9 +1332,7 @@
         "agency_name": "US Number Department",
         "agency_phone_number": "123-456-0023",
         "applicant_eligibility_description": "Movie change my quite her agree. Television artist professional kid realize who. Radio bar finally decide. School ground outside blood item upon race world.",
-        "applicant_types": [
-          "nonprofits_non_higher_education_without_501c3"
-        ],
+        "applicant_types": ["nonprofits_non_higher_education_without_501c3"],
         "archive_date": "2024-02-26",
         "award_ceiling": 8385000,
         "award_floor": 381136,
@@ -1478,11 +1352,7 @@
           "natural_resources"
         ],
         "funding_category_description": "Though city commercial believe market middle half.",
-        "funding_instruments": [
-          "grant",
-          "other",
-          "cooperative_agreement"
-        ],
+        "funding_instruments": ["grant", "other", "cooperative_agreement"],
         "is_cost_sharing": false,
         "is_forecast": true,
         "post_date": "2024-01-28",
@@ -1536,13 +1406,9 @@
         "forecasted_close_date_description": "Include sense treatment idea.",
         "forecasted_post_date": "2024-03-23",
         "forecasted_project_start_date": "2024-11-12",
-        "funding_categories": [
-          "opportunity_zone_benefits"
-        ],
+        "funding_categories": ["opportunity_zone_benefits"],
         "funding_category_description": null,
-        "funding_instruments": [
-          "procurement_contract"
-        ],
+        "funding_instruments": ["procurement_contract"],
         "is_cost_sharing": true,
         "is_forecast": true,
         "post_date": "2024-01-26",
