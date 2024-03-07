@@ -12,12 +12,11 @@ main {
 }
 
 .search-bar {
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
 
   #search-input-text {
-
     width: 100%;
   }
 
@@ -33,8 +32,11 @@ main {
 }
 
 #search-results-list {
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  text-align: center;
+  ul {
+    list-style-position: inside;
+  }
 }
 
 // .grid-container {
