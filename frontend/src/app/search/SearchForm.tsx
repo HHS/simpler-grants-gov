@@ -49,22 +49,24 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
   return (
     <form action={updateSearchResultAction}>
       <div className="grid-container">
-        <div id="search-bar" className="grid-row">
+        <div className="grid-row search-bar">
+          {" "}
+          {/* Flex container */}
           <input
             className="usa-input"
-            id="search-input"
-            name="search"
+            id="search-input-text"
+            name="search-input"
             type="search"
             placeholder="Search a keyword"
           />
-          <button className="usa-button" type="submit">
+          <button className="usa-button search-submit-button" type="submit">
             Search
           </button>
         </div>
+
         <div className="grid-row grid-gap">
           <aside className="tablet:grid-col-4">
-            <fieldset className="usa-fieldset">{/* Filter content */}</fieldset>
-            {/* More filters */}
+            <fieldset className="usa-fieldset">Filters</fieldset>
           </aside>
           <main className="tablet:grid-col-8">
             <SearchResultsList searchResults={searchResults} />
