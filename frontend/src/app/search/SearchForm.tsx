@@ -4,6 +4,7 @@ import "./_search.scss";
 
 import React from "react";
 import SearchBar from "../../components/search/SearchBar";
+import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
@@ -27,9 +28,9 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
         <div className="search-bar">
           <SearchBar />
         </div>
-
         <div className="grid-row">
           <aside className="tablet:grid-col-4">
+            <SearchOpportunityStatus />
             <fieldset className="usa-fieldset">Filters</fieldset>
           </aside>
           <main className="tablet:grid-col-8">
