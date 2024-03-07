@@ -17,6 +17,7 @@ from tests.conftest import (
     sprint_row,
 )
 
+
 def result_row(
     day: str,
     opened: int,
