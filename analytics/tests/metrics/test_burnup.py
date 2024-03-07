@@ -618,98 +618,98 @@ class TestFormatSlackMessage:
         assert Unit.points.value in title
 
 
-# class TestPlotResults:
-#     """Test the SprintBurnup.show_results() method."""
+class TestPlotResults:
+    """Test the SprintBurnup.show_results() method."""
 
-#     def test_plot_results_output_stored_in_chart_property(self):
-#         """SprintBurnup.chart should contain the output of plot_results()."""
-#         # setup - create test data
-#         sprint_data = [
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-#             sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
-#         ]
-#         test_data = SprintBoard.from_dict(sprint_data)
-#         # execution
-#         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
-#         # validation - check that the chart attribute matches output of plot_results()
-#         assert output.chart == output.plot_results()
-
-
-# class TestExportMethods:
-#     """Test the export methods method for SprintBurnup."""
-
-#     @pytest.mark.parametrize(
-#         ("method", "file_name"),
-#         [
-#             ("export_results", "RESULTS_CSV"),
-#             ("export_dataset", "DATASET_CSV"),
-#             ("export_chart_to_html", "CHART_HTML"),
-#             ("export_chart_to_png", "CHART_PNG"),
-#         ],
-#     )
-#     def test_export_results_to_correct_file_path(
-#         self,
-#         method: str,
-#         file_name: str,
-#         tmp_path: Path,
-#         sample_burnup: SprintBurnup,
-#     ):
-#         """The file should be exported to the correct location."""
-#         # setup - check that file doesn't exist at output location
-#         file_name = getattr(sample_burnup, file_name)
-#         expected_path = tmp_path / file_name
-#         assert expected_path.parent.exists() is True
-#         assert expected_path.exists() is False
-#         # execution
-#         func = getattr(sample_burnup, method)
-#         output = func(output_dir=expected_path.parent)
-#         # validation - check that output path matches expected and file exists
-#         assert output == expected_path
-#         assert expected_path.exists()
-
-#     @pytest.mark.parametrize(
-#         ("method", "file_name"),
-#         [
-#             ("export_results", "RESULTS_CSV"),
-#             ("export_dataset", "DATASET_CSV"),
-#             ("export_chart_to_html", "CHART_HTML"),
-#             ("export_chart_to_png", "CHART_PNG"),
-#         ],
-#     )
-#     def test_create_parent_dir_if_it_does_not_exists(
-#         self,
-#         method: str,
-#         file_name: str,
-#         tmp_path: Path,
-#         sample_burnup: SprintBurnup,
-#     ):
-#         """The parent directory should be created if it doesn't already exist."""
-#         # setup - check that file and parent directory don't exist
-#         file_name = getattr(sample_burnup, file_name)
-#         expected_path = tmp_path / "new_folder" / file_name
-#         assert expected_path.parent.exists() is False  # doesn't yet exist
-#         assert expected_path.exists() is False
-#         # execution
-#         func = getattr(sample_burnup, method)
-#         output = func(output_dir=expected_path.parent)
-#         # validation - check that output path matches expected and file exists
-#         assert output == expected_path
-#         assert expected_path.exists()
+    def test_plot_results_output_stored_in_chart_property(self):
+        """SprintBurnup.chart should contain the output of plot_results()."""
+        # setup - create test data
+        sprint_data = [
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        ]
+        test_data = SprintBoard.from_dict(sprint_data)
+        # execution
+        output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
+        # validation - check that the chart attribute matches output of plot_results()
+        assert output.chart == output.plot_results()
 
 
-# def test_post_to_slack(
-#     mock_slackbot: MockSlackbot,
-#     tmp_path: Path,
-#     sample_burnup: SprintBurnup,
-# ):
-#     """Test the steps required to post the results to slack, without actually posting."""
-#     # execution
-#     sample_burnup.post_results_to_slack(
-#         mock_slackbot,
-#         channel_id="test_channel",
-#         output_dir=tmp_path,
-#     )
-#     # validation - check that output files exist
-#     for output in ["RESULTS_CSV", "DATASET_CSV", "CHART_PNG", "CHART_HTML"]:
-#         output_path = tmp_path / getattr(sample_burnup, output)
-#         assert output_path.exists() is True
+class TestExportMethods:
+    """Test the export methods method for SprintBurnup."""
+
+    @pytest.mark.parametrize(
+        ("method", "file_name"),
+        [
+            ("export_results", "RESULTS_CSV"),
+            ("export_dataset", "DATASET_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
+        ],
+    )
+    def test_export_results_to_correct_file_path(
+        self,
+        method: str,
+        file_name: str,
+        tmp_path: Path,
+        sample_burnup: SprintBurnup,
+    ):
+        """The file should be exported to the correct location."""
+        # setup - check that file doesn't exist at output location
+        file_name = getattr(sample_burnup, file_name)
+        expected_path = tmp_path / file_name
+        assert expected_path.parent.exists() is True
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(sample_burnup, method)
+        output = func(output_dir=expected_path.parent)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()
+
+    @pytest.mark.parametrize(
+        ("method", "file_name"),
+        [
+            ("export_results", "RESULTS_CSV"),
+            ("export_dataset", "DATASET_CSV"),
+            ("export_chart_to_html", "CHART_HTML"),
+            ("export_chart_to_png", "CHART_PNG"),
+        ],
+    )
+    def test_create_parent_dir_if_it_does_not_exists(
+        self,
+        method: str,
+        file_name: str,
+        tmp_path: Path,
+        sample_burnup: SprintBurnup,
+    ):
+        """The parent directory should be created if it doesn't already exist."""
+        # setup - check that file and parent directory don't exist
+        file_name = getattr(sample_burnup, file_name)
+        expected_path = tmp_path / "new_folder" / file_name
+        assert expected_path.parent.exists() is False  # doesn't yet exist
+        assert expected_path.exists() is False
+        # execution
+        func = getattr(sample_burnup, method)
+        output = func(output_dir=expected_path.parent)
+        # validation - check that output path matches expected and file exists
+        assert output == expected_path
+        assert expected_path.exists()
+
+
+def test_post_to_slack(
+    mock_slackbot: MockSlackbot,
+    tmp_path: Path,
+    sample_burnup: SprintBurnup,
+):
+    """Test the steps required to post the results to slack, without actually posting."""
+    # execution
+    sample_burnup.post_results_to_slack(
+        mock_slackbot,
+        channel_id="test_channel",
+        output_dir=tmp_path,
+    )
+    # validation - check that output files exist
+    for output in ["RESULTS_CSV", "DATASET_CSV", "CHART_PNG", "CHART_HTML"]:
+        output_path = tmp_path / getattr(sample_burnup, output)
+        assert output_path.exists() is True
