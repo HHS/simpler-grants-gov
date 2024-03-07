@@ -13,7 +13,7 @@ export interface AssistanceListing {
     agency_name: string | null;
     agency_phone_number: string | null;
     applicant_eligibility_description: string | null;
-    applicant_types: string[] | null; 
+    applicant_types: string[] | null;
     archive_date: string | null;
     award_ceiling: number | null;
     award_floor: number | null;
@@ -27,9 +27,9 @@ export interface AssistanceListing {
     forecasted_close_date_description: string | null;
     forecasted_post_date: string | null;
     forecasted_project_start_date: string | null;
-    funding_categories: string[] | null; 
+    funding_categories: string[] | null;
     funding_category_description: string | null;
-    funding_instruments: string[] | null; 
+    funding_instruments: string[] | null;
     is_cost_sharing: boolean | null;
     is_forecast: boolean;
     post_date: string | null;
@@ -50,7 +50,7 @@ export interface AssistanceListing {
     updated_at: string;
   }
 
-  export interface OpportunitiesData {
+  export interface ApiResponse {
     data: Opportunity[];
     message: string;
     pagination_info: {
