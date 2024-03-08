@@ -51,6 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "container_log_failure" {
   evaluation_periods  = 5
   metric_name         = "DeliveryErrors"
   namespace           = "AWS/Logs"
+  period              = 60
   statistic           = "Sum"
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_sns_topic.log_failure.arn]
