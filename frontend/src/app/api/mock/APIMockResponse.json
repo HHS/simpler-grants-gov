@@ -2,7 +2,7 @@
   "data": [
     {
       "agency": "US-ABC",
-      "category": "continuation",
+      "category": "<======== THIS IS MOCK DATA ================>",
       "category_explanation": null,
       "created_at": "2024-03-07T19:53:45.438381+00:00",
       "opportunity_assistance_listings": [
@@ -18,7 +18,7 @@
       "opportunity_id": 1,
       "opportunity_number": "ABC-1-XYZ-001",
       "opportunity_status": "forecasted",
-      "opportunity_title": "Research into Brewing technologist industry",
+      "opportunity_title": "<======== THIS IS MOCK DATA ================>",
       "summary": {
         "additional_info_url": "google.com",
         "additional_info_url_description": "Click me for additional info",

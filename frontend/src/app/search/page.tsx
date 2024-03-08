@@ -9,8 +9,7 @@ import { cookies } from "next/headers";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 import { notFound } from "next/navigation";
 
-const useMockData = false;
-const searchFetcher = useMockData
+const searchFetcher = process.env.NEXT_PUBLIC_USE_SEARCH_MOCK_DATA
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
@@ -25,7 +24,6 @@ export default async function Search() {
   if (!ffManager.isFeatureEnabled("showSearchV0")) {
     return notFound();
   }
-
   const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
   return (
     <>

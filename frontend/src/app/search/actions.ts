@@ -5,8 +5,7 @@ import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher"
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 
-const useMockData = false;
-const searchFetcher = useMockData
+const searchFetcher = process.env.NEXT_PUBLIC_USE_SEARCH_MOCK_DATA
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
