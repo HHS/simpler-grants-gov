@@ -1,8 +1,6 @@
 import React from "react";
 import { Checkbox } from "@trussworks/react-uswds";
 
-// TODO: import uswds checkbox
-// There's a variant for checkbox to display it in a box
 export default function SearchOpportunityStatus() {
   return (
     <>
