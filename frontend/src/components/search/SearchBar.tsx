@@ -2,7 +2,7 @@ import React from "react";
 
 export default function SearchBar() {
   return (
-    <form className="usa-search usa-search--big" role="search">
+    <div className="usa-search usa-search--big" role="search">
       <label className="usa-sr-only" htmlFor="search-field">
         Search
       </label>
@@ -20,6 +20,6 @@ export default function SearchBar() {
           alt="Search"
         /> */}
       </button>
-    </form>
+    </div>
   );
 }
