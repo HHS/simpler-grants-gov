@@ -1,4 +1,5 @@
-import SearchOpportunityAPI from "../../src/api/SearchOpportunityAPI";
+import { JSONRequestBody } from "../../src/app/api/BaseApi";
+import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
 
 const mockFetch = ({
   response = { data: { opportunities: [] }, errors: [], warnings: [] },
@@ -24,7 +25,7 @@ describe("SearchOpportunityAPI", () => {
     searchApi = new SearchOpportunityAPI();
   });
 
-  describe("getSearchOpportunities", () => {
+  describe("searchOpportunities", () => {
     beforeEach(() => {
       global.fetch = mockFetch({
         response: {
@@ -35,20 +36,33 @@ describe("SearchOpportunityAPI", () => {
       });
     });
 
-    it("sends GET request to search opportunities endpoint with query parameters", async () => {
+    it("sends POST request to search opportunities endpoint with query parameters", async () => {
       const queryParams = { keyword: "science" };
-      const response = await searchApi.getSearchOpportunities(queryParams);
+
+      const response = await searchApi.searchOpportunities(queryParams);
+
+      const method = "POST";
+      const headers = baseRequestHeaders;
+
+      const body: JSONRequestBody = {
+        pagination: {
+          order_by: "opportunity_id",
+          page_offset: 1,
+          page_size: 25,
+          sort_direction: "ascending",
+        },
+        ...queryParams,
+      };
 
       expect(fetch).toHaveBeenCalledWith(
-        `${process.env.apiUrl as string}/search/opportunities?keyword=science`,
-        {
-          method: "GET",
-          headers: baseRequestHeaders,
-          body: null,
-        },
+        expect.any(String),
+        expect.objectContaining({
+          method,
+          headers,
+          body: JSON.stringify(body),
+        }),
       );
       expect(response.data).toEqual({ opportunities: [] });
-      expect(1).toBe(1);
     });
   });
 });

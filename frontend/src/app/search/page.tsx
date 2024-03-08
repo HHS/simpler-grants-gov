@@ -1,19 +1,13 @@
-"use client";
-
-import React, { useState } from "react";
-import {
-  SearchFetcher,
-  fetchSearchOpportunities,
-} from "../../services/searchfetcher/SearchFetcher";
-
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { Opportunity } from "../../types/searchTypes";
-import PageNotFound from "../../pages/404";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+// Disable rule to allow server actions to be called without warning
+/* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
+import React from "react";
+import { SearchForm } from "./SearchForm";
+import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 
-const useMockData = true;
-const searchFetcher: SearchFetcher = useMockData
+const useMockData = false;
+const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
@@ -22,39 +16,11 @@ const searchFetcher: SearchFetcher = useMockData
 //   locale: string;
 // }
 
-// interface SearchProps {
-//   initialOpportunities: Opportunity[];
-// }
-
-export default function Search() {
-  const { featureFlagsManager, mounted } = useFeatureFlags();
-  const [searchResults, setSearchResults] = useState<Opportunity[]>([]);
-
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    performSearch().catch((e) => console.log(e));
-  };
-
-  const performSearch = async () => {
-    const opportunities = await fetchSearchOpportunities(searchFetcher);
-    setSearchResults(opportunities);
-  };
-
-  if (!mounted) return null;
-  if (!featureFlagsManager.isFeatureEnabled("showSearchV0")) {
-    return <PageNotFound />;
-  }
-
+export default async function Search() {
+  const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
   return (
     <>
-      <button onClick={handleButtonClick}>Update Results</button>
-      <ul>
-        {searchResults.map((opportunity) => (
-          <li key={opportunity.id}>
-            {opportunity.id}, {opportunity.title}
-          </li>
-        ))}
-      </ul>
+      <SearchForm initialSearchResults={initialSearchResults} />
     </>
   );
 }
