@@ -117,12 +117,14 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                 <span className="display-block desktop:text-right">
                   <strong>Award Ceiling:</strong>{" "}
                   <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3">
-                    ${opportunity.summary.award_ceiling.toLocaleString()}
+                    $
+                    {opportunity?.summary?.award_ceiling.toLocaleString() ||
+                      "--"}
                   </span>
                 </span>
                 <span className="display-block desktop:text-right">
                   <strong>Floor:</strong> $
-                  {opportunity.summary.award_floor.toLocaleString()}
+                  {opportunity?.summary?.award_floor.toLocaleString() || "--"}
                 </span>
               </div>
             </div>
