@@ -6,7 +6,15 @@ import React from "react";
 import { SearchForm } from "./SearchForm";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 
-const useMockData = false;
+// import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
+// import Breadcrumbs from "src/components/Breadcrumbs";
+import PageSEO from "src/components/PageSEO";
+// import BetaAlert from "src/components/BetaAlert";
+
+import { GridContainer } from "@trussworks/react-uswds";
+
+const useMockData = true;
+
 const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
@@ -20,6 +28,26 @@ export default async function Search() {
   const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
   return (
     <>
+      {/* TODO: i18n */}
+      <PageSEO
+        title="Search Funding Opportunities"
+        description="Try out our experimental search page."
+      />
+
+      <GridContainer>
+        {/* TODO: BetaAlert Breadcrumbs */}
+        {/* <BetaAlert /> */}
+        {/* <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} /> */}
+        <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
+          Search funding opportunities
+        </h1>
+        <p className="tablet-lg:font-sans-lg line-height-sans-3 usa-intro margin-top-2">
+          We’re incrementally improving this experimental search page. How can
+          we make it easier to discover grants that are right for you? Let us
+          know at <a href="mailto:simpler@grants.gov">simpler@grants.gov</a>.
+        </p>
+      </GridContainer>
+
       <SearchForm initialSearchResults={initialSearchResults} />
     </>
   );

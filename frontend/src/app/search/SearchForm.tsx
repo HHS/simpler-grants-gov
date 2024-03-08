@@ -1,7 +1,5 @@
 "use client";
 
-import "./_search.scss";
-
 import React from "react";
 import SearchBar from "../../components/search/SearchBar";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
@@ -28,25 +26,19 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
         <div className="search-bar">
           <SearchBar />
         </div>
-        <div className="grid-row">
-          <aside className="tablet:grid-col-4">
+        <div className="grid-row grid-gap">
+          <div className="tablet:grid-col-4">
             <SearchOpportunityStatus />
             <fieldset className="usa-fieldset">Filters</fieldset>
-          </aside>
-          <main className="tablet:grid-col-8">
-            <div className="grid-row" id="search-results-header">
+          </div>
+          <div className="tablet:grid-col-8">
+            <div className="usa-prose">
               <SearchResultsHeader searchResults={searchResults} />
-            </div>
-            <div className="search-pagination">
               <SearchPagination />
-            </div>
-            <div id="search-results-list">
               <SearchResultsList searchResults={searchResults} />
-            </div>
-            <div className="search-pagination">
               <SearchPagination />
             </div>
-          </main>
+          </div>
         </div>
       </div>
     </form>
