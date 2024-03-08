@@ -18,17 +18,120 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
   }
 
   return (
-    <div>
-      <h4>{searchResults.length} Opportunities</h4>
-      <ul>
-        {searchResults.map((opportunity) => (
-          <li key={opportunity.opportunity_id}>
-            {opportunity.category}, {opportunity.opportunity_title},{" "}
-            {opportunity.summary.close_date}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="usa-list--unstyled">
+      {searchResults.map((opportunity) => (
+        <li
+          key={opportunity.opportunity_id}
+          className="
+              border-1px
+              border-base-lighter
+              padding-x-2
+              padding-y-105
+              margin-bottom-2
+              text-base-darker
+            "
+        >
+          <div className="grid-row grid-gap">
+            <div className="desktop:grid-col-fill">
+              <div className="grid-row flex-column">
+                <div className="grid-col tablet:order-2">
+                  <h2 className="margin-y-105 line-height-serif-2">
+                    <a href="#" className="usa-link usa-link--external">
+                      {opportunity.opportunity_title}
+                    </a>
+                  </h2>
+                </div>
+                {/*
+
+                  TODO: conditionally show dates if they exist
+                  and add color based on status
+
+                  */}
+                <div className="grid-col tablet:order-1 overflow-hidden">
+                  <span
+                    className="
+                        display-block
+                        tablet:display-inline-block
+                        tablet:border-left-1px
+                        tablet:padding-x-1
+                        tablet:margin-left-neg-1
+                        tablet:margin-right-1
+                        tablet:border-base-lighter
+                      "
+                  >
+                    <span className="usa-tag bg-accent-warm-dark">
+                      <strong className="">Closing:</strong>{" "}
+                      {/* TODO: format date */}
+                      {opportunity.summary.close_date}
+                    </span>
+                  </span>
+                  <span
+                    className="
+                        display-block
+                        tablet:display-inline-block
+                        tablet:border-left-1px
+                        tablet:padding-x-1
+                        tablet:margin-left-neg-1
+                        tablet:margin-right-1
+                        tablet:border-base-lighter
+                      "
+                  >
+                    <strong>Posted:</strong> {opportunity.summary.post_date}
+                    {/* TODO: format date */}
+                  </span>
+                </div>
+                <div className="grid-col tablet:order-3 overflow-hidden">
+                  <span
+                    className="
+                        display-block
+                        tablet:display-inline-block
+                        tablet:border-left-1px
+                        tablet:padding-x-1
+                        tablet:margin-left-neg-1
+                        tablet:margin-right-1
+                        tablet:border-base-lighter
+                      "
+                  >
+                    <strong>Agency:</strong> {opportunity.summary.agency_name}
+                  </span>
+                  <span
+                    className="
+                        display-block
+                        tablet:display-inline-block
+                        tablet:border-left-1px
+                        tablet:padding-x-1
+                        tablet:margin-left-neg-1
+                        tablet:margin-right-1
+                        tablet:border-base-lighter
+                      "
+                  >
+                    <strong>Opportunity Number:</strong>{" "}
+                    {opportunity.opportunity_number}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="desktop:grid-col-auto">
+              <div className="overflow-hidden">
+                {/* TODO: Better way to format as a dollar amounts */}
+                <span className="display-block desktop:text-right">
+                  <strong>Award Ceiling:</strong>{" "}
+                  <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3">
+                    $
+                    {opportunity?.summary?.award_ceiling?.toLocaleString() ||
+                      "--"}
+                  </span>
+                </span>
+                <span className="display-block desktop:text-right">
+                  <strong>Floor:</strong> $
+                  {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 };
 
