@@ -16,7 +16,7 @@ import PageSEO from "src/components/PageSEO";
 
 import { GridContainer } from "@trussworks/react-uswds";
 
-const useMockData = true;
+const useMockData = false;
 
 const searchFetcher = useMockData
   ? new MockSearchFetcher()

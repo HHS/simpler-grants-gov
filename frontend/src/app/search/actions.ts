@@ -5,7 +5,7 @@ import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher"
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 
-const useMockData = true;
+const useMockData = false;
 const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
