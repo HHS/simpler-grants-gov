@@ -1,7 +1,8 @@
-import { ExternalRoutes } from "src/constants/routes";
+"use client";
 
 import { Trans, useTranslation } from "next-i18next";
 
+import { ExternalRoutes } from "src/constants/routes";
 import FullWidthAlert from "./FullWidthAlert";
 
 const BetaAlert = () => {

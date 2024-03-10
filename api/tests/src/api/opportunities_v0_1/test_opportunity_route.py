@@ -93,9 +93,11 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
         resp_opportunity["opportunity_assistance_listings"],
     )
 
-    assert set(db_opportunity.funding_instruments) == set(resp_opportunity["funding_instruments"])
-    assert set(db_opportunity.funding_categories) == set(resp_opportunity["funding_categories"])
-    assert set(db_opportunity.applicant_types) == set(resp_opportunity["applicant_types"])
+    # TODO - these have been moved in the DB model - will be fixed in https://github.com/HHS/simpler-grants-gov/issues/1364
+    # assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
+    # assert set(db_opportunity.funding_instruments) == set(resp_opportunity["funding_instruments"])
+    # assert set(db_opportunity.funding_categories) == set(resp_opportunity["funding_categories"])
+    # assert set(db_opportunity.applicant_types) == set(resp_opportunity["applicant_types"])
 
 
 def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: dict):
@@ -103,7 +105,6 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
         assert resp_summary is None
         return
 
-    assert db_summary.opportunity_status == resp_summary["opportunity_status"]
     assert db_summary.summary_description == resp_summary["summary_description"]
     assert db_summary.is_cost_sharing == resp_summary["is_cost_sharing"]
     assert str(db_summary.close_date) == resp_summary["close_date"]
@@ -287,11 +288,12 @@ def test_opportunity_search_invalid_request_422(
         {},
         # Set all the non-opportunity model objects to null/empty
         {
-            "summary": None,
+            "current_opportunity_summary": None,
             "opportunity_assistance_listings": [],
-            "link_funding_instruments": [],
-            "link_funding_categories": [],
-            "link_applicant_types": [],
+            # TODO: https://github.com/HHS/simpler-grants-gov/issues/1364
+            # "link_funding_instruments": [],
+            # "link_funding_categories": [],
+            # "link_applicant_types": [],
         },
     ],
 )
