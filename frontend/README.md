@@ -135,6 +135,7 @@ E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` director
 
 To run E2E tests via CLI:
 
+- `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
 - `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
 - `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
 
