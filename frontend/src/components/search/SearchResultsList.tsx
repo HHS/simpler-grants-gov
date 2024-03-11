@@ -2,6 +2,7 @@ import Loading from "../../app/search/loading";
 // SearchResultsList.tsx
 import React from "react";
 import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+import { formatDate } from "../../utils/dateUtil";
 import { useFormStatus } from "react-dom";
 
 interface SearchResultsListProps {
@@ -76,8 +77,8 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                         tablet:border-base-lighter
                       "
                   >
-                    <strong>Posted:</strong> {opportunity.summary.post_date}
-                    {/* TODO: format date */}
+                    <strong>Posted:</strong>{" "}
+                    {formatDate(opportunity.summary.post_date)}
                   </span>
                 </div>
                 <div className="grid-col tablet:order-3 overflow-hidden">

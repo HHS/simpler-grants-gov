@@ -1,5 +1,5 @@
-import React from "react";
 import { Checkbox } from "@trussworks/react-uswds";
+import React from "react";
 
 export default function SearchOpportunityStatus() {
   return (
@@ -9,8 +9,8 @@ export default function SearchOpportunityStatus() {
       <div className="grid-row flex-wrap">
         <div className="grid-col-6 padding-right-1">
           <Checkbox
-            id="status-forcasted"
-            name="status-forcasted"
+            id="status-forecasted"
+            name="status-forecasted"
             label="Forecasted"
             tile={true}
             className=""
