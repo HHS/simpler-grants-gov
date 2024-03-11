@@ -77,7 +77,8 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                         tablet:border-base-lighter
                       "
                   >
-                    <strong>Posted:</strong> {formatDate(opportunity.summary.post_date)}
+                    <strong>Posted:</strong>{" "}
+                    {formatDate(opportunity.summary.post_date)}
                     {/* TODO: format date */}
                   </span>
                 </div>
