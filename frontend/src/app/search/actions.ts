@@ -1,14 +1,11 @@
 // All exports in this file are server actions
 "use server";
 
-import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
-import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
 
-const searchFetcher = process.env.NEXT_PUBLIC_USE_SEARCH_MOCK_DATA
-  ? new MockSearchFetcher()
-  : new APISearchFetcher();
+const searchFetcher = getSearchFetcher();
 
 export async function updateResults() {
-  return await fetchSearchOpportunities(searchFetcher);
+
+  return await searchFetcher.fetchOpportunities();
 }

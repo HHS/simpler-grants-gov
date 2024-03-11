@@ -10,7 +10,7 @@ export default function SearchBar() {
         className="usa-input maxw-none"
         id="search-field"
         type="search"
-        name="search"
+        name="search-keyword"
       />
       <button className="usa-button" type="submit">
         <span className="usa-search__submit-text">Search </span>

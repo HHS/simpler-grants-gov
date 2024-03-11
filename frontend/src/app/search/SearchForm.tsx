@@ -15,13 +15,13 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ initialSearchResults }: SearchFormProps) {
-  const [searchResults, updateSearchResultAction] = useFormState(
+  const [searchResults, updateSearchResultsAction] = useFormState(
     updateResults,
     initialSearchResults,
   );
 
   return (
-    <form action={updateSearchResultAction}>
+    <form action={updateSearchResultsAction}>
       <div className="grid-container">
         <div className="search-bar">
           <SearchBar />
