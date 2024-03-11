@@ -11,7 +11,7 @@ analytics = "analytics.cli:app"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
-kaleido = "0.2.1"
+kaleido = "0.2.1.post1"
 notebook = "^7.0.0" # Goal is to replace this with another method of presenting charts
 pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
@@ -27,8 +27,8 @@ mypy = "^1.4.1"
 pylint = "^3.0.2"
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
-ruff = "^0.0.278"
-safety = "^2.3.5"
+ruff = "^0.3.0"
+safety = "^2.4.0-beta"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
