@@ -79,7 +79,6 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                   >
                     <strong>Posted:</strong>{" "}
                     {formatDate(opportunity.summary.post_date)}
-                    {/* TODO: format date */}
                   </span>
                 </div>
                 <div className="grid-col tablet:order-3 overflow-hidden">
