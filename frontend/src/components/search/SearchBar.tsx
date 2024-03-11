@@ -1,15 +1,10 @@
 import React from "react";
-import { ReadonlyURLSearchParams } from "next/navigation";
 
 interface SearchBarProps {
   handleSearch: (searchTerm: string) => void;
-  searchParams: ReadonlyURLSearchParams;
 }
 
-export default function SearchBar({
-  handleSearch,
-  searchParams,
-}: SearchBarProps) {
+export default function SearchBar({ handleSearch }: SearchBarProps) {
   return (
     <div className="usa-search usa-search--big" role="search">
       <label className="usa-sr-only" htmlFor="search-field">

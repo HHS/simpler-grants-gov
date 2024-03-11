@@ -35,7 +35,7 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
     if (pathname) {
       const newPath = `${pathname}?${params.toString()}`;
 
-      // Cannot use replace or push from useRouter since that
+      // Cannot use replace or push from `useRouter` since that
       // will cause a page refresh (which calls the server page code again).
       // Using the native browser's History API does not cause a refresh.
       window.history.pushState({}, "", newPath);
@@ -46,7 +46,7 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
     <form action={updateSearchResultsAction}>
       <div className="grid-container">
         <div className="search-bar">
-          <SearchBar handleSearch={handleSearch} searchParams={searchParams} />
+          <SearchBar handleSearch={handleSearch} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
