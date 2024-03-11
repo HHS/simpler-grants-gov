@@ -8,8 +8,7 @@ variable "github_repository" {
   description = "The GitHub repository in 'org/repo' format to provide access to AWS account resources. Example: navapbc/template-infra"
 }
 
-variable "iam_role_policy_arns" {
+variable "allowed_actions" {
   type        = list(string)
-  description = "List of IAM policy ARNs to attach to the GitHub Actions IAM role. Defaults to Developer power user access role."
-  default     = ["arn:aws:iam::aws:policy/AdministratorAccess"]
+  description = "List of IAM actions to allow GitHub Actions to perform"
 }
