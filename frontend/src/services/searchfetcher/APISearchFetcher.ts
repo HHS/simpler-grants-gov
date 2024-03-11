@@ -16,7 +16,6 @@ export class APISearchFetcher extends SearchFetcher {
 
   async fetchOpportunities(): Promise<SearchResponseData> {
     try {
-
       // Keep commented in case we need to simulate a delay to test loaders
       //  await new Promise((resolve) => setTimeout(resolve, 1250));
 
