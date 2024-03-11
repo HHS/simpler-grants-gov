@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
+
 import React from "react";
 import SearchBar from "../../components/search/SearchBar";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
@@ -20,11 +22,31 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
     initialSearchResults,
   );
 
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const handleSearch = (term: string) => {
+    const params = new URLSearchParams(searchParams || {});
+    if (term) {
+      params.set("query", term);
+    } else {
+      params.delete("query");
+    }
+    if (pathname) {
+      const newPath = `${pathname}?${params.toString()}`;
+
+      // Cannot use replace or push from useRouter since that
+      // will cause a page refresh (which calls the server page code again).
+      // Using the native browser's History API does not cause a refresh.
+      window.history.pushState({}, "", newPath);
+    }
+  };
+
   return (
     <form action={updateSearchResultAction}>
       <div className="grid-container">
         <div className="search-bar">
-          <SearchBar />
+          <SearchBar handleSearch={handleSearch} searchParams={searchParams} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">

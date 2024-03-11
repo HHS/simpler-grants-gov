@@ -1,6 +1,10 @@
 import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
+import { GridContainer } from "@trussworks/react-uswds";
 import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
+// import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
+// import Breadcrumbs from "src/components/Breadcrumbs";
+import PageSEO from "src/components/PageSEO";
 // Disable rule to allow server actions to be called without warning
 /* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
 import React from "react";
@@ -9,12 +13,7 @@ import { cookies } from "next/headers";
 import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
 import { notFound } from "next/navigation";
 
-// import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-// import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
 // import BetaAlert from "src/components/BetaAlert";
-
-import { GridContainer } from "@trussworks/react-uswds";
 
 const useMockData = false;
 
@@ -27,13 +26,27 @@ const searchFetcher = useMockData
 //   locale: string;
 // }
 
-export default async function Search() {
+interface ServerPageProps {
+  params: {
+    // route params
+    slug: string;
+  };
+  searchParams: {
+    // query string params
+    [key: string]: string | string[] | undefined;
+  };
+}
+
+export default async function Search({ searchParams }: ServerPageProps) {
+  console.log("searchParams serer side =>", searchParams);
+
   const cookieStore = cookies();
   const ffManager = new FeatureFlagsManager(cookieStore);
   if (!ffManager.isFeatureEnabled("showSearchV0")) {
     return notFound();
   }
 
+  console.log("calling server");
   const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
   return (
     <>

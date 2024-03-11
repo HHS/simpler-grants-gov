@@ -10,6 +10,7 @@ const searchFetcher = useMockData
   ? new MockSearchFetcher()
   : new APISearchFetcher();
 
-export async function updateResults() {
+export async function updateResults(prevState, formData) {
+  console.log("action => ", formData);
   return await fetchSearchOpportunities(searchFetcher);
 }
