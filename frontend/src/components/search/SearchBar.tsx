@@ -20,6 +20,9 @@ export default function SearchBar({
         id="search-field"
         type="search"
         name="search-text-input"
+        onChange={(e) => {
+          handleSearch(e.target.value);
+        }}
       />
 
       <button className="usa-button" type="submit">

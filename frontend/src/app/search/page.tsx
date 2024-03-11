@@ -7,7 +7,6 @@ import { cookies } from "next/headers";
 import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
-
 const searchFetcher = getSearchFetcher();
 
 // TODO: use for i18n when ready
@@ -34,7 +33,6 @@ export default async function Search({ searchParams }: ServerPageProps) {
   if (!ffManager.isFeatureEnabled("showSearchV0")) {
     return notFound();
   }
-
 
   const initialSearchResults = await searchFetcher.fetchOpportunities();
 
