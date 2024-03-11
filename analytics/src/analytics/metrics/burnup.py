@@ -59,14 +59,17 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         burnup_cols = [self.opened_col, self.closed_col, self.points_col]
         df_sprint = self.sprint_data[burnup_cols].copy()
         # get the date range over which tix were created and closed
-        df_tix_range = get_tix_date_range(df_sprint, self.opened_col, 
-                                          self.closed_col, self.dataset.sprint_end(self.sprint))
+        df_tix_range = get_tix_date_range(
+            df_sprint,
+            self.opened_col,
+            self.closed_col,
+            self.dataset.sprint_end(self.sprint),
+        )
         # get the number of tix opened and closed each day
         df_opened = get_daily_tix_counts_by_status(df_sprint, "opened", self.unit)
         df_closed = get_daily_tix_counts_by_status(df_sprint, "closed", self.unit)
         # combine the daily opened and closed counts to get total open and closed per day
         return get_cum_sum_of_tix(df_tix_range, df_opened, df_closed)
-
 
     def plot_results(self) -> Figure:
         """Plot the sprint burnup using a plotly area chart."""
@@ -215,5 +218,3 @@ class SprintBurnup(BaseMetric[SprintBoard]):
     #         pd.date_range(opened_min, closed_max),
     #         columns=[self.date_col],
     #     )
-
-
