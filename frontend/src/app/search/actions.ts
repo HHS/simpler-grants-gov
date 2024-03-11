@@ -1,16 +1,11 @@
 // All exports in this file are server actions
 "use server";
 
-import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
-import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
 
-const useMockData = false;
-const searchFetcher = useMockData
-  ? new MockSearchFetcher()
-  : new APISearchFetcher();
+const searchFetcher = getSearchFetcher();
 
-export async function updateResults(prevState, formData) {
-  console.log("action => ", formData);
-  return await fetchSearchOpportunities(searchFetcher);
+export async function updateResults() {
+  return await searchFetcher.fetchOpportunities();
+
 }

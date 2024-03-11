@@ -19,11 +19,7 @@ export default function SearchBar({
         className="usa-input maxw-none"
         id="search-field"
         type="search"
-        name="search"
-        onChange={(e) => {
-          handleSearch(e.target.value);
-        }}
-        defaultValue={searchParams.get("query")?.toString()}
+        name="search-text-input"
       />
 
       <button className="usa-button" type="submit">
@@ -34,7 +30,6 @@ export default function SearchBar({
           alt="Search"
         /> */}
       </button>
-      <input name="reset" className="usa-input" type="reset" value="reset" />
     </div>
   );
 }
