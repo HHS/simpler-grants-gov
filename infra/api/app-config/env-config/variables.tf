@@ -37,3 +37,9 @@ variable "enable_v01_endpoints" {
   type        = bool
   default     = false
 }
+
+variable "domain" {
+  type        = string
+  description = "DNS domain of the website managed by HHS"
+  default     = null
+}
