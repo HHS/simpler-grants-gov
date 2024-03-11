@@ -15,6 +15,11 @@ from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
+from analytics.metrics.utils import (
+    get_cum_sum_of_tix,
+    get_daily_tix_counts_by_status,
+    get_tix_date_range,
+)
 
 
 class SprintBurnup(BaseMetric[SprintBoard]):
@@ -54,12 +59,14 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         burnup_cols = [self.opened_col, self.closed_col, self.points_col]
         df_sprint = self.sprint_data[burnup_cols].copy()
         # get the date range over which tix were created and closed
-        df_tix_range = self._get_tix_date_range(df_sprint)
+        df_tix_range = get_tix_date_range(df_sprint, self.opened_col, 
+                                          self.closed_col, self.dataset.sprint_end(self.sprint))
         # get the number of tix opened and closed each day
-        df_opened = self._get_daily_tix_counts_by_status(df_sprint, "opened")
-        df_closed = self._get_daily_tix_counts_by_status(df_sprint, "closed")
+        df_opened = get_daily_tix_counts_by_status(df_sprint, "opened", self.unit)
+        df_closed = get_daily_tix_counts_by_status(df_sprint, "closed", self.unit)
         # combine the daily opened and closed counts to get total open and closed per day
-        return self._get_cum_sum_of_open_tix(df_tix_range, df_opened, df_closed)
+        return get_cum_sum_of_tix(df_tix_range, df_opened, df_closed)
+
 
     def plot_results(self) -> Figure:
         """Plot the sprint burnup using a plotly area chart."""
@@ -77,6 +84,7 @@ class SprintBurnup(BaseMetric[SprintBoard]):
             value_vars=["total_closed", "total_open"],
             var_name="cols",
         )
+
         # create a area chart from the data in self.results
         chart = px.area(
             data_frame=df,
@@ -156,85 +164,56 @@ class SprintBurnup(BaseMetric[SprintBoard]):
         sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
         return self.dataset.df[sprint_filter]
 
-    def _get_daily_tix_counts_by_status(
-        self,
-        df: pd.DataFrame,
-        status: Literal["opened", "closed"],
-    ) -> pd.DataFrame:
-        """
-        Count the number of issues or points opened or closed by date.
+    # def _get_daily_tix_counts_by_status(
+    #     self,
+    #     df: pd.DataFrame,
+    #     status: Literal["opened", "closed"],
+    # ) -> pd.DataFrame:
+    #     """
+    #     Count the number of issues or points opened or closed by date.
 
-        Notes
-        -----
-        It does this by:
-        - Grouping on the created_date or opened_date column, depending on status
-        - Counting the total number of rows per group
+    #     Notes
+    #     -----
+    #     It does this by:
+    #     - Grouping on the created_date or opened_date column, depending on status
+    #     - Counting the total number of rows per group
 
-        """
-        # create local copies of the key column names
-        agg_col = self.opened_col if status == "opened" else self.closed_col
-        unit_col = self.unit.value
-        key_cols = [agg_col, unit_col]
-        # create a dummy column to sum per row if the unit is tasks
-        if self.unit == Unit.issues:
-            df[unit_col] = 1
-        # isolate the key columns, group by open or closed date, then sum the units
-        df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
-        return df_agg.rename(columns={agg_col: self.date_col, unit_col: status})
+    #     """
+    #     # create local copies of the key column names
+    #     agg_col = self.opened_col if status == "opened" else self.closed_col
+    #     unit_col = self.unit.value
+    #     key_cols = [agg_col, unit_col]
+    #     # create a dummy column to sum per row if the unit is tasks
+    #     if self.unit == Unit.issues:
+    #         df[unit_col] = 1
+    #     # isolate the key columns, group by open or closed date, then sum the units
+    #     df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
+    #     return df_agg.rename(columns={agg_col: self.date_col, unit_col: status})
 
-    def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Get the date range over which issues were created and closed.
+    # def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
+    #     """
+    #     Get the date range over which issues were created and closed.
 
-        Notes
-        -----
-        It does this by:
-        - Finding the date when the sprint ends
-        - Finding the earliest date a issue was created
-        - Finding the latest date a issue was closed
-        - Creating a row for each day between the earliest date a ticket was opened
-          and either the sprint end _or_ the latest date an issue was closed,
-          whichever is the later date.
+    #     Notes
+    #     -----
+    #     It does this by:
+    #     - Finding the date when the sprint ends
+    #     - Finding the earliest date a issue was created
+    #     - Finding the latest date a issue was closed
+    #     - Creating a row for each day between the earliest date a ticket was opened
+    #       and either the sprint end _or_ the latest date an issue was closed,
+    #       whichever is the later date.
 
-        """
-        # get earliest date an issue was opened and latest date one was closed
-        sprint_end = self.dataset.sprint_end(self.sprint)
-        opened_min = df[self.opened_col].min()
-        closed_max = df[self.closed_col].max()
-        closed_max = sprint_end if closed_max is nan else max(sprint_end, closed_max)
-        # creates a dataframe with one row for each day between min and max date
-        return pd.DataFrame(
-            pd.date_range(opened_min, closed_max),
-            columns=[self.date_col],
-        )
+    #     """
+    #     # get earliest date an issue was opened and latest date one was closed
+    #     sprint_end = self.dataset.sprint_end(self.sprint)
+    #     opened_min = df[self.opened_col].min()
+    #     closed_max = df[self.closed_col].max()
+    #     closed_max = sprint_end if closed_max is nan else max(sprint_end, closed_max)
+    #     # creates a dataframe with one row for each day between min and max date
+    #     return pd.DataFrame(
+    #         pd.date_range(opened_min, closed_max),
+    #         columns=[self.date_col],
+    #     )
 
-    def _get_cum_sum_of_open_tix(
-        self,
-        dates: pd.DataFrame,
-        opened: pd.DataFrame,
-        closed: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """
-        Get the cumulative sum of open issues and closed issues per day.
 
-        Notes
-        -----
-        It does this by:
-        - Left joining the full date range to the daily open and closed counts
-          so that we have a row for each day of the range, with a column for tix
-          opened and a column for tix closed on that day
-        - getting the cumulative sum of open and closed issues
-
-        """
-        # left join the full date range to open and closed counts
-        df = (
-            dates.merge(opened, on=self.date_col, how="left")
-            .merge(closed, on=self.date_col, how="left")
-            .fillna(0)
-        )
-        # calculate the difference between opened and closed each day
-        # cumulatively sum the difference to get the running total
-        df["delta"] = df["opened"] - df["closed"]
-        df["total_open"] = df["delta"].cumsum()
-        df["total_closed"] = df["closed"].cumsum()
-        return df
