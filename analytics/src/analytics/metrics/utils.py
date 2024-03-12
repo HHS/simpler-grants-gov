@@ -2,24 +2,15 @@
 
 from __future__ import annotations
 
-from math import isnan
 from typing import Literal
 
 import pandas as pd
-from plotly.graph_objects import Figure
 
 from analytics.metrics.base import Unit
 
-# def get_and_validate_sprint_name() -> None:
-#     """Docstring."""
-
-# def isolate_data_for_this_sprint() -> None:
-#     """Docstring."""
 
 def get_daily_tix_counts_by_status(df: pd.DataFrame,
                                    status: Literal["opened", "closed"],
-                                #    opened_col,
-                                #    closed_col,
                                    unit: Unit) -> pd.DataFrame:
     """
     Count the number of issues or points opened or closed by date.
