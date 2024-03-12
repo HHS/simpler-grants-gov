@@ -22,7 +22,7 @@ const statusOptions: StatusOption[] = [
 ];
 
 // Wait a half-second before updating query params
-  // and submitting the form
+// and submitting the form
 const SEARCH_OPPORTUNITY_DEBOUNCE_TIME = 500;
 
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
@@ -35,7 +35,6 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(),
   );
-
 
   const debouncedUpdate = useDebouncedCallback(
     (selectedStatuses: Set<string>) => {
