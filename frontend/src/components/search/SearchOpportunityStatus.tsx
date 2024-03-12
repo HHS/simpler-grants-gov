@@ -23,13 +23,13 @@ const statusOptions: StatusOption[] = [
 
 // Wait a half-second before updating query params
 // and submitting the form
-const SEARCH_OPPORTUNITY_DEBOUNCE_TIME = 500;
+const SEARCH_OPPORTUNITY_STATUS_DEBOUNCE_TIME = 500;
 
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   formRef,
 }) => {
   const [mounted, setMounted] = useState(false);
-  const { updateMultipleParam } = useSearchParamUpdater();
+  const { updateQueryParams } = useSearchParamUpdater();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
@@ -39,10 +39,10 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   const debouncedUpdate = useDebouncedCallback(
     (selectedStatuses: Set<string>) => {
       const key = "status";
-      updateMultipleParam(selectedStatuses, key);
+      updateQueryParams(selectedStatuses, key);
       formRef?.current?.requestSubmit();
     },
-    SEARCH_OPPORTUNITY_DEBOUNCE_TIME,
+    SEARCH_OPPORTUNITY_STATUS_DEBOUNCE_TIME,
   );
 
   const handleCheck = (statusValue: string, isChecked: boolean) => {
@@ -52,9 +52,7 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
         ? updatedStatuses.add(statusValue)
         : updatedStatuses.delete(statusValue);
 
-      if (mounted) {
-        debouncedUpdate(updatedStatuses);
-      }
+      debouncedUpdate(updatedStatuses);
       return updatedStatuses;
     });
   };
@@ -78,6 +76,7 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
               label={option.label}
               tile={true}
               onChange={(e) => handleCheck(option.value, e.target.checked)}
+              disabled={!mounted} // Required to be disabled until hydrated so query params are updated properly
             />
           </div>
         ))}

@@ -4,10 +4,10 @@ import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 
 export default function SearchBar() {
   const [inputValue, setInputValue] = useState<string>("");
-  const { updateSingularParam } = useSearchParamUpdater();
+  const { updateQueryParams } = useSearchParamUpdater();
 
   const handleSubmit = () => {
-    updateSingularParam(inputValue, "query");
+    updateQueryParams(inputValue, "query");
   };
 
   return (

@@ -23,12 +23,12 @@ interface SearchSortByProps {
 }
 
 const SearchSortBy: React.FC<SearchSortByProps> = ({ formRef }) => {
-  const { updateSingularParam } = useSearchParamUpdater();
+  const { updateQueryParams } = useSearchParamUpdater();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value;
     const key = "sortby";
-    updateSingularParam(newValue, key);
+    updateQueryParams(newValue, key);
     formRef?.current?.requestSubmit();
   };
 
