@@ -56,7 +56,7 @@ def search_opportunities(
         stmt = stmt.where(TransferTopportunity.oppcategory == search_params.category)
 
     paginator: Paginator[TransferTopportunity] = Paginator(
-        stmt, db_session, page_size=search_params.paging.page_size
+        TransferTopportunity, stmt, db_session, page_size=search_params.paging.page_size
     )
     opportunities = paginator.page_at(page_offset=search_params.paging.page_offset)
     pagination_info = PaginationInfo.from_pagination_models(search_params, paginator)

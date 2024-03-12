@@ -47,6 +47,7 @@ class PostgresDBClient(DBClient):
             "postgresql+psycopg://",
             pool=conn_pool,
             hide_parameters=db_config.hide_sql_parameter_logs,
+            echo=True,
             # TODO: Don't think we need this as we aren't using JSON columns, but keeping for reference
             # json_serializer=lambda o: json.dumps(o, default=pydantic.json.pydantic_encoder),
         )
