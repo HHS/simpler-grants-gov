@@ -28,7 +28,7 @@ describe("useSearchParamUpdater", () => {
   it("updates a singular param and pushes new path", async () => {
     const { result } = renderHook(() => useSearchParamUpdater());
 
-    result.current.updateSingularParam("testQuery", "query");
+    result.current.updateQueryParams("testQuery", "query");
 
     await waitFor(() => {
       expect(mockPushState).toHaveBeenCalledWith(
@@ -43,7 +43,7 @@ describe("useSearchParamUpdater", () => {
     const { result } = renderHook(() => useSearchParamUpdater());
     const statuses = new Set(["forecasted", "posted"]);
 
-    result.current.updateMultipleParam(statuses, "status");
+    result.current.updateQueryParams(statuses, "status");
 
     await waitFor(() => {
       expect(mockPushState).toHaveBeenCalledWith(
