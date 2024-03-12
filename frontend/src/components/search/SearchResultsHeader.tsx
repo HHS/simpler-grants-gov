@@ -6,15 +6,21 @@ interface SearchResultsHeaderProps {
   searchResults: SearchResponseData;
 }
 
+interface SearchResultsHeaderProps {
+  searchResults: SearchResponseData;
+  formRef: React.RefObject<HTMLFormElement>;
+}
+
 const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
   searchResults,
+  formRef,
 }) => {
   return (
     <>
       <div>
         <h2>{searchResults.length} Opportunities</h2>
       </div>
-      <SearchSortyBy />
+      <SearchSortyBy formRef={formRef} />
     </>
   );
 };

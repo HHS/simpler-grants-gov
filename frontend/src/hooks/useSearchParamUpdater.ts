@@ -16,6 +16,9 @@ export function useSearchParamUpdater() {
     let newPath = `${pathname}?${params.toString()}`;
     newPath = newPath.replace("QUERY_PLACEHOLDER", value);
 
+    // TODO - expand this to other filters as they are built,
+    // such as agency and funding instrument,
+    // so we retain commas instead of %2C in the URL
     if (params.get("status")) {
       const statusCheckboxParams = params.get("status") || "";
       const encodedStatusCheckboxParams = statusCheckboxParams.replaceAll(
@@ -31,11 +34,12 @@ export function useSearchParamUpdater() {
     window.history.pushState({}, "", newPath);
   };
 
-  const updateMultipleParam = (selectedStatusesString: string, key: string) => {
+  const updateMultipleParam = (selectedSet: Set<string>, key: string) => {
+    const commaSeparatedSelections = Array.from(selectedSet).join(",");
     const params = new URLSearchParams(searchParams || {});
-    const placeholder = "STATUS_PLACEHOLDER";
+    const placeholder = "a_placeholder";
 
-    if (selectedStatusesString) {
+    if (commaSeparatedSelections) {
       params.set(key, placeholder);
     } else {
       params.delete(key);
@@ -44,7 +48,7 @@ export function useSearchParamUpdater() {
     let newPath = `${pathname}?${params.toString()}`;
 
     // replace the placeholder with the comma separated string of statuses
-    newPath = newPath.replace(placeholder, selectedStatusesString);
+    newPath = newPath.replace(placeholder, commaSeparatedSelections);
 
     window.history.pushState({}, "", newPath);
   };

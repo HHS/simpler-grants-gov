@@ -1,3 +1,6 @@
+import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
+import { useState } from "react";
+
 type SortOption = {
   label: string;
   value: string;
@@ -16,15 +19,30 @@ const SORT_OPTIONS: SortOption[] = [
   { label: "Close Date (Descending)", value: "closeDateDesc" },
 ];
 
-const SearchSortBy: React.FC = () => {
+interface SearchSortByProps {
+  formRef: React.RefObject<HTMLFormElement>;
+}
+
+const SearchSortBy: React.FC<SearchSortByProps> = ({ formRef }) => {
+  const { updateSingularParam } = useSearchParamUpdater();
+  const [sortValue, setSortValue] = useState<string>("");
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortValue(event.target.value);
+    const key = "sortby";
+    updateSingularParam(sortValue, key);
+    formRef?.current?.requestSubmit();
+  };
+
   return (
     <div id="search-sort-by">
       <select
         className="usa-select"
         name="search-sort-by"
         id="search-sort-by-select"
+        onChange={handleChange}
       >
-        {SORT_OPTIONS.map((option: SortOption) => (
+        {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

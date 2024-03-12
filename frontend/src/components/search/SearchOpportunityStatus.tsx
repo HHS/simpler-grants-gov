@@ -21,9 +21,13 @@ const statusOptions: StatusOption[] = [
   { id: "status-archived", label: "Archived", value: "archived" },
 ];
 
-const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({ formRef }) => {
+const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
+  formRef,
+}) => {
   const { updateMultipleParam } = useSearchParamUpdater();
-  const [selectedStatuses, setSelectedStatuses] = useState(new Set());
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
+    new Set(),
+  );
 
   const handleCheck = (statusValue: string, isChecked: boolean) => {
     setSelectedStatuses((prevSelectedStatuses) => {
@@ -35,12 +39,11 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({ formR
     });
   };
 
-  // Wait half a second before update query params
+  // Wait half a second before updating query params
   // and submitting the form
   const debouncedUpdate = useDebouncedCallback(() => {
-    const commaSeparatedStatusString = Array.from(selectedStatuses).join(",");
     const key = "status";
-    updateMultipleParam(commaSeparatedStatusString, key);
+    updateMultipleParam(selectedStatuses, key);
     formRef?.current?.requestSubmit();
   }, 500);
 

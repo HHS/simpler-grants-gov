@@ -36,7 +36,10 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
           </div>
           <div className="tablet:grid-col-8">
             <div className="usa-prose">
-              <SearchResultsHeader searchResults={searchResults} />
+              <SearchResultsHeader
+                formRef={formRef}
+                searchResults={searchResults}
+              />
               <SearchPagination />
               <SearchResultsList searchResults={searchResults} />
               <SearchPagination />
