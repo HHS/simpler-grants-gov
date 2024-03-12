@@ -24,6 +24,7 @@ const statusOptions: StatusOption[] = [
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   formRef,
 }) => {
+  const [mounted, setMounted] = useState(false);
   const { updateMultipleParam } = useSearchParamUpdater();
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(),
@@ -48,7 +49,14 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   }, 500);
 
   useEffect(() => {
-    debouncedUpdate();
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      console.log("calling debouncedUpdate");
+      debouncedUpdate();
+    }
   }, [selectedStatuses, debouncedUpdate]);
 
   return (
