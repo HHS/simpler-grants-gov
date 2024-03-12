@@ -38,7 +38,7 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
             <div className="usa-prose">
               <SearchResultsHeader
                 formRef={formRef}
-                searchResults={searchResults}
+                searchResultsLength={searchResults.length}
               />
               <SearchPagination />
               <SearchResultsList searchResults={searchResults} />
