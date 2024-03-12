@@ -1,14 +1,14 @@
 """Add indexes for search
 
-Revision ID: 35062145d2ff
+Revision ID: f8364285630d
 Revises: 578c80acb29c
-Create Date: 2024-03-12 12:13:20.649288
+Create Date: 2024-03-12 13:22:57.718265
 
 """
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "35062145d2ff"
+revision = "f8364285630d"
 down_revision = "578c80acb29c"
 branch_labels = None
 depends_on = None
