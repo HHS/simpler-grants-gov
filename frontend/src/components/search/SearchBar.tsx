@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 
-interface SearchBarProps {
-  handleSearch: (searchTerm: string) => void;
-}
+import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 
-export default function SearchBar({ handleSearch }: SearchBarProps) {
+export default function SearchBar() {
+  const [inputValue, setInputValue] = useState<string>("");
+  const { updateSingularParam } = useSearchParamUpdater();
+
+  const handleSubmit = () => {
+    updateSingularParam(inputValue, "query");
+  };
+
   return (
     <div className="usa-search usa-search--big" role="search">
       <label className="usa-sr-only" htmlFor="search-field">
@@ -15,12 +20,11 @@ export default function SearchBar({ handleSearch }: SearchBarProps) {
         id="search-field"
         type="search"
         name="search-text-input"
-        onChange={(e) => {
-          handleSearch(e.target.value);
-        }}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
       />
 
-      <button className="usa-button" type="submit">
+      <button className="usa-button" type="submit" onClick={handleSubmit}>
         <span className="usa-search__submit-text">Search </span>
         {/* <img
           src="/assets/img/usa-icons-bg/search--white.svg"
