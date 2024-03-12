@@ -2,7 +2,7 @@ import React from "react";
 
 export default function SearchBar() {
   return (
-    <form className="usa-search usa-search--big" role="search">
+    <div className="usa-search usa-search--big" role="search">
       <label className="usa-sr-only" htmlFor="search-field">
         Search
       </label>
@@ -10,7 +10,7 @@ export default function SearchBar() {
         className="usa-input maxw-none"
         id="search-field"
         type="search"
-        name="search"
+        name="search-text-input"
       />
       <button className="usa-button" type="submit">
         <span className="usa-search__submit-text">Search </span>
@@ -20,6 +20,6 @@ export default function SearchBar() {
           alt="Search"
         /> */}
       </button>
-    </form>
+    </div>
   );
 }
