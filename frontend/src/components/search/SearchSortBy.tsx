@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 
 type SortOption = {
@@ -26,12 +24,9 @@ interface SearchSortByProps {
 
 const SearchSortBy: React.FC<SearchSortByProps> = ({ formRef }) => {
   const { updateSingularParam } = useSearchParamUpdater();
-  const [sortValue, setSortValue] = useState<string>("");
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value;
-    setSortValue(newValue);
-
     const key = "sortby";
     updateSingularParam(newValue, key);
     formRef?.current?.requestSubmit();
