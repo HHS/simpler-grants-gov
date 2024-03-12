@@ -21,13 +21,29 @@ const statusOptions: StatusOption[] = [
   { id: "status-archived", label: "Archived", value: "archived" },
 ];
 
+// Wait a half-second before updating query params
+  // and submitting the form
+const SEARCH_OPPORTUNITY_DEBOUNCE_TIME = 500;
+
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   formRef,
 }) => {
   const [mounted, setMounted] = useState(false);
   const { updateMultipleParam } = useSearchParamUpdater();
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(),
+  );
+
+
+  const debouncedUpdate = useDebouncedCallback(
+    (selectedStatuses: Set<string>) => {
+      const key = "status";
+      updateMultipleParam(selectedStatuses, key);
+      formRef?.current?.requestSubmit();
+    },
+    SEARCH_OPPORTUNITY_DEBOUNCE_TIME,
   );
 
   const handleCheck = (statusValue: string, isChecked: boolean) => {
@@ -36,28 +52,20 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
       isChecked
         ? updatedStatuses.add(statusValue)
         : updatedStatuses.delete(statusValue);
+
+      if (mounted) {
+        debouncedUpdate(updatedStatuses);
+      }
       return updatedStatuses;
     });
   };
 
-  // Wait half a second before updating query params
-  // and submitting the form
-  const debouncedUpdate = useDebouncedCallback(() => {
-    const key = "status";
-    updateMultipleParam(selectedStatuses, key);
-    formRef?.current?.requestSubmit();
-  }, 500);
-
   useEffect(() => {
     setMounted(true);
+    return () => {
+      setMounted(false);
+    };
   }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      console.log("calling debouncedUpdate");
-      debouncedUpdate();
-    }
-  }, [selectedStatuses, debouncedUpdate]);
 
   return (
     <>
