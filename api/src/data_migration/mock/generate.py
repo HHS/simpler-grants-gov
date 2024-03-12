@@ -63,10 +63,10 @@ def generate(db_session: db.Session) -> None:
 def update_existing_data(db_session, max_opportunity_id):
     """Update a subset of existing opportunities in the source tables."""
 
-    # Every 1000th record is updated every run (step is always constant):
+    # Every record with id ending in 001:
     update_ids = set(range(1, max_opportunity_id, 1000))
-    # Plus 1% of records updated rarely (step at 1% of max id):
-    update_ids |= set(range(5, max_opportunity_id, int(max_opportunity_id * 0.01)))
+    # Plus the 20 most recently created records:
+    update_ids |= set(range(max_opportunity_id - 19, max_opportunity_id + 1))
 
     logger.info("updating rows %r" % sorted(update_ids))
 
