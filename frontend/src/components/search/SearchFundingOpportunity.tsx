@@ -1,5 +1,5 @@
 import { Accordion, Checkbox } from "@trussworks/react-uswds";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface AccordionItemProps {
   title: React.ReactNode | string;
@@ -18,6 +18,7 @@ interface FilterOption {
 }
 
 export default function SearchFundingOpportunity() {
+  const [mounted, setMounted] = useState<boolean>(false);
   const filterOptions: FilterOption[] = [
     {
       id: "funding-opportunity-cooperative_agreement",
@@ -32,6 +33,10 @@ export default function SearchFundingOpportunity() {
     },
     { id: "funding-opportunity-other", label: "Other", value: "other" },
   ];
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const accordionOptions: AccordionItemProps[] = [
     {
@@ -58,7 +63,7 @@ export default function SearchFundingOpportunity() {
                 name={option.id}
                 label={option.label}
                 // onChange={(e) => handleCheck(option.value, e.target.checked)}
-                // disabled={!mounted} // Required to be disabled until hydrated so query params are updated properly
+                disabled={!mounted} // Required to be disabled until hydrated so query params are updated properly
               />
             </div>
           ))}
