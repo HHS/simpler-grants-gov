@@ -38,7 +38,10 @@ export function SearchForm({
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus formRef={formRef} initialStatuses={status} />
+            <SearchOpportunityStatus
+              formRef={formRef}
+              initialStatuses={status}
+            />
             <fieldset className="usa-fieldset">Filters</fieldset>
           </div>
           <div className="tablet:grid-col-8">
