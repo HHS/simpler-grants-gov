@@ -12,6 +12,7 @@ interface StatusOption {
 
 interface SearchOpportunityStatusProps {
   formRef: React.RefObject<HTMLFormElement>;
+  initialStatuses: string;
 }
 
 const statusOptions: StatusOption[] = [
@@ -27,14 +28,17 @@ const SEARCH_OPPORTUNITY_STATUS_DEBOUNCE_TIME = 500;
 
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   formRef,
+  initialStatuses,
 }) => {
   const [mounted, setMounted] = useState(false);
   const { updateQueryParams } = useSearchParamUpdater();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
-    new Set(),
+  const initialStatusesSet = new Set(
+    initialStatuses ? initialStatuses.split(",") : [],
   );
+
+  const [selectedStatuses, setSelectedStatuses] =
+    useState<Set<string>>(initialStatusesSet);
 
   const debouncedUpdate = useDebouncedCallback(
     (selectedStatuses: Set<string>) => {
@@ -77,6 +81,7 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
               tile={true}
               onChange={(e) => handleCheck(option.value, e.target.checked)}
               disabled={!mounted} // Required to be disabled until hydrated so query params are updated properly
+              checked={selectedStatuses.has(option.value)}
             />
           </div>
         ))}

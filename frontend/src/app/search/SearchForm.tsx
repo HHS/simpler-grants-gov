@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 
+import { ConvertedSearchParams } from "../../types/requestURLTypes";
 import SearchBar from "../../components/search/SearchBar";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
@@ -13,25 +14,31 @@ import { useFormState } from "react-dom";
 
 interface SearchFormProps {
   initialSearchResults: SearchResponseData;
+  requestURLQueryParams: ConvertedSearchParams;
 }
 
-export function SearchForm({ initialSearchResults }: SearchFormProps) {
+export function SearchForm({
+  initialSearchResults,
+  requestURLQueryParams,
+}: SearchFormProps) {
   const [searchResults, updateSearchResultsAction] = useFormState(
     updateResults,
     initialSearchResults,
   );
 
-  const formRef = useRef(null);
+  const formRef = useRef(null); // allows us to submit form from child components
+
+  const { status, query, sortby } = requestURLQueryParams;
 
   return (
     <form ref={formRef} action={updateSearchResultsAction}>
       <div className="grid-container">
         <div className="search-bar">
-          <SearchBar />
+          <SearchBar initialQuery={query} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus formRef={formRef} />
+            <SearchOpportunityStatus formRef={formRef} initialStatuses={status} />
             <fieldset className="usa-fieldset">Filters</fieldset>
           </div>
           <div className="tablet:grid-col-8">
@@ -39,6 +46,7 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
               <SearchResultsHeader
                 formRef={formRef}
                 searchResultsLength={searchResults.length}
+                initialSortBy={sortby}
               />
               <SearchPagination />
               <SearchResultsList searchResults={searchResults} />
