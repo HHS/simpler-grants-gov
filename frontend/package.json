@@ -19,6 +19,8 @@
     "test": "jest --ci --coverage",
     "test-update": "jest --update-snapshot",
     "test-watch": "jest --watch",
+    "test:e2e": "npx playwright test --config ./tests/playwright.config.ts",
+    "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui",
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
+    "@playwright/test": "^1.42.0",
     "@storybook/addon-designs": "^7.0.1",
     "@storybook/addon-essentials": "^7.1.0",
     "@storybook/nextjs": "^7.1.0",
