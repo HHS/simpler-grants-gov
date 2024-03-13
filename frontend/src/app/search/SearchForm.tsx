@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 
 import { ConvertedSearchParams } from "../../types/requestURLTypes";
 import SearchBar from "../../components/search/SearchBar";
+import SearchFundingOpportunity from "../../components/search/SearchFundingOpportunity";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
@@ -38,11 +39,11 @@ export function SearchForm({
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus
+            <SearchOpportunityStatus   
               formRef={formRef}
               initialStatuses={status}
             />
-            <fieldset className="usa-fieldset">Filters</fieldset>
+            <SearchFundingOpportunity />
           </div>
           <div className="tablet:grid-col-8">
             <div className="usa-prose">
