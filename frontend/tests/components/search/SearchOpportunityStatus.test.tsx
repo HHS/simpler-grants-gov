@@ -31,14 +31,16 @@ describe("SearchOpportunityStatus", () => {
   });
 
   it("passes accessibility scan", async () => {
-    const { container } = render(<SearchOpportunityStatus formRef={formRef} />);
+    const { container } = render(
+      <SearchOpportunityStatus formRef={formRef} initialStatuses="" />,
+    );
     const results = await axe(container);
 
     expect(results).toHaveNoViolations();
   });
 
   it("component renders with checkboxes", () => {
-    render(<SearchOpportunityStatus formRef={formRef} />);
+    render(<SearchOpportunityStatus formRef={formRef} initialStatuses="" />);
 
     expect(screen.getByText("Forecasted")).toBeEnabled();
     expect(screen.getByText("Posted")).toBeEnabled();
