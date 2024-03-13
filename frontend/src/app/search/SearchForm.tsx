@@ -32,7 +32,7 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus />
+            <SearchOpportunityStatus formRef={formRef} />
             <SearchFundingOpportunity />
           </div>
           <div className="tablet:grid-col-8">
