@@ -165,3 +165,4 @@ module "monitoring" {
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   incident_management_service_integration_url = module.app_config.has_incident_management_service ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 }
+

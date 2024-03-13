@@ -66,6 +66,46 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "app_response_time_anomalies" {
+  # test alarm using anomaly detection to monitor response time.
+  # a PR-worthy alarm will need to track something else to get service errors
+  alarm_name          = "${var.service_name}-response-time-anomalies"
+  comparison_operator = "GreaterThanUpperThreshold"
+  evaluation_periods  = 5
+  threshold_metric_id = "q1"
+  alarm_description   = "Anomalies with latency"
+  treat_missing_data  = "ignore"
+  # commented for testing
+  # alarm_actions       = [aws_sns_topic.this.arn]
+  # ok_actions          = [aws_sns_topic.this.arn]
+
+  dimensions = {
+    LoadBalancer = var.load_balancer_arn_suffix
+  }
+
+  # upper band for anomaly detection
+  metric_query {
+    id          = "q1"
+    label       = "expectedLevel(m1)"
+    return_data = "true"
+    expression  = "ANOMALY_DETECTION_BAND(m1)"
+  }
+
+  metric_query {
+    id          = "m1"
+    return_data = "true"
+
+    metric {
+      metric_name = "TargetResponseTime"
+      namespace   = "AWS/ApplicationELB"
+      period      = 60
+      stat        = "Average"
+      unit        = "Count"
+    }
+  }
+}
+
+
 #email integration
 
 resource "aws_sns_topic_subscription" "email_integration" {
@@ -84,3 +124,4 @@ resource "aws_sns_topic_subscription" "incident_management_service_integration" 
   protocol               = "https"
   topic_arn              = aws_sns_topic.this.arn
 }
+
