@@ -31,6 +31,10 @@ export function SearchForm({
 
   const { status, query, sortby, page } = requestURLQueryParams;
 
+  const maxPaginationError = //TODO: move this to server-side calculation?
+    searchResults.pagination_info.page_offset >
+    searchResults.pagination_info.total_pages;
+
   return (
     <form ref={formRef} action={updateSearchResultsAction}>
       <div className="grid-container">
@@ -57,10 +61,13 @@ export function SearchForm({
               <SearchPagination
                 page={page}
                 formRef={formRef}
-                showHiddenInput={true}
+                showHiddenInput={true} 
                 totalPages={searchResults.pagination_info.total_pages}
               />
-              <SearchResultsList searchResults={searchResults.data} />
+              <SearchResultsList
+                searchResults={searchResults.data}
+                maxPaginationError={maxPaginationError}
+              />
               <SearchPagination
                 page={page}
                 formRef={formRef}

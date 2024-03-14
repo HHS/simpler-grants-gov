@@ -7,10 +7,12 @@ import { useFormStatus } from "react-dom";
 
 interface SearchResultsListProps {
   searchResults: SearchResponseData;
+  maxPaginationError: boolean;
 }
 
 const SearchResultsList: React.FC<SearchResultsListProps> = ({
   searchResults,
+  maxPaginationError,
 }) => {
   const { pending } = useFormStatus();
 
@@ -20,6 +22,13 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
 
   return (
     <ul className="usa-list--unstyled">
+        {/* TODO #1485: show proper USWDS error  */}
+      {maxPaginationError && (
+        <h4>
+          You're trying to access opportunity results that are beyond the last
+          page of data.
+        </h4>
+      )}
       {searchResults.map((opportunity) => (
         <li
           key={opportunity?.opportunity_id}

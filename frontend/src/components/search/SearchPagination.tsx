@@ -6,7 +6,7 @@ import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 interface SearchPaginationProps {
   page: number;
   formRef: React.RefObject<HTMLFormElement>;
-  showHiddenInput?: boolean;
+  showHiddenInput?: boolean; // Only one of the two SearchPagination should have this set
   totalPages: number;
 }
 
@@ -39,6 +39,7 @@ export default function SearchPagination({
   return (
     <>
       {showHiddenInput === true && (
+        // Allows us to pass a value to server action when updating results
         <input type="hidden" name="currentPage" ref={currentPageInputRef} />
       )}
       <Pagination
