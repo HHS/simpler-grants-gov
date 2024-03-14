@@ -8,7 +8,7 @@ export type SearchResponseData = Opportunity[];
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {
-    return process.env.NEXT_PUBLIC_API_URL || "";
+    return process.env.API_URL || "";
   }
 
   get namespace(): string {
