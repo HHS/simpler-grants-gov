@@ -103,7 +103,6 @@ export default abstract class BaseApi {
       // throw fetchErrorToNetworkError(error);
     }
 
-
     const { data, message, pagination_info, status_code, errors, warnings } =
       responseBody;
     if (!response.ok) {
