@@ -8,7 +8,6 @@ class OpportunityStatus(StrEnum):
     POSTED = "posted"
     CLOSED = "closed"
     ARCHIVED = "archived"
-    UNKNOWN = "unknown"
 
 
 OPPORTUNITY_STATUS_CONFIG = LookupConfig(
@@ -17,7 +16,6 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
         LookupStr(OpportunityStatus.POSTED, 2),
         LookupStr(OpportunityStatus.CLOSED, 3),
         LookupStr(OpportunityStatus.ARCHIVED, 4),
-        LookupStr(OpportunityStatus.UNKNOWN, 5),
     ]
 )
 

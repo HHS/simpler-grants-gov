@@ -128,9 +128,12 @@ def _add_order_by(
         case "agency_code":
             field = Opportunity.agency
         case _:
-            raise Exception(
-                "TODO - shouldn't happen as it would mean a mismatch in the API schema to here"
-            )
+            # If this exception happens, it means our API schema
+            # allows for values we don't have implemented. This
+            # means we can't determine how to sort / need to correct
+            # the mismatch.
+            msg = f"Unconfigured sort_by parameter {pagination.order_by} provided, cannot determine how to sort."
+            raise Exception(msg)
 
     # Any values that are null will automatically be sorted to the end
     return stmt.order_by(nulls_last(sort_fn(field)))

@@ -26,27 +26,23 @@ def _build_opportunities(db_session: db.Session) -> None:
     logger.info(f"Creating opportunities starting with opportunity_id {max_opportunity_id + 1}")
     factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
 
-    for i in range(300):
-        logger.info(i)
-        # Create a few opportunities in various scenarios
-        factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
-        factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
+    # Create a few opportunities in various scenarios
+    factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
+    factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
 
-        # generate a few opportunities with mostly null values
-        all_null_opportunities = factories.OpportunityFactory.create_batch(
-            size=5, all_fields_null=True
+    # generate a few opportunities with mostly null values
+    all_null_opportunities = factories.OpportunityFactory.create_batch(size=5, all_fields_null=True)
+    for all_null_opportunity in all_null_opportunities:
+        summary = factories.OpportunitySummaryFactory.create(
+            all_fields_null=True, opportunity=all_null_opportunity
         )
-        for all_null_opportunity in all_null_opportunities:
-            summary = factories.OpportunitySummaryFactory.create(
-                all_fields_null=True, opportunity=all_null_opportunity
-            )
-            factories.CurrentOpportunitySummaryFactory.create(
-                opportunity=all_null_opportunity, opportunity_summary=summary
-            )
+        factories.CurrentOpportunitySummaryFactory.create(
+            opportunity=all_null_opportunity, opportunity_summary=summary
+        )
 
     logger.info("Finished creating opportunities")
 
