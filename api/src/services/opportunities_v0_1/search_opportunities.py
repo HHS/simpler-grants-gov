@@ -134,6 +134,12 @@ def search_opportunities(
         #
         # See: https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#what-kind-of-loading-to-use
         .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+        # Distinct is necessary as the joins may add duplicate rows when multiple one-to-many relationships match
+        # While SQLAlchemy will unique those rows for us, the SQL query still ends up with far less than the limit
+        # we specify as that is done outside of the DB.
+        # By having distinct, we do that ourselves in the query so that the limit we specify will be the actual amount
+        # of records returned (assuming there at least that number to return)
+        .distinct()
     )
 
     stmt = _add_query_filters(stmt, search_params.query)
