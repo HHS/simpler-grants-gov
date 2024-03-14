@@ -22,11 +22,12 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
 
   return (
     <ul className="usa-list--unstyled">
-        {/* TODO #1485: show proper USWDS error  */}
+      {/* TODO #1485: show proper USWDS error  */}
       {maxPaginationError && (
         <h4>
-          You're trying to access opportunity results that are beyond the last
-          page of data.
+          {
+            "You''re trying to access opportunity results that are beyond the last page of data."
+          }
         </h4>
       )}
       {searchResults.map((opportunity) => (
