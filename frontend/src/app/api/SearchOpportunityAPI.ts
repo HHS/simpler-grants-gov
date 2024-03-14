@@ -1,7 +1,6 @@
 import "server-only";
 
-import BaseApi, { JSONRequestBody } from "./BaseApi";
-
+import BaseApi from "./BaseApi";
 import { Opportunity } from "../../types/searchTypes";
 
 export type SearchResponseData = Opportunity[];
@@ -21,15 +20,14 @@ export default class SearchOpportunityAPI extends BaseApi {
     return { ...baseHeaders, ...searchHeaders };
   }
 
-  async searchOpportunities(queryParams?: JSONRequestBody) {
+  async searchOpportunities(page = 1) {
     const requestBody = {
       pagination: {
         order_by: "opportunity_id",
-        page_offset: 1,
+        page_offset: page,
         page_size: 25,
         sort_direction: "ascending",
       },
-      ...queryParams,
     };
 
     const subPath = "search";

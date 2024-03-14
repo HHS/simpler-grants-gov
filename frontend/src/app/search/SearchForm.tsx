@@ -29,7 +29,7 @@ export function SearchForm({
 
   const formRef = useRef(null); // allows us to submit form from child components
 
-  const { status, query, sortby } = requestURLQueryParams;
+  const { status, query, sortby, page } = requestURLQueryParams;
 
   return (
     <form ref={formRef} action={updateSearchResultsAction}>
@@ -52,9 +52,13 @@ export function SearchForm({
                 searchResultsLength={searchResults.length}
                 initialSortBy={sortby}
               />
-              <SearchPagination />
+              <SearchPagination
+                page={page}
+                formRef={formRef}
+                showHiddenInput={true}
+              />
               <SearchResultsList searchResults={searchResults} />
-              <SearchPagination />
+              <SearchPagination page={page} formRef={formRef} />
             </div>
           </div>
         </div>

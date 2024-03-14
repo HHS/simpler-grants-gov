@@ -8,8 +8,8 @@ import PageSEO from "src/components/PageSEO";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
+import { convertSearchParamsToProperTypes } from "../../utils/convertSearchParamsToStrings";
 import { cookies } from "next/headers";
-import { forceSearchParamsToStringValue } from "../../utils/convertSearchParamsToStrings";
 import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
@@ -33,8 +33,11 @@ export default async function Search({ searchParams }: ServerPageProps) {
     return notFound();
   }
 
-  const convertedSearchParams = forceSearchParamsToStringValue(searchParams);
-  const initialSearchResults = await searchFetcher.fetchOpportunities();
+  const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
+  const initialSearchResults = await searchFetcher.fetchOpportunities(
+    convertedSearchParams,
+  );
+
 
   return (
     <>
