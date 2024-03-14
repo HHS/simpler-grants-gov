@@ -81,7 +81,3 @@ export function SearchForm({
     </form>
   );
 }
-
-
-
-
