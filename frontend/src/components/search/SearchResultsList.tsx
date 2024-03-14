@@ -38,7 +38,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                 <div className="grid-col tablet:order-2">
                   <h2 className="margin-y-105 line-height-serif-2">
                     {/* TODO: href here needs to be set to:
-                        dev/staging: https://grants.gov/search-results-detail/<opportunity_id>
+                        dev/staging:  https://test.grants.gov/search-results-detail/<opportunity_id>
                         local/prod: https://grants.gov/search-results-detail/<opportunity_id>
                     */}
                     <a href="#" className="usa-link usa-link--external">
