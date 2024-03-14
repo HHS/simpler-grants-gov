@@ -1,6 +1,6 @@
 import "server-only";
 
-import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+import { SearchAPIResponse } from "../../types/searchTypes";
 
 export interface SearchFetcherProps {
   page: number;
@@ -9,5 +9,5 @@ export interface SearchFetcherProps {
 export abstract class SearchFetcher {
   abstract fetchOpportunities(
     props: SearchFetcherProps,
-  ): Promise<SearchResponseData>;
+  ): Promise<SearchAPIResponse>;
 }

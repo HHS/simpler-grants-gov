@@ -26,7 +26,6 @@ interface ServerPageProps {
 }
 
 export default async function Search({ searchParams }: ServerPageProps) {
-  console.log("searchParams serer side =>", searchParams);
 
   const ffManager = new FeatureFlagsManager(cookies());
   if (!ffManager.isFeatureEnabled("showSearchV0")) {

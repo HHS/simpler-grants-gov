@@ -3,18 +3,18 @@
 import React, { useRef } from "react";
 
 import { ConvertedSearchParams } from "../../types/requestURLTypes";
+import { SearchAPIResponse } from "../../types/searchTypes";
 import SearchBar from "../../components/search/SearchBar";
 import SearchFundingOpportunity from "../../components/search/SearchFundingOpportunity";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
-import { SearchResponseData } from "../api/SearchOpportunityAPI";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
 import { updateResults } from "./actions";
 import { useFormState } from "react-dom";
 
 interface SearchFormProps {
-  initialSearchResults: SearchResponseData;
+  initialSearchResults: SearchAPIResponse;
   requestURLQueryParams: ConvertedSearchParams;
 }
 
@@ -49,16 +49,23 @@ export function SearchForm({
             <div className="usa-prose">
               <SearchResultsHeader
                 formRef={formRef}
-                searchResultsLength={searchResults.length}
+                searchResultsLength={
+                  searchResults.pagination_info.total_records
+                }
                 initialSortBy={sortby}
               />
               <SearchPagination
                 page={page}
                 formRef={formRef}
                 showHiddenInput={true}
+                totalPages={searchResults.pagination_info.total_pages}
               />
-              <SearchResultsList searchResults={searchResults} />
-              <SearchPagination page={page} formRef={formRef} />
+              <SearchResultsList searchResults={searchResults.data} />
+              <SearchPagination
+                page={page}
+                formRef={formRef}
+                totalPages={searchResults.pagination_info.total_pages}
+              />
             </div>
           </div>
         </div>

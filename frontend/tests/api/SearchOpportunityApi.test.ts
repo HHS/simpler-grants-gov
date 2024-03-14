@@ -39,7 +39,7 @@ describe("SearchOpportunityAPI", () => {
     it("sends POST request to search opportunities endpoint with query parameters", async () => {
       const queryParams = { keyword: "science" };
 
-      const response = await searchApi.searchOpportunities(queryParams);
+      const response = await searchApi.searchOpportunities();
 
       const method = "POST";
       const headers = baseRequestHeaders;

@@ -31,7 +31,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     };
 
     const subPath = "search";
-    const response = await this.request<SearchResponseData>(
+    const response = await this.request(
       "POST",
       this.basePath,
       this.namespace,

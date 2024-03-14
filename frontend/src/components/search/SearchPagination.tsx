@@ -7,38 +7,43 @@ interface SearchPaginationProps {
   page: number;
   formRef: React.RefObject<HTMLFormElement>;
   showHiddenInput?: boolean;
+  totalPages: number;
 }
 
-const TOTAL_PAGES = 44;
 const MAX_SLOTS = 5;
 
 export default function SearchPagination({
   page = 1,
   formRef,
   showHiddenInput,
+  totalPages,
 }: SearchPaginationProps) {
-  console.log("page in searchpagination => ", page);
   const { updateQueryParams } = useSearchParamUpdater();
   const [currentPage, setCurrentPage] = useState<number>(
-    getSafeCurrentPage(page, TOTAL_PAGES),
+    getSafeCurrentPage(page, totalPages),
   );
 
+  const currentPageInputRef = React.useRef<HTMLInputElement>(null);
+
   const handlePageChange = (page: number) => {
-    console.log("page in handlePageChange => ", page);
     const queryParamKey = "page";
     updateQueryParams(page.toString(), queryParamKey);
+    if (currentPageInputRef.current) {
+      currentPageInputRef.current.value = page.toString();
+    }
+
     formRef?.current?.requestSubmit();
-    setCurrentPage(getSafeCurrentPage(page, TOTAL_PAGES));
+    setCurrentPage(getSafeCurrentPage(page, totalPages));
   };
 
   return (
     <>
       {showHiddenInput === true && (
-        <input type="hidden" name="currentPage" value={currentPage} />
+        <input type="hidden" name="currentPage" ref={currentPageInputRef} />
       )}
       <Pagination
         pathname="/search"
-        totalPages={TOTAL_PAGES}
+        totalPages={totalPages}
         currentPage={currentPage}
         maxSlots={MAX_SLOTS}
         onClickNext={() => handlePageChange(currentPage + 1)}
