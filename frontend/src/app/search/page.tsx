@@ -1,25 +1,34 @@
-import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
-import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-// Disable rule to allow server actions to be called without warning
-/* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
+import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
+import PageSEO from "src/components/PageSEO";
 import React from "react";
+import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
-import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { cookies } from "next/headers";
+import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
+import { notFound } from "next/navigation";
 
-const useMockData = false;
-const searchFetcher = useMockData
-  ? new MockSearchFetcher()
-  : new APISearchFetcher();
-
+const searchFetcher = getSearchFetcher();
 // TODO: use for i18n when ready
 // interface RouteParams {
 //   locale: string;
 // }
 
 export default async function Search() {
-  const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
+  const cookieStore = cookies();
+  const ffManager = new FeatureFlagsManager(cookieStore);
+  if (!ffManager.isFeatureEnabled("showSearchV0")) {
+    return notFound();
+  }
+
+  const initialSearchResults = await searchFetcher.fetchOpportunities();
   return (
     <>
+      {/* TODO: i18n */}
+      <PageSEO
+        title="Search Funding Opportunities"
+        description="Try out our experimental search page."
+      />
+      <SearchCallToAction />
       <SearchForm initialSearchResults={initialSearchResults} />
     </>
   );

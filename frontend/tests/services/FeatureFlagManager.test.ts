@@ -2,16 +2,15 @@
  * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
  */
 
-import Cookies from "js-cookie";
-
 import { NextRequest, NextResponse } from "next/server";
-
-import { FeatureFlagsManager } from "../../src/services/FeatureFlagManager";
-import { mockProcessEnv } from "../utils/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
 } from "../utils/FeatureFlagTestUtils";
+
+import Cookies from "js-cookie";
+import { FeatureFlagsManager } from "../../src/services/FeatureFlagManager";
+import { mockProcessEnv } from "../utils/commonTestUtils";
 
 describe("FeatureFlagsManager", () => {
   const COOKIE_VALUE = { feature1: true };
@@ -412,5 +411,32 @@ describe("FeatureFlagsManager", () => {
       expectedNewFeatureFlags,
     );
     expect(featureFlagsManager.featureFlags).toEqual(expectedNewFeatureFlags);
+  });
+
+  describe("Calls feature flag from server component", () => {
+    const readonlyCookiesExample = {
+      _ff: '{"feature1": true, "feature2": false}',
+    };
+
+    test("correctly initializes from ReadonlyRequestCookies", () => {
+      const readonlyCookies = readonlyCookiesExample;
+      const featureFlagsManager = new FeatureFlagsManager(readonlyCookies);
+
+      expect(featureFlagsManager.isFeatureEnabled("feature1")).toBe(true);
+      expect(featureFlagsManager.isFeatureEnabled("feature2")).toBe(false);
+    });
+
+    test("throws error for invalid feature flag in ReadonlyRequestCookies", () => {
+      const invalidFlagCookies = {
+        _ff: '{"invalidFeature": true}',
+      };
+
+      const featureFlagsManager = new FeatureFlagsManager(invalidFlagCookies);
+
+      // Accessing an invalid feature flag throws an error
+      expect(() =>
+        featureFlagsManager.isFeatureEnabled("invalidFeature"),
+      ).toThrow();
+    });
   });
 });
