@@ -3,7 +3,8 @@
 import React, { useRef } from "react";
 
 import SearchBar from "../../components/search/SearchBar";
-import SearchFundingOpportunity from "../../components/search/SearchFundingOpportunity";
+import SearchFilterAgency from "src/components/search/SearchFilterAgency";
+import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
 import { SearchResponseData } from "../api/SearchOpportunityAPI";
@@ -33,7 +34,8 @@ export function SearchForm({ initialSearchResults }: SearchFormProps) {
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
             <SearchOpportunityStatus formRef={formRef} />
-            <SearchFundingOpportunity />
+            <SearchFilterFundingInstrument />
+            <SearchFilterAgency />
           </div>
           <div className="tablet:grid-col-8">
             <div className="usa-prose">
