@@ -5,7 +5,8 @@ import React, { useRef } from "react";
 import { ConvertedSearchParams } from "../../types/requestURLTypes";
 import { SearchAPIResponse } from "../../types/searchTypes";
 import SearchBar from "../../components/search/SearchBar";
-import SearchFundingOpportunity from "../../components/search/SearchFundingOpportunity";
+import SearchFilterAgency from "src/components/search/SearchFilterAgency";
+import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
@@ -44,11 +45,12 @@ export function SearchForm({
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus
+             <SearchOpportunityStatus
               formRef={formRef}
               initialStatuses={status}
             />
-            <SearchFundingOpportunity />
+            <SearchFilterFundingInstrument />
+            <SearchFilterAgency />
           </div>
           <div className="tablet:grid-col-8">
             <div className="usa-prose">

@@ -27,6 +27,8 @@ def search_opportunities(
         # TODO - when we want to sort by non-opportunity table fields we'll need to change this
         .order_by(sort_fn(getattr(Opportunity, search_params.pagination.order_by)))
         .where(Opportunity.is_draft.is_(False))  # Only ever return non-drafts
+        # Filter anything without a current opportunity summary
+        .where(Opportunity.current_opportunity_summary != None)  # noqa: E711
         .options(joinedload("*"))  # Automatically load all relationships
     )
 
