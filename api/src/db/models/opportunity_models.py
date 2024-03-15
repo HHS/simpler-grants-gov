@@ -70,6 +70,13 @@ class Opportunity(Base, TimestampMixin):
 
         return self.current_opportunity_summary.opportunity_summary
 
+    @property
+    def opportunity_status(self) -> OpportunityStatus | None:
+        if self.current_opportunity_summary is None:
+            return None
+
+        return self.current_opportunity_summary.opportunity_status
+
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"

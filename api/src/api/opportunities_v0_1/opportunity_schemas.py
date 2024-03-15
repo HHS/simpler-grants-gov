@@ -10,14 +10,6 @@ from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class OpportunitySummarySchema(Schema):
-    opportunity_status = fields.Enum(
-        OpportunityStatus,
-        metadata={
-            "description": "The current status of the opportunity",
-            "example": OpportunityStatus.POSTED,
-        },
-    )
-
     summary_description = fields.String(
         metadata={
             "description": "The summary of the opportunity",
@@ -29,10 +21,16 @@ class OpportunitySummarySchema(Schema):
             "description": "Whether or not the opportunity has a cost sharing/matching requirement",
         }
     )
+    is_forecast = fields.Boolean(
+        metadata={
+            "description": "Whether the opportunity is forecasted, that is, the information is only an estimate and not yet official",
+            "example": False,
+        }
+    )
 
     close_date = fields.Date(
         metadata={
-            "description": "The date that the opportunity will close",
+            "description": "The date that the opportunity will close - only set if is_forecast=False",
         }
     )
     close_date_description = fields.String(
@@ -92,6 +90,38 @@ class OpportunitySummarySchema(Schema):
         }
     )
 
+    forecasted_post_date = fields.Date(
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be posted, and transition out of being a forecast"
+        }
+    )
+    forecasted_close_date = fields.Date(
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be close once posted."
+        }
+    )
+    forecasted_close_date_description = fields.String(
+        metadata={
+            "description": "Forecasted opportunity only. Optional details regarding the forecasted closed date.",
+            "example": "Proposals will probably be due on this date",
+        }
+    )
+    forecasted_award_date = fields.Date(
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor plans to award the opportunity."
+        }
+    )
+    forecasted_project_start_date = fields.Date(
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor expects the award recipient should start their project"
+        }
+    )
+    fiscal_year = fields.Integer(
+        metadata={
+            "description": "Forecasted opportunity only. The fiscal year the project is expected to be funded and launched"
+        }
+    )
+
     funding_category_description = fields.String(
         metadata={
             "description": "Additional information about the funding category",
@@ -142,6 +172,10 @@ class OpportunitySummarySchema(Schema):
         }
     )
 
+    funding_instruments = fields.List(fields.Enum(FundingInstrument))
+    funding_categories = fields.List(fields.Enum(FundingCategory))
+    applicant_types = fields.List(fields.Enum(ApplicantType))
+
 
 class OpportunityAssistanceListingSchema(Schema):
     program_title = fields.String(
@@ -191,27 +225,18 @@ class OpportunitySchema(Schema):
         }
     )
 
-    revision_number = fields.Integer(
-        metadata={
-            "description": "The current revision number of the opportunity, counting starts at 0",
-            "example": 0,
-        }
-    )
-    modified_comments = fields.String(
-        metadata={
-            "description": "Details regarding what modification was last made",
-            "example": None,
-        }
-    )
-
     opportunity_assistance_listings = fields.List(
         fields.Nested(OpportunityAssistanceListingSchema())
     )
     summary = fields.Nested(OpportunitySummarySchema())
 
-    funding_instruments = fields.List(fields.Enum(FundingInstrument))
-    funding_categories = fields.List(fields.Enum(FundingCategory))
-    applicant_types = fields.List(fields.Enum(ApplicantType))
+    opportunity_status = fields.Enum(
+        OpportunityStatus,
+        metadata={
+            "description": "The current status of the opportunity",
+            "example": OpportunityStatus.POSTED,
+        },
+    )
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

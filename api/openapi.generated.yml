@@ -16,7 +16,7 @@ info:
   contact:
     name: Simpler Grants.gov
     url: https://simpler.grants.gov/
-    email: simplergrantsgov@hhs.gov
+    email: simpler@grants.gov
   title: Simpler Grants API
   version: v0
 tags:
@@ -784,17 +784,6 @@ components:
     OpportunitySummary:
       type: object
       properties:
-        opportunity_status:
-          description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
-          enum:
-          - forecasted
-          - posted
-          - closed
-          - archived
-          type:
-          - string
         summary_description:
           type: string
           description: The summary of the opportunity
@@ -803,10 +792,15 @@ components:
           type: boolean
           description: Whether or not the opportunity has a cost sharing/matching
             requirement
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted, that is, the information
+            is only an estimate and not yet official
+          example: false
         close_date:
           type: string
           format: date
-          description: The date that the opportunity will close
+          description: The date that the opportunity will close - only set if is_forecast=False
         close_date_description:
           type: string
           description: Optional details regarding the close date
@@ -844,6 +838,35 @@ components:
           type: string
           description: The text to display for the additional_info_url link
           example: Click me for more info
+        forecasted_post_date:
+          type: string
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be posted, and transition out of being a forecast
+        forecasted_close_date:
+          type: string
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be close once posted.
+        forecasted_close_date_description:
+          type: string
+          description: Forecasted opportunity only. Optional details regarding the
+            forecasted closed date.
+          example: Proposals will probably be due on this date
+        forecasted_award_date:
+          type: string
+          format: date
+          description: Forecasted opportunity only. The date the grantor plans to
+            award the opportunity.
+        forecasted_project_start_date:
+          type: string
+          format: date
+          description: Forecasted opportunity only. The date the grantor expects the
+            award recipient should start their project
+        fiscal_year:
+          type: integer
+          description: Forecasted opportunity only. The fiscal year the project is
+            expected to be funded and launched
         funding_category_description:
           type: string
           description: Additional information about the funding category
@@ -877,63 +900,6 @@ components:
           type: string
           description: The text for the link to the agency email address
           example: Click me to email the agency
-    Opportunity:
-      type: object
-      properties:
-        opportunity_id:
-          type: integer
-          readOnly: true
-          description: The internal ID of the opportunity
-          example: 12345
-        opportunity_number:
-          type: string
-          description: The funding opportunity number
-          example: ABC-123-XYZ-001
-        opportunity_title:
-          type: string
-          description: The title of the opportunity
-          example: Research into conservation techniques
-        agency:
-          type: string
-          description: The agency who created the opportunity
-          example: US-ABC
-        category:
-          description: The opportunity category
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-          - discretionary
-          enum:
-          - discretionary
-          - mandatory
-          - continuation
-          - earmark
-          - other
-          type:
-          - string
-        category_explanation:
-          type: string
-          description: Explanation of the category when the category is 'O' (other)
-          example: null
-        revision_number:
-          type: integer
-          description: The current revision number of the opportunity, counting starts
-            at 0
-          example: 0
-        modified_comments:
-          type: string
-          description: Details regarding what modification was last made
-          example: null
-        opportunity_assistance_listings:
-          type: array
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListing'
-        summary:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySummary'
         funding_instruments:
           type: array
           items:
@@ -999,6 +965,65 @@ components:
             - unrestricted
             type:
             - string
+    Opportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          readOnly: true
+          description: The internal ID of the opportunity
+          example: 12345
+        opportunity_number:
+          type: string
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
+          type: string
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
+          type: string
+          description: The agency who created the opportunity
+          example: US-ABC
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
+          enum:
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
+          type:
+          - string
+        category_explanation:
+          type: string
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        opportunity_assistance_listings:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/OpportunityAssistanceListing'
+        summary:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySummary'
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
         created_at:
           type: string
           format: date-time
