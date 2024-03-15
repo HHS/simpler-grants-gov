@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { Accordion } from "@trussworks/react-uswds";
 import SearchFilterCheckbox from "./SearchFilterCheckbox";
 import SearchFilterSection from "./SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "./SearchFilterToggleAll";
+import useSearchFilter from "../../../hooks/useSearchFilter";
 
 export interface AccordionItemProps {
   title: React.ReactNode | string;
@@ -32,25 +33,13 @@ export function SearchFilterAccordion({
   filterOptions,
   title,
 }: SearchFilterAccordionProps) {
-    
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Initialize options with unchecked state
-  const [options, setOptions] = useState<FilterOption[]>(
-    filterOptions.map((option) => ({
-      ...option,
-      isChecked: false,
-      children: option.children
-        ? option.children.map((child) => ({
-            ...child,
-            isChecked: false,
-          }))
-        : undefined,
-    })),
-  );
-  const [mounted, setMounted] = useState<boolean>(false);
+  const {
+    totalCheckedCount,
+    options,
+    mounted,
+    toggleOptionChecked,
+    toggleSelectAll,
+  } = useSearchFilter(filterOptions);
 
   const [checkedTotal, setCheckedTotal] = useState<number>(0);
   const incrementTotal = () => {
@@ -60,60 +49,12 @@ export function SearchFilterAccordion({
     setCheckedTotal(checkedTotal - 1);
   };
 
-  const countChecked = (optionsList: FilterOption[]): number => {
-    return optionsList.reduce((acc, option) => {
-      // If there are children, only count the children, not the parent section.
-      return option.children
-        ? acc + countChecked(option.children)
-        : acc + (option.isChecked ? 1 : 0);
-    }, 0);
-  };
-
-  const toggleSelectAll = (isSelected: boolean, sectionId?: string) => {
-    const recursiveToggle = (
-      optionsList: FilterOption[],
-      withinSection = false,
-    ): FilterOption[] =>
-      optionsList.map((option) => {
-        // Determine if the current option is within the specified section or if no section is specified
-        const isInSection = sectionId
-          ? option.id === sectionId || withinSection
-          : true;
-
-        return {
-          ...option,
-          // Toggle only if in the specified section (or no section is specified)
-          isChecked: isInSection ? isSelected : option.isChecked,
-          children: option.children
-            ? recursiveToggle(option.children, isInSection)
-            : undefined,
-        };
-      });
-
-    setOptions((currentOptions) => {
-      const newOptions = recursiveToggle(currentOptions);
-      setCheckedTotal(countChecked(newOptions));
-      return newOptions;
-    });
-  };
-
-  const toggleOptionChecked = (optionId: string, isChecked: boolean) => {
-    const updateChecked = (options: FilterOption[]): FilterOption[] =>
-      options.map((opt) => ({
-        ...opt,
-        isChecked: opt.id === optionId ? isChecked : opt.isChecked,
-        children: opt.children ? updateChecked(opt.children) : undefined,
-      }));
-
-    setOptions((prevOptions) => updateChecked(prevOptions));
-  };
-
   const getAccordionTitle = () => (
     <>
       {title}
-      {!!checkedTotal && (
+      {!!totalCheckedCount && (
         <span className="usa-tag usa-tag--big radius-pill margin-left-1">
-          {checkedTotal}
+          {totalCheckedCount}
         </span>
       )}
     </>

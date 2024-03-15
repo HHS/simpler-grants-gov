@@ -1,9 +1,25 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import { FilterOption } from '../components/search/SearchFilterAccordion/SearchFilterAccordion';
+import { FilterOption } from "../components/search/SearchFilterAccordion/SearchFilterAccordion";
 
-function useFilterOptions(initialOptions: FilterOption[]) {
-  const [options, setOptions] = useState<FilterOption[]>(initialOptions);
+function useSearchFilter(initialOptions: FilterOption[]) {
+  // Initialize all isChecked to false
+  const [options, setOptions] = useState<FilterOption[]>(
+    initialOptions.map((option) => ({
+      ...option,
+      isChecked: false,
+      children: option.children
+        ? option.children.map((child) => ({
+            ...child,
+            isChecked: false,
+          }))
+        : undefined,
+    })),
+  );
+  const [mounted, setMounted] = useState<boolean>(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Recursively count checked options
   const countChecked = useCallback((optionsList: FilterOption[]): number => {
@@ -16,28 +32,46 @@ function useFilterOptions(initialOptions: FilterOption[]) {
 
   // Recursively toggle options
   const recursiveToggle = useCallback(
-    (optionsList: FilterOption[], isSelected: boolean, sectionId?: string, withinSection = false): FilterOption[] => {
+    (
+      optionsList: FilterOption[],
+      isSelected: boolean,
+      sectionId?: string,
+      withinSection = false,
+    ): FilterOption[] => {
       return optionsList.map((option) => {
-        const isInSection = sectionId ? option.id === sectionId || withinSection : true;
+        const isInSection = sectionId
+          ? option.id === sectionId || withinSection
+          : true;
         return {
           ...option,
           isChecked: isInSection ? isSelected : option.isChecked,
-          children: option.children ? recursiveToggle(option.children, isSelected, sectionId, isInSection) : undefined,
+          children: option.children
+            ? recursiveToggle(
+                option.children,
+                isSelected,
+                sectionId,
+                isInSection,
+              )
+            : undefined,
         };
       });
     },
-    []
+    [],
   );
 
   // Toggle all options or options within a section
   const toggleSelectAll = useCallback(
     (isSelected: boolean, sectionId?: string) => {
       setOptions((currentOptions) => {
-        const newOptions = recursiveToggle(currentOptions, isSelected, sectionId);
+        const newOptions = recursiveToggle(
+          currentOptions,
+          isSelected,
+          sectionId,
+        );
         return newOptions;
       });
     },
-    [recursiveToggle]
+    [recursiveToggle],
   );
 
   // Toggle a single option
@@ -54,13 +88,14 @@ function useFilterOptions(initialOptions: FilterOption[]) {
         return updateChecked(prevOptions);
       });
     },
-    []
+    [],
   );
 
   // The total count of checked options
   const totalCheckedCount = countChecked(options);
 
   return {
+    mounted,
     options,
     setOptions,
     toggleSelectAll,
@@ -69,4 +104,4 @@ function useFilterOptions(initialOptions: FilterOption[]) {
   };
 }
 
-export default useFilterOptions;
+export default useSearchFilter;
