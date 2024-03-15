@@ -32,6 +32,7 @@ export function SearchFilterAccordion({
   filterOptions,
   title,
 }: SearchFilterAccordionProps) {
+    
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -61,10 +62,10 @@ export function SearchFilterAccordion({
 
   const countChecked = (optionsList: FilterOption[]): number => {
     return optionsList.reduce((acc, option) => {
-      const childrenChecked = option.children
-        ? countChecked(option.children)
-        : 0;
-      return acc + (option.isChecked ? 1 : 0) + childrenChecked;
+      // If there are children, only count the children, not the parent section.
+      return option.children
+        ? acc + countChecked(option.children)
+        : acc + (option.isChecked ? 1 : 0);
     }, 0);
   };
 

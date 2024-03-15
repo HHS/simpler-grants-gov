@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
+
 import { FilterOption } from "../SearchFilterAccordion";
 import SearchFilterCheckbox from "../SearchFilterCheckbox";
 import SearchFilterToggleAll from "../SearchFilterToggleAll";
 import SectionLinkCount from "./SectionLinkCount";
 import SectionLinkLabel from "./SectionLinkLabel";
-import { useState } from "react";
 
 interface SearchFilterSectionProps {
   option: FilterOption;
@@ -42,6 +43,15 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   const handleClearAll = () => {
     toggleSelectAll(false, option.id);
   };
+
+  useEffect(() => {
+    if (option.children) {
+      const newCount = option.children.filter(
+        (child) => child.isChecked,
+      ).length;
+      setSectionCount(newCount);
+    }
+  }, [option.children]);
 
   return (
     <div>
