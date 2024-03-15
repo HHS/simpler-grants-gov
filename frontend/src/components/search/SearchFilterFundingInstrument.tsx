@@ -1,4 +1,7 @@
-import { FilterOption, SearchFilter } from "src/components/search/SearchFilter";
+import {
+  FilterOption,
+  SearchFilterAccordion,
+} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export default function SearchFilterFundingInstrument() {
   const filterOptions: FilterOption[] = [
@@ -25,6 +28,9 @@ export default function SearchFilterFundingInstrument() {
   ];
 
   return (
-    <SearchFilter filterOptions={filterOptions} title="Funding instrument" />
+    <SearchFilterAccordion
+      filterOptions={filterOptions}
+      title="Funding instrument"
+    />
   );
 }
