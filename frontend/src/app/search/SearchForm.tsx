@@ -45,7 +45,7 @@ export function SearchForm({
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-             <SearchOpportunityStatus
+            <SearchOpportunityStatus
               formRef={formRef}
               initialStatuses={status}
             />
