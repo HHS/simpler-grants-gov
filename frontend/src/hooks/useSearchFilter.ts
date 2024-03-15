@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import { FilterOption } from "../components/search/SearchFilterAccordion/SearchFilterAccordion";
 
-function useSearchFilter(initialOptions: FilterOption[]) {
+function useSearchFilter(initialFilterOptions: FilterOption[]) {
   // Initialize all isChecked to false
   const [options, setOptions] = useState<FilterOption[]>(
-    initialOptions.map((option) => ({
+    initialFilterOptions.map((option) => ({
       ...option,
       isChecked: false,
       children: option.children
@@ -16,6 +16,15 @@ function useSearchFilter(initialOptions: FilterOption[]) {
         : undefined,
     })),
   );
+
+  const [checkedTotal, setCheckedTotal] = useState<number>(0);
+  const incrementTotal = () => {
+    setCheckedTotal(checkedTotal + 1);
+  };
+  const decrementTotal = () => {
+    setCheckedTotal(checkedTotal - 1);
+  };
+
   const [mounted, setMounted] = useState<boolean>(false);
   useEffect(() => {
     setMounted(true);
@@ -101,6 +110,8 @@ function useSearchFilter(initialOptions: FilterOption[]) {
     toggleSelectAll,
     toggleOptionChecked,
     totalCheckedCount,
+    incrementTotal,
+    decrementTotal,
   };
 }
 

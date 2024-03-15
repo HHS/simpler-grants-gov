@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-
 import { Accordion } from "@trussworks/react-uswds";
+import React from "react";
 import SearchFilterCheckbox from "./SearchFilterCheckbox";
 import SearchFilterSection from "./SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "./SearchFilterToggleAll";
@@ -25,29 +24,24 @@ export interface FilterOption {
 }
 
 interface SearchFilterAccordionProps {
-  filterOptions: FilterOption[];
+  initialFilterOptions: FilterOption[];
   title: string;
 }
 
 export function SearchFilterAccordion({
-  filterOptions,
+  initialFilterOptions,
   title,
 }: SearchFilterAccordionProps) {
+  // manage most of state in custom hook
   const {
     totalCheckedCount,
     options,
     mounted,
     toggleOptionChecked,
     toggleSelectAll,
-  } = useSearchFilter(filterOptions);
-
-  const [checkedTotal, setCheckedTotal] = useState<number>(0);
-  const incrementTotal = () => {
-    setCheckedTotal(checkedTotal + 1);
-  };
-  const decrementTotal = () => {
-    setCheckedTotal(checkedTotal - 1);
-  };
+    incrementTotal,
+    decrementTotal,
+  } = useSearchFilter(initialFilterOptions);
 
   const getAccordionTitle = () => (
     <>

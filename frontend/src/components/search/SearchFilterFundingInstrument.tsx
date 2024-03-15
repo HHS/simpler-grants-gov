@@ -4,7 +4,7 @@ import {
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export default function SearchFilterFundingInstrument() {
-  const filterOptions: FilterOption[] = [
+  const initialFilterOptions: FilterOption[] = [
     {
       id: "funding-opportunity-cooperative_agreement",
       label: "Cooperative Agreement",
@@ -29,7 +29,7 @@ export default function SearchFilterFundingInstrument() {
 
   return (
     <SearchFilterAccordion
-      filterOptions={filterOptions}
+      initialFilterOptions={initialFilterOptions}
       title="Funding instrument"
     />
   );
