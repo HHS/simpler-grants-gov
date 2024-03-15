@@ -3,7 +3,9 @@ import { agencyFilterList } from "./SearchFilterAccordion/filterJSONLists/agency
 
 export default function SearchFilterAgency() {
   return (
-    <SearchFilterAccordion initialFilterOptions={agencyFilterList} title="Agency" />
-
+    <SearchFilterAccordion
+      initialFilterOptions={agencyFilterList}
+      title="Agency"
+    />
   );
 }
