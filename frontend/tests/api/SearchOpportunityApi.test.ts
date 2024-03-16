@@ -1,8 +1,23 @@
 import { JSONRequestBody } from "../../src/app/api/BaseApi";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
 
+// mockFetch should match the SearchAPIResponse type structure
 const mockFetch = ({
-  response = { data: { opportunities: [] }, errors: [], warnings: [] },
+  response = {
+    data: [],
+    message: "Success",
+    pagination_info: {
+      order_by: "opportunity_id",
+      page_offset: 1,
+      page_size: 25,
+      sort_direction: "ascending",
+      total_pages: 1,
+      total_records: 0,
+    },
+    status_code: 200,
+    errors: [],
+    warnings: [],
+  },
   ok = true,
   status = 200,
 }) => {
@@ -27,19 +42,12 @@ describe("SearchOpportunityAPI", () => {
 
   describe("searchOpportunities", () => {
     beforeEach(() => {
-      global.fetch = mockFetch({
-        response: {
-          data: { opportunities: [] },
-          errors: [],
-          warnings: [],
-        },
-      });
+      global.fetch = mockFetch({});
     });
 
     it("sends POST request to search opportunities endpoint with query parameters", async () => {
-      const queryParams = { keyword: "science" };
-
-      const response = await searchApi.searchOpportunities(queryParams);
+      // Call the function under test
+      const response = await searchApi.searchOpportunities();
 
       const method = "POST";
       const headers = baseRequestHeaders;
@@ -51,18 +59,33 @@ describe("SearchOpportunityAPI", () => {
           page_size: 25,
           sort_direction: "ascending",
         },
-        ...queryParams,
       };
 
+      const expectedUrl = `${searchApi.version}${searchApi.basePath}/${searchApi.namespace}/search`;
+
       expect(fetch).toHaveBeenCalledWith(
-        expect.any(String),
+        expectedUrl,
         expect.objectContaining({
           method,
           headers,
           body: JSON.stringify(body),
         }),
       );
-      expect(response.data).toEqual({ opportunities: [] });
+
+      expect(response).toEqual({
+        data: [],
+        message: "Success",
+        pagination_info: {
+          order_by: "opportunity_id",
+          page_offset: 1,
+          page_size: 25,
+          sort_direction: "ascending",
+          total_pages: 1,
+          total_records: 0,
+        },
+        status_code: 200,
+        warnings: [],
+      });
     });
   });
 });
