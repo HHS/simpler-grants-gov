@@ -8,6 +8,7 @@ import PageSEO from "src/components/PageSEO";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
+import { convertSearchParamsToProperTypes } from "../../utils/convertSearchParamsToStrings";
 import { cookies } from "next/headers";
 import { forceSearchParamsToStringValue } from "../../utils/convertSearchParamsToStrings";
 import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
@@ -26,15 +27,15 @@ interface ServerPageProps {
 }
 
 export default async function Search({ searchParams }: ServerPageProps) {
-  console.log("searchParams serer side =>", searchParams);
-
   const ffManager = new FeatureFlagsManager(cookies());
   if (!ffManager.isFeatureEnabled("showSearchV0")) {
     return notFound();
   }
 
-  const convertedSearchParams = forceSearchParamsToStringValue(searchParams);
-  const initialSearchResults = await searchFetcher.fetchOpportunities();
+  const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
+  const initialSearchResults = await searchFetcher.fetchOpportunities(
+    convertedSearchParams,
+  );
 
   return (
     <>
