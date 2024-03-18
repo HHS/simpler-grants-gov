@@ -62,6 +62,19 @@ def monkeypatch_session():
 
 
 # From https://github.com/pytest-dev/pytest/issues/363
+@pytest.fixture(scope="class")
+def monkeypatch_class():
+    """
+    Create a monkeypatch instance that can be used to
+    monkeypatch global environment, objects, and attributes
+    for the duration of a test class.
+    """
+    mpatch = _pytest.monkeypatch.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+# From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="module")
 def monkeypatch_module():
     mpatch = _pytest.monkeypatch.MonkeyPatch()

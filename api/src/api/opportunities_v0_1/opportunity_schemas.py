@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -242,9 +243,43 @@ class OpportunitySchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
+class OpportunitySearchFilterSchema(Schema):
+    funding_instrument = fields.Nested(
+        StrSearchSchemaBuilder("FundingInstrumentFilterSchema")
+        .with_one_of(allowed_values=FundingInstrument)
+        .build()
+    )
+    funding_category = fields.Nested(
+        StrSearchSchemaBuilder("FundingCategoryFilterSchema")
+        .with_one_of(allowed_values=FundingCategory)
+        .build()
+    )
+    applicant_type = fields.Nested(
+        StrSearchSchemaBuilder("ApplicantTypeFilterSchema")
+        .with_one_of(allowed_values=ApplicantType)
+        .build()
+    )
+    opportunity_status = fields.Nested(
+        StrSearchSchemaBuilder("OpportunityStatusFilterSchema")
+        .with_one_of(allowed_values=OpportunityStatus)
+        .build()
+    )
+    agency = fields.Nested(
+        StrSearchSchemaBuilder("AgencyFilterSchema")
+        .with_one_of(example="US-ABC", minimum_length=2)
+        .build()
+    )
+
+
 class OpportunitySearchRequestSchema(Schema):
-    # A follow-up ticket will add filters and sorting
-    # for now just including the pagination parameters.
+    query = fields.String(
+        metadata={
+            "description": "Query string which searches against several text fields",
+            "example": "research",
+        }
+    )
+
+    filters = fields.Nested(OpportunitySearchFilterSchema())
 
     pagination = fields.Nested(
         generate_pagination_schema(
