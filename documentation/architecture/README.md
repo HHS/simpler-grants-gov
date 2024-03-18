@@ -11,125 +11,6 @@ This is a general architecture diagram of the simpler.grants.gov system.
 ```mermaid
 %%{init: {'theme': 'neutral' } }%%
 flowchart TB
-
-    %% AWS Tenant
-    subgraph AWS [HHS AWS Tenant]
-        shared
-        vpc:::az
-    end
-
-    %% AWS Shared Services
-    subgraph shared [AWS Shared Services]
-        ECSC
-        iam
-        kms
-        ssm
-        cloudwatch
-        ecr
-    end
-
-    subgraph iam [Identity Access Managment]
-        IAM:::sec
-    end
-
-    subgraph kms [Key Management Service]
-        KMS:::sec
-    end
-
-    subgraph ssm [System Manager]
-        SSM:::sec
-    end
-
-    subgraph cloudwatch [Logging and Metrics]
-        CloudWatch:::sec
-    end
-
-    subgraph ecr [Elastic Container Registry]
-        ECR:::ecs
-    end
-
-    subgraph ECSC [ECS Cluster]
-        ECSS["ECS Service
-        Fargate Launch Type"]:::ecs
-    end
-    ECSS --attach parameters to service--> ssm
-    ecr --encrypt and decrypt images--> kms
-    style ECSC stroke:#FF9900
-
-    %% AWS Services Within VPC
-    subgraph vpc ["AWS Virtual Private Cloud (VPC)"]
-        direction TB
-        public-subnet1:::subnet
-        RDS
-        AZ1 & AZ2 --> RDS
-    end
-
-    class AZ1 az
-    class AZ2 az
-    vpc --> cloudwatch
-
-    subgraph public-subnet1 [Public Subnet]
-        ALB["Application Load Balancer (ALB)"]:::lb --> AZ1 & AZ2
-    end
-
-    subgraph AZ1 [Availability zone 1]
-        direction TB
-        private-subnet1:::subnet
-        subgraph private-subnet1 [Private Subnet]
-            ECS1:::ecs
-            ECS2:::ecs
-        end
-
-    end
-    subgraph AZ2 [Availability zone 2]
-        direction TB
-        private-subnet2:::subnet
-        subgraph private-subnet2 [Private Subnet]
-            ECS3:::ecs
-            ECS4:::ecs
-        end
-
-    end
-    subgraph ECS1 ["ECS Front-End Task (Next.js)"]
-        c1[" Docker
-        Container 1"]
-        c2[" Docker
-        Container n"]
-    end
-    subgraph ECS2 ["ECS Back-End Task (Flask)"]
-        c3[" Docker
-        Container 1"]
-        c4[" Docker
-        Container n"]
-    end
-    subgraph ECS3["ECS Front-End Task (Next.js)"]
-        c5[" Docker
-        Container 1"]
-        c6[" Docker
-        Container n"]
-    end
-    subgraph ECS4 ["ECS Back-End Task (Flask)"]
-        c7[" Docker
-        Container 1"]
-        c8[" Docker
-        Container n"]
-    end
-
-    subgraph RDS
-        subgraph private-subnet3 [Private Subnet]
-            DB[("Multi-AZ Grants.gov
-            Replica Database")]:::db
-            PDB[("Multi-AZ Postgres DB
-            for Back End")]:::db
-        end
-    end
-    style RDS stroke:blue,color:blue
-    private-subnet3:::subnet
-
-    ecr --> ECSC
-    ECSS --> AZ1 & AZ2
-    public[Public Internet Users] --> ALB
-
     %% CI/CD Pipeline
     eng["Developers fas:fa-laptop-code"] --"Push to main branch fas:fa-code-branch"--> GH
     subgraph GH ["Github fab:fa-github"]
@@ -137,108 +18,16 @@ flowchart TB
         click repo href "https://github.com/HHS/simpler-grants-gov" _blank
     end
     GH --Build and Deploys Image--> iam --> ecr
-    GH --Restarts task with new Image--> iam --> ECSS
-
-
-    %% Styles
-    classDef ecs fill:#FF9900,color:black
-    classDef db fill:blue,color:white
-    classDef az color:green,stroke:green,stroke-dasharray: 5 5
-    classDef subnet color:darkblue, stroke:darkblue, stroke-dasharray: 5 5
-    classDef lb fill:purple, color:white
-    classDef sec fill:red,color:white
-
+    GH --Restarts task with new Image--> iam --> ECS
 ```
 
 ## AWS Hosted Infrastructure
 
 This is an architecture diagram focusing on the AWS shared infrastructure managed by simpler.grants.gov
 
-```mermaid
-%%{init: {'theme': 'neutral' } }%%
-flowchart TD
-        %% AWS Tenant
-    subgraph AWS [HHS AWS Tenant]
-        VPC2:::az
-    end
+![Grants gov system architecture - v1 0 0 (current) (4)](https://github.com/HHS/simpler-grants-gov/assets/5768468/a7e8adb5-5e23-4623-9bda-66e34f437079)
 
-    %% AWS Services Within VPC
-    subgraph VPC2 ["AWS Virtual Private Cloud (VPC)"]
-        direction LR
-        AZ1:::az
-        AZ2:::az
-        public-subnet1:::subnet
-        RDS
-        AZ1 & AZ2 --> RDS
-    end
-
-    subgraph public-subnet1 [Public Subnet]
-        ALB["Application Load Balancer (ALB)"]:::lb --> AZ1 & AZ2
-    end
-
-    subgraph AZ1 [Availability zone 1]
-        direction TB
-        private-subnet1:::subnet
-        subgraph private-subnet1 [Private Subnet]
-            ECS1:::ecs
-            ECS2:::ecs
-        end
-
-    end
-    subgraph AZ2 [Availability zone 2]
-        direction TB
-        private-subnet2:::subnet
-        subgraph private-subnet2 [Private Subnet]
-            ECS3:::ecs
-            ECS4:::ecs
-        end
-
-    end
-    subgraph ECS1 ["ECS Front-End Task (Next.js)"]
-        c1[" Docker
-        Container 1"]
-        c2[" Docker
-        Container n"]
-    end
-    subgraph ECS2 ["ECS Back-End Task (Flask)"]
-        c3[" Docker
-        Container 1"]
-        c4[" Docker
-        Container n"]
-    end
-    subgraph ECS3["ECS Front-End Task (Next.js)"]
-        c5[" Docker
-        Container 1"]
-        c6[" Docker
-        Container n"]
-    end
-    subgraph ECS4 ["ECS Back-End Task (Flask)"]
-        c7[" Docker
-        Container 1"]
-        c8[" Docker
-        Container n"]
-    end
-
-    subgraph RDS
-        subgraph private-subnet3 [Private Subnet]
-            DB[("Multi-AZ Grants.gov
-            Replica Database")]:::db
-            PDB[("Multi-AZ Postgres DB
-            for Back End")]:::db
-        end
-    end
-    style RDS stroke:blue,color:blue
-    private-subnet3:::subnet
-
-    %% Styles
-    classDef ecs fill:#FF9900,color:black
-    classDef db fill:blue,color:white
-    classDef az color:green,stroke:green,stroke-dasharray: 5 5
-    classDef subnet color:darkblue, stroke:darkblue, stroke-dasharray: 5 5
-    classDef lb fill:purple, color:white
-    classDef sec fill:red,color:white
-
-```
+It was generated via the LucidChart. You can find it inside the Nava LucidChart by viewing "Shared With Me" > "Nava" > "Grants.gov". You can also find it at [this shareable link](https://lucid.app/lucidchart/8d0fb4b2-fe85-4460-8df9-1255a506c5b6/edit?viewport_loc=-622%2C-233%2C5673%2C3098%2C0_0&invitationId=inv_a5fd77d9-d546-4b02-925a-6c3e254ccce7), if you already have access.
 
 ## AWS Shared Services
 
