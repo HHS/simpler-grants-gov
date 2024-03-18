@@ -67,3 +67,15 @@ export interface SearchAPIResponse {
   warnings?: unknown[] | null | undefined;
   errors?: unknown[] | null | undefined;
 }
+
+// Only a few defined keys possible
+// URL example => ?query=abcd&status=closed,archived
+export type QueryParamKey =
+  | "page"
+  | "query"
+  | "sortby"
+  | "status"
+  | "fundingInstrument"
+  | "eligibility"
+  | "agency"
+  | "category";

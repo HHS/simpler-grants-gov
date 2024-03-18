@@ -3,10 +3,12 @@ import { renderHook, waitFor } from "@testing-library/react";
 
 import { useSearchParamUpdater } from "../../src/hooks/useSearchParamUpdater";
 
+let mockSearchParams = new URLSearchParams();
+
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(() => "/test") as jest.Mock<string>,
   useSearchParams: jest.fn(
-    () => new URLSearchParams(),
+    () => mockSearchParams,
   ) as jest.Mock<URLSearchParams>,
 }));
 
@@ -22,6 +24,7 @@ describe("useSearchParamUpdater", () => {
   beforeEach(() => {
     // Reset the mock state before each test
     mockPushState.mockClear();
+    mockSearchParams = new URLSearchParams();
     jest.clearAllMocks();
   });
 
@@ -56,14 +59,14 @@ describe("useSearchParamUpdater", () => {
 
   // TODO: fix clear test
 
-  //   it("clears the status param when no statuses are selected", async () => {
-  //     const { result } = renderHook(() => useSearchParamUpdater());
-  //     const statuses: Set<string> = new Set();
+  it("clears the status param when no statuses are selected", async () => {
+    const { result } = renderHook(() => useSearchParamUpdater());
+    const statuses: Set<string> = new Set();
 
-  //     result.current.updateMultipleParam(statuses, "status");
+    result.current.updateQueryParams(statuses, "status");
 
-  //     await waitFor(() => {
-  //       expect(mockPushState).toHaveBeenCalledWith({}, "", "/test");
-  //     });
-  //   });
+    await waitFor(() => {
+      expect(mockPushState).toHaveBeenCalledWith({}, "", "/test");
+    });
+  });
 });

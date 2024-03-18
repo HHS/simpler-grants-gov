@@ -1,3 +1,5 @@
+"use client";
+
 import FilterCheckbox from "../../FilterCheckbox";
 import { FilterOption } from "./SearchFilterAccordion";
 
@@ -26,9 +28,11 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
     <FilterCheckbox
       id={option.id}
       label={option.label}
+      name={option.id} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
       disabled={!mounted}
       checked={option.isChecked === true}
+      //   value={option.id} // TODO: consider poassing explicit value
     />
   );
 };

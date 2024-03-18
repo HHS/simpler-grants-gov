@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 
 import { Checkbox } from "@trussworks/react-uswds";
 import { useDebouncedCallback } from "use-debounce";
@@ -12,7 +14,7 @@ interface StatusOption {
 
 interface SearchOpportunityStatusProps {
   formRef: React.RefObject<HTMLFormElement>;
-  initialStatuses: string;
+  initialQueryParams: string;
 }
 
 const statusOptions: StatusOption[] = [
@@ -28,13 +30,13 @@ const SEARCH_OPPORTUNITY_STATUS_DEBOUNCE_TIME = 500;
 
 const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   formRef,
-  initialStatuses,
+  initialQueryParams,
 }) => {
   const [mounted, setMounted] = useState(false);
   const { updateQueryParams } = useSearchParamUpdater();
 
   const initialStatusesSet = new Set(
-    initialStatuses ? initialStatuses.split(",") : [],
+    initialQueryParams ? initialQueryParams.split(",") : [],
   );
 
   const [selectedStatuses, setSelectedStatuses] =

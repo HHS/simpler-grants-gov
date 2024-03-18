@@ -5,7 +5,7 @@ import {
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.
-// Process all of them so they're just a string
+// Process all of them so they're just a string (or number for page)
 export function convertSearchParamsToProperTypes(
   params: ServerSideSearchParams,
 ): ConvertedSearchParams {

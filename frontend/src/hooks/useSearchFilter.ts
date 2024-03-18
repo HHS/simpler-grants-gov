@@ -1,21 +1,47 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 
 import { FilterOption } from "../components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { QueryParamKey } from "../types/searchTypes";
+import { useDebouncedCallback } from "use-debounce";
+import { useSearchParamUpdater } from "./useSearchParamUpdater";
 
-function useSearchFilter(initialFilterOptions: FilterOption[]) {
-  // Initialize all isChecked to false
-  const [options, setOptions] = useState<FilterOption[]>(
-    initialFilterOptions.map((option) => ({
+// Encapsulate core search filter accordion logic:
+// - Keep track of checked count
+//     - Increment/decrement functions
+// - Toggle one or all checkboxes
+// - Run debounced function that updates query params and submits form
+// (Does not cover opportunity status checkbox logic)
+function useSearchFilter(
+  initialFilterOptions: FilterOption[],
+  initialQueryParams: string,
+  queryParamKey: QueryParamKey, // agency, fundingInstrument, eligibility, or category
+  formRef: React.RefObject<HTMLFormElement>,
+) {
+  const [options, setOptions] = useState<FilterOption[]>(() =>
+    initializeOptions(initialFilterOptions, initialQueryParams),
+  );
+
+  function initializeOptions(
+    initialFilterOptions: FilterOption[],
+    initialQueryParams: string | null,
+  ) {
+    // convert the request URL query params to a set
+    const initialParamsSet = new Set(
+      initialQueryParams ? initialQueryParams.split(",") : [],
+    );
+    return initialFilterOptions.map((option) => ({
       ...option,
-      isChecked: false,
+      isChecked: initialParamsSet.has(option.value),
       children: option.children
         ? option.children.map((child) => ({
             ...child,
-            isChecked: false,
+            isChecked: initialParamsSet.has(child.value),
           }))
         : undefined,
-    })),
-  );
+    }));
+  }
 
   const [checkedTotal, setCheckedTotal] = useState<number>(0);
   const incrementTotal = () => {
@@ -24,6 +50,8 @@ function useSearchFilter(initialFilterOptions: FilterOption[]) {
   const decrementTotal = () => {
     setCheckedTotal(checkedTotal - 1);
   };
+
+  const { updateQueryParams } = useSearchParamUpdater();
 
   const [mounted, setMounted] = useState<boolean>(false);
   useEffect(() => {
@@ -68,7 +96,30 @@ function useSearchFilter(initialFilterOptions: FilterOption[]) {
     [],
   );
 
-  // Toggle all options or options within a section
+  // Update query params and submit form to refresh search results
+  const debouncedUpdateQueryParams = useDebouncedCallback(() => {
+    const checkedSet = new Set<string>();
+
+    const checkOption = (option: FilterOption) => {
+      if (option.isChecked) {
+        checkedSet.add(option.value);
+      }
+      if (option.children) {
+        // recursively add children checked options to the set
+        option.children.forEach(checkOption);
+      }
+    };
+
+    // Build a new set of the checked options.
+    // TODO: instead of building the Set from scratch everytime
+    // a Set could be maintaned on click/select all.
+    options.forEach(checkOption);
+
+    updateQueryParams(checkedSet, queryParamKey);
+    formRef.current?.requestSubmit();
+  }, 500);
+
+  // Toggle all checkbox options on the accordion, or all within a section
   const toggleSelectAll = useCallback(
     (isSelected: boolean, sectionId?: string) => {
       setOptions((currentOptions) => {
@@ -77,10 +128,12 @@ function useSearchFilter(initialFilterOptions: FilterOption[]) {
           isSelected,
           sectionId,
         );
+
+        debouncedUpdateQueryParams();
         return newOptions;
       });
     },
-    [recursiveToggle],
+    [recursiveToggle, debouncedUpdateQueryParams],
   );
 
   // Toggle a single option
@@ -94,10 +147,13 @@ function useSearchFilter(initialFilterOptions: FilterOption[]) {
             children: opt.children ? updateChecked(opt.children) : undefined,
           }));
         };
+
+        // Trigger the debounced update when options/checkboxes change
+        debouncedUpdateQueryParams();
         return updateChecked(prevOptions);
       });
     },
-    [],
+    [debouncedUpdateQueryParams],
   );
 
   // The total count of checked options

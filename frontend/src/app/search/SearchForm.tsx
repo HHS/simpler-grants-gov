@@ -1,7 +1,5 @@
 "use client";
 
-import React, { useRef } from "react";
-
 import { ConvertedSearchParams } from "../../types/requestURLTypes";
 import { SearchAPIResponse } from "../../types/searchTypes";
 import SearchBar from "../../components/search/SearchBar";
@@ -11,8 +9,7 @@ import SearchOpportunityStatus from "../../components/search/SearchOpportunitySt
 import SearchPagination from "../../components/search/SearchPagination";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
-import { updateResults } from "./actions";
-import { useFormState } from "react-dom";
+import { useSearchFormState } from "../../hooks/useSearchFormState";
 
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
@@ -23,34 +20,40 @@ export function SearchForm({
   initialSearchResults,
   requestURLQueryParams,
 }: SearchFormProps) {
-  const [searchResults, updateSearchResultsAction] = useFormState(
-    updateResults,
-    initialSearchResults,
-  );
-
-  const formRef = useRef(null); // allows us to submit form from child components
-
-  const { status, query, sortby, page } = requestURLQueryParams;
-
-  // TODO: move this to server-side calculation?
-  const maxPaginationError =
-    searchResults.pagination_info.page_offset >
-    searchResults.pagination_info.total_pages;
+  // Capture top level logic, including useFormState in useSearhcFormState hook
+  const {
+    searchResults, // result of calling server action
+    updateSearchResultsAction, // server action function alias
+    formRef, // used in children to submit the form
+    maxPaginationError,
+    statusQueryParams,
+    queryQueryParams,
+    sortbyQueryParams,
+    pageQueryParams,
+    agencyQueryParams,
+    fundingInstrumentQueryParams,
+  } = useSearchFormState(initialSearchResults, requestURLQueryParams);
 
   return (
     <form ref={formRef} action={updateSearchResultsAction}>
       <div className="grid-container">
         <div className="search-bar">
-          <SearchBar initialQuery={query} />
+          <SearchBar initialQueryParams={queryQueryParams} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
             <SearchOpportunityStatus
               formRef={formRef}
-              initialStatuses={status}
+              initialQueryParams={statusQueryParams}
             />
-            <SearchFilterFundingInstrument />
-            <SearchFilterAgency />
+            <SearchFilterFundingInstrument
+              formRef={formRef}
+              initialQueryParams={fundingInstrumentQueryParams}
+            />
+            <SearchFilterAgency
+              formRef={formRef}
+              initialQueryParams={agencyQueryParams}
+            />
           </div>
           <div className="tablet:grid-col-8">
             <div className="usa-prose">
@@ -59,10 +62,10 @@ export function SearchForm({
                 searchResultsLength={
                   searchResults.pagination_info.total_records
                 }
-                initialSortBy={sortby}
+                initialSortBy={sortbyQueryParams}
               />
               <SearchPagination
-                page={page}
+                initialQueryParams={pageQueryParams}
                 formRef={formRef}
                 showHiddenInput={true}
                 totalPages={searchResults.pagination_info.total_pages}
@@ -72,7 +75,7 @@ export function SearchForm({
                 maxPaginationError={maxPaginationError}
               />
               <SearchPagination
-                page={page}
+                initialQueryParams={pageQueryParams}
                 formRef={formRef}
                 totalPages={searchResults.pagination_info.total_pages}
               />

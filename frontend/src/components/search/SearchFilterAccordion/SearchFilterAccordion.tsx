@@ -1,5 +1,5 @@
 import { Accordion } from "@trussworks/react-uswds";
-import React from "react";
+import { QueryParamKey } from "../../../types/searchTypes";
 import SearchFilterCheckbox from "./SearchFilterCheckbox";
 import SearchFilterSection from "./SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "./SearchFilterToggleAll";
@@ -25,12 +25,18 @@ export interface FilterOption {
 
 interface SearchFilterAccordionProps {
   initialFilterOptions: FilterOption[];
-  title: string;
+  title: string; // Title in header of accordion
+  initialQueryParams: string; // comma-separated string list of query params from the request URL
+  queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
+  formRef: React.RefObject<HTMLFormElement>;
 }
 
 export function SearchFilterAccordion({
   initialFilterOptions,
   title,
+  queryParamKey,
+  initialQueryParams,
+  formRef,
 }: SearchFilterAccordionProps) {
   // manage most of state in custom hook
   const {
@@ -41,7 +47,12 @@ export function SearchFilterAccordion({
     toggleSelectAll,
     incrementTotal,
     decrementTotal,
-  } = useSearchFilter(initialFilterOptions);
+  } = useSearchFilter(
+    initialFilterOptions,
+    initialQueryParams,
+    queryParamKey,
+    formRef,
+  );
 
   const getAccordionTitle = () => (
     <>

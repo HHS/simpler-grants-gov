@@ -1,3 +1,5 @@
+"use client";
+
 interface SearchFilterToggleAllProps {
   onSelectAll?: () => void;
   onClearAll?: () => void;
@@ -11,7 +13,12 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
     <div className="grid-col-fill">
       <button
         className="usa-button usa-button--unstyled font-sans-xs"
-        onClick={onSelectAll}
+        onClick={(event) => {
+          // form submission is done in useSearchFilter, so
+          // prevent the onClick from submitting here.
+          event.preventDefault();
+          onSelectAll?.();
+        }}
       >
         Select All
       </button>
@@ -19,7 +26,10 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
     <div className="grid-col-fill text-right">
       <button
         className="usa-button usa-button--unstyled font-sans-xs"
-        onClick={onClearAll}
+        onClick={(event) => {
+          event.preventDefault();
+          onClearAll?.();
+        }}
       >
         Clear All
       </button>
