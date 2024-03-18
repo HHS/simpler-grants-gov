@@ -91,7 +91,7 @@ export function SearchFilterAccordion({
                 updateCheckedOption={toggleOptionChecked}
                 toggleSelectAll={toggleSelectAll}
                 isSectionAllSelected={isSectionAllSelected[option.id]}
-                isSectionNoneSelected={isSectionNoneSelected[option.id]} 
+                isSectionNoneSelected={isSectionNoneSelected[option.id]}
               />
             ) : (
               <SearchFilterCheckbox
