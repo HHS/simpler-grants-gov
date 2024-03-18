@@ -67,7 +67,7 @@ def monkeypatch_class():
     """
     Create a monkeypatch instance that can be used to
     monkeypatch global environment, objects, and attributes
-    for the duration the test session.
+    for the duration of a test class.
     """
     mpatch = _pytest.monkeypatch.MonkeyPatch()
     yield mpatch
