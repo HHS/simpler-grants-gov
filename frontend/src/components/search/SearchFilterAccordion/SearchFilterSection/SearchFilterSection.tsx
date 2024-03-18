@@ -15,6 +15,8 @@ interface SearchFilterSectionProps {
   mounted: boolean;
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
   toggleSelectAll: (isSelected: boolean, sectionId: string) => void;
+  isSectionAllSelected: boolean;
+  isSectionNoneSelected: boolean;
 }
 
 const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
@@ -24,6 +26,8 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   mounted,
   updateCheckedOption,
   toggleSelectAll,
+  isSectionAllSelected,
+  isSectionNoneSelected,
 }) => {
   const [childrenVisible, setChildrenVisible] = useState<boolean>(false);
 
@@ -74,6 +78,8 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
           <SearchFilterToggleAll
             onSelectAll={handleSelectAll}
             onClearAll={handleClearAll}
+            isAllSelected={isSectionAllSelected}
+            isNoneSelected={isSectionNoneSelected}
           />
           <ul className="usa-list usa-list--unstyled margin-left-4">
             {option.children?.map((child) => (

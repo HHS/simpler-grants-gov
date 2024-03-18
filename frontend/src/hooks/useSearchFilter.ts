@@ -9,7 +9,7 @@ import { useSearchParamUpdater } from "./useSearchParamUpdater";
 
 // Encapsulate core search filter accordion logic:
 // - Keep track of checked count
-//     - Increment/decrement functions
+//     - Provide increment/decrement functions
 // - Toggle one or all checkboxes
 // - Run debounced function that updates query params and submits form
 // (Does not cover opportunity status checkbox logic)
@@ -19,6 +19,7 @@ function useSearchFilter(
   queryParamKey: QueryParamKey, // agency, fundingInstrument, eligibility, or category
   formRef: React.RefObject<HTMLFormElement>,
 ) {
+  const { updateQueryParams } = useSearchParamUpdater();
   const [options, setOptions] = useState<FilterOption[]>(() =>
     initializeOptions(initialFilterOptions, initialQueryParams),
   );
@@ -43,6 +44,69 @@ function useSearchFilter(
     }));
   }
 
+  // Recursively count checked options
+  const countChecked = useCallback((optionsList: FilterOption[]): number => {
+    return optionsList.reduce((acc, option) => {
+      return option.children
+        ? acc + countChecked(option.children)
+        : acc + (option.isChecked ? 1 : 0);
+    }, 0);
+  }, []);
+
+  // Used for disabled select all / clear all states
+  const determineInitialSelectionStates = useCallback(
+    (options: FilterOption[]) => {
+      const totalOptions = options.reduce((total, option) => {
+        return total + (option.children ? option.children.length : 1);
+      }, 0);
+
+      const totalChecked = countChecked(options);
+      const allSelected = totalChecked === totalOptions;
+      const noneSelected = totalChecked === 0;
+
+      type SectionStates = {
+        isSectionAllSelected: { [key: string]: boolean };
+        isSectionNoneSelected: { [key: string]: boolean };
+      };
+
+      const sectionStates = options.reduce<SectionStates>(
+        (acc, option) => {
+          if (option.children) {
+            const totalInSection = option.children.length;
+            const checkedInSection = countChecked(option.children);
+            acc.isSectionAllSelected[option.id] =
+              totalInSection === checkedInSection;
+            acc.isSectionNoneSelected[option.id] = checkedInSection === 0;
+          }
+          return acc;
+        },
+        { isSectionAllSelected: {}, isSectionNoneSelected: {} },
+      );
+
+      return {
+        allSelected,
+        noneSelected,
+        ...sectionStates,
+      };
+    },
+    [countChecked],
+  );
+
+  const initialSelectionStates = determineInitialSelectionStates(options);
+
+  const [isAllSelected, setIsAllSelected] = useState<boolean>(
+    initialSelectionStates.allSelected,
+  );
+  const [isNoneSelected, setIsNoneSelected] = useState<boolean>(
+    initialSelectionStates.noneSelected,
+  );
+  const [isSectionAllSelected, setIsSectionAllSelected] = useState<{
+    [key: string]: boolean;
+  }>(initialSelectionStates.isSectionAllSelected);
+  const [isSectionNoneSelected, setIsSectionNoneSelected] = useState<{
+    [key: string]: boolean;
+  }>(initialSelectionStates.isSectionNoneSelected);
+
   const [checkedTotal, setCheckedTotal] = useState<number>(0);
   const incrementTotal = () => {
     setCheckedTotal(checkedTotal + 1);
@@ -51,20 +115,9 @@ function useSearchFilter(
     setCheckedTotal(checkedTotal - 1);
   };
 
-  const { updateQueryParams } = useSearchParamUpdater();
-
   const [mounted, setMounted] = useState<boolean>(false);
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Recursively count checked options
-  const countChecked = useCallback((optionsList: FilterOption[]): number => {
-    return optionsList.reduce((acc, option) => {
-      return option.children
-        ? acc + countChecked(option.children)
-        : acc + (option.isChecked ? 1 : 0);
-    }, 0);
   }, []);
 
   // Recursively toggle options
@@ -119,6 +172,30 @@ function useSearchFilter(
     formRef.current?.requestSubmit();
   }, 500);
 
+  // Extracted function to calculate and update selection states
+  const updateSelectionStates = useCallback(
+    (newOptions: FilterOption[], sectionId?: string | undefined) => {
+      const newSelectionStates = determineInitialSelectionStates(newOptions);
+      setIsAllSelected(newSelectionStates.allSelected);
+      setIsNoneSelected(newSelectionStates.noneSelected);
+
+      if (sectionId) {
+        setIsSectionAllSelected((prevState) => ({
+          ...prevState,
+          [sectionId]: newSelectionStates.isSectionAllSelected[sectionId],
+        }));
+        setIsSectionNoneSelected((prevState) => ({
+          ...prevState,
+          [sectionId]: newSelectionStates.isSectionNoneSelected[sectionId],
+        }));
+      } else {
+        setIsSectionAllSelected(newSelectionStates.isSectionAllSelected);
+        setIsSectionNoneSelected(newSelectionStates.isSectionNoneSelected);
+      }
+    },
+    [determineInitialSelectionStates],
+  );
+
   // Toggle all checkbox options on the accordion, or all within a section
   const toggleSelectAll = useCallback(
     (isSelected: boolean, sectionId?: string) => {
@@ -129,11 +206,13 @@ function useSearchFilter(
           sectionId,
         );
 
+        updateSelectionStates(newOptions, sectionId);
+
         debouncedUpdateQueryParams();
         return newOptions;
       });
     },
-    [recursiveToggle, debouncedUpdateQueryParams],
+    [recursiveToggle, debouncedUpdateQueryParams, updateSelectionStates],
   );
 
   // Toggle a single option
@@ -147,13 +226,20 @@ function useSearchFilter(
             children: opt.children ? updateChecked(opt.children) : undefined,
           }));
         };
+        const newOptions = updateChecked(prevOptions);
+        updateSelectionStates(newOptions);
+
+        // If the option being toggled has children, pass the option's id to update its specific section state
+        if (prevOptions.find((opt) => opt.id === optionId)?.children) {
+          updateSelectionStates(newOptions, optionId);
+        }
 
         // Trigger the debounced update when options/checkboxes change
         debouncedUpdateQueryParams();
-        return updateChecked(prevOptions);
+        return newOptions;
       });
     },
-    [debouncedUpdateQueryParams],
+    [debouncedUpdateQueryParams, updateSelectionStates],
   );
 
   // The total count of checked options
@@ -168,6 +254,10 @@ function useSearchFilter(
     totalCheckedCount,
     incrementTotal,
     decrementTotal,
+    isAllSelected,
+    isNoneSelected,
+    isSectionAllSelected,
+    isSectionNoneSelected,
   };
 }
 

@@ -47,6 +47,10 @@ export function SearchFilterAccordion({
     toggleSelectAll,
     incrementTotal,
     decrementTotal,
+    isAllSelected,
+    isNoneSelected,
+    isSectionAllSelected,
+    isSectionNoneSelected,
   } = useSearchFilter(
     initialFilterOptions,
     initialQueryParams,
@@ -70,6 +74,8 @@ export function SearchFilterAccordion({
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true)}
         onClearAll={() => toggleSelectAll(false)}
+        isAllSelected={isAllSelected}
+        isNoneSelected={isNoneSelected}
       />
       <ul className="usa-list usa-list--unstyled">
         {options.map((option) => (
@@ -84,6 +90,8 @@ export function SearchFilterAccordion({
                 mounted={mounted}
                 updateCheckedOption={toggleOptionChecked}
                 toggleSelectAll={toggleSelectAll}
+                isSectionAllSelected={isSectionAllSelected[option.id]}
+                isSectionNoneSelected={isSectionNoneSelected[option.id]} 
               />
             ) : (
               <SearchFilterCheckbox

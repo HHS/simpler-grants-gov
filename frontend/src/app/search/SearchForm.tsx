@@ -1,6 +1,6 @@
 "use client";
 
-import { ConvertedSearchParams } from "../../types/requestURLTypes";
+import { ConvertedSearchParams } from "../../types/searchRequestURLTypes";
 import { SearchAPIResponse } from "../../types/searchTypes";
 import SearchBar from "../../components/search/SearchBar";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";

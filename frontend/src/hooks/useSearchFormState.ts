@@ -1,6 +1,6 @@
 "use client";
 
-import { ConvertedSearchParams } from "../types/requestURLTypes";
+import { ConvertedSearchParams } from "../types/searchRequestURLTypes";
 import { SearchAPIResponse } from "../types/searchTypes";
 import { updateResults } from "../app/search/actions";
 import { useFormState } from "react-dom";

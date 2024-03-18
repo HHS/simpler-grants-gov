@@ -1,4 +1,4 @@
-import { ConvertedSearchParams } from "../../src/types/requestURLTypes";
+import { ConvertedSearchParams } from "../../src/types/searchRequestURLTypes";
 import ReactDOM from "react-dom";
 // import ReactDOM from "react-dom";
 import { SearchAPIResponse } from "../../src/types/searchTypes";
