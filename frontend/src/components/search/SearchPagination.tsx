@@ -1,10 +1,12 @@
+"use client";
+
 import React, { useState } from "react";
 
 import { Pagination } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 
 interface SearchPaginationProps {
-  page: number;
+  initialQueryParams: number;
   formRef: React.RefObject<HTMLFormElement>;
   showHiddenInput?: boolean; // Only one of the two SearchPagination should have this set
   totalPages: number;
@@ -13,14 +15,14 @@ interface SearchPaginationProps {
 const MAX_SLOTS = 5;
 
 export default function SearchPagination({
-  page = 1,
+  initialQueryParams = 1,
   formRef,
   showHiddenInput,
   totalPages,
 }: SearchPaginationProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const [currentPage, setCurrentPage] = useState<number>(
-    getSafeCurrentPage(page, totalPages),
+    getSafeCurrentPage(initialQueryParams, totalPages),
   );
 
   const currentPageInputRef = React.useRef<HTMLInputElement>(null);
@@ -40,7 +42,12 @@ export default function SearchPagination({
     <>
       {showHiddenInput === true && (
         // Allows us to pass a value to server action when updating results
-        <input type="hidden" name="currentPage" ref={currentPageInputRef} />
+        <input
+          type="hidden"
+          name="currentPage"
+          ref={currentPageInputRef}
+          value={currentPage}
+        />
       )}
       <Pagination
         pathname="/search"

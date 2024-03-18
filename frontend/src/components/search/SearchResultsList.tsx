@@ -1,6 +1,6 @@
+"use client";
+
 import Loading from "../../app/search/loading";
-// SearchResultsList.tsx
-import React from "react";
 import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
 import { formatDate } from "../../utils/dateUtil";
 import { useFormStatus } from "react-dom";

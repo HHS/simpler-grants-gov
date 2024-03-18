@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { FilterOption } from "../SearchFilterAccordion";
@@ -67,7 +69,7 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
           <SectionLinkCount sectionCount={sectionCount} />
         </span>
       </button>
-      {childrenVisible && (
+      {childrenVisible ? (
         <div className="padding-y-1">
           <SearchFilterToggleAll
             onSelectAll={handleSelectAll}
@@ -82,11 +84,20 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
                   decrement={decrement}
                   mounted={mounted}
                   updateCheckedOption={updateCheckedOption}
+                  //   value={child.id} // TODO: consider passing the actual value to the server action
                 />
               </li>
             ))}
           </ul>
         </div>
+      ) : (
+        // Collapsed sections won't send checked values to the server action.
+        // So we need hidden inputs.
+        option.children?.map((child) =>
+          child.isChecked ? (
+            <input key={child.id} type="hidden" name={child.value} value="on" />
+          ) : null,
+        )
       )}
     </div>
   );

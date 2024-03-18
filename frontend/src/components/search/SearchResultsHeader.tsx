@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import SearchSortyBy from "./SearchSortBy";
 
 interface SearchResultsHeaderProps {

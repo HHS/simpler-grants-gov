@@ -12,7 +12,8 @@ const searchFetcher = getSearchFetcher();
 export async function updateResults(
   prevState: SearchAPIResponse,
   formData: FormData,
-) {
+): Promise<SearchAPIResponse> {
+  console.log("formData => ", formData);
   const pageValue = formData.get("currentPage");
   const page = pageValue ? parseInt(pageValue as string, 10) : 1;
   const safePage = !isNaN(page) && page > 0 ? page : 1;

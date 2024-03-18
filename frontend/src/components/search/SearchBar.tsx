@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+"use client";
 
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
+import { useState } from "react";
 
 interface SearchBarProps {
-  initialQuery: string;
+  initialQueryParams: string;
 }
 
-export default function SearchBar({ initialQuery }: SearchBarProps) {
-  const [inputValue, setInputValue] = useState<string>(initialQuery);
+export default function SearchBar({ initialQueryParams }: SearchBarProps) {
+  const [inputValue, setInputValue] = useState<string>(initialQueryParams);
   const { updateQueryParams } = useSearchParamUpdater();
 
   const handleSubmit = () => {
