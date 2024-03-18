@@ -1,0 +1,46 @@
+name: Analytics Checks
+
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - analytics/**
+      - .github/workflows/ci-analytics.yml
+
+defaults:
+  run:
+    working-directory: ./analytics
+
+jobs:
+  lint-test:
+    name: Analytics Lint, Format & Tests
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      ANALYTICS_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      ANALYTICS_REPORTING_CHANNEL_ID: ${{ secrets.REPORTING_CHANNEL_ID_TEST }}
+      ACTION: show-results # show results, but don't post them to slack
+    steps:
+      # set up python
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      # install poetry
+      - uses: Gr1N/setup-poetry@v8
+
+      - name: Install analytics package using poetry
+        run: make install
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run tests
+        run: make test-audit
+
+      - name: Export GitHub data
+        run: make gh-data-export
+
+      - name: Run reports
+        run: make sprint-reports

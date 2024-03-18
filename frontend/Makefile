@@ -22,6 +22,8 @@ endif
 export RUN_USER
 export RUN_UID
 
+ENVIRONMENT ?= dev
+
 ##################################################
 # Release
 ##################################################
@@ -31,12 +33,23 @@ release-build:
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
 		--build-arg RUN_UID=$(RUN_UID) \
+		--build-arg NEXT_PUBLIC_ENVIRONMENT=${ENVIRONMENT} \
 		$(OPTS) \
 		.
 
 ##################################################
 # Local development
 ##################################################
+build-dev: # Build the Next.js local dev server in Docker
+	docker compose build --no-cache nextjs
+
+build-storybook: # Build Storybook in Docker
+	docker compose build --no-cache storybook
+
+reinstall-deps:
+	rm -rf node_modules
+	npm install
+
 dev: # Run the Next.js local dev server in Docker
 	docker compose up --detach nextjs
 	docker compose logs --follow nextjs
@@ -47,3 +60,19 @@ storybook: # Run the Storybook local dev server in Docker
 
 stop:
 	docker compose down
+
+##################################################
+# Load testing
+##################################################
+
+load-test-local: # Load test the local environment at localhost:3000
+	artillery run artillery-load-test.yml
+
+load-test-dev: # Load test the dev environment in aws
+	artillery run -e dev artillery-load-test.yml
+
+load-test-staging: # Load test the staging environment in aws
+	artillery run -e staging artillery-load-test.yml
+
+load-test-prod: # Load test the production environment in aws. Please test responsibly
+	artillery run -e prod artillery-load-test.yml

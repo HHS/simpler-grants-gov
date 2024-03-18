@@ -6,7 +6,8 @@ import {
 
 type Props = {
   type: "success" | "warning" | "error" | "info";
-  children: React.ReactNode;
+  heading?: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const getBGColor = (type: Props["type"]) => {
@@ -22,15 +23,16 @@ const getBGColor = (type: Props["type"]) => {
   }
 };
 
-const FullWidthAlert = ({ type, children }: Props) => {
+const FullWidthAlert = ({ type, heading, children }: Props) => {
   return (
     <div className={`${getBGColor(type)}`}>
-      <GridContainer className="desktop:padding-y-2 tablet-lg:padding-y-1">
+      <GridContainer className="padding-y-1 tablet-lg:padding-y-2">
         <Grid>
           <USWDSAlert
             className="border-left-0 bg-transparent padding-left-0 margin-x-neg-2"
             type={type}
-            headingLevel="h4"
+            headingLevel="h2"
+            heading={heading}
             slim
           >
             {children}

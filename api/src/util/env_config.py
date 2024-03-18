@@ -1,6 +1,6 @@
 import os
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 import src
 
@@ -12,5 +12,4 @@ env_file = os.path.join(
 
 
 class PydanticBaseEnvConfig(BaseSettings):
-    class Config:
-        env_file = env_file
+    model_config = SettingsConfigDict(env_file=env_file)

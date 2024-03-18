@@ -8,6 +8,8 @@ import src.adapters.db as db
 import src.logging
 from src.db.models import metadata
 
+from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -16,7 +18,6 @@ logger = logging.getLogger("migrations")
 
 # Initialize logging
 with src.logging.init("migrations"):
-
     # add your model's MetaData object here
     # for 'autogenerate' support
     # from myapp import mymodel
@@ -30,15 +31,29 @@ with src.logging.init("migrations"):
 
     def include_object(
         object: sqlalchemy.schema.SchemaItem,
-        name: str,
+        name: str | None,
         type_: str,
         reflected: bool,
         compare_to: Any,
     ) -> bool:
         if type_ == "schema" and getattr(object, "schema", None) is not None:
             return False
+        if type_ == "table" and name is not None and name.startswith("foreign_"):
+            # We create foreign tables to an Oracle database, if we see those locally
+            # just ignore them as they aren't something we want included in Alembic
+            return False
         else:
             return True
+
+    def render_item(type_: str, obj: Any, autogen_context: Any) -> Any:
+        # Alembic tries to set the type of the column as LookupColumn
+        # despite it being derived from the Integer column type,
+        # so force it to be Integer during it's generation process
+        if type_ == "type" and isinstance(obj, LookupColumn):
+            return "sa.Integer()"
+
+        # False means to use the default processing
+        return False
 
     def run_migrations_online() -> None:
         """Run migrations in 'online' mode.
@@ -57,6 +72,7 @@ with src.logging.init("migrations"):
                 include_schemas=False,
                 include_object=include_object,
                 compare_type=True,
+                render_item=render_item,
             )
             with context.begin_transaction():
                 context.run_migrations()

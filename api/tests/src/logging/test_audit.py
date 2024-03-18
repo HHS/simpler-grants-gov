@@ -59,12 +59,12 @@ test_audit_hook_data = [
     ),
     pytest.param(
         subprocess.Popen,
-        (["/usr/bin/git", "commit", "-m", "Fixes a bug."],),
+        (["/usr/bin/git", "log", "HEAD~1..HEAD"],),
         [
             {
                 "msg": "subprocess.Popen",
                 "audit.args.executable": "/usr/bin/git",
-                "audit.args.args": ["/usr/bin/git", "commit", "-m", "Fixes a bug."],
+                "audit.args.args": ["/usr/bin/git", "log", "HEAD~1..HEAD"],
             }
         ],
         id="subprocess.Popen",
@@ -141,7 +141,7 @@ def test_audit_hook(
         pass
 
     assert len(caplog.records) == len(expected_records)
-    for record, expected_record in zip(caplog.records, expected_records):
+    for record, expected_record in zip(caplog.records, expected_records, strict=True):
         assert record.levelname == "AUDIT"
         assert_record_match(record, expected_record)
 
@@ -161,7 +161,7 @@ def test_os_kill(init_audit_hook, caplog: pytest.LogCaptureFixture):
     ]
 
     assert len(caplog.records) == len(expected_records)
-    for record, expected_record in zip(caplog.records, expected_records):
+    for record, expected_record in zip(caplog.records, expected_records, strict=True):
         assert record.levelname == "AUDIT"
         assert_record_match(record, expected_record)
 
@@ -232,7 +232,7 @@ def test_repeated_audit_logs(
     ]
 
     assert len(caplog.records) == len(expected_records)
-    for record, expected_record in zip(caplog.records, expected_records):
+    for record, expected_record in zip(caplog.records, expected_records, strict=True):
         assert record.levelname == "AUDIT"
         assert_record_match(record, expected_record)
 

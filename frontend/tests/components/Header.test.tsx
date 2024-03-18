@@ -20,17 +20,16 @@ const props = {
 describe("Header", () => {
   it("toggles the mobile nav menu", async () => {
     render(<Header {...props} />);
-
-    const menuButton = screen.getByRole("button", { name: /menu/i });
+    const menuButton = screen.getByTestId("navMenuButton");
 
     expect(menuButton).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /home/i })).toHaveAttribute(
       "href",
-      "/"
+      "/",
     );
-    expect(screen.getByRole("link", { name: /health/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /process/i })).toHaveAttribute(
       "href",
-      "/health"
+      "/process",
     );
 
     await userEvent.click(menuButton);

@@ -2,7 +2,12 @@
 # Constants
 ##################################################
 
-APP_NAME := main-api
+APP_NAME := grants-api
+
+# Colors for output, can be used as:
+# 	echo -e "this text is the default color $(RED) this text is red $(NO_COLOR) everything here is the default color again"
+RED := \033[0;31m
+NO_COLOR := \033[0m
 
 # Adding this to the end of a script that outputs JSON will convert
 # it to a readable format with timestamps and color-coding.
@@ -39,7 +44,7 @@ else
 PY_RUN_CMD := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
 endif
 
-FLASK_CMD := $(PY_RUN_CMD) flask --env-file local.env
+FLASK_CMD := $(PY_RUN_CMD) flask
 
 # Docker user configuration
 # This logic is to avoid issues with permissions and mounting local volumes,
@@ -80,7 +85,7 @@ setup-local:
 	poetry config virtualenvs.in-project true
 
 	# Install dependencies
-	poetry install --no-root
+	poetry install --no-root --all-extras --with dev
 
 ##################################################
 # API Build & Run
@@ -103,7 +108,7 @@ clean-volumes: ## Remove project docker volumes (which includes the DB state)
 stop:
 	docker-compose down
 
-check: format-check lint test
+check: format-check lint db-check-migrations test
 
 ##################################################
 # DB & migrations
@@ -114,12 +119,12 @@ check: format-check lint test
 #########################
 
 # Docker starts the image for the DB but it's not quite
-# fully ready, so add a 5 second sleep so upgrade doesn't
-# fail because the DB hasn't started yet.
-init-db: start-db sleep-5 db-migrate
+# ready to accept connections so we add a brief wait script
+init-db: start-db db-migrate
 
 start-db:
-	docker-compose up --detach main-db
+	docker-compose up --detach grants-db
+	./bin/wait-for-local-db.sh
 
 ## Destroy current DB, setup new one
 db-recreate: clean-volumes init-db
@@ -161,6 +166,17 @@ db-migrate-history: ## Show migration history
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
+db-seed-local:
+	$(PY_RUN_CMD) db-seed-local
+
+db-check-migrations: ## Verify the DB schema matches the DB migrations generated
+	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
+
+create-erds: # Create ERD diagrams for our DB schema
+	$(PY_RUN_CMD) create-erds
+	mv bin/*.png ../documentation/api/database/erds
+
+
 ##################################################
 # Testing
 ##################################################
@@ -176,6 +192,8 @@ test-watch: ## Run tests continually and watch for changes
 
 test-coverage: ## Run tests and generate coverage report
 	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
+	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
+	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report
@@ -187,22 +205,22 @@ test-coverage-report: ## Open HTML test coverage report
 ##################################################
 
 format: ## Format files
-	$(PY_RUN_CMD) isort --atomic src tests
-	$(PY_RUN_CMD) black src tests
+	$(PY_RUN_CMD) isort --atomic src tests bin
+	$(PY_RUN_CMD) black src tests bin
 
 format-check: ## Check file formatting
-	$(PY_RUN_CMD) isort --atomic --check-only src tests
-	$(PY_RUN_CMD) black --check src tests
+	$(PY_RUN_CMD) isort --atomic --check-only src tests bin
+	$(PY_RUN_CMD) black --check src tests bin
 
 lint: lint-py ## Lint
 
 lint-py: lint-flake lint-mypy
 
 lint-flake:
-	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests
+	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests bin
 
 lint-mypy:
-	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src $(MYPY_POSTPROC)
+	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
@@ -215,15 +233,18 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-cmd-user-create-csv: ## Create a CSV of the useres in the database (Run `make cli-user-create-csv args="--help"` to see the command's options)
-	$(FLASK_CMD) user create-csv $(args)
-
 # Set init-db as pre-requisite since there seems to be a race condition
 # where the DB can't yet receive connections if it's starting from a
 # clean state (e.g. after make stop, make clean-volumes, make openapi-spec)
 openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
+
+copy-oracle-data:
+	$(FLASK_CMD) data-migration copy-oracle-data
+
+setup-foreign-tables:
+	$(FLASK_CMD) data-migration setup-foreign-tables
 
 ##################################################
 # Miscellaneous Utilities
@@ -232,9 +253,30 @@ openapi-spec: init-db ## Generate OpenAPI spec
 login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
 
-# Pauses for 5 seconds
-sleep-5:
-	sleep 5
+login-db: ## Start psql with project environment variables
+	PGPASSWORD=$$DB_PASSWORD psql --host=$$DB_HOST --port=$$DB_PORT --username=$$DB_USER $$DB_NAME
+
+console: ## Start interactive Python console
+	$(PY_RUN_CMD) python3 -i -m src.tool.console.interactive
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+##################################################
+# Load testing
+##################################################
+
+load-test-local: # Load test the local environment at localhost:3000
+	artillery run artillery-load-test.yml
+
+load-test-dev: # Load test the dev environment in aws
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/dev/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e dev artillery-load-test.yml
+
+load-test-staging: # Load test the staging environment in aws
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/staging/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e staging artillery-load-test.yml
+
+load-test-prod: # Load test the production environment in aws. Please test responsibly
+	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
+	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml

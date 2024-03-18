@@ -1,6 +1,7 @@
 import { useTranslation } from "next-i18next";
 
 import Footer from "./Footer";
+import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
 
 type Props = {
@@ -21,6 +22,7 @@ const Layout = ({ children }: Props) => {
       <Header />
       <main id="main-content">{children}</main>
       <Footer />
+      <GrantsIdentifier />
     </div>
   );
 };

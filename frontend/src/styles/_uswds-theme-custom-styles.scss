@@ -24,7 +24,9 @@ i.e.
 
 .pdf-card {
   transition: transform 0.2s;
+  @include u-shadow(2);
   &:hover {
-    transform: scale(1.04);
+    transform: scale(1.1) rotate(1deg);
+    @include u-shadow(4);
   }
 }

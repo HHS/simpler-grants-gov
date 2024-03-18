@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-14 <!-- REQUIRED -->
-- **Related Issue:** [#97](https://github.com/HHS/grants-equity/issues/97) <!-- RECOMMENDED -->
+- **Related Issue:** [#97](https://github.com/HHS/simpler-grants-gov/issues/97) <!-- RECOMMENDED -->
 - **Deciders:** Lucas Brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Andy Cochran, Sarah Knopp <!-- REQUIRED -->
 
 ## Context and Problem Statement
@@ -12,6 +12,7 @@ The project will need a web framework to build and manage the frontend. The goal
 ## Decision Drivers <!-- RECOMMENDED -->
 
 ### Must Haves
+
 - Active Maintenance: The web framework is actively maintained with patches and minor releases delivered on a regular basis
 - Community of Users: The web framework has an active community of open source users and the framework is commonly used for frontend development
 - Usability: The framework is relatively easy to learn for developers without prior experience in the particular framework, and there are plenty of resources and training materials available
@@ -20,6 +21,7 @@ The project will need a web framework to build and manage the frontend. The goal
 - Client-side Rendering: The framework also supports rendering or modifying content client-side based on user interaction with the page (e.g. filtering, searching, etc.)
 
 ### Nice to Have
+
 - AuthN/AuthZ: The framework supports Authentication & Authorization routing natively or there are established extensions that provide this functionality
 - Internationalization (i18n): The framework supports localized routing for different languages natively or there are established extensions that provide this functionality
 - Middleware: The framework supports other types of middleware (i.e. functions or scripts that execute before a routing request is complete)

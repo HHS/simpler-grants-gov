@@ -65,7 +65,7 @@ $ make db-migrate
 ```python
 class ExampleTable(Base):
     ...
-    my_new_timestamp = Column(TIMESTAMP(timezone=True)) # Newly added line
+    my_new_timestamp: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True)) # Newly added line
 ```
 
 2. Automatically generate a migration file with `make db-migrate-create MIGRATE_MSG="Add created_at timestamp to address table"`
@@ -122,3 +122,14 @@ Or, if you wish to avoid creating extra migrations, you can manually adjust
 the `down_revision` of one of the migrations to point to the other one. This
 is also the necessary approach if the migrations need to happen in a defined
 order.
+
+## Alembic Check
+
+To make sure we haven't forgotten to generate migrations after modifying the database models,
+we rely on [alembic check](https://alembic.sqlalchemy.org/en/latest/autogenerate.html#running-alembic-check-to-test-for-new-upgrade-operations)
+which can be run by `make db-check-migrations`. What this command does is compare the current local
+database to your migration files, and see if anything would be generated if you attempted to create
+a new migration. If there would be anything created, it errors.
+
+This check also runs as part of our CI/CD, so even if you forget to run it yourself during development,
+it will be caught when you send a pull request.

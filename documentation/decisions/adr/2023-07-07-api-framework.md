@@ -2,12 +2,12 @@
 
 - **Status:** Active
 - **Last Modified:** 2023-07-07 <!-- REQUIRED -->
-- **Related Issue:** [#28](https://github.com/HHS/grants-equity/issues/28) <!-- RECOMMENDED -->
+- **Related Issue:** [#28](https://github.com/HHS/simpler-grants-gov/issues/28) <!-- RECOMMENDED -->
 - **Deciders:** Lucas brown, Aaron Couch, Billy Daly, Sammy Steiner, Daphne Gold, Gina Carson, Sumi Thaiveettil, Eshter Oke <!-- REQUIRED -->
 
 ## Context and Problem Statement
 
-This ADR is to decide what python framework to use for the back-end API of grants.gov. Python was chosen as the language for the back-end API in [ADR #3](https://github.com/HHS/grants-equity/blob/main/documentation/decisions/adr/0003-api-language.md).
+This ADR is to decide what python framework to use for the back-end API of grants.gov. Python was chosen as the language for the back-end API in [ADR #3](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/decisions/adr/0003-api-language.md).
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -30,15 +30,17 @@ This ADR is to decide what python framework to use for the back-end API of grant
 Chosen option: Flask + APIFlask, because it is well established with a broad community of developers and provides good tooling to move quickly. It has great documentation to help folks contribute quickly. Additionally the Nava Flask template recently adopted it, so we can leverage the template to get going quickly with a well engineered solution.
 
 ### Positive Consequences <!-- OPTIONAL -->
+
 - Leverages the Nava open source template
 - OpenAPI specs can be auto generated from models in code
+- Flexibility in defining schemas
 
 ### Negative Consequences <!-- OPTIONAL -->
+
 - Code first paradigm, we should auto generate api documentation in the CI/CD pipeline to ensure it stays up to date with the code
 - This is a relatively new library, so we should ensure code modularity in case we need to swap it out in the future
 
 ## Pros and Cons of the Options <!-- OPTIONAL -->
-
 
 ### Flask
 
@@ -53,7 +55,6 @@ Flask is a simple, but extensible, micro web framework for python created in 201
   - Lack of standardization means more decision making and good code quality is very important
   - Async operation takes additional planning and work
 
-
 ### Flask + Connexion
 
 This deserves its own option because it fundamentally changes the way that we would develop with python and flask. With connexion, you first write your API contract, using the Swagger/OpenAPI standard. Then, the endpoints you defined will be mapped to your python view functions, ensuring that your python code does what your API contract says it does. This makes it rather unique in the landscape of python web frameworks, as most other tools start from your code instead of the other way around.
@@ -65,23 +66,31 @@ This deserves its own option because it fundamentally changes the way that we wo
 - **Cons**
   - Same as Flask
 
-
 ### Flask + APIFlask
 
 This deserves its own option because it adds a lot of support to Flask for a more traditional code first api approach, in contrast to connexion. APIFlask is a lightweight Python web API framework based on Flask and marshmallow-code projects. It's easy to use, highly customizable, ORM/ODM-agnostic, and 100% compatible with the Flask ecosystem. The Nava Flask template repo has recently replaced connexion with apiflask, documented in [connexion replacement decision record](https://github.com/navapbc/template-application-flask/blob/main/docs/decisions/0001-connexion-replacement.md).
+
+APIFlask relies on [Marshmallow](https://marshmallow.readthedocs.io/en/stable/) to define the request & response schemas. Marshmallow is a well tested serialization/deserialization, and validation library for converting between JSON and python dictionaries.
+Marshmallow schemas are defined using classes in-code, and polymorphism can be used to quickly make small adjustments to schemas for new endpoints. Fields can be marked as just for serialization or deserialization (ie. response / request) which also minimizes how much needs to be defined.
+Marshmallow also supports the concept of "partial" schemas. When attaching a schema to a route, if you mark it as partial, all fields are marked as not required. This makes building schemas for update endpoints simpler as you don't need to duplicate an entire schema just to mark fields as optional. This means we can potentially define a single schema for create, read, and update endpoints, and avoid a significant amount of duplication.
+
+APIFlask uses [apispec](https://apispec.readthedocs.io/en/latest/) to convert the Marshmallow schema into the OpenAPI/Swagger specification.
 
 - **Pros**
   - Same as Flask
   - Simplifies boilerplate code necessary for a Flask API by pulling the best features of many libraries
   - Very well documented
+  - Marshmallow is very flexible, and allows for significant customization in defined schemas
 - **Cons**
   - Same as Flask
+  - Marshmallow only converts JSON to dictionaries - if you want to work with typed/IDE auto-complete-able objects, you'll need to use a library like Pydantic and define models again
   - Relatively young project
-
 
 ### FastApi
 
-FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This  implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks.
+FastAPI is a modern, fast (high-performance), web framework created in 2018 for building APIs with python 3.7+ based on standard python type hints. This implementation-first library is designed as a performant and intuitive alternative to existing python API frameworks.
+
+Schemas are defined using [Pydantic](https://docs.pydantic.dev/latest/) which is a model definition and validation library that thoroughly leverages Python typing features
 
 - **Pros**
   - Designed for speed and can perform asynchronous operations natively (if needed)
@@ -91,7 +100,6 @@ FastAPI is a modern, fast (high-performance), web framework created in 2018 for 
   - Documentation for more advanced cases is lacking
   - As the newest of the frameworks, it has the smallest community of support
   - Can have memory management issues
-
 
 ### Django
 
@@ -103,7 +111,6 @@ Django is a full stack python web framework created in 2005 that follows the mod
 - **Cons**
   - Monolithic style, steep learning curve, and large codebase make it difficult for collaborators
   - Assumes both front end and back end are included in the monolith application
-
 
 ## Links <!-- OPTIONAL -\->
 

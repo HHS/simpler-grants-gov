@@ -1,0 +1,19 @@
+# List of vulnerabilities to ignore for the trivy scan
+# Please add safelists in the following format to make it easier when checking
+# Package/module name: URL to vulnerability for checking updates
+#  Versions:     URL to the version history
+#  Dependencies: Name of any other packages or modules that are dependent on this version
+#                 Link to the dependencies for ease of checking for updates
+#  Issue:         Why there is a finding and why this is here or not been removed
+#  Last checked:  Date last checked in scans
+#The-CVE-or-vuln-id # Remove comment at start of line
+CVE-2023-5363
+# 11/14/2023 - Postgres vulnerabilities in the Debian image
+CVE-2023-39417
+CVE-2023-5869
+CVE-2023-39418
+CVE-2023-5868
+CVE-2023-5870
+# 2/12/2024 - libgnutls30 in node:20-bullseye-slim not updated with latest fix. Check again after 2/20/2024 to remove
+CVE-2024-0567
+CVE-2023-5981

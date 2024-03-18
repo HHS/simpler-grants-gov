@@ -1,17 +1,17 @@
 # Convenience script for running alembic migration commands through a pyscript
 # rather than the command line. This allows poetry to package and alias it for
 # running on the production docker image from any directory.
-import itertools
 import logging
 import os
-from typing import Optional
 
 import alembic.command as command
 import alembic.script as script
 import sqlalchemy
 from alembic.config import Config
-from alembic.operations.ops import MigrationScript
 from alembic.runtime import migration
+
+import src.logging
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 
 logger = logging.getLogger(__name__)
 alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "./alembic.ini"))
@@ -22,6 +22,11 @@ alembic_cfg.set_main_option("script_location", os.path.dirname(__file__))
 
 def up(revision: str = "head") -> None:
     command.upgrade(alembic_cfg, revision)
+
+    # We want logging for the lookups, but alembic already sets
+    # it up in env.py, so set it up again separately for the syncing
+    with src.logging.init("sync_lookup_values"):
+        sync_lookup_values()
 
 
 def down(revision: str = "-1") -> None:
@@ -53,41 +58,3 @@ def have_all_migrations_run(db_engine: sqlalchemy.engine.Engine) -> None:
         logger.info(
             f"The current migration head is up to date, {current_heads} and Alembic is expecting {expected_heads}"
         )
-
-
-def check_model_parity() -> None:
-    revisions: list[MigrationScript] = []
-
-    def process_revision_directives(
-        context: migration.MigrationContext,
-        revision: Optional[str],
-        directives: list[MigrationScript],
-    ) -> None:
-        nonlocal revisions
-        revisions = list(directives)
-        # Prevent actually generating a migration
-        directives[:] = []
-
-    command.revision(
-        config=alembic_cfg,
-        autogenerate=True,
-        process_revision_directives=process_revision_directives,
-    )
-    diff = list(
-        itertools.chain.from_iterable(
-            op.as_diffs() for script in revisions for op in script.upgrade_ops_list
-        )
-    )
-
-    message = (
-        "The application models are not in sync with the migrations. You should generate "
-        "a new automigration or update your local migration file. "
-        "If there are unexpected errors you may need to merge main into your branch."
-    )
-
-    if diff:
-        for line in diff:
-            print("::error title=Missing migration::Missing migration:", line)
-
-        logger.error(message, extra={"issues": str(diff)})
-        raise Exception(message)

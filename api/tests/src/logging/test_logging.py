@@ -28,7 +28,6 @@ def test_init(caplog: pytest.LogCaptureFixture, monkeypatch, log_format, expecte
     monkeypatch.setenv("LOG_FORMAT", log_format)
 
     with src.logging.init("test_logging"):
-
         records = caplog.records
         assert len(records) == 2
         assert re.match(

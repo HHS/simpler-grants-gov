@@ -1,13 +1,12 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Iterable
 from uuid import UUID
 
-from sqlalchemy import TIMESTAMP, Column, MetaData, inspect
+from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import declarative_mixin
+from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.util import datetime_util
@@ -26,8 +25,35 @@ metadata = MetaData(
 )
 
 
-@as_declarative(metadata=metadata)
-class Base:
+class Base(DeclarativeBase):
+    # Attach the metadata to the Base class so all tables automatically get added to the metadata
+    metadata = metadata
+
+    # Override the default type that SQLAlchemy will map python types to.
+    # This is used if you simply define a column like:
+    #
+    #   my_column: Mapped[str]
+    #
+    # If you provide a mapped_column attribute you can override these values
+    #
+    # See: https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#mapped-column-derives-the-datatype-and-nullability-from-the-mapped-annotation
+    #      for the default mappings
+    #
+    # See: https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html#orm-declarative-mapped-column-type-map
+    #      for details on setting up this configuration.
+    type_annotation_map = {
+        # Always include a timezone for datetimes
+        datetime: TIMESTAMP(timezone=True),
+        # Explicitly use the Text column type for strings
+        str: Text,
+        # Always use the Postgres UUID column type
+        uuid.UUID: postgresql.UUID(as_uuid=True),
+    }
+
+    @classmethod
+    def get_table_name(cls) -> str:
+        return cls.__tablename__
+
     def _dict(self) -> dict:
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
@@ -46,23 +72,37 @@ class Base:
 
     def copy(self, **kwargs: dict[str, Any]) -> "Base":
         # TODO - Python 3.11 will let us make the return Self instead
-        table = self.__table__  # type: ignore
+        table = self.__table__
         non_pk_columns = [
-            k for k in table.columns.keys() if k not in table.primary_key.columns.keys()
+            k for k in table.columns.keys() if k not in table.primary_key.columns.keys()  # type: ignore
         ]
         data = {c: getattr(self, c) for c in non_pk_columns}
         data.update(kwargs)
         copy = self.__class__(**data)
         return copy
 
+    def __repr__(self) -> str:
+        values = []
+        for k, v in self.for_json().items():
+            values.append(f"{k}={v!r}")
+
+        return f"<{self.__class__.__name__}({','.join(values)})"
+
+    def __rich_repr__(self) -> Iterable[tuple[str, Any]]:
+        """Rich repr for interactive console.
+
+        See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
+        """
+        return self._dict().items()
+
 
 @declarative_mixin
 class IdMixin:
     """Mixin to add a UUID id primary key column to a model
-    https://docs.sqlalchemy.org/en/14/orm/declarative_mixins.html
+    https://docs.sqlalchemy.org/en/20/orm/declarative_mixins.html
     """
 
-    id: uuid.UUID = Column(postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
 
 def same_as_created_at(context: Any) -> Any:
@@ -72,18 +112,16 @@ def same_as_created_at(context: Any) -> Any:
 @declarative_mixin
 class TimestampMixin:
     """Mixin to add created_at and updated_at columns to a model
-    https://docs.sqlalchemy.org/en/14/orm/declarative_mixins.html#mixing-in-columns
+    https://docs.sqlalchemy.org/en/20/orm/declarative_mixins.html#mixing-in-columns
     """
 
-    created_at: datetime = Column(
-        TIMESTAMP(timezone=True),
+    created_at: Mapped[datetime] = mapped_column(
         nullable=False,
         default=datetime_util.utcnow,
         server_default=sqlnow(),
     )
 
-    updated_at: datetime = Column(
-        TIMESTAMP(timezone=True),
+    updated_at: Mapped[datetime] = mapped_column(
         nullable=False,
         default=same_as_created_at,
         onupdate=datetime_util.utcnow,

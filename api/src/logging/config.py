@@ -5,6 +5,8 @@ import pwd
 import sys
 from typing import Any, ContextManager, cast
 
+from pydantic_settings import SettingsConfigDict
+
 import src.logging.audit
 import src.logging.formatters as formatters
 import src.logging.pii as pii
@@ -20,14 +22,12 @@ class HumanReadableFormatterConfig(PydanticBaseEnvConfig):
 
 
 class LoggingConfig(PydanticBaseEnvConfig):
-    format = "json"
-    level = "INFO"
-    enable_audit = False
-    human_readable_formatter = HumanReadableFormatterConfig()
+    model_config = SettingsConfigDict(env_prefix="log_", env_nested_delimiter="__")
 
-    class Config:
-        env_prefix = "log_"
-        env_nested_delimiter = "__"
+    format: str = "json"
+    level: str = "INFO"
+    enable_audit: bool = False
+    human_readable_formatter: HumanReadableFormatterConfig = HumanReadableFormatterConfig()
 
 
 class LoggingContext(ContextManager[None]):

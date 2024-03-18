@@ -2,15 +2,16 @@ import logging
 
 import _pytest.monkeypatch
 import boto3
-import flask
 import flask.testing
 import moto
 import pytest
+from apiflask import APIFlask
 
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.db import models
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 
@@ -61,6 +62,19 @@ def monkeypatch_session():
 
 
 # From https://github.com/pytest-dev/pytest/issues/363
+@pytest.fixture(scope="class")
+def monkeypatch_class():
+    """
+    Create a monkeypatch instance that can be used to
+    monkeypatch global environment, objects, and attributes
+    for the duration of a test class.
+    """
+    mpatch = _pytest.monkeypatch.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+# From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="module")
 def monkeypatch_module():
     mpatch = _pytest.monkeypatch.MonkeyPatch()
@@ -80,7 +94,10 @@ def db_client(monkeypatch_session) -> db.DBClient:
     """
 
     with db_testing.create_isolated_db(monkeypatch_session) as db_client:
-        models.metadata.create_all(bind=db_client.get_connection())
+        with db_client.get_connection() as conn, conn.begin():
+            models.metadata.create_all(bind=conn)
+
+        sync_lookup_values(db_client)
         yield db_client
 
 
@@ -114,7 +131,7 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client) -> flask.Flask:
+def app(db_client) -> APIFlask:
     return app_entry.create_app()
 
 
@@ -129,9 +146,15 @@ def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
 
 
 @pytest.fixture
-def api_auth_token(monkeypatch):
-    auth_token = "abcd1234"
-    monkeypatch.setenv("API_AUTH_TOKEN", auth_token)
+def all_api_auth_tokens(monkeypatch):
+    all_auth_tokens = ["abcd1234", "wxyz7890", "lmno56"]
+    monkeypatch.setenv("API_AUTH_TOKEN", ",".join(all_auth_tokens))
+    return all_auth_tokens
+
+
+@pytest.fixture
+def api_auth_token(monkeypatch, all_api_auth_tokens):
+    auth_token = all_api_auth_tokens[0]
     return auth_token
 
 

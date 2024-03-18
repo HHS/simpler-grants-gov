@@ -1,0 +1,121 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    "group:monorepos"
+  ],
+  "schedule": [
+    "on the 2nd and 4th day instance on sunday after 9pm"
+  ],
+  "ignoreUnstable": true,
+  "labels": [
+    "dependencies"
+  ],
+  "branchPrefix": "renovate/",
+  "reviewers": [
+    "sammysteiner",
+    "acouch",
+    "jamesbursa",
+    "coilysiren",
+    "aplybeah"
+  ],
+  "rangeStrategy": "update-lockfile",
+  "timezone": "America/New_York",
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "vulnerability"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the api directory",
+      "matchFileNames": [
+        "api/**"
+      ],
+      "groupName": "Api"
+    },
+    {
+      "description": "Group all dependencies from the frontend directory",
+      "matchFileNames": [
+        "frontend/**"
+      ],
+      "groupName": "Frontend"
+    },
+    {
+      "description": "Group all dependencies from the infra directory",
+      "matchFileNames": [
+        "infra/**"
+      ],
+      "groupName": "Infra"
+    },
+    {
+      "description": "Group all dependencies from the analytics directory",
+      "matchFileNames": [
+        "analytics/**"
+      ],
+      "groupName": "Analytics"
+    },
+    {
+      "description": "Group all dependencies from the .github directory",
+      "matchFileNames": [
+        ".github/**"
+      ],
+      "groupName": "CI/CD"
+    },
+    {
+      "description": "Group React packages together",
+      "packageNames": [
+        "react",
+        "@types/react",
+        "react-dom",
+        "@types/react-dom"
+      ],
+      "groupName": "React"
+    },
+    {
+      "description": "Group Storybook packages together",
+      "matchPackagePatterns": [
+        "storybook"
+      ],
+      "groupName": "Storybook"
+    },
+    {
+      "description": "Group Next.js packages together",
+      "matchPackagePatterns": ["next"],
+      "groupName": "Next.js"
+    },
+    {
+      "description": "Group I18next packages together",
+      "matchPackagePatterns": [
+        "i18next"
+      ],
+      "groupName": "I18next"
+    },
+    {
+      "description": "Group test packages together",
+      "enabled": false,
+      "matchPackagePatterns": ["jest", "testing-library"],
+      "groupName": "Jest"
+    },
+    {
+      "description": "Group CSS-related packages together",
+      "enabled": false,
+      "matchPackagePatterns": ["postcss", "sass"],
+      "groupName": "Styling"
+    },
+    {
+      "description": "@uswds/uswds must match the version that react-uswds depends on, so it should be manually updated. If this isn't here, uswds updates will be included in frontend updates. If a renovate PR fails because of the @uswds/uswds package version, manually update that package version in the PR and that should fix the issue.",
+      "enabled": false,
+      "matchPackagePatterns": ["@uswds/uswds"],
+      "groupName": "USWDS core"
+    },
+    {
+      "description": "Leave peer dependencies alone",
+      "depTypeList": [
+        "peerDependencies"
+      ],
+      "enabled": false
+    }
+  ]
+}

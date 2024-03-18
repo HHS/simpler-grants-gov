@@ -1,21 +1,34 @@
 # Maintainers
 
-MAINTAINERS:
+This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOWNERS) for list of reviewers for different parts of the codebase. Team members include:
 
-- lucasmbrown-usds
-- aprilypchen
+<!-- Note: team members listed in alphabetical order by last name -->
 
-approvers:
 
-- TBA
+## Product and Delivery
 
-reviewers:
+* Lucas Brown
+* Julius Chang
+* Sarah Knopp
+* Billy Daly
+* Eric Valenzuela
 
-- decause-gov
+## Engineering
 
-| Roles | Responsibilities | Requirements | Defined by |
-| --- |:--- |:--- |:--- |
-| member | active contributor in the community | multiple contributions to the project. | PROJECT GitHub org Committer Team |
-| reviewer | review contributions from other members | history of review and authorship in a subproject | MAINTAINERS file reviewer entry, and GitHub Org Triage Team |
-| approver | approve accepting contributions | highly experienced and active reviewer + contributor to a subproject | MAINTAINERS file approver entry and GitHub Triage Team |
-| lead | set direction and priorities for a subproject | demonstrated responsibility and excellent technical judgement for the subproject | MAINTAINERS file owner entry and GitHub Org Admin Team |
+* Aaron Couch
+* Alsia Plybeah
+* Kai Siren
+* Michael Chouinard
+* Sammy Steiner
+* Brett Rosenblatt
+* Brandon Tabaska
+
+## Product and Project Management
+
+* Esther Oke
+* Sumit Haiveettil
+
+## Content and Design
+
+* Andy Cochran
+* Emily Ianacone

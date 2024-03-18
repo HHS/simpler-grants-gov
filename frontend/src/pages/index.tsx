@@ -1,38 +1,30 @@
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
-import WtGIContent from "src/components/WtGIContent";
-import FullWidthAlert from "../components/FullWidthAlert";
-import FundingContent from "../components/FundingContent";
-import GoalContent from "../components/GoalContent";
+import PageSEO from "src/components/PageSEO";
+import BetaAlert from "../components/BetaAlert";
 import Hero from "../components/Hero";
+import IndexGoalContent from "./content/IndexGoalContent";
+import ProcessAndResearchContent from "./content/ProcessAndResearchContent";
 
 const Home: NextPage = () => {
   const { t } = useTranslation("common", { keyPrefix: "Index" });
 
   return (
     <>
+      <PageSEO title={t("page_title")} description={t("meta_description")} />
       <Hero />
-      <FullWidthAlert type="info">
-        <Trans
-          t={t}
-          i18nKey="alert"
-          components={{
-            LinkToGrants: <a href="https://www.grants.gov" />,
-          }}
-        />
-      </FullWidthAlert>
-      <GoalContent />
-      <FundingContent />
-      <WtGIContent />
+      <BetaAlert />
+      <IndexGoalContent />
+      <ProcessAndResearchContent />
     </>
   );
 };
 
-// Change this to getStaticProps if you're not using server-side rendering
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+// Change this to GetServerSideProps if you're using server-side rendering
+export const getStaticProps: GetStaticProps = async ({ locale }) => {
   const translations = await serverSideTranslations(locale ?? "en");
   return { props: { ...translations } };
 };

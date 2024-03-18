@@ -9,6 +9,12 @@ module.exports = {
     // https://nextjs.org/docs/basic-features/eslint
     "next/core-web-vitals",
   ],
+  rules: {
+    // Next.js <Image> component is useful for optimizing images, but also requires additional
+    // dependencies to work in standalone mode. It may be overkill for most projects at
+    // Nava which aren't image heavy.
+    "@next/next/no-img-element": "off",
+  },
   // Additional lint rules. These get layered onto the top-level rules.
   overrides: [
     // Lint config specific to Test files
@@ -38,6 +44,7 @@ module.exports = {
       ],
       plugins: ["@typescript-eslint"],
       rules: {
+        camelcase: "off",
         // Prevent dead code accumulation
         "@typescript-eslint/no-unused-vars": "error",
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
