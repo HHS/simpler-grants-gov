@@ -16,7 +16,7 @@ info:
   contact:
     name: Simpler Grants.gov
     url: https://simpler.grants.gov/
-    email: simplergrantsgov@hhs.gov
+    email: simpler@grants.gov
   title: Simpler Grants API
   version: v0
 tags:

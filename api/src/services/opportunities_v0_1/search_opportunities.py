@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, asc, desc, nulls_last, or_, select
@@ -35,9 +35,19 @@ class SearchOpportunityParams(BaseModel):
     filters: SearchOpportunityFilters | None = Field(default=None)
 
 
-def _add_query_filters(
-    stmt: Select[tuple[Opportunity]], query: str | None
-) -> Select[tuple[Opportunity]]:
+def _join_stmt_to_current_summary(stmt: Select[tuple[Any]]) -> Select[tuple[Any]]:
+    # Utility method to add this join to a select statement as we do this in a few places
+    #
+    # We need to add joins so that the where/order_by clauses
+    # can query against the tables that are relevant for these filters
+    return stmt.join(CurrentOpportunitySummary).join(
+        OpportunitySummary,
+        CurrentOpportunitySummary.opportunity_summary_id
+        == OpportunitySummary.opportunity_summary_id,
+    )
+
+
+def _add_query_filters(stmt: Select[tuple[Any]], query: str | None) -> Select[tuple[Any]]:
     if query is None or len(query) == 0:
         return stmt
 
@@ -47,8 +57,8 @@ def _add_query_filters(
 
 
 def _add_filters(
-    stmt: Select[tuple[Opportunity]], filters: SearchOpportunityFilters | None
-) -> Select[tuple[Opportunity]]:
+    stmt: Select[tuple[Any]], filters: SearchOpportunityFilters | None
+) -> Select[tuple[Any]]:
     if filters is None:
         return stmt
 
@@ -123,8 +133,12 @@ def _add_order_by(
             field = Opportunity.opportunity_title
         case "post_date":
             field = OpportunitySummary.post_date
+            # Need to add joins to the query stmt to order by field from opportunity summary
+            stmt = _join_stmt_to_current_summary(stmt)
         case "close_date":
             field = OpportunitySummary.close_date
+            # Need to add joins to the query stmt to order by field from opportunity summary
+            stmt = _join_stmt_to_current_summary(stmt)
         case "agency_code":
             field = Opportunity.agency
         case _:
@@ -144,11 +158,63 @@ def search_opportunities(
 ) -> Tuple[Sequence[Opportunity], PaginationInfo]:
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
 
-    stmt = (
-        select(Opportunity)
-        .where(Opportunity.is_draft.is_(False))  # Only ever return non-drafts
+    """
+    We create an inner query which handles all of the filtering and returns
+    a set of opportunity IDs for the outer query to filter against. This query
+    ends up looking like (varying based on exact filters):
+
+        SELECT DISTINCT
+            opportunity.opportunity_id
+        FROM opportunity
+            JOIN current_opportunity_summary ON opportunity.opportunity_id = current_opportunity_summary.opportunity_id
+            JOIN opportunity_summary ON current_opportunity_summary.opportunity_summary_id = opportunity_summary.opportunity_summary_id
+            JOIN link_opportunity_summary_funding_instrument ON opportunity_summary.opportunity_summary_id = link_opportunity_summary_funding_instrument.opportunity_summary_id
+            JOIN link_opportunity_summary_funding_category ON opportunity_summary.opportunity_summary_id = link_opportunity_summary_funding_category.opportunity_summary_id
+            JOIN link_opportunity_summary_applicant_type ON opportunity_summary.opportunity_summary_id = link_opportunity_summary_applicant_type.opportunity_summary_id
+        WHERE
+            opportunity.is_draft IS FALSE
+            AND(EXISTS (
+                SELECT
+                    1 FROM current_opportunity_summary
+                WHERE
+                    opportunity.opportunity_id = current_opportunity_summary.opportunity_id))
+        AND link_opportunity_summary_funding_instrument.funding_instrument_id IN(1, 2, 3, 4))
+    """
+    inner_stmt = (
+        select(Opportunity.opportunity_id).where(
+            Opportunity.is_draft.is_(False)
+        )  # Only ever return non-drafts
         # Filter anything without a current opportunity summary
         .where(Opportunity.current_opportunity_summary != None)  # noqa: E711
+        # Distinct the opportunity IDs returned so that the outer query
+        # has fewer results to query against
+        .distinct()
+    )
+
+    # Current + Opportunity Summary are always needed so just add them here
+    inner_stmt = _join_stmt_to_current_summary(inner_stmt)
+    inner_stmt = _add_query_filters(inner_stmt, search_params.query)
+    inner_stmt = _add_filters(inner_stmt, search_params.filters)
+
+    #
+    #
+    """
+    The outer query handles sorting and filters against the inner query described above.
+    This ends up looking like (joins to current opportunity if ordering by other fields):
+
+    SELECT
+            opportunity.opportunity_id,
+            opportunity.opportunity_title,
+            -- and so on for the opportunity table fields
+        FROM opportunity
+        WHERE
+            opportunity.opportunity_id in ( /* the above subquery */ )
+        ORDER BY
+            opportunity.opportunity_id DESC NULLS LAST
+        LIMIT 25 OFFSET 100
+    """
+    stmt = (
+        select(Opportunity).where(Opportunity.opportunity_id.in_(inner_stmt))
         # selectinload makes it so all relationships are loaded and attached to the Opportunity
         # records that we end up fetching. It emits a separate "select * from table where opportunity_id in (x, y ,z)"
         # for each relationship. This is used instead of joinedload as it ends up more performant for complex models
@@ -156,20 +222,9 @@ def search_opportunities(
         #
         # See: https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#what-kind-of-loading-to-use
         .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-        # We need to add joins so that the where clauses
-        # can query against the tables that are relevant for these filters
-        # Current + Opportunity Summary are always needed so just add them here
-        .join(CurrentOpportunitySummary)
-        .join(
-            OpportunitySummary,
-            CurrentOpportunitySummary.opportunity_summary_id
-            == OpportunitySummary.opportunity_summary_id,
-        )
     )
 
     stmt = _add_order_by(stmt, search_params.pagination)
-    stmt = _add_query_filters(stmt, search_params.query)
-    stmt = _add_filters(stmt, search_params.filters)
 
     paginator: Paginator[Opportunity] = Paginator(
         Opportunity, stmt, db_session, page_size=search_params.pagination.page_size

@@ -59,10 +59,11 @@ export interface PaginationInfo {
   total_records: number;
 }
 
-export interface ApiResponse {
+export interface SearchAPIResponse {
   data: Opportunity[];
   message: string;
   pagination_info: PaginationInfo;
   status_code: number;
-  warnings?: [];
+  warnings?: unknown[] | null | undefined;
+  errors?: unknown[] | null | undefined;
 }

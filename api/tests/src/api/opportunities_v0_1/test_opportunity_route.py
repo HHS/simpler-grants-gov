@@ -223,13 +223,20 @@ def validate_assistance_listings(
 @pytest.mark.parametrize(
     "search_request,expected_values",
     [
-        # Verifying page offset and size work properly
+        ### Verifying page offset and size work properly
+        # In a few of these tests we specify all possible values
+        # for a given filter. This is to make sure that the one-to-many
+        # relationships don't cause the counts to get thrown off
         (
-            get_search_request(page_offset=1, page_size=5),
+            get_search_request(
+                page_offset=1, page_size=5, funding_instrument_one_of=[e for e in FundingInstrument]
+            ),
             SearchExpectedValues(total_pages=2, total_records=10, response_record_count=5),
         ),
         (
-            get_search_request(page_offset=2, page_size=3),
+            get_search_request(
+                page_offset=2, page_size=3, funding_category_one_of=[e for e in FundingCategory]
+            ),
             SearchExpectedValues(total_pages=4, total_records=10, response_record_count=3),
         ),
         (

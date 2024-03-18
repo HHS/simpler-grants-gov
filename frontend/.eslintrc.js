@@ -44,6 +44,7 @@ module.exports = {
       ],
       plugins: ["@typescript-eslint"],
       rules: {
+        camelcase: "off",
         // Prevent dead code accumulation
         "@typescript-eslint/no-unused-vars": "error",
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
