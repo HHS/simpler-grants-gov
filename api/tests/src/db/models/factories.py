@@ -345,6 +345,12 @@ class OpportunitySummaryFactory(BaseFactory):
             link_applicant_types=[],
         )
 
+        no_link_values = factory.Trait(
+            link_funding_instruments=[],
+            link_funding_categories=[],
+            link_applicant_types=[],
+        )
+
 
 class CurrentOpportunitySummaryFactory(BaseFactory):
     class Meta:

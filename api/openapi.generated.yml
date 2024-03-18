@@ -314,6 +314,47 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OpportunitySearchRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: ascending
+              example2:
+                summary: All filters
+                value:
+                  query: research
+                  filters:
+                    agency:
+                      one_of:
+                      - US-ABC
+                      - HHS
+                    applicant_type:
+                      one_of:
+                      - state_governments
+                      - county_governments
+                      - individuals
+                    funding_category:
+                      one_of:
+                      - recovery_act
+                      - arts
+                      - natural_resources
+                    funding_instrument:
+                      one_of:
+                      - cooperative_agreement
+                      - grant
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v0/opportunities/{opportunity_id}:
@@ -727,6 +768,130 @@ components:
           type: string
           format: date-time
           readOnly: true
+    FundingInstrumentFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          items:
+            enum:
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
+            type:
+            - string
+    FundingCategoryFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          items:
+            enum:
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
+            type:
+            - string
+    ApplicantTypeFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          items:
+            enum:
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
+            type:
+            - string
+    OpportunityStatusFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          items:
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    AgencyFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          items:
+            type: string
+            minLength: 2
+            example: US-ABC
+    OpportunitySearchFilter:
+      type: object
+      properties:
+        funding_instrument:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FundingInstrumentFilter'
+        funding_category:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FundingCategoryFilter'
+        applicant_type:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicantTypeFilter'
+        opportunity_status:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityStatusFilter'
+        agency:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyFilter'
     OpportunityPagination:
       type: object
       properties:
@@ -761,6 +926,15 @@ components:
     OpportunitySearchRequest:
       type: object
       properties:
+        query:
+          type: string
+          description: Query string which searches against several text fields
+          example: research
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchFilter'
         pagination:
           type:
           - object
