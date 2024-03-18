@@ -43,4 +43,49 @@ export default class SearchFilterManager {
         : undefined,
     }));
   };
+
+  // Method to count checked options
+  countChecked = (options: FilterOption[]): number => {
+    return options.reduce(
+      (acc, option) =>
+        acc +
+        (option.isChecked ? 1 : 0) +
+        (option.children ? this.countChecked(option.children) : 0),
+      0,
+    );
+  };
+
+  // Check if all options in a section are selected
+  isSectionAllSelected = (
+    options: FilterOption[],
+    sectionId: string,
+  ): boolean => {
+    const section = options.find((option) => option.id === sectionId);
+    if (!section || !section.children) return false;
+    return section.children.every((child) => child.isChecked);
+  };
+
+  // Get checked count by section
+  getCheckedCountBySection = (
+    options: FilterOption[],
+  ): Record<string, number> => {
+    return options.reduce(
+      (acc, option) => {
+        if (option.children) {
+          acc[option.id] = this.countChecked(option.children);
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+  };
+
+  // Check if all options in the whole accordion are selected
+  isAllSelected = (options: FilterOption[]): boolean => {
+    return options.every(
+      (option) =>
+        option.isChecked ||
+        (option.children && this.isAllSelected(option.children)),
+    );
+  };
 }

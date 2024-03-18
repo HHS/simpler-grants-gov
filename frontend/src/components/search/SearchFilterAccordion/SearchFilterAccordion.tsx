@@ -3,7 +3,7 @@ import { QueryParamKey } from "../../../types/searchTypes";
 import SearchFilterCheckbox from "./SearchFilterCheckbox";
 import SearchFilterSection from "./SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "./SearchFilterToggleAll";
-import useSearchFilter from "../../../hooks/useSearchFilter";
+import useSearchFilter from "../../../hooks/useSearchFilterAccordion";
 
 export interface AccordionItemProps {
   title: React.ReactNode | string;
@@ -40,7 +40,7 @@ export function SearchFilterAccordion({
 }: SearchFilterAccordionProps) {
   // manage most of state in custom hook
   const {
-    totalCheckedCount,
+    // totalCheckedCount,
     options,
     mounted,
     toggleOptionChecked,
@@ -51,6 +51,7 @@ export function SearchFilterAccordion({
     isNoneSelected,
     isSectionAllSelected,
     isSectionNoneSelected,
+    totalChecked,
   } = useSearchFilter(
     initialFilterOptions,
     initialQueryParams,
@@ -61,11 +62,16 @@ export function SearchFilterAccordion({
   const getAccordionTitle = () => (
     <>
       {title}
-      {!!totalCheckedCount && (
+      {!!totalChecked && (
+        <span className="usa-tag usa-tag--big radius-pill margin-left-1">
+          {totalChecked}
+        </span>
+      )}
+      {/* {!!totalCheckedCount && (
         <span className="usa-tag usa-tag--big radius-pill margin-left-1">
           {totalCheckedCount}
         </span>
-      )}
+      )} */}
     </>
   );
 

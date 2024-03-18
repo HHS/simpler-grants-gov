@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { FilterOption } from "../components/search/SearchFilterAccordion/SearchFilterAccordion";
 import { QueryParamKey } from "../types/searchTypes";
+import SearchFilterManager from "../services/search/SearchFilterManager";
 import { useDebouncedCallback } from "use-debounce";
 import { useSearchParamUpdater } from "./useSearchParamUpdater";
 
@@ -13,16 +14,24 @@ import { useSearchParamUpdater } from "./useSearchParamUpdater";
 // - Toggle one or all checkboxes
 // - Run debounced function that updates query params and submits form
 // (Does not cover opportunity status checkbox logic)
-function useSearchFilter(
+function useSearchFilterAccordion(
   initialFilterOptions: FilterOption[],
   initialQueryParams: string,
   queryParamKey: QueryParamKey, // agency, fundingInstrument, eligibility, or category
   formRef: React.RefObject<HTMLFormElement>,
 ) {
   const { updateQueryParams } = useSearchParamUpdater();
+  const [totalChecked, setTotalChecked] = useState<number>(0);
   const [options, setOptions] = useState<FilterOption[]>(() =>
     initializeOptions(initialFilterOptions, initialQueryParams),
   );
+
+  //   const searchFilterManager = useMemo(
+  //     () =>
+  //       new SearchFilterManager(options, setOptions, updateQueryParams, formRef),
+  //     [updateQueryParams, formRef, options],
+  //   //   );
+  console.log("totalChecked => ", totalChecked);
 
   function initializeOptions(
     initialFilterOptions: FilterOption[],
@@ -32,6 +41,8 @@ function useSearchFilter(
     const initialParamsSet = new Set(
       initialQueryParams ? initialQueryParams.split(",") : [],
     );
+
+    setTotalChecked(initialParamsSet.size);
     return initialFilterOptions.map((option) => ({
       ...option,
       isChecked: initialParamsSet.has(option.value),
@@ -108,12 +119,9 @@ function useSearchFilter(
   }>(initialSelectionStates.isSectionNoneSelected);
 
   const [checkedTotal, setCheckedTotal] = useState<number>(0);
-  const incrementTotal = () => {
-    setCheckedTotal(checkedTotal + 1);
-  };
-  const decrementTotal = () => {
-    setCheckedTotal(checkedTotal - 1);
-  };
+
+  const incrementTotal = () => setCheckedTotal(checkedTotal + 1);
+  const decrementTotal = () => setCheckedTotal(checkedTotal - 1);
 
   const [mounted, setMounted] = useState<boolean>(false);
   useEffect(() => {
@@ -207,7 +215,7 @@ function useSearchFilter(
         );
 
         updateSelectionStates(newOptions, sectionId);
-
+            
         debouncedUpdateQueryParams();
         return newOptions;
       });
@@ -238,6 +246,10 @@ function useSearchFilter(
         debouncedUpdateQueryParams();
         return newOptions;
       });
+
+      setTotalChecked((prevCount) => {
+        return isChecked ? prevCount + 1 : prevCount - 1;
+      });
     },
     [debouncedUpdateQueryParams, updateSelectionStates],
   );
@@ -258,7 +270,8 @@ function useSearchFilter(
     isNoneSelected,
     isSectionAllSelected,
     isSectionNoneSelected,
+    totalChecked,
   };
 }
 
-export default useSearchFilter;
+export default useSearchFilterAccordion;

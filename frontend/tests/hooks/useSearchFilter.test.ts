@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { FilterOption } from "../../src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import useSearchFilter from "../../src/hooks/useSearchFilter";
+import useSearchFilter from "../../src/hooks/useSearchFilterAccordion";
 
 jest.mock("../../src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
