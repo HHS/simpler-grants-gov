@@ -2,7 +2,7 @@
 
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
-import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";

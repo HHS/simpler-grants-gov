@@ -9,7 +9,7 @@ import {
 } from "../../types/search/searchRequestTypes";
 
 import BaseApi from "./BaseApi";
-import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {

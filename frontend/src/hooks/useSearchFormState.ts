@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchAPIResponse } from "../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "../services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
 import { updateResults } from "../app/search/actions";
 import { useFormState } from "react-dom";
 import { useRef } from "react";

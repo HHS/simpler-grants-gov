@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 // import ReactDOM from "react-dom";
 import { SearchAPIResponse } from "../../src/types/search/searchResponseTypes";
-import { SearchFetcherProps } from "../../src/services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "../../src/services/search/searchfetcher/SearchFetcher";
 import { renderHook } from "@testing-library/react";
 import { useSearchFormState } from "../../src/hooks/useSearchFormState";
 

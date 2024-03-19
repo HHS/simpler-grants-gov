@@ -1,4 +1,4 @@
-import { SearchFetcherProps } from "../../src/services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "../../src/services/search/searchfetcher/SearchFetcher";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
 import { SearchRequestBody } from "../../src/types/search/searchRequestTypes";
 

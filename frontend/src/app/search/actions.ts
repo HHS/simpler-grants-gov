@@ -3,8 +3,7 @@
 
 import { FormDataService } from "../../services/search/FormDataService";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
-import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
+import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 
 // Gets MockSearchFetcher or APISearchFetcher based on environment variable
 const searchFetcher = getSearchFetcher();
@@ -15,7 +14,7 @@ export async function updateResults(
   formData: FormData,
 ): Promise<SearchAPIResponse> {
   const formDataService = new FormDataService(formData);
-  const searchProps: SearchFetcherProps = formDataService.processFormData();
+  const searchProps = formDataService.processFormData();
 
   return await searchFetcher.fetchOpportunities(searchProps);
 }

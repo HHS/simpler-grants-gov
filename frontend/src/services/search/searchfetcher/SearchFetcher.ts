@@ -1,6 +1,6 @@
 import "server-only";
 
-import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
+import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
 
 export interface SearchFetcherProps {
   page: number;

@@ -1,5 +1,5 @@
-import { SearchFetcherProps } from "../services/searchfetcher/SearchFetcher";
-import { ServerSideSearchParams } from "../types/requestURLTypes";
+import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
+import { ServerSideSearchParams } from "../types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.

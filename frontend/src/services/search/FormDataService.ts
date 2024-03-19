@@ -1,4 +1,4 @@
-import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
+import { SearchFetcherProps } from "./searchfetcher/SearchFetcher";
 
 export class FormDataService {
   formData: FormData;

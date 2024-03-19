@@ -900,6 +900,10 @@ components:
           enum:
           - opportunity_id
           - opportunity_number
+          - opportunity_title
+          - post_date
+          - close_date
+          - agency_code
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending

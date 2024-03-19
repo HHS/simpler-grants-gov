@@ -1,4 +1,5 @@
 import dataclasses
+from datetime import date
 from enum import IntEnum
 
 import pytest
@@ -14,7 +15,7 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from tests.src.db.models import factories
+from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     LinkOpportunitySummaryApplicantTypeFactory,
@@ -250,18 +251,9 @@ def validate_assistance_listings(
             get_search_request(page_offset=100, page_size=5),
             SearchExpectedValues(total_pages=2, total_records=10, response_record_count=0),
         ),
-        # Sorting
-        (
-            get_search_request(order_by="opportunity_id", sort_direction="ascending"),
-            SearchExpectedValues(total_pages=2, total_records=10, response_record_count=5),
-        ),
-        (
-            get_search_request(order_by="opportunity_number", sort_direction="descending"),
-            SearchExpectedValues(total_pages=2, total_records=10, response_record_count=5),
-        ),
     ],
 )
-def test_opportunity_search_paging_and_sorting_200(
+def test_opportunity_search_paging_200(
     client,
     api_auth_token,
     enable_factory_create,
@@ -269,7 +261,7 @@ def test_opportunity_search_paging_and_sorting_200(
     expected_values,
     truncate_opportunities,
 ):
-    # This test is just focused on testing the sorting and pagination
+    # This test is just focused on testing the pagination
     OpportunityFactory.create_batch(size=10)
 
     resp = client.post(
@@ -280,6 +272,150 @@ def test_opportunity_search_paging_and_sorting_200(
     assert resp.status_code == 200
 
     validate_search_pagination(search_response, search_request, expected_values)
+
+
+def setup_pagination_scenario(
+    opportunity_id: int,
+    opportunity_number: str,
+    opportunity_title: str,
+    post_date: date,
+    close_date: date | None,
+    agency: str,
+) -> None:
+    opportunity = OpportunityFactory.create(
+        opportunity_id=opportunity_id,
+        opportunity_number=opportunity_number,
+        opportunity_title=opportunity_title,
+        agency=agency,
+        no_current_summary=True,
+    )
+
+    opportunity_summary = OpportunitySummaryFactory.create(
+        opportunity=opportunity, post_date=post_date, close_date=close_date
+    )
+
+    CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        opportunity_summary=opportunity_summary,
+    )
+
+
+class TestSearchPagination(BaseTestClass):
+    @pytest.fixture(scope="class")
+    def setup_scenarios(self, truncate_opportunities, enable_factory_create):
+        setup_pagination_scenario(
+            opportunity_id=1,
+            opportunity_number="dddd",
+            opportunity_title="zzzz",
+            post_date=date(2024, 3, 1),
+            close_date=None,
+            agency="mmmm",
+        )
+        setup_pagination_scenario(
+            opportunity_id=2,
+            opportunity_number="eeee",
+            opportunity_title="yyyy",
+            post_date=date(2024, 2, 1),
+            close_date=date(2024, 12, 1),
+            agency="nnnn",
+        )
+        setup_pagination_scenario(
+            opportunity_id=3,
+            opportunity_number="aaaa",
+            opportunity_title="wwww",
+            post_date=date(2024, 5, 1),
+            close_date=date(2024, 11, 1),
+            agency="llll",
+        )
+        setup_pagination_scenario(
+            opportunity_id=4,
+            opportunity_number="bbbb",
+            opportunity_title="uuuu",
+            post_date=date(2024, 4, 1),
+            close_date=date(2024, 10, 1),
+            agency="kkkk",
+        )
+        setup_pagination_scenario(
+            opportunity_id=5,
+            opportunity_number="cccc",
+            opportunity_title="xxxx",
+            post_date=date(2024, 1, 1),
+            close_date=date(2024, 9, 1),
+            agency="oooo",
+        )
+
+    @pytest.mark.parametrize(
+        "search_request,expected_order",
+        [
+            ### These various scenarios are setup so that the order will be different depending on the field
+            ### See the set values in the above setup method
+            # Opportunity ID
+            (
+                get_search_request(order_by="opportunity_id", sort_direction="ascending"),
+                [1, 2, 3, 4, 5],
+            ),
+            (
+                get_search_request(order_by="opportunity_id", sort_direction="descending"),
+                [5, 4, 3, 2, 1],
+            ),
+            # Opportunity number
+            (
+                get_search_request(order_by="opportunity_number", sort_direction="ascending"),
+                [3, 4, 5, 1, 2],
+            ),
+            (
+                get_search_request(order_by="opportunity_number", sort_direction="descending"),
+                [2, 1, 5, 4, 3],
+            ),
+            # Opportunity title
+            (
+                get_search_request(order_by="opportunity_title", sort_direction="ascending"),
+                [4, 3, 5, 2, 1],
+            ),
+            (
+                get_search_request(order_by="opportunity_title", sort_direction="descending"),
+                [1, 2, 5, 3, 4],
+            ),
+            # Post date
+            (get_search_request(order_by="post_date", sort_direction="ascending"), [5, 2, 1, 4, 3]),
+            (
+                get_search_request(order_by="post_date", sort_direction="descending"),
+                [3, 4, 1, 2, 5],
+            ),
+            # Close date
+            # note that opportunity id 1's value is null which always goes to the end regardless of direction
+            (
+                get_search_request(order_by="close_date", sort_direction="ascending"),
+                [5, 4, 3, 2, 1],
+            ),
+            (
+                get_search_request(order_by="close_date", sort_direction="descending"),
+                [2, 3, 4, 5, 1],
+            ),
+            # Agency
+            (
+                get_search_request(order_by="agency_code", sort_direction="ascending"),
+                [4, 3, 1, 2, 5],
+            ),
+            (
+                get_search_request(order_by="agency_code", sort_direction="descending"),
+                [5, 2, 1, 3, 4],
+            ),
+        ],
+    )
+    def test_opportunity_sorting_200(
+        self, client, api_auth_token, search_request, expected_order, setup_scenarios
+    ):
+        resp = client.post(
+            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        search_response = resp.get_json()
+        assert resp.status_code == 200
+
+        returned_opportunity_ids = [record["opportunity_id"] for record in search_response["data"]]
+
+        assert returned_opportunity_ids == expected_order
 
 
 #####################################
@@ -406,7 +542,7 @@ def setup_opportunity(
             [
                 {
                     "field": "pagination.order_by",
-                    "message": "Value must be one of: opportunity_id, opportunity_number",
+                    "message": "Value must be one of: opportunity_id, opportunity_number, opportunity_title, post_date, close_date, agency_code",
                     "type": "invalid_choice",
                 },
                 {
@@ -478,7 +614,7 @@ def test_opportunity_search_invalid_request_422(
     assert response_data == expected_response_data
 
 
-class TestSearchScenarios:
+class TestSearchScenarios(BaseTestClass):
     """
     Group the scenario tests in a class for performance. As the setup for these
     tests is slow, but can be shared across all of them, initialize them once
@@ -486,26 +622,7 @@ class TestSearchScenarios:
     """
 
     @pytest.fixture(scope="class")
-    def db_session(self, db_client, monkeypatch_class):
-        # Note this shadows the db_session fixture for tests in this class
-        with db_client.get_session() as db_session:
-            # Set the factories DB session. This is what would normally be done with
-            # the "enable_factory_create" fixture, but for the class level
-            monkeypatch_class.setattr(factories, "_db_session", db_session)
-
-            yield db_session
-
-    @pytest.fixture(scope="class")
-    def truncate_db(self, db_session):
-        opportunities = db_session.query(Opportunity).all()
-        for opp in opportunities:
-            db_session.delete(opp)
-
-        # Force the deletes to the DB
-        db_session.commit()
-
-    @pytest.fixture(scope="class")
-    def setup_scenarios(self, truncate_db):
+    def setup_scenarios(self, truncate_opportunities, enable_factory_create):
         # Won't be returned ever because it's a draft opportunity
         setup_opportunity(Scenario.DRAFT_OPPORTUNITY, is_draft=True)
 
