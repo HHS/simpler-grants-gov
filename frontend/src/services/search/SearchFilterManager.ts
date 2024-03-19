@@ -6,6 +6,8 @@ type UpdateQueryParamsFunction = (
   queryParamKey: QueryParamKey,
 ) => void;
 
+// TODO (Issue #1491): explore setting up a more maintanable class to manage checked state
+// (This file is not currently being used though - just a placeholder for the meantime)
 export default class SearchFilterManager {
   options: FilterOption[];
   setOptions: React.Dispatch<React.SetStateAction<FilterOption[]>>;
