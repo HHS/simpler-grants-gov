@@ -1,14 +1,14 @@
 "use client";
 
-import { ConvertedSearchParams } from "../types/searchRequestURLTypes";
-import { SearchAPIResponse } from "../types/searchTypes";
+import { SearchAPIResponse } from "../types/search/searchResponseTypes";
+import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
 import { updateResults } from "../app/search/actions";
 import { useFormState } from "react-dom";
 import { useRef } from "react";
 
 export function useSearchFormState(
   initialSearchResults: SearchAPIResponse,
-  requestURLQueryParams: ConvertedSearchParams,
+  requestURLQueryParams: SearchFetcherProps,
 ) {
   const [searchResults, updateSearchResultsAction] = useFormState(
     updateResults,
@@ -16,11 +16,11 @@ export function useSearchFormState(
   );
 
   const formRef = useRef(null);
+  const queryQueryParams = requestURLQueryParams.query as string;
+  const sortbyQueryParams = requestURLQueryParams.sortby as string;
 
   const {
     status: statusQueryParams,
-    query: queryQueryParams,
-    sortby: sortbyQueryParams,
     page: pageQueryParams,
     agency: agencyQueryParams,
     fundingInstrument: fundingInstrumentQueryParams,
@@ -28,8 +28,9 @@ export function useSearchFormState(
 
   // TODO: move this to server-side calculation?
   const maxPaginationError =
+    searchResults.pagination_info.total_pages > 0 &&
     searchResults.pagination_info.page_offset >
-    searchResults.pagination_info.total_pages;
+      searchResults.pagination_info.total_pages;
 
   return {
     searchResults,

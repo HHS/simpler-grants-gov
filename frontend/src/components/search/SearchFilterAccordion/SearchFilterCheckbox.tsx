@@ -9,6 +9,7 @@ interface SearchFilterCheckboxProps {
   decrement: () => void;
   mounted: boolean;
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
+  accordionTitle: string;
 }
 
 const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
@@ -17,6 +18,7 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
   decrement,
   mounted,
   updateCheckedOption,
+  accordionTitle,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
@@ -24,11 +26,14 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
     updateCheckedOption(option.id, checked);
   };
 
+  const getNameAttribute = () =>
+    accordionTitle === "Agency" ? `agency-${option.id}` : option.id;
+
   return (
     <FilterCheckbox
       id={option.id}
       label={option.label}
-      name={option.id} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
+      name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
       disabled={!mounted}
       checked={option.isChecked === true}

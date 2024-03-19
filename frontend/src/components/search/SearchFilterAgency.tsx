@@ -4,7 +4,7 @@ import { SearchFilterAccordion } from "src/components/search/SearchFilterAccordi
 import { agencyFilterList } from "./SearchFilterAccordion/filterJSONLists/agencyFilterList";
 
 export interface SearchFilterAgencyProps {
-  initialQueryParams: string;
+  initialQueryParams: Set<string>;
   formRef: React.RefObject<HTMLFormElement>;
 }
 
