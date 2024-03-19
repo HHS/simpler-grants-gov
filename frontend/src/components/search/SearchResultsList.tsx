@@ -20,6 +20,21 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
     return <Loading />;
   }
 
+  if (searchResults.length === 0) {
+    return (
+      <div>
+        <h2>Your search did not return any results.</h2>
+        <p>Select at least one status.</p>
+        <ul>
+          <li>{"Check any terms you've entered for typos"}</li>
+          <li>Try different keywords</li>
+          <li>{"Make sure you've selected the right statuses"}</li>
+          <li>Try resetting filters or selecting fewer options</li>
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <ul className="usa-list--unstyled">
       {/* TODO #1485: show proper USWDS error  */}
