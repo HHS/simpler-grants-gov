@@ -1,7 +1,7 @@
 "use client";
 
 import { ConvertedSearchParams } from "../../types/requestURLTypes";
-import { SearchAPIResponse } from "../../types/searchTypes";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";

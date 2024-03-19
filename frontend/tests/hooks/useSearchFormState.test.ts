@@ -1,7 +1,7 @@
 import { ConvertedSearchParams } from "../../src/types/requestURLTypes";
 import ReactDOM from "react-dom";
 // import ReactDOM from "react-dom";
-import { SearchAPIResponse } from "../../src/types/searchTypes";
+import { SearchAPIResponse } from "../../src/types/search/searchResponseTypes";
 import { renderHook } from "@testing-library/react";
 import { useSearchFormState } from "../../src/hooks/useSearchFormState";
 

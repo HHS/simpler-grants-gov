@@ -24,7 +24,7 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
         className="usa-input maxw-none"
         id="search-field"
         type="search"
-        name="search-text-input"
+        name="query"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />

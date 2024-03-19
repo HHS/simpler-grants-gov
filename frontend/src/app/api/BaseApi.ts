@@ -4,7 +4,7 @@
 // https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
-import { SearchAPIResponse } from "../../types/searchTypes";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";

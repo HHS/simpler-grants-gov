@@ -1,7 +1,8 @@
 // All exports in this file are server actions
 "use server";
 
-import { SearchAPIResponse } from "../../types/searchTypes";
+import { FormDataService } from "../../services/search/FormDataService";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
 import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
 
@@ -14,13 +15,9 @@ export async function updateResults(
   formData: FormData,
 ): Promise<SearchAPIResponse> {
   console.log("formData => ", formData);
-  const pageValue = formData.get("currentPage");
-  const page = pageValue ? parseInt(pageValue as string, 10) : 1;
-  const safePage = !isNaN(page) && page > 0 ? page : 1;
 
-  const searchProps: SearchFetcherProps = {
-    page: safePage,
-  };
-
+  const formDataService = new FormDataService(formData);
+  const searchProps: SearchFetcherProps = formDataService.processFormData();
+  console.log("searchProps => ", searchProps);
   return await searchFetcher.fetchOpportunities(searchProps);
 }

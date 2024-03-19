@@ -1,5 +1,6 @@
-import { JSONRequestBody } from "../../src/app/api/BaseApi";
+import { SearchFetcherProps } from "../../src/services/searchfetcher/SearchFetcher";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
+import { SearchRequestBody } from "../../src/types/search/searchRequestTypes";
 
 // mockFetch should match the SearchAPIResponse type structure
 const mockFetch = ({
@@ -46,19 +47,37 @@ describe("SearchOpportunityAPI", () => {
     });
 
     it("sends POST request to search opportunities endpoint with query parameters", async () => {
-      // Call the function under test
-      const response = await searchApi.searchOpportunities();
+      const searchProps: SearchFetcherProps = {
+        page: 1,
+        status: new Set(["forecasted", "posted"]),
+        fundingInstrument: new Set(["grant", "cooperative_agreement"]),
+        agency: new Set(),
+        query: "research",
+        sortby: "opportunityNumberAsc",
+      };
+
+      const response = await searchApi.searchOpportunities(searchProps);
 
       const method = "POST";
       const headers = baseRequestHeaders;
 
-      const body: JSONRequestBody = {
+      const requestBody: SearchRequestBody = {
         pagination: {
           order_by: "opportunity_id",
           page_offset: 1,
           page_size: 25,
           sort_direction: "ascending",
         },
+        // Filters key comes after pagination to match the expected order
+        filters: {
+          opportunity_status: {
+            one_of: Array.from(searchProps.status),
+          },
+          funding_instrument: {
+            one_of: Array.from(searchProps.fundingInstrument),
+          },
+        },
+        query: searchProps.query || "",
       };
 
       const expectedUrl = `${searchApi.version}${searchApi.basePath}/${searchApi.namespace}/search`;
@@ -68,7 +87,7 @@ describe("SearchOpportunityAPI", () => {
         expect.objectContaining({
           method,
           headers,
-          body: JSON.stringify(body),
+          body: JSON.stringify(requestBody),
         }),
       );
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { FilterOption } from "../components/search/SearchFilterAccordion/SearchFilterAccordion";
-import { QueryParamKey } from "../types/searchTypes";
+import { QueryParamKey } from "../types/search/searchResponseTypes";
 import { useDebouncedCallback } from "use-debounce";
 import { useSearchParamUpdater } from "./useSearchParamUpdater";
 

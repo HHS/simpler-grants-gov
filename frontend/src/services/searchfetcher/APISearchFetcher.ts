@@ -2,7 +2,7 @@ import "server-only";
 
 import { SearchFetcher, SearchFetcherProps } from "./SearchFetcher";
 
-import { SearchAPIResponse } from "../../types/searchTypes";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchOpportunityAPI from "../../app/api/SearchOpportunityAPI";
 
 export class APISearchFetcher extends SearchFetcher {
@@ -13,14 +13,14 @@ export class APISearchFetcher extends SearchFetcher {
     this.searchApi = new SearchOpportunityAPI();
   }
 
-  async fetchOpportunities({
-    page,
-  }: SearchFetcherProps): Promise<SearchAPIResponse> {
+  async fetchOpportunities(
+    searchInputs: SearchFetcherProps,
+  ): Promise<SearchAPIResponse> {
     try {
       // Keep commented in case we need to simulate a delay to test loaders
       //  await new Promise((resolve) => setTimeout(resolve, 1250));
 
-      const response = await this.searchApi.searchOpportunities(page);
+      const response = await this.searchApi.searchOpportunities(searchInputs);
       if (!response.data) {
         throw new Error(`No data returned from API`);
       }

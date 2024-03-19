@@ -1,5 +1,5 @@
 import { Accordion } from "@trussworks/react-uswds";
-import { QueryParamKey } from "../../../types/searchTypes";
+import { QueryParamKey } from "../../../types/search/searchResponseTypes";
 import SearchFilterCheckbox from "./SearchFilterCheckbox";
 import SearchFilterSection from "./SearchFilterSection/SearchFilterSection";
 import SearchFilterToggleAll from "./SearchFilterToggleAll";
@@ -84,6 +84,7 @@ export function SearchFilterAccordion({
                 mounted={mounted}
                 updateCheckedOption={toggleOptionChecked}
                 toggleSelectAll={toggleSelectAll}
+                accordionTitle={title}
               />
             ) : (
               <SearchFilterCheckbox
@@ -92,6 +93,7 @@ export function SearchFilterAccordion({
                 decrement={decrementTotal}
                 mounted={mounted}
                 updateCheckedOption={toggleOptionChecked}
+                accordionTitle={title}
               />
             )}
           </li>

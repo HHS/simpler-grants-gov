@@ -1,6 +1,6 @@
 import "server-only";
 
-import { SearchAPIResponse } from "../../types/searchTypes";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import { SearchFetcher } from "./SearchFetcher";
 import mockData from "../../app/api/mock/APIMockResponse.json";
 
