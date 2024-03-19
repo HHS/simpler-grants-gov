@@ -1,7 +1,7 @@
-import { ConvertedSearchParams } from "../../src/types/requestURLTypes";
 import ReactDOM from "react-dom";
 // import ReactDOM from "react-dom";
 import { SearchAPIResponse } from "../../src/types/search/searchResponseTypes";
+import { SearchFetcherProps } from "../../src/services/searchfetcher/SearchFetcher";
 import { renderHook } from "@testing-library/react";
 import { useSearchFormState } from "../../src/hooks/useSearchFormState";
 
@@ -30,13 +30,13 @@ jest.mock("react-dom", () => {
   };
 });
 describe("useSearchFormState", () => {
-  const mockRequestURLQueryParams: ConvertedSearchParams = {
-    status: "open",
+  const mockRequestURLQueryParams: SearchFetcherProps = {
+    status: new Set(["open"]),
     query: "",
     sortby: "date",
     page: 1,
-    agency: "NASA",
-    fundingInstrument: "grant",
+    agency: new Set(["NASA"]),
+    fundingInstrument: new Set(["grant"]),
   };
 
   it("initializes with the correct search results", () => {

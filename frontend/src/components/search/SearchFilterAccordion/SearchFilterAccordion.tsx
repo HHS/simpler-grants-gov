@@ -26,7 +26,7 @@ export interface FilterOption {
 interface SearchFilterAccordionProps {
   initialFilterOptions: FilterOption[];
   title: string; // Title in header of accordion
-  initialQueryParams: Set<string>; 
+  initialQueryParams: Set<string>;
   queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
   formRef: React.RefObject<HTMLFormElement>;
 }

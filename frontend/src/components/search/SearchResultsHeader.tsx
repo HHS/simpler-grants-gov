@@ -18,7 +18,10 @@ const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
       <div>
         <h2>{searchResultsLength} Opportunities</h2>
       </div>
-      <SearchSortyBy formRef={formRef} initialQueryParams={initialQueryParams} />
+      <SearchSortyBy
+        formRef={formRef}
+        initialQueryParams={initialQueryParams}
+      />
     </>
   );
 };
