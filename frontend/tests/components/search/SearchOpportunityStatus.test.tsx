@@ -32,7 +32,10 @@ describe("SearchOpportunityStatus", () => {
 
   it("passes accessibility scan", async () => {
     const { container } = render(
-      <SearchOpportunityStatus formRef={formRef} initialQueryParams="" />,
+      <SearchOpportunityStatus
+        formRef={formRef}
+        initialQueryParams={new Set()}
+      />,
     );
     const results = await axe(container);
 
@@ -40,7 +43,14 @@ describe("SearchOpportunityStatus", () => {
   });
 
   it("component renders with checkboxes", () => {
-    render(<SearchOpportunityStatus formRef={formRef} initialQueryParams="" />);
+    render(
+      <SearchOpportunityStatus
+        formRef={formRef}
+        initialQueryParams={
+          new Set(["forecasted", "posted", "closed", "archived"])
+        }
+      />,
+    );
 
     expect(screen.getByText("Forecasted")).toBeEnabled();
     expect(screen.getByText("Posted")).toBeEnabled();

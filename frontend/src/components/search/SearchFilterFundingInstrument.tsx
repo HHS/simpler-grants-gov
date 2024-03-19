@@ -6,7 +6,7 @@ import {
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export interface SearchFilterFundingInstrumentProps {
-  initialQueryParams: string;
+  initialQueryParams: Set<string>;
   formRef: React.RefObject<HTMLFormElement>;
 }
 

@@ -11,10 +11,10 @@ export interface ServerSideSearchParams {
 // Converted search param types
 // IE... query becomes a string, page becomes a number
 export interface ConvertedSearchParams {
+  page: number;
   query: string;
   sortby: string;
   status: string;
-  page: number;
   agency: string;
   fundingInstrument: string;
 }

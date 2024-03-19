@@ -1,8 +1,8 @@
 "use client";
 
-import { ConvertedSearchParams } from "../../types/requestURLTypes";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
+import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
@@ -13,7 +13,7 @@ import { useSearchFormState } from "../../hooks/useSearchFormState";
 
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
-  requestURLQueryParams: ConvertedSearchParams;
+  requestURLQueryParams: SearchFetcherProps;
 }
 
 export function SearchForm({
@@ -62,7 +62,7 @@ export function SearchForm({
                 searchResultsLength={
                   searchResults.pagination_info.total_records
                 }
-                initialSortBy={sortbyQueryParams}
+                initialQueryParams={sortbyQueryParams}
               />
               <SearchPagination
                 initialQueryParams={pageQueryParams}

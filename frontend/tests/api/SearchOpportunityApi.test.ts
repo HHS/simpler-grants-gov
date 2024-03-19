@@ -63,12 +63,11 @@ describe("SearchOpportunityAPI", () => {
 
       const requestBody: SearchRequestBody = {
         pagination: {
-          order_by: "opportunity_id",
+          order_by: "opportunity_number", // This should be the actual value being used in the API method
           page_offset: 1,
           page_size: 25,
-          sort_direction: "ascending",
+          sort_direction: "ascending", // or "descending" based on your sortby parameter
         },
-        // Filters key comes after pagination to match the expected order
         filters: {
           opportunity_status: {
             one_of: Array.from(searchProps.status),
@@ -95,6 +94,8 @@ describe("SearchOpportunityAPI", () => {
         data: [],
         message: "Success",
         pagination_info: {
+          // TODO: the response order_by should
+          // by what the request had: opportunity_number
           order_by: "opportunity_id",
           page_offset: 1,
           page_size: 25,

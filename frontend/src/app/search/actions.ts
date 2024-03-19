@@ -14,10 +14,9 @@ export async function updateResults(
   prevState: SearchAPIResponse,
   formData: FormData,
 ): Promise<SearchAPIResponse> {
-  console.log("formData => ", formData);
 
   const formDataService = new FormDataService(formData);
   const searchProps: SearchFetcherProps = formDataService.processFormData();
-  console.log("searchProps => ", searchProps);
+
   return await searchFetcher.fetchOpportunities(searchProps);
 }

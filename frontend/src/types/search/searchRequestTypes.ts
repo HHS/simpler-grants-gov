@@ -4,11 +4,13 @@ export interface SearchFilterRequestBody {
   funding_instrument?: { one_of: string[] };
 }
 
+export type PaginationOrderBy = "opportunity_id" | "opportunity_number";
+export type PaginationSortDirection = "ascending" | "descending";
 export interface PaginationRequestBody {
-  order_by: string;
+  order_by: PaginationOrderBy;
   page_offset: number;
   page_size: number;
-  sort_direction: "ascending" | "descending";
+  sort_direction: PaginationSortDirection;
 }
 
 export type SearchRequestBody = {

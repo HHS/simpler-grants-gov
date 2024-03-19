@@ -1,7 +1,9 @@
 import "server-only";
 
 import {
+  PaginationOrderBy,
   PaginationRequestBody,
+  PaginationSortDirection,
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "../../types/search/searchRequestTypes";
@@ -40,7 +42,6 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody.query = query;
     }
 
-    console.log("request Boyd => ", requestBody);
     const subPath = "search";
     const response = await this.request(
       "POST",
@@ -79,12 +80,36 @@ export default class SearchOpportunityAPI extends BaseApi {
     searchInputs: SearchFetcherProps,
   ): PaginationRequestBody {
     const { sortby, page } = searchInputs;
+
+    // TODO: 3/18/24 - API only allows id or number right now
+    // Will need to change these two valid values
+    const orderByFieldLookup = {
+      opportunityNumber: "opportunity_number",
+      opportunityTitle: "opportunity_number",
+      agency: "opportunity_id",
+      postedDate: "opportunity_id",
+      closeDate: "opportunity_id",
+    };
+
+    let order_by: PaginationOrderBy = "opportunity_id";
+    if (sortby) {
+      for (const [key, value] of Object.entries(orderByFieldLookup)) {
+        if (sortby.startsWith(key)) {
+          order_by = value as PaginationOrderBy;
+          break; // Stop searching after the first match is found
+        }
+      }
+    }
+
+    const sort_direction: PaginationSortDirection = sortby?.endsWith("Desc")
+      ? "descending"
+      : "ascending";
+
     return {
-      //   order_by: sortby || "opportunity_id",
-      order_by: "opportunity_id",
+      order_by,
       page_offset: page,
       page_size: 25,
-      sort_direction: sortby?.endsWith("Desc") ? "descending" : "ascending", // ensure string literal is returned
+      sort_direction,
     };
   }
 }

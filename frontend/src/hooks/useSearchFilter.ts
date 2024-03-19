@@ -15,7 +15,7 @@ import { useSearchParamUpdater } from "./useSearchParamUpdater";
 // (Does not cover opportunity status checkbox logic)
 function useSearchFilter(
   initialFilterOptions: FilterOption[],
-  initialQueryParams: string,
+  initialQueryParams: Set<string>,
   queryParamKey: QueryParamKey, // agency, fundingInstrument, eligibility, or category
   formRef: React.RefObject<HTMLFormElement>,
 ) {
@@ -25,19 +25,15 @@ function useSearchFilter(
 
   function initializeOptions(
     initialFilterOptions: FilterOption[],
-    initialQueryParams: string | null,
+    initialQueryParams: Set<string>,
   ) {
-    // convert the request URL query params to a set
-    const initialParamsSet = new Set(
-      initialQueryParams ? initialQueryParams.split(",") : [],
-    );
     return initialFilterOptions.map((option) => ({
       ...option,
-      isChecked: initialParamsSet.has(option.value),
+      isChecked: initialQueryParams.has(option.value),
       children: option.children
         ? option.children.map((child) => ({
             ...child,
-            isChecked: initialParamsSet.has(child.value),
+            isChecked: initialQueryParams.has(child.value),
           }))
         : undefined,
     }));
