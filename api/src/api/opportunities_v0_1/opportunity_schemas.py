@@ -283,7 +283,15 @@ class OpportunitySearchRequestSchema(Schema):
 
     pagination = fields.Nested(
         generate_pagination_schema(
-            "OpportunityPaginationSchema", ["opportunity_id", "opportunity_number"]
+            "OpportunityPaginationSchema",
+            [
+                "opportunity_id",
+                "opportunity_number",
+                "opportunity_title",
+                "post_date",
+                "close_date",
+                "agency_code",
+            ],
         ),
         required=True,
     )
