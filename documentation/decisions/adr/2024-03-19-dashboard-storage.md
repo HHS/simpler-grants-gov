@@ -46,55 +46,41 @@ All of these options should be evaluated for 0 - 6 months, 6 months - 2 years, 2
 
 AWS S3 is a file storage system, traditionally used to store data in the form of individual documents. S3 is best for storing data types formatted as individual documents, or data types where all of the relevant data can be stored within a single file. Due to that, S3 becomes non-ideal for anything in the millions of records, particularly when those records are split up across multiple files. S3 is best in a business intelligence context when used with small datasets, such as our GitHub data. Large data sets require a query layer to be integrated into S3, a query layer like AWS Athena or AWS Redshift. For large enough data sizes, performance starts to become the key issue with S3.
 
-Data is hosted in S3 at $0.023 per GB-month
+[Data is hosted in S3 at $0.023 per GB-month](https://aws.amazon.com/s3/pricing/).
 
-- **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
+At 0 - 6 months, S3 is a reasonable choice due to our small data sizes. Past that point, performance issues with large data sizes make S3 a non-ideal choice.
+
+At 2 - 5 years, S3's performance issues require the introduction of another query / compute layer like AWS Athena or AWS Redshift.
 
 ### Redshift
 
-AWS Redshift is a Postgres-based data warehouse that you can use to store large data sets. Redshift is optimized for OLAP queries, which makes it an ideal choice for analyzing business analytics data. 
+AWS Redshift is a Postgres-based data warehouse that you can use to store large data sets. Redshift is optimized for OLAP queries, which makes it an ideal choice for analyzing business analytics data. To query CSV data in Redshift, you must first upload it to S3 and then into Redshift, which makes Redshift feel like a "query layer" for S3. 
 
-Data is hosted in Redshift at $0.024 per GB-month, essentially the same price as S3.
+[Data is hosted in Redshift at $0.024 per GB-month](https://aws.amazon.com/redshift/pricing/), essentially the same price as S3.
 
-- **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
+At 0 - 6 months, Redshift loses to S3 due to S3 being vastly easier to set up and configure.
+
+At 6 months - 2 years, Redshift starts to beat S3 as the initial setup cost has already been paid, and Redshift will start to show performance advantages relative to S3.
+
+At 2 - 5 years, performance bottle-necks with S3 mean that Redshift easily wins any comparison.
 
 ### Postgres
 
 Postgres, as hosted by AWS RDS, is a SQL database that you can use to store large data sets. Many of the characteristics that apply to Redshift apply to Postgres, with the caveat that Postgres is not built for business intelligence use cases.
 
-Data is hosted in Postgres at $0.115 per GB-month, higher than S3 and Redshift.
+[Data is hosted in Postgres at $0.115 per GB-month](https://aws.amazon.com/rds/postgresql/pricing/), higher than S3 and Redshift.
 
-- **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
+In every time range, Postgres loses to Redshift due to Postgres being an OLTP database built for real-time data processing. In the 2 - 5 year range, Postgres also loses due to its high GB-month hosting cost.
 
 ### Snowflake
 
-Snowflake is a data warehouse that is traditionally used to store big data for processing and analytics. Snowflake is a third-party data hosting platform, and does not have an AWS-native deployment solution. 
+Snowflake is a data warehouse that is traditionally used to store big data for processing and analytics. Snowflake is a third-party data hosting platform and does not have an AWS-native deployment solution. Deploying Snowflake would require us to either self-host the database or build the infrastructure to connect our systems with an externally managed service. Similarly to Redshift, Snowflake is an OLAP optimized data warehouse, that is well-designed for business analytics queries.
 
-- **Pros**
-  - Good, because {argument a}
-  - Good, because {argument b}
-  - ...
-- **Cons**
-  - Bad, because {argument c}
-  - ...
+At 0 - 6 months, Snowflake loses to Redshift due to Redshift being vastly easier to set up and configure.
+
+At 6 months - 2 years, Snowflake and Redshift are essentially identical solutions.
+
+At 2 - 5 years, Snowflake may start to show cost and performance advantages relative to Redshift. Hard evidence to back this up is hard to come by, though.
 
 ## Decision Outcome
 
