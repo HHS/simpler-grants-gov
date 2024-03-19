@@ -2,6 +2,12 @@ import { FilterOption } from "../SearchFilterAccordion";
 
 export const agencyFilterList: FilterOption[] = [
   {
+    // Required to see results from locally seeded db
+    id: "US-ABC",
+    label: "ABC demo to see results",
+    value: "US-ABC",
+  },
+  {
     id: "ARPAH",
     label: "All Advanced Research Projects Agency for Health [ARPAH]",
     value: "ARPAH",
