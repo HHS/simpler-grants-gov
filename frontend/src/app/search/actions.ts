@@ -2,8 +2,8 @@
 "use server";
 
 import { SearchAPIResponse } from "../../types/searchTypes";
-import { SearchFetcherProps } from "../../services/searchfetcher/SearchFetcher";
-import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 
 // Gets MockSearchFetcher or APISearchFetcher based on environment variable
 const searchFetcher = getSearchFetcher();

@@ -2,8 +2,8 @@ import "server-only";
 
 import { SearchFetcher, SearchFetcherProps } from "./SearchFetcher";
 
-import { SearchAPIResponse } from "../../types/searchTypes";
-import SearchOpportunityAPI from "../../app/api/SearchOpportunityAPI";
+import { SearchAPIResponse } from "../../../types/searchTypes";
+import SearchOpportunityAPI from "../../../app/api/SearchOpportunityAPI";
 
 export class APISearchFetcher extends SearchFetcher {
   private searchApi: SearchOpportunityAPI;

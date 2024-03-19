@@ -1,7 +1,7 @@
 import {
   ConvertedSearchParams,
   ServerSideSearchParams,
-} from "../types/requestURLTypes";
+} from "../types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.

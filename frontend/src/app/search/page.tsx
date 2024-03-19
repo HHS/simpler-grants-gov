@@ -1,7 +1,7 @@
 import {
   ServerSideRouteParams,
   ServerSideSearchParams,
-} from "../../types/requestURLTypes";
+} from "../../types/searchRequestURLTypes";
 
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
 import PageSEO from "src/components/PageSEO";
@@ -10,7 +10,7 @@ import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
 import { convertSearchParamsToProperTypes } from "../../utils/convertSearchParamsToStrings";
 import { cookies } from "next/headers";
-import { getSearchFetcher } from "../../services/searchfetcher/SearchFetcherUtil";
+import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
 const searchFetcher = getSearchFetcher();
