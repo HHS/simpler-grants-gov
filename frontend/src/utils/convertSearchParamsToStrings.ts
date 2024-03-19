@@ -25,5 +25,5 @@ function paramToSet(param: string | string[] | undefined): Set<string> {
   if (Array.isArray(param)) {
     return new Set(param);
   }
-  return new Set([param]);
+  return new Set(param.split(","));
 }

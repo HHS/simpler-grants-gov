@@ -28,8 +28,9 @@ export function useSearchFormState(
 
   // TODO: move this to server-side calculation?
   const maxPaginationError =
+    searchResults.pagination_info.total_pages > 0 &&
     searchResults.pagination_info.page_offset >
-    searchResults.pagination_info.total_pages;
+      searchResults.pagination_info.total_pages;
 
   return {
     searchResults,
