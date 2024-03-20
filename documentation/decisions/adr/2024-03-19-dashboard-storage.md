@@ -23,9 +23,11 @@ This data storage solution will be our canonical source of truth for many types 
 - API application metrics
 - API infrastructure metrics from Cloudwatch
 
-We will not be importing all of these types of data immediately. On the 0 - 6 month timeframe, we will only be importing the smaller datasets (thousands of records). By 2 - 5 years we will be importing all of these types of data, and our data size will be quite large (many millions of records). The desired solutions have different cost/performance characteristics in those time ranges, and we will need to evaluate those differences.
+We will not be importing all of these types of data immediately. On the 0 - 6 month timeframe, we will only likely only be  importing the smaller datasets (thousands of records), with the exception of the infrastructure metrics. By 2 - 5 years we will be importing all of these types of data, and our data size will be quite large (many millions of records). The desired solutions have different cost/performance characteristics in those time ranges, and we will need to evaluate those differences.
 
-## Decision Drivers <!-- RECOMMENDED -->
+That said, with respect to data size, there is still a large outstanding question. For those sources of data, do we want to ingest point level data (e.g. individual page views, clicks, and API calls) or do we want to do some level of aggregation before loading it into our data warehouse. Choosing to pre-aggregate the data would decrease the total size of our data across every time range.
+
+## Decision Drivers
 
 - cost
 - ease of use
