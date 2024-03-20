@@ -14,7 +14,7 @@ interface StatusOption {
 
 interface SearchOpportunityStatusProps {
   formRef: React.RefObject<HTMLFormElement>;
-  initialQueryParams: string;
+  initialQueryParams: Set<string>;
 }
 
 const statusOptions: StatusOption[] = [
@@ -35,12 +35,8 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
   const [mounted, setMounted] = useState(false);
   const { updateQueryParams } = useSearchParamUpdater();
 
-  const initialStatusesSet = new Set(
-    initialQueryParams ? initialQueryParams.split(",") : [],
-  );
-
   const [selectedStatuses, setSelectedStatuses] =
-    useState<Set<string>>(initialStatusesSet);
+    useState<Set<string>>(initialQueryParams);
 
   const debouncedUpdate = useDebouncedCallback(
     (selectedStatuses: Set<string>) => {

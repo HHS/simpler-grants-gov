@@ -35,7 +35,7 @@ describe("useSearchFilter", () => {
 
   it("should initialize all options as unchecked", () => {
     const { result } = renderHook(() =>
-      useSearchFilter(initialOptions, "", "status", mockFormRef),
+      useSearchFilter(initialOptions, new Set(), "status", mockFormRef),
     );
 
     /* eslint-disable jest/no-conditional-expect */
@@ -51,7 +51,7 @@ describe("useSearchFilter", () => {
   });
   it("should toggle an option's checked state", async () => {
     const { result } = renderHook(() =>
-      useSearchFilter(initialOptions, "", "status", mockFormRef),
+      useSearchFilter(initialOptions, new Set(), "status", mockFormRef),
     );
 
     act(() => {
@@ -67,7 +67,12 @@ describe("useSearchFilter", () => {
 
   it("should correctly update the total checked count after toggling options", async () => {
     const { result } = renderHook(() =>
-      useSearchFilter(initialOptions, "closed,archived", "status", mockFormRef),
+      useSearchFilter(
+        initialOptions,
+        new Set(["closed", "archived"]),
+        "status",
+        mockFormRef,
+      ),
     );
 
     act(() => {

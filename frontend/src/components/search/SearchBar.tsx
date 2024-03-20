@@ -17,14 +17,14 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
 
   return (
     <div className="usa-search usa-search--big" role="search">
-      <label className="usa-sr-only" htmlFor="search-field">
+      <label className="usa-sr-only" htmlFor="query">
         Search
       </label>
       <input
         className="usa-input maxw-none"
-        id="search-field"
+        id="query"
         type="search"
-        name="search-text-input"
+        name="query"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />

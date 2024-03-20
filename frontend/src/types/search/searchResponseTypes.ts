@@ -79,3 +79,5 @@ export type QueryParamKey =
   | "eligibility"
   | "agency"
   | "category";
+
+export type SearchResponseData = Opportunity[];

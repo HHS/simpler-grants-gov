@@ -21,14 +21,16 @@ const SORT_OPTIONS: SortOption[] = [
 
 interface SearchSortByProps {
   formRef: React.RefObject<HTMLFormElement>;
-  initialSortBy: string;
+  initialQueryParams: string;
 }
 
 const SearchSortBy: React.FC<SearchSortByProps> = ({
   formRef,
-  initialSortBy,
+  initialQueryParams,
 }) => {
-  const [sortBy, setSortBy] = useState(initialSortBy || SORT_OPTIONS[0].value);
+  const [sortBy, setSortBy] = useState(
+    initialQueryParams || SORT_OPTIONS[0].value,
+  );
   const { updateQueryParams } = useSearchParamUpdater();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

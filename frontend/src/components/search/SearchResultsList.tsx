@@ -1,7 +1,7 @@
 "use client";
 
 import Loading from "../../app/search/loading";
-import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+import { SearchResponseData } from "../../types/search/searchResponseTypes";
 import { formatDate } from "../../utils/dateUtil";
 import { useFormStatus } from "react-dom";
 
@@ -18,6 +18,21 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
 
   if (pending) {
     return <Loading />;
+  }
+
+  if (searchResults.length === 0) {
+    return (
+      <div>
+        <h2>Your search did not return any results.</h2>
+        <p>Select at least one status.</p>
+        <ul>
+          <li>{"Check any terms you've entered for typos"}</li>
+          <li>Try different keywords</li>
+          <li>{"Make sure you've selected the right statuses"}</li>
+          <li>Try resetting filters or selecting fewer options</li>
+        </ul>
+      </div>
+    );
   }
 
   return (

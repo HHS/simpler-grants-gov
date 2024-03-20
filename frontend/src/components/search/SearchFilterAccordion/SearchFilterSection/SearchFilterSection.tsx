@@ -15,6 +15,7 @@ interface SearchFilterSectionProps {
   mounted: boolean;
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
   toggleSelectAll: (isSelected: boolean, sectionId: string) => void;
+  accordionTitle: string;
   isSectionAllSelected: boolean;
   isSectionNoneSelected: boolean;
 }
@@ -26,6 +27,7 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   mounted,
   updateCheckedOption,
   toggleSelectAll,
+  accordionTitle,
   isSectionAllSelected,
   isSectionNoneSelected,
 }) => {
@@ -59,6 +61,9 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
     }
   }, [option.children]);
 
+  const getHiddenName = (name: string) =>
+    accordionTitle === "Agency" ? `agency-${name}` : name;
+
   return (
     <div>
       <button
@@ -90,6 +95,7 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
                   decrement={decrement}
                   mounted={mounted}
                   updateCheckedOption={updateCheckedOption}
+                  accordionTitle={accordionTitle}
                   //   value={child.id} // TODO: consider passing the actual value to the server action
                 />
               </li>
@@ -101,7 +107,13 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
         // So we need hidden inputs.
         option.children?.map((child) =>
           child.isChecked ? (
-            <input key={child.id} type="hidden" name={child.value} value="on" />
+            <input
+              key={child.id}
+              type="hidden"
+              //   name={child.value}
+              name={getHiddenName(child.id)}
+              value="on"
+            />
           ) : null,
         )
       )}

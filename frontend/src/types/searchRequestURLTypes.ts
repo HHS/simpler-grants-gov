@@ -7,14 +7,3 @@ export interface ServerSideRouteParams {
 export interface ServerSideSearchParams {
   [key: string]: string | undefined;
 }
-
-// Converted search param types
-// IE... query becomes a string, page becomes a number
-export interface ConvertedSearchParams {
-  query: string;
-  sortby: string;
-  status: string;
-  page: number;
-  agency: string;
-  fundingInstrument: string;
-}

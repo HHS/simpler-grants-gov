@@ -6,7 +6,7 @@ import {
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export interface SearchFilterFundingInstrumentProps {
-  initialQueryParams: string;
+  initialQueryParams: Set<string>;
   formRef: React.RefObject<HTMLFormElement>;
 }
 
@@ -16,22 +16,22 @@ export default function SearchFilterFundingInstrument({
 }: SearchFilterFundingInstrumentProps) {
   const initialFilterOptions: FilterOption[] = [
     {
-      id: "funding-opportunity-cooperative_agreement",
+      id: "funding-instrument-cooperative_agreement",
       label: "Cooperative Agreement",
       value: "cooperative_agreement",
     },
     {
-      id: "funding-opportunity-grant",
+      id: "funding-instrument-grant",
       label: "Grant",
       value: "grant",
     },
     {
-      id: "funding-opportunity-procurement_contract",
+      id: "funding-instrument-procurement_contract",
       label: "Procurement Contract ",
       value: "procurement_contract",
     },
     {
-      id: "funding-opportunity-other",
+      id: "funding-instrument-other",
       label: "Other",
       value: "other",
     },

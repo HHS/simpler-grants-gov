@@ -1,5 +1,5 @@
 import { FilterOption } from "../../components/search/SearchFilterAccordion/SearchFilterAccordion";
-import { QueryParamKey } from "../../types/searchTypes";
+import { QueryParamKey } from "../../types/search/searchResponseTypes";
 
 type UpdateQueryParamsFunction = (
   checkedSet: Set<string>,
