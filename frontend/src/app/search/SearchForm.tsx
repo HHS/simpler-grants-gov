@@ -20,7 +20,8 @@ export function SearchForm({
   initialSearchResults,
   requestURLQueryParams,
 }: SearchFormProps) {
-  // Capture top level logic, including useFormState in useSearhcFormState hook
+  // Capture top level logic, including useFormState in the useSearchFormState hook
+  console.log("requestURLQueryPArams => ", requestURLQueryParams);
   const {
     searchResults, // result of calling server action
     updateSearchResultsAction, // server action function alias
@@ -32,10 +33,26 @@ export function SearchForm({
     pageQueryParams,
     agencyQueryParams,
     fundingInstrumentQueryParams,
+    fieldChanged,
+    setFieldChanged,
+    resetPagination,
   } = useSearchFormState(initialSearchResults, requestURLQueryParams);
 
+  //   const handleSubmit = (evt) => {
+  // evt?.preventDefault();
+  // console.log(evt?.current);
+  // console.log("in Handle SUBMIT!!!!!!!!!", evt);
+  // console.log("formREf => ", formRef);
+  //   };
+
+  console.log("pageQueryParams => ", pageQueryParams);
+
   return (
-    <form ref={formRef} action={updateSearchResultsAction}>
+    <form
+      ref={formRef}
+      action={updateSearchResultsAction}
+      //   onSubmit={handleSubmit}
+    >
       <div className="grid-container">
         <div className="search-bar">
           <SearchBar initialQueryParams={queryQueryParams} />
@@ -69,6 +86,9 @@ export function SearchForm({
                 formRef={formRef}
                 showHiddenInput={true}
                 totalPages={searchResults.pagination_info.total_pages}
+                fieldChanged={fieldChanged}
+                setFieldChanged={setFieldChanged}
+                resetPagination={resetPagination}
               />
               <SearchResultsList
                 searchResults={searchResults.data}
@@ -78,11 +98,15 @@ export function SearchForm({
                 initialQueryParams={pageQueryParams}
                 formRef={formRef}
                 totalPages={searchResults.pagination_info.total_pages}
+                fieldChanged={fieldChanged}
+                setFieldChanged={setFieldChanged}
+                resetPagination={resetPagination}
               />
             </div>
           </div>
         </div>
       </div>
+      <input type="hidden" name="fieldChanged" value={fieldChanged} />
     </form>
   );
 }

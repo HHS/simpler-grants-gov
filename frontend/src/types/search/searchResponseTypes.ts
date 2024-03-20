@@ -1,3 +1,5 @@
+import { SearchFetcherActionType } from "./searchRequestTypes";
+
 export interface AssistanceListing {
   assistance_listing_number: string;
   program_title: string;
@@ -66,6 +68,8 @@ export interface SearchAPIResponse {
   status_code: number;
   warnings?: unknown[] | null | undefined;
   errors?: unknown[] | null | undefined;
+  actionType?: SearchFetcherActionType;
+  fieldChanged?: string;
 }
 
 // Only a few defined keys possible

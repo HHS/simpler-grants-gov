@@ -4,6 +4,7 @@ import {
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortDirection,
+  SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "../../types/search/searchRequestTypes";
@@ -42,6 +43,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody.query = query;
     }
 
+    console.log("request boyd => ", requestBody);
     const subPath = "search";
     const response = await this.request(
       "POST",
@@ -79,16 +81,28 @@ export default class SearchOpportunityAPI extends BaseApi {
   private buildPagination(
     searchInputs: SearchFetcherProps,
   ): PaginationRequestBody {
-    const { sortby, page } = searchInputs;
+    const { sortby, page, fieldChanged } = searchInputs;
 
-    // TODO: 3/18/24 - API only allows id or number right now
-    // Will need to change these two valid values
+    // When performing an update (query, filter, sortby change) - we want to
+    // start back at the 1st page (we never want to retain the current page).
+    // In addition to resetting to 1 here, we need to do some work on the client
+    // as well (update query param, update current page to 1 in the SearhcPagination
+    // component.
+    // On initial load (SearchFetcherActionType.InitialLoad) we just use the page sent, since
+    // we want to honor the initial query param page chosen. There is validation guards
+    // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
+    const page_offset =
+      searchInputs.actionType === SearchFetcherActionType.Update &&
+      fieldChanged !== "pagination"
+        ? 1
+        : page;
+
     const orderByFieldLookup = {
       opportunityNumber: "opportunity_number",
-      opportunityTitle: "opportunity_number",
-      agency: "opportunity_id",
-      postedDate: "opportunity_id",
-      closeDate: "opportunity_id",
+      opportunityTitle: "opportunity_title",
+      agency: "agency_code",
+      postedDate: "post_date",
+      closeDate: "close_date",
     };
 
     let order_by: PaginationOrderBy = "opportunity_id";
@@ -107,7 +121,7 @@ export default class SearchOpportunityAPI extends BaseApi {
 
     return {
       order_by,
-      page_offset: page,
+      page_offset,
       page_size: 25,
       sort_direction,
     };

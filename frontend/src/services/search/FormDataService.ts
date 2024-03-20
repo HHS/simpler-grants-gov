@@ -1,3 +1,4 @@
+import { SearchFetcherActionType } from "../../types/search/searchRequestTypes";
 import { SearchFetcherProps } from "./searchfetcher/SearchFetcher";
 
 export class FormDataService {
@@ -17,8 +18,14 @@ export class FormDataService {
       agency: this.agency,
       query: this.query,
       sortby: this.sortBy,
+
+      // This is currently only called from the server action
+      // (updating results, not the initial load)
+      actionType: SearchFetcherActionType.Update,
+      fieldChanged: this.fieldChanged,
     };
 
+    // console.log("formData => ", this.formData);
     return searchProps;
   }
 
@@ -103,5 +110,9 @@ export class FormDataService {
   get sortBy(): string | null {
     const sortByValue = this.getFormDataWithValue("search-sort-by");
     return sortByValue as string | null;
+  }
+
+  get fieldChanged(): string {
+    return (this.getFormDataWithValue("fieldChanged") as string) || "";
   }
 }

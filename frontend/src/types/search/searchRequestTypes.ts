@@ -18,3 +18,9 @@ export type SearchRequestBody = {
   filters?: SearchFilterRequestBody;
   query?: string;
 };
+
+export enum SearchFetcherActionType {
+  // Just 2 types at the moment
+  InitialLoad = "initialLoad",
+  Update = "update",
+}

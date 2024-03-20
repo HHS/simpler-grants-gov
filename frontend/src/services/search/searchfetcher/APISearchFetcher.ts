@@ -21,6 +21,9 @@ export class APISearchFetcher extends SearchFetcher {
       //  await new Promise((resolve) => setTimeout(resolve, 1250));
 
       const response = await this.searchApi.searchOpportunities(searchInputs);
+      response.actionType = searchInputs.actionType;
+      response.fieldChanged = searchInputs.fieldChanged;
+      
       if (!response.data) {
         throw new Error(`No data returned from API`);
       }

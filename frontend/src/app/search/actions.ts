@@ -13,6 +13,10 @@ export async function updateResults(
   prevState: SearchAPIResponse,
   formData: FormData,
 ): Promise<SearchAPIResponse> {
+  console.log(
+    "actions formDAta fieldChanged => ",
+    formData.get("fieldChanged")?.toString(),
+  );
   const formDataService = new FormDataService(formData);
   const searchProps = formDataService.processFormData();
 
