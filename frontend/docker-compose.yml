@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   nextjs:
     container_name: next-dev
     build:
