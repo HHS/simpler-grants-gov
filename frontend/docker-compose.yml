@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  nextjs:
+    container_name: next-dev
+    build:
+      context: .
+      target: dev
+    env_file:
+      - ./.env.development
+    volumes:
+      - ./src:/frontend/src
+      - ./public:/frontend/public
+    restart: always
+    ports:
+      - 3000:3000
+
+  storybook:
+    container_name: storybook
+    build:
+      context: .
+      target: dev
+    command: npm run storybook
+    volumes:
+      - ./src:/frontend/src
+      - ./public:/frontend/public
+      - ./.storybook:/frontend/.storybook
+      - ./stories:/frontend/stories
+    restart: always
+    ports:
+      - 6006:6006
