@@ -86,4 +86,4 @@ At 2 - 5 years, Snowflake may start to show cost and performance advantages rela
 
 ## Decision Outcome
 
-Chosen option: "{option 1}", because {justification. e.g., only option which meets a key decision driver | which satisfies x condition | ... }.
+The chosen option for this ADR is **_AWS Redshift_**. Redshift has been chosen due to its OLAP design, and its potential advantages when used with very large datasets.
