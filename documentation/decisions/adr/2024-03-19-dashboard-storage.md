@@ -2,7 +2,7 @@
 
 - **Status:** Active
 - **Last Modified:** 2024-03-19
-- **Related Issue:** [#{issue number}](https://github.com/HHS/simpler-grants-gov/issues/{issue number})
+- **Related Issue:** [#1506](https://github.com/HHS/simpler-grants-gov/issues/1506)
 - **Deciders:** Aaron Couch, Billy Daly
 
 ## Context and Problem Statement
@@ -54,7 +54,7 @@ At 2 - 5 years, S3's performance issues require the introduction of another quer
 
 ### Redshift
 
-AWS Redshift is a Postgres-based data warehouse that you can use to store large data sets. Redshift is optimized for OLAP queries, which makes it an ideal choice for analyzing business analytics data. To query CSV data in Redshift, you must first upload it to S3 and then into Redshift, which makes Redshift feel like a "query layer" for S3. 
+AWS Redshift is a Postgres-based data warehouse that you can use to store large data sets. This ADR assumes we are going to be using Redshift Serverless, rather than statically provisioned Redshift. We assume that serverless technologies will work in this case because this is a data warehouse backed by an ELT process, so it's data is not being accessed most of the time. Redshift is optimized for OLAP queries, which makes it an ideal choice for analyzing business analytics data. To query CSV data in Redshift, you must first upload it to S3 and then into Redshift, which makes Redshift feel like a "query layer" for S3.
 
 [Data is hosted in Redshift at $0.024 per GB-month](https://aws.amazon.com/redshift/pricing/), essentially the same price as S3.
 
@@ -66,7 +66,7 @@ At 2 - 5 years, performance bottle-necks with S3 mean that Redshift easily wins 
 
 ### Postgres
 
-Postgres, as hosted by AWS RDS, is a SQL database that you can use to store large data sets. Many of the characteristics that apply to Redshift apply to Postgres, with the caveat that Postgres is not built for business intelligence use cases.
+Postgres, as hosted by AWS RDS, is a SQL database that you can use to store large data sets. Many of the characteristics that apply to Redshift apply to Postgres, with the caveat that Postgres is not built for business intelligence use cases. We have an existing Postgres database, but we would not want to re-use it for our data analytics purposes.
 
 [Data is hosted in Postgres at $0.115 per GB-month](https://aws.amazon.com/rds/postgresql/pricing/), higher than S3 and Redshift.
 
