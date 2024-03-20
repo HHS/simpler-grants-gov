@@ -72,7 +72,7 @@ Postgres, as hosted by AWS RDS, is a SQL database that you can use to store larg
 
 [Data is hosted in Postgres at $0.115 per GB-month](https://aws.amazon.com/rds/postgresql/pricing/), higher than S3 and Redshift.
 
-In every time range, Postgres loses to Redshift due to Postgres being an OLTP database built for real-time data processing. In the 2 - 5 year range, Postgres also loses due to its high GB-month hosting cost.
+In every time range, Postgres loses to Redshift due to Postgres being an OLTP database built for real-time data processing. In the 2 - 5 year range, Postgres also loses due to its high GB-month hosting cost. There is however, evidence that Postgres is faster than Redshift, and that Redshift's OLAP advantages don't kick in until the data grows to terabtyes in size.
 
 ### Snowflake
 
