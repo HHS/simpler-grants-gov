@@ -43,7 +43,6 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody.query = query;
     }
 
-    console.log("request boyd => ", requestBody);
     const subPath = "search";
     const response = await this.request(
       "POST",
@@ -85,11 +84,9 @@ export default class SearchOpportunityAPI extends BaseApi {
 
     // When performing an update (query, filter, sortby change) - we want to
     // start back at the 1st page (we never want to retain the current page).
-    // In addition to resetting to 1 here, we need to do some work on the client
-    // as well (update query param, update current page to 1 in the SearhcPagination
-    // component.
-    // On initial load (SearchFetcherActionType.InitialLoad) we just use the page sent, since
-    // we want to honor the initial query param page chosen. There is validation guards
+    // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
+    // clear the page query param and set the page back to 1.
+    // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
     // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
     const page_offset =
       searchInputs.actionType === SearchFetcherActionType.Update &&

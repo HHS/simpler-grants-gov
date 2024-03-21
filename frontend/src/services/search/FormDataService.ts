@@ -20,12 +20,11 @@ export class FormDataService {
       sortby: this.sortBy,
 
       // This is currently only called from the server action
-      // (updating results, not the initial load)
+      // (marked as Update for updating results, not the initial load)
       actionType: SearchFetcherActionType.Update,
       fieldChanged: this.fieldChanged,
     };
 
-    // console.log("formData => ", this.formData);
     return searchProps;
   }
 

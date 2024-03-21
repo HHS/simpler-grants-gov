@@ -21,37 +21,28 @@ export function SearchForm({
   requestURLQueryParams,
 }: SearchFormProps) {
   // Capture top level logic, including useFormState in the useSearchFormState hook
-  console.log("requestURLQueryPArams => ", requestURLQueryParams);
   const {
     searchResults, // result of calling server action
     updateSearchResultsAction, // server action function alias
     formRef, // used in children to submit the form
-    maxPaginationError,
     statusQueryParams,
     queryQueryParams,
     sortbyQueryParams,
-    pageQueryParams,
     agencyQueryParams,
     fundingInstrumentQueryParams,
-    fieldChanged,
-    setFieldChanged,
-    resetPagination,
+    maxPaginationError,
+    fieldChangedRef,
+    page,
+    handlePageChange,
+    topPaginationRef,
+    handleSubmit,
   } = useSearchFormState(initialSearchResults, requestURLQueryParams);
-
-  //   const handleSubmit = (evt) => {
-  // evt?.preventDefault();
-  // console.log(evt?.current);
-  // console.log("in Handle SUBMIT!!!!!!!!!", evt);
-  // console.log("formREf => ", formRef);
-  //   };
-
-  console.log("pageQueryParams => ", pageQueryParams);
 
   return (
     <form
       ref={formRef}
       action={updateSearchResultsAction}
-      //   onSubmit={handleSubmit}
+      onSubmit={handleSubmit}
     >
       <div className="grid-container">
         <div className="search-bar">
@@ -81,32 +72,32 @@ export function SearchForm({
                 }
                 initialQueryParams={sortbyQueryParams}
               />
-              <SearchPagination
-                initialQueryParams={pageQueryParams}
-                formRef={formRef}
-                showHiddenInput={true}
-                totalPages={searchResults.pagination_info.total_pages}
-                fieldChanged={fieldChanged}
-                setFieldChanged={setFieldChanged}
-                resetPagination={resetPagination}
-              />
+              {searchResults.data.length >= 1 ? (
+                <SearchPagination
+                  totalPages={searchResults.pagination_info.total_pages}
+                  page={page}
+                  handlePageChange={handlePageChange}
+                  showHiddenInput={true}
+                  paginationRef={topPaginationRef}
+                />
+              ) : null}
+
               <SearchResultsList
                 searchResults={searchResults.data}
                 maxPaginationError={maxPaginationError}
               />
-              <SearchPagination
-                initialQueryParams={pageQueryParams}
-                formRef={formRef}
-                totalPages={searchResults.pagination_info.total_pages}
-                fieldChanged={fieldChanged}
-                setFieldChanged={setFieldChanged}
-                resetPagination={resetPagination}
-              />
+              {searchResults.data.length >= 1 ? (
+                <SearchPagination
+                  totalPages={searchResults.pagination_info.total_pages}
+                  page={page}
+                  handlePageChange={handlePageChange}
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </div>
-      <input type="hidden" name="fieldChanged" value={fieldChanged} />
+      <input type="hidden" name="fieldChanged" ref={fieldChangedRef} />
     </form>
   );
 }
