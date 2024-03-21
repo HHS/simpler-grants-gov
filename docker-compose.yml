@@ -1,65 +1,8 @@
 version: '3'
 
-services:
+include:
+  - path: ./api/docker-compose.yml
+  - path: ./frontend/docker-compose.yml
 
-  grants-db:
-    image: postgres:14-alpine
-    container_name: grants-db
-    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
-    env_file: ./api/local.env
-    ports:
-      - "5432:5432"
-    volumes:
-      - grantsdbdata:/var/lib/postgresql/data
-
-  grants-api:
-    build:
-      context: ./api
-      target: dev
-      args:
-        - RUN_UID=${RUN_UID:-4000}
-        - RUN_USER=${RUN_USER:-api}
-    command: ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
-    container_name: grants-api
-    env_file: ./api/local.env
-    ports:
-      - 8080:8080
-    volumes:
-      - ./api:/api
-    depends_on:
-      - grants-db
-
-  nextjs:
-    container_name: next-dev
-    build:
-      context: ./frontend
-      target: dev
-    env_file:
-      # Add your non-secret environment variables to this file:
-      - ./frontend/.env.development
-      # If you have secrets, add them to this file and uncomment this line:
-      # - ./frontend/.env.local
-    volumes:
-      - ./frontend/src:/frontend/src
-      - ./frontend/public:/frontend/public
-    restart: always
-    ports:
-      - 3000:3000
-
-  storybook:
-    container_name: storybook
-    build:
-      context: ./frontend
-      target: dev
-    command: npm run storybook
-    volumes:
-      - ./frontend/src:/frontend/src
-      - ./frontend/public:/frontend/public
-      - ./frontend/.storybook:/frontend/.storybook
-      - ./frontend/stories:/frontend/stories
-    restart: always
-    ports:
-      - 6006:6006
-
-volumes:
-  grantsdbdata:
+# services:
+  # Define other services or override configurations

@@ -4,6 +4,8 @@ Implements the SprintBoard dataset.
 This is a sub-class of BaseDataset that stores the tickets and metadata
 set for each ticket in the Sprint Planning Board
 """
+from __future__ import annotations
+
 from typing import Self
 
 import pandas as pd
@@ -109,6 +111,7 @@ class SprintBoard(BaseDataset):
         -------
         Self:
             An instance of the SprintBoard dataset class
+
         """
         # load and merge input datasets
         df_sprints = load_json_data_as_df(

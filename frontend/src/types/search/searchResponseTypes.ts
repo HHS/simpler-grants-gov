@@ -59,10 +59,25 @@ export interface PaginationInfo {
   total_records: number;
 }
 
-export interface ApiResponse {
+export interface SearchAPIResponse {
   data: Opportunity[];
   message: string;
   pagination_info: PaginationInfo;
   status_code: number;
-  warnings?: [];
+  warnings?: unknown[] | null | undefined;
+  errors?: unknown[] | null | undefined;
 }
+
+// Only a few defined keys possible
+// URL example => ?query=abcd&status=closed,archived
+export type QueryParamKey =
+  | "page"
+  | "query"
+  | "sortby"
+  | "status"
+  | "fundingInstrument"
+  | "eligibility"
+  | "agency"
+  | "category";
+
+export type SearchResponseData = Opportunity[];

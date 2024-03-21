@@ -95,7 +95,7 @@ def configure_app(app: APIFlask) -> None:
         "contact": {
             "name": "Simpler Grants.gov",
             "url": "https://simpler.grants.gov/",
-            "email": "simplergrantsgov@hhs.gov",
+            "email": "simpler@grants.gov",
         },
     }
 

@@ -1,20 +1,27 @@
-import React from "react";
-import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+"use client";
+
 import SearchSortyBy from "./SearchSortBy";
 
 interface SearchResultsHeaderProps {
-  searchResults: SearchResponseData;
+  searchResultsLength: number;
+  formRef: React.RefObject<HTMLFormElement>;
+  initialQueryParams: string;
 }
 
 const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
-  searchResults,
+  searchResultsLength,
+  formRef,
+  initialQueryParams,
 }) => {
   return (
     <>
       <div>
-        <h2>{searchResults.length} Opportunities</h2>
+        <h2>{searchResultsLength} Opportunities</h2>
       </div>
-      <SearchSortyBy />
+      <SearchSortyBy
+        formRef={formRef}
+        initialQueryParams={initialQueryParams}
+      />
     </>
   );
 };

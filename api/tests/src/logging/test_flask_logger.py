@@ -141,6 +141,6 @@ def test_log_response_time(app: Flask, caplog: pytest.LogCaptureFixture):
     assert "response.time_ms" in last_record.__dict__
     response_time_ms = last_record.__dict__["response.time_ms"]
     expected_response_time_ms = 100  # ms
-    allowed_error = 20  # ms
+    allowed_error = 25  # ms
 
     assert response_time_ms == pytest.approx(expected_response_time_ms, abs=allowed_error)

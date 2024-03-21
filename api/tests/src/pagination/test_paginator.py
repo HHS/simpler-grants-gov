@@ -1,7 +1,14 @@
 import pytest
 from sqlalchemy import select
 
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
+    Opportunity,
+    OpportunitySummary,
+)
 from src.pagination.paginator import Paginator
 from tests.src.db.models.factories import OpportunityFactory
 
@@ -52,7 +59,7 @@ def test_paginator(db_session, create_opportunities):
     base_stmt = select(Opportunity)
 
     # Verify that with no additional filters, we get everything
-    paginator = Paginator(base_stmt, db_session, page_size=6)
+    paginator = Paginator(Opportunity, base_stmt, db_session, page_size=6)
     assert paginator.page_size == 6
     assert paginator.total_pages == 3
     assert paginator.total_records == 15
@@ -65,7 +72,7 @@ def test_paginator(db_session, create_opportunities):
 
     # Verify when filtering by last name
     stmt = base_stmt.filter(Opportunity.opportunity_title == "something else")
-    paginator = Paginator(stmt, db_session, page_size=10)
+    paginator = Paginator(Opportunity, stmt, db_session, page_size=10)
     assert paginator.page_size == 10
     assert paginator.total_pages == 1
     assert paginator.total_records == 5
@@ -75,7 +82,7 @@ def test_paginator(db_session, create_opportunities):
 
     # Verify when filtering by opportunity number
     stmt = base_stmt.filter(Opportunity.opportunity_number == "XYZ-222")
-    paginator = Paginator(stmt, db_session, page_size=1)
+    paginator = Paginator(Opportunity, stmt, db_session, page_size=1)
     assert paginator.page_size == 1
     assert paginator.total_pages == 4
     assert paginator.total_records == 4
@@ -88,7 +95,7 @@ def test_paginator(db_session, create_opportunities):
 
     # Verify when filtering by is_draft
     stmt = base_stmt.filter(Opportunity.is_draft.is_(False))
-    paginator = Paginator(stmt, db_session, page_size=100)
+    paginator = Paginator(Opportunity, stmt, db_session, page_size=100)
     assert paginator.page_size == 100
     assert paginator.total_pages == 1
     assert paginator.total_records == 3
@@ -102,7 +109,7 @@ def test_paginator(db_session, create_opportunities):
         Opportunity.opportunity_number == "XYZ-222",
         Opportunity.is_draft.is_(False),
     )
-    paginator = Paginator(stmt, db_session)
+    paginator = Paginator(Opportunity, stmt, db_session)
     assert paginator.page_size == 25
     assert paginator.total_pages == 1
     assert paginator.total_records == 1
@@ -112,15 +119,34 @@ def test_paginator(db_session, create_opportunities):
 
     # Verify when filtering to zero results
     stmt = base_stmt.filter(Opportunity.opportunity_title == "something that won't be found")
-    paginator = Paginator(stmt, db_session)
+    paginator = Paginator(Opportunity, stmt, db_session)
     assert paginator.page_size == 25
     assert paginator.total_pages == 0
     assert paginator.total_records == 0
 
     assert len(paginator.page_at(1)) == 0
 
+    # Verify when adding joins, the counts continue to be correct
+    # If we didn't have distinct in the count function, we'd end up with
+    # every opportunity being counted extra for each Link table value
+    stmt = (
+        base_stmt.join(CurrentOpportunitySummary)
+        .join(
+            OpportunitySummary,
+            CurrentOpportunitySummary.opportunity_summary_id
+            == OpportunitySummary.opportunity_summary_id,
+        )
+        .join(LinkOpportunitySummaryFundingInstrument)
+        .join(LinkOpportunitySummaryFundingCategory)
+        .join(LinkOpportunitySummaryApplicantType)
+    )
+    paginator = Paginator(Opportunity, stmt, db_session, page_size=6)
+    assert paginator.page_size == 6
+    assert paginator.total_pages == 3
+    assert paginator.total_records == 15
+
 
 @pytest.mark.parametrize("page_size", [0, -1, -2])
 def test_page_size_zero_or_negative(db_session, page_size):
     with pytest.raises(ValueError, match="Page size must be at least 1"):
-        Paginator(select(Opportunity), db_session, page_size)
+        Paginator(Opportunity, select(Opportunity), db_session, page_size)

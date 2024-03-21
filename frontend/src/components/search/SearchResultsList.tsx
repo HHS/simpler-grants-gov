@@ -1,16 +1,18 @@
+"use client";
+
 import Loading from "../../app/search/loading";
-// SearchResultsList.tsx
-import React from "react";
-import { SearchResponseData } from "../../app/api/SearchOpportunityAPI";
+import { SearchResponseData } from "../../types/search/searchResponseTypes";
 import { formatDate } from "../../utils/dateUtil";
 import { useFormStatus } from "react-dom";
 
 interface SearchResultsListProps {
   searchResults: SearchResponseData;
+  maxPaginationError: boolean;
 }
 
 const SearchResultsList: React.FC<SearchResultsListProps> = ({
   searchResults,
+  maxPaginationError,
 }) => {
   const { pending } = useFormStatus();
 
@@ -18,11 +20,34 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
     return <Loading />;
   }
 
+  if (searchResults.length === 0) {
+    return (
+      <div>
+        <h2>Your search did not return any results.</h2>
+        <p>Select at least one status.</p>
+        <ul>
+          <li>{"Check any terms you've entered for typos"}</li>
+          <li>Try different keywords</li>
+          <li>{"Make sure you've selected the right statuses"}</li>
+          <li>Try resetting filters or selecting fewer options</li>
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <ul className="usa-list--unstyled">
+      {/* TODO #1485: show proper USWDS error  */}
+      {maxPaginationError && (
+        <h4>
+          {
+            "You''re trying to access opportunity results that are beyond the last page of data."
+          }
+        </h4>
+      )}
       {searchResults.map((opportunity) => (
         <li
-          key={opportunity.opportunity_id}
+          key={opportunity?.opportunity_id}
           className="
               border-1px
               border-base-lighter
@@ -37,8 +62,12 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
               <div className="grid-row flex-column">
                 <div className="grid-col tablet:order-2">
                   <h2 className="margin-y-105 line-height-serif-2">
+                    {/* TODO: href here needs to be set to:
+                        dev/staging:  https://test.grants.gov/search-results-detail/<opportunity_id>
+                        local/prod: https://grants.gov/search-results-detail/<opportunity_id>
+                    */}
                     <a href="#" className="usa-link usa-link--external">
-                      {opportunity.opportunity_title}
+                      {opportunity?.opportunity_title}
                     </a>
                   </h2>
                 </div>
@@ -63,7 +92,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                     <span className="usa-tag bg-accent-warm-dark">
                       <strong className="">Closing:</strong>{" "}
                       {/* TODO: format date */}
-                      {opportunity.summary.close_date}
+                      {opportunity?.summary?.close_date}
                     </span>
                   </span>
                   <span
@@ -78,7 +107,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                       "
                   >
                     <strong>Posted:</strong>{" "}
-                    {formatDate(opportunity.summary.post_date)}
+                    {formatDate(opportunity?.summary?.post_date)}
                   </span>
                 </div>
                 <div className="grid-col tablet:order-3 overflow-hidden">
@@ -93,7 +122,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                         tablet:border-base-lighter
                       "
                   >
-                    <strong>Agency:</strong> {opportunity.summary.agency_name}
+                    <strong>Agency:</strong> {opportunity?.summary?.agency_name}
                   </span>
                   <span
                     className="
@@ -107,7 +136,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
                       "
                   >
                     <strong>Opportunity Number:</strong>{" "}
-                    {opportunity.opportunity_number}
+                    {opportunity?.opportunity_number}
                   </span>
                 </div>
               </div>
