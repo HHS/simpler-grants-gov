@@ -31,7 +31,7 @@ export function useSearchFormState(
   queryQueryParams = queryQueryParams || "";
   sortbyQueryParams = sortbyQueryParams || "";
 
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(pageQueryParams || 1);
   const topPaginationRef = useRef<HTMLInputElement>(null);
 
   const fieldChangedRef = useRef<HTMLInputElement>(null); // hidden input that lets us know what field has just been toggled
@@ -63,8 +63,10 @@ export function useSearchFormState(
   const handleSubmit = () => {
     if (fieldChangedRef.current) {
       if (fieldChangedRef.current.value !== "pagination") {
-        updateQueryParams("", "page");
+        // Always reset the page to 1
+        // This is done on the API side in SearchOpportunityAPI
         setPage(1);
+        updateQueryParams("", "page"); // clear page query param
       }
     }
   };

@@ -55,7 +55,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return response;
   }
 
-  // Build to one_of syntax
+  // Build with one_of syntax
   private buildFilters(
     searchInputs: SearchFetcherProps,
   ): SearchFilterRequestBody {
