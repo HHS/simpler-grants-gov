@@ -1,5 +1,6 @@
 import logging
 
+import click
 from sqlalchemy import func
 
 import src.adapters.db as db
@@ -13,7 +14,7 @@ from src.util.local import error_if_not_local
 logger = logging.getLogger(__name__)
 
 
-def _build_opportunities(db_session: db.Session) -> None:
+def _build_opportunities(db_session: db.Session, iterations: int) -> None:
     # Just create a variety of opportunities for local testing
     # we can eventually look into creating more specific scenarios
 
@@ -26,23 +27,27 @@ def _build_opportunities(db_session: db.Session) -> None:
     logger.info(f"Creating opportunities starting with opportunity_id {max_opportunity_id + 1}")
     factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
 
-    # Create a few opportunities in various scenarios
-    factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
-    factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
-    factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
-    factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
-    factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
-    factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
+    for i in range(iterations):
+        logger.info(f"Creating opportunity batch number  {i}")
+        # Create a few opportunities in various scenarios
+        factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
+        factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
+        factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
+        factories.OpportunityFactory.create_batch(size=5, is_archived_non_forecast_summary=True)
+        factories.OpportunityFactory.create_batch(size=5, is_archived_forecast_summary=True)
+        factories.OpportunityFactory.create_batch(size=5, no_current_summary=True)
 
-    # generate a few opportunities with mostly null values
-    all_null_opportunities = factories.OpportunityFactory.create_batch(size=5, all_fields_null=True)
-    for all_null_opportunity in all_null_opportunities:
-        summary = factories.OpportunitySummaryFactory.create(
-            all_fields_null=True, opportunity=all_null_opportunity
+        # generate a few opportunities with mostly null values
+        all_null_opportunities = factories.OpportunityFactory.create_batch(
+            size=5, all_fields_null=True
         )
-        factories.CurrentOpportunitySummaryFactory.create(
-            opportunity=all_null_opportunity, opportunity_summary=summary
-        )
+        for all_null_opportunity in all_null_opportunities:
+            summary = factories.OpportunitySummaryFactory.create(
+                all_fields_null=True, opportunity=all_null_opportunity
+            )
+            factories.CurrentOpportunitySummaryFactory.create(
+                opportunity=all_null_opportunity, opportunity_summary=summary
+            )
 
     logger.info("Finished creating opportunities")
 
@@ -57,7 +62,13 @@ def _build_opportunities(db_session: db.Session) -> None:
     logger.info("Finished creating records in the transfer_topportunity table")
 
 
-def seed_local_db() -> None:
+@click.command()
+@click.option(
+    "--iterations",
+    default=1,
+    help="Number of sets of opportunities to create, note that several are created per iteration",
+)
+def seed_local_db(iterations: int) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
@@ -67,7 +78,7 @@ def seed_local_db() -> None:
         with db_client.get_session() as db_session:
             factories._db_session = db_session
 
-            _build_opportunities(db_session)
+            _build_opportunities(db_session, iterations)
             # Need to commit to force any updates made
             # after factories created objects
             db_session.commit()

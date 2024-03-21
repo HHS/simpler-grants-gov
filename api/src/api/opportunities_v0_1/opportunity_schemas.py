@@ -1,4 +1,4 @@
-from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -276,7 +276,8 @@ class OpportunitySearchRequestSchema(Schema):
         metadata={
             "description": "Query string which searches against several text fields",
             "example": "research",
-        }
+        },
+        validate=[validators.Length(min=1, max=100)],
     )
 
     filters = fields.Nested(OpportunitySearchFilterSchema())
