@@ -71,7 +71,7 @@ export function useSearchFormState(
     }
   };
 
-  // TODO: move this to server-side calculation?
+  // TODO (Issue #1517): move this to server-side calculation?
   const maxPaginationError =
     searchResults.pagination_info.total_pages > 0 &&
     searchResults.pagination_info.page_offset >

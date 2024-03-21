@@ -11,7 +11,7 @@ export function useSearchParamUpdater() {
     queryParamValue: string | Set<string>,
     key: string,
   ) => {
-    // TODO: Next's useSearchParams was causing issues. document.location.search
+    // TODO (#1518): Next's useSearchParams was causing issues. document.location.search
     // seems to work better when calling from the form submit. Some follow up work
     // to investigate if URLSearchParams(useSearchParams()) can still work.
     const params = new URLSearchParams(document.location.search);
