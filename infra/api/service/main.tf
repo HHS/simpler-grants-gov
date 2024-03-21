@@ -127,9 +127,8 @@ module "service" {
   cpu                   = 1024
   memory                = 2048
 
-  api_auth_token       = data.aws_ssm_parameter.api_auth_token.value
-  enable_v01_endpoints = module.app_config.environment_configs[var.environment_name].enable_v01_endpoints
-  cert_arn             = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  api_auth_token = data.aws_ssm_parameter.api_auth_token.value
+  cert_arn       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
@@ -143,6 +142,10 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  extra_environment_variables = local.service_config.extra_environment_variables
+
+  # secrets = local.service_config.secrets
 }
 
 module "monitoring" {
