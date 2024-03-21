@@ -1,43 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-
 import { Pagination } from "@trussworks/react-uswds";
-import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 
 interface SearchPaginationProps {
-  initialQueryParams: number;
-  formRef: React.RefObject<HTMLFormElement>;
   showHiddenInput?: boolean; // Only one of the two SearchPagination should have this set
   totalPages: number;
+  page: number;
+  handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
+  paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
 }
 
 const MAX_SLOTS = 5;
 
 export default function SearchPagination({
-  initialQueryParams = 1,
-  formRef,
   showHiddenInput,
   totalPages,
+  page,
+  handlePageChange,
+  paginationRef,
 }: SearchPaginationProps) {
-  const { updateQueryParams } = useSearchParamUpdater();
-  const [currentPage, setCurrentPage] = useState<number>(
-    getSafeCurrentPage(initialQueryParams, totalPages),
-  );
-
-  const currentPageInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handlePageChange = (page: number) => {
-    const queryParamKey = "page";
-    updateQueryParams(page.toString(), queryParamKey);
-    if (currentPageInputRef.current) {
-      currentPageInputRef.current.value = page.toString();
-    }
-
-    formRef?.current?.requestSubmit();
-    setCurrentPage(getSafeCurrentPage(page, totalPages));
-  };
-
   return (
     <>
       {showHiddenInput === true && (
@@ -45,23 +26,19 @@ export default function SearchPagination({
         <input
           type="hidden"
           name="currentPage"
-          ref={currentPageInputRef}
-          value={currentPage}
+          ref={paginationRef}
+          value={page}
         />
       )}
       <Pagination
         pathname="/search"
         totalPages={totalPages}
-        currentPage={currentPage}
+        currentPage={page}
         maxSlots={MAX_SLOTS}
-        onClickNext={() => handlePageChange(currentPage + 1)}
-        onClickPrevious={() => handlePageChange(currentPage - 1)}
+        onClickNext={() => handlePageChange(page + 1)}
+        onClickPrevious={() => handlePageChange(page - 1)}
         onClickPageNumber={(event, page) => handlePageChange(page)}
       />
     </>
   );
-}
-
-function getSafeCurrentPage(page: number, TOTAL_PAGES: number) {
-  return Math.max(1, Math.min(page, TOTAL_PAGES));
 }
