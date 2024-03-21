@@ -32,12 +32,6 @@ variable "has_incident_management_service" {
   type = bool
 }
 
-variable "enable_v01_endpoints" {
-  description = "determines whether the v0.1 endpoints are available in the API"
-  type        = bool
-  default     = false
-}
-
 variable "domain" {
   type        = string
   description = "DNS domain of the website managed by HHS"

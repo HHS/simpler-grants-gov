@@ -37,10 +37,6 @@ output "api_auth_token" {
   }
 }
 
-output "enable_v01_endpoints" {
-  value = var.enable_v01_endpoints
-}
-
 output "domain" {
   value = var.domain
 }
