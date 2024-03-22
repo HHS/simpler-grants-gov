@@ -8,6 +8,7 @@ on:
       - infra/frontend/service/**
       - infra/test/**
       - .github/workflows/ci-infra-service.yml
+
   pull_request:
     paths:
       - infra/frontend/service/**
