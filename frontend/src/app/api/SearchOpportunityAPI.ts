@@ -4,6 +4,7 @@ import {
   PaginationOrderBy,
   PaginationRequestBody,
   PaginationSortDirection,
+  SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "../../types/search/searchRequestTypes";
@@ -54,7 +55,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return response;
   }
 
-  // Build to one_of syntax
+  // Build with one_of syntax
   private buildFilters(
     searchInputs: SearchFetcherProps,
   ): SearchFilterRequestBody {
@@ -79,16 +80,26 @@ export default class SearchOpportunityAPI extends BaseApi {
   private buildPagination(
     searchInputs: SearchFetcherProps,
   ): PaginationRequestBody {
-    const { sortby, page } = searchInputs;
+    const { sortby, page, fieldChanged } = searchInputs;
 
-    // TODO: 3/18/24 - API only allows id or number right now
-    // Will need to change these two valid values
+    // When performing an update (query, filter, sortby change) - we want to
+    // start back at the 1st page (we never want to retain the current page).
+    // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
+    // clear the page query param and set the page back to 1.
+    // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
+    // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
+    const page_offset =
+      searchInputs.actionType === SearchFetcherActionType.Update &&
+      fieldChanged !== "pagination"
+        ? 1
+        : page;
+
     const orderByFieldLookup = {
       opportunityNumber: "opportunity_number",
-      opportunityTitle: "opportunity_number",
-      agency: "opportunity_id",
-      postedDate: "opportunity_id",
-      closeDate: "opportunity_id",
+      opportunityTitle: "opportunity_title",
+      agency: "agency_code",
+      postedDate: "post_date",
+      closeDate: "close_date",
     };
 
     let order_by: PaginationOrderBy = "opportunity_id";
@@ -107,7 +118,7 @@ export default class SearchOpportunityAPI extends BaseApi {
 
     return {
       order_by,
-      page_offset: page,
+      page_offset,
       page_size: 25,
       sort_direction,
     };

@@ -15,12 +15,14 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
+from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     LinkOpportunitySummaryApplicantTypeFactory,
     LinkOpportunitySummaryFundingCategoryFactory,
     LinkOpportunitySummaryFundingInstrumentFactory,
+    OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -460,6 +462,12 @@ class Scenario(IntEnum):
     # Applicant type: Small businesses
     POSTED_ONE_OF_EACH_ENUM = 12
 
+    # Opportunity title has a percentage sign which we search against
+    POSTED_OPPORTUNITY_TITLE_HAS_PERCENT = 13
+
+    # Description has several random characters that we search against
+    CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS = 14
+
 
 def setup_opportunity(
     scenario: Scenario,
@@ -467,19 +475,42 @@ def setup_opportunity(
     has_current_opportunity: bool = True,
     has_other_non_current_opportunity: bool = False,
     is_draft: bool = False,
+    opportunity_title: str = "Default opportunity title",
+    opportunity_number: str | None = None,
     opportunity_status: OpportunityStatus | None = OpportunityStatus.POSTED,
+    summary_description: str = "Default summary description",
     funding_instruments: list[FundingInstrument] | None = None,
     funding_categories: list[FundingCategory] | None = None,
     applicant_types: list[ApplicantType] | None = None,
     agency: str | None = "DEFAULT-ABC",
+    assistance_listings: list[tuple[str, str]] | None = None,
 ):
+    if opportunity_number is None:
+        opportunity_number = f"OPP-NUMBER-{scenario}"
+
     opportunity = OpportunityFactory.create(
-        opportunity_id=scenario, no_current_summary=True, agency=agency, is_draft=is_draft
+        opportunity_id=scenario,
+        no_current_summary=True,
+        agency=agency,
+        is_draft=is_draft,
+        opportunity_title=opportunity_title,
+        opportunity_number=opportunity_number,
     )
+
+    if assistance_listings:
+        for assistance_listing_number, program_title in assistance_listings:
+            OpportunityAssistanceListingFactory.create(
+                opportunity=opportunity,
+                assistance_listing_number=assistance_listing_number,
+                program_title=program_title,
+            )
 
     if has_current_opportunity:
         opportunity_summary = OpportunitySummaryFactory.create(
-            opportunity=opportunity, revision_number=2, no_link_values=True
+            opportunity=opportunity,
+            revision_number=2,
+            no_link_values=True,
+            summary_description=summary_description,
         )
         CurrentOpportunitySummaryFactory.create(
             opportunity=opportunity,
@@ -599,6 +630,28 @@ def setup_opportunity(
                 }
             ],
         ),
+        # Too short of a query
+        (
+            get_search_request(query=""),
+            [
+                {
+                    "field": "query",
+                    "message": "Length must be between 1 and 100.",
+                    "type": "min_or_max_length",
+                }
+            ],
+        ),
+        # Too long of a query
+        (
+            get_search_request(query="A" * 101),
+            [
+                {
+                    "field": "query",
+                    "message": "Length must be between 1 and 100.",
+                    "type": "min_or_max_length",
+                }
+            ],
+        ),
     ],
 )
 def test_opportunity_search_invalid_request_422(
@@ -612,6 +665,31 @@ def test_opportunity_search_invalid_request_422(
     print(resp.get_json())
     response_data = resp.get_json()["errors"]
     assert response_data == expected_response_data
+
+
+def search_scenario_id_fnc(val):
+    # Because we have a lot of tests, having the ID output by pytest simply be
+    # search_request11-expected_scenarios11
+    # can be a bit difficult to follow. This method is attached to the tests in the
+    # below class to try and roughly format the output into something readable to help
+    # you find the test we want.
+    #
+    # Note that Pytest calls this method once for each parametrized value, so the list
+    # represents the expected results, and the dict represents the search request object.
+    if isinstance(val, list):
+        return "Expected:" + ",".join([v.name for v in val])
+
+    if isinstance(val, dict):
+        # The pagination doesn't matter much for these tests
+        # so exclude it from the test name ID
+        copy_dict = val.copy()
+        del copy_dict["pagination"]
+        # Note that pytest seems to disallow periods in the ID names, so flatten
+        # it using / instead
+        return str(flatten_dict(copy_dict, separator="/"))
+
+    # fallback in case we setup anything else to just use the value as is
+    return val
 
 
 class TestSearchScenarios(BaseTestClass):
@@ -663,6 +741,7 @@ class TestSearchScenarios(BaseTestClass):
         setup_opportunity(
             Scenario.POSTED_ALL_ENUM_VALUES,
             opportunity_status=OpportunityStatus.POSTED,
+            opportunity_title="I have collected every enum known to humankind",
             funding_instruments=[e for e in FundingInstrument],
             funding_categories=[e for e in FundingCategory],
             applicant_types=[e for e in ApplicantType],
@@ -671,6 +750,7 @@ class TestSearchScenarios(BaseTestClass):
         setup_opportunity(
             Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
             opportunity_status=OpportunityStatus.POSTED,
+            opportunity_title="I have collected very few enum known to humankind",
             applicant_types=[ApplicantType.STATE_GOVERNMENTS, ApplicantType.COUNTY_GOVERNMENTS],
             agency="DIFFERENT-ABC",
         )
@@ -687,6 +767,7 @@ class TestSearchScenarios(BaseTestClass):
 
         setup_opportunity(
             Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES,
+            summary_description="I am a description for an opportunity",
             opportunity_status=OpportunityStatus.CLOSED,
             funding_categories=[FundingCategory.FOOD_AND_NUTRITION, FundingCategory.ENERGY],
             agency="DIFFERENT-XYZ",
@@ -705,6 +786,25 @@ class TestSearchScenarios(BaseTestClass):
             funding_instruments=[FundingInstrument.PROCUREMENT_CONTRACT],
             funding_categories=[FundingCategory.ENVIRONMENT],
             applicant_types=[ApplicantType.SMALL_BUSINESSES],
+        )
+
+        setup_opportunity(
+            Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
+            opportunity_title="Investigate 50% of everything",
+            assistance_listings=[
+                ("01.234", "The first example assistance listing"),
+                ("56.78", "The second example assistance listing"),
+            ],
+        )
+
+        setup_opportunity(
+            Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS,
+            opportunity_status=OpportunityStatus.CLOSED,
+            summary_description="/$!-/%^&hello*~%%%//%@#$",
+            assistance_listings=[
+                ("01.234", "The first example assistance listing"),
+                ("99.999", "The third example assistance listing"),
+            ],
         )
 
     @pytest.mark.parametrize(
@@ -735,6 +835,7 @@ class TestSearchScenarios(BaseTestClass):
                     Scenario.POSTED_ALL_ENUM_VALUES,
                     Scenario.POSTED_NULL_OTHER_VALUES,
                     Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
+                    Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
                 ],
             ),
             # Just forecasted
@@ -761,6 +862,7 @@ class TestSearchScenarios(BaseTestClass):
                     Scenario.ARCHIVED_NULL_OTHER_VALUES,
                     Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES,
                     Scenario.ARCHIVED_ONLY_ONE_FUNDING_INSTRUMENT_ONE_APPLICANT_TYPE,
+                    Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS,
                 ],
             ),
             # Posted or forecasted
@@ -779,6 +881,7 @@ class TestSearchScenarios(BaseTestClass):
                     Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
                     Scenario.FORECASTED_NULL_OTHER_VALUES,
                     Scenario.FORECASTED_FUNDING_INSTRUMENTS_AND_CATEGORIES,
+                    Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
                 ],
             ),
             ### Agency field tests (note that agency works as a prefix)
@@ -808,6 +911,8 @@ class TestSearchScenarios(BaseTestClass):
                     Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES,
                     Scenario.ARCHIVED_ONLY_ONE_FUNDING_INSTRUMENT_ONE_APPLICANT_TYPE,
                     Scenario.POSTED_ONE_OF_EACH_ENUM,
+                    Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
+                    Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS,
                 ],
             ),
             ### Testing the one-to-many enum values
@@ -976,6 +1081,7 @@ class TestSearchScenarios(BaseTestClass):
                 [],
             ),
         ],
+        ids=search_scenario_id_fnc,
     )
     def test_opportunity_search_filters_200(
         self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
@@ -987,6 +1093,211 @@ class TestSearchScenarios(BaseTestClass):
         search_response = resp.get_json()
         assert resp.status_code == 200
 
+        self.validate_results(search_request, search_response, expected_scenarios)
+
+    @pytest.mark.parametrize(
+        "search_request,expected_scenarios",
+        [
+            ### Verify that passing in a percentage sign (which is used in ilike) works still
+            (
+                get_search_request(page_size=25, query="50% of everything"),
+                [Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT],
+            ),
+            (
+                get_search_request(page_size=25, query="50%"),
+                [Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT],
+            ),
+            ### Can query against opportunity number (note it gets generated as OPP-NUMBER-{scenario} automatically)
+            (
+                get_search_request(
+                    page_size=25,
+                    query=f"OPP-NUMBER-{Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES}",
+                ),
+                [Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES],
+            ),
+            (
+                get_search_request(
+                    page_size=25,
+                    query=f"NUMBER-{Scenario.ARCHIVED_ONLY_ONE_FUNDING_INSTRUMENT_ONE_APPLICANT_TYPE}",
+                ),
+                [Scenario.ARCHIVED_ONLY_ONE_FUNDING_INSTRUMENT_ONE_APPLICANT_TYPE],
+            ),
+            ### These all fetch the same description which has a lot of weird characters in it
+            # just the readable part
+            (
+                get_search_request(page_size=25, query="hello"),
+                [Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS],
+            ),
+            # The whole thing
+            (
+                get_search_request(page_size=25, query="/$!-/%^&hello*~%%%//%@#$"),
+                [Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS],
+            ),
+            # part of it
+            (
+                get_search_request(page_size=25, query="*~%%%"),
+                [Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS],
+            ),
+            ### Can query against agency similar to the agency filter itself
+            (
+                get_search_request(page_size=25, query="diffeRENT"),
+                [
+                    Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
+                    Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES,
+                ],
+            ),
+            (
+                get_search_request(page_size=25, query="diffeRENT-xYz"),
+                [Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES],
+            ),
+            ### Assistance listing number + program title queries
+            (
+                get_search_request(page_size=25, query="01.234"),
+                [
+                    Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
+                    Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS,
+                ],
+            ),
+            (
+                get_search_request(page_size=25, query="56.78"),
+                [Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT],
+            ),
+            (
+                get_search_request(page_size=25, query="99.999"),
+                [Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS],
+            ),
+            (
+                get_search_request(page_size=25, query="example assistance listing"),
+                [
+                    Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
+                    Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS,
+                ],
+            ),
+            (
+                get_search_request(page_size=25, query="second example"),
+                [Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT],
+            ),
+            (
+                get_search_request(page_size=25, query="the third example"),
+                [Scenario.CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS],
+            ),
+            ### A few queries that return nothing as they're way too specific, even if they sort've overlap actual values
+            (get_search_request(query="different types of words that are so specific"), []),
+            (get_search_request(query="US-ABC DIFFERENT US-XYZ"), []),
+            (get_search_request(query="01.234.56.78.99"), []),
+            (get_search_request(query="the fourth example"), []),
+        ],
+        ids=search_scenario_id_fnc,
+    )
+    def test_opportunity_query_string_200(
+        self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
+    ):
+        resp = client.post(
+            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        search_response = resp.get_json()
+        assert resp.status_code == 200
+
+        self.validate_results(search_request, search_response, expected_scenarios)
+
+    @pytest.mark.parametrize(
+        "search_request,expected_scenarios",
+        [
+            # There are two forecasted records, but only one has an agency of "default-abc"
+            (
+                get_search_request(
+                    page_size=25,
+                    query="default-abc",
+                    opportunity_status_one_of=[OpportunityStatus.FORECASTED],
+                ),
+                [Scenario.FORECASTED_FUNDING_INSTRUMENTS_AND_CATEGORIES],
+            ),
+            # There are a few opportunities with "humankind" in their title
+            (
+                get_search_request(
+                    page_size=25,
+                    query="humankind",
+                    applicant_type_one_of=[
+                        ApplicantType.STATE_GOVERNMENTS,
+                        ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+                    ],
+                ),
+                [
+                    Scenario.POSTED_ALL_ENUM_VALUES,
+                    Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
+                ],
+            ),
+            # Like the previous one, but the query is more specific and only gets one of the scenarios
+            (
+                get_search_request(
+                    page_size=25,
+                    query="very few enum known to humankind",
+                    applicant_type_one_of=[
+                        ApplicantType.STATE_GOVERNMENTS,
+                        ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+                    ],
+                ),
+                [Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES],
+            ),
+            # Agency filtered by one_of, query hits something in the summary description
+            (
+                get_search_request(
+                    page_size=25,
+                    query="i am a description",
+                    agency_one_of=["DIFFERENT-XYZ", "DIFFERENT-abc"],
+                ),
+                [Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES],
+            ),
+            ### A few scenarios that don't return any results because filters/query make it too specific
+            (
+                get_search_request(
+                    page_size=25,
+                    query="humankind",
+                    opportunity_status_one_of=[
+                        OpportunityStatus.FORECASTED,
+                        OpportunityStatus.CLOSED,
+                        OpportunityStatus.ARCHIVED,
+                    ],
+                ),
+                [],
+            ),
+            (
+                get_search_request(
+                    page_size=25,
+                    query="different",
+                    funding_instrument_one_of=[FundingInstrument.GRANT],
+                ),
+                [],
+            ),
+            (
+                get_search_request(
+                    page_size=25,
+                    query="words that don't hit anything",
+                    applicant_type_one_of=[
+                        ApplicantType.STATE_GOVERNMENTS,
+                        ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+                    ],
+                ),
+                [],
+            ),
+        ],
+        ids=search_scenario_id_fnc,
+    )
+    def test_opportunity_query_and_filter_200(
+        self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
+    ):
+        # Basically a combo of the above two tests, testing requests with both query text and filters set
+        resp = client.post(
+            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        search_response = resp.get_json()
+        assert resp.status_code == 200
+
+        self.validate_results(search_request, search_response, expected_scenarios)
+
+    def validate_results(self, search_request, search_response, expected_scenarios):
         returned_scenarios = set([record["opportunity_id"] for record in search_response["data"]])
         expected_scenarios = set(expected_scenarios)
 

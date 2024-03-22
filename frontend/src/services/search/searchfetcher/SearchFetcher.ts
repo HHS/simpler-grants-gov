@@ -1,6 +1,7 @@
 import "server-only";
 
 import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
+import { SearchFetcherActionType } from "../../../types/search/searchRequestTypes";
 
 export interface SearchFetcherProps {
   page: number;
@@ -9,6 +10,8 @@ export interface SearchFetcherProps {
   agency: Set<string>;
   fundingInstrument: Set<string>;
   sortby: string | null;
+  actionType?: SearchFetcherActionType;
+  fieldChanged?: string;
 }
 
 export abstract class SearchFetcher {
