@@ -37,6 +37,7 @@ func TestService(t *testing.T) {
 	fmt.Println("::group::Initialize service module")
 	TerraformInit(t, terraformOptions, "dev.s3.tfbackend")
 	fmt.Println("::endgroup::")
+	fmt.Println("::testing 1 2::")
 
 	defer terraform.WorkspaceDelete(t, terraformOptions, workspaceName)
 	fmt.Println("::group::Select new terraform workspace")
