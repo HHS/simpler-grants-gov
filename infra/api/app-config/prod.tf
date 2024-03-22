@@ -8,4 +8,9 @@ module "prod_config" {
   database_instance_count         = 2
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+
+  service_override_extra_environment_variables = {
+    # determines whether the v0.1 endpoints are available in the API
+    ENABLE_V_0_1_ENDPOINTS = "false"
+  }
 }
