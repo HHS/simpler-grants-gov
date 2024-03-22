@@ -287,11 +287,3 @@ class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkOpportunityStatus.opportunity_status_id),
         index=True,
     )
-
-
-class TmpThing(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "tmp_thing"
-
-    opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
-    )
