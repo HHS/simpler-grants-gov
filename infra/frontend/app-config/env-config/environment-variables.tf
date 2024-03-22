@@ -14,10 +14,20 @@ locals {
   # store. Configurations are of the format
   # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
   secrets = [
-    # Example secret
-    # {
-    #   name           = "SECRET_SAUCE"
-    #   ssm_param_name = "/${var.app_name}-${var.environment}/secret-sauce"
-    # }
+    {
+      # Sendy API key to pass with requests for sendy subscriber endpoints.
+      name           = "SENDY_API_KEY"
+      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-api-key"
+    },
+    {
+      # Sendy API base url for requests to manage subscribers.
+      name           = "SENDY_API_URL"
+      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-api-url"
+    },
+    {
+      # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
+      name           = "SENDY_LIST_ID"
+      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+    }
   ]
 }
