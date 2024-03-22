@@ -10,6 +10,8 @@ from apiflask import APIFlask
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
+from src.adapters.db.clients.postgres_config import PostgresDBConfig
+from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
@@ -122,6 +124,12 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
     """
     monkeypatch.setattr(factories, "_db_session", db_session)
     return db_session
+
+
+@pytest.fixture
+def test_api_schema(db_client):
+    db_config = PostgresDBConfig()
+    return f"{db_config.schema_prefix_override}{Schemas.API}"
 
 
 ####################

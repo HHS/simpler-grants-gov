@@ -37,6 +37,10 @@ with src.logging.init("migrations"):
         reflected: bool,
         compare_to: Any,
     ) -> bool:
+        # We don't want alembic to try and drop its own table
+        if name == "alembic_version":
+            return False
+
         if type_ == "schema" and getattr(object, "schema", None) is not None:
             return False
         if type_ == "table" and name is not None and name.startswith("foreign_"):

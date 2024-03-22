@@ -24,7 +24,6 @@ def create_isolated_db(monkeypatch) -> db.DBClient:
 
     test_schemas = [f"{schema_prefix}{schema}" for schema in Schemas]
 
-    monkeypatch.setenv("DB_SCHEMA", ",".join(test_schemas))
     monkeypatch.setenv("SCHEMA_PREFIX_OVERRIDE", schema_prefix)
     monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
 
