@@ -69,6 +69,6 @@ def _run_copy_commands(db_session: db.Session, api_schema: str) -> None:
     db_session.execute(text(SqlCommands.OPPORTUNITY_DELETE_QUERY.format(api_schema)))
     db_session.execute(text(SqlCommands.OPPORTUNITY_INSERT_QUERY.format(api_schema, api_schema)))
     count = db_session.scalar(
-        text(f"SELECT count(*) from {api_schema}.transfer_topportunity")
-    )  # nosec
+        text(f"SELECT count(*) from {api_schema}.transfer_topportunity")  # nosec
+    )
     logger.info(f"Loaded {count} records into {api_schema}.transfer_topportunity")
