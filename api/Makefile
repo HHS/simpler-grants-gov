@@ -120,7 +120,7 @@ check: format-check lint db-check-migrations test
 
 # Docker starts the image for the DB but it's not quite
 # ready to accept connections so we add a brief wait script
-init-db: start-db db-migrate
+init-db: start-db setup-postgres-db db-migrate
 
 start-db:
 	docker-compose up --detach grants-db
@@ -175,6 +175,9 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 create-erds: # Create ERD diagrams for our DB schema
 	$(PY_RUN_CMD) create-erds
 	mv bin/*.png ../documentation/api/database/erds
+
+setup-postgres-db: # Does any initial setup necessary for our local database to work
+	$(PY_RUN_CMD) setup-postgres-db
 
 
 ##################################################

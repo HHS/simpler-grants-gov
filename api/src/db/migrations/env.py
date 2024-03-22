@@ -6,6 +6,7 @@ import sqlalchemy
 
 import src.adapters.db as db
 import src.logging
+from src.constants.schema import Schemas
 from src.db.models import metadata
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
@@ -69,10 +70,11 @@ with src.logging.init("migrations"):
             context.configure(
                 connection=connection,
                 target_metadata=target_metadata,
-                include_schemas=False,
+                include_schemas=True,
                 include_object=include_object,
                 compare_type=True,
                 render_item=render_item,
+                version_table_schema=Schemas.API,
             )
             with context.begin_transaction():
                 context.run_migrations()

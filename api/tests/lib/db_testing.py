@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 import src.adapters.db as db
 from src.adapters.db.clients.postgres_config import get_db_config
+from src.constants.schema import Schemas
 
 logger = logging.getLogger(__name__)
 
@@ -18,21 +19,28 @@ def create_isolated_db(monkeypatch) -> db.DBClient:
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
-    schema_name = f"test_schema_{uuid.uuid4().int}"
-    monkeypatch.setenv("DB_SCHEMA", schema_name)
+
+    schema_prefix = f"test_{uuid.uuid4().int}_"
+
+    test_schemas = [f"{schema_prefix}{schema}" for schema in Schemas]
+
+    monkeypatch.setenv("DB_SCHEMA", ",".join(test_schemas))
+    monkeypatch.setenv("SCHEMA_PREFIX_OVERRIDE", schema_prefix)
     monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
 
     # To improve test performance, don't check the database connection
     # when initializing the DB client.
     db_client = db.PostgresDBClient()
     with db_client.get_connection() as conn:
-        _create_schema(conn, schema_name)
+        for schema in test_schemas:
+            _create_schema(conn, schema)
 
         try:
             yield db_client
 
         finally:
-            _drop_schema(conn, schema_name)
+            for schema in test_schemas:
+                _drop_schema(conn, schema)
 
 
 def _create_schema(conn: db.Connection, schema_name: str):
