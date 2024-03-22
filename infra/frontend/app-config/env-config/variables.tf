@@ -26,24 +26,6 @@ variable "domain" {
   default     = null
 }
 
-variable "sendy_api_key" {
-  description = "Sendy API key to pass with requests for sendy subscriber endpoints."
-  type        = string
-  default     = null
-}
-
-variable "sendy_api_url" {
-  description = "Sendy API base url for requests to manage subscribers."
-  type        = string
-  default     = null
-}
-
-variable "sendy_list_id" {
-  description = "Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list."
-  type        = string
-  default     = null
-}
-
 variable "service_override_extra_environment_variables" {
   type        = map(string)
   description = <<EOT

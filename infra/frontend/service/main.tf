@@ -110,18 +110,6 @@ data "aws_acm_certificate" "cert" {
   domain = local.domain
 }
 
-data "aws_ssm_parameter" "sendy_api_key" {
-  name = local.environment_config.sendy_api_key
-}
-
-data "aws_ssm_parameter" "sendy_api_url" {
-  name = local.environment_config.sendy_api_url
-}
-
-data "aws_ssm_parameter" "sendy_list_id" {
-  name = local.environment_config.sendy_list_id
-}
-
 output "environment_name" {
   value = var.environment_name
 }
@@ -137,9 +125,6 @@ module "service" {
   enable_autoscaling    = module.app_config.enable_autoscaling
   cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
   hostname              = module.app_config.hostname
-  sendy_api_key         = data.aws_ssm_parameter.sendy_api_key.value
-  sendy_api_url         = data.aws_ssm_parameter.sendy_api_url.value
-  sendy_list_id         = data.aws_ssm_parameter.sendy_list_id.value
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
