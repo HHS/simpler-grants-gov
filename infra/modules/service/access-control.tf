@@ -135,6 +135,15 @@ data "aws_iam_policy_document" "task_executor" {
     ]
     resources = [data.aws_ecr_repository.app.arn]
   }
+
+  dynamic "statement" {
+    for_each = length(var.secrets) > 0 ? [1] : []
+    content {
+      sid       = "SecretsAccess"
+      actions   = ["ssm:GetParameters"]
+      resources = local.secret_arn_patterns
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "task_executor" {

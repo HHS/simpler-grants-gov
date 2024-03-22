@@ -153,6 +153,9 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  extra_environment_variables = local.service_config.extra_environment_variables
+  secrets                     = local.service_config.secrets
 }
 
 module "monitoring" {

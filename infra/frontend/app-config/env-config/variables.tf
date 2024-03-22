@@ -43,3 +43,12 @@ variable "sendy_list_id" {
   type        = string
   default     = null
 }
+
+variable "service_override_extra_environment_variables" {
+  type        = map(string)
+  description = <<EOT
+    Map that overrides the default extra environment variables defined in environment-variables.tf.
+    Map from environment variable name to environment variable value
+    EOT
+  default     = {}
+}
