@@ -10,6 +10,8 @@ interface SearchResultsListItemProps {
 export default function SearchResultsListItem({
   opportunity,
 }: SearchResultsListItemProps) {
+  // TODO: Confirm once deploying to lowers
+  // relates to https://github.com/HHS/simpler-grants-gov/issues/1521
   const opportunityURL =
     process.env.NEXT_PUBLIC_ENVIRONMENT === "prod"
       ? "https://grants.gov"
@@ -25,17 +27,17 @@ export default function SearchResultsListItem({
     tablet:border-base-lighter
   `;
 
+  const resultBorderClasses = `
+    border-1px
+    border-base-lighter
+    padding-x-2
+    padding-y-105
+    margin-bottom-2
+    text-base-darker
+  `;
+
   return (
-    <div
-      className="
-        border-1px
-        border-base-lighter
-        padding-x-2
-        padding-y-105
-        margin-bottom-2
-        text-base-darker
-      "
-    >
+    <div className={resultBorderClasses}>
       <div className="grid-row grid-gap">
         <div className="desktop:grid-col-fill">
           <div className="grid-row flex-column">
