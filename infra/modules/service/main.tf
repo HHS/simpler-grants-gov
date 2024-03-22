@@ -95,6 +95,7 @@ resource "aws_ecs_task_definition" "app" {
         ]
       },
       environment = local.environment_variables,
+      secrets     = local.secrets,
       portMappings = [
         {
           containerPort = var.container_port,

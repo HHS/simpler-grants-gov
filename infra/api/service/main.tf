@@ -144,8 +144,7 @@ module "service" {
   } : null
 
   extra_environment_variables = local.service_config.extra_environment_variables
-
-  # secrets = local.service_config.secrets
+  secrets                     = local.service_config.secrets
 }
 
 module "monitoring" {
