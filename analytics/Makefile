@@ -17,7 +17,7 @@ APP_NAME ?= grants-analytics
 SHELL = /bin/bash -o pipefail
 
 ifdef CI
- DOCKER_EXEC_ARGS := -T -e CI -e ANALYTICS_SLACK_BOT_TOKEN
+ DOCKER_EXEC_ARGS := -T -e CI -e ANALYTICS_SLACK_BOT_TOKEN -e ANALYTICS_REPORTING_CHANNEL_ID
 else
 endif
 
