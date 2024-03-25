@@ -6,17 +6,15 @@ open issues for each day in a sprint
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import pandas as pd
 import plotly.express as px
 from numpy import nan
+from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
-
-if TYPE_CHECKING:
-    from plotly.graph_objects import Figure
 
 
 class SprintBurndown(BaseMetric[SprintBoard]):

@@ -90,19 +90,18 @@ def calculate_sprint_burndown(
         post_results=post_results,
     )
 
-
 @metrics_app.command(name="sprint_burnup")
 def calculate_sprint_burnup(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
-    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
+    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value, # type: ignore[assignment]
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
 ) -> None:
-    """Calculate the burnup of a particular sprint."""
-    # load the input data
+    """Calculate the burnup of a particular sprint"""
+    # load the input data 
     sprint_data = SprintBoard.load_from_json_files(
         sprint_file=sprint_file,
         issue_file=issue_file,
