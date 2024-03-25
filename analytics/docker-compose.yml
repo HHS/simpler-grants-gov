@@ -13,3 +13,4 @@ services:
     volumes:
       - .:/analytics
       - ~/.ssh:/home/${RUN_USER:-analytics}/.ssh
+    env_file: ./local.env
