@@ -27,5 +27,7 @@ For example:
 
 You can populate our opportunity data by running: `make db-seed-local` when you have the DB running.
 
-This script currently creates 25 new opportunities each time you run it. In the future, as we expand the amount of data we support, we'll
-add more options and data to the DB, but this should give a rough set of data to work with.
+This script currently creates a few dozen opportunities each time you run it in various scenarios (differing opportunity statuses, titles, etc.).
+
+If you require a large amount of data locally, you can run `make db-seed-local args="--iterations 5"` setting the iterations count to your desired number.
+This effectively behaves like running the script multiple times in succession, and creates that many batches of opportunities.

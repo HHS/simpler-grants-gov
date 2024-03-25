@@ -30,7 +30,7 @@ const mockData = [
 
 // Mock both search fetchers in case we switch
 // Could also switch on a feature flag
-jest.mock("../../src/services/searchfetcher/APISearchFetcher", () => {
+jest.mock("../../src/services/search/searchfetcher/APISearchFetcher", () => {
   return {
     APISearchFetcher: jest.fn().mockImplementation(() => {
       return {
@@ -42,7 +42,7 @@ jest.mock("../../src/services/searchfetcher/APISearchFetcher", () => {
   };
 });
 
-jest.mock("../../src/services/searchfetcher/MockSearchFetcher", () => {
+jest.mock("../../src/services/search/searchfetcher/MockSearchFetcher", () => {
   return {
     MockSearchFetcher: jest.fn().mockImplementation(() => {
       return {

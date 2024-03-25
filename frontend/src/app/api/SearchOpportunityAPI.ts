@@ -1,14 +1,20 @@
 import "server-only";
 
-import BaseApi, { JSONRequestBody } from "./BaseApi";
+import {
+  PaginationOrderBy,
+  PaginationRequestBody,
+  PaginationSortDirection,
+  SearchFetcherActionType,
+  SearchFilterRequestBody,
+  SearchRequestBody,
+} from "../../types/search/searchRequestTypes";
 
-import { Opportunity } from "../../types/searchTypes";
-
-export type SearchResponseData = Opportunity[];
+import BaseApi from "./BaseApi";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {
-    return process.env.NEXT_PUBLIC_API_URL || "";
+    return process.env.API_URL || "";
   }
 
   get namespace(): string {
@@ -21,19 +27,24 @@ export default class SearchOpportunityAPI extends BaseApi {
     return { ...baseHeaders, ...searchHeaders };
   }
 
-  async searchOpportunities(queryParams?: JSONRequestBody) {
-    const requestBody = {
-      pagination: {
-        order_by: "opportunity_id",
-        page_offset: 1,
-        page_size: 25,
-        sort_direction: "ascending",
-      },
-      ...queryParams,
-    };
+  async searchOpportunities(searchInputs: SearchFetcherProps) {
+    const { query } = searchInputs;
+    const filters = this.buildFilters(searchInputs);
+    const pagination = this.buildPagination(searchInputs);
+
+    const requestBody: SearchRequestBody = { pagination };
+
+    // Only add filters if there are some
+    if (Object.keys(filters).length > 0) {
+      requestBody.filters = filters;
+    }
+
+    if (query) {
+      requestBody.query = query;
+    }
 
     const subPath = "search";
-    const response = await this.request<SearchResponseData>(
+    const response = await this.request(
       "POST",
       this.basePath,
       this.namespace,
@@ -42,5 +53,74 @@ export default class SearchOpportunityAPI extends BaseApi {
     );
 
     return response;
+  }
+
+  // Build with one_of syntax
+  private buildFilters(
+    searchInputs: SearchFetcherProps,
+  ): SearchFilterRequestBody {
+    const { agency, status, fundingInstrument } = searchInputs;
+    const filters: SearchFilterRequestBody = {};
+
+    if (agency && agency.size > 0) {
+      filters.agency = { one_of: Array.from(agency) };
+    }
+
+    if (status && status.size > 0) {
+      filters.opportunity_status = { one_of: Array.from(status) };
+    }
+
+    if (fundingInstrument && fundingInstrument.size > 0) {
+      filters.funding_instrument = { one_of: Array.from(fundingInstrument) };
+    }
+
+    return filters;
+  }
+
+  private buildPagination(
+    searchInputs: SearchFetcherProps,
+  ): PaginationRequestBody {
+    const { sortby, page, fieldChanged } = searchInputs;
+
+    // When performing an update (query, filter, sortby change) - we want to
+    // start back at the 1st page (we never want to retain the current page).
+    // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
+    // clear the page query param and set the page back to 1.
+    // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
+    // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
+    const page_offset =
+      searchInputs.actionType === SearchFetcherActionType.Update &&
+      fieldChanged !== "pagination"
+        ? 1
+        : page;
+
+    const orderByFieldLookup = {
+      opportunityNumber: "opportunity_number",
+      opportunityTitle: "opportunity_title",
+      agency: "agency_code",
+      postedDate: "post_date",
+      closeDate: "close_date",
+    };
+
+    let order_by: PaginationOrderBy = "opportunity_id";
+    if (sortby) {
+      for (const [key, value] of Object.entries(orderByFieldLookup)) {
+        if (sortby.startsWith(key)) {
+          order_by = value as PaginationOrderBy;
+          break; // Stop searching after the first match is found
+        }
+      }
+    }
+
+    const sort_direction: PaginationSortDirection = sortby?.endsWith("Desc")
+      ? "descending"
+      : "ascending";
+
+    return {
+      order_by,
+      page_offset,
+      page_size: 25,
+      sort_direction,
+    };
   }
 }

@@ -1,15 +1,20 @@
 // All exports in this file are server actions
 "use server";
 
-import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
-import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { FormDataService } from "../../services/search/FormDataService";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
+import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 
-const useMockData = false;
-const searchFetcher = useMockData
-  ? new MockSearchFetcher()
-  : new APISearchFetcher();
+// Gets MockSearchFetcher or APISearchFetcher based on environment variable
+const searchFetcher = getSearchFetcher();
 
-export async function updateResults() {
-  return await fetchSearchOpportunities(searchFetcher);
+// Server action called when SearchForm is submitted
+export async function updateResults(
+  prevState: SearchAPIResponse,
+  formData: FormData,
+): Promise<SearchAPIResponse> {
+  const formDataService = new FormDataService(formData);
+  const searchProps = formDataService.processFormData();
+
+  return await searchFetcher.fetchOpportunities(searchProps);
 }

@@ -51,6 +51,7 @@ locals {
   database_config                                = local.environment_config.database_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   api_auth_token_config                          = local.environment_config.api_auth_token
+  domain                                         = local.environment_config.domain
 }
 
 terraform {
@@ -88,6 +89,11 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
+data "aws_acm_certificate" "cert" {
+  count  = local.domain != null ? 1 : 0
+  domain = local.domain
+}
+
 data "aws_iam_policy" "app_db_access_policy" {
   count = module.app_config.has_database ? 1 : 0
   name  = local.database_config.app_access_policy_name
@@ -121,8 +127,8 @@ module "service" {
   cpu                   = 1024
   memory                = 2048
 
-  api_auth_token       = data.aws_ssm_parameter.api_auth_token.value
-  enable_v01_endpoints = module.app_config.environment_configs[var.environment_name].enable_v01_endpoints
+  api_auth_token = data.aws_ssm_parameter.api_auth_token.value
+  cert_arn       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
@@ -136,6 +142,9 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
+
+  extra_environment_variables = local.service_config.extra_environment_variables
+  secrets                     = local.service_config.secrets
 }
 
 module "monitoring" {

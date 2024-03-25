@@ -6,7 +6,7 @@ from apiflask.types import ResponseHeaderType
 from src.api.response import ValidationErrorDetail
 
 
-def raise_flask_error(  # type: ignore
+def raise_flask_error(
     status_code: int,
     message: str | None = None,
     detail: Any = None,

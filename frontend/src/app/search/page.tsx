@@ -1,40 +1,41 @@
-import { APISearchFetcher } from "../../services/searchfetcher/APISearchFetcher";
+import {
+  ServerSideRouteParams,
+  ServerSideSearchParams,
+} from "../../types/searchRequestURLTypes";
+
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
-import { MockSearchFetcher } from "../../services/searchfetcher/MockSearchFetcher";
-// Disable rule to allow server actions to be called without warning
-/* eslint-disable react/jsx-no-bind, @typescript-eslint/no-misused-promises */
+import PageSEO from "src/components/PageSEO";
 import React from "react";
+import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
+import { convertSearchParamsToProperTypes } from "../../utils/search/convertSearchParamsToProperTypes";
 import { cookies } from "next/headers";
-import { fetchSearchOpportunities } from "../../services/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
-// import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-// import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
-// import BetaAlert from "src/components/BetaAlert";
-
-import { GridContainer } from "@trussworks/react-uswds";
-
-const useMockData = false;
-
-const searchFetcher = useMockData
-  ? new MockSearchFetcher()
-  : new APISearchFetcher();
+const searchFetcher = getSearchFetcher();
 
 // TODO: use for i18n when ready
 // interface RouteParams {
 //   locale: string;
 // }
 
-export default async function Search() {
-  const cookieStore = cookies();
-  const ffManager = new FeatureFlagsManager(cookieStore);
+interface ServerPageProps {
+  params: ServerSideRouteParams;
+  searchParams: ServerSideSearchParams;
+}
+
+export default async function Search({ searchParams }: ServerPageProps) {
+  const ffManager = new FeatureFlagsManager(cookies());
   if (!ffManager.isFeatureEnabled("showSearchV0")) {
     return notFound();
   }
 
-  const initialSearchResults = await fetchSearchOpportunities(searchFetcher);
+  const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
+  const initialSearchResults = await searchFetcher.fetchOpportunities(
+    convertedSearchParams,
+  );
+
   return (
     <>
       {/* TODO: i18n */}
@@ -42,22 +43,11 @@ export default async function Search() {
         title="Search Funding Opportunities"
         description="Try out our experimental search page."
       />
-
-      <GridContainer>
-        {/* TODO: BetaAlert Breadcrumbs */}
-        {/* <BetaAlert /> */}
-        {/* <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} /> */}
-        <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-          Search funding opportunities
-        </h1>
-        <p className="tablet-lg:font-sans-lg line-height-sans-3 usa-intro margin-top-2">
-          We’re incrementally improving this experimental search page. How can
-          we make it easier to discover grants that are right for you? Let us
-          know at <a href="mailto:simpler@grants.gov">simpler@grants.gov</a>.
-        </p>
-      </GridContainer>
-
-      <SearchForm initialSearchResults={initialSearchResults} />
+      <SearchCallToAction />
+      <SearchForm
+        initialSearchResults={initialSearchResults}
+        requestURLQueryParams={convertedSearchParams}
+      />
     </>
   );
 }

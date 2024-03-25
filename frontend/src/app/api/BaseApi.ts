@@ -4,6 +4,7 @@
 // https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -11,13 +12,16 @@ export interface JSONRequestBody {
   [key: string]: unknown;
 }
 
-export interface ApiResponseBody<TResponseData> {
-  message: string;
-  data: TResponseData;
-  status_code: number;
-  errors?: unknown[]; // TODO: define error and warning Issue type
-  warnings?: unknown[];
-}
+// TODO: keep for reference on generic response type
+
+// export interface ApiResponseBody<TResponseData> {
+//   message: string;
+//   data: TResponseData;
+//   status_code: number;
+
+//   errors?: unknown[]; // TODO: define error and warning Issue type
+//   warnings?: unknown[];
+// }
 
 export interface HeadersDict {
   [header: string]: string;
@@ -49,7 +53,7 @@ export default abstract class BaseApi {
   /**
    * Send an API request.
    */
-  async request<TResponseData>(
+  async request(
     method: ApiMethod,
     basePath: string,
     namespace: string,
@@ -74,7 +78,7 @@ export default abstract class BaseApi {
     };
 
     headers["Content-Type"] = "application/json";
-    const response = await this.sendRequest<TResponseData>(url, {
+    const response = await this.sendRequest(url, {
       body: method === "GET" || !body ? null : createRequestBody(body),
       headers,
       method,
@@ -86,15 +90,12 @@ export default abstract class BaseApi {
   /**
    * Send a request and handle the response
    */
-  private async sendRequest<TResponseData>(
-    url: string,
-    fetchOptions: RequestInit,
-  ) {
+  private async sendRequest(url: string, fetchOptions: RequestInit) {
     let response: Response;
-    let responseBody: ApiResponseBody<TResponseData>;
+    let responseBody: SearchAPIResponse;
     try {
       response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as ApiResponseBody<TResponseData>;
+      responseBody = (await response.json()) as SearchAPIResponse;
     } catch (error) {
       console.log("Network Error encountered => ", error);
       throw new Error("Network request failed");
@@ -102,7 +103,8 @@ export default abstract class BaseApi {
       // throw fetchErrorToNetworkError(error);
     }
 
-    const { data, errors, warnings } = responseBody;
+    const { data, message, pagination_info, status_code, errors, warnings } =
+      responseBody;
     if (!response.ok) {
       console.log(
         "Not OK Response => ",
@@ -119,6 +121,9 @@ export default abstract class BaseApi {
 
     return {
       data,
+      message,
+      pagination_info,
+      status_code,
       warnings,
     };
   }

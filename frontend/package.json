@@ -19,6 +19,8 @@
     "test": "jest --ci --coverage",
     "test-update": "jest --update-snapshot",
     "test-watch": "jest --watch",
+    "test:e2e": "npx playwright test --config ./tests/playwright.config.ts",
+    "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui",
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -36,10 +38,12 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^14.0.0",
     "server-only": "^0.0.1",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "use-debounce": "^10.0.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
+    "@playwright/test": "^1.42.0",
     "@storybook/addon-designs": "^7.0.1",
     "@storybook/addon-essentials": "^7.1.0",
     "@storybook/nextjs": "^7.1.0",
@@ -61,7 +65,7 @@
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-jest-dom": "^5.0.1",
-    "eslint-plugin-storybook": "^0.6.12",
+    "eslint-plugin-storybook": "^0.8.0",
     "eslint-plugin-testing-library": "^5.11.0",
     "i18next-browser-languagedetector": "^7.0.2",
     "i18next-http-backend": "^2.2.1",

@@ -1,7 +1,7 @@
 import math
-from typing import Generic, Sequence, TypeVar
+from typing import Generic, Sequence, Type, TypeVar
 
-from sqlalchemy import Select, func
+from sqlalchemy import Select, func, inspect
 
 import src.adapters.db as db
 from src.db.models.base import Base
@@ -38,7 +38,10 @@ class Paginator(Generic[T]):
 
     """
 
-    def __init__(self, stmt: Select, db_session: db.Session, page_size: int = 25):
+    def __init__(
+        self, table_model: Type[Base], stmt: Select, db_session: db.Session, page_size: int = 25
+    ):
+        self.table_model = table_model
         self.stmt = stmt
         self.db_session = db_session
 
@@ -47,7 +50,7 @@ class Paginator(Generic[T]):
 
         self.page_size = page_size
 
-        self.total_records = _get_record_count(self.db_session, self.stmt)
+        self.total_records = _get_record_count(self.table_model, self.db_session, self.stmt)
         self.total_pages = int(math.ceil(self.total_records / self.page_size))
 
     def page_at(self, page_offset: int) -> Sequence[T]:
@@ -67,8 +70,13 @@ class Paginator(Generic[T]):
         )
 
 
-def _get_record_count(db_session: db.Session, stmt: Select) -> int:
-    # Simplify the query to instead be select count(*) from <whatever the query was>
-    # and remove the order_by as we won't care for this query.
-    count_stmt = stmt.order_by(None).with_only_columns(func.count(), maintain_column_froms=True)
+def _get_record_count(table_model: Type[Base], db_session: db.Session, stmt: Select) -> int:
+    # Simplify the query to instead be select count(DISTINCT(<primary key>)) from <whatever the query was>
+    # and remove the order_by as we won't care for this query and it would just make it slower.
+
+    primary_key = inspect(table_model).primary_key[0]
+
+    count_stmt = stmt.order_by(None).with_only_columns(
+        func.count(primary_key.distinct()), maintain_column_froms=True
+    )
     return db_session.execute(count_stmt).scalar_one()

@@ -29,7 +29,7 @@ class Opportunity(Base, TimestampMixin):
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
 
-    agency: Mapped[str | None]
+    agency: Mapped[str | None] = mapped_column(index=True)
 
     category: Mapped[OpportunityCategory | None] = mapped_column(
         "opportunity_category_id",
@@ -57,6 +57,10 @@ class Opportunity(Base, TimestampMixin):
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
 
+    all_opportunity_summaries: Mapped[list["OpportunitySummary"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
     @property
     def summary(self) -> "OpportunitySummary | None":
         """
@@ -70,13 +74,22 @@ class Opportunity(Base, TimestampMixin):
 
         return self.current_opportunity_summary.opportunity_summary
 
+    @property
+    def opportunity_status(self) -> OpportunityStatus | None:
+        if self.current_opportunity_summary is None:
+            return None
+
+        return self.current_opportunity_summary.opportunity_status
+
 
 class OpportunitySummary(Base, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
     opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
-    opportunity_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Opportunity.opportunity_id))
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     summary_description: Mapped[str | None]
@@ -177,7 +190,10 @@ class LinkOpportunitySummaryFundingInstrument(Base, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger,
+        ForeignKey(OpportunitySummary.opportunity_summary_id),
+        primary_key=True,
+        index=True,
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -186,6 +202,7 @@ class LinkOpportunitySummaryFundingInstrument(Base, TimestampMixin):
         LookupColumn(LkFundingInstrument),
         ForeignKey(LkFundingInstrument.funding_instrument_id),
         primary_key=True,
+        index=True,
     )
 
     legacy_funding_instrument_id: Mapped[int | None]
@@ -198,7 +215,10 @@ class LinkOpportunitySummaryFundingCategory(Base, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_category"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger,
+        ForeignKey(OpportunitySummary.opportunity_summary_id),
+        primary_key=True,
+        index=True,
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -207,6 +227,7 @@ class LinkOpportunitySummaryFundingCategory(Base, TimestampMixin):
         LookupColumn(LkFundingCategory),
         ForeignKey(LkFundingCategory.funding_category_id),
         primary_key=True,
+        index=True,
     )
 
     legacy_funding_category_id: Mapped[int | None]
@@ -219,7 +240,10 @@ class LinkOpportunitySummaryApplicantType(Base, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger,
+        ForeignKey(OpportunitySummary.opportunity_summary_id),
+        primary_key=True,
+        index=True,
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(OpportunitySummary)
 
@@ -228,6 +252,7 @@ class LinkOpportunitySummaryApplicantType(Base, TimestampMixin):
         LookupColumn(LkApplicantType),
         ForeignKey(LkApplicantType.applicant_type_id),
         primary_key=True,
+        index=True,
     )
 
     legacy_applicant_type_id: Mapped[int | None]
@@ -240,14 +265,17 @@ class CurrentOpportunitySummary(Base, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
     opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(
         single_parent=True, cascade="all, delete-orphan"
     )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(OpportunitySummary.opportunity_summary_id), primary_key=True
+        BigInteger,
+        ForeignKey(OpportunitySummary.opportunity_summary_id),
+        primary_key=True,
+        index=True,
     )
     opportunity_summary: Mapped[OpportunitySummary] = relationship(
         single_parent=True, cascade="all, delete-orphan"
@@ -257,4 +285,5 @@ class CurrentOpportunitySummary(Base, TimestampMixin):
         "opportunity_status_id",
         LookupColumn(LkOpportunityStatus),
         ForeignKey(LkOpportunityStatus.opportunity_status_id),
+        index=True,
     )

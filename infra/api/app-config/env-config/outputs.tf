@@ -16,6 +16,12 @@ output "database_config" {
 output "service_config" {
   value = {
     region = var.default_region
+    extra_environment_variables = merge(
+      local.default_extra_environment_variables,
+      var.service_override_extra_environment_variables
+    )
+
+    secrets = toset(local.secrets)
   }
 }
 
@@ -31,6 +37,6 @@ output "api_auth_token" {
   }
 }
 
-output "enable_v01_endpoints" {
-  value = var.enable_v01_endpoints
+output "domain" {
+  value = var.domain
 }

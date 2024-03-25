@@ -127,6 +127,25 @@ A subset of tests can be ran by passing a pattern to the script. For example, to
 npm run test-watch -- pages
 ```
 
+## 🚦 End-to-end (E2E) testing
+
+[Playwright](https://playwright.dev/) is a framework for web testing and its test runner is called [Playwright Test](https://playwright.dev/docs/api/class-test), which can be used to run E2E or integration tests across chromium, firefox, and webkit browsers.
+
+E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` directory.
+
+To run E2E tests via CLI:
+
+- `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
+- `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
+- `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
+
+To run E2E tests using VS Code:
+
+1. Download the VS Code extension described in these [Playwright docs](https://playwright.dev/docs/running-tests#run-tests-in-vs-code)
+2. Follow the [instructions](https://playwright.dev/docs/getting-started-vscode#running-tests) Playwright provides
+
+In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
+
 ## 🤖 Type checking, linting, and formatting
 
 - [TypeScript](https://www.typescriptlang.org/) is used for type checking.
