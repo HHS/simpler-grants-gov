@@ -35,6 +35,9 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
   && mkdir /analytics \
   && chown -R ${RUN_UID} "/home/${RUN_USER}" /analytics)
 
+# Set PYTHONPATH so that the tests can find the source code.
+ENV PYTHONPATH="/analytics/src/:$PYTHONPATH"
+
 #-----------
 # Dev image
 #-----------
