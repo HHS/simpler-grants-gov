@@ -68,22 +68,26 @@ At 2 - 5 years, performance bottle-necks with S3 mean that Redshift easily wins 
 
 ### Postgres
 
-Postgres, as hosted by AWS RDS, is a SQL database that you can use to store large data sets. Many of the characteristics that apply to Redshift apply to Postgres, with the caveat that Postgres is not built for business intelligence use cases. We have an existing Postgres database, but we would not want to re-use it for our data analytics purposes.
+Postgres, as hosted by AWS RDS, is an open-source SQL database that you can use to store large data sets. Many of the positive characteristics that apply to Redshift apply to Postgres, with the caveat that Postgres is not built for business intelligence use cases. That said, Postgres's open-source nature gives it a distinct advantage over Redshift, especially when thinking about collaboration with open-source contributors. We have an existing Postgres database, but we would not want to re-use it for our data analytics purposes. We would however be able to re-use its terraform configuration.
 
 [Data is hosted in Postgres at $0.115 per GB-month](https://aws.amazon.com/rds/postgresql/pricing/), higher than S3 and Redshift.
 
-In every time range, Postgres loses to Redshift due to Postgres being an OLTP database built for real-time data processing. In the 2 - 5 year range, Postgres also loses due to its high GB-month hosting cost. There is however, evidence that Postgres is faster than Redshift, and that Redshift's OLAP advantages don't kick in until the data grows to terabtyes in size.
+At 0 - 6 months, Postgres beats Redshift due to us already having a functional and secure Postgres configuration. Additionally, for small data sizes, Postgres is optimized to return queries more quickly than Redshift.
+
+At 6 months - 2 years, Redshift and Postgres are essentially identical solutions, given that we have already paid down the initial setup cost.
+
+ In the 2 - 5 year range, Postgres becomes less appealing due to its higher GB-month hosting cost. There is however evidence that Redshift's OLAP advantages don't kick in until the data grows to terabytes in size. It is unclear if our data will ever grow to that size.
 
 ### Snowflake
 
 Snowflake is a data warehouse that is traditionally used to store big data for processing and analytics. Snowflake is a third-party data hosting platform and does not have an AWS-native deployment solution. Deploying Snowflake would require us to either self-host the database or build the infrastructure to connect our systems with an externally managed service. Similarly to Redshift, Snowflake is an OLAP optimized data warehouse, that is well-designed for business analytics queries.
 
-At 0 - 6 months, Snowflake loses to Redshift due to Redshift being vastly easier to set up and configure.
+At 0 - 6 months, Snowflake loses to Redshift and Postgres due to the AWS managed databases being vastly easier to set up and configure.
 
-At 6 months - 2 years, Snowflake and Redshift are essentially identical solutions.
+At 6 months - 2 years, Snowflake Redshift and Postgres are essentially identical solutions, given that we have already paid down the initial setup cost.
 
-At 2 - 5 years, Snowflake may start to show cost and performance advantages relative to Redshift. Hard evidence to back this up is hard to come by, though.
+At 2 - 5 years, Snowflake may start to show cost and performance advantages relative to Redshift or Postgres. Hard evidence to back this up is hard to come by, though.
 
 ## Decision Outcome
 
-The chosen option for this ADR is **_AWS Redshift_**. Redshift has been chosen due to its OLAP design, and its potential advantages when used with very large datasets.
+At present this ADR has the most evidence in favor of **Postgres**, in large part due to the fact that we are already using it. Additional evidence that we will have "big data" (eg 1 TB or larger) would shift this ADR in favor of **Redshift**, but we do not have evidence of that at this time.
