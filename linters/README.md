@@ -36,7 +36,7 @@ root
 5. Choose the version of the workflow you want to run based on its branch. **Note:** In most cases this will be `Branch: main`.
 6. Finally, click the green "Run workflow" button to trigger that linter.
 
-### Adding a new linter
+### Add a new linter
 
 1. Create a new linting script in `linters/scripts/`.
    - **Note:** If you're script requires a long graphql query for the GitHub graphql API, pull that query out into its own `.graphql` file stored in `linters/queries/`.
