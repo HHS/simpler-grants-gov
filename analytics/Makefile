@@ -87,12 +87,12 @@ lint:
 unit-test:
 	@echo "=> Running unit tests"
 	@echo "============================="
-	$(POETRY) pytest --cov=src
+	$(POETRY) pytest -s --cov=src
 
 e2e-test:
 	@echo "=> Running end-to-end tests"
 	@echo "============================="
-	$(POETRY) pytest tests/integrations --cov=src --cov-append
+	$(POETRY) pytest -s tests/integrations --cov=src --cov-append
 
 test-audit: unit-test e2e-test
 	@echo "=> Running test coverage report"
@@ -133,7 +133,7 @@ gh-data-export: sprint-data-export issue-data-export
 sprint-burndown:
 	@echo "=> Running sprint burndown report"
 	@echo "====================================================="
-	poetry run analytics calculate sprint_burndown \
+	$(POETRY) analytics calculate sprint_burndown \
 	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
 	--sprint  "$(SPRINT)" \
@@ -143,7 +143,7 @@ sprint-burndown:
 percent-complete:
 	@echo "=> Running percent complete deliverable"
 	@echo "====================================================="
-	poetry run analytics calculate deliverable_percent_complete \
+	$(POETRY) analytics calculate deliverable_percent_complete \
 	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
 	--unit $(UNIT) \
