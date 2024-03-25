@@ -1,0 +1,28 @@
+name: Lint - Close done issues
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "00 5 * * 1-5"
+
+defaults:
+  run:
+    working-directory: ./linters # ensures that this job runs from the ./linters sub-directory
+
+jobs:
+  run-project-linters:
+    name: Run GitHub project linters
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+    steps:
+      # set up python
+      - uses: actions/checkout@v3
+
+      - name: Close open issues marked as "Done" in Sprint Board
+        run: |
+          ORG="HHS"\
+            PROJECT=13\
+            STATUS="Done"\
+            BATCH=100\
+            ./scripts/close-issues-in-done-col.sh
