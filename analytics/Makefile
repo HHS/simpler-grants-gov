@@ -17,8 +17,9 @@ APP_NAME ?= grants-analytics
 SHELL = /bin/bash -o pipefail
 
 ifdef CI
- DOCKER_EXEC_ARGS := -T -e CI
+ DOCKER_EXEC_ARGS := -T -e CI -e GH_TOKEN
 else
+ DOCKER_EXEC_ARGS := -e GH_TOKEN
 endif
 
 # By default, all python/poetry commands will run inside of the docker container
@@ -69,7 +70,7 @@ install: check-prereqs
 	poetry install
 
 login:
-	gh auth login
+	$(GITHUB) auth login
 
 build:
 	docker-compose build
@@ -87,12 +88,12 @@ lint:
 unit-test:
 	@echo "=> Running unit tests"
 	@echo "============================="
-	$(POETRY) pytest -s --cov=src
+	$(POETRY) pytest --cov=src
 
 e2e-test:
 	@echo "=> Running end-to-end tests"
 	@echo "============================="
-	$(POETRY) pytest -s tests/integrations --cov=src --cov-append
+	$(POETRY) pytest tests/integrations --cov=src --cov-append
 
 test-audit: unit-test e2e-test
 	@echo "=> Running test coverage report"
