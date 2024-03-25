@@ -143,11 +143,7 @@ def _add_filters(
         # Note that we filter against the agency code in the opportunity, not in the summary
         one_of_agencies = filters.agency.get("one_of")
         if one_of_agencies:
-            # This produces something like:
-            #   ..WHERE ((opportunity.agency ILIKE 'US-ABC%') OR (opportunity.agency ILIKE 'HHS%'))
-            stmt = stmt.where(
-                or_(*[Opportunity.agency.istartswith(agency) for agency in one_of_agencies])
-            )
+            stmt = stmt.where(Opportunity.agency.in_(one_of_agencies))
 
     return stmt
 
