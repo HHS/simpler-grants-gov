@@ -94,6 +94,15 @@ test-audit: unit-test e2e-test
 	@echo "============================="
 	$(POETRY) coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
 
+release-build:
+	docker buildx build \
+		--target release \
+		--platform=linux/amd64 \
+		--build-arg RUN_USER=$(RUN_USER) \
+		--build-arg RUN_UID=$(RUN_UID) \
+		$(OPTS) \
+		.
+
 #################
 # Data Commands #
 #################

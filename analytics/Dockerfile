@@ -45,9 +45,6 @@ ARG RUN_USER
 # In between ARG RUN_USER and USER ${RUN_USER}, the user is still root
 # If there is anything that needs to be ran as root, this is the spot
 
-# Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz
-
 USER ${RUN_USER}
 WORKDIR /analytics
 
