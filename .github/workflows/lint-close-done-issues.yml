@@ -21,8 +21,8 @@ jobs:
 
       - name: Close open issues marked as "Done" in Sprint Board
         run: |
-          ORG="HHS"\
-            PROJECT=13\
-            STATUS="Done"\
-            BATCH=100\
-            ./scripts/close-issues-in-done-col.sh
+          ./scripts/close-issues-in-done-col.sh \
+            --org HHS \
+            --project 13 \
+            --status Done \
+            --batch 100
