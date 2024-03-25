@@ -16,6 +16,11 @@ APP_NAME ?= grants-analytics
 # Required for CI to work properly
 SHELL = /bin/bash -o pipefail
 
+ifdef CI
+ DOCKER_EXEC_ARGS := -T -e CI -e ANALYTICS_SLACK_BOT_TOKEN
+else
+endif
+
 # By default, all python/poetry commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
