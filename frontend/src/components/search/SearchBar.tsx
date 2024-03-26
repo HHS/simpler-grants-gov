@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 import { useState } from "react";
 
@@ -16,27 +17,35 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
   };
 
   return (
-    <div className="usa-search usa-search--big" role="search">
-      <label className="usa-sr-only" htmlFor="query">
-        Search
+    <div className="margin-top-5 margin-bottom-2">
+      <label
+        htmlFor="query"
+        className="font-sans-lg display-block margin-bottom-2"
+      >
+        <span className="text-bold">Search terms </span>
+        <small className="inline-block">
+          Enter keywords, opportunity numbers, or assistance listing numbers
+        </small>
       </label>
-      <input
-        className="usa-input maxw-none"
-        id="query"
-        type="search"
-        name="query"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      />
+      <div className="usa-search usa-search--big" role="search">
+        <input
+          className="usa-input maxw-none"
+          id="query"
+          type="search"
+          name="query"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
 
-      <button className="usa-button" type="submit" onClick={handleSubmit}>
-        <span className="usa-search__submit-text">Search </span>
-        {/* <img
-          src="/assets/img/usa-icons-bg/search--white.svg"
-          className="usa-search__submit-icon"
-          alt="Search"
-        /> */}
-      </button>
+        <button className="usa-button" type="submit" onClick={handleSubmit}>
+          <span className="usa-search__submit-text">Search </span>
+          <Icon.Search
+            className="usa-search__submit-icon"
+            size={4}
+            aria-label="Search"
+          />
+        </button>
+      </div>
     </div>
   );
 }
