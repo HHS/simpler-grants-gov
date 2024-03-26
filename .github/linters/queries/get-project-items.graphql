@@ -1,0 +1,38 @@
+query ($endCursor: String, $login: String!, $project: Int!, $batch: Int!) {
+  # get the project by the user login and project number
+  organization(login: $login) {
+    projectV2(number: $project) {
+      # insert the projectFields fragment below
+      ...projectFields
+    }
+  }
+}
+
+fragment projectFields on ProjectV2 {
+  # get project items in batches of 100, which is the match batch size
+  items(first: $batch, after: $endCursor) {
+    # allows us to use --paginate in the gh api call
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+
+    # fetch details per item in the list
+    nodes {
+      # fetch the value of the status column
+      status: fieldValueByName(name: "Status") {
+        ... on ProjectV2ItemFieldSingleSelectValue {
+          name
+        }
+      }
+
+      # fetch the issue URL and open/closed state
+      issue: content {
+        ... on Issue {
+          url
+          state
+        }
+      }
+    }
+  }
+}
