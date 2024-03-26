@@ -40,10 +40,22 @@ Once you follow the steps above, check that you meet the prerequisites with: `ma
 
 1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
 2. Create a `.secrets.toml` with the following details, see the next section to discover where these values can be found:
+
    ```toml
    reporting_channel_id = "<REPLACE_WITH_CHANNEL_ID>"
    slack_bot_token = "<REPLACE_WITH_SLACKBOT_TOKEN_ID>"
    ```
+
+3. Set a Github Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
+
+  - Go to https://github.com/settings/tokens
+  - Create a token
+  - Give it the following scopes:
+    - repo
+    - read:org
+    - admin:public_key
+    - project
+  - Add `export GH_TOKEN=...` to your `zshrc` or similar
 
 ### Configuring secrets
 
