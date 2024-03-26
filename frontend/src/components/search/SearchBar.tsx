@@ -23,7 +23,7 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
         className="font-sans-lg display-block margin-bottom-2"
       >
         <span className="text-bold">Search terms </span>
-        <small className="inline-block">
+        <small className="display-inline-block">
           Enter keywords, opportunity numbers, or assistance listing numbers
         </small>
       </label>
