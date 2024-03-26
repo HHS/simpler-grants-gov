@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - linters/**
+      - .github/linters/**
       - .github/workflows/ci-project-linters.yml
 
 defaults:
