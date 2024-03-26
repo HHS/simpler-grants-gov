@@ -6,12 +6,10 @@ open issues for each day in a sprint
 """
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import plotly.express as px
-from numpy import nan
-from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
@@ -20,6 +18,9 @@ from analytics.metrics.utils import (
     get_daily_tix_counts_by_status,
     get_tix_date_range,
 )
+
+if TYPE_CHECKING:
+    from plotly.graph_objects import Figure
 
 
 class SprintBurnup(BaseMetric[SprintBoard]):
