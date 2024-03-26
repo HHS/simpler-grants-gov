@@ -77,9 +77,8 @@ resource "aws_cloudwatch_metric_alarm" "service_errors" {
   threshold           = 0
   treat_missing_data  = "ignore"
   alarm_description   = "Alarm for service errors"
-  # commented for testing
-  # alarm_actions       = [aws_sns_topic.this.arn]
-  # ok_actions          = [aws_sns_topic.this.arn]
+  alarm_actions       = [aws_sns_topic.this.arn]
+  ok_actions          = [aws_sns_topic.this.arn]
 }
 
 
