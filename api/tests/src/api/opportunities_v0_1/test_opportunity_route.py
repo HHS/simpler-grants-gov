@@ -72,19 +72,19 @@ def get_search_request(
 
     filters = {}
 
-    if funding_instrument_one_of:
+    if funding_instrument_one_of is not None:
         filters["funding_instrument"] = {"one_of": funding_instrument_one_of}
 
-    if funding_category_one_of:
+    if funding_category_one_of is not None:
         filters["funding_category"] = {"one_of": funding_category_one_of}
 
-    if applicant_type_one_of:
+    if applicant_type_one_of is not None:
         filters["applicant_type"] = {"one_of": applicant_type_one_of}
 
-    if opportunity_status_one_of:
+    if opportunity_status_one_of is not None:
         filters["opportunity_status"] = {"one_of": opportunity_status_one_of}
 
-    if agency_one_of:
+    if agency_one_of is not None:
         filters["agency"] = {"one_of": agency_one_of}
 
     if len(filters) > 0:
@@ -650,6 +650,90 @@ def setup_opportunity(
                     "message": "Length must be between 1 and 100.",
                     "type": "min_or_max_length",
                 }
+            ],
+        ),
+        # Verify that if the one_of lists are empty, we get a validation error
+        (
+            get_search_request(
+                funding_instrument_one_of=[],
+                funding_category_one_of=[],
+                applicant_type_one_of=[],
+                opportunity_status_one_of=[],
+                agency_one_of=[],
+            ),
+            [
+                {
+                    "field": "filters.funding_instrument.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.funding_category.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.applicant_type.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.opportunity_status.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.agency.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+            ],
+        ),
+        # Validate that if a filter is provided, but empty, we'll provide an exception
+        # note that the get_search_request() method isn't great for constructing this particular
+        # case - so we manually define the request instead
+        (
+            {
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 5,
+                    "order_by": "opportunity_id",
+                    "sort_direction": "descending",
+                },
+                "filters": {
+                    "funding_instrument": {},
+                    "funding_category": {},
+                    "applicant_type": {},
+                    "opportunity_status": {},
+                    "agency": {},
+                },
+            },
+            [
+                {
+                    "field": "filters.funding_instrument",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.funding_category",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.applicant_type",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.opportunity_status",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.agency",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
             ],
         ),
     ],
