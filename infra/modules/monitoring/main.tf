@@ -66,26 +66,23 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   }
 }
 
-# resource "aws_cloudwatch_metric_alarm" "service_error_anomalies" {
-#   alarm_name          = "${var.service_name}-error-anomalies"
-#   comparison_operator = "GreaterThanThreshold"
-#   evaluation_periods  = 5
-#   alarm_description   = "Alarm for service errors"
-#   treat_missing_data  = "ignore"
-#   statistic           = "Sum"
-#   threshold           = 1
-#   # commented for testing
-#   # alarm_actions       = [aws_sns_topic.this.arn]
-#   # ok_actions          = [aws_sns_topic.this.arn]
+resource "aws_cloudwatch_metric_alarm" "service_errors" {
+  alarm_name          = "${var.service_name}-errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "ErrorCount"
+  namespace           = var.service_name
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 0
+  treat_missing_data  = "ignore"
+  alarm_description   = "Alarm for service errors"
+  # commented for testing
+  # alarm_actions       = [aws_sns_topic.this.arn]
+  # ok_actions          = [aws_sns_topic.this.arn]
+}
 
-#   dimensions = {
-#     LoadBalancer = var.load_balancer_arn_suffix # change! 
-#   }
 
-# }
-
-# query json
-# filter for levelname: ERROR
 resource "aws_cloudwatch_log_metric_filter" "service_error_filter" {
 
   name           = "service-error-filter"
