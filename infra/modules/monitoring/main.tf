@@ -85,7 +85,7 @@ resource "aws_cloudwatch_metric_alarm" "service_errors" {
 resource "aws_cloudwatch_log_metric_filter" "service_error_filter" {
 
   name           = "service-error-filter"
-  pattern        = "%ERROR%"                     # pattern can find events in unstructured logs
+  pattern        = "%ERROR | Exception%"         # pattern can find events in unstructured logs
   log_group_name = "service/${var.service_name}" # cloudwatch log group for the ecs service
 
   metric_transformation {
