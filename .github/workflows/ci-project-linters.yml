@@ -18,7 +18,6 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
     steps:
-      # set up python
       - uses: actions/checkout@v3
 
       - name: Dry run - Close open issues marked as "Done" in Sprint Board
