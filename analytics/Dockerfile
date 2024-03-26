@@ -118,8 +118,5 @@ RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_g
 # defiend in pyproject.toml
 ENV PATH="/analytics/.venv/bin:$PATH"
 
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
 
 USER ${RUN_USER}
