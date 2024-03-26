@@ -9,9 +9,9 @@ import pandas as pd
 from analytics.metrics.base import Unit
 
 
-def get_daily_tix_counts_by_status(df: pd.DataFrame,
-                                   status: Literal["opened", "closed"],
-                                   unit: Unit) -> pd.DataFrame:
+def get_daily_tix_counts_by_status(
+    df: pd.DataFrame, status: Literal["opened", "closed"], unit: Unit,
+) -> pd.DataFrame:
     """
     Count the number of issues or points opened or closed by date.
 
@@ -30,9 +30,13 @@ def get_daily_tix_counts_by_status(df: pd.DataFrame,
     df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
     return df_agg.rename(columns={agg_col: "date", unit_col: status})
 
-def get_tix_date_range(df: pd.DataFrame, open_col: str | None,
-                       closed_col: str | None,
-                       sprint_end: pd.Timestamp) -> pd.DataFrame:
+
+def get_tix_date_range(
+    df: pd.DataFrame,
+    open_col: str | None,
+    closed_col: str | None,
+    sprint_end: pd.Timestamp,
+) -> pd.DataFrame:
     """
     Get the data range over which issues were created and closed.
 
@@ -52,8 +56,9 @@ def get_tix_date_range(df: pd.DataFrame, open_col: str | None,
     closed_max = sprint_end if pd.isna(closed_max) else max(sprint_end, closed_max)
     return pd.DataFrame(
         pd.date_range(opened_min, closed_max),
-        columns = ["date"],
+        columns=["date"],
     )
+
 
 def get_cum_sum_of_tix(
     dates: pd.DataFrame,
@@ -83,5 +88,3 @@ def get_cum_sum_of_tix(
     df["total_open"] = df["delta"].cumsum()
     df["total_closed"] = df["closed"].cumsum()
     return df
-
-
