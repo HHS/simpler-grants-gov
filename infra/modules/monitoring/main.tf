@@ -66,45 +66,39 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "app_response_time_anomalies" {
-  # test alarm using anomaly detection to monitor response time.
-  # a PR-worthy alarm will need to track something else to get service errors
-  alarm_name          = "${var.service_name}-response-time-anomalies"
-  comparison_operator = "GreaterThanUpperThreshold"
-  evaluation_periods  = 5
-  threshold_metric_id = "q1"
-  alarm_description   = "Anomalies with latency"
-  treat_missing_data  = "ignore"
-  # commented for testing
-  # alarm_actions       = [aws_sns_topic.this.arn]
-  # ok_actions          = [aws_sns_topic.this.arn]
+# resource "aws_cloudwatch_metric_alarm" "service_error_anomalies" {
+#   alarm_name          = "${var.service_name}-error-anomalies"
+#   comparison_operator = "GreaterThanThreshold"
+#   evaluation_periods  = 5
+#   alarm_description   = "Alarm for service errors"
+#   treat_missing_data  = "ignore"
+#   statistic           = "Sum"
+#   threshold           = 1
+#   # commented for testing
+#   # alarm_actions       = [aws_sns_topic.this.arn]
+#   # ok_actions          = [aws_sns_topic.this.arn]
 
-  dimensions = {
-    LoadBalancer = var.load_balancer_arn_suffix
-  }
+#   dimensions = {
+#     LoadBalancer = var.load_balancer_arn_suffix # change! 
+#   }
 
-  # upper band for anomaly detection
-  metric_query {
-    id          = "q1"
-    label       = "expectedLevel(m1)"
-    return_data = "true"
-    expression  = "ANOMALY_DETECTION_BAND(m1)"
-  }
+# }
 
-  metric_query {
-    id          = "m1"
-    return_data = "true"
+# query json
+# filter for levelname: ERROR
+resource "aws_cloudwatch_log_metric_filter" "service_error_filter" {
 
-    metric {
-      metric_name = "TargetResponseTime"
-      namespace   = "AWS/ApplicationELB"
-      period      = 60
-      stat        = "Average"
-      unit        = "Count"
-    }
+  name           = "service-error-filter"
+  pattern        = "%ERROR%"                     # pattern can find events in unstructured logs
+  log_group_name = "service/${var.service_name}" # cloudwatch log group for the ecs service
+
+  metric_transformation {
+    name      = "ErrorCount"
+    namespace = var.service_name # destination namespace for the metrics;
+    value     = 1                # value published to the metric name when a Filter Pattern match occurs.
+    unit      = "None"           # default option, just looking for errors
   }
 }
-
 
 #email integration
 
