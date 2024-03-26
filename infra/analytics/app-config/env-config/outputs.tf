@@ -8,6 +8,7 @@ output "database_config" {
     schema_name                 = var.app_name
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
+    instance_count              = var.database_instance_count
   } : null
 }
 
@@ -21,14 +22,4 @@ output "service_config" {
 
     secrets = toset(local.secrets)
   }
-}
-
-output "incident_management_service_integration" {
-  value = var.has_incident_management_service ? {
-    integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
-  } : null
-}
-
-output "domain" {
-  value = var.domain
 }

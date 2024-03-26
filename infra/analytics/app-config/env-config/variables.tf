@@ -13,29 +13,14 @@ variable "default_region" {
 }
 
 variable "has_database" {
-  type = bool
+  type    = bool
+  default = true
 }
 
 variable "database_instance_count" {
   description = "Number of database instances. Should be 2+ for production environments."
   type        = number
   default     = 1
-}
-
-variable "database_enable_http_endpoint" {
-  description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
-  type        = bool
-  default     = false
-}
-
-variable "has_incident_management_service" {
-  type = bool
-}
-
-variable "domain" {
-  type        = string
-  description = "DNS domain of the website managed by HHS"
-  default     = null
 }
 
 variable "service_override_extra_environment_variables" {
