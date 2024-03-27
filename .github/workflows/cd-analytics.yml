@@ -9,10 +9,6 @@ on:
       - "main"
     paths:
       - "analytics/**"
-  # TEMPORARY: for testing purposes!
-  pull_request:
-    paths:
-      - .github/workflows/cd-analytics.yml
   release:
     types: [published]
   workflow_dispatch:
