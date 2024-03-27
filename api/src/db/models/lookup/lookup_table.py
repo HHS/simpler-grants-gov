@@ -1,12 +1,12 @@
 from typing import Type, TypeVar
 
-from src.db.models.base import Base
+from src.db.models.base import ApiSchemaTable
 from src.db.models.lookup import Lookup
 
 L = TypeVar("L", bound="LookupTable")
 
 
-class LookupTable(Base):
+class LookupTable(ApiSchemaTable):
     __abstract__ = True
 
     @classmethod

@@ -6,6 +6,7 @@ from sqlalchemy import text
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ForeignTableConfig(PydanticBaseEnvConfig):
     is_local_foreign_table: bool = Field(False)
+    schema_name: str = Field(Schemas.API)
 
 
 @dataclass
@@ -62,7 +64,7 @@ def setup_foreign_tables(db_session: db.Session) -> None:
     logger.info("Successfully ran setup-foreign-tables")
 
 
-def build_sql(table_name: str, columns: list[Column], is_local: bool) -> str:
+def build_sql(table_name: str, columns: list[Column], is_local: bool, schema_name: str) -> str:
     """
     Build the SQL for creating a possibly foreign data table. If running
     with is_local, it instead creates a regular table.
@@ -111,10 +113,17 @@ def build_sql(table_name: str, columns: list[Column], is_local: bool) -> str:
         # We don't want the config at the end if we're running locally so unset it
         create_command_suffix = ""
 
-    return f"{create_table_command} foreign_{table_name.lower()} ({','.join(column_sql_parts)}){create_command_suffix}"
+    return f"{create_table_command} {schema_name}.foreign_{table_name.lower()} ({','.join(column_sql_parts)}){create_command_suffix}"
 
 
 def _run_create_table_commands(db_session: db.Session, config: ForeignTableConfig) -> None:
     db_session.execute(
-        text(build_sql("TOPPORTUNITY", OPPORTUNITY_COLUMNS, config.is_local_foreign_table))
+        text(
+            build_sql(
+                "TOPPORTUNITY",
+                OPPORTUNITY_COLUMNS,
+                config.is_local_foreign_table,
+                config.schema_name,
+            )
+        )
     )

@@ -10,15 +10,17 @@ from tests.src.db.models.factories import ForeignTopportunityFactory, TransferTo
 
 
 @pytest.fixture(autouse=True)
-def setup_foreign_tables(db_session):
-    _run_create_table_commands(db_session, ForeignTableConfig(is_local_foreign_table=True))
+def setup_foreign_tables(db_session, test_api_schema):
+    _run_create_table_commands(
+        db_session, ForeignTableConfig(is_local_foreign_table=True, schema_name=test_api_schema)
+    )
 
 
 @pytest.fixture(autouse=True, scope="function")
-def truncate_tables(db_session):
+def truncate_tables(db_session, test_api_schema):
     # Automatically delete all the data in the relevant tables before tests
-    db_session.execute(text("TRUNCATE TABLE foreign_topportunity"))
-    db_session.execute(text("TRUNCATE TABLE transfer_topportunity"))
+    db_session.execute(text(f"TRUNCATE TABLE {test_api_schema}.foreign_topportunity"))
+    db_session.execute(text(f"TRUNCATE TABLE {test_api_schema}.transfer_topportunity"))
 
 
 def convert_value_for_insert(value) -> str:
@@ -35,7 +37,7 @@ def convert_value_for_insert(value) -> str:
     raise Exception("Type not configured for conversion")
 
 
-def build_foreign_opportunity(db_session, opp_params: dict):
+def build_foreign_opportunity(db_session, opp_params: dict, api_schema: str):
     opp = ForeignTopportunityFactory.build(**opp_params)
 
     columns = opp.keys()
@@ -43,39 +45,41 @@ def build_foreign_opportunity(db_session, opp_params: dict):
 
     db_session.execute(
         text(
-            f"INSERT INTO foreign_topportunity ({','.join(columns)}) VALUES ({','.join(values)})"  # nosec
+            f"INSERT INTO {api_schema}.foreign_topportunity ({','.join(columns)}) VALUES ({','.join(values)})"  # nosec
         )
     )
 
     return opp
 
 
-def test_copy_oracle_data_foreign_empty(db_session, enable_factory_create):
+def test_copy_oracle_data_foreign_empty(db_session, enable_factory_create, test_api_schema):
     TransferTopportunityFactory.create_batch(size=5)
     # The foreign table is empty, so this just truncates the transfer table
     assert db_session.query(TransferTopportunity).count() == 5
-    _run_copy_commands(db_session)
+    _run_copy_commands(db_session, test_api_schema)
     assert db_session.query(TransferTopportunity).count() == 0
 
 
-def test_copy_oracle_data(db_session, enable_factory_create):
+def test_copy_oracle_data(db_session, enable_factory_create, test_api_schema):
     print(db_session.__class__.__name__)
 
     # Create some records initially in the table that we'll wipe
     TransferTopportunityFactory.create_batch(size=3)
 
     foreign_records = [
-        build_foreign_opportunity(db_session, {}),
-        build_foreign_opportunity(db_session, {}),
-        build_foreign_opportunity(db_session, {}),
-        build_foreign_opportunity(db_session, {"oppnumber": "ABC-123-454-321-CBA"}),
-        build_foreign_opportunity(db_session, {"opportunity_id": 100}),
+        build_foreign_opportunity(db_session, {}, test_api_schema),
+        build_foreign_opportunity(db_session, {}, test_api_schema),
+        build_foreign_opportunity(db_session, {}, test_api_schema),
+        build_foreign_opportunity(
+            db_session, {"oppnumber": "ABC-123-454-321-CBA"}, test_api_schema
+        ),
+        build_foreign_opportunity(db_session, {"opportunity_id": 100}, test_api_schema),
     ]
 
     # The copy script won't fetch anything with is_draft not equaling "N" so add one
-    build_foreign_opportunity(db_session, {"is_draft": "Y"})
+    build_foreign_opportunity(db_session, {"is_draft": "Y"}, test_api_schema)
 
-    _run_copy_commands(db_session)
+    _run_copy_commands(db_session, test_api_schema)
 
     copied_opportunities = db_session.query(TransferTopportunity).all()
 

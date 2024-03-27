@@ -39,8 +39,9 @@ def upgrade():
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("opportunity_id", name=op.f("opportunity_pkey")),
+        schema="api",
     )
-    op.drop_table("topportunity")
+    op.drop_table("topportunity", schema="api")
     # ### end Alembic commands ###
 
 
@@ -69,6 +70,7 @@ def downgrade():
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("opportunity_id", name="topportunity_pkey"),
+        schema="api",
     )
-    op.drop_table("opportunity")
+    op.drop_table("opportunity", schema="api")
     # ### end Alembic commands ###

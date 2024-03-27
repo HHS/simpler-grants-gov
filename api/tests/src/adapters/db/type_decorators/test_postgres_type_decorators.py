@@ -14,7 +14,9 @@ from tests.src.db.models.factories import OpportunityFactory
     "category,db_value",
     [(OpportunityCategory.CONTINUATION, 3), (OpportunityCategory.EARMARK, 4), (None, None)],
 )
-def test_lookup_column_conversion(db_session, enable_factory_create, category, db_value):
+def test_lookup_column_conversion(
+    db_session, enable_factory_create, category, db_value, test_api_schema
+):
     # Verify column works with factories
     opportunity = OpportunityFactory.create(category=category)
     assert opportunity.category == category
@@ -32,7 +34,7 @@ def test_lookup_column_conversion(db_session, enable_factory_create, category, d
     # Verify what we stored in the DB is the integer
     raw_db_value = db_session.execute(
         text(
-            f"select opportunity_category_id from {Opportunity.get_table_name()} where opportunity_id={opportunity.opportunity_id}"  # nosec
+            f"select opportunity_category_id from {test_api_schema}.{Opportunity.get_table_name()} where opportunity_id={opportunity.opportunity_id}"  # nosec
         )
     ).scalar()
     assert raw_db_value == db_value

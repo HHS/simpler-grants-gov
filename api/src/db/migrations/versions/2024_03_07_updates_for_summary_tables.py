@@ -44,23 +44,28 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_category_id"],
-            ["lk_opportunity_category.opportunity_category_id"],
+            ["api.lk_opportunity_category.opportunity_category_id"],
             name=op.f("opportunity_opportunity_category_id_lk_opportunity_category_fkey"),
         ),
         sa.PrimaryKeyConstraint("opportunity_id", name=op.f("opportunity_pkey")),
+        schema="api",
     )
-    op.create_index(op.f("opportunity_is_draft_idx"), "opportunity", ["is_draft"], unique=False)
+    op.create_index(
+        op.f("opportunity_is_draft_idx"), "opportunity", ["is_draft"], unique=False, schema="api"
+    )
     op.create_index(
         op.f("opportunity_opportunity_category_id_idx"),
         "opportunity",
         ["opportunity_category_id"],
         unique=False,
+        schema="api",
     )
     op.create_index(
         op.f("opportunity_opportunity_title_idx"),
         "opportunity",
         ["opportunity_title"],
         unique=False,
+        schema="api",
     )
     op.create_table(
         "opportunity_assistance_listing",
@@ -84,18 +89,20 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_id"],
-            ["opportunity.opportunity_id"],
+            ["api.opportunity.opportunity_id"],
             name=op.f("opportunity_assistance_listing_opportunity_id_opportunity_fkey"),
         ),
         sa.PrimaryKeyConstraint(
             "opportunity_assistance_listing_id", name=op.f("opportunity_assistance_listing_pkey")
         ),
+        schema="api",
     )
     op.create_index(
         op.f("opportunity_assistance_listing_opportunity_id_idx"),
         "opportunity_assistance_listing",
         ["opportunity_id"],
         unique=False,
+        schema="api",
     )
     op.create_table(
         "opportunity_summary",
@@ -151,10 +158,11 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_id"],
-            ["opportunity.opportunity_id"],
+            ["api.opportunity.opportunity_id"],
             name=op.f("opportunity_summary_opportunity_id_opportunity_fkey"),
         ),
         sa.PrimaryKeyConstraint("opportunity_summary_id", name=op.f("opportunity_summary_pkey")),
+        schema="api",
     )
     op.create_table(
         "current_opportunity_summary",
@@ -175,19 +183,19 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_id"],
-            ["opportunity.opportunity_id"],
+            ["api.opportunity.opportunity_id"],
             name=op.f("current_opportunity_summary_opportunity_id_opportunity_fkey"),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_status_id"],
-            ["lk_opportunity_status.opportunity_status_id"],
+            ["api.lk_opportunity_status.opportunity_status_id"],
             name=op.f(
                 "current_opportunity_summary_opportunity_status_id_lk_opportunity_status_fkey"
             ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
-            ["opportunity_summary.opportunity_summary_id"],
+            ["api.opportunity_summary.opportunity_summary_id"],
             name=op.f(
                 "current_opportunity_summary_opportunity_summary_id_opportunity_summary_fkey"
             ),
@@ -197,6 +205,7 @@ def upgrade():
             "opportunity_summary_id",
             name=op.f("current_opportunity_summary_pkey"),
         ),
+        schema="api",
     )
     op.create_table(
         "link_opportunity_summary_applicant_type",
@@ -219,14 +228,14 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["applicant_type_id"],
-            ["lk_applicant_type.applicant_type_id"],
+            ["api.lk_applicant_type.applicant_type_id"],
             name=op.f(
                 "link_opportunity_summary_applicant_type_applicant_type_id_lk_applicant_type_fkey"
             ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
-            ["opportunity_summary.opportunity_summary_id"],
+            ["api.opportunity_summary.opportunity_summary_id"],
             name=op.f(
                 "link_opportunity_summary_applicant_type_opportunity_summary_id_opportunity_summary_fkey"
             ),
@@ -236,6 +245,7 @@ def upgrade():
             "applicant_type_id",
             name=op.f("link_opportunity_summary_applicant_type_pkey"),
         ),
+        schema="api",
     )
     op.create_table(
         "link_opportunity_summary_funding_category",
@@ -258,14 +268,14 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["funding_category_id"],
-            ["lk_funding_category.funding_category_id"],
+            ["api.lk_funding_category.funding_category_id"],
             name=op.f(
                 "link_opportunity_summary_funding_category_funding_category_id_lk_funding_category_fkey"
             ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
-            ["opportunity_summary.opportunity_summary_id"],
+            ["api.opportunity_summary.opportunity_summary_id"],
             name=op.f(
                 "link_opportunity_summary_funding_category_opportunity_summary_id_opportunity_summary_fkey"
             ),
@@ -275,6 +285,7 @@ def upgrade():
             "funding_category_id",
             name=op.f("link_opportunity_summary_funding_category_pkey"),
         ),
+        schema="api",
     )
     op.create_table(
         "link_opportunity_summary_funding_instrument",
@@ -297,14 +308,14 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["funding_instrument_id"],
-            ["lk_funding_instrument.funding_instrument_id"],
+            ["api.lk_funding_instrument.funding_instrument_id"],
             name=op.f(
                 "link_opportunity_summary_funding_instrument_funding_instrument_id_lk_funding_instrument_fkey"
             ),
         ),
         sa.ForeignKeyConstraint(
             ["opportunity_summary_id"],
-            ["opportunity_summary.opportunity_summary_id"],
+            ["api.opportunity_summary.opportunity_summary_id"],
             name=op.f(
                 "link_opportunity_summary_funding_instrument_opportunity_summary_id_opportunity_summary_fkey"
             ),
@@ -314,24 +325,28 @@ def upgrade():
             "funding_instrument_id",
             name=op.f("link_opportunity_summary_funding_instrument_pkey"),
         ),
+        schema="api",
     )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table("link_opportunity_summary_funding_instrument")
-    op.drop_table("link_opportunity_summary_funding_category")
-    op.drop_table("link_opportunity_summary_applicant_type")
-    op.drop_table("current_opportunity_summary")
-    op.drop_table("opportunity_summary")
+    op.drop_table("link_opportunity_summary_funding_instrument", schema="api")
+    op.drop_table("link_opportunity_summary_funding_category", schema="api")
+    op.drop_table("link_opportunity_summary_applicant_type", schema="api")
+    op.drop_table("current_opportunity_summary", schema="api")
+    op.drop_table("opportunity_summary", schema="api")
     op.drop_index(
         op.f("opportunity_assistance_listing_opportunity_id_idx"),
         table_name="opportunity_assistance_listing",
+        schema="api",
     )
-    op.drop_table("opportunity_assistance_listing")
-    op.drop_index(op.f("opportunity_opportunity_title_idx"), table_name="opportunity")
-    op.drop_index(op.f("opportunity_opportunity_category_id_idx"), table_name="opportunity")
-    op.drop_index(op.f("opportunity_is_draft_idx"), table_name="opportunity")
-    op.drop_table("opportunity")
+    op.drop_table("opportunity_assistance_listing", schema="api")
+    op.drop_index(op.f("opportunity_opportunity_title_idx"), table_name="opportunity", schema="api")
+    op.drop_index(
+        op.f("opportunity_opportunity_category_id_idx"), table_name="opportunity", schema="api"
+    )
+    op.drop_index(op.f("opportunity_is_draft_idx"), table_name="opportunity", schema="api")
+    op.drop_table("opportunity", schema="api")
     # ### end Alembic commands ###

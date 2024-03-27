@@ -9,6 +9,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
 from sqlalchemy.sql.functions import now as sqlnow
 
+from src.constants.schema import Schemas
 from src.util import datetime_util
 
 # Override the default naming of constraints
@@ -16,7 +17,7 @@ from src.util import datetime_util
 # https://stackoverflow.com/questions/4107915/postgresql-default-constraint-names/4108266#4108266
 metadata = MetaData(
     naming_convention={
-        "ix": "%(column_0_label)s_idx",
+        "ix": "%(table_name)s_%(column_0_name)s_idx",
         "uq": "%(table_name)s_%(column_0_name)s_uniq",
         "ck": "%(table_name)s_`%(constraint_name)s_check`",
         "fk": "%(table_name)s_%(column_0_name)s_%(referred_table_name)s_fkey",
@@ -94,6 +95,12 @@ class Base(DeclarativeBase):
         See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
         """
         return self._dict().items()
+
+
+class ApiSchemaTable(Base):
+    __abstract__ = True
+
+    __table_args__ = {"schema": Schemas.API}
 
 
 @declarative_mixin

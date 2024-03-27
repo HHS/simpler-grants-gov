@@ -47,11 +47,26 @@ def test_only_single_head_revision_in_migrations():
         )
 
 
-def test_db_setup_via_alembic_migration(empty_schema, caplog: pytest.LogCaptureFixture):
-    caplog.set_level(logging.INFO)  # noqa: B1
-    command.upgrade(alembic_cfg, "head")
-    # Verify the migration ran by checking the logs
+def test_db_setup_via_alembic_migration(
+    empty_schema, caplog: pytest.LogCaptureFixture, capsys: pytest.CaptureFixture
+):
+    """
+    All of our tests run using temporary DB schemas. However the alembic
+    migrations are generated with the schema hardcoded (eg. "api") and trying to make alembic
+    work in a test requires intercepting those function calls to swap in our
+    test schema. While this is doable, we'd need to do it for more than a dozen
+    functions with varying signatures, which feels too brittle and complex
+    to be a valuable test
+    """
+
+    caplog.set_level(logging.INFO)
+    # Tell Alembic to run all migrations, generating SQL commands for each
+    command.upgrade(alembic_cfg, "base:head", sql=True)
+
+    # Verify that the upgrades ran and that at least one specific query is present
+    # Alembic just writes to stdout, so capsys captures that.
     assert "Running upgrade" in caplog.text
+    assert "CREATE TABLE api.opportunity" in capsys.readouterr().out
 
 
 def test_db_init_with_migrations(empty_schema):
