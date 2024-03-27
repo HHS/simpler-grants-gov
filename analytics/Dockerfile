@@ -68,13 +68,6 @@ RUN poetry install --no-root --with dev
 
 COPY . /analytics
 
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
-
-# Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
-
 #---------
 # Release
 #---------
