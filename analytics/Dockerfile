@@ -111,4 +111,5 @@ RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_g
 # defiend in pyproject.toml
 ENV PATH="/analytics/.venv/bin:$PATH"
 
+
 USER ${RUN_USER}
