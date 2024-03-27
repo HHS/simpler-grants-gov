@@ -111,15 +111,19 @@ export default function SearchResultsListItem({
           </div>
         </div>
         <div className="desktop:grid-col-auto">
-          <div className="overflow-hidden">
+          <div className="overflow-hidden font-body-xs">
             {/* TODO: Better way to format as a dollar amounts */}
-            <span className="display-block desktop:text-right">
+            <span
+              className={`${metadataBorderClasses} desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
+            >
               <strong>Award Ceiling:</strong>{" "}
-              <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3">
+              <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
               </span>
             </span>
-            <span className="display-block desktop:text-right">
+            <span
+              className={`${metadataBorderClasses} desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
+            >
               <strong>Floor:</strong> $
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>

@@ -64,14 +64,12 @@ export function SearchForm({
             />
           </div>
           <div className="tablet:grid-col-8">
+            <SearchResultsHeader
+              formRef={formRef}
+              searchResultsLength={searchResults.pagination_info.total_records}
+              initialQueryParams={sortbyQueryParams}
+            />
             <div className="usa-prose">
-              <SearchResultsHeader
-                formRef={formRef}
-                searchResultsLength={
-                  searchResults.pagination_info.total_records
-                }
-                initialQueryParams={sortbyQueryParams}
-              />
               {searchResults.data.length >= 1 ? (
                 <SearchPagination
                   totalPages={searchResults.pagination_info.total_pages}
