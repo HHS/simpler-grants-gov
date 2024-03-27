@@ -1,0 +1,38 @@
+name: Deploy Analytics
+# Need to set a default value for when the workflow is triggered from a git push
+# which bypasses the default configuration for inputs
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "analytics/**"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  analytics-checks:
+    name: Run Analyics Checks
+    uses: ./.github/workflows/ci-analytics.yml
+    secrets: inherit
+
+  deploy:
+    name: Deploy
+    needs: analytics-checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "analytics"
+      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
