@@ -1,3 +1,4 @@
+import src.data_migration.mock.generate
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 
 # import any of the other files so they get initialized and attached to the blueprint
