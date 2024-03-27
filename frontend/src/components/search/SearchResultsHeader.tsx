@@ -14,15 +14,17 @@ const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
   initialQueryParams,
 }) => {
   return (
-    <>
-      <div>
-        <h2>{searchResultsLength} Opportunities</h2>
+    <div className="grid-row">
+      <h2 className="tablet-lg:grid-col-fill margin-top-5 tablet-lg:margin-top-2 tablet-lg:margin-bottom-0">
+        {searchResultsLength} Opportunities
+      </h2>
+      <div className="tablet-lg:grid-col-auto">
+        <SearchSortyBy
+          formRef={formRef}
+          initialQueryParams={initialQueryParams}
+        />
       </div>
-      <SearchSortyBy
-        formRef={formRef}
-        initialQueryParams={initialQueryParams}
-      />
-    </>
+    </div>
   );
 };
 export default SearchResultsHeader;
