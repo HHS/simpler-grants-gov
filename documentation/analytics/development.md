@@ -57,6 +57,10 @@ Once you follow the steps above, check that you meet the prerequisites with: `ma
     - project
   - Add `export GH_TOKEN=...` to your `zshrc` or similar
 
+### Docker vs Native
+
+This project run itself inside of docker by default. If you wish to run this natively, add PY_RUN_APPROACH=local to your environment variables. You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add it to your ~/.zshrc file (and run `source ~/.zshrc`).
+
 ### Configuring secrets
 
 #### Prerequisites
