@@ -968,11 +968,11 @@ class TestSearchScenarios(BaseTestClass):
                     Scenario.POSTED_OPPORTUNITY_TITLE_HAS_PERCENT,
                 ],
             ),
-            ### Agency field tests (note that agency works as a prefix)
+            ### Agency field tests
             ### By default agency is set to "DEFAULT-ABC" with a few overriding that to "DIFFERENT-<something>"
-            # Should only return the agencies that start "DIFFERENT-" (case-insensitive)
+            # Should only return the agencies that start "DIFFERENT-"
             (
-                get_search_request(page_size=25, agency_one_of=["DiFfErEnT"]),
+                get_search_request(page_size=25, agency_one_of=["DIFFERENT-ABC", "DIFFERENT-XYZ"]),
                 [
                     Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
                     Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES,
@@ -982,12 +982,14 @@ class TestSearchScenarios(BaseTestClass):
             (get_search_request(page_size=25, agency_one_of=["no agency starts with this"]), []),
             # Should only return a single agency as it's the only one that has this name
             (
-                get_search_request(page_size=25, agency_one_of=["different-xyz"]),
+                get_search_request(page_size=25, agency_one_of=["DIFFERENT-XYZ"]),
                 [Scenario.CLOSED_NON_DEFAULT_AGENCY_WITH_FUNDING_CATEGORIES],
             ),
-            # Should return everything with agency set as it will be happy with both prefixes
+            # Should return everything with agency set as these are all the values we set
             (
-                get_search_request(page_size=25, agency_one_of=["DEFAULT", "different"]),
+                get_search_request(
+                    page_size=25, agency_one_of=["DEFAULT-ABC", "DIFFERENT-ABC", "DIFFERENT-XYZ"]
+                ),
                 [
                     Scenario.POSTED_ALL_ENUM_VALUES,
                     Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES,
@@ -1096,7 +1098,7 @@ class TestSearchScenarios(BaseTestClass):
             (
                 get_search_request(
                     page_size=25,
-                    agency_one_of=["different"],
+                    agency_one_of=["DIFFERENT-ABC"],
                     applicant_type_one_of=[ApplicantType.COUNTY_GOVERNMENTS],
                 ),
                 [Scenario.POSTED_NON_DEFAULT_AGENCY_WITH_APP_TYPES],
@@ -1160,7 +1162,7 @@ class TestSearchScenarios(BaseTestClass):
                 get_search_request(
                     page_size=25,
                     opportunity_status_one_of=[OpportunityStatus.FORECASTED],
-                    agency_one_of=["different"],
+                    agency_one_of=["DIFFERENT-ABC", "DIFFERENT-XYZ"],
                 ),
                 [],
             ),
