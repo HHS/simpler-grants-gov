@@ -1,4 +1,3 @@
-import dataclasses
 from datetime import date
 from enum import IntEnum
 
@@ -10,335 +9,124 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
-from src.db.models.opportunity_models import (
-    Opportunity,
-    OpportunityAssistanceListing,
-    OpportunitySummary,
-)
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import (
-    CurrentOpportunitySummaryFactory,
-    LinkOpportunitySummaryApplicantTypeFactory,
-    LinkOpportunitySummaryFundingCategoryFactory,
-    LinkOpportunitySummaryFundingInstrumentFactory,
-    OpportunityAssistanceListingFactory,
-    OpportunityFactory,
-    OpportunitySummaryFactory,
+from tests.src.api.opportunities_v0_1.conftest import (
+    get_search_request,
+    setup_opportunity,
+    validate_search_pagination,
 )
-
-
-@pytest.fixture
-def truncate_opportunities(db_session):
-    # Note that we can't just do db_session.query(Opportunity).delete() as the cascade deletes won't work automatically:
-    # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-queryguide-update-delete-caveats
-    # but if we do it individually they will
-    opportunities = db_session.query(Opportunity).all()
-    for opp in opportunities:
-        db_session.delete(opp)
-
-    # Force the deletes to the DB
-    db_session.commit()
-
-
-@dataclasses.dataclass
-class SearchExpectedValues:
-    total_pages: int
-    total_records: int
-
-    response_record_count: int
-
-
-def get_search_request(
-    page_offset: int = 1,
-    page_size: int = 5,
-    order_by: str = "opportunity_id",
-    sort_direction: str = "descending",
-    query: str | None = None,
-    funding_instrument_one_of: list[FundingInstrument] | None = None,
-    funding_category_one_of: list[FundingCategory] | None = None,
-    applicant_type_one_of: list[ApplicantType] | None = None,
-    opportunity_status_one_of: list[OpportunityStatus] | None = None,
-    agency_one_of: list[str] | None = None,
-):
-    req = {
-        "pagination": {
-            "page_offset": page_offset,
-            "page_size": page_size,
-            "order_by": order_by,
-            "sort_direction": sort_direction,
-        }
-    }
-
-    filters = {}
-
-    if funding_instrument_one_of is not None:
-        filters["funding_instrument"] = {"one_of": funding_instrument_one_of}
-
-    if funding_category_one_of is not None:
-        filters["funding_category"] = {"one_of": funding_category_one_of}
-
-    if applicant_type_one_of is not None:
-        filters["applicant_type"] = {"one_of": applicant_type_one_of}
-
-    if opportunity_status_one_of is not None:
-        filters["opportunity_status"] = {"one_of": opportunity_status_one_of}
-
-    if agency_one_of is not None:
-        filters["agency"] = {"one_of": agency_one_of}
-
-    if len(filters) > 0:
-        req["filters"] = filters
-
-    if query is not None:
-        req["query"] = query
-
-    return req
-
+from tests.src.db.models.factories import OpportunityFactory
 
 #####################################
-# Validation utils
+# Pagination and ordering tests
 #####################################
-
-
-def validate_search_pagination(
-    search_response: dict, search_request: dict, expected_values: SearchExpectedValues
-):
-    pagination_info = search_response["pagination_info"]
-    assert pagination_info["page_offset"] == search_request["pagination"]["page_offset"]
-    assert pagination_info["page_size"] == search_request["pagination"]["page_size"]
-    assert pagination_info["order_by"] == search_request["pagination"]["order_by"]
-    assert pagination_info["sort_direction"] == search_request["pagination"]["sort_direction"]
-
-    assert pagination_info["total_pages"] == expected_values.total_pages
-    assert pagination_info["total_records"] == expected_values.total_records
-
-    searched_opportunities = search_response["data"]
-    assert len(searched_opportunities) == expected_values.response_record_count
-
-    # Verify data is sorted as expected
-    reverse = pagination_info["sort_direction"] == "descending"
-    resorted_opportunities = sorted(
-        searched_opportunities, key=lambda u: u[pagination_info["order_by"]], reverse=reverse
-    )
-    assert resorted_opportunities == searched_opportunities
-
-
-def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
-    assert db_opportunity.opportunity_id == resp_opportunity["opportunity_id"]
-    assert db_opportunity.opportunity_number == resp_opportunity["opportunity_number"]
-    assert db_opportunity.opportunity_title == resp_opportunity["opportunity_title"]
-    assert db_opportunity.agency == resp_opportunity["agency"]
-    assert db_opportunity.category == resp_opportunity["category"]
-    assert db_opportunity.category_explanation == resp_opportunity["category_explanation"]
-
-    validate_opportunity_summary(db_opportunity.summary, resp_opportunity["summary"])
-    validate_assistance_listings(
-        db_opportunity.opportunity_assistance_listings,
-        resp_opportunity["opportunity_assistance_listings"],
-    )
-
-    assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
-
-
-def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: dict):
-    if db_summary is None:
-        assert resp_summary is None
-        return
-
-    assert db_summary.summary_description == resp_summary["summary_description"]
-    assert db_summary.is_cost_sharing == resp_summary["is_cost_sharing"]
-    assert db_summary.is_forecast == resp_summary["is_forecast"]
-    assert str(db_summary.close_date) == str(resp_summary["close_date"])
-    assert db_summary.close_date_description == resp_summary["close_date_description"]
-    assert str(db_summary.post_date) == str(resp_summary["post_date"])
-    assert str(db_summary.archive_date) == str(resp_summary["archive_date"])
-    assert db_summary.expected_number_of_awards == resp_summary["expected_number_of_awards"]
-    assert (
-        db_summary.estimated_total_program_funding
-        == resp_summary["estimated_total_program_funding"]
-    )
-    assert db_summary.award_floor == resp_summary["award_floor"]
-    assert db_summary.award_ceiling == resp_summary["award_ceiling"]
-    assert db_summary.additional_info_url == resp_summary["additional_info_url"]
-    assert (
-        db_summary.additional_info_url_description
-        == resp_summary["additional_info_url_description"]
-    )
-
-    assert str(db_summary.forecasted_post_date) == str(resp_summary["forecasted_post_date"])
-    assert str(db_summary.forecasted_close_date) == str(resp_summary["forecasted_close_date"])
-    assert (
-        db_summary.forecasted_close_date_description
-        == resp_summary["forecasted_close_date_description"]
-    )
-    assert str(db_summary.forecasted_award_date) == str(resp_summary["forecasted_award_date"])
-    assert str(db_summary.forecasted_project_start_date) == str(
-        resp_summary["forecasted_project_start_date"]
-    )
-    assert db_summary.fiscal_year == resp_summary["fiscal_year"]
-
-    assert db_summary.funding_category_description == resp_summary["funding_category_description"]
-    assert (
-        db_summary.applicant_eligibility_description
-        == resp_summary["applicant_eligibility_description"]
-    )
-
-    assert db_summary.agency_code == resp_summary["agency_code"]
-    assert db_summary.agency_name == resp_summary["agency_name"]
-    assert db_summary.agency_phone_number == resp_summary["agency_phone_number"]
-    assert db_summary.agency_contact_description == resp_summary["agency_contact_description"]
-    assert db_summary.agency_email_address == resp_summary["agency_email_address"]
-    assert (
-        db_summary.agency_email_address_description
-        == resp_summary["agency_email_address_description"]
-    )
-
-    assert set(db_summary.funding_instruments) == set(resp_summary["funding_instruments"])
-    assert set(db_summary.funding_categories) == set(resp_summary["funding_categories"])
-    assert set(db_summary.applicant_types) == set(resp_summary["applicant_types"])
-
-
-def validate_assistance_listings(
-    db_assistance_listings: list[OpportunityAssistanceListing], resp_listings: list[dict]
-) -> None:
-    # In order to compare this list, sort them both the same and compare from there
-    db_assistance_listings.sort(key=lambda a: (a.assistance_listing_number, a.program_title))
-    resp_listings.sort(key=lambda a: (a["assistance_listing_number"], a["program_title"]))
-
-    assert len(db_assistance_listings) == len(resp_listings)
-    for db_assistance_listing, resp_listing in zip(
-        db_assistance_listings, resp_listings, strict=True
-    ):
-        assert (
-            db_assistance_listing.assistance_listing_number
-            == resp_listing["assistance_listing_number"]
-        )
-        assert db_assistance_listing.program_title == resp_listing["program_title"]
-
-
-#####################################
-# Search opportunities tests
-#####################################
-
-
-@pytest.mark.parametrize(
-    "search_request,expected_values",
-    [
-        ### Verifying page offset and size work properly
-        # In a few of these tests we specify all possible values
-        # for a given filter. This is to make sure that the one-to-many
-        # relationships don't cause the counts to get thrown off
-        (
-            get_search_request(
-                page_offset=1, page_size=5, funding_instrument_one_of=[e for e in FundingInstrument]
-            ),
-            SearchExpectedValues(total_pages=2, total_records=10, response_record_count=5),
-        ),
-        (
-            get_search_request(
-                page_offset=2, page_size=3, funding_category_one_of=[e for e in FundingCategory]
-            ),
-            SearchExpectedValues(total_pages=4, total_records=10, response_record_count=3),
-        ),
-        (
-            get_search_request(page_offset=3, page_size=4),
-            SearchExpectedValues(total_pages=3, total_records=10, response_record_count=2),
-        ),
-        (
-            get_search_request(page_offset=10, page_size=1),
-            SearchExpectedValues(total_pages=10, total_records=10, response_record_count=1),
-        ),
-        (
-            get_search_request(page_offset=100, page_size=5),
-            SearchExpectedValues(total_pages=2, total_records=10, response_record_count=0),
-        ),
-    ],
-)
-def test_opportunity_search_paging_200(
-    client,
-    api_auth_token,
-    enable_factory_create,
-    search_request,
-    expected_values,
-    truncate_opportunities,
-):
-    # This test is just focused on testing the pagination
-    OpportunityFactory.create_batch(size=10)
-
-    resp = client.post(
-        "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-    )
-
-    search_response = resp.get_json()
-    assert resp.status_code == 200
-
-    validate_search_pagination(search_response, search_request, expected_values)
-
-
-def setup_pagination_scenario(
-    opportunity_id: int,
-    opportunity_number: str,
-    opportunity_title: str,
-    post_date: date,
-    close_date: date | None,
-    agency: str,
-) -> None:
-    opportunity = OpportunityFactory.create(
-        opportunity_id=opportunity_id,
-        opportunity_number=opportunity_number,
-        opportunity_title=opportunity_title,
-        agency=agency,
-        no_current_summary=True,
-    )
-
-    opportunity_summary = OpportunitySummaryFactory.create(
-        opportunity=opportunity, post_date=post_date, close_date=close_date
-    )
-
-    CurrentOpportunitySummaryFactory.create(
-        opportunity=opportunity,
-        opportunity_summary=opportunity_summary,
-    )
 
 
 class TestSearchPagination(BaseTestClass):
     @pytest.fixture(scope="class")
     def setup_scenarios(self, truncate_opportunities, enable_factory_create):
-        setup_pagination_scenario(
-            opportunity_id=1,
+        # This test is just focused on testing the pagination
+        # We don't need to worry about anything specific as there is no filtering
+        OpportunityFactory.create_batch(size=10)
+
+    @pytest.mark.parametrize(
+        "search_request,expected_values",
+        [
+            ### Verifying page offset and size work properly
+            # In a few of these tests we specify all possible values
+            # for a given filter. This is to make sure that the one-to-many
+            # relationships don't cause the counts to get thrown off
+            (
+                get_search_request(
+                    page_offset=1,
+                    page_size=5,
+                    funding_instrument_one_of=[e for e in FundingInstrument],
+                ),
+                dict(total_pages=2, total_records=10, response_record_count=5),
+            ),
+            (
+                get_search_request(
+                    page_offset=2, page_size=3, funding_category_one_of=[e for e in FundingCategory]
+                ),
+                dict(total_pages=4, total_records=10, response_record_count=3),
+            ),
+            (
+                get_search_request(page_offset=3, page_size=4),
+                dict(total_pages=3, total_records=10, response_record_count=2),
+            ),
+            (
+                get_search_request(page_offset=10, page_size=1),
+                dict(total_pages=10, total_records=10, response_record_count=1),
+            ),
+            (
+                get_search_request(page_offset=100, page_size=5),
+                dict(total_pages=2, total_records=10, response_record_count=0),
+            ),
+        ],
+    )
+    def test_opportunity_search_paging_200(
+        self,
+        client,
+        api_auth_token,
+        enable_factory_create,
+        search_request,
+        expected_values,
+        setup_scenarios,
+    ):
+        resp = client.post(
+            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        search_response = resp.get_json()
+        assert resp.status_code == 200
+
+        validate_search_pagination(
+            search_response,
+            search_request,
+            expected_values["total_pages"],
+            expected_values["total_records"],
+            expected_values["response_record_count"],
+        )
+
+
+class TestSearchOrdering(BaseTestClass):
+    @pytest.fixture(scope="class")
+    def setup_scenarios(self, truncate_opportunities, enable_factory_create):
+        setup_opportunity(
+            1,
             opportunity_number="dddd",
             opportunity_title="zzzz",
             post_date=date(2024, 3, 1),
             close_date=None,
             agency="mmmm",
         )
-        setup_pagination_scenario(
-            opportunity_id=2,
+        setup_opportunity(
+            2,
             opportunity_number="eeee",
             opportunity_title="yyyy",
             post_date=date(2024, 2, 1),
             close_date=date(2024, 12, 1),
             agency="nnnn",
         )
-        setup_pagination_scenario(
-            opportunity_id=3,
+        setup_opportunity(
+            3,
             opportunity_number="aaaa",
             opportunity_title="wwww",
             post_date=date(2024, 5, 1),
             close_date=date(2024, 11, 1),
             agency="llll",
         )
-        setup_pagination_scenario(
-            opportunity_id=4,
+        setup_opportunity(
+            4,
             opportunity_number="bbbb",
             opportunity_title="uuuu",
             post_date=date(2024, 4, 1),
             close_date=date(2024, 10, 1),
             agency="kkkk",
         )
-        setup_pagination_scenario(
-            opportunity_id=5,
+        setup_opportunity(
+            5,
             opportunity_number="cccc",
             opportunity_title="xxxx",
             post_date=date(2024, 1, 1),
@@ -421,7 +209,7 @@ class TestSearchPagination(BaseTestClass):
 
 
 #####################################
-# Search opportunities tests (Scenarios)
+# Search querying & filtering
 #####################################
 
 
@@ -467,288 +255,6 @@ class Scenario(IntEnum):
 
     # Description has several random characters that we search against
     CLOSED_SUMMARY_DESCRIPTION_MANY_CHARACTERS = 14
-
-
-def setup_opportunity(
-    scenario: Scenario,
-    /,  # all named params after this
-    has_current_opportunity: bool = True,
-    has_other_non_current_opportunity: bool = False,
-    is_draft: bool = False,
-    opportunity_title: str = "Default opportunity title",
-    opportunity_number: str | None = None,
-    opportunity_status: OpportunityStatus | None = OpportunityStatus.POSTED,
-    summary_description: str = "Default summary description",
-    funding_instruments: list[FundingInstrument] | None = None,
-    funding_categories: list[FundingCategory] | None = None,
-    applicant_types: list[ApplicantType] | None = None,
-    agency: str | None = "DEFAULT-ABC",
-    assistance_listings: list[tuple[str, str]] | None = None,
-):
-    if opportunity_number is None:
-        opportunity_number = f"OPP-NUMBER-{scenario}"
-
-    opportunity = OpportunityFactory.create(
-        opportunity_id=scenario,
-        no_current_summary=True,
-        agency=agency,
-        is_draft=is_draft,
-        opportunity_title=opportunity_title,
-        opportunity_number=opportunity_number,
-    )
-
-    if assistance_listings:
-        for assistance_listing_number, program_title in assistance_listings:
-            OpportunityAssistanceListingFactory.create(
-                opportunity=opportunity,
-                assistance_listing_number=assistance_listing_number,
-                program_title=program_title,
-            )
-
-    if has_current_opportunity:
-        opportunity_summary = OpportunitySummaryFactory.create(
-            opportunity=opportunity,
-            revision_number=2,
-            no_link_values=True,
-            summary_description=summary_description,
-        )
-        CurrentOpportunitySummaryFactory.create(
-            opportunity=opportunity,
-            opportunity_summary=opportunity_summary,
-            opportunity_status=opportunity_status,
-        )
-
-        if funding_instruments:
-            for funding_instrument in funding_instruments:
-                LinkOpportunitySummaryFundingInstrumentFactory.create(
-                    opportunity_summary=opportunity_summary, funding_instrument=funding_instrument
-                )
-
-        if funding_categories:
-            for funding_category in funding_categories:
-                LinkOpportunitySummaryFundingCategoryFactory.create(
-                    opportunity_summary=opportunity_summary, funding_category=funding_category
-                )
-
-        if applicant_types:
-            for applicant_type in applicant_types:
-                LinkOpportunitySummaryApplicantTypeFactory.create(
-                    opportunity_summary=opportunity_summary, applicant_type=applicant_type
-                )
-
-    if has_other_non_current_opportunity:
-        OpportunitySummaryFactory.create(opportunity=opportunity, revision_number=1)
-
-
-@pytest.mark.parametrize(
-    "search_request,expected_response_data",
-    [
-        (
-            {},
-            [
-                {
-                    "field": "pagination",
-                    "message": "Missing data for required field.",
-                    "type": "required",
-                },
-            ],
-        ),
-        (
-            get_search_request(page_offset=-1, page_size=-1),
-            [
-                {
-                    "field": "pagination.page_size",
-                    "message": "Must be greater than or equal to 1.",
-                    "type": "min_or_max_value",
-                },
-                {
-                    "field": "pagination.page_offset",
-                    "message": "Must be greater than or equal to 1.",
-                    "type": "min_or_max_value",
-                },
-            ],
-        ),
-        (
-            get_search_request(order_by="fake_field", sort_direction="up"),
-            [
-                {
-                    "field": "pagination.order_by",
-                    "message": "Value must be one of: opportunity_id, opportunity_number, opportunity_title, post_date, close_date, agency_code",
-                    "type": "invalid_choice",
-                },
-                {
-                    "field": "pagination.sort_direction",
-                    "message": "Must be one of: ascending, descending.",
-                    "type": "invalid_choice",
-                },
-            ],
-        ),
-        # The one_of enum filters
-        (
-            get_search_request(
-                funding_instrument_one_of=["not_a_valid_value"],
-                funding_category_one_of=["also_not_valid", "here_too"],
-                applicant_type_one_of=["not_an_applicant_type"],
-                opportunity_status_one_of=["also not real"],
-            ),
-            [
-                {
-                    "field": "filters.funding_instrument.one_of.0",
-                    "message": f"Must be one of: {', '.join(FundingInstrument)}.",
-                    "type": "invalid_choice",
-                },
-                {
-                    "field": "filters.funding_category.one_of.0",
-                    "message": f"Must be one of: {', '.join(FundingCategory)}.",
-                    "type": "invalid_choice",
-                },
-                {
-                    "field": "filters.funding_category.one_of.1",
-                    "message": f"Must be one of: {', '.join(FundingCategory)}.",
-                    "type": "invalid_choice",
-                },
-                {
-                    "field": "filters.applicant_type.one_of.0",
-                    "message": f"Must be one of: {', '.join(ApplicantType)}.",
-                    "type": "invalid_choice",
-                },
-                {
-                    "field": "filters.opportunity_status.one_of.0",
-                    "message": f"Must be one of: {', '.join(OpportunityStatus)}.",
-                    "type": "invalid_choice",
-                },
-            ],
-        ),
-        # Too short of agency
-        (
-            get_search_request(agency_one_of=["a"]),
-            [
-                {
-                    "field": "filters.agency.one_of.0",
-                    "message": "Shorter than minimum length 2.",
-                    "type": "min_length",
-                }
-            ],
-        ),
-        # Too short of a query
-        (
-            get_search_request(query=""),
-            [
-                {
-                    "field": "query",
-                    "message": "Length must be between 1 and 100.",
-                    "type": "min_or_max_length",
-                }
-            ],
-        ),
-        # Too long of a query
-        (
-            get_search_request(query="A" * 101),
-            [
-                {
-                    "field": "query",
-                    "message": "Length must be between 1 and 100.",
-                    "type": "min_or_max_length",
-                }
-            ],
-        ),
-        # Verify that if the one_of lists are empty, we get a validation error
-        (
-            get_search_request(
-                funding_instrument_one_of=[],
-                funding_category_one_of=[],
-                applicant_type_one_of=[],
-                opportunity_status_one_of=[],
-                agency_one_of=[],
-            ),
-            [
-                {
-                    "field": "filters.funding_instrument.one_of",
-                    "message": "Shorter than minimum length 1.",
-                    "type": "min_length",
-                },
-                {
-                    "field": "filters.funding_category.one_of",
-                    "message": "Shorter than minimum length 1.",
-                    "type": "min_length",
-                },
-                {
-                    "field": "filters.applicant_type.one_of",
-                    "message": "Shorter than minimum length 1.",
-                    "type": "min_length",
-                },
-                {
-                    "field": "filters.opportunity_status.one_of",
-                    "message": "Shorter than minimum length 1.",
-                    "type": "min_length",
-                },
-                {
-                    "field": "filters.agency.one_of",
-                    "message": "Shorter than minimum length 1.",
-                    "type": "min_length",
-                },
-            ],
-        ),
-        # Validate that if a filter is provided, but empty, we'll provide an exception
-        # note that the get_search_request() method isn't great for constructing this particular
-        # case - so we manually define the request instead
-        (
-            {
-                "pagination": {
-                    "page_offset": 1,
-                    "page_size": 5,
-                    "order_by": "opportunity_id",
-                    "sort_direction": "descending",
-                },
-                "filters": {
-                    "funding_instrument": {},
-                    "funding_category": {},
-                    "applicant_type": {},
-                    "opportunity_status": {},
-                    "agency": {},
-                },
-            },
-            [
-                {
-                    "field": "filters.funding_instrument",
-                    "message": "At least one filter rule must be provided.",
-                    "type": "invalid",
-                },
-                {
-                    "field": "filters.funding_category",
-                    "message": "At least one filter rule must be provided.",
-                    "type": "invalid",
-                },
-                {
-                    "field": "filters.applicant_type",
-                    "message": "At least one filter rule must be provided.",
-                    "type": "invalid",
-                },
-                {
-                    "field": "filters.opportunity_status",
-                    "message": "At least one filter rule must be provided.",
-                    "type": "invalid",
-                },
-                {
-                    "field": "filters.agency",
-                    "message": "At least one filter rule must be provided.",
-                    "type": "invalid",
-                },
-            ],
-        ),
-    ],
-)
-def test_opportunity_search_invalid_request_422(
-    client, api_auth_token, search_request, expected_response_data
-):
-    resp = client.post(
-        "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-    )
-    assert resp.status_code == 422
-
-    print(resp.get_json())
-    response_data = resp.get_json()["errors"]
-    assert response_data == expected_response_data
 
 
 def search_scenario_id_fnc(val):
@@ -1172,14 +678,7 @@ class TestSearchScenarios(BaseTestClass):
     def test_opportunity_search_filters_200(
         self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
     ):
-        resp = client.post(
-            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-
-        search_response = resp.get_json()
-        assert resp.status_code == 200
-
-        self.validate_results(search_request, search_response, expected_scenarios)
+        self.query_and_validate_results(client, api_auth_token, search_request, expected_scenarios)
 
     @pytest.mark.parametrize(
         "search_request,expected_scenarios",
@@ -1278,14 +777,7 @@ class TestSearchScenarios(BaseTestClass):
     def test_opportunity_query_string_200(
         self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
     ):
-        resp = client.post(
-            "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-
-        search_response = resp.get_json()
-        assert resp.status_code == 200
-
-        self.validate_results(search_request, search_response, expected_scenarios)
+        self.query_and_validate_results(client, api_auth_token, search_request, expected_scenarios)
 
     @pytest.mark.parametrize(
         "search_request,expected_scenarios",
@@ -1374,6 +866,11 @@ class TestSearchScenarios(BaseTestClass):
         self, client, api_auth_token, search_request, expected_scenarios, setup_scenarios
     ):
         # Basically a combo of the above two tests, testing requests with both query text and filters set
+        self.query_and_validate_results(client, api_auth_token, search_request, expected_scenarios)
+
+    def query_and_validate_results(
+        self, client, api_auth_token, search_request, expected_scenarios
+    ):
         resp = client.post(
             "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
@@ -1381,9 +878,6 @@ class TestSearchScenarios(BaseTestClass):
         search_response = resp.get_json()
         assert resp.status_code == 200
 
-        self.validate_results(search_request, search_response, expected_scenarios)
-
-    def validate_results(self, search_request, search_response, expected_scenarios):
         returned_scenarios = set([record["opportunity_id"] for record in search_response["data"]])
         expected_scenarios = set(expected_scenarios)
 
@@ -1410,105 +904,223 @@ class TestSearchScenarios(BaseTestClass):
         validate_search_pagination(
             search_response,
             search_request,
-            SearchExpectedValues(
-                total_pages=expected_total_pages,
-                total_records=expected_total_records,
-                response_record_count=expected_total_records,
-            ),
+            expected_total_pages=expected_total_pages,
+            expected_total_records=expected_total_records,
+            expected_response_record_count=expected_total_records,
         )
 
 
 #####################################
-# GET opportunity tests
+# Request validation tests
 #####################################
 
 
 @pytest.mark.parametrize(
-    "opportunity_params,opportunity_summary_params",
+    "search_request,expected_response_data",
     [
-        ({}, {}),
-        # Only an opportunity exists, no other connected records
-        (
-            {
-                "opportunity_assistance_listings": [],
-            },
-            None,
-        ),
-        # Summary exists, but none of the list values set
         (
             {},
-            {
-                "link_funding_instruments": [],
-                "link_funding_categories": [],
-                "link_applicant_types": [],
-            },
+            [
+                {
+                    "field": "pagination",
+                    "message": "Missing data for required field.",
+                    "type": "required",
+                },
+            ],
         ),
-        # All possible values set to null/empty
-        # Note this uses traits on the factories to handle setting everything
-        ({"all_fields_null": True}, {"all_fields_null": True}),
+        (
+            get_search_request(page_offset=-1, page_size=-1),
+            [
+                {
+                    "field": "pagination.page_size",
+                    "message": "Must be greater than or equal to 1.",
+                    "type": "min_or_max_value",
+                },
+                {
+                    "field": "pagination.page_offset",
+                    "message": "Must be greater than or equal to 1.",
+                    "type": "min_or_max_value",
+                },
+            ],
+        ),
+        (
+            get_search_request(order_by="fake_field", sort_direction="up"),
+            [
+                {
+                    "field": "pagination.order_by",
+                    "message": "Value must be one of: opportunity_id, opportunity_number, opportunity_title, post_date, close_date, agency_code",
+                    "type": "invalid_choice",
+                },
+                {
+                    "field": "pagination.sort_direction",
+                    "message": "Must be one of: ascending, descending.",
+                    "type": "invalid_choice",
+                },
+            ],
+        ),
+        # The one_of enum filters
+        (
+            get_search_request(
+                funding_instrument_one_of=["not_a_valid_value"],
+                funding_category_one_of=["also_not_valid", "here_too"],
+                applicant_type_one_of=["not_an_applicant_type"],
+                opportunity_status_one_of=["also not real"],
+            ),
+            [
+                {
+                    "field": "filters.funding_instrument.one_of.0",
+                    "message": f"Must be one of: {', '.join(FundingInstrument)}.",
+                    "type": "invalid_choice",
+                },
+                {
+                    "field": "filters.funding_category.one_of.0",
+                    "message": f"Must be one of: {', '.join(FundingCategory)}.",
+                    "type": "invalid_choice",
+                },
+                {
+                    "field": "filters.funding_category.one_of.1",
+                    "message": f"Must be one of: {', '.join(FundingCategory)}.",
+                    "type": "invalid_choice",
+                },
+                {
+                    "field": "filters.applicant_type.one_of.0",
+                    "message": f"Must be one of: {', '.join(ApplicantType)}.",
+                    "type": "invalid_choice",
+                },
+                {
+                    "field": "filters.opportunity_status.one_of.0",
+                    "message": f"Must be one of: {', '.join(OpportunityStatus)}.",
+                    "type": "invalid_choice",
+                },
+            ],
+        ),
+        # Too short of agency
+        (
+            get_search_request(agency_one_of=["a"]),
+            [
+                {
+                    "field": "filters.agency.one_of.0",
+                    "message": "Shorter than minimum length 2.",
+                    "type": "min_length",
+                }
+            ],
+        ),
+        # Too short of a query
+        (
+            get_search_request(query=""),
+            [
+                {
+                    "field": "query",
+                    "message": "Length must be between 1 and 100.",
+                    "type": "min_or_max_length",
+                }
+            ],
+        ),
+        # Too long of a query
+        (
+            get_search_request(query="A" * 101),
+            [
+                {
+                    "field": "query",
+                    "message": "Length must be between 1 and 100.",
+                    "type": "min_or_max_length",
+                }
+            ],
+        ),
+        # Verify that if the one_of lists are empty, we get a validation error
+        (
+            get_search_request(
+                funding_instrument_one_of=[],
+                funding_category_one_of=[],
+                applicant_type_one_of=[],
+                opportunity_status_one_of=[],
+                agency_one_of=[],
+            ),
+            [
+                {
+                    "field": "filters.funding_instrument.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.funding_category.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.applicant_type.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.opportunity_status.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+                {
+                    "field": "filters.agency.one_of",
+                    "message": "Shorter than minimum length 1.",
+                    "type": "min_length",
+                },
+            ],
+        ),
+        # Validate that if a filter is provided, but empty, we'll provide an exception
+        # note that the get_search_request() method isn't great for constructing this particular
+        # case - so we manually define the request instead
+        (
+            {
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 5,
+                    "order_by": "opportunity_id",
+                    "sort_direction": "descending",
+                },
+                "filters": {
+                    "funding_instrument": {},
+                    "funding_category": {},
+                    "applicant_type": {},
+                    "opportunity_status": {},
+                    "agency": {},
+                },
+            },
+            [
+                {
+                    "field": "filters.funding_instrument",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.funding_category",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.applicant_type",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.opportunity_status",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+                {
+                    "field": "filters.agency",
+                    "message": "At least one filter rule must be provided.",
+                    "type": "invalid",
+                },
+            ],
+        ),
     ],
 )
-def test_get_opportunity_200(
-    client, api_auth_token, enable_factory_create, opportunity_params, opportunity_summary_params
+def test_opportunity_search_invalid_request_422(
+    client, api_auth_token, search_request, expected_response_data
 ):
-    # Split the setup of the opportunity from the opportunity summary to simplify the factory usage a bit
-    db_opportunity = OpportunityFactory.create(
-        **opportunity_params, current_opportunity_summary=None
-    )  # We'll set the current opportunity below
-
-    if opportunity_summary_params is not None:
-        db_opportunity_summary = OpportunitySummaryFactory.create(
-            **opportunity_summary_params, opportunity=db_opportunity
-        )
-        CurrentOpportunitySummaryFactory.create(
-            opportunity=db_opportunity, opportunity_summary=db_opportunity_summary
-        )
-
-    resp = client.get(
-        f"/v0.1/opportunities/{db_opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    resp = client.post(
+        "/v0.1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
-    assert resp.status_code == 200
-    response_data = resp.get_json()["data"]
+    assert resp.status_code == 422
 
-    validate_opportunity(db_opportunity, response_data)
-
-
-def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):
-    resp = client.get("/v0.1/opportunities/1", headers={"X-Auth": api_auth_token})
-    assert resp.status_code == 404
-    assert resp.get_json()["message"] == "Could not find Opportunity with ID 1"
-
-
-def test_get_opportunity_404_not_found_is_draft(client, api_auth_token, enable_factory_create):
-    # The endpoint won't return drafts, so this'll be a 404 despite existing
-    opportunity = OpportunityFactory.create(is_draft=True)
-
-    resp = client.get(
-        f"/v0.1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
-    )
-    assert resp.status_code == 404
-    assert (
-        resp.get_json()["message"]
-        == f"Could not find Opportunity with ID {opportunity.opportunity_id}"
-    )
-
-
-#####################################
-# Auth tests
-#####################################
-@pytest.mark.parametrize(
-    "method,url,body",
-    [
-        ("POST", "/v0.1/opportunities/search", get_search_request()),
-        ("GET", "/v0.1/opportunities/1", None),
-    ],
-)
-def test_opportunity_unauthorized_401(client, api_auth_token, method, url, body):
-    # open is just the generic method that post/get/etc. call under the hood
-    response = client.open(url, method=method, json=body, headers={"X-Auth": "incorrect token"})
-
-    assert response.status_code == 401
-    assert (
-        response.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
+    print(resp.get_json())
+    response_data = resp.get_json()["errors"]
+    assert response_data == expected_response_data
