@@ -103,7 +103,7 @@ data "aws_iam_policy" "migrator_db_access_policy" {
 }
 
 module "service" {
-  source                = "../../modules/service-no-alb"
+  source                = "../../modules/background-task-service"
   service_name          = local.service_name
   is_temporary          = false
   image_repository_name = module.app_config.image_repository_name
