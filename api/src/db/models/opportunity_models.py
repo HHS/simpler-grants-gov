@@ -41,7 +41,7 @@ class Opportunity(Base, TimestampMixin):
 
     is_draft: Mapped[bool] = mapped_column(index=True)
 
-    revision_number: Mapped[str | None]
+    revision_number: Mapped[str | None]  # TODO: convert to numeric?
     modified_comments: Mapped[str | None]
 
     # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
@@ -80,6 +80,13 @@ class Opportunity(Base, TimestampMixin):
             return None
 
         return self.current_opportunity_summary.opportunity_status
+
+    def attributes_for_comparison(self) -> dict:
+        """Return a dict of attributes that should be considered to detect if a change occurred."""
+        attributes = self._dict()
+        del attributes["created_at"]
+        del attributes["updated_at"]
+        return attributes
 
 
 class OpportunitySummary(Base, TimestampMixin):

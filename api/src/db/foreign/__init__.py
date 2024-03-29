@@ -7,6 +7,8 @@
 #  - Migrations are not used to manage creation and changes as the tables are actually defined in a different system.
 #
 
+from typing import Any, Iterable
+
 import sqlalchemy
 from sqlalchemy.orm import mapped_column
 
@@ -15,6 +17,19 @@ foreign_metadata = sqlalchemy.MetaData()
 
 class Base(sqlalchemy.orm.DeclarativeBase):
     metadata = foreign_metadata
+
+    def _dict(self) -> dict:
+        return {c.key: getattr(self, c.key) for c in sqlalchemy.inspect(self).mapper.column_attrs}
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}({self._dict()!r})"
+
+    def __rich_repr__(self) -> Iterable[tuple[str, Any]]:
+        """Rich repr for interactive console.
+
+        See https://rich.readthedocs.io/en/latest/pretty.html#rich-repr-protocol
+        """
+        return self._dict().items()
 
 
 class ForeignTopportunity(Base):
