@@ -54,3 +54,8 @@
 
 * [Development](contributing/development/README.md)
   * [GitHub - Code](contributing/development/github-code.md)
+
+## ANALYTICS
+
+* [Simpler Grants.gov Analytics](analytics/simpler-grants.gov-analytics/README.md)
+  * [API metrics](analytics/simpler-grants.gov-analytics/api-metrics.md)
