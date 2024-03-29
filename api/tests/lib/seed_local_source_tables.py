@@ -9,7 +9,7 @@ import sqlalchemy
 
 import src.adapters.db
 import src.logging
-from src.db.foreign import foreign_topportunity
+from src.db.foreign import ForeignTopportunity
 from tests.src.db.models.factories import ForeignTopportunityFactory
 
 logger = logging.getLogger(__name__)
@@ -54,8 +54,8 @@ def update_existing_data(db_session, max_opportunity_id):
         updated_opportunity.pop("last_upd_date")
 
         db_session.execute(
-            sqlalchemy.update(foreign_topportunity)
-            .where(foreign_topportunity.c.opportunity_id == opportunity_id)
+            sqlalchemy.update(ForeignTopportunity)
+            .where(ForeignTopportunity.opportunity_id == opportunity_id)
             .values(**updated_opportunity)
         )
 
@@ -74,12 +74,12 @@ def generate_batch(db_session, start_id, count):
 
     opportunity_rows = ForeignTopportunityFactory.build_batch(size=count)
 
-    db_session.execute(sqlalchemy.insert(foreign_topportunity), opportunity_rows)
+    db_session.execute(sqlalchemy.insert(ForeignTopportunity), opportunity_rows)
 
 
 def get_max_opportunity_id(db_session):
     max_opportunity_id = db_session.query(
-        sqlalchemy.func.max(foreign_topportunity.c.opportunity_id)
+        sqlalchemy.func.max(ForeignTopportunity.opportunity_id)
     ).scalar()
     logger.info("max(opportunity_id) = %r" % max_opportunity_id)
     if max_opportunity_id is None:
