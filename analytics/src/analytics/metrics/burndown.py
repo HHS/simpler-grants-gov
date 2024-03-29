@@ -4,15 +4,19 @@ Calculates burndown for sprints.
 This is a subclass of the BaseMetric class that calculates the running total of
 open issues for each day in a sprint
 """
-from typing import Literal
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal
 
 import pandas as pd
 import plotly.express as px
 from numpy import nan
-from plotly.graph_objects import Figure
 
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.metrics.base import BaseMetric, Statistic, Unit
+
+if TYPE_CHECKING:
+    from plotly.graph_objects import Figure
 
 
 class SprintBurndown(BaseMetric[SprintBoard]):
@@ -47,6 +51,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         3. Count the number of issues opened and closed on each day of that range
         4. Calculate the delta between opened and closed issues per day
         5. Cumulatively sum those deltas to get the running total of open tix
+
         """
         # make a copy of columns and rows we need to calculate burndown for this sprint
         burndown_cols = [self.opened_col, self.closed_col, self.points_col]
@@ -91,6 +96,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         Notes
         -----
         TODO(@widal001): 2023-12-04 - Should stats be calculated in separate private methods?
+
         """
         df = self.results
         # get sprint start and end dates
@@ -160,6 +166,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         It does this by:
         - Grouping on the created_date or opened_date column, depending on status
         - Counting the total number of rows per group
+
         """
         # create local copies of the key column names
         agg_col = self.opened_col if status == "opened" else self.closed_col
@@ -185,6 +192,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         - Creating a row for each day between the earliest date a ticket was opened
           and either the sprint end _or_ the latest date an issue was closed,
           whichever is the later date.
+
         """
         # get earliest date an issue was opened and latest date one was closed
         sprint_end = self.dataset.sprint_end(self.sprint)
@@ -214,6 +222,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
           opened and a column for tix closed on that day
         - Subtracting closed from opened to get the "delta" on each day in the range
         - Cumulatively summing the deltas to get the running total of open tix
+
         """
         # left join the full date range to open and closed counts
         df = (

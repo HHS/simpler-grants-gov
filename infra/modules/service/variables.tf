@@ -47,24 +47,6 @@ variable "hostname" {
   default     = null
 }
 
-variable "sendy_api_key" {
-  description = "Sendy API key to pass with requests for sendy subscriber endpoints."
-  type        = string
-  default     = null
-}
-
-variable "sendy_api_url" {
-  description = "Sendy API base url for requests to manage subscribers."
-  type        = string
-  default     = null
-}
-
-variable "sendy_list_id" {
-  description = "Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list."
-  type        = string
-  default     = null
-}
-
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
@@ -81,8 +63,17 @@ variable "private_subnet_ids" {
 }
 
 variable "extra_environment_variables" {
-  type        = list(object({ name = string, value = string }))
-  description = "Additional environment variables to pass to the service container"
+  type        = map(string)
+  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
+  default     = {}
+}
+
+variable "secrets" {
+  type = set(object({
+    name           = string
+    ssm_param_name = string
+  }))
+  description = "List of configurations for defining environment variables that pull from SSM parameter store"
   default     = []
 }
 
@@ -137,12 +128,6 @@ variable "api_auth_token" {
   type        = string
   default     = null
   description = "Auth token for connecting to the API"
-}
-
-variable "enable_v01_endpoints" {
-  description = "determines whether the v0.1 endpoints are available in the API"
-  type        = bool
-  default     = false
 }
 
 variable "is_temporary" {

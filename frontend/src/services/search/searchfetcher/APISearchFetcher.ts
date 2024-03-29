@@ -1,10 +1,9 @@
 import "server-only";
 
-import SearchOpportunityAPI, {
-  SearchResponseData,
-} from "../../app/api/SearchOpportunityAPI";
+import { SearchFetcher, SearchFetcherProps } from "./SearchFetcher";
 
-import { SearchFetcher } from "./SearchFetcher";
+import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
+import SearchOpportunityAPI from "../../../app/api/SearchOpportunityAPI";
 
 export class APISearchFetcher extends SearchFetcher {
   private searchApi: SearchOpportunityAPI;
@@ -14,16 +13,22 @@ export class APISearchFetcher extends SearchFetcher {
     this.searchApi = new SearchOpportunityAPI();
   }
 
-  async fetchOpportunities(): Promise<SearchResponseData> {
+  async fetchOpportunities(
+    searchInputs: SearchFetcherProps,
+  ): Promise<SearchAPIResponse> {
     try {
       // Keep commented in case we need to simulate a delay to test loaders
       //  await new Promise((resolve) => setTimeout(resolve, 1250));
 
-      const response = await this.searchApi.searchOpportunities();
+      const response: SearchAPIResponse =
+        await this.searchApi.searchOpportunities(searchInputs);
+      response.actionType = searchInputs.actionType;
+      response.fieldChanged = searchInputs.fieldChanged;
+
       if (!response.data) {
         throw new Error(`No data returned from API`);
       }
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error fetching opportunities:", error);
       throw error;

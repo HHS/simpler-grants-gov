@@ -1,46 +1,101 @@
 "use client";
 
-import React from "react";
+import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
+import SearchFilterAgency from "src/components/search/SearchFilterAgency";
+import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
-import { SearchResponseData } from "../api/SearchOpportunityAPI";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
-import { updateResults } from "./actions";
-import { useFormState } from "react-dom";
+import { useSearchFormState } from "../../hooks/useSearchFormState";
 
 interface SearchFormProps {
-  initialSearchResults: SearchResponseData;
+  initialSearchResults: SearchAPIResponse;
+  requestURLQueryParams: SearchFetcherProps;
 }
 
-export function SearchForm({ initialSearchResults }: SearchFormProps) {
-  const [searchResults, updateSearchResultsAction] = useFormState(
-    updateResults,
-    initialSearchResults,
-  );
+export function SearchForm({
+  initialSearchResults,
+  requestURLQueryParams,
+}: SearchFormProps) {
+  // Capture top level logic, including useFormState in the useSearchFormState hook
+  const {
+    searchResults, // result of calling server action
+    updateSearchResultsAction, // server action function alias
+    formRef, // used in children to submit the form
+    statusQueryParams,
+    queryQueryParams,
+    sortbyQueryParams,
+    agencyQueryParams,
+    fundingInstrumentQueryParams,
+    maxPaginationError,
+    fieldChangedRef,
+    page,
+    handlePageChange,
+    topPaginationRef,
+    handleSubmit,
+  } = useSearchFormState(initialSearchResults, requestURLQueryParams);
 
   return (
-    <form action={updateSearchResultsAction}>
+    <form
+      ref={formRef}
+      action={updateSearchResultsAction}
+      onSubmit={handleSubmit}
+    >
       <div className="grid-container">
         <div className="search-bar">
-          <SearchBar />
+          <SearchBar initialQueryParams={queryQueryParams} />
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <SearchOpportunityStatus />
-            <fieldset className="usa-fieldset">Filters</fieldset>
+            <SearchOpportunityStatus
+              formRef={formRef}
+              initialQueryParams={statusQueryParams}
+            />
+            <SearchFilterFundingInstrument
+              formRef={formRef}
+              initialQueryParams={fundingInstrumentQueryParams}
+            />
+            <SearchFilterAgency
+              formRef={formRef}
+              initialQueryParams={agencyQueryParams}
+            />
           </div>
           <div className="tablet:grid-col-8">
+            <SearchResultsHeader
+              formRef={formRef}
+              searchResultsLength={searchResults.pagination_info.total_records}
+              initialQueryParams={sortbyQueryParams}
+            />
             <div className="usa-prose">
-              <SearchResultsHeader searchResults={searchResults} />
-              <SearchPagination />
-              <SearchResultsList searchResults={searchResults} />
-              <SearchPagination />
+              {searchResults.data.length >= 1 ? (
+                <SearchPagination
+                  totalPages={searchResults.pagination_info.total_pages}
+                  page={page}
+                  handlePageChange={handlePageChange}
+                  showHiddenInput={true}
+                  paginationRef={topPaginationRef}
+                />
+              ) : null}
+
+              <SearchResultsList
+                searchResults={searchResults.data}
+                maxPaginationError={maxPaginationError}
+              />
+              {searchResults.data.length >= 1 ? (
+                <SearchPagination
+                  totalPages={searchResults.pagination_info.total_pages}
+                  page={page}
+                  handlePageChange={handlePageChange}
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </div>
+      <input type="hidden" name="fieldChanged" ref={fieldChangedRef} />
     </form>
   );
 }

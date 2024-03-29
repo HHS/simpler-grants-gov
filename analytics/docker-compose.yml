@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+
+  grants-analytics:
+    build:
+      context: .
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-analytics}
+    container_name: grants-analytics
+    volumes:
+      - .:/analytics
+      - ~/.ssh:/home/${RUN_USER:-analytics}/.ssh

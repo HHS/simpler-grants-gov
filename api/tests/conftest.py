@@ -12,6 +12,7 @@ import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
+from src.db.models.opportunity_models import Opportunity
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 
@@ -55,6 +56,19 @@ def monkeypatch_session():
     Create a monkeypatch instance that can be used to
     monkeypatch global environment, objects, and attributes
     for the duration the test session.
+    """
+    mpatch = _pytest.monkeypatch.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+# From https://github.com/pytest-dev/pytest/issues/363
+@pytest.fixture(scope="class")
+def monkeypatch_class():
+    """
+    Create a monkeypatch instance that can be used to
+    monkeypatch global environment, objects, and attributes
+    for the duration of a test class.
     """
     mpatch = _pytest.monkeypatch.MonkeyPatch()
     yield mpatch
@@ -177,3 +191,67 @@ def mock_s3_bucket_resource(mock_s3):
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
+
+
+####################
+# Class-based testing
+####################
+
+
+class BaseTestClass:
+    """
+    A base class to derive a test class from. This lets
+    us have a set of fixtures with a scope greater than
+    an individual test, but that need to be more granular than
+    session scoping.
+
+    Useful for avoiding repetition in setup of tests which
+    can be clearer or provide better performance.
+
+    See: https://docs.pytest.org/en/7.1.x/how-to/fixtures.html#fixture-scopes
+
+    For example:
+
+    class TestExampleClass(BaseTestClass):
+
+        @pytest.fixture(scope="class")
+        def setup_data(db_session):
+            # note that the db_session here would be the one created in this class
+            # as it will pull from the class scope instead
+
+            examples = ExampleFactory.create_batch(size=100)
+    """
+
+    @pytest.fixture(scope="class")
+    def db_session(self, db_client, monkeypatch_class):
+        # Note this shadows the db_session fixture for tests in this class
+        with db_client.get_session() as db_session:
+            yield db_session
+
+    @pytest.fixture(scope="class")
+    def enable_factory_create(self, monkeypatch_class, db_session):
+        """
+        Allows the create method of factories to be called. By default, the create
+            throws an exception to prevent accidental creation of database objects for tests
+            that do not need persistence. This fixture only allows the create method to be
+            called for the current class of tests. Each test that needs to call Factory.create should pull in
+            this fixture.
+        """
+        monkeypatch_class.setattr(factories, "_db_session", db_session)
+
+    @pytest.fixture(scope="class")
+    def truncate_opportunities(self, db_session):
+        """
+        Use this fixture when you want to truncate the opportunity table
+        and handle deleting all related records.
+
+        As this is at the class scope, this will only run once for a given
+        class implementation.
+        """
+
+        opportunities = db_session.query(Opportunity).all()
+        for opp in opportunities:
+            db_session.delete(opp)
+
+        # Force the deletes to the DB
+        db_session.commit()

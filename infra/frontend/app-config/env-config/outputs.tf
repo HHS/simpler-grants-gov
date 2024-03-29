@@ -14,6 +14,12 @@ output "database_config" {
 output "service_config" {
   value = {
     region = var.default_region
+    extra_environment_variables = merge(
+      local.default_extra_environment_variables,
+      var.service_override_extra_environment_variables
+    )
+
+    secrets = toset(local.secrets)
   }
 }
 
@@ -25,17 +31,4 @@ output "incident_management_service_integration" {
 
 output "domain" {
   value = var.domain
-}
-
-output "sendy_api_key" {
-  value     = var.sendy_api_key
-  sensitive = true
-}
-
-output "sendy_api_url" {
-  value = var.sendy_api_url
-}
-
-output "sendy_list_id" {
-  value = var.sendy_list_id
 }

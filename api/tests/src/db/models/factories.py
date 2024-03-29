@@ -131,6 +131,15 @@ class OpportunityFactory(BaseFactory):
             current_opportunity_summary__is_archived_forecast_summary=True
         )
 
+        # Set all nullable fields to null
+        all_fields_null = factory.Trait(
+            agency=None,
+            category=None,
+            category_explanation=None,
+            current_opportunity_summary=None,
+            opportunity_assistance_listings=None,
+        )
+
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
@@ -298,6 +307,48 @@ class OpportunitySummaryFactory(BaseFactory):
         is_non_public_forecast_summary = factory.Trait(
             is_forecast=True,
             post_date=factory.Faker("date_between", start_date="+3w", end_date="+4w"),
+        )
+
+        # Set all nullable fields to null
+        all_fields_null = factory.Trait(
+            summary_description=None,
+            is_cost_sharing=None,
+            post_date=None,
+            close_date=None,
+            close_date_description=None,
+            archive_date=None,
+            unarchive_date=None,
+            expected_number_of_awards=None,
+            estimated_total_program_funding=None,
+            award_floor=None,
+            award_ceiling=None,
+            additional_info_url=None,
+            additional_info_url_description=None,
+            forecasted_post_date=None,
+            forecasted_close_date=None,
+            forecasted_close_date_description=None,
+            forecasted_award_date=None,
+            forecasted_project_start_date=None,
+            fiscal_year=None,
+            modification_comments=None,
+            funding_category_description=None,
+            applicant_eligibility_description=None,
+            agency_code=None,
+            agency_name=None,
+            agency_phone_number=None,
+            agency_contact_description=None,
+            agency_email_address=None,
+            agency_email_address_description=None,
+            is_deleted=None,
+            link_funding_instruments=[],
+            link_funding_categories=[],
+            link_applicant_types=[],
+        )
+
+        no_link_values = factory.Trait(
+            link_funding_instruments=[],
+            link_funding_categories=[],
+            link_applicant_types=[],
         )
 
 

@@ -1,8 +1,24 @@
-import { JSONRequestBody } from "../../src/app/api/BaseApi";
+import { SearchFetcherProps } from "../../src/services/search/searchfetcher/SearchFetcher";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
+import { SearchRequestBody } from "../../src/types/search/searchRequestTypes";
 
+// mockFetch should match the SearchAPIResponse type structure
 const mockFetch = ({
-  response = { data: { opportunities: [] }, errors: [], warnings: [] },
+  response = {
+    data: [],
+    message: "Success",
+    pagination_info: {
+      order_by: "opportunity_id",
+      page_offset: 1,
+      page_size: 25,
+      sort_direction: "ascending",
+      total_pages: 1,
+      total_records: 0,
+    },
+    status_code: 200,
+    errors: [],
+    warnings: [],
+  },
   ok = true,
   status = 200,
 }) => {
@@ -27,42 +43,69 @@ describe("SearchOpportunityAPI", () => {
 
   describe("searchOpportunities", () => {
     beforeEach(() => {
-      global.fetch = mockFetch({
-        response: {
-          data: { opportunities: [] },
-          errors: [],
-          warnings: [],
-        },
-      });
+      global.fetch = mockFetch({});
     });
 
     it("sends POST request to search opportunities endpoint with query parameters", async () => {
-      const queryParams = { keyword: "science" };
+      const searchProps: SearchFetcherProps = {
+        page: 1,
+        status: new Set(["forecasted", "posted"]),
+        fundingInstrument: new Set(["grant", "cooperative_agreement"]),
+        agency: new Set(),
+        query: "research",
+        sortby: "opportunityNumberAsc",
+      };
 
-      const response = await searchApi.searchOpportunities(queryParams);
+      const response = await searchApi.searchOpportunities(searchProps);
 
       const method = "POST";
       const headers = baseRequestHeaders;
 
-      const body: JSONRequestBody = {
+      const requestBody: SearchRequestBody = {
         pagination: {
+          order_by: "opportunity_number", // This should be the actual value being used in the API method
+          page_offset: 1,
+          page_size: 25,
+          sort_direction: "ascending", // or "descending" based on your sortby parameter
+        },
+        filters: {
+          opportunity_status: {
+            one_of: Array.from(searchProps.status),
+          },
+          funding_instrument: {
+            one_of: Array.from(searchProps.fundingInstrument),
+          },
+        },
+        query: searchProps.query || "",
+      };
+
+      const expectedUrl = `${searchApi.version}${searchApi.basePath}/${searchApi.namespace}/search`;
+
+      expect(fetch).toHaveBeenCalledWith(
+        expectedUrl,
+        expect.objectContaining({
+          method,
+          headers,
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      expect(response).toEqual({
+        data: [],
+        message: "Success",
+        pagination_info: {
+          // TODO: the response order_by should
+          // by what the request had: opportunity_number
           order_by: "opportunity_id",
           page_offset: 1,
           page_size: 25,
           sort_direction: "ascending",
+          total_pages: 1,
+          total_records: 0,
         },
-        ...queryParams,
-      };
-
-      expect(fetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          method,
-          headers,
-          body: JSON.stringify(body),
-        }),
-      );
-      expect(response.data).toEqual({ opportunities: [] });
+        status_code: 200,
+        warnings: [],
+      });
     });
   });
 });
