@@ -7,9 +7,8 @@ import logging
 import factory
 import sqlalchemy
 
-import src.adapters.db as db
-import src.adapters.db.flask_db as flask_db
-from src.data_migration.data_migration_blueprint import data_migration_blueprint
+import src.adapters.db
+import src.logging
 from tests.src.db.models.factories import ForeignTopportunityFactory
 
 logger = logging.getLogger(__name__)
@@ -41,23 +40,24 @@ foreign_topportunity = sqlalchemy.Table(
 )
 
 
-@data_migration_blueprint.cli.command(
-    "mock-generate", help="Populate or update source tables with reproducible mock data"
-)
-@flask_db.with_db_session()
-def generate(db_session: db.Session) -> None:
-    logger.info("populating source tables with mock data")
+def seed_local_source_tables() -> None:
+    with src.logging.init("seed_local_source_tables"):
+        logger.info("populating source tables with mock data")
 
+        db_client = src.adapters.db.PostgresDBClient()
+
+        with db_client.get_session() as db_session:
+            update_and_append_data(db_session)
+
+        logger.info("populating source tables done")
+
+
+def update_and_append_data(db_session):
     max_opportunity_id = get_max_opportunity_id(db_session)
-
     if max_opportunity_id:
         update_existing_data(db_session, max_opportunity_id)
-
     append_new_data(db_session, max_opportunity_id)
-
     db_session.commit()
-
-    logger.info("populating source tables done")
 
 
 def update_existing_data(db_session, max_opportunity_id):
@@ -110,3 +110,7 @@ def get_max_opportunity_id(db_session):
     if max_opportunity_id is None:
         return 0
     return int(max_opportunity_id)
+
+
+if __name__ == "__main__":
+    seed_local_source_tables()
