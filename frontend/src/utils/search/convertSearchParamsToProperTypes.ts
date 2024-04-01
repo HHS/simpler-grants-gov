@@ -1,5 +1,6 @@
-import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
-import { ServerSideSearchParams } from "../types/searchRequestURLTypes";
+import { SearchFetcherActionType } from "../../types/search/searchRequestTypes";
+import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
+import { ServerSideSearchParams } from "../../types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.
@@ -14,9 +15,11 @@ export function convertSearchParamsToProperTypes(
     agency: paramToSet(params.agency),
     fundingInstrument: paramToSet(params.fundingInstrument),
     sortby: params.sortby || null, // Convert empty string to null if needed
+
     // Ensure page is at least 1 or default to 1 if undefined
-    page: Math.max(1, parseInt(params.page || "1")),
-  }; // Type assertion since we know the structure matches
+    page: getSafePage(params.page),
+    actionType: SearchFetcherActionType.InitialLoad,
+  };
 }
 
 // Helper function to convert query parameters to set
@@ -26,4 +29,10 @@ function paramToSet(param: string | string[] | undefined): Set<string> {
     return new Set(param);
   }
   return new Set(param.split(","));
+}
+
+// Keeps page >= 1.
+// (We can't enforce a max here since this is before the API request)
+function getSafePage(page: string | undefined) {
+  return Math.max(1, parseInt(page || "1"));
 }

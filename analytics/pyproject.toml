@@ -1,8 +1,8 @@
 [tool.poetry]
 authors = ["widal001 <billy.daly@agile6.com>"]
 description = "Python package for analyzing data related to the Simpler Grants Project"
-name = "analytics"
-packages = [{include = "analytics", from = "src"}]
+name = "simpler-grants-gov-analytics"
+packages = [{ include = "analytics", from = "src" }]
 readme = "README.md"
 version = "0.1.0"
 
@@ -12,14 +12,14 @@ analytics = "analytics.cli:app"
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
 kaleido = "0.2.1"
-notebook = "^7.0.0" # Goal is to replace this with another method of presenting charts
+notebook = "^7.0.0"                              # Goal is to replace this with another method of presenting charts
 pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
 pydantic = "^2.0.3"
 python = "^3.11"
 slack-sdk = "^3.23.0"
-typer = {extras = ["all"], version = "^0.9.0"}
+typer = { extras = ["all"], version = "^0.9.0" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -39,10 +39,7 @@ python_version = "3.11"
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
-module = [
-  "plotly.*",
-  "dynaconf.*",
-]
+module = ["plotly.*", "dynaconf.*"]
 
 [tool.pylint."MESSAGE CONTROL"]
 disable = [
@@ -55,17 +52,17 @@ disable = [
 
 [tool.ruff]
 ignore = [
-  "ANN101", # missing type annotation for self
-  "ANN102", # missing type annotation for cls
-  "D203", # no blank line before class
-  "D212", # multi-line summary first line
-  "FIX002", # line contains TODO
-  "PD901", # pandas df variable name
+  "ANN101",  # missing type annotation for self
+  "ANN102",  # missing type annotation for cls
+  "D203",    # no blank line before class
+  "D212",    # multi-line summary first line
+  "FIX002",  # line contains TODO
+  "PD901",   # pandas df variable name
   "PLR0913", # Too many arguments to function call
-  "PTH123", # `open()` should be replaced by `Path.open()`
-  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
-  "TD003", # missing an issue link on TODO
-  "T201", # use of `print` detected
+  "PTH123",  # `open()` should be replaced by `Path.open()`
+  "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
+  "TD003",   # missing an issue link on TODO
+  "T201",    # use of `print` detected
 ]
 line-length = 100
 select = ["ALL"]

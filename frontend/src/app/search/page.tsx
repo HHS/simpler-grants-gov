@@ -8,7 +8,7 @@ import PageSEO from "src/components/PageSEO";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
-import { convertSearchParamsToProperTypes } from "../../utils/convertSearchParamsToStrings";
+import { convertSearchParamsToProperTypes } from "../../utils/search/convertSearchParamsToProperTypes";
 import { cookies } from "next/headers";
 import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";

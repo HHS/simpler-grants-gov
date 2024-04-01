@@ -12,6 +12,7 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingCategory,
     LinkOpportunitySummaryFundingInstrument,
     Opportunity,
+    OpportunityAssistanceListing,
     OpportunitySummary,
 )
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
@@ -51,7 +52,44 @@ def _add_query_filters(stmt: Select[tuple[Any]], query: str | None) -> Select[tu
     if query is None or len(query) == 0:
         return stmt
 
-    # TODO - will implement this in https://github.com/HHS/simpler-grants-gov/issues/1455
+    ilike_query = f"%{query}%"
+
+    # Add a left join to the assistance listing table to filter by any of its values
+    stmt = stmt.outerjoin(
+        OpportunityAssistanceListing,
+        Opportunity.opportunity_id == OpportunityAssistanceListing.opportunity_id,
+    )
+
+    """
+    This adds the following to the inner query (assuming the query value is "example")
+
+    WHERE
+        (opportunity.opportunity_title ILIKE '%example%'
+        OR opportunity.opportunity_number ILIKE '%example%'
+        OR opportunity.agency ILIKE '%example%'
+        OR opportunity_summary.summary_description ILIKE '%example%'
+        OR opportunity_assistance_listing.assistance_listing_number = 'example'
+        OR opportunity_assistance_listing.program_title ILIKE '%example%'))
+
+    Note that SQLAlchemy escapes everything and queries are actually written like:
+
+        opportunity.opportunity_number ILIKE % (opportunity_number_1)
+    """
+    stmt = stmt.where(
+        or_(
+            # Title partial match
+            Opportunity.opportunity_title.ilike(ilike_query),
+            # Number partial match
+            Opportunity.opportunity_number.ilike(ilike_query),
+            # Agency (code) partial match
+            Opportunity.agency.ilike(ilike_query),
+            # Summary description partial match
+            OpportunitySummary.summary_description.ilike(ilike_query),
+            # assistance listing number matches exactly or program title partial match
+            OpportunityAssistanceListing.assistance_listing_number == query,
+            OpportunityAssistanceListing.program_title.ilike(ilike_query),
+        )
+    )
 
     return stmt
 
@@ -105,11 +143,7 @@ def _add_filters(
         # Note that we filter against the agency code in the opportunity, not in the summary
         one_of_agencies = filters.agency.get("one_of")
         if one_of_agencies:
-            # This produces something like:
-            #   ..WHERE ((opportunity.agency ILIKE 'US-ABC%') OR (opportunity.agency ILIKE 'HHS%'))
-            stmt = stmt.where(
-                or_(*[Opportunity.agency.istartswith(agency) for agency in one_of_agencies])
-            )
+            stmt = stmt.where(Opportunity.agency.in_(one_of_agencies))
 
     return stmt
 

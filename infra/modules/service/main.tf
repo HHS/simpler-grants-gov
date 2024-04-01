@@ -12,16 +12,12 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
-  sendy_api_key           = var.sendy_api_key != null ? [{ name = "SENDY_API_KEY", value = var.sendy_api_key }] : []
-  sendy_api_url           = var.sendy_api_url != null ? [{ name = "SENDY_API_URL", value = var.sendy_api_url }] : []
-  sendy_list_id           = var.sendy_list_id != null ? [{ name = "SENDY_LIST_ID", value = var.sendy_list_id }] : []
-  enable_v01_endpoints    = var.enable_v01_endpoints == true ? [{ name = "ENABLE_V_0_1_ENDPOINTS", value = "true" }] : []
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "API_AUTH_TOKEN", value : var.api_auth_token },
-  ], local.hostname, local.sendy_api_key, local.sendy_api_url, local.sendy_list_id, local.enable_v01_endpoints)
+  ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
@@ -29,7 +25,14 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
-  environment_variables = concat(local.base_environment_variables, local.db_environment_variables, var.extra_environment_variables)
+  environment_variables = concat(
+    local.base_environment_variables,
+    local.db_environment_variables,
+    [
+      for name, value in var.extra_environment_variables :
+      { name : name, value : value }
+    ],
+  )
 }
 
 #-------------------
@@ -89,6 +92,7 @@ resource "aws_ecs_task_definition" "app" {
         ]
       },
       environment = local.environment_variables,
+      secrets     = local.secrets,
       portMappings = [
         {
           containerPort = var.container_port,

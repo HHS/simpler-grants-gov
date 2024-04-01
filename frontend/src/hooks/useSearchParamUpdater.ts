@@ -1,9 +1,8 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export function useSearchParamUpdater() {
-  const searchParams = useSearchParams();
   const pathname = usePathname() || "";
 
   // Singular string-type param updates include: search input, dropdown, and page numbers
@@ -12,7 +11,10 @@ export function useSearchParamUpdater() {
     queryParamValue: string | Set<string>,
     key: string,
   ) => {
-    const params = new URLSearchParams(searchParams || {});
+    // TODO (#1518): Next's useSearchParams was causing issues. document.location.search
+    // seems to work better when calling from the form submit. Some follow up work
+    // to investigate if URLSearchParams(useSearchParams()) can still work.
+    const params = new URLSearchParams(document.location.search);
 
     const finalQueryParamValue =
       queryParamValue instanceof Set
