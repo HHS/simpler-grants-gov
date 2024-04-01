@@ -17,6 +17,12 @@ variable "has_database" {
   default = true
 }
 
+variable "domain" {
+  type        = string
+  description = "DNS domain of the website managed by HHS"
+  default     = null
+}
+
 variable "database_instance_count" {
   description = "Number of database instances. Should be 2+ for production environments."
   type        = number

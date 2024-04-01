@@ -23,3 +23,7 @@ output "service_config" {
     secrets = toset(local.secrets)
   }
 }
+
+output "domain" {
+  value = var.domain
+}
