@@ -184,15 +184,9 @@ class SprintBurnup(BaseMetric[SprintBoard]):
 
     #     """
     #     # create local copies of the key column names
-    #     agg_col = self.opened_col if status == "opened" else self.closed_col
-    #     unit_col = self.unit.value
-    #     key_cols = [agg_col, unit_col]
     #     # create a dummy column to sum per row if the unit is tasks
     #     if self.unit == Unit.issues:
-    #         df[unit_col] = 1
     #     # isolate the key columns, group by open or closed date, then sum the units
-    #     df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
-    #     return df_agg.rename(columns={agg_col: self.date_col, unit_col: status})
 
     # def _get_tix_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
     #     """
@@ -210,12 +204,5 @@ class SprintBurnup(BaseMetric[SprintBoard]):
 
     #     """
     #     # get earliest date an issue was opened and latest date one was closed
-    #     sprint_end = self.dataset.sprint_end(self.sprint)
-    #     opened_min = df[self.opened_col].min()
-    #     closed_max = df[self.closed_col].max()
-    #     closed_max = sprint_end if closed_max is nan else max(sprint_end, closed_max)
     #     # creates a dataframe with one row for each day between min and max date
     #     return pd.DataFrame(
-    #         pd.date_range(opened_min, closed_max),
-    #         columns=[self.date_col],
-    #     )
