@@ -10,7 +10,9 @@ from analytics.metrics.base import Unit
 
 
 def get_daily_tix_counts_by_status(
-    df: pd.DataFrame, status: Literal["opened", "closed"], unit: Unit,
+    df: pd.DataFrame,
+    status: Literal["opened", "closed"],
+    unit: Unit,
 ) -> pd.DataFrame:
     """
     Count the number of issues or points opened or closed by date.
