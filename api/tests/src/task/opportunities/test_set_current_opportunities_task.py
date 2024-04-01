@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -148,7 +148,7 @@ def validate_current_opportunity(
         assert (
             current_opportunity_summary.opportunity_summary_id
             == container.expected_current_summary.opportunity_summary_id
-        ), "hello"
+        )
 
 
 # These params are used by several tests below and represent
@@ -518,3 +518,48 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
         assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 5
         assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 1
         assert metrics[set_current_opportunities_task.Metrics.MODIFIED_OPPORTUNITY_COUNT] == 4
+
+
+def test_via_cli(cli_runner, db_session, enable_factory_create):
+    # Simple test that just verifies that we can invoke the script via the CLI
+    # note that the script will always use todays date as the current date, so we
+    # need to generate the scenario from that instead
+
+    # A basic posted scenario
+    container1 = OpportunityContainer().with_summary(
+        is_forecast=False,
+        post_date=CURRENT_DATE - timedelta(days=10),
+        close_date=CURRENT_DATE + timedelta(days=30),
+        archive_date=CURRENT_DATE + timedelta(days=60),
+        is_expected_current=True,
+    )
+
+    # a basic forecasted scenario with several past revisions
+    container2 = (
+        OpportunityContainer()
+        .with_summary(
+            is_forecast=True,
+            post_date=CURRENT_DATE - timedelta(days=5),
+            archive_date=CURRENT_DATE + timedelta(days=60),
+            is_already_current=True,
+            revision_number=2,
+        )
+        .with_summary(
+            is_forecast=True,
+            post_date=CURRENT_DATE - timedelta(days=5),
+            archive_date=CURRENT_DATE + timedelta(days=60),
+            revision_number=1,
+        )
+        .with_summary(
+            is_forecast=True,
+            post_date=CURRENT_DATE - timedelta(days=5),
+            archive_date=CURRENT_DATE + timedelta(days=120),
+            is_expected_current=True,
+            revision_number=3,
+        )
+    )
+
+    cli_runner.invoke(args=["task", "set-current-opportunities"])
+
+    validate_current_opportunity(db_session, container1, OpportunityStatus.POSTED)
+    validate_current_opportunity(db_session, container2, OpportunityStatus.FORECASTED)
