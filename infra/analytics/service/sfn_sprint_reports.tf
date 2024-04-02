@@ -40,6 +40,14 @@ resource "aws_sfn_state_machine" "sprint_reports" {
                   {
                     "Name" : "PY_RUN_APPROACH",
                     "Value" : "local",
+                  },
+                  {
+                    "Name" : "SPRINT_FILE",
+                    "Value" : "/tmp/sprint-data.json",
+                  },
+                  {
+                    "Name" : "ISSUE_FILE",
+                    "Value" : "/tmp/issue-data.json",
                   }
                 ]
                 "Command" : [
