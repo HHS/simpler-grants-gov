@@ -36,6 +36,12 @@ resource "aws_sfn_state_machine" "sprint_reports" {
             "ContainerOverrides" : [
               {
                 "Name" : local.service_name,
+                "Environment" : [
+                  {
+                    "Name" : "PY_RUN_APPROACH",
+                    "Value" : "local",
+                  }
+                ]
                 "Command" : [
                   "make",
                   "gh-data-export",
