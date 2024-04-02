@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import Field
 
+from src.constants.schema import Schemas
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -15,10 +16,18 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
     name: str = Field(alias="DB_NAME")
     username: str = Field(alias="DB_USER")
     password: Optional[str] = Field(None, alias="DB_PASSWORD")
-    db_schema: str = Field("public", alias="DB_SCHEMA")
     port: int = Field(5432, alias="DB_PORT")
     hide_sql_parameter_logs: bool = Field(True, alias="HIDE_SQL_PARAMETER_LOGS")
     ssl_mode: str = Field("require", alias="DB_SSL_MODE")
+
+    schema_prefix_override: str | None = Field(None)
+
+    def get_schema_translate_map(self) -> dict[str, str]:
+        prefix = ""
+        if self.schema_prefix_override is not None:
+            prefix = self.schema_prefix_override
+
+        return {schema: f"{prefix}{schema}" for schema in Schemas}
 
 
 def get_db_config() -> PostgresDBConfig:
@@ -31,7 +40,6 @@ def get_db_config() -> PostgresDBConfig:
             "dbname": db_config.name,
             "username": db_config.username,
             "password": "***" if db_config.password is not None else None,
-            "db_schema": db_config.db_schema,
             "port": db_config.port,
             "hide_sql_parameter_logs": db_config.hide_sql_parameter_logs,
         },

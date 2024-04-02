@@ -4,6 +4,7 @@ from sqlalchemy import text
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 
 logger = logging.getLogger(__name__)
@@ -20,10 +21,10 @@ class SqlCommands:
     #################################
 
     OPPORTUNITY_DELETE_QUERY = """
-        delete from transfer_topportunity
+        delete from {}.transfer_topportunity
     """
     OPPORTUNITY_INSERT_QUERY = """
-        insert into transfer_topportunity
+        insert into {}.transfer_topportunity
             select
                 opportunity_id,
                 oppnumber,
@@ -40,7 +41,7 @@ class SqlCommands:
                 last_upd_date,
                 creator_id,
                 created_date
-            from foreign_topportunity
+            from {}.foreign_topportunity
             where is_draft = 'N'
     """
 
@@ -54,7 +55,7 @@ def copy_oracle_data(db_session: db.Session) -> None:
 
     try:
         with db_session.begin():
-            _run_copy_commands(db_session)
+            _run_copy_commands(db_session, Schemas.API)
     except Exception:
         logger.exception("Failed to run copy-oracle-data command")
         raise
@@ -62,10 +63,12 @@ def copy_oracle_data(db_session: db.Session) -> None:
     logger.info("Successfully ran copy-oracle-data")
 
 
-def _run_copy_commands(db_session: db.Session) -> None:
+def _run_copy_commands(db_session: db.Session, api_schema: str) -> None:
     logger.info("Running copy commands for TOPPORTUNITY")
 
-    db_session.execute(text(SqlCommands.OPPORTUNITY_DELETE_QUERY))
-    db_session.execute(text(SqlCommands.OPPORTUNITY_INSERT_QUERY))
-    count = db_session.scalar(text("SELECT count(*) from transfer_topportunity"))
-    logger.info(f"Loaded {count} records into transfer_topportunity")
+    db_session.execute(text(SqlCommands.OPPORTUNITY_DELETE_QUERY.format(api_schema)))
+    db_session.execute(text(SqlCommands.OPPORTUNITY_INSERT_QUERY.format(api_schema, api_schema)))
+    count = db_session.scalar(
+        text(f"SELECT count(*) from {api_schema}.transfer_topportunity")  # nosec
+    )
+    logger.info(f"Loaded {count} records into {api_schema}.transfer_topportunity")

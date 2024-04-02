@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import _pytest.monkeypatch
 import boto3
@@ -10,6 +11,7 @@ from apiflask import APIFlask
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
+from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
@@ -84,7 +86,7 @@ def monkeypatch_module():
 
 
 @pytest.fixture(scope="session")
-def db_client(monkeypatch_session) -> db.DBClient:
+def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
     """
     Creates an isolated database for the test session.
 
@@ -94,7 +96,7 @@ def db_client(monkeypatch_session) -> db.DBClient:
     after the test suite session completes.
     """
 
-    with db_testing.create_isolated_db(monkeypatch_session) as db_client:
+    with db_testing.create_isolated_db(monkeypatch_session, db_schema_prefix) as db_client:
         with db_client.get_connection() as conn, conn.begin():
             models.metadata.create_all(bind=conn)
 
@@ -122,6 +124,16 @@ def enable_factory_create(monkeypatch, db_session) -> db.Session:
     """
     monkeypatch.setattr(factories, "_db_session", db_session)
     return db_session
+
+
+@pytest.fixture(scope="session")
+def db_schema_prefix():
+    return f"test_{uuid.uuid4().int}_"
+
+
+@pytest.fixture
+def test_api_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.API}"
 
 
 ####################
