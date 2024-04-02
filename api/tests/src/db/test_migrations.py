@@ -1,4 +1,5 @@
 import logging  # noqa: B1
+import uuid
 
 import alembic.command as command
 import pytest
@@ -20,7 +21,9 @@ def empty_schema(monkeypatch) -> db.DBClient:
     This is similar to what the db_client fixture does but does not create any tables in the
     schema.
     """
-    with db_testing.create_isolated_db(monkeypatch) as db_client:
+    with db_testing.create_isolated_db(
+        monkeypatch, f"test_migrations_{uuid.uuid4().int}_"
+    ) as db_client:
         yield db_client
 
 

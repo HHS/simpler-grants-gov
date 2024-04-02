@@ -20,7 +20,7 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
     hide_sql_parameter_logs: bool = Field(True, alias="HIDE_SQL_PARAMETER_LOGS")
     ssl_mode: str = Field("require", alias="DB_SSL_MODE")
 
-    schema_prefix_override: str | None = Field(None, alias="SCHEMA_PREFIX_OVERRIDE")
+    schema_prefix_override: str | None = Field(None)
 
     def get_schema_translate_map(self) -> dict[str, str]:
         prefix = ""

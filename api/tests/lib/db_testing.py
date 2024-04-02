@@ -1,35 +1,34 @@
 """Helper functions for testing database code."""
 import contextlib
 import logging
-import uuid
 
 from sqlalchemy import text
 
 import src.adapters.db as db
 from src.adapters.db.clients.postgres_config import get_db_config
-from src.constants.schema import Schemas
 
 logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def create_isolated_db(monkeypatch) -> db.DBClient:
+def create_isolated_db(monkeypatch, db_schema_prefix) -> db.DBClient:
     """
     Creates a temporary PostgreSQL schema and creates a database engine
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
 
-    schema_prefix = f"test_{uuid.uuid4().int}_"
-
-    test_schemas = [f"{schema_prefix}{schema}" for schema in Schemas]
-
-    monkeypatch.setenv("SCHEMA_PREFIX_OVERRIDE", schema_prefix)
-    monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
-
     # To improve test performance, don't check the database connection
     # when initializing the DB client.
-    db_client = db.PostgresDBClient()
+    monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
+    # We set the prefix override here so when the API client creates a DB config
+    # it also has the appropriate prefix value for mapping
+    monkeypatch.setenv("SCHEMA_PREFIX_OVERRIDE", db_schema_prefix)
+
+    db_config = db.PostgresDBConfig(schema_prefix_override=db_schema_prefix)
+    db_client = db.PostgresDBClient(db_config)
+    test_schemas = db_config.get_schema_translate_map().values()
+
     with db_client.get_connection() as conn:
         for schema in test_schemas:
             _create_schema(conn, schema)

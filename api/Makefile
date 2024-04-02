@@ -176,7 +176,7 @@ create-erds: # Create ERD diagrams for our DB schema
 	$(PY_RUN_CMD) create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
-setup-postgres-db: # Does any initial setup necessary for our local database to work
+setup-postgres-db: ## Does any initial setup necessary for our local database to work
 	$(PY_RUN_CMD) setup-postgres-db
 
 

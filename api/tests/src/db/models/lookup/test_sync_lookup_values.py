@@ -1,4 +1,5 @@
 import logging
+import uuid
 from enum import StrEnum
 from typing import Type
 
@@ -22,7 +23,9 @@ def schema_no_lookup(monkeypatch) -> db.PostgresDBClient:
     This is similar to what the db_client fixture does but does not create any tables in the
     schema.
     """
-    with db_testing.create_isolated_db(monkeypatch) as db_client:
+    with db_testing.create_isolated_db(
+        monkeypatch, f"test_lookup_{uuid.uuid4().int}_"
+    ) as db_client:
         db_models.metadata.create_all(bind=db_client._engine)
         # Skipping the sync that normally occurs to do in tests below
         yield db_client
