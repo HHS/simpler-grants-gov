@@ -11,7 +11,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
-from src.db.models.base import Base, TimestampMixin
+from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -21,7 +21,7 @@ from src.db.models.lookup_models import (
 )
 
 
-class Opportunity(Base, TimestampMixin):
+class Opportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity"
 
     opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -82,7 +82,7 @@ class Opportunity(Base, TimestampMixin):
         return self.current_opportunity_summary.opportunity_status
 
 
-class OpportunitySummary(Base, TimestampMixin):
+class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
 
     opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -169,7 +169,7 @@ class OpportunitySummary(Base, TimestampMixin):
         return {a.applicant_type for a in self.link_applicant_types}
 
 
-class OpportunityAssistanceListing(Base, TimestampMixin):
+class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
 
     opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -186,7 +186,7 @@ class OpportunityAssistanceListing(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkOpportunitySummaryFundingInstrument(Base, TimestampMixin):
+class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
@@ -211,7 +211,7 @@ class LinkOpportunitySummaryFundingInstrument(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkOpportunitySummaryFundingCategory(Base, TimestampMixin):
+class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_category"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
@@ -236,7 +236,7 @@ class LinkOpportunitySummaryFundingCategory(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class LinkOpportunitySummaryApplicantType(Base, TimestampMixin):
+class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
 
     opportunity_summary_id: Mapped[int] = mapped_column(
@@ -261,7 +261,7 @@ class LinkOpportunitySummaryApplicantType(Base, TimestampMixin):
     created_by: Mapped[str | None]
 
 
-class CurrentOpportunitySummary(Base, TimestampMixin):
+class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "current_opportunity_summary"
 
     opportunity_id: Mapped[int] = mapped_column(
