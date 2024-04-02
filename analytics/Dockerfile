@@ -8,7 +8,7 @@ FROM python:3-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir poetry --upgrade
+RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 
 RUN apt-get update \
   # Install security updates
