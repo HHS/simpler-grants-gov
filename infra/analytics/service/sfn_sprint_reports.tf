@@ -1,3 +1,14 @@
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
+resource "aws_cloudwatch_log_group" "sprint_reports" {
+  name_prefix = "/aws/vendedlogs/states/${local.service_name}-sprint-reports"
+
+  # Conservatively retain logs for 5 years.
+  # Looser requirements may allow shorter retention periods
+  retention_in_days = 1827
+
+  # checkov:skip=CKV_AWS_158:skip requirement to encrypt with customer managed KMS key
+}
+
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine
 resource "aws_sfn_state_machine" "sprint_reports" {
 
@@ -40,7 +51,7 @@ resource "aws_sfn_state_machine" "sprint_reports" {
   })
 
   logging_configuration {
-    log_destination        = "${module.service.service_logs_arn}:*"
+    log_destination        = "${aws_cloudwatch_log_group.sprint_reports.arn}:*"
     include_execution_data = true
     level                  = "ERROR"
   }
