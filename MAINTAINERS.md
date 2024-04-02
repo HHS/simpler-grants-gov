@@ -22,6 +22,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Sammy Steiner
 * Brett Rosenblatt
 * Brandon Tabaska
+* Ebuwa Evbuoma-Fike
 
 ## Product and Project Management
 

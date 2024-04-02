@@ -48,7 +48,6 @@ def test_get_connection_parameters(monkeypatch: pytest.MonkeyPatch):
         user=db_config.username,
         password=db_config.password,
         port=db_config.port,
-        options=f"-c search_path={db_config.db_schema}",
         connect_timeout=10,
         sslmode="require",
     )
