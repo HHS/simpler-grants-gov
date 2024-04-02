@@ -54,11 +54,31 @@ class CustomProvider(BaseProvider):
     # has valid values
     AGENCIES = ["USAID", "ARPAH", "DOC", "DOC-EDA"]
 
+    # Various words we can use when building the agency names
+    # Stuff that sounds like it might be an agency, even if its not exactly the name
+    AGENCY_WORDS = [
+        "Agriculture",
+        "Commerce",
+        "Defense",
+        "Education",
+        "Economics",
+        "Energy",
+        "Health",
+        "Housing",
+        "Justice",
+        "Labor",
+        "State",
+        "Interior",
+        "Transportation",
+        "Science",
+        "Arts",
+    ]
+
     AGENCY_NAME_FORMATS = [
-        "Department of {{word}}",
-        "Department of the {{word}}",
-        "Agency for {{word}}",
-        "National {{word}} Administration",
+        "Department of {{agency_word}}",
+        "Department of the {{agency_word}}",
+        "Agency for {{agency_word}}",
+        "National {{agency_word}} Administration",
     ]
 
     AGENCY_CONTACT_DESC_FORMATS = [
@@ -109,6 +129,9 @@ class CustomProvider(BaseProvider):
 
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
+
+    def agency_word(self) -> str:
+        return self.random_element(self.AGENCY_WORDS)
 
     def agency_name(self) -> str:
         pattern = self.random_element(self.AGENCY_NAME_FORMATS)
