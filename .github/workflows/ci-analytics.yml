@@ -47,3 +47,9 @@ jobs:
 
       - name: Run reports
         run: make sprint-reports
+
+  vulnerability-scans:
+    name: Run API Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: "analytics"
