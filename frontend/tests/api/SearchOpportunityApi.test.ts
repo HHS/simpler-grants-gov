@@ -52,6 +52,8 @@ describe("SearchOpportunityAPI", () => {
         status: new Set(["forecasted", "posted"]),
         fundingInstrument: new Set(["grant", "cooperative_agreement"]),
         agency: new Set(),
+        category: new Set(),
+        eligibility: new Set(),
         query: "research",
         sortby: "opportunityNumberAsc",
       };

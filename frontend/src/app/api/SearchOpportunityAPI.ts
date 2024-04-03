@@ -30,7 +30,6 @@ export default class SearchOpportunityAPI extends BaseApi {
   async searchOpportunities(searchInputs: SearchFetcherProps) {
     const { query } = searchInputs;
     const filters = this.buildFilters(searchInputs);
-    console.log("filters => ", filters);
     const pagination = this.buildPagination(searchInputs);
 
     const requestBody: SearchRequestBody = { pagination };
@@ -44,8 +43,6 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody.query = query;
     }
 
-    console.log("request boyd => ", requestBody);
-
     const subPath = "search";
     const response = await this.request(
       "POST",
@@ -55,7 +52,6 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody,
     );
 
-    console.log("response => ", response.data.length);
     return response;
   }
 
@@ -75,6 +71,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     }
 
     if (eligibility && eligibility.size > 0) {
+      // Note that eligibility gets remapped to the API name of "applicant_type"
       filters.applicant_type = { one_of: Array.from(eligibility) };
     }
 
@@ -83,6 +80,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     }
 
     if (category && category.size > 0) {
+      // Note that category gets remapped to the API name of "funding_category"
       filters.funding_category = { one_of: Array.from(category) };
     }
 
