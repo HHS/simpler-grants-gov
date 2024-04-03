@@ -256,8 +256,9 @@ setup-foreign-tables:
 login: start ## Start shell in running container
 	docker exec -it $(APP_NAME) bash
 
+DB_URI := postgresql://$(DB_USER)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?options=-csearch_path%3dapi
 login-db: ## Start psql with project environment variables
-	PGPASSWORD=$$DB_PASSWORD psql --host=$$DB_HOST --port=$$DB_PORT --username=$$DB_USER $$DB_NAME
+	PGPASSWORD=$$DB_PASSWORD psql $(DB_URI)
 
 console: ## Start interactive Python console
 	$(PY_RUN_CMD) python3 -i -m src.tool.console.interactive
