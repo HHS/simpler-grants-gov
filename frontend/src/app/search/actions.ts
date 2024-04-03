@@ -16,5 +16,7 @@ export async function updateResults(
   const formDataService = new FormDataService(formData);
   const searchProps = formDataService.processFormData();
 
+  console.log("searchProps => ", searchProps);
+
   return await searchFetcher.fetchOpportunities(searchProps);
 }

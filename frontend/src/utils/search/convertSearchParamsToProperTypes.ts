@@ -12,8 +12,10 @@ export function convertSearchParamsToProperTypes(
     ...params,
     query: params.query || "", // Convert empty string to null if needed
     status: paramToSet(params.status),
-    agency: paramToSet(params.agency),
     fundingInstrument: paramToSet(params.fundingInstrument),
+    eligibility: paramToSet(params.eligibility),
+    agency: paramToSet(params.agency),
+    category: paramToSet(params.category),
     sortby: params.sortby || null, // Convert empty string to null if needed
 
     // Ensure page is at least 1 or default to 1 if undefined

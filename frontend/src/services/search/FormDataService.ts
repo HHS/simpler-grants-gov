@@ -15,7 +15,9 @@ export class FormDataService {
       page: this.page,
       status: this.status,
       fundingInstrument: this.fundingInstrument,
+      eligibility: this.eligibility,
       agency: this.agency,
+      category: this.category,
       query: this.query,
       sortby: this.sortBy,
 
@@ -89,6 +91,23 @@ export class FormDataService {
     return fundingInstruments;
   }
 
+  get eligibility(): Set<string> {
+    const eligibilities = new Set<string>();
+
+    // Iterate over all entries in the FormData
+    for (const [key] of this.formData.entries()) {
+      if (key.startsWith("eligibility-")) {
+        // Remove the initial 'eligibility-' prefix and add the remainder to the set
+        const eligibilityId = key.substring("eligibility-".length);
+        if (eligibilityId) {
+          eligibilities.add(eligibilityId);
+        }
+      }
+    }
+
+    return eligibilities;
+  }
+
   get agency(): Set<string> {
     const agencies = new Set<string>();
 
@@ -104,6 +123,23 @@ export class FormDataService {
     }
 
     return agencies;
+  }
+
+  get category(): Set<string> {
+    const categories = new Set<string>();
+
+    // Iterate over all entries in the FormData
+    for (const [key] of this.formData.entries()) {
+      if (key.startsWith("category-")) {
+        // Remove the initial 'category-' prefix and add the remainder to the set
+        const categoryId = key.substring("category-".length);
+        if (categoryId) {
+          categories.add(categoryId);
+        }
+      }
+    }
+
+    return categories;
   }
 
   get sortBy(): string | null {
