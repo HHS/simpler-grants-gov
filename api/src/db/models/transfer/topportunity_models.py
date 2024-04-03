@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import VARCHAR, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db.models.base import Base, TimestampMixin
+from src.db.models.base import ApiSchemaTable, TimestampMixin
 
 ##########
 # NOTES
@@ -15,7 +15,7 @@ use VARCHAR instead of TEXT at the moment, as well as have booleans stored as ch
 """
 
 
-class TransferTopportunity(Base, TimestampMixin):
+class TransferTopportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "transfer_topportunity"
 
     opportunity_id: Mapped[int] = mapped_column(Integer, primary_key=True)

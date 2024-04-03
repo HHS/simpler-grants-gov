@@ -75,15 +75,18 @@ login:
 build:
 	docker-compose build
 
-lint:
-	@echo "=> Running code quality checks"
-	@echo "============================="
-	$(POETRY) black src tests
-	$(POETRY) ruff src tests --fix
-	$(POETRY) pylint src tests
-	$(POETRY) mypy src
-	@echo "============================="
-	@echo "=> All checks succeeded"
+release-build:
+	docker buildx build \
+		--target release \
+		--platform=linux/amd64 \
+		--build-arg RUN_USER=$(RUN_USER) \
+		--build-arg RUN_UID=$(RUN_UID) \
+		$(OPTS) \
+		.
+
+#########
+# Tests #
+#########
 
 unit-test:
 	@echo "=> Running unit tests"
@@ -100,14 +103,33 @@ test-audit: unit-test e2e-test
 	@echo "============================="
 	$(POETRY) coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
 
-release-build:
-	docker buildx build \
-		--target release \
-		--platform=linux/amd64 \
-		--build-arg RUN_USER=$(RUN_USER) \
-		--build-arg RUN_UID=$(RUN_UID) \
-		$(OPTS) \
-		.
+##########################
+# Formatting and Linting #
+##########################
+
+format: ## runs code formatting
+	@echo "=> Running code formatting"
+	@echo "============================="
+	$(POETRY) black src tests
+	$(POETRY) ruff --fix src tests
+	@echo "============================="
+	@echo "=> Code formatting complete"
+
+format-check: ## runs code formatting checks
+	@echo "=> Running code formatting checks"
+	@echo "============================="
+	$(POETRY) black --check src tests
+	$(POETRY) ruff  --fix --exit-non-zero-on-fix src tests
+	@echo "============================="
+	@echo "=> All checks succeeded"
+
+lint: ## runs code quality checks
+	@echo "=> Running code quality checks"
+	@echo "============================="
+	$(POETRY) pylint src tests
+	$(POETRY) mypy src
+	@echo "============================="
+	@echo "=> All checks succeeded"
 
 #################
 # Data Commands #

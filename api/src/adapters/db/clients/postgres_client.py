@@ -47,6 +47,7 @@ class PostgresDBClient(DBClient):
             "postgresql+psycopg://",
             pool=conn_pool,
             hide_parameters=db_config.hide_sql_parameter_logs,
+            execution_options={"schema_translate_map": db_config.get_schema_translate_map()},
             # TODO: Don't think we need this as we aren't using JSON columns, but keeping for reference
             # json_serializer=lambda o: json.dumps(o, default=pydantic.json.pydantic_encoder),
         )
@@ -94,7 +95,6 @@ def get_connection_parameters(db_config: PostgresDBConfig) -> dict[str, Any]:
         user=db_config.username,
         password=password,
         port=db_config.port,
-        options=f"-c search_path={db_config.db_schema}",
         connect_timeout=10,
         sslmode=db_config.ssl_mode,
         **connect_args,
