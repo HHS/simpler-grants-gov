@@ -6,78 +6,37 @@ import React from "react";
 import SearchFilterSection from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 import { axe } from "jest-axe";
 
-// type FunctionProps = Record<string, () => void>;
-
-// jest.mock(
-//   "../../../../../src/components/search/SearchFilterAccordion/SearchFilterCheckbox",
-//   () => {
-//     const MockCheckbox = (props: FunctionProps) => (
-//       <button onClick={() => props.increment()}>MockCheckbox</button>
-//     );
-//     MockCheckbox.displayName = "MockCheckbox";
-//     return MockCheckbox;
-//   },
-// );
-// jest.mock(
-//   "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel",
-//   () => {
-//     const MockSectionLinkLabel = () => <div>SectionLinkLabel</div>;
-//     MockSectionLinkLabel.displayName = "MockSectionLinkLabel";
-//     return MockSectionLinkLabel;
-//   },
-// );
-
-// type SectionCountProps = { sectionCount: number };
-// jest.mock(
-//   "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount",
-//   () => {
-//     const MockSectionLinkCount = ({ sectionCount }: SectionCountProps) => (
-//       <div>Count: {sectionCount}</div>
-//     );
-//     MockSectionLinkCount.displayName = "MockSectionLinkCount";
-//     return MockSectionLinkCount;
-//   },
-// );
-// jest.mock(
-//   "../../../../../src/components/search/SearchFilterAccordion/SearchFilterToggleAll",
-//   () => {
-//     const MockSearchFilterToggleAll = () => <div>ToggleAllControls</div>;
-//     MockSearchFilterToggleAll.displayName = "MockSearchFilterToggleAll";
-//     return MockSearchFilterToggleAll;
-//   },
-// );
+const defaultProps = {
+  option: {
+    id: "1",
+    label: "Option 1",
+    value: "some value",
+    children: [
+      {
+        id: "1-1",
+        label: "Child 1",
+        isChecked: false,
+        value: "1st child value",
+      },
+      {
+        id: "1-2",
+        label: "Child 2",
+        isChecked: true,
+        value: "2nd child value",
+      },
+    ],
+  },
+  incrementTotal: jest.fn(),
+  decrementTotal: jest.fn(),
+  mounted: true,
+  updateCheckedOption: jest.fn(),
+  toggleSelectAll: jest.fn(),
+  accordionTitle: "Default Title",
+  isSectionAllSelected: false,
+  isSectionNoneSelected: true,
+};
 
 describe("SearchFilterSection", () => {
-  const defaultProps = {
-    option: {
-      id: "1",
-      label: "Option 1",
-      value: "some value",
-      children: [
-        {
-          id: "1-1",
-          label: "Child 1",
-          isChecked: false,
-          value: "1st child value",
-        },
-        {
-          id: "1-2",
-          label: "Child 2",
-          isChecked: true,
-          value: "2nd child value",
-        },
-      ],
-    },
-    incrementTotal: jest.fn(),
-    decrementTotal: jest.fn(),
-    mounted: true,
-    updateCheckedOption: jest.fn(),
-    toggleSelectAll: jest.fn(),
-    accordionTitle: "Default Title",
-    isSectionAllSelected: false,
-    isSectionNoneSelected: true,
-  };
-
   it("should not have accessibility violations", async () => {
     const { container } = render(<SearchFilterSection {...defaultProps} />);
     const results = await axe(container);
