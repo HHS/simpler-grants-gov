@@ -8,7 +8,6 @@ export default function SectionLinkLabel({
   childrenVisible: boolean;
   option: FilterOption;
 }) {
-
   // When the arrow is down, the section is collapsed, and we can expand the section
   // When the arrow is up, the section is expanded, and we can collapse the section
   const ariaLabel = childrenVisible ? "Collapse section" : "Expand section";
