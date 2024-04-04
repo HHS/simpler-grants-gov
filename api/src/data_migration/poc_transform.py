@@ -37,6 +37,8 @@ def main():
 
 
 class Transform:
+    """Transform data from source (foreign) tables to the API tables."""
+
     def __init__(self, db_session: src.adapters.db.Session):
         self.db_session = db_session
         self.unmodified_count = 0
@@ -47,16 +49,10 @@ class Transform:
 
     def run(self) -> None:
         # Read existing data from the opportunity table
-        self.existing_opportunity = {
-            opportunity.opportunity_id: opportunity
-            for opportunity in self.db_session.query(Opportunity)
-        }
-        logger.info(
-            "read opportunity table", extra={"opportunity.count": len(self.existing_opportunity)}
-        )
+        self.read_existing_data()
 
         # Process each row in the source foreign_topportunity table
-        total_count = self.db_session.query(ForeignTopportunity).count()
+        total_count = self.db_session.query(ForeignTopportunity.opportunity_id).count()
         rows = self.db_session.query(ForeignTopportunity).order_by(
             ForeignTopportunity.opportunity_id
         )
@@ -65,6 +61,16 @@ class Transform:
 
         # Flush any remaining bulk inserts
         self.bulk_insert(None, flush=True)
+
+    def read_existing_data(self):
+        """Read existing opportunity data from the database into memory."""
+        self.existing_opportunity = {
+            opportunity.opportunity_id: opportunity
+            for opportunity in self.db_session.query(Opportunity)
+        }
+        logger.info(
+            "read opportunity table", extra={"opportunity.count": len(self.existing_opportunity)}
+        )
 
     def transform_row(self, foreign_opportunity: ForeignTopportunity) -> None:
         opportunity_id = foreign_opportunity.opportunity_id
@@ -80,7 +86,7 @@ class Transform:
 
     def update_row(self, opportunity_id: int, new: dict):
         existing = self.existing_opportunity[opportunity_id]
-        existing_attributes = existing.attributes_for_comparison()
+        existing_attributes = {key: getattr(existing, key) for key in new}
         if existing_attributes == new:
             # logger.info("unmodified", extra={"opportunity_id": opportunity_id})
             self.unmodified_count += 1
@@ -89,7 +95,7 @@ class Transform:
         logger.info(
             "modified",
             extra={
-                "opportunity_id": existing.opportunity_id,
+                "opportunity_id": opportunity_id,
                 "transform.old": dict(existing_attributes.items() - new.items()),
                 "transform.new": dict(new.items() - existing_attributes.items()),
             },
