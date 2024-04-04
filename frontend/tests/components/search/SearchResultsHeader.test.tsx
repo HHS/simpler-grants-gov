@@ -4,7 +4,6 @@ import React from "react";
 import SearchResultsHeader from "../../../src/components/search/SearchResultsHeader";
 import { axe } from "jest-axe";
 
-// Mock the SearchSortBy component
 jest.mock("../../../src/components/search/SearchSortBy", () => {
   return {
     __esModule: true,

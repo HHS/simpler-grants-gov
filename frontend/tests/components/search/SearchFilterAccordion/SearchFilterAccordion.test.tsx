@@ -114,6 +114,8 @@ describe("SearchFilterAccordion", () => {
       "accordionItem_funding-instrument-filter",
     );
     expect(contentDiv).toHaveAttribute("hidden");
+
+    // Toggle the accordion and the hidden attribute should be removed
     fireEvent.click(accordionToggleButton);
     expect(contentDiv).not.toHaveAttribute("hidden");
   });

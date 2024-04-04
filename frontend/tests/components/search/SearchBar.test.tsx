@@ -6,8 +6,6 @@ import React from "react";
 import SearchBar from "../../../src/components/search/SearchBar";
 import { axe } from "jest-axe";
 
-// jest.mock("src/hooks/useSearchParamUpdater");
-
 // Mock the hook since it's used in the component
 const mockUpdateQueryParams = jest.fn();
 
