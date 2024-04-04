@@ -5,7 +5,6 @@ import React from "react";
 import SearchResultsListItem from "../../../src/components/search/SearchResultsListItem";
 import { axe } from "jest-axe";
 
-// Step 2: Mock Data
 const mockOpportunity: Opportunity = {
   opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
