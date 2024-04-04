@@ -1,9 +1,6 @@
-import {
-  Opportunity,
-  Summary,
-} from "../../../src/types/search/searchResponseTypes";
 import { render, screen } from "@testing-library/react";
 
+import { Opportunity } from "../../../src/types/search/searchResponseTypes";
 import React from "react";
 import SearchResultsListItem from "../../../src/components/search/SearchResultsListItem";
 import { axe } from "jest-axe";

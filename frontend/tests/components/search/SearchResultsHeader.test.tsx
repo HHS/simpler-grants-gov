@@ -43,5 +43,4 @@ describe("SearchResultsHeader", () => {
     expect(screen.getByText("100 Opportunities")).toBeInTheDocument();
     expect(screen.getByText("Mock SearchSortBy")).toBeInTheDocument();
   });
-
 });
