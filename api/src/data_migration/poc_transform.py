@@ -22,9 +22,9 @@ def main():
         db_client = src.adapters.db.PostgresDBClient()
 
         with db_client.get_session() as db_session:
-            transform = Transform(db_session)
-            transform.run()
-            db_session.commit()
+            with db_session.begin():
+                 transform = Transform(db_session)
+                 transform.run()
 
             logger.info(
                 "transform done",
