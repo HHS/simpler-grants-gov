@@ -81,13 +81,6 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
         return self.current_opportunity_summary.opportunity_status
 
-    def attributes_for_comparison(self) -> dict:
-        """Return a dict of attributes that should be considered to detect if a change occurred."""
-        attributes = self._dict()
-        del attributes["created_at"]
-        del attributes["updated_at"]
-        return attributes
-
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
