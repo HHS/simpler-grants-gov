@@ -12,11 +12,15 @@ from typing import Any, Iterable
 import sqlalchemy
 from sqlalchemy.orm import mapped_column
 
+from src.constants.schema import Schemas
+
 foreign_metadata = sqlalchemy.MetaData()
 
 
 class Base(sqlalchemy.orm.DeclarativeBase):
     metadata = foreign_metadata
+
+    __table_args__ = {"schema": Schemas.API}
 
     def _dict(self) -> dict:
         return {c.key: getattr(self, c.key) for c in sqlalchemy.inspect(self).mapper.column_attrs}
