@@ -14,10 +14,17 @@ locals {
   # store. Configurations are of the format
   # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
   secrets = [
-    # Example secret
-    # {
-    #   name           = "SECRET_SAUCE"
-    #   ssm_param_name = "/${var.app_name}-${var.environment}/secret-sauce"
-    # }
+    {
+      name           = "GH_TOKEN"
+      ssm_param_name = "/${var.app_name}/${var.environment}/github-token"
+    },
+    {
+      name           = "ANALYTICS_SLACK_BOT_TOKEN"
+      ssm_param_name = "/${var.app_name}/${var.environment}/slack-bot-token"
+    },
+    {
+      name           = "ANALYTICS_REPORTING_CHANNEL_ID"
+      ssm_param_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
+    }
   ]
 }
