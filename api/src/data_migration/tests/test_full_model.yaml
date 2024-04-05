@@ -1,0 +1,31 @@
+test_example_full_model:
+  model: api.opportunity_sqlmesh
+  inputs:
+    api.foreign_topportunity:
+      rows:
+      - opportunity_id: 1000
+        oppnumber: ABC-456-DEF
+        opptitle: Research into software testing industry
+        owningagency: Department of Testing
+        oppcategory: C
+        category_explanation: Used for testing
+        is_draft: Y
+        revision_number: 55
+        modified_comments: More research requested
+        publisheruid: ABC
+        publisher_profile_id: 200
+
+  outputs:
+    query:
+      rows:
+      - opportunity_id: 1000
+        opportunity_number: ABC-456-DEF
+        opportunity_title: Research into software testing industry
+        agency: Department of Testing
+        opportunity_category_id: 3
+        category_explanation: Used for testing
+        is_draft: True
+        revision_number: 55
+        modified_comments: More research requested
+        publisher_user_id: ABC
+        publisher_profile_id: 200

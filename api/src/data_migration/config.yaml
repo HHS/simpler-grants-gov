@@ -1,0 +1,14 @@
+gateways:
+    local:
+        connection:
+            type: postgres
+            host: localhost
+            user: app
+            password: secret123
+            port: 5433
+            database: app
+
+default_gateway: local
+
+model_defaults:
+    dialect: postgres
