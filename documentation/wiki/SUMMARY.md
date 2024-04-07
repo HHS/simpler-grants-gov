@@ -25,6 +25,7 @@
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
     * [Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
     * [Participant advisory community](product/deliverables/specifications/participant-advisory-community.md)
+    * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
 
 ## Collaborating
 
