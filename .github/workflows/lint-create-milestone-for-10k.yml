@@ -1,0 +1,40 @@
+name: Lint - Create milestone for 10k
+
+# run when an issue is opened or when a new label is applied
+on:
+  issues:
+    types: [opened, labeled]
+
+# avoid duplicate runs when an issue is created with a label
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  create-milestone:
+    name: Create milestone for 10k issue
+    # only run this if the issue has the 'deliverable: 10k' label and is *not* assigned to a milestone
+    if: "${{ contains(github.event.issue.labels.*.name, 'deliverable: 10k ft') && (! github.event.issue.milestone) }}"
+    runs-on: ubuntu-latest
+
+    # set permissions of automatically created GitHub token to issue: write
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+
+    # create the milestone using the issue title then assign the issue to that milestone
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create the milestone
+        run: |
+          gh api \
+            --method POST \
+            /repos/$REPO/milestones \
+            -f title="${ISSUE_TITLE}"
+      - name: Assign issue to milestone
+        run: |
+          gh issue edit $ISSUE_NUMBER --milestone "${ISSUE_TITLE}" --repo $REPO
