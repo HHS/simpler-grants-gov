@@ -6,7 +6,7 @@ description: Create a translation process for Simpler.Grants.gov content and doc
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/orgs/HHS/projects/12/views/8?pane=issue&#x26;itemId=40475988">Issue 568</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="content-translation.md#overview">Overview</a></p><ul><li><a href="content-translation.md#business-value">Business value</a></li><li><a href="content-translation.md#user-stories">User stories</a></li></ul></li><li><p><a href="content-translation.md#technical-description">Technical description</a></p><ul><li><a href="content-translation.md#definition-of-done">Definition of done</a></li><li><a href="content-translation.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="content-translation.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/orgs/HHS/projects/12/views/8?pane=issue&#x26;itemId=40475988">Issue 568</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="content-translation.md#overview">Overview</a></p><ul><li><a href="content-translation.md#business-value">Business value</a></li><li><a href="content-translation.md#user-stories">User stories</a></li></ul></li><li><p><a href="content-translation.md#technical-description">Technical description</a></p><ul><li><a href="content-translation.md#definition-of-done">Definition of done</a></li><li><a href="content-translation.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="content-translation.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="content-translation.md#logs">Logs</a></p><ul><li><a href="content-translation.md#change-log">Change log</a></li><li><a href="content-translation.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -175,3 +175,17 @@ Does this deliverable expose any new attack vectors or expand the attack surface
 If so, how are we addressing these risks?
 
 1. **Translation review:** In the event that we accept translations from the public, we'll want to set up a review and approval process to ensure that the translations are accurate and consistent with our community guidelines.
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

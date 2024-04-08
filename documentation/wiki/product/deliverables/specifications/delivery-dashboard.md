@@ -6,7 +6,7 @@ description: Create a public-facing dashboard with sprint and delivery metrics.
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/65">Issue 65</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="delivery-dashboard.md#overview">Overview</a></p><ul><li><a href="delivery-dashboard.md#business-value">Business value</a></li><li><a href="delivery-dashboard.md#user-stories">User stories</a></li></ul></li><li><p><a href="delivery-dashboard.md#technical-description">Technical description</a></p><ul><li><a href="delivery-dashboard.md#definition-of-done">Definition of done</a></li><li><a href="delivery-dashboard.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="delivery-dashboard.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/65">Issue 65</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="delivery-dashboard.md#overview">Overview</a></p><ul><li><a href="delivery-dashboard.md#business-value">Business value</a></li><li><a href="delivery-dashboard.md#user-stories">User stories</a></li></ul></li><li><p><a href="delivery-dashboard.md#technical-description">Technical description</a></p><ul><li><a href="delivery-dashboard.md#definition-of-done">Definition of done</a></li><li><a href="delivery-dashboard.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="delivery-dashboard.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="delivery-dashboard.md#logs">Logs</a></p><ul><li><a href="delivery-dashboard.md#change-log">Change log</a></li><li><a href="delivery-dashboard.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -260,3 +260,17 @@ If so, how are we addressing these risks?
 
 * **Secrets manager:** We'll use the appropriate secrets manager for the tool we choose to orchestrate our ETL pipeline. For example, if we are using GitHub actions as a lightweight scheduler, we'll use [GitHub secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). If we're using a more mature orchestration tool, like Airflow, we'll use its [secrets backend](https://airflow.apache.org/docs/apache-airflow-providers/core-extensions/secrets-backends.html) feature.
 * **Least privilege:** In addition to managing these secrets securely, we'll also follow the principle of least privilege when creating and managing the scopes or roles associated with these integrations.
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

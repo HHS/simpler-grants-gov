@@ -8,7 +8,7 @@ description: >-
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/70">Issue 70</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="get-opportunities.md#overview">Overview</a></p><ul><li><a href="get-opportunities.md#business-value">Business value</a></li><li><a href="get-opportunities.md#user-stories">User stories</a></li></ul></li><li><p><a href="get-opportunities.md#technical-description">Technical description</a></p><ul><li><a href="get-opportunities.md#definition-of-done">Definition of done</a></li><li><a href="get-opportunities.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="get-opportunities.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/70">Issue 70</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="get-opportunities.md#overview">Overview</a></p><ul><li><a href="get-opportunities.md#business-value">Business value</a></li><li><a href="get-opportunities.md#user-stories">User stories</a></li></ul></li><li><p><a href="get-opportunities.md#technical-description">Technical description</a></p><ul><li><a href="get-opportunities.md#definition-of-done">Definition of done</a></li><li><a href="get-opportunities.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="get-opportunities.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="get-opportunities.md#logs">Logs</a></p><ul><li><a href="get-opportunities.md#change-log">Change log</a></li><li><a href="get-opportunities.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -92,30 +92,30 @@ The way that data is stored and delivered through the API should balance:
 
 Following sections describe the conditions that must be met to consider this deliverable "done".
 
-* [ ] The following infrastructure requirements are satisfied:
-  * [ ] &#x20;The code needed to build and deploy the site is merged to `main`
-  * [ ] &#x20;The site is built and hosted with the tools selected in the [API Planning](https://github.com/HHS/simpler-grants-gov/issues/42) and [DB Planning](https://github.com/HHS/simpler-grants-gov/issues/48) deliverables
-  * [ ] &#x20;All code quality checks set up in the [Developer Tools deliverable](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
-  * [ ] &#x20;The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code deliverable](https://github.com/HHS/simpler-grants-gov/issues/123) framework
-  * [ ] &#x20;Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD deliverable](https://github.com/HHS/simpler-grants-gov/issues/57)
-  * [ ] &#x20;DB migrations are automatically configured through scripts that enable upgrading/downgrading database quickly and easily (e.g., by using Alembic [https://github.com/sqlalchemy/alembic](https://github.com/sqlalchemy/alembic))
-  * [ ] &#x20;The API has been load tested using the framework established in the [Peformance Testing Framework deliverable](https://github.com/HHS/simpler-grants-gov/issues/69) to ensure that it remains performant under heavy user traffic
-  * [ ] &#x20;Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring deliverable](https://github.com/HHS/simpler-grants-gov/issues/370)
-  * [ ] &#x20;An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response deliverable](https://github.com/HHS/simpler-grants-gov/issues/373)
-  * [ ] &#x20;The chosen API URL sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
-* [ ] &#x20;The following developer experience (DX) requirements are satisfied:
-  * [ ] &#x20;The API is live at the chosen URL
-  * [ ] &#x20;Developers can learn how to interact with the API by referencing the API documentation
-  * [ ] &#x20;The endpoint path indicates which major version of the API the developer is consuming
-  * [ ] &#x20;Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning deliverable](https://github.com/HHS/simpler-grants-gov/issues/68)
-  * [ ] &#x20;The endpoint is available when legacy grants.gov experiences planned or unplanned downtime, maintenance, and upgrades
-  * [ ] &#x20;Test data is scripted to provide consistent and reliable test fixtures for integration tests and local development per the [Test Data and Schema deliverable](https://github.com/HHS/simpler-grants-gov/issues/)
-  * [ ] &#x20;All developers (including open source contributors) are able to spin up either database replica or test fixture data so that they can conduct local development.
-  * [ ] &#x20;Feature flag framework is implemented so that functionality can be deployed to PROD without being turned on per the [Feature flag framework deliverable](https://github.com/HHS/simpler-grants-gov/issues/)
-* [ ] &#x20;The following data requirements are satisfied:
-  * [ ] &#x20;The endpoint returns all of the grant opportunities that are available on grants.gov
-  * [ ] &#x20;The endpoint returns at least one (1) field per opportunity
-  * [ ] &#x20;Updates to the data in legacy Grants.gov are propagated to the new endpoint within 1 hour
+* [x] The following infrastructure requirements are satisfied:
+  * [x] The code needed to build and deploy the site is merged to `main`
+  * [x] The site is built and hosted with the tools selected in the [API Planning](https://github.com/HHS/simpler-grants-gov/issues/42) and [DB Planning](https://github.com/HHS/simpler-grants-gov/issues/48) deliverables
+  * [x] All code quality checks set up in the [Developer Tools deliverable](https://github.com/HHS/simpler-grants-gov/issues/50) are passing
+  * [x] The resources required to deploy and host the API are provisioned programmatically using the [Infrastructure-as-Code deliverable](https://github.com/HHS/simpler-grants-gov/issues/123) framework
+  * [x] Code changes are deployed using the CI/CD pipeline set up in [the Back-end CI/CD deliverable](https://github.com/HHS/simpler-grants-gov/issues/57)
+  * [x] DB migrations are automatically configured through scripts that enable upgrading/downgrading database quickly and easily (e.g., by using Alembic [https://github.com/sqlalchemy/alembic](https://github.com/sqlalchemy/alembic))
+  * [x] The API has been load tested using the framework established in the [Peformance Testing Framework deliverable](https://github.com/HHS/simpler-grants-gov/issues/69) to ensure that it remains performant under heavy user traffic
+  * [x] Logging/monitoring is configured, and it both records the metrics defined below and alerts the development team when the API is down or other key monitoring thresholds are met (e.g. frequency of 4xx requests, response times, etc.) per the [API Logging & Monitoring deliverable](https://github.com/HHS/simpler-grants-gov/issues/370)
+  * [x] An incident response protocol is in place and the on-call team have followed that protocol in at least one training or simulation per the [Incident Response deliverable](https://github.com/HHS/simpler-grants-gov/issues/373)
+  * [x] The chosen API URL sub-domain has been secured for future deployment of the API and we've contacted the teams working on the existing service (if any) that is currently accessed through this sub-domain
+* [x] &#x20;The following developer experience (DX) requirements are satisfied:
+  * [x] The API is live at the chosen URL
+  * [x] Developers can learn how to interact with the API by referencing the API documentation
+  * [x] The endpoint path indicates which major version of the API the developer is consuming
+  * [x] Breaking changes to the API follow a predictable protocol that is documented within the [API Versioning deliverable](https://github.com/HHS/simpler-grants-gov/issues/68)
+  * [x] The endpoint is available when legacy grants.gov experiences planned or unplanned downtime, maintenance, and upgrades
+  * [x] Test data is scripted to provide consistent and reliable test fixtures for integration tests and local development per the [Test Data and Schema deliverable](https://github.com/HHS/simpler-grants-gov/issues/)
+  * [x] All developers (including open source contributors) are able to spin up either database replica or test fixture data so that they can conduct local development.
+* [x] &#x20;The following data requirements are satisfied:
+  * [x] &#x20;The endpoint returns all of the grant opportunities that are available on grants.gov
+  * [x] &#x20;The endpoint returns at least one (1) field per opportunity
+  * [x] &#x20;Updates to the data in legacy Grants.gov are propagated to the new endpoint within 1 hour
+  * [ ] Our desired project metrics are captured and displayed in a public place
 
 ### Proposed metrics
 
@@ -196,3 +196,17 @@ If so, how are we addressing these risks?
 * **Security Approval:** Before the official launch of the API to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
 * **Developer Tools:** As part of the Developer Tools deliverable, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
 * **API Security Planning:** As part of the API Security Planning deliverable, we will specifically be identifying and evaluating strategies to mitigate security risks for the API, such as the use of API tokens and/or rate limiting API requests.
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/5/2024</td><td>Adds acceptance criteria for publish metrics publicly to match GitHub issue</td><td>This acceptance criteria was added in GitHub on 3/14/24 to clarify the expectation around how stakeholders would access metrics for this 30k</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="358">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td><p>All criteria except for:</p><ul><li>Our desired project metrics are captured and displayed in a public place</li></ul></td><td>Criteria were previously marked as completed in GitHub, with the exception of publishing metrics.</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

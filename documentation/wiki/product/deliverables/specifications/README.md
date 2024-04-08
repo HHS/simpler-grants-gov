@@ -23,7 +23,7 @@ The following deliverables are actively being worked on and we have estimated a 
 * [Participant advisory community](participant-advisory-community.md)
 * [Open source onboarding](open-source-onboarding.md)
 * [Search API](search-api.md)
-* [Search user interface](search-user-interface.md)
+* [Search user interface](search-ui.md)
 
 ## Done
 
