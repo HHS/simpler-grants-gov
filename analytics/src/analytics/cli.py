@@ -1,7 +1,7 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
-from typing import Annotated, Optional
 from pathlib import Path
+from typing import Annotated, Optional
 
 import typer
 from slack_sdk import WebClient
@@ -184,5 +184,7 @@ def show_and_or_post_results(
     if post_results:
         slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
         metric.post_results_to_slack(
-            slackbot=slackbot, channel_id=settings.reporting_channel_id, output_dir=Path(output_dir)
+            slackbot=slackbot,
+            channel_id=settings.reporting_channel_id,
+            output_dir=Path(output_dir),
         )
