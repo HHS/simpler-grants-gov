@@ -37,6 +37,8 @@ describe("useSearchFormState", () => {
     page: 1,
     agency: new Set(["NASA"]),
     fundingInstrument: new Set(["grant"]),
+    eligibility: new Set(),
+    category: new Set(),
   };
 
   it("initializes with the correct search results", () => {

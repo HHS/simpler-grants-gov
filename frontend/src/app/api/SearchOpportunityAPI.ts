@@ -59,19 +59,29 @@ export default class SearchOpportunityAPI extends BaseApi {
   private buildFilters(
     searchInputs: SearchFetcherProps,
   ): SearchFilterRequestBody {
-    const { agency, status, fundingInstrument } = searchInputs;
+    const { status, fundingInstrument, eligibility, agency, category } =
+      searchInputs;
     const filters: SearchFilterRequestBody = {};
+
+    if (status && status.size > 0) {
+      filters.opportunity_status = { one_of: Array.from(status) };
+    }
+    if (fundingInstrument && fundingInstrument.size > 0) {
+      filters.funding_instrument = { one_of: Array.from(fundingInstrument) };
+    }
+
+    if (eligibility && eligibility.size > 0) {
+      // Note that eligibility gets remapped to the API name of "applicant_type"
+      filters.applicant_type = { one_of: Array.from(eligibility) };
+    }
 
     if (agency && agency.size > 0) {
       filters.agency = { one_of: Array.from(agency) };
     }
 
-    if (status && status.size > 0) {
-      filters.opportunity_status = { one_of: Array.from(status) };
-    }
-
-    if (fundingInstrument && fundingInstrument.size > 0) {
-      filters.funding_instrument = { one_of: Array.from(fundingInstrument) };
+    if (category && category.size > 0) {
+      // Note that category gets remapped to the API name of "funding_category"
+      filters.funding_category = { one_of: Array.from(category) };
     }
 
     return filters;
