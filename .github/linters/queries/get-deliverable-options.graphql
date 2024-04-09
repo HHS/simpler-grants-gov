@@ -1,0 +1,16 @@
+query ($login: String!, $project: Int!) {
+  organization(login: $login) {
+    projectV2(number: $project) {
+      # fetch the list of options for the "Deliverable" field
+      field(name: "Deliverable") {
+        # for each option, get its id and name
+        ... on ProjectV2SingleSelectField {
+          options {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
