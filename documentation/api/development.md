@@ -70,6 +70,56 @@ Any environment variables specified directly in the [docker-compose](../../docke
 
 This API uses a very simple [ApiKey authentication approach](https://apiflask.com/authentication/#use-external-authentication-library) which requires the caller to provide a static key. This is specified with the `API_AUTH_TOKEN` environment variable.
 
+## VSCode Remote Attach Container Debugging
+
+The API can be run in debug mode that allows for remote attach debugging (currently only supported from VSCode) to the container.
+
+- Requirements:
+
+  - VSCode Python extension
+  - Updated Poetry with the `debugpy` dev package in `pyproject.toml`
+
+- First create a file `./vscode/launch.json` - as shown below. (Default name of `Python: Remote Attach`)
+
+- Start the server in debug mode via `make start-debug` or `make start-debug run-logs`.
+    - This will start the `main-app` service with port 5678 exposed.
+
+- The server will start in waiting mode, waiting for you to attach the debugger (see `/src/app.py`) before continuing to run.
+
+- Go to your VSCode debugger window and run the `Python: Remote Attach` option
+
+- You should now be able to hit set breakpoints throughout the API
+
+`./vscode/launch.json`:
+
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Remote Attach",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/api",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": false,
+        },
+    ]
+}
+```
+
+
 ## Next steps
 
 Now that you're up and running, read the [application docs](../../api/README.md) to familiarize yourself with the application.
