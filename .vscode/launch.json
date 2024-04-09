@@ -1,0 +1,54 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+      {
+        "name": "Python: Remote Attach",
+        "type": "debugpy",
+        "request": "attach",
+        "connect": {
+            "host": "localhost",
+            "port": 5678
+        },
+        "pathMappings": [
+            {
+                "localRoot": "${workspaceFolder}/api",
+                "remoteRoot": "."
+            }
+        ],
+        "justMyCode": false,
+      },
+      {
+        "name": "Next.js: debug server-side",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev",
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      {
+        "name": "Next.js: debug server-side built",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm start",
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      {
+        "name": "Next.js: debug client-side",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:3000"
+      },
+      {
+        "name": "Next.js: debug full stack",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev",
+        "serverReadyAction": {
+          "pattern": "- Local:.+(https?://.+)",
+          "uriFormat": "%s",
+          "action": "debugWithChrome"
+        },
+        "cwd": "${workspaceFolder}/frontend"
+      }
+    ]
+  }
