@@ -7,6 +7,7 @@ REPO ?= simpler-grants-gov
 SPRINT_PROJECT ?= 13
 SPRINT_FILE ?= data/sprint-data.json
 ISSUE_FILE ?= data/issue-data.json
+OUTPUT_DIR ?= data
 SPRINT ?= @current
 UNIT ?= points
 ACTION ?= show-results
@@ -159,6 +160,7 @@ sprint-burndown:
 	$(POETRY) analytics calculate sprint_burndown \
 	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
+	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
 	--unit $(UNIT) \
 	--$(ACTION)
@@ -169,6 +171,7 @@ percent-complete:
 	$(POETRY) analytics calculate deliverable_percent_complete \
 	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
+	--output-dir $(OUTPUT_DIR) \
 	--unit $(UNIT) \
 	--$(ACTION)
 
