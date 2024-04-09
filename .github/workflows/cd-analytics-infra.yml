@@ -1,0 +1,39 @@
+name: Deploy Analytics Infra
+
+# Need to deploy changes to analytics/infra
+# this workflow will be effectively the same per application. 
+
+on:
+  push:
+    branches:
+      - main
+      # - alsia/create-infra-deploy-files -> testing branch
+    paths:
+      - "infra/analytics/**"
+
+jobs:
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: analytics # todo: add inputs to make more programatic.
+          environment: dev # for testing; will move to staging and prod
+      
+      - name: Terraform Init and Apply
+        run: | 
+          ./bin/teraform-init-and-apply.sh
+        # TF_CLI_ARGS="-input=false -auto-approve"  # skips confirmation prompt in the pipeline; commented for testing
+
+        # this script needs the backend config name (the  environment name) and the module location (e.g. infra/{app}/**)
+
+        # extract path that contains changes somehow?
