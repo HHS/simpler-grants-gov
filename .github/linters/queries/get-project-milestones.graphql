@@ -1,0 +1,42 @@
+query ($endCursor: String, $login: String!, $project: Int!, $batch: Int!) {
+  # get the project by the user login and project number
+  organization(login: $login) {
+    projectV2(number: $project) {
+      # insert the projectFields fragment below
+      ...projectFields
+    }
+  }
+}
+
+fragment projectFields on ProjectV2 {
+  # get project items in batches of 100, which is the match batch size
+  items(first: $batch, after: $endCursor) {
+    # allows us to use --paginate in the gh api call
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+
+    # fetch details per item in the list
+    nodes {
+      # fetch the id of the project item
+      id
+
+      # fetch the value of the deliverable column
+      deliverable: fieldValueByName(name: "Deliverable") {
+        ... on ProjectV2ItemFieldSingleSelectValue {
+          name
+        }
+      }
+
+      # fetch the URL of the milestone associated with the project item
+      milestone: fieldValueByName(name: "Milestone") {
+        ... on ProjectV2ItemFieldMilestoneValue {
+          milestone {
+            url
+          }
+        }
+      }
+    }
+  }
+}
