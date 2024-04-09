@@ -183,6 +183,16 @@ It's recommended that developers configure their code editor to auto run these t
 
 </details>
 
+## Debugging the Next App in VSCode
+
+- See the debug config: `./.vscode/launch.json`
+  - There are several debug config targets defined there depending on if you want to debug just client components (client-side), just server components (server-side), or both (with the Full Stack option). You can also debug the built server (launched from `npm start` instead of `npm run dev`).
+- Run one of these launch targets from the VSCode debug menu
+- Place breakpoints in VSCode
+- Visit the relevant routes in the browser and confirm you can hit these breakpoints
+
+\*\* Note that debugging the server-side or full-stack here doesn't debug the API. See the API
+
 ## Other topics
 
 - [Internationalization](../documentation/frontend/internationalization.md)

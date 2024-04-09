@@ -3,7 +3,7 @@
     "configurations": [
 
       {
-        "name": "Python: Remote Attach",
+        "name": "API Remote Attach",
         "type": "debugpy",
         "request": "attach",
         "connect": {
