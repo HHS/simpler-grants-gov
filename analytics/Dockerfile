@@ -8,7 +8,7 @@ FROM python:3-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir poetry --upgrade
+RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 
 RUN apt-get update \
   # Install security updates
@@ -26,11 +26,14 @@ RUN apt-get update \
 
 # Install gh CLI
 # docs: https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN mkdir -p -m 755 /etc/apt/keyrings && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN mkdir -p /etc/apt/keyrings \
+  && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
   && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
   && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-  && apt update \
-  && apt install gh -y \
+  && apt-get update \
+  && apt-get install gh -y \
+  && rm -fr /var/lib/apt/lists/* \
   && gh --version
 
 ARG RUN_UID
