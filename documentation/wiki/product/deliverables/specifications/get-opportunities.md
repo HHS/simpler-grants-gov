@@ -8,7 +8,7 @@ description: >-
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/70">Issue 70</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="get-opportunities.md#overview">Overview</a></p><ul><li><a href="get-opportunities.md#business-value">Business value</a></li><li><a href="get-opportunities.md#user-stories">User stories</a></li></ul></li><li><p><a href="get-opportunities.md#technical-description">Technical description</a></p><ul><li><a href="get-opportunities.md#definition-of-done">Definition of done</a></li><li><a href="get-opportunities.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="get-opportunities.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="get-opportunities.md#logs">Logs</a></p><ul><li><a href="get-opportunities.md#change-log">Change log</a></li><li><a href="get-opportunities.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Done</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/70">Issue 70</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="get-opportunities.md#overview">Overview</a></p><ul><li><a href="get-opportunities.md#business-value">Business value</a></li><li><a href="get-opportunities.md#user-stories">User stories</a></li></ul></li><li><p><a href="get-opportunities.md#technical-description">Technical description</a></p><ul><li><a href="get-opportunities.md#definition-of-done">Definition of done</a></li><li><a href="get-opportunities.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="get-opportunities.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="get-opportunities.md#logs">Logs</a></p><ul><li><a href="get-opportunities.md#change-log">Change log</a></li><li><a href="get-opportunities.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -115,11 +115,11 @@ Following sections describe the conditions that must be met to consider this del
   * [x] &#x20;The endpoint returns all of the grant opportunities that are available on grants.gov
   * [x] &#x20;The endpoint returns at least one (1) field per opportunity
   * [x] &#x20;Updates to the data in legacy Grants.gov are propagated to the new endpoint within 1 hour
-  * [ ] Our desired project metrics are captured and displayed in a public place
+  * [x] Our desired project metrics are captured and displayed in a public place
 
 ### Proposed metrics
 
-* Number of unique users accessing API
+* Number of API keys
 * Total number of API calls made
 * Error rate of API calls
 * Uptime of service
@@ -203,10 +203,10 @@ If so, how are we addressing these risks?
 
 Major updates to the content of this page will be added here.
 
-<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/5/2024</td><td>Adds acceptance criteria for publish metrics publicly to match GitHub issue</td><td>This acceptance criteria was added in GitHub on 3/14/24 to clarify the expectation around how stakeholders would access metrics for this 30k</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/5/2024</td><td>Adds acceptance criteria for publish metrics publicly to match GitHub issue</td><td>This acceptance criteria was added in GitHub on 3/14/24 to clarify the expectation around how stakeholders would access metrics for this 30k</td></tr><tr><td>4/10/2024</td><td>Changed metric for "Number of unique users" to "Number of API keys" </td><td>Change was made during 30k review meeting</td></tr></tbody></table>
 
 ### Implementation log
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="358">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td><p>All criteria except for:</p><ul><li>Our desired project metrics are captured and displayed in a public place</li></ul></td><td>Criteria were previously marked as completed in GitHub, with the exception of publishing metrics.</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="358">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td><p>All criteria except for:</p><ul><li>Our desired project metrics are captured and displayed in a public place</li></ul></td><td>Criteria were previously marked as completed in GitHub, with the exception of publishing metrics.</td></tr><tr><td>4/10/2024</td><td><p>Completed and checked off:</p><ul><li>Our desired project metrics are captured and displayed in a public place</li></ul></td><td>Updated in 30k review meeting on 4/10/24</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
