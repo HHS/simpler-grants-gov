@@ -64,7 +64,7 @@ Here's how Metabase evaluates against our criteria:
 - ✅ Allows technical users to create ad hoc queries to create graphs - [Metabase supports creating a variety of visual types](https://www.metabase.com/learn/visualization/)
 - ✅ Easy-to-use UI for non-coders - Subjectively, the Metabase UI was found to be easy to use.
 - ✅ Replicable for users outside of the project - Metabase is open-source and
-- ✅ Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
+- Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
 - ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker)
 - ✅ Simple account creation - [Metabase uses simple username and password accounts](https://www.metabase.com/docs/latest/configuring-metabase/setting-up-metabase)
 
