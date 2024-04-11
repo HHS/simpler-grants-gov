@@ -19,6 +19,9 @@ jobs:
       matrix:
         directory: ["build-repository","database", "service"]
         envs: [ "dev"]
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +33,7 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: analytics # todo: add inputs to make more programatic.
+          app_name: analytics
           environment: shared # for testing; will move to staging and prod
       
       - name: Terraform Init and Apply
