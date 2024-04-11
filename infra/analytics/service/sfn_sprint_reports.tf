@@ -48,6 +48,10 @@ resource "aws_sfn_state_machine" "sprint_reports" {
                   {
                     "Name" : "ISSUE_FILE",
                     "Value" : "/tmp/issue-data.json",
+                  },
+                  {
+                    "Name" : "OUTPUT_DIR",
+                    "Value" : "/tmp/",
                   }
                 ]
                 "Command" : [

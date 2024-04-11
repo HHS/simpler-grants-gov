@@ -1,5 +1,6 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
+from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
@@ -19,6 +20,7 @@ SPRINT_FILE_ARG = typer.Option(help="Path to file with exported sprint data")
 ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
 ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
+OUTPUT_DIR_ARG = typer.Option(help="Path to directory where output files will be saved")
 OWNER_ARG = typer.Option(help="GitHub handle of the repo or project owner")
 REPO_ARG = typer.Option(help="Name of the GitHub repo")
 PROJECT_ARG = typer.Option(help="Number of the GitHub project")
@@ -75,6 +77,7 @@ def calculate_sprint_burndown(
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
+    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
@@ -88,6 +91,7 @@ def calculate_sprint_burndown(
         metric=burndown,
         show_results=show_results,
         post_results=post_results,
+        output_dir=output_dir,
     )
 
 
@@ -100,6 +104,7 @@ def calculate_sprint_burnup(
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
+    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
 ) -> None:
     """Calculate the burnup of a particular sprint."""
     # load the input data
@@ -113,6 +118,7 @@ def calculate_sprint_burnup(
         metric=burnup,
         show_results=show_results,
         post_results=post_results,
+        output_dir=output_dir,
     )
 
 
@@ -126,6 +132,7 @@ def calculate_deliverable_percent_complete(
     *,  # makes the following args keyword only
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
+    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
     roadmap_file: Annotated[Optional[str], ROADMAP_FILE_ARG] = None,  # noqa: UP007
     include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
 ) -> None:
@@ -153,6 +160,7 @@ def calculate_deliverable_percent_complete(
         metric=metric,
         show_results=show_results,
         post_results=post_results,
+        output_dir=output_dir,
     )
 
 
@@ -161,6 +169,7 @@ def show_and_or_post_results(
     *,  # makes the following args keyword only
     show_results: bool,
     post_results: bool,
+    output_dir: str,
 ) -> None:
     """Optionally show the results of a metric and/or post them to slack."""
     # defer load of settings until this command is called
@@ -177,4 +186,5 @@ def show_and_or_post_results(
         metric.post_results_to_slack(
             slackbot=slackbot,
             channel_id=settings.reporting_channel_id,
+            output_dir=Path(output_dir),
         )
