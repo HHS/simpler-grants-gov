@@ -8,6 +8,29 @@ on:
       - "infra/api/**"
 
 jobs:
+  build-repository:
+  name: Build Repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: analytics
+          environment: shared
+      - name: Build Repository
+        run: |
+          ./bin/terraform-init-and-apply.sh infra/api/build-repository shared
+
   deploy-infra:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
@@ -32,11 +55,7 @@ jobs:
           app_name: api
           environment: shared
 
-      - name: Build Repository
-        run: |
-          ./bin/terraform-init-and-apply.sh infra/api/build-repository shared
-
       - name: Terraform Init and Apply
         run: |
-          TF_CLI_ARGS="-input=false -auto-approve" 
+          export TF_CLI_ARGS="-input=false -auto-approve" 
           ./bin/terraform-init-and-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}

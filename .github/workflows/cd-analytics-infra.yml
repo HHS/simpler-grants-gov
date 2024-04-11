@@ -1,5 +1,5 @@
 name: Deploy Analytics Infra
-
+# Todo: create a composite action
 on:
   push:
     branches:
@@ -9,6 +9,29 @@ on:
     #   - "infra/analytics/**"
 
 jobs:
+  build-repository:
+  name: Build Repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: analytics
+          environment: shared
+      - name: Build Repository
+        run: |
+          ./bin/terraform-init-and-apply.sh infra/analytics/build-repository shared
+
   deploy-infra:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
@@ -33,12 +56,8 @@ jobs:
           app_name: analytics
           environment: shared
 
-      - name: Build Repository
-        run: |
-          ./bin/terraform-init-and-apply.sh infra/analytics/build-repository shared
-
       - name: Terraform Init and Apply
         run: |
           ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
         # ./bin/teraform-init-and-apply.sh # commented for testing. This script runs terraform init and apply
-        # TF_CLI_ARGS="-input=false -auto-approve"  # skips confirmation prompt in the pipeline; commented for testing
+        # export TF_CLI_ARGS="-input=false -auto-approve"  # skips confirmation prompt in the pipeline; commented for testing
