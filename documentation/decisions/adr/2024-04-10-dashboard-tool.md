@@ -23,10 +23,12 @@ We will evaluate the BI tool based on the following capabilities and attributes:
 - Easy-to-use UI for non-coders
 - Replicable for users outside of the project
 - Cost of ownership
+- Ease of deployment
+- Simple account creation
 
 ## Solution Options
 
-The possible solution space here is quite large, but we have narrowed it down to 5 to options total, only 2 of which are evaluated in this ADR. The 5 options we evaluated are:
+The possible solution space here is quite large, but we have narrowed it down to 5 to options total, only 2 of which are evaluated in this ADR. Only 2 options were thoroughly evaluated in the interest of time. The 5 total options we evaluated are listed below.
 
 - AWS QuickSight - evaluated below
 - Metabase - evaluated below
@@ -38,10 +40,38 @@ The possible solution space here is quite large, but we have narrowed it down to
 
 > AWS QuickSight is a cloud-based Business Intelligence (BI) service provided by Amazon Web Services (AWS). It enables users to easily create and share interactive dashboards and visualizations from various data sources, including AWS services, databases, and third-party applications. QuickSight offers features such as ad-hoc analysis, machine learning-powered insights, and seamless integration with AWS services like Amazon Redshift, Amazon RDS, and Amazon S3. It provides users with the ability to explore data through drag-and-drop interfaces, create custom visualizations, and perform advanced analytics without requiring extensive technical expertise. With pay-as-you-go pricing and scalability, QuickSight offers an accessible and cost-effective solution for organizations looking to harness the power of BI in the cloud.
 
+Here's how QuickSight evaluates against our criteria:
+
+- ✅ Ability to share public dashboards - [AWS QuickSight supports public dashboards](https://docs.aws.amazon.com/quicksight/latest/user/embedded-analytics-1-click-public.html)
+- ✅ Ability to show private dashboards to selected users - [AWS QuickSight supports access controlled dashboards](https://docs.aws.amazon.com/quicksight/latest/user/sharing-a-dashboard.html)
+- ✅ Ability to connect to common data sources (S3, Redshift, Postgres) - [AWS QuickSight supports common data sources](https://docs.aws.amazon.com/quicksight/latest/user/supported-data-sources.html)
+- ✅ Allows technical users to create ad hoc queries to create graphs - [AWS QuickSight supports creating a variety of visual types](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visual-types.html)
+- ✅ Easy-to-use UI for non-coders - Subjectively, the AWS QuickSight UI was found to be easy to use.
+- ❌ Replicable for users outside of the project - AWS QuickSight is not open source, so its results can only replicated by having access to our AWS account
+- Cost of ownership - A rough estimate puts AWS QuickSight at about ~$300/month for our quantity of users. [Pricing page.](https://aws.amazon.com/quicksight/pricing/)
+- ✅ Ease of deployment - [AWS QuickSight can be deploy via Terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_account_subscription)
+- ❌ Simple account creation - [AWS QuickSight users must be deployed via Terraform or the AWS console. These users require an associated IAM user to be created.](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_user)
+
 ### Metabase
 
 > Metabase is an open-source Business Intelligence (BI) tool that enables users to easily query, visualize, and share insights from their data. It offers a user-friendly interface that allows users to create and customize dashboards and visualizations without the need for advanced technical skills. Metabase supports various data sources, including SQL databases like MySQL, PostgreSQL, and MongoDB, as well as cloud services like Google BigQuery and Amazon Redshift. With features such as SQL querying, interactive dashboards, and natural language querying, Metabase empowers users to explore and understand their data in a flexible and intuitive way. Additionally, being open-source, Metabase allows for community contributions and customization, making it a popular choice for organizations seeking a cost-effective and customizable BI solution.
 
+Here's how Metabase evaluates against our criteria:
+
+- ✅ Ability to share public dashboards - [Metabase supports public dashboards](https://www.metabase.com/docs/latest/questions/sharing/public-links)
+- ✅ Ability to show private dashboards to selected users - [Metabase supports access controlled dashboards](https://www.metabase.com/learn/administration/guide-to-sharing-data)
+- ✅ Ability to connect to common data sources (S3, Redshift, Postgres) - [Metabase supports common data sources](https://www.metabase.com/data_sources/)
+- ✅ Allows technical users to create ad hoc queries to create graphs - [Metabase supports creating a variety of visual types](https://www.metabase.com/learn/visualization/)
+- ✅ Easy-to-use UI for non-coders - Subjectively, the Metabase UI was found to be easy to use.
+- ✅ Replicable for users outside of the project - Metabase is open-source and
+- ✅ Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
+- ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker)
+- ✅ Simple account creation - [Metabase uses simple username and password accounts](https://www.metabase.com/docs/latest/configuring-metabase/setting-up-metabase)
+
 ### QuickSight and Metabase compared
 
+Metabase's more conventional account creation, and open-source nature, make it slightly beat out AWS QuickSight. That said, they both unambiguously satisfy the majority of our decision criteria. Either tool would be a good choice to implement.
+
 ## Decision
+
+This ADR supports Metabase as our chosen BI tool.
