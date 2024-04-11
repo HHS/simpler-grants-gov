@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: analytics # todo: add inputs to make more programatic.
-          environment: dev # for testing; will move to staging and prod
+          environment: shared # for testing; will move to staging and prod
       
       - name: Terraform Init and Apply
         run: |
