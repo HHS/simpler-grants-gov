@@ -8,8 +8,8 @@ on:
     branches:
       # - main
       - alsia/create-infra-deploy-files
-    paths:
-      - "infra/analytics/**"
+    # paths:
+    #   - "infra/analytics/**"
 
 jobs:
   deploy-infra:

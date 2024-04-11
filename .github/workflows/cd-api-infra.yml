@@ -1,0 +1,37 @@
+name: Deploy API Infra
+
+# Need to deploy changes to analytics/infra
+# this workflow will be effectively the same per application. 
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/api/**"
+
+jobs:
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ["build-repository","database", "service"]
+        envs: [ "dev"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: dev # for testing; will move to staging and prod
+      
+      - name: Terraform Init and Apply
+        run: |
+          ./bin/teraform-init-and-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
