@@ -3,10 +3,9 @@ name: Deploy Analytics Infra
 on:
   push:
     branches:
-      # - main
-      - alsia/create-infra-depoly-files
-    # paths:
-    #   - "infra/analytics/**"
+      - main
+    paths:
+      - "infra/analytics/**"
 
 jobs:
   build-repository:
@@ -58,6 +57,5 @@ jobs:
 
       - name: Terraform Init and Apply
         run: |
-          ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
-        # ./bin/teraform-init-and-apply.sh # commented for testing. This script runs terraform init and apply
-        # export TF_CLI_ARGS="-input=false -auto-approve"  # skips confirmation prompt in the pipeline; commented for testing
+          export TF_CLI_ARGS="-input=false -auto-approve" 
+          ./bin/terraform-init-and-apply.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
