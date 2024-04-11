@@ -1,8 +1,5 @@
 name: Deploy Analytics Infra
 
-# Need to deploy changes to analytics/infra
-# this workflow will be effectively the same per application. 
-
 on:
   push:
     branches:
@@ -17,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["build-repository","database", "service"]
+        directory: ["database", "service"]
         envs: [ "dev"]
     permissions:
       contents: read
@@ -34,14 +31,14 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: analytics
-          environment: shared # for testing; will move to staging and prod
-      
+          environment: shared
+
+      - name: Build Repository
+        run: |
+          ./bin/terraform-init-and-apply.sh infra/analytics/build-repository shared
+
       - name: Terraform Init and Apply
         run: |
           ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
         # ./bin/teraform-init-and-apply.sh # commented for testing. This script runs terraform init and apply
         # TF_CLI_ARGS="-input=false -auto-approve"  # skips confirmation prompt in the pipeline; commented for testing
-
-        # this script needs the backend config name (the  environment name) and the module location (e.g. infra/{app}/**)
-
-        # make matrix for staging and prod

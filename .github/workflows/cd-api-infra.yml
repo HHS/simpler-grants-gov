@@ -1,8 +1,5 @@
 name: Deploy API Infra
 
-# Need to deploy changes to analytics/infra
-# this workflow will be effectively the same per application. 
-
 on:
   push:
     branches:
@@ -16,8 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["build-repository","database", "service"]
-        envs: [ "dev"]
+        directory: ["database", "service"]
+        envs: [ "staging", "prod"]
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v3
@@ -30,8 +30,13 @@ jobs:
         uses: ./.github/actions/configure-aws-credentials
         with:
           app_name: api
-          environment: dev # for testing; will move to staging and prod
-      
+          environment: shared
+
+      - name: Build Repository
+        run: |
+          ./bin/terraform-init-and-apply.sh infra/api/build-repository shared
+
       - name: Terraform Init and Apply
         run: |
-          ./bin/teraform-init-and-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
+          TF_CLI_ARGS="-input=false -auto-approve" 
+          ./bin/terraform-init-and-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
