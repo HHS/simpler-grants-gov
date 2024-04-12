@@ -133,7 +133,13 @@ export default abstract class BaseApi {
         data,
       );
 
-      throwError(response, data);
+      if (errors && Array.isArray(errors)) {
+        for (const error of errors) {
+          if (error) {
+            throwError(error, searchInputs, response);
+          }
+        }
+      }
     }
 
     return {
@@ -205,26 +211,29 @@ export function fetchErrorToNetworkError(
   return new NetworkError(error, searchInputs);
 }
 
-const throwError = (response: Response, data: unknown = {}) => {
+const throwError = (
+  error: unknown,
+  searchInputs: SearchFetcherProps,
+  response: Response,
+) => {
   const { status } = response;
-  const message = `${status} status code received`;
 
   switch (status) {
     case 400:
-      throw new BadRequestError(data, message);
+      throw new BadRequestError(error, searchInputs);
     case 401:
-      throw new UnauthorizedError(data, message);
+      throw new UnauthorizedError(error, searchInputs);
     case 403:
-      throw new ForbiddenError(data, message);
+      throw new ForbiddenError(error, searchInputs);
     case 404:
-      throw new NotFoundError(data, message);
+      throw new NotFoundError(error, searchInputs);
     case 408:
-      throw new RequestTimeoutError(data, message);
+      throw new RequestTimeoutError(error, searchInputs);
     case 500:
-      throw new InternalServerError(data, message);
+      throw new InternalServerError(error, searchInputs);
     case 503:
-      throw new ServiceUnavailableError(data, message);
+      throw new ServiceUnavailableError(error, searchInputs);
     default:
-      throw new ApiRequestError(data, message);
+      throw new ApiRequestError(error, searchInputs, "APIRequestError", status);
   }
 };

@@ -13,6 +13,17 @@ class TestApi extends BaseApi {
   }
 }
 
+const searchInputs = {
+  status: new Set(["active"]),
+  fundingInstrument: new Set(["grant"]),
+  eligibility: new Set(["public"]),
+  agency: new Set(["NASA"]),
+  category: new Set(["science"]),
+  query: "space exploration",
+  sortby: "date",
+  page: 1,
+};
+
 describe("BaseApi", () => {
   let testApi: TestApi;
 
@@ -32,7 +43,7 @@ describe("BaseApi", () => {
     const namespace = "mynamespace";
     const subPath = "myendpointendpoint";
 
-    await testApi.request(method, basePath, namespace, subPath);
+    await testApi.request(method, basePath, namespace, subPath, searchInputs);
 
     const expectedHeaders = {
       "Content-Type": "application/json",
@@ -59,16 +70,6 @@ describe("BaseApi", () => {
         page_size: 25,
         sort_direction: "ascending",
       },
-    };
-    const searchInputs = {
-      status: new Set(["active"]),
-      fundingInstrument: new Set(["grant"]),
-      eligibility: new Set(["public"]),
-      agency: new Set(["NASA"]),
-      category: new Set(["science"]),
-      query: "space exploration",
-      sortby: "date",
-      page: 1,
     };
 
     await testApi.request(
