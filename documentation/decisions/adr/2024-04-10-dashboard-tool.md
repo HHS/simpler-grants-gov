@@ -49,7 +49,7 @@ Here's how QuickSight evaluates against our criteria:
 - ✅ Easy-to-use UI for non-coders - Subjectively, the AWS QuickSight UI was found to be easy to use.
 - ❌ Replicable for users outside of the project - AWS QuickSight is not open source, so its results can only replicated by having access to our AWS account
 - Cost of ownership - A rough estimate puts AWS QuickSight at about ~$300/month for our quantity of users. [Pricing page.](https://aws.amazon.com/quicksight/pricing/)
-- ✅ Ease of deployment - [AWS QuickSight can be deploy via Terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_account_subscription)
+- ✅✅ Ease of deployment - [AWS QuickSight can be deploy via Terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_account_subscription). The entire deployment would be AWS managed, we do not need to manage the deployment in any way.
 - ❌ Simple account creation - [AWS QuickSight users must be deployed via Terraform or the AWS console. These users require an associated IAM user to be created.](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_user)
 
 ### Metabase
@@ -65,7 +65,7 @@ Here's how Metabase evaluates against our criteria:
 - ✅ Easy-to-use UI for non-coders - Subjectively, the Metabase UI was found to be easy to use.
 - ✅ Replicable for users outside of the project - Metabase is open-source and could be replicated by people outside the project by giving them access to a copy of our analytics database.
 - Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
-- ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker)
+- ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker). This ECS service would be managed by us, so we would be responsible for managing upgrades to the service.
 - ✅ Simple account creation - [Metabase uses simple username and password accounts](https://www.metabase.com/docs/latest/configuring-metabase/setting-up-metabase)
 
 ### QuickSight and Metabase compared
