@@ -75,3 +75,10 @@ Metabase's more conventional account creation, and open-source nature, make it s
 ## Decision
 
 This ADR supports Metabase as our chosen BI tool.
+
+## Links
+
+- [Best BI tools for startups: How to choose a BI tool
+](https://www.airops.com/blog/best-bi-tools-for-startups-how-to-choose-a-bi-tool)
+- [Metabase vs QuickSight Comparison](https://www.restack.io/docs/metabase-knowledge-metabase-vs-quicksight-comparison)
+- [Amazon Quicksight vs Metabase](https://stackshare.io/stackups/amazon-quicksight-vs-metabase)
