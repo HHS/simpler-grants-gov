@@ -4,6 +4,8 @@ import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
 import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";
+import SearchFilterCategory from "../../components/search/SearchFilterCategory";
+import SearchFilterEligibility from "../../components/search/SearchFilterEligibility";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
 import SearchPagination from "../../components/search/SearchPagination";
@@ -28,8 +30,10 @@ export function SearchForm({
     statusQueryParams,
     queryQueryParams,
     sortbyQueryParams,
-    agencyQueryParams,
     fundingInstrumentQueryParams,
+    eligibilityQueryParams,
+    agencyQueryParams,
+    categoryQueryParams,
     maxPaginationError,
     fieldChangedRef,
     page,
@@ -58,9 +62,17 @@ export function SearchForm({
               formRef={formRef}
               initialQueryParams={fundingInstrumentQueryParams}
             />
+            <SearchFilterEligibility
+              formRef={formRef}
+              initialQueryParams={eligibilityQueryParams}
+            />
             <SearchFilterAgency
               formRef={formRef}
               initialQueryParams={agencyQueryParams}
+            />
+            <SearchFilterCategory
+              formRef={formRef}
+              initialQueryParams={categoryQueryParams}
             />
           </div>
           <div className="tablet:grid-col-8">

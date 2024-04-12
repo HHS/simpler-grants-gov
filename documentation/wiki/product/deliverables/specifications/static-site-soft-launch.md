@@ -6,7 +6,7 @@ description: Deploy a static site with information about the Simpler.Grants.gov 
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Done</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/62">Issue 62</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="static-site-soft-launch.md#overview">Overview</a></p><ul><li><a href="static-site-soft-launch.md#business-value">Business value</a></li><li><a href="static-site-soft-launch.md#user-stories">User stories</a></li></ul></li><li><p><a href="static-site-soft-launch.md#technical-description">Technical description</a></p><ul><li><a href="static-site-soft-launch.md#definition-of-done">Definition of done</a></li><li><a href="static-site-soft-launch.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="static-site-soft-launch.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Done</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/62">Issue 62</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="static-site-soft-launch.md#overview">Overview</a></p><ul><li><a href="static-site-soft-launch.md#business-value">Business value</a></li><li><a href="static-site-soft-launch.md#user-stories">User stories</a></li></ul></li><li><p><a href="static-site-soft-launch.md#technical-description">Technical description</a></p><ul><li><a href="static-site-soft-launch.md#definition-of-done">Definition of done</a></li><li><a href="static-site-soft-launch.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="static-site-soft-launch.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="static-site-soft-launch.md#logs">Logs</a></p><ul><li><a href="static-site-soft-launch.md#change-log">Change log</a></li><li><a href="static-site-soft-launch.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -186,3 +186,17 @@ If so, how are we addressing these risks?
 * **Security Approval:** Before the official launch of the static site to the public, we will be reviewing our infrastructure and code security practices with the HHS team to ensure that they adhere to HHS standards.
 * **Developer Tools:** As part of the Developer Tools deliverable, the team is setting up a series of tools that will enforce certain code quality standards and security checks. These include things like secrets management, code linting, dependency monitoring, etc.
 * **Form Submissions:** The implementation plan for form submissions will evaluate and consider common security practices for validating and sanitizing user input. Form submissions will also likely be stored in a system that is separate from the production database with grant data.
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="281">Update</th><th>Notes</th></tr></thead><tbody><tr><td>3/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>3/5/2024</td><td>All criteria</td><td>All criteria were previously marked as completed in GitHub when 30k was delivered in September of 2023</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
