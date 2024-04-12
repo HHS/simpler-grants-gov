@@ -1,7 +1,9 @@
 export interface SearchFilterRequestBody {
-  agency?: { one_of: string[] };
   opportunity_status?: { one_of: string[] };
   funding_instrument?: { one_of: string[] };
+  applicant_type?: { one_of: string[] };
+  agency?: { one_of: string[] };
+  funding_category?: { one_of: string[] };
 }
 
 export type PaginationOrderBy = "opportunity_id" | "opportunity_number";

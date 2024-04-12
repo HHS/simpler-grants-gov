@@ -28,6 +28,7 @@ export default function SearchPagination({
           name="currentPage"
           ref={paginationRef}
           value={page}
+          data-testid="hiddenCurrentPage"
         />
       )}
       <Pagination
