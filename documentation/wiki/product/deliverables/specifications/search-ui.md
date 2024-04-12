@@ -2,11 +2,11 @@
 description: Deploy basic search functionality behind a feature flag.
 ---
 
-# Search user interface
+# Search UI
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/89">Issue 89</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-user-interface.md#overview">Overview</a></p><ul><li><a href="search-user-interface.md#business-value">Business value</a></li><li><a href="search-user-interface.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-user-interface.md#technical-description">Technical description</a></p><ul><li><a href="search-user-interface.md#definition-of-done">Definition of done</a></li><li><a href="search-user-interface.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-user-interface.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/89">Issue 89</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-ui.md#overview">Overview</a></p><ul><li><a href="search-ui.md#business-value">Business value</a></li><li><a href="search-ui.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-ui.md#technical-description">Technical description</a></p><ul><li><a href="search-ui.md#definition-of-done">Definition of done</a></li><li><a href="search-ui.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-ui.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-ui.md#logs">Logs</a></p><ul><li><a href="search-ui.md#change-log">Change log</a></li><li><a href="search-ui.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -259,3 +259,16 @@ Does this 30k ft deliverable expose any new attack vectors or expand the attack 
 
 If so, how are we addressing these risks?
 
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

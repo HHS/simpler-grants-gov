@@ -6,7 +6,7 @@ description: Extend and transform the opportunity data model
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/972">Issue 972</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-api.md#overview">Overview</a></p><ul><li><a href="search-api.md#business-value">Business value</a></li><li><a href="search-api.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-api.md#technical-description">Technical description</a></p><ul><li><a href="search-api.md#definition-of-done">Definition of done</a></li><li><a href="search-api.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-api.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/972">Issue 972</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-api.md#overview">Overview</a></p><ul><li><a href="search-api.md#business-value">Business value</a></li><li><a href="search-api.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-api.md#technical-description">Technical description</a></p><ul><li><a href="search-api.md#definition-of-done">Definition of done</a></li><li><a href="search-api.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-api.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-api.md#logs">Logs</a></p><ul><li><a href="search-api.md#change-log">Change log</a></li><li><a href="search-api.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -206,8 +206,6 @@ Is there any notable functionality we do _**not**_ expect to be in place before 
 * The Search UI 30k deliverable will be happening in parallel with this effort. The Search UI effort will use the Search API&#x20;
 * The data model for Grants as a Protocol will not be completed before this work starts and we will need to update the API in a future deliverable
 
-###
-
 ### Open questions
 
 <details>
@@ -287,3 +285,17 @@ If so, how are we addressing these risks?
 2. Enforce strong authentication and authorization mechanisms such as key management
 3. ETL tool will go through our ADR process and we will select a tool with security factors as a decision criteria&#x20;
 4. Other security preventions include - scanning for vulnerabilities using automated tools and manual reviews, we have logging to track data access and usage, we will also go through the formal security review process to ensure that we are aligned with the SIA and security controls required
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

@@ -9,7 +9,7 @@ description: >-
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Responsible parties</strong></td><td><ul><li><a data-mention href="https://app.gitbook.com/u/uNHb7bntU3X9uUQVhriLvi6TDCO2">Risha Lee</a> - Designer/researcher</li><li><a data-mention href="https://app.gitbook.com/u/lcQCDQDQ89bczhJijH2pkU1TvRD3">Andy Cochran</a> - Design</li><li><a data-mention href="https://app.gitbook.com/u/7lzKMr1fMVYGtzZWQCJenjXo9c33">Sumi Thaiveettil</a> - Product</li></ul></td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>Issue <a href="https://github.com/HHS/simpler-grants-gov/issues/327">#327</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="participant-advisory-community.md#overview">Overview</a></p><ul><li><a href="participant-advisory-community.md#business-value">Business value</a></li><li><a href="participant-advisory-community.md#user-stories">User stories</a></li></ul></li><li><p><a href="participant-advisory-community.md#technical-description">Technical description</a></p><ul><li><a href="participant-advisory-community.md#definition-of-done">Definition of done</a></li><li><a href="participant-advisory-community.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="participant-advisory-community.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Responsible parties</strong></td><td><ul><li><a data-mention href="https://app.gitbook.com/u/uNHb7bntU3X9uUQVhriLvi6TDCO2">Risha Lee</a> - Designer/researcher</li><li><a data-mention href="https://app.gitbook.com/u/lcQCDQDQ89bczhJijH2pkU1TvRD3">Andy Cochran</a> - Design</li><li><a data-mention href="https://app.gitbook.com/u/7lzKMr1fMVYGtzZWQCJenjXo9c33">Sumi Thaiveettil</a> - Product</li></ul></td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>Issue <a href="https://github.com/HHS/simpler-grants-gov/issues/327">#327</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="participant-advisory-community.md#overview">Overview</a></p><ul><li><a href="participant-advisory-community.md#business-value">Business value</a></li><li><a href="participant-advisory-community.md#user-stories">User stories</a></li></ul></li><li><p><a href="participant-advisory-community.md#technical-description">Technical description</a></p><ul><li><a href="participant-advisory-community.md#definition-of-done">Definition of done</a></li><li><a href="participant-advisory-community.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="participant-advisory-community.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="participant-advisory-community.md#logs">Logs</a></p><ul><li><a href="participant-advisory-community.md#change-log">Change log</a></li><li><a href="participant-advisory-community.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -260,3 +260,17 @@ Does this deliverable expose any new attack vectors or expand the attack surface
 If so, how are we addressing these risks?
 
 * We will check with MH and HHS security to ensure that we have permissions to use Ethn.io
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

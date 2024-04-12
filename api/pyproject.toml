@@ -44,6 +44,7 @@ types-pyyaml = "^6.0.12.11"
 setuptools = "^68.2.2"
 pydot = "1.4.2"
 sadisplay = "0.4.9"
+debugpy = "^1.8.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

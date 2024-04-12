@@ -49,6 +49,7 @@ const SearchSortBy: React.FC<SearchSortByProps> = ({
         id="search-sort-by-select"
         onChange={handleChange}
         value={sortBy}
+        aria-label="Sort By"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>

@@ -6,7 +6,7 @@ description: Develop a unified brand identity for grants.gov
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Responsible parties</strong></td><td><a data-mention href="https://app.gitbook.com/u/kNKTEVSWuBM01RRbfUCEetyk2ww1">Senongo Akpem</a><br><a data-mention href="https://app.gitbook.com/u/ZTTdtzrorQaMcCHqoJ0llCpg2l33">Zoe Blumenfeld</a><br><a data-mention href="https://app.gitbook.com/u/7lzKMr1fMVYGtzZWQCJenjXo9c33">Sumi Thaiveettil</a><br></td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>Issue <a href="https://github.com/HHS/simpler-grants-gov/issues/88">#88</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="unified-branding.md#overview">Overview</a></p><ul><li><a href="unified-branding.md#business-value">Business value</a></li><li><a href="unified-branding.md#user-stories">User stories</a></li></ul></li><li><p><a href="unified-branding.md#technical-description">Technical description</a></p><ul><li><a href="unified-branding.md#definition-of-done">Definition of done</a></li><li><a href="unified-branding.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="unified-branding.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In Progress</td></tr><tr><td><strong>Responsible parties</strong></td><td><a data-mention href="https://app.gitbook.com/u/kNKTEVSWuBM01RRbfUCEetyk2ww1">Senongo Akpem</a><br><a data-mention href="https://app.gitbook.com/u/ZTTdtzrorQaMcCHqoJ0llCpg2l33">Zoe Blumenfeld</a><br><a data-mention href="https://app.gitbook.com/u/7lzKMr1fMVYGtzZWQCJenjXo9c33">Sumi Thaiveettil</a><br></td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>Issue <a href="https://github.com/HHS/simpler-grants-gov/issues/88">#88</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="unified-branding.md#overview">Overview</a></p><ul><li><a href="unified-branding.md#business-value">Business value</a></li><li><a href="unified-branding.md#user-stories">User stories</a></li></ul></li><li><p><a href="unified-branding.md#technical-description">Technical description</a></p><ul><li><a href="unified-branding.md#definition-of-done">Definition of done</a></li><li><a href="unified-branding.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="unified-branding.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="unified-branding.md#logs">Logs</a></p><ul><li><a href="unified-branding.md#change-log">Change log</a></li><li><a href="unified-branding.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -217,3 +217,17 @@ Does this deliverable expose any new attack vectors or expand the attack surface
 If so, how are we addressing these risks?
 
 1. Currently, anyone can copy branding and images from the site itself so it should not be a different if it is in a repository. We will explore how different audiences will interact with the brand. For example, internal staff may get a simple URL to access the logo, or do we need to consider building it in to the tools. HHS has the basics up on a public page, but not all the stuff like powerpoint decks and letterhead. so we should consider a middle-ground. See the guidelines for use here:  https://www.hhs.gov/web/policies-and-standards/web-policies/logo-seal-and-symbol-policies/index.html
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

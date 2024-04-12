@@ -6,7 +6,7 @@ description: Template page for deliverable specifications.
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>[Issue number]</td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="specification-template.md#overview">Overview</a></p><ul><li><a href="specification-template.md#business-value">Business value</a></li><li><a href="specification-template.md#user-stories">User stories</a></li></ul></li><li><p><a href="specification-template.md#technical-description">Technical description</a></p><ul><li><a href="specification-template.md#definition-of-done">Definition of done</a></li><li><a href="specification-template.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="specification-template.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Planning</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td>[Issue number]</td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="specification-template.md#overview">Overview</a></p><ul><li><a href="specification-template.md#business-value">Business value</a></li><li><a href="specification-template.md#user-stories">User stories</a></li></ul></li><li><p><a href="specification-template.md#technical-description">Technical description</a></p><ul><li><a href="specification-template.md#definition-of-done">Definition of done</a></li><li><a href="specification-template.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="specification-template.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="specification-template.md#logs">Logs</a></p><ul><li><a href="specification-template.md#change-log">Change log</a></li><li><a href="specification-template.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -139,8 +139,16 @@ If so, how are we addressing these risks?
 
 * \[to be added]
 
-## Change log
+## Logs
+
+### Change log
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
