@@ -1,6 +1,7 @@
 import "server-only";
 
 import BaseApi, { ApiMethod, JSONRequestBody } from "../../src/app/api/BaseApi";
+import { NetworkError, UnauthorizedError } from "src/errors";
 
 // Define a concrete implementation of BaseApi for testing
 class TestApi extends BaseApi {
@@ -93,5 +94,58 @@ describe("BaseApi", () => {
         body: JSON.stringify(body),
       }),
     );
+  });
+
+  describe("Not OK response", () => {
+    let testApi: TestApi;
+
+    beforeEach(() => {
+      testApi = new TestApi();
+      global.fetch = jest.fn().mockResolvedValue({
+        json: () =>
+          Promise.resolve({
+            data: {},
+            errors: [],
+            message:
+              "The server could not verify that you are authorized to access the URL requested",
+            status_code: 401,
+          }),
+        ok: false,
+        status: 401,
+      });
+    });
+
+    it("throws an UnauthorizedError for a 401 response", async () => {
+      const method = "GET";
+      const basePath = "http://mydomain:8080";
+      const namespace = "mynamespace";
+      const subPath = "endpoint";
+
+      await expect(
+        testApi.request(method, basePath, namespace, subPath, searchInputs),
+      ).rejects.toThrow(UnauthorizedError);
+    });
+  });
+
+  describe("API is down", () => {
+    let testApi: TestApi;
+
+    beforeEach(() => {
+      testApi = new TestApi();
+      global.fetch = jest.fn().mockImplementation(() => {
+        throw new Error("Network failure");
+      });
+    });
+
+    it("throws a NetworkError when fetch fails", async () => {
+      const method = "GET";
+      const basePath = "http://mydomain:8080";
+      const namespace = "mynamespace";
+      const subPath = "endpoint";
+
+      await expect(
+        testApi.request(method, basePath, namespace, subPath, searchInputs),
+      ).rejects.toThrow(NetworkError);
+    });
   });
 });

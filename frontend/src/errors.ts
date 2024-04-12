@@ -25,6 +25,7 @@ export class NetworkError extends Error {
   }
 }
 
+// Used as a base class for all !response.ok errors
 export class BaseFrontendError extends Error {
   constructor(
     error: unknown,

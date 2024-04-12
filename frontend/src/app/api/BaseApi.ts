@@ -15,10 +15,12 @@ import {
   ServiceUnavailableError,
   UnauthorizedError,
 } from "src/errors";
+import { compact, isEmpty } from "lodash";
 
+// TODO (#1682): replace search specific references (since this is a generic API file that any
+// future page or different namespace could use)
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
-import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -26,15 +28,12 @@ export interface JSONRequestBody {
 }
 
 // TODO: keep for reference on generic response type
-
-// export interface ApiResponseBody<TResponseData> {
-//   message: string;
-//   data: TResponseData;
-//   status_code: number;
-
-//   errors?: unknown[]; // TODO: define error and warning Issue type
-//   warnings?: unknown[];
-// }
+interface ApiResponse<TData, TErrors> {
+  data: TData; // Generic type for data, can be any structure
+  errors?: TErrors; // Optional array of errors
+  message: string; // General message, usually about the status
+  status_code: number; // HTTP status code
+}
 
 export interface HeadersDict {
   [header: string]: string;
@@ -71,6 +70,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
+
     searchInputs: SearchFetcherProps,
     body?: JSONRequestBody,
     options: {
@@ -119,27 +119,15 @@ export default abstract class BaseApi {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as SearchAPIResponse;
     } catch (error) {
+      // API most likely down, but also possibly an error setting up or sending a request
+      // or parsing the response.
       throw fetchErrorToNetworkError(error, searchInputs);
     }
 
-    const { data, message, pagination_info, status_code, errors, warnings } =
+    const { data, message, pagination_info, status_code, warnings } =
       responseBody;
     if (!response.ok) {
-      console.log(
-        "Not OK Response => ",
-        response,
-        errors,
-        this.namespace,
-        data,
-      );
-
-      if (errors && Array.isArray(errors)) {
-        for (const error of errors) {
-          if (error) {
-            throwError(error, searchInputs, response);
-          }
-        }
-      }
+      handleNotOkResponse(responseBody, message, status_code, searchInputs);
     }
 
     return {
@@ -211,14 +199,29 @@ export function fetchErrorToNetworkError(
   return new NetworkError(error, searchInputs);
 }
 
-const throwError = (
-  error: unknown,
+function handleNotOkResponse(
+  response: ApiResponse<unknown, unknown>,
+  message: string,
+  status_code: number,
   searchInputs: SearchFetcherProps,
-  response: Response,
-) => {
-  const { status } = response;
+) {
+  const { errors } = response;
+  if (isEmpty(errors)) {
+    // No detailed errors provided, throw generic error based on status code
+    throwError(message, status_code, searchInputs);
+  } else {
+    // TODO (#1502): Handle multiple detailed errors once API supports it
+    console.log("Detailed errors to be handled in the future:", errors);
+  }
+}
 
-  switch (status) {
+const throwError = (
+  message: string,
+  status_code: number,
+  searchInputs: SearchFetcherProps,
+) => {
+  const error = { message };
+  switch (status_code) {
     case 400:
       throw new BadRequestError(error, searchInputs);
     case 401:
@@ -234,6 +237,11 @@ const throwError = (
     case 503:
       throw new ServiceUnavailableError(error, searchInputs);
     default:
-      throw new ApiRequestError(error, searchInputs, "APIRequestError", status);
+      throw new ApiRequestError(
+        error,
+        searchInputs,
+        "APIRequestError",
+        status_code,
+      );
   }
 };
