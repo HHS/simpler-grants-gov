@@ -4,7 +4,20 @@
 // https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
+import {
+  ApiRequestError,
+  BadRequestError,
+  ForbiddenError,
+  InternalServerError,
+  NetworkError,
+  NotFoundError,
+  RequestTimeoutError,
+  ServiceUnavailableError,
+  UnauthorizedError,
+} from "src/errors";
+
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
+import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
 import { compact } from "lodash";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -58,6 +71,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
+    searchInputs: SearchFetcherProps,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -78,11 +92,15 @@ export default abstract class BaseApi {
     };
 
     headers["Content-Type"] = "application/json";
-    const response = await this.sendRequest(url, {
-      body: method === "GET" || !body ? null : createRequestBody(body),
-      headers,
-      method,
-    });
+    const response = await this.sendRequest(
+      url,
+      {
+        body: method === "GET" || !body ? null : createRequestBody(body),
+        headers,
+        method,
+      },
+      searchInputs,
+    );
 
     return response;
   }
@@ -90,17 +108,18 @@ export default abstract class BaseApi {
   /**
    * Send a request and handle the response
    */
-  private async sendRequest(url: string, fetchOptions: RequestInit) {
+  private async sendRequest(
+    url: string,
+    fetchOptions: RequestInit,
+    searchInputs: SearchFetcherProps,
+  ) {
     let response: Response;
     let responseBody: SearchAPIResponse;
     try {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as SearchAPIResponse;
     } catch (error) {
-      console.log("Network Error encountered => ", error);
-      throw new Error("Network request failed");
-      // TODO: Error management
-      // throw fetchErrorToNetworkError(error);
+      throw fetchErrorToNetworkError(error, searchInputs);
     }
 
     const { data, message, pagination_info, status_code, errors, warnings } =
@@ -114,9 +133,7 @@ export default abstract class BaseApi {
         data,
       );
 
-      throw new Error("Not OK response received");
-      // TODO: Error management
-      // handleNotOkResponse(response, errors, this.namespace, data);
+      throwError(response, data);
     }
 
     return {
@@ -174,3 +191,40 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
 
   return JSON.stringify(payload);
 }
+
+/**
+ * Handle request errors
+ */
+export function fetchErrorToNetworkError(
+  error: unknown,
+  searchInputs: SearchFetcherProps,
+) {
+  // Request failed to send or something failed while parsing the response
+  // Log the JS error to support troubleshooting
+  console.error(error);
+  return new NetworkError(error, searchInputs);
+}
+
+const throwError = (response: Response, data: unknown = {}) => {
+  const { status } = response;
+  const message = `${status} status code received`;
+
+  switch (status) {
+    case 400:
+      throw new BadRequestError(data, message);
+    case 401:
+      throw new UnauthorizedError(data, message);
+    case 403:
+      throw new ForbiddenError(data, message);
+    case 404:
+      throw new NotFoundError(data, message);
+    case 408:
+      throw new RequestTimeoutError(data, message);
+    case 500:
+      throw new InternalServerError(data, message);
+    case 503:
+      throw new ServiceUnavailableError(data, message);
+    default:
+      throw new ApiRequestError(data, message);
+  }
+};

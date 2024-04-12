@@ -78,13 +78,15 @@ export function SearchForm({
           <div className="tablet:grid-col-8">
             <SearchResultsHeader
               formRef={formRef}
-              searchResultsLength={searchResults.pagination_info.total_records}
+              searchResultsLength={
+                searchResults?.pagination_info?.total_records
+              }
               initialQueryParams={sortbyQueryParams}
             />
             <div className="usa-prose">
-              {searchResults.data.length >= 1 ? (
+              {searchResults?.data.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults.pagination_info.total_pages}
+                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
@@ -93,12 +95,13 @@ export function SearchForm({
               ) : null}
 
               <SearchResultsList
-                searchResults={searchResults.data}
+                searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
+                errors={initialSearchResults.errors}
               />
-              {searchResults.data.length >= 1 ? (
+              {searchResults?.data?.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults.pagination_info.total_pages}
+                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                 />

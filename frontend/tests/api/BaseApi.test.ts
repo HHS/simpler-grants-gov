@@ -60,8 +60,25 @@ describe("BaseApi", () => {
         sort_direction: "ascending",
       },
     };
+    const searchInputs = {
+      status: new Set(["active"]),
+      fundingInstrument: new Set(["grant"]),
+      eligibility: new Set(["public"]),
+      agency: new Set(["NASA"]),
+      category: new Set(["science"]),
+      query: "space exploration",
+      sortby: "date",
+      page: 1,
+    };
 
-    await testApi.request(method, basePath, namespace, subPath, body);
+    await testApi.request(
+      method,
+      basePath,
+      namespace,
+      subPath,
+      searchInputs,
+      body,
+    );
 
     const expectedHeaders = {
       "Content-Type": "application/json",

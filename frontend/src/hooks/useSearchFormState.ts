@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 
 import { SearchAPIResponse } from "../types/search/searchResponseTypes";
-import { SearchFetcherActionType } from "../types/search/searchRequestTypes";
 import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
 import { updateResults } from "../app/search/actions";
 import { useFormState } from "react-dom";
@@ -75,13 +74,9 @@ export function useSearchFormState(
 
   // TODO (Issue #1517): move this to server-side calculation?
   const maxPaginationError =
-    searchResults.pagination_info.total_pages > 0 &&
-    searchResults.pagination_info.page_offset >
-      searchResults.pagination_info.total_pages;
-
-  const resetPagination =
-    searchResults.actionType === SearchFetcherActionType.Update &&
-    searchResults.fieldChanged !== "pagination";
+    searchResults?.pagination_info?.total_pages > 0 &&
+    searchResults?.pagination_info?.page_offset >
+      searchResults?.pagination_info?.total_pages;
 
   return {
     searchResults,
@@ -98,7 +93,6 @@ export function useSearchFormState(
     agencyQueryParams,
     categoryQueryParams,
     fieldChangedRef,
-    resetPagination,
     page,
     setPage,
     handlePageChange,
