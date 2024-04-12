@@ -1,39 +1,43 @@
+--
+-- SQLMesh model definition.
+--
+
 MODEL (
+  -- Name of destination table (actually a view that's pointing to a table managed by SQLMesh).
   name api.opportunity_sqlmesh,
-  kind FULL,
+
+  -- Key columns that uniquely identify rows.
   grain opportunity_id,
-  allow_partials true
 
---  columns (
---    opportunity_id BIGINT,
---    opportunity_number TEXT,
---    opportunity_title TEXT,
---    agency TEXT,
---    opportunity_category_id INTEGER REFERENCES api.lk_opportunity_category(opportunity_category_id),
---    category_explanation TEXT,
---    is_draft BOOL,
---    revision_number INTEGER,
---    modified_comments TEXT,
---    publisher_user_id TEXT,
---    publisher_profile_id BIGINT,
---  ),
+  -- Can be executed at any time, does not need to align to specific time intervals.
+  allow_partials true,
 
---  @cron "*/5 * * * *"
+  -- Various model kinds were tested in this proof of concept (one at a time).
 
---  kind SCD_TYPE_2_BY_COLUMN (
---    unique_key opportunity_id,
---    columns [oppnumber, opptitle, owningagency, oppcategory, category_explanation,
---             is_draft, revision_number, modified_comments, publisheruid, publisher_profile_id]
---  )
+  -------------------------------------------------------------------------------------------------
+  -- FULL - full dataset rewritten each time:
+  --kind FULL,
 
---  kind INCREMENTAL_BY_UNIQUE_KEY (
---    unique_key opportunity_id
---  ),
---  @cron "*/5 * * * *"
+  -------------------------------------------------------------------------------------------------
+  -- INCREMENTAL_BY_UNIQUE_KEY - based on a unique key, rows are added or updated:
+  --kind INCREMENTAL_BY_UNIQUE_KEY (
+  --  unique_key opportunity_id
+  --),
+
+  -------------------------------------------------------------------------------------------------
+  -- SCD_TYPE_2_BY_COLUMN - Slowly Changing Dimension (SCD), appends modified rows to keep a full history:
+  kind SCD_TYPE_2_BY_COLUMN (
+    unique_key opportunity_id,
+    columns [opportunity_number, opportunity_title, agency, opportunity_category_id, category_explanation,
+             is_draft, revision_number, modified_comments, publisher_user_id, publisher_profile_id]
+  )
+
+  -------------------------------------------------------------------------------------------------
 );
 
 ;
 
+-- SELECT expression for model.
 SELECT
   opportunity_id::BIGINT,
   oppnumber::TEXT AS opportunity_number,
@@ -51,9 +55,13 @@ SELECT
   revision_number::INTEGER AS revision_number,
   modified_comments::TEXT AS modified_comments,
   publisheruid::TEXT AS publisher_user_id,
-  publisher_profile_id::BIGINT AS publisher_profile_id
+  publisher_profile_id::BIGINT AS publisher_profile_id,
 FROM
   api.foreign_topportunity;
 
+-- Post-statements to add foreign key references and created_at column.
 ALTER TABLE api.opportunity_sqlmesh
 ADD FOREIGN KEY (opportunity_category_id) REFERENCES api.lk_opportunity_category(opportunity_category_id);
+
+ALTER TABLE api.opportunity_sqlmesh
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
