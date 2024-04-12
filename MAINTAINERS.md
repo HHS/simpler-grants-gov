@@ -23,13 +23,20 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Brett Rosenblatt
 * Brandon Tabaska
 * Ebuwa Evbuoma-Fike
+* James Bursa
+* Ryan Lewis
 
 ## Product and Project Management
 
-* Esther Oke
-* Sumit Haiveettil
+* Sumi Thaiveettil
+* Margaret Spring
+
 
 ## Content and Design
 
 * Andy Cochran
 * Emily Ianacone
+* Risha Lee
+* Crystabel Rangel
+* Senongo Akpem
+* Meghan Casey
