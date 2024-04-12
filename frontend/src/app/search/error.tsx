@@ -78,39 +78,6 @@ function getErrorInitialSearchResults(
   };
 }
 
-// function getErrorSearchResults() {
-//   const queryParams = new URLSearchParams(window.location.search);
-
-//   const statusParam = queryParams.get("status");
-//   const fundingInstrumentParam = queryParams.get("fundingInstrument");
-//   const eligibilityParam = queryParams.get("eligibility");
-//   const agencyParam = queryParams.get("agency");
-//   const categoryParam = queryParams.get("category");
-//   const sortbyParam = queryParams.get("sortby");
-
-//   const status = statusParam
-//     ? statusParam.split(",")
-//     : ["forecasted", "posted"];
-//   const fundingInstruments = fundingInstrumentParam
-//     ? fundingInstrumentParam.split(",")
-//     : [];
-//   const eligibility = eligibilityParam ? eligibilityParam.split(",") : [];
-//   const agencies = agencyParam ? agencyParam.split(",") : [];
-//   const categories = categoryParam ? categoryParam.split(",") : [];
-//   const sortby = sortbyParam || ""; // Default to an empty string if it's not provided
-
-//   return {
-//     query: "",
-//     status: new Set<string>(status),
-//     fundingInstrument: new Set<string>(fundingInstruments),
-//     eligibility: new Set<string>(eligibility),
-//     agency: new Set<string>(agencies),
-//     category: new Set<string>(categories),
-//     sortby,
-//     page: 1,
-//   };
-// }
-
 // There will be no pagination shown on an error
 // so the values here just need to be valid for the page to
 // load without error
