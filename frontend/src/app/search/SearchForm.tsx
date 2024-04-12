@@ -97,7 +97,7 @@ export function SearchForm({
               <SearchResultsList
                 searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
-                errors={initialSearchResults.errors}
+                errors={searchResults.errors}
               />
               {searchResults?.data?.length >= 1 ? (
                 <SearchPagination
