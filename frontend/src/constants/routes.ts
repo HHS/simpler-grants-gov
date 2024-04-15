@@ -28,5 +28,5 @@ export const ExternalRoutes = {
   PERFORMANCE_REPORTS: "https://www.hhs.gov/about/budget/index.html",
   PRIVACY_POLICY: "https://www.grants.gov/privacy-policy",
   USA: "https://www.usa.gov",
-  WIKI: "https://wiki.simpler.hhs.gov"
+  WIKI: "https://wiki.simpler.hhs.gov",
 };
