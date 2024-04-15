@@ -8,7 +8,7 @@ description: >-
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Prioritized</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/277">Issue 277</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="opportunity-listing-synopsis.md#overview">Overview</a></p><ul><li><a href="opportunity-listing-synopsis.md#business-value">Business value</a></li><li><a href="opportunity-listing-synopsis.md#user-stories">User stories</a></li></ul></li><li><p><a href="opportunity-listing-synopsis.md#technical-description">Technical description</a></p><ul><li><a href="opportunity-listing-synopsis.md#definition-of-done">Definition of done</a></li><li><a href="opportunity-listing-synopsis.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="opportunity-listing-synopsis.md#assumptions-and-dependencies">Dependencies and assumptions</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Prioritized</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/277">Issue 277</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="opportunity-listing-synopsis.md#overview">Overview</a></p><ul><li><a href="opportunity-listing-synopsis.md#business-value">Business value</a></li><li><a href="opportunity-listing-synopsis.md#user-stories">User stories</a></li></ul></li><li><p><a href="opportunity-listing-synopsis.md#technical-description">Technical description</a></p><ul><li><a href="opportunity-listing-synopsis.md#definition-of-done">Definition of done</a></li><li><a href="opportunity-listing-synopsis.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="opportunity-listing-synopsis.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="opportunity-listing-synopsis.md#logs">Logs</a></p><ul><li><a href="opportunity-listing-synopsis.md#change-log">Change log</a></li><li><a href="opportunity-listing-synopsis.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -155,3 +155,17 @@ Does this deliverable expose any new attack vectors or expand the attack surface
 If so, how are we addressing these risks?
 
 * **Security review:** We'll following the security controls in place for grants.gov and evaluate the need for a separate Security Impact Assessment (SIA) for adding file storage.
+
+## Logs
+
+### Change log
+
+Major updates to the content of this page will be added here.
+
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+### Implementation log
+
+Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
+
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

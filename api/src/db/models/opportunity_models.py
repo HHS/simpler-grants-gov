@@ -1,6 +1,7 @@
 from datetime import date
 
 from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -153,20 +154,31 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
 
-    @property
-    def funding_instruments(self) -> set[FundingInstrument]:
-        # Helper method for serialization of the API response
-        return {f.funding_instrument for f in self.link_funding_instruments}
-
-    @property
-    def funding_categories(self) -> set[FundingCategory]:
-        # Helper method for serialization of the API response
-        return {f.funding_category for f in self.link_funding_categories}
-
-    @property
-    def applicant_types(self) -> set[ApplicantType]:
-        # Helper method for serialization of the API response
-        return {a.applicant_type for a in self.link_applicant_types}
+    # Create an association proxy for each of the link table relationships
+    # https://docs.sqlalchemy.org/en/20/orm/extensions/associationproxy.html
+    #
+    # This lets us use these values as if they were just ordinary lists on a python
+    # object. For example::
+    #
+    #   opportunity.funding_instruments.add(FundingInstrument.GRANT)
+    #
+    # will add a row to the link_opportunity_summary_funding_instrument table itself
+    # and is still capable of using all of our column mapping code uneventfully.
+    funding_instruments: AssociationProxy[set[FundingInstrument]] = association_proxy(
+        "link_funding_instruments",
+        "funding_instrument",
+        creator=lambda obj: LinkOpportunitySummaryFundingInstrument(funding_instrument=obj),
+    )
+    funding_categories: AssociationProxy[set[FundingCategory]] = association_proxy(
+        "link_funding_categories",
+        "funding_category",
+        creator=lambda obj: LinkOpportunitySummaryFundingCategory(funding_category=obj),
+    )
+    applicant_types: AssociationProxy[set[ApplicantType]] = association_proxy(
+        "link_applicant_types",
+        "applicant_type",
+        creator=lambda obj: LinkOpportunitySummaryApplicantType(applicant_type=obj),
+    )
 
 
 class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):

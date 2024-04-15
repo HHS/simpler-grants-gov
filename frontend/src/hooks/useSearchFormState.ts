@@ -23,8 +23,10 @@ export function useSearchFormState(
   let {
     status: statusQueryParams,
     page: pageQueryParams,
-    agency: agencyQueryParams,
     fundingInstrument: fundingInstrumentQueryParams,
+    eligibility: eligibilityQueryParams,
+    agency: agencyQueryParams,
+    category: categoryQueryParams,
     query: queryQueryParams,
     sortby: sortbyQueryParams,
   } = requestURLQueryParams;
@@ -91,8 +93,10 @@ export function useSearchFormState(
     queryQueryParams,
     sortbyQueryParams,
     pageQueryParams,
-    agencyQueryParams,
     fundingInstrumentQueryParams,
+    eligibilityQueryParams,
+    agencyQueryParams,
+    categoryQueryParams,
     fieldChangedRef,
     resetPagination,
     page,

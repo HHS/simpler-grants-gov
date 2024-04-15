@@ -19,11 +19,10 @@ The following deliverables have a specification but are still being planned. As 
 The following deliverables are actively being worked on and we have estimated a target date for delivery. However, as we continue to work on this deliverable, unknown risks and other factors may influence the scope or timeline.
 
 * [Unified branding](unified-branding.md)
-* [GET opportunities endpoint](get-opportunities.md)
 * [Participant advisory community](participant-advisory-community.md)
 * [Open source onboarding](open-source-onboarding.md)
 * [Search API](search-api.md)
-* [Search user interface](search-user-interface.md)
+* [Search user interface](search-ui.md)
 
 ## Done
 
@@ -31,9 +30,10 @@ The following deliverables have been completed.
 
 * [Static site soft launch](static-site-soft-launch.md)
 * [Static site public launch](static-site-public-launch.md)
+* [GET opportunities endpoint](get-opportunities.md)
 
 ## Change log
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>4/10/2024</td><td>Moves GET Opportunities from "In Progress" to "Done"</td><td>Updated during 30k review meeting on 4/10</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

@@ -16,15 +16,15 @@
     * [Static site soft launch](product/deliverables/specifications/static-site-soft-launch.md)
     * [Static site public launch](product/deliverables/specifications/static-site-public-launch.md)
     * [GET Opportunities](product/deliverables/specifications/get-opportunities.md)
-    * [Opportunity endpoint API limited announcement](product/deliverables/specifications/opportunity-endpoint-api-limited-announcement.md)
     * [Search API](product/deliverables/specifications/search-api.md)
-    * [Search user interface](product/deliverables/specifications/search-user-interface.md)
+    * [Search UI](product/deliverables/specifications/search-ui.md)
     * [Unified branding](product/deliverables/specifications/unified-branding.md)
     * [Content translation](product/deliverables/specifications/content-translation.md)
     * [Delivery dashboard](product/deliverables/specifications/delivery-dashboard.md)
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
     * [Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
     * [Participant advisory community](product/deliverables/specifications/participant-advisory-community.md)
+    * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
 
 ## Collaborating
 

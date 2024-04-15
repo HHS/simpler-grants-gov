@@ -15,7 +15,9 @@ export class FormDataService {
       page: this.page,
       status: this.status,
       fundingInstrument: this.fundingInstrument,
+      eligibility: this.eligibility,
       agency: this.agency,
+      category: this.category,
       query: this.query,
       sortby: this.sortBy,
 
@@ -45,65 +47,44 @@ export class FormDataService {
     return queryValue !== "" ? queryValue?.toString() : null;
   }
 
-  // Builds a set of selected status values from the formData
-  get status(): Set<string> {
-    const statuses = new Set<string>();
-    const statusKeys = [
-      "status-forecasted",
-      "status-posted",
-      "status-closed",
-      "status-archived",
-    ];
+  getValuesByKeyPrefix(prefix: string, splitAtSecondPart = false): Set<string> {
+    const values = new Set<string>();
 
-    for (const key of statusKeys) {
-      const value = this.getFormDataWithValue(key);
-      if (value !== null) {
-        statuses.add(key.split("-")[1]); // Add the part after 'status-', e.g., 'forecasted'
-      }
-    }
-    return statuses;
-  }
+    for (const [key] of this.formData.entries()) {
+      if (key.startsWith(prefix)) {
+        // Determine the index to split at, which is 1 by default,
+        // but 2 if we're looking at 'funding-instrument-'.
+        const indexToSplit = splitAtSecondPart ? 2 : 1;
+        const value = key.split("-").slice(indexToSplit).join();
 
-  // Getting a set of selected funding instruments
-  get fundingInstrument(): Set<string> {
-    const fundingInstruments = new Set<string>();
-
-    const fundingInstrumentTypes = [
-      "funding-instrument-cooperative_agreement",
-      "funding-instrument-grant",
-      "funding-instrument-procurement_contract",
-      "funding-instrument-other",
-    ];
-
-    for (const key of fundingInstrumentTypes) {
-      const value = this.getFormDataWithValue(key);
-      if (value !== null) {
-        // Extracting the part after 'funding-instrument-', e.g., 'grant'
-        const instrument = key.split("-")[2];
-        if (instrument) {
-          fundingInstruments.add(instrument);
+        if (value) {
+          values.add(value);
         }
       }
     }
 
-    return fundingInstruments;
+    return values;
+  }
+
+  get status(): Set<string> {
+    return this.getValuesByKeyPrefix("status-");
+  }
+
+  get fundingInstrument(): Set<string> {
+    // Pass 'true' to handle the special case of splitting 'funding-instrument-'after the second dash
+    return this.getValuesByKeyPrefix("funding-instrument-", true);
+  }
+
+  get eligibility(): Set<string> {
+    return this.getValuesByKeyPrefix("eligibility-");
   }
 
   get agency(): Set<string> {
-    const agencies = new Set<string>();
+    return this.getValuesByKeyPrefix("agency-");
+  }
 
-    // Iterate over all entries in the FormData
-    for (const [key] of this.formData.entries()) {
-      if (key.startsWith("agency-")) {
-        // Remove the initial 'agency-' prefix and add the remainder to the set
-        const agencyId = key.substring("agency-".length);
-        if (agencyId) {
-          agencies.add(agencyId);
-        }
-      }
-    }
-
-    return agencies;
+  get category(): Set<string> {
+    return this.getValuesByKeyPrefix("category-");
   }
 
   get sortBy(): string | null {

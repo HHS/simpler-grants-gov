@@ -94,6 +94,9 @@ build:
 start:
 	docker-compose up --detach
 
+start-debug:
+	docker compose -f docker-compose.yml -f docker-compose.debug.yml up --detach
+
 run-logs: start
 	docker-compose logs --follow --no-color $(APP_NAME)
 

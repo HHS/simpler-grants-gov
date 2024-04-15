@@ -1,0 +1,16 @@
+version: "3.8"
+
+# run with `docker compose -f`
+# combines ports and env vars with the main docker-compose.yml main-app service
+
+services:
+  grants-api:
+    command: [
+      "poetry", "run", "python", "-m", "debugpy",
+      "--listen", "0.0.0.0:5678",
+      "--wait-for-client",  "--log-to-stderr",
+      "-m", "flask", "--app", "src.app", "run",
+      "--host", "0.0.0.0", "--port", "8080", "--no-reload"
+    ]
+    ports:
+      - 5678:5678

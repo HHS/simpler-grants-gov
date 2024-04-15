@@ -7,8 +7,10 @@ export interface SearchFetcherProps {
   page: number;
   query: string | null | undefined;
   status: Set<string>;
-  agency: Set<string>;
   fundingInstrument: Set<string>;
+  eligibility: Set<string>;
+  agency: Set<string>;
+  category: Set<string>;
   sortby: string | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
