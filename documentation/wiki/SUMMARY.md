@@ -15,7 +15,7 @@
   * [Specifications](product/deliverables/specifications/README.md)
     * [Static site soft launch](product/deliverables/specifications/static-site-soft-launch.md)
     * [Static site public launch](product/deliverables/specifications/static-site-public-launch.md)
-    * [GET Opportunities](product/deliverables/specifications/get-opportunities.md)
+    * [🏁 GET Opportunities](product/deliverables/specifications/get-opportunities.md)
     * [Search API](product/deliverables/specifications/search-api.md)
     * [Search UI](product/deliverables/specifications/search-ui.md)
     * [Unified branding](product/deliverables/specifications/unified-branding.md)
