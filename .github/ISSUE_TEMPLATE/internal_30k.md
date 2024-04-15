@@ -9,6 +9,12 @@ assignees: ""
 
 ---
 
+### Key links
+
+- Deliverable specification
+- [Simpler Grants.gov full roadmap](https://github.com/orgs/HHS/projects/12)
+- 10k milestones
+
 ### Description
 
 - **What:** {1-2 sentence summary of what should be delivered}
@@ -17,19 +23,5 @@ assignees: ""
   - {Audience for this deliverable}
   - {Audience for this deliverable}
 
-### Business Goals
-
-- {1 sentence description of goal for this deliverable}
-- {1 sentence description of goal for this deliverable}
-
-### Dependencies
-
-- [ ] {Link to 10k or 30k ticket that blocks this deliverable}
-
-### Functionality
-
-- [ ] {Link to 10k ticket that should be completed with this deliverable}
-
-### Definition of Done
-
-- [ ] {Condition that must be satisfied by this deliverable}
+> [!NOTE]
+> For more information about this deliverable, please refer to the deliverable specification linked above.
