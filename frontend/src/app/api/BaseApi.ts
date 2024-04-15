@@ -223,7 +223,7 @@ const throwError = (
   firstError?: APIResponseError,
 ) => {
   // Include just firstError for now, we can expand this
-  // If we need ValidationErrors to be more expanded 
+  // If we need ValidationErrors to be more expanded
   const error = firstError ? { message, firstError } : { message };
   switch (status_code) {
     case 400:
