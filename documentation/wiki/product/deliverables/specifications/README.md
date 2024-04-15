@@ -19,7 +19,7 @@ The following deliverables have a specification but are still being planned. As 
 The following deliverables are actively being worked on and we have estimated a target date for delivery. However, as we continue to work on this deliverable, unknown risks and other factors may influence the scope or timeline.
 
 * [Unified branding](unified-branding.md)
-* [Participant advisory community](participant-advisory-community.md)
+* [Co-design group](co-design-group.md)
 * [Open source onboarding](open-source-onboarding.md)
 * [Search API](search-api.md)
 * [Search user interface](search-ui.md)
