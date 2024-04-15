@@ -39,7 +39,7 @@ Documentation and development instructions for the front-end are provided in the
 
 Thank you for considering contributing to an Open Source project of the US
 Government! For more information about our contribution guidelines, see
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[CONTRIBUTING.md](CONTRIBUTING.md) to learn more and join our community see our [wiki](https://wiki.simpler.hhs.gov).
 
 ## Security
 
