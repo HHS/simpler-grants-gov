@@ -21,17 +21,14 @@ DECODE_LOG := 2>&1 | python3 -u src/logging/util/decodelog.py
 SHELL = /bin/bash -o pipefail
 
 # The APP_DIR variable is the path from the root of the repository to this Makefile.
-# This variable is used to display errors from Flake8 and MyPy in the 'Files Changed'
+# This variable is used to display errors from MyPy in the 'Files Changed'
 # section of a pull request. If this is set to the incorrect value, you won't be able
 # to see the errors on the correct files in that section
 APP_DIR := api
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
- FLAKE8_FORMAT := '::warning file=$(APP_DIR)/%(path)s,line=%(row)d,col=%(col)d::%(path)s:%(row)d:%(col)d: %(code)s %(text)s'
  MYPY_FLAGS := --no-pretty
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
-else
- FLAKE8_FORMAT := default
 endif
 
 # By default, all python/poetry commands will run inside of the docker container
@@ -220,10 +217,10 @@ format-check: ## Check file formatting
 
 lint: lint-py ## Lint
 
-lint-py: lint-flake lint-mypy
+lint-py: lint-ruff lint-mypy
 
-lint-flake:
-	$(PY_RUN_CMD) flake8 --format=$(FLAKE8_FORMAT) src tests bin
+lint-ruff:
+	$(PY_RUN_CMD) ruff check src tests bin
 
 lint-mypy:
 	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
