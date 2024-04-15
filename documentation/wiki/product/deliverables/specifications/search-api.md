@@ -159,9 +159,9 @@ Following sections describe the conditions that must be met to consider this del
     * [ ] Data needed for metrics is actively being captured in PROD
     * [ ] Key architectural decisions made about this deliverable are documented publicly (as needed)
   * [ ] Functional requirements
-    * [ ] The API reads data from a new opportunity data model with clearly defined tables, relationships, and attributes
-    * [ ] The API pulls data from more than just the `opportunity` data of the Grants.gov live database.&#x20;
-    * [ ] An ERD for the new data model is documented in a publicly accessible location, and the ERD is automatically updated with future changes to the data model
+    * [x] The API reads data from a new opportunity data model with clearly defined tables, relationships, and attributes
+    * [x] The API pulls data from more than just the `opportunity` data of the Grants.gov live database.&#x20;
+    * [x] An ERD for the new data model is documented in a publicly accessible location, and the ERD is automatically updated with future changes to the data model
     * [ ] There is a service in place which transforms data from the old data model from Grants.gov live to a new, intuitive, easier-to-use data model.&#x20;
     * [ ] Changes made to data on grants.gov live are propagated to the new simpler.grants.gov data model within 1 hour
     * [ ] A new (minor) version of the `GET /opportunities` API endpoint has been released and includes fields from the expanded data model (e.g. status, agency, etc.)
@@ -170,7 +170,7 @@ Following sections describe the conditions that must be met to consider this del
       * [ ] Filter opportunities by at least one structured field from the new data model
       * [ ] Sort opportunities by at least one structured field from the new data model
     * [ ] We've received security approval to host (but not share) non-public data in the AWS Simpler environments
-    * [ ] Select a logging and monitoring tool for backend and frontend &#x20;
+    * [x] Select a logging and monitoring tool for backend and frontend &#x20;
     * [ ] Started the procurement process for the logging and monitoring tool
 * **Nice to have**
   * [ ] S2S users can sign up for the API with a self-service authentication option that replaces the key management method established previously
@@ -298,4 +298,4 @@ Major updates to the content of this page will be added here.
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/12/24</td><td>The API reads data from a new opportunity data model with clearly defined tables, relationships, and attributes</td><td>Based on data model discovery and proposal that was reviewed with key stakeholders. Documented here: <a href="https://app.gitbook.com/o/cFcvhi6d0nlLyH2VzVgn/s/v1V0jIH7mb7Yb3jlNrgk/engineering/learnings/opportunity-endpoint-data-model">https://app.gitbook.com/o/cFcvhi6d0nlLyH2VzVgn/s/v1V0jIH7mb7Yb3jlNrgk/engineering/learnings/opportunity-endpoint-data-model</a></td></tr><tr><td>4/12/24</td><td>The API pulls data from more than just the <code>opportunity</code> data of the Grants.gov live database. </td><td>The API pulls data from more than the opportunity table from the g.gov replicated database</td></tr><tr><td>4/12/24</td><td>An ERD for the new data model is documented in a publicly accessible location, and the ERD is automatically updated with future changes to the data model</td><td><a href="../../../../api/database/erds/#full-schema">https://github.com/HHS/simpler-grants-gov/blob/main/documentation/api/database/erds/README.md#full-schema</a></td></tr><tr><td>4/12/24</td><td>Select a logging and monitoring tool for backend and frontend </td><td>ADR for New Relic here: <a href="../../../../decisions/adr/2024-03-04-logging-monitoring.md">https://github.com/HHS/simpler-grants-gov/blob/main/documentation/decisions/adr/2024-03-04-logging-monitoring.md</a></td></tr><tr><td>4/12/24</td><td>Started the procurement process for the logging and monitoring tool</td><td>Procurement has been started:  <a href="https://github.com/HHS/simpler-grants-gov/issues/1676">[Task]: Decide on Strategy/Workflow for NewRelic Procurement</a><br>Implementation steps have been outlined here: <a href="https://github.com/HHS/simpler-grants-gov/milestone/101">https://github.com/HHS/simpler-grants-gov/milestone/101</a></td></tr><tr><td>4/12/24</td><td><strong>Nice-to-have:</strong> S2S users can sign up for the API with a self-service authentication option that replaces the key management method established previously</td><td>Not doing, this is part of the API authn deliverable we'll do in the future. We've started conversations with Login to see what's feasible. </td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

@@ -23,7 +23,7 @@
     * [Delivery dashboard](product/deliverables/specifications/delivery-dashboard.md)
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
     * [Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
-    * [Participant advisory community](product/deliverables/specifications/participant-advisory-community.md)
+    * [Co-design group](product/deliverables/specifications/co-design-group.md)
     * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
 
 ## Collaborating
