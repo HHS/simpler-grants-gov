@@ -14,6 +14,7 @@ import {
   RequestTimeoutError,
   ServiceUnavailableError,
   UnauthorizedError,
+  ValidationError,
 } from "src/errors";
 import { compact, isEmpty } from "lodash";
 
@@ -27,12 +28,10 @@ export interface JSONRequestBody {
   [key: string]: unknown;
 }
 
-// TODO: keep for reference on generic response type
-interface ApiResponse<TData, TErrors> {
-  data: TData; // Generic type for data, can be any structure
-  errors?: TErrors; // Optional array of errors
-  message: string; // General message, usually about the status
-  status_code: number; // HTTP status code
+interface APIResponseError {
+  field: string;
+  message: string;
+  type: string;
 }
 
 export interface HeadersDict {
@@ -200,7 +199,7 @@ export function fetchErrorToNetworkError(
 }
 
 function handleNotOkResponse(
-  response: ApiResponse<unknown, unknown>,
+  response: SearchAPIResponse,
   message: string,
   status_code: number,
   searchInputs: SearchFetcherProps,
@@ -210,8 +209,10 @@ function handleNotOkResponse(
     // No detailed errors provided, throw generic error based on status code
     throwError(message, status_code, searchInputs);
   } else {
-    // TODO (#1502): Handle multiple detailed errors once API supports it
-    console.log("Detailed errors to be handled in the future:", errors);
+    if (errors) {
+      const firstError = errors[0] as APIResponseError;
+      throwError(message, status_code, searchInputs, firstError);
+    }
   }
 }
 
@@ -219,8 +220,11 @@ const throwError = (
   message: string,
   status_code: number,
   searchInputs: SearchFetcherProps,
+  firstError?: APIResponseError,
 ) => {
-  const error = { message };
+  // Include just firstError for now, we can expand this
+  // If we need ValidationErrors to be more expanded 
+  const error = firstError ? { message, firstError } : { message };
   switch (status_code) {
     case 400:
       throw new BadRequestError(error, searchInputs);
@@ -230,6 +234,8 @@ const throwError = (
       throw new ForbiddenError(error, searchInputs);
     case 404:
       throw new NotFoundError(error, searchInputs);
+    case 422:
+      throw new ValidationError(error, searchInputs);
     case 408:
       throw new RequestTimeoutError(error, searchInputs);
     case 500:

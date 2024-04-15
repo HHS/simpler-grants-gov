@@ -64,7 +64,6 @@ export default function Error({ error }: ErrorProps) {
  * Generate empty response data to render the full page on an error
  * which otherwise may not have any data.
  */
-
 function getErrorInitialSearchResults(
   parsedError: ParsedError,
   pagination_info: PaginationInfo,

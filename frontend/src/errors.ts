@@ -115,6 +115,15 @@ export class RequestTimeoutError extends ApiRequestError {
   }
 }
 
+/**
+ * An API response returned a 422 status code
+ */
+export class ValidationError extends ApiRequestError {
+  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+    super(error, searchInputs, "ValidationError", 422);
+  }
+}
+
 /***************************************************/
 /* 500 Errors
 /***************************************************/
