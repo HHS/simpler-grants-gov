@@ -28,6 +28,16 @@ locals {
       # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
       name           = "SENDY_LIST_ID"
       ssm_param_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+    },
+    {
+      # URL that the frontend uses to make fetch requests to the API.
+      name           = "API_URL"
+      ssm_param_name = "/${var.app_name}/${var.environment}/api-url"
+    },
+    {
+      # Token that the frontend uses to authenticate when making Grants API fetch requests.
+      name           = "API_AUTH_TOKEN"
+      ssm_param_name = "/${var.app_name}/${var.environment}/api-auth-token"
     }
   ]
 }
