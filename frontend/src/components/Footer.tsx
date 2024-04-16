@@ -28,8 +28,11 @@ const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
     <Tag className="usa-social-link__icon" name={name} aria-label={name} />
   </a>
 );
+type Props = {
+  link_twitter?: string;
+};
 
-const Footer = () => {
+const Footer = ({ link_twitter }: Props) => {
   const { t } = useTranslation("common", {
     keyPrefix: "Footer",
   });
@@ -37,7 +40,7 @@ const Footer = () => {
   const links = [
     {
       href: ExternalRoutes.GRANTS_TWITTER,
-      name: t("link_twitter"),
+      name: link_twitter,
       Tag: Icon.Twitter,
     },
     {
@@ -68,7 +71,7 @@ const Footer = () => {
   ].map(({ href, name, Tag }) => (
     <SocialLink
       href={href}
-      key={name.toLocaleLowerCase()}
+      key={name}
       name={name}
       Tag={Tag}
     />

@@ -26,12 +26,12 @@ const primaryLinks: PrimaryLinks = [
 
 type Props = {
   logoPath?: string;
+  title?: string;
+  nav_menu_toggle?: string;
+  menuLinks: any;
 };
 
-const Header = ({ logoPath }: Props) => {
-  const { t, i18n } = useTranslation("common", {
-    keyPrefix: "Header",
-  });
+const Header = ({ logoPath, title, nav_menu_toggle, menuLinks }: Props) => {
 
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
@@ -40,7 +40,7 @@ const Header = ({ logoPath }: Props) => {
 
   const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
-      {t(link.i18nKey)}
+      {menuLinks[link.i18nKey]}
     </a>
   ));
 
@@ -50,7 +50,7 @@ const Header = ({ logoPath }: Props) => {
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
       <GovBanner
-        language={i18n.language?.match(/^es-?/) ? "spanish" : "english"}
+        language={"english"}
       />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
@@ -66,12 +66,12 @@ const Header = ({ logoPath }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
             <NavMenuButton
               onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
+              label={nav_menu_toggle}
             />
           </div>
           <PrimaryNav

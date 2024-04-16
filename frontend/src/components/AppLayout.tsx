@@ -9,15 +9,25 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
+  const title = 'Simpler.Grants.gov';
+  const menuLinks = {
+    nav_link_home: "Home",
+    nav_link_process: "Process",
+    nav_link_research:  "Research",
+    nav_link_newsletter: "Newsletter",
+  }
+
+
+
   return (
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
       <a className="usa-skipnav" href="#main-content">
         {"skip_to_main"}
       </a>
-      <Header />
+      <Header title={title} menuLinks={menuLinks}/>
       <main id="main-content">{children}</main>
-      <Footer />
+      <Footer link_twitter="atf"/>
       <GrantsIdentifier />
     </div>
   );
