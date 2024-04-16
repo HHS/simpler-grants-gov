@@ -1,11 +1,12 @@
 name: Deploy Analytics Infra
 
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || ['dev', 'staging'] }}
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || ('dev', 'staging') }}
 
 on:
   push:
     branches:
       - main
+      - alsia/create-infra-depoly-files # testing
     paths:
       - "infra/analytics/**"
   release:
@@ -41,7 +42,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ${{ (github.event_name == 'release' && ['prod']) || ['dev', 'staging'] }}
+        envs: ${{ (github.event_name == 'release' && 'prod') || ('dev', 'staging') }}
     permissions:
       contents: read
       id-token: write
