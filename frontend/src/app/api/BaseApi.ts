@@ -4,24 +4,35 @@
 // https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
+import {
+  ApiRequestError,
+  BadRequestError,
+  ForbiddenError,
+  InternalServerError,
+  NetworkError,
+  NotFoundError,
+  RequestTimeoutError,
+  ServiceUnavailableError,
+  UnauthorizedError,
+  ValidationError,
+} from "src/errors";
+import { compact, isEmpty } from "lodash";
+
+// TODO (#1682): replace search specific references (since this is a generic API file that any
+// future page or different namespace could use)
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
-import { compact } from "lodash";
+import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
   [key: string]: unknown;
 }
 
-// TODO: keep for reference on generic response type
-
-// export interface ApiResponseBody<TResponseData> {
-//   message: string;
-//   data: TResponseData;
-//   status_code: number;
-
-//   errors?: unknown[]; // TODO: define error and warning Issue type
-//   warnings?: unknown[];
-// }
+interface APIResponseError {
+  field: string;
+  message: string;
+  type: string;
+}
 
 export interface HeadersDict {
   [header: string]: string;
@@ -58,6 +69,8 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
+
+    searchInputs: SearchFetcherProps,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -78,11 +91,15 @@ export default abstract class BaseApi {
     };
 
     headers["Content-Type"] = "application/json";
-    const response = await this.sendRequest(url, {
-      body: method === "GET" || !body ? null : createRequestBody(body),
-      headers,
-      method,
-    });
+    const response = await this.sendRequest(
+      url,
+      {
+        body: method === "GET" || !body ? null : createRequestBody(body),
+        headers,
+        method,
+      },
+      searchInputs,
+    );
 
     return response;
   }
@@ -90,33 +107,26 @@ export default abstract class BaseApi {
   /**
    * Send a request and handle the response
    */
-  private async sendRequest(url: string, fetchOptions: RequestInit) {
+  private async sendRequest(
+    url: string,
+    fetchOptions: RequestInit,
+    searchInputs: SearchFetcherProps,
+  ) {
     let response: Response;
     let responseBody: SearchAPIResponse;
     try {
       response = await fetch(url, fetchOptions);
       responseBody = (await response.json()) as SearchAPIResponse;
     } catch (error) {
-      console.log("Network Error encountered => ", error);
-      throw new Error("Network request failed");
-      // TODO: Error management
-      // throw fetchErrorToNetworkError(error);
+      // API most likely down, but also possibly an error setting up or sending a request
+      // or parsing the response.
+      throw fetchErrorToNetworkError(error, searchInputs);
     }
 
-    const { data, message, pagination_info, status_code, errors, warnings } =
+    const { data, message, pagination_info, status_code, warnings } =
       responseBody;
     if (!response.ok) {
-      console.log(
-        "Not OK Response => ",
-        response,
-        errors,
-        this.namespace,
-        data,
-      );
-
-      throw new Error("Not OK response received");
-      // TODO: Error management
-      // handleNotOkResponse(response, errors, this.namespace, data);
+      handleNotOkResponse(responseBody, message, status_code, searchInputs);
     }
 
     return {
@@ -174,3 +184,70 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
 
   return JSON.stringify(payload);
 }
+
+/**
+ * Handle request errors
+ */
+export function fetchErrorToNetworkError(
+  error: unknown,
+  searchInputs: SearchFetcherProps,
+) {
+  // Request failed to send or something failed while parsing the response
+  // Log the JS error to support troubleshooting
+  console.error(error);
+  return new NetworkError(error, searchInputs);
+}
+
+function handleNotOkResponse(
+  response: SearchAPIResponse,
+  message: string,
+  status_code: number,
+  searchInputs: SearchFetcherProps,
+) {
+  const { errors } = response;
+  if (isEmpty(errors)) {
+    // No detailed errors provided, throw generic error based on status code
+    throwError(message, status_code, searchInputs);
+  } else {
+    if (errors) {
+      const firstError = errors[0] as APIResponseError;
+      throwError(message, status_code, searchInputs, firstError);
+    }
+  }
+}
+
+const throwError = (
+  message: string,
+  status_code: number,
+  searchInputs: SearchFetcherProps,
+  firstError?: APIResponseError,
+) => {
+  // Include just firstError for now, we can expand this
+  // If we need ValidationErrors to be more expanded
+  const error = firstError ? { message, firstError } : { message };
+  switch (status_code) {
+    case 400:
+      throw new BadRequestError(error, searchInputs);
+    case 401:
+      throw new UnauthorizedError(error, searchInputs);
+    case 403:
+      throw new ForbiddenError(error, searchInputs);
+    case 404:
+      throw new NotFoundError(error, searchInputs);
+    case 422:
+      throw new ValidationError(error, searchInputs);
+    case 408:
+      throw new RequestTimeoutError(error, searchInputs);
+    case 500:
+      throw new InternalServerError(error, searchInputs);
+    case 503:
+      throw new ServiceUnavailableError(error, searchInputs);
+    default:
+      throw new ApiRequestError(
+        error,
+        searchInputs,
+        "APIRequestError",
+        status_code,
+      );
+  }
+};

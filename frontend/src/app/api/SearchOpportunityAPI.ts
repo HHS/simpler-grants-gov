@@ -49,6 +49,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       this.basePath,
       this.namespace,
       subPath,
+      searchInputs,
       requestBody,
     );
 
