@@ -71,7 +71,7 @@ This effort allows us to…&#x20;
 
 **Goal**
 
-Define the scope and purpose of the PAC, identify underserved communities, and establish the framework for engagement.
+Define the scope and purpose of the co-design group, identify underserved communities, and establish the framework for engagement.
 
 * Define co-design group scope and purpose
 * Identify and prioritize underserved communities through quantitative and qualitative data analysis&#x20;
@@ -101,8 +101,8 @@ The criteria that should inform this approach include:
 
 * How will we ensure that our roadmap is informed by the co-design group and user research?
 * How can we set clear expectations with the co-design group candidates?&#x20;
-* How long will participants be expected to participate in the PAC?
-* How many hours are participants expected to commit to the PAC?
+* How long will participants be expected to participate in the co-design group?
+* How many hours are participants expected to commit to the co-design group?
 
 ### Recruitment activities and engagement
 
@@ -131,10 +131,10 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Data needed for metrics is actively being captured in PROD
   * [ ] Key architectural decisions made about this deliverable are documented publicly
 * [ ] Finalize the name of what we will call the participatory group and approval from HHS
-* [ ] A screening and consent process has been defined and documented for the PAC, and this process:
+* [ ] A screening and consent process has been defined and documented for the Co-design group, and this process:
   * [ ] Screens applicants against an explicitly documented set of selection criteria
   * [ ] Sets clear guidelines and expectations for participation&#x20;
-  * [ ] Explicitly communicates how consent and privacy will be handled in the different type of sessions held by the PAC
+  * [ ] Explicitly communicates how consent and privacy will be handled in the different type of sessions held by the Co-design group
 * [ ] A panel of 12-24 participants have been selected, and these participants:
   * [ ] Represent underserved communities that have been determined to have unequal access to grants
   * [ ] Have completed the screening and consent process
@@ -144,7 +144,7 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Allocates sufficient funds to compensate co-design group participants for the next 12 months
   * [ ] Outlines how co-design group participants will be compensated (e.g. through gift cards, honorariums, etc.)
   * [ ] Provides an anticipated payment schedule for this compensation that is communicated to participants
-* [ ] The following requirements satisfied to facilitate collaboration with members of the PAC:
+* [ ] The following requirements satisfied to facilitate collaboration with members of the co-design group:
   * [ ] Ethn.io has been procured and configured
   * [ ] HHS security team has approved Simpler.Grants.gov to collect and store Personally Identifying Information (PII) in our systems
   * [ ] Our PRA (Paperwork Reduction Act) requests have been approved to conduct surveys or questionnaires
@@ -161,9 +161,9 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Can be accessed by members of the co-design group at no cost to them
   * [ ] Can be accessed by (a subset of) members of the Simpler.Grants.gov team
 * [ ] A proposal for including agency representatives in a co-design group-like structure has been documented, and this proposal:
-  * [ ] Answers a series of open questions about how to involve agency representatives in a PAC
+  * [ ] Answers a series of open questions about how to involve agency representatives in a co-design group
   * [ ] Identifies potential changes that need to be made to the screening and consent process for agency representatives
-* [ ] A translator is present for all sessions with the PAC
+* [ ] A translator is present for all sessions with the co-design group
 
 ### Proposed metrics
 
@@ -215,7 +215,7 @@ We could potentially focus on a demographic segment where users who are fluent i
 
 <details>
 
-<summary>Would we need a 508-compliance review of any materials (PDFs, slide decks, etc.) we're preparing for the PAC?</summary>
+<summary>Would we need a 508-compliance review of any materials (PDFs, slide decks, etc.) we're preparing for the co-design group?</summary>
 
 To be answered
 
