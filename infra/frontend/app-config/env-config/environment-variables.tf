@@ -30,7 +30,7 @@ locals {
       ssm_param_name = "/${var.app_name}/${var.environment}/sendy-list-id"
     },
     {
-      # URL that the frontend uses to make fetch requests to the API.
+      # URL that the frontend uses to make fetch requests to the Grants API.
       name           = "API_URL"
       ssm_param_name = "/${var.app_name}/${var.environment}/api-url"
     },
