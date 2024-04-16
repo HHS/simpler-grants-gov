@@ -1,11 +1,15 @@
 name: Deploy Frontend Infra
 
+run-name: Deploy ${{ github.ref_name }} to Frontend ${{ (github.event_name == 'release' && 'prod') || ['dev', 'staging'] }}
+
 on:
   push:
     branches:
       - main
     paths:
       - "infra/frontend/**"
+  release:
+    types: [published]
 
 jobs:
   build-repository:
@@ -36,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["database", "service"]
-        envs: [ "staging", "prod"]
+        directory: ["service"]
+        envs: ${{ (github.event_name == 'release' && ['prod']) || ['dev', 'staging'] }}
     permissions:
       contents: read
       id-token: write

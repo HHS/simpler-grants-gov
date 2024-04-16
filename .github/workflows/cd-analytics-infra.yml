@@ -1,11 +1,15 @@
 name: Deploy Analytics Infra
-# Todo: create a composite action
+
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || ['dev', 'staging'] }}
+
 on:
   push:
     branches:
       - main
     paths:
       - "infra/analytics/**"
+  release:
+    types: [published]
 
 jobs:
   build-repository:
@@ -37,7 +41,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: [ "dev"]
+        envs: ${{ (github.event_name == 'release' && ['prod']) || ['dev', 'staging'] }}
     permissions:
       contents: read
       id-token: write

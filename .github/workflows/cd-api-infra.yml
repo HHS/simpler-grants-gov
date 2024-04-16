@@ -1,11 +1,15 @@
 name: Deploy API Infra
 
+run-name: Deploy ${{ github.ref_name }} to API ${{ (github.event_name == 'release' && 'prod') || ['dev', 'staging'] }}
+
 on:
   push:
     branches:
       - main
     paths:
       - "infra/api/**"
+  release:
+    types: [published]
 
 jobs:
   build-repository:
@@ -25,7 +29,7 @@ jobs:
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: analytics
+          app_name: api
           environment: shared
       - name: Build Repository
         run: |
@@ -37,7 +41,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: [ "staging", "prod"]
+        envs: ${{ (github.event_name == 'release' && ['prod']) || ['dev', 'staging'] }}
     permissions:
       contents: read
       id-token: write
