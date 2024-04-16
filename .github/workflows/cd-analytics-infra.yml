@@ -5,10 +5,10 @@ run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == '
 on:
   push:
     branches:
-      - main
+      # - main
       - alsia/create-infra-depoly-files # testing
-    paths:
-      - "infra/analytics/**"
+    # paths:
+    #   - "infra/analytics/**"
   release:
     types: [published]
 
