@@ -31,12 +31,6 @@ output "incident_management_service_integration" {
   } : null
 }
 
-output "api_auth_token" {
-  value = {
-    api_auth_token_param_name = "/api/${var.environment}/api-auth-token"
-  }
-}
-
 output "domain" {
   value = var.domain
 }
