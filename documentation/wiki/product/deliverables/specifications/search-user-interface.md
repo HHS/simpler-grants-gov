@@ -117,7 +117,7 @@ This effort focuses on implementing feature flags, strengthening infrastructure,
 
 Basic requirements:
 
-* [ ] Code is deployed to `main` & PROD through our CI/CD pipeline
+* [ ] Code is merged into `main` and deployed to PROD using our CI/D pipeline
 * [ ] Services are live in PROD (maybe behind feature flag)
 * [ ] All new services have passed a security review (if necessary)
 * [ ] All new services have completed a 508 compliance review (if necessary)
@@ -132,10 +132,10 @@ Functional requirements:
 * [x] All of the search features available in the UI are also available via the API, and vice versa
 * [x] Search criteria are reflected in the URL so that users can bookmark or share the link to the page with the results from that combination of criteria
 * [x] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results
-* [ ] At least 1 user research participant has been compensated for their time
 * [ ] Any site downtime will generate automated notifications to project maintainers
 * [x] Functionality can be hidden from users behind a URL-based feature flag, if desired
 * [ ] Documented findings for current search in grants.gov live and strategy for future search relevance
+* [ ] Our desired project metrics are captured and displayed in a public place
 
 **Nice-to-have:**
 
@@ -150,7 +150,6 @@ _Metrics alone shouldn't be the sole focus. Analyzing them alongside click-throu
 * Click-through-rate to the opportunity listing on grants.gov to measure the search accuracy for those top searched terms
 * Number of searches made per search term and the click conversion rate to the opportunity listing
 * Number of searches made per filter combination and the click-through-rate to the opportunity listing
-* Click-through-rate from search results to the opportunity listing&#x20;
 
 **Note:** While not in scope for this deliverable, we may want to track the accuracy of search results based on user feedback in the future.
 
@@ -265,7 +264,7 @@ If so, how are we addressing these risks?
 
 Major updates to the content of this page will be added here.
 
-<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="423">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/17/2024</td><td><ul><li>Removed “At least 1 user research participant has been compensated for their time” from DoD.</li><li>Reworded: “Code is deployed to main &#x26; PROD through our CI/CD pipeline” to “Code is merged into main and deployed to PROD using our CI/D pipeline”.</li><li>Added: “Our desired project metrics are captured and displayed in a public place” to DoD.</li><li>Removed: “Click-through-rate from search results to the opportunity listing” from proposed metrics.</li></ul></td><td>Updates discussed and decided on by the development team and P&#x26;D at the 30k review meeting on 4/17.</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
 
 ### Implementation log
 
