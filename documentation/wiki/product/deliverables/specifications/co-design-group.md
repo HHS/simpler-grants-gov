@@ -141,7 +141,7 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Outlines how co-design group participants will be compensated (e.g. through gift cards, honorariums, etc.)
   * [ ] Provides an anticipated payment schedule for this compensation that is communicated to participants
 * [ ] The following requirements satisfied to facilitate collaboration with members of the co-design group:
-  * [ ] Ethn.io has been procured and configured
+  * [x] Ethn.io has been procured and configured
   * [ ] HHS security team has approved Simpler.Grants.gov to collect and store Personally Identifying Information (PII) in our systems
   * [ ] Our PRA (Paperwork Reduction Act) requests have been approved to conduct surveys or questionnaires
 * [ ] Project maintainers and co-design group facilitators have identified opportunities in the product roadmap where the co-design group will be leveraged in decision making by HHS
@@ -269,4 +269,4 @@ Major updates to the content of this page will be added here.
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>April 8, 2024</td><td>Finalize the name of what we will call the participatory group and approval from HHS</td><td><ul><li>New name: Co-Design Group approved by Lucas Brown — <a href="https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623">https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623</a> </li></ul></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>April 8, 2024</td><td>Finalize the name of what we will call the participatory group and approval from HHS</td><td><ul><li>New name: Co-Design Group approved by Lucas Brown — <a href="https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623">https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623</a> </li></ul></td></tr><tr><td>April 12, 2024</td><td>Ethn.io has been procured and configured</td><td><ul><li>Ethnio procurement plan updated, separating concerns of participant management and incentives disbursement; Nava using their own limited access licenses — <a href="https://github.com/HHS/simpler-grants-gov/issues/891#issuecomment-2052520494">https://github.com/HHS/simpler-grants-gov/issues/891#issuecomment-2052520494</a></li></ul></td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
