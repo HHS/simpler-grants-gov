@@ -74,14 +74,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "general_purpose" {
       }
     }
   }
-
-  rule {
-    id     = "Expiration"
-    status = "Enabled"
-    expiration {
-      days = 2555
-    }
-  }
   # checkov:skip=CKV_AWS_300:There is a known issue where this check brings up false positives
 }
 
