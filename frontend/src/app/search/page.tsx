@@ -4,6 +4,7 @@ import {
 } from "../../types/searchRequestURLTypes";
 import { Metadata } from "next";
 
+import BetaAlert from "../../components/BetaAlert";
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
@@ -46,8 +47,14 @@ export default async function Search({ searchParams }: ServerPageProps) {
     convertedSearchParams,
   );
 
+  const beta_strings = {
+    alert_title: "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
+    alert: "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website."
+  };
+
   return (
     <>
+      <BetaAlert beta_strings={beta_strings}/>
       <SearchCallToAction />
       <SearchForm
         initialSearchResults={initialSearchResults}

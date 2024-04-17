@@ -4,10 +4,15 @@ import Link from "next/link";
 
 // TODO: next-intl upgrade
 
+const beta_strings = {
+  alert_title: "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
+  alert: "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website."
+};
+
 export default function NotFound() {
   return (
     <>
-      <BetaAlert />
+      <BetaAlert beta_strings={beta_strings}/>
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15">
         <h1 className="nj-h1">{"page_not_found.title"}</h1>
         <p className="margin-bottom-2">{"page_not_found.message_content_1"}</p>

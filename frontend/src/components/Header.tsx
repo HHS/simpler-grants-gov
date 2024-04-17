@@ -46,7 +46,7 @@ const Header = ({ header_strings, logoPath }: Props) => {
 
   const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
-      {header_strings[link.i18nKey]}
+      {header_strings[link.i18nKey as keyof HeaderStrings]}
     </a>
   ));
 

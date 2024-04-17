@@ -12,12 +12,16 @@ import ProcessInvolved from "./content/ProcessInvolved";
 import ProcessMilestones from "./content/ProcessMilestones";
 
 const Process: NextPage = () => {
-  const { t } = useTranslation("common", { keyPrefix: "Process" });
+  const { t } = useTranslation("common");
+  const beta_strings = {
+    alert_title: t("Beta_alert.alert_title"),
+    alert: t("Beta_alert.alert")
+  };
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <BetaAlert />
+      <PageSEO title={t("page_title")} description={t("Process.meta_description")} />
+      <BetaAlert beta_strings={beta_strings}/>
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessContent />
       <div className="padding-top-4 bg-gray-5">

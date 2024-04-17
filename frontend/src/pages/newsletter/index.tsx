@@ -26,7 +26,11 @@ import BetaAlert from "../../components/BetaAlert";
 import { Data } from "../api/subscribe";
 
 const Newsletter: NextPage = () => {
-  const { t } = useTranslation("common", { keyPrefix: "Newsletter" });
+  const { t } = useTranslation("common");
+  const beta_strings = {
+    alert_title: t("Beta_alert.alert_title"),
+    alert: t("Beta_alert.alert")
+  };
   const router = useRouter();
   const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
 
@@ -47,11 +51,11 @@ const Newsletter: NextPage = () => {
     const emailRegex =
       /^(\D)+(\w)*((\.(\w)+)?)+@(\D)+(\w)*((\.(\D)+(\w)*)+)?(\.)[a-z]{2,}$/g;
     if (fieldName === "name" && formData.name === "")
-      return "errors.missing_name";
+      return "Newsletter.errors.missing_name";
     if (fieldName === "email" && formData.email === "")
-      return "errors.missing_email";
+      return "Newsletter.errors.missing_email";
     if (fieldName === "email" && !emailRegex.test(formData.email))
-      return "errors.invalid_email";
+      return "Newsletter.errors.invalid_email";
     return "valid";
   };
 
@@ -106,20 +110,20 @@ const Newsletter: NextPage = () => {
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <BetaAlert />
+      <PageSEO title={t("Newsletter.page_title")} description={t("Newsletter.meta_description")} />
+      <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={NEWSLETTER_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-          {t("title")}
+          {t("Newsletter.title")}
         </h1>
         <p className="usa-intro font-sans-md tablet:font-sans-lg desktop-lg:font-sans-xl margin-bottom-0">
-          {t("intro")}
+          {t("Newsletter.intro")}
         </p>
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
-            <p className="usa-intro">{t("paragraph_1")}</p>
+            <p className="usa-intro">{t("Newsletter.paragraph_1")}</p>
             <Trans
               t={t}
               i18nKey="list"
