@@ -10,7 +10,7 @@ description: >-
 
 The following deliverables have a specification but are still being planned. As a result, the scope of work and estimated timeline are still being refined.
 
-* [Delivery dashboard](delivery-dashboard.md)
+* [Delivery dashboard](delivery-dashboard/)
 * [Content translation](content-translation.md)
 * [Opportunity listing - synopsis](opportunity-listing-synopsis.md)
 
@@ -22,7 +22,7 @@ The following deliverables are actively being worked on and we have estimated a 
 * [Co-design group](co-design-group.md)
 * [Open source onboarding](open-source-onboarding.md)
 * [Search API](search-api.md)
-* [Search user interface](search-ui.md)
+* [Search user interface](search-user-interface.md)
 
 ## Done
 

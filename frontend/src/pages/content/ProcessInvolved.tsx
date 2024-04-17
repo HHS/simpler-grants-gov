@@ -50,6 +50,14 @@ const ProcessInvolved = () => {
                     href={ExternalRoutes.GITHUB_REPO}
                   />
                 ),
+                wiki: (
+                  <a
+                    className="usa-link--external"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={ExternalRoutes.WIKI}
+                  />
+                ),
               }}
             />
           </p>

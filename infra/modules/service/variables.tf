@@ -124,12 +124,6 @@ variable "min_capacity" {
   default     = 2
 }
 
-variable "api_auth_token" {
-  type        = string
-  default     = null
-  description = "Auth token for connecting to the API"
-}
-
 variable "is_temporary" {
   description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
   type        = bool
