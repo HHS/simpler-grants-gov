@@ -2,8 +2,7 @@ import BetaAlert from "../components/BetaAlert";
 import { GridContainer } from "@trussworks/react-uswds";
 import Link from "next/link";
 
-// TODO: next-intl upgrade
-
+// TODO: Remove during move to app router and next-intl upgrade
 const beta_strings = {
   alert_title:
     "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",

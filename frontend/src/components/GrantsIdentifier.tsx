@@ -18,6 +18,7 @@ import {
 
 import logo from "../../public/img/logo-white-lg.webp";
 
+// TODO: Remove during move to app router and next-intl upgrade
 type IdentifierStrings = {
   link_about: string;
   link_accessibility: string;

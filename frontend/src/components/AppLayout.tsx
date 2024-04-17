@@ -9,6 +9,7 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
+  // TODO: Remove during move to app router and next-intl upgrade
   const header_strings = {
     nav_link_home: "Home",
     nav_link_process: "Process",

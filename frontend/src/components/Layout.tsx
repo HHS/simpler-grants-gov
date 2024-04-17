@@ -11,6 +11,7 @@ type Props = {
 const Layout = ({ children }: Props) => {
   const { t } = useTranslation("common");
 
+  // TODO: Remove during move to app router and next-intl upgrade
   const header_strings = {
     title: t("Header.title"),
     nav_menu_toggle: t("nav_menu_toggle"),

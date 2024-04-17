@@ -16,6 +16,7 @@ type PrimaryLinks = {
   href: string;
 }[];
 
+// TODO: Remove during move to app router and next-intl upgrade
 type HeaderStrings = {
   nav_link_home: string;
   nav_link_process: string;

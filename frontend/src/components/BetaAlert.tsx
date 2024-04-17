@@ -16,7 +16,7 @@ type Props = {
 };
 
 const BetaAlert = ({ beta_strings }: Props) => {
-  // TODO: Remove for i18n update.
+  // TODO: Remove during move to app router and next-intl upgrade
   const title_start = beta_strings.alert_title.substring(
     0,
     beta_strings.alert_title.indexOf("<LinkToGrants>"),

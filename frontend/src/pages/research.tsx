@@ -15,6 +15,7 @@ import ResearchThemes from "./content/ResearchThemes";
 
 const Research: NextPage = () => {
   const { t } = useTranslation("common");
+  // TODO: Remove during move to app router and next-intl upgrade
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
     alert: t("Beta_alert.alert"),

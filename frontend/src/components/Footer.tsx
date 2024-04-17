@@ -28,6 +28,7 @@ const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
   </a>
 );
 
+// TODO: Remove during move to app router and next-intl upgrade
 type FooterStrings = {
   agency_name: string;
   agency_contact_center: string;
