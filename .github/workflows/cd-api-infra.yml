@@ -1,6 +1,6 @@
 name: Deploy API Infra
 
-run-name: Deploy ${{ github.ref_name }} to API ${{ (github.event_name == 'release' && 'prod') || ('dev', 'staging') }} # check if this logical grouping works
+run-name: Deploy ${{ github.ref_name }} to API ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ${{ (github.event_name == 'release' && 'prod') || ('dev', 'staging') }}
+        envs: ${{ (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }} # fix
     permissions:
       contents: read
       id-token: write

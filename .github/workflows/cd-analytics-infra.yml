@@ -1,6 +1,6 @@
 name: Deploy Analytics Infra
 
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -42,7 +42,10 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ${{ (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
+        envs: ['dev', 'staging', 'prod']
+        exclude:
+          - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+
     permissions:
       contents: read
       id-token: write
