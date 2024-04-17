@@ -14,12 +14,15 @@ const NewsletterUnsubscribe: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
 
   return (
     <>
-      <PageSEO title={t("Newsletter_unsubscribe.page_title")} description={t("Newsletter_unsubscribe.meta_description")} />
+      <PageSEO
+        title={t("Newsletter_unsubscribe.page_title")}
+        description={t("Newsletter_unsubscribe.meta_description")}
+      />
       <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={NEWSLETTER_UNSUBSCRIBE_CRUMBS} />
 
@@ -32,7 +35,9 @@ const NewsletterUnsubscribe: NextPage = () => {
         </p>
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
-            <p className="usa-intro">{t("Newsletter_unsubscribe.paragraph_1")}</p>
+            <p className="usa-intro">
+              {t("Newsletter_unsubscribe.paragraph_1")}
+            </p>
             <Link className="usa-button margin-bottom-4" href="/newsletter">
               {t("Newsletter_unsubscribe.button_resub")}
             </Link>
@@ -55,7 +60,9 @@ const NewsletterUnsubscribe: NextPage = () => {
         </Grid>
       </GridContainer>
       <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
-        <p className="font-sans-3xs text-base-dark">{t("Newsletter_unsubscribe.disclaimer")}</p>
+        <p className="font-sans-3xs text-base-dark">
+          {t("Newsletter_unsubscribe.disclaimer")}
+        </p>
       </GridContainer>
     </>
   );

@@ -27,13 +27,13 @@ type IdentifierStrings = {
   link_performance: string;
   link_privacy: string;
   logo_alt: string;
-}
+};
 
 type Props = {
   identifier_strings: IdentifierStrings;
-}
+};
 
-const GrantsIdentifier = ({identifier_strings}: Props) => {
+const GrantsIdentifier = ({ identifier_strings }: Props) => {
   const { t } = useTranslation("common", {
     keyPrefix: "Identifier",
   });

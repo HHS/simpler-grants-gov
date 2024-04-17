@@ -11,7 +11,7 @@ const PageNotFound: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
   return (
     <>

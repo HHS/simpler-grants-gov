@@ -29,7 +29,7 @@ const Newsletter: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
   const router = useRouter();
   const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
@@ -110,7 +110,10 @@ const Newsletter: NextPage = () => {
 
   return (
     <>
-      <PageSEO title={t("Newsletter.page_title")} description={t("Newsletter.meta_description")} />
+      <PageSEO
+        title={t("Newsletter.page_title")}
+        description={t("Newsletter.meta_description")}
+      />
       <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={NEWSLETTER_CRUMBS} />
 

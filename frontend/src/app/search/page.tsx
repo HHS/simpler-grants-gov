@@ -30,7 +30,7 @@ export function generateMetadata() {
   // TODO: use the following for i18n const t = await getTranslations({ locale: params.locale });
   const meta: Metadata = {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
-    description: "Try out our experimental search page."
+    description: "Try out our experimental search page.",
   };
 
   return meta;
@@ -48,13 +48,15 @@ export default async function Search({ searchParams }: ServerPageProps) {
   );
 
   const beta_strings = {
-    alert_title: "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
-    alert: "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website."
+    alert_title:
+      "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
+    alert:
+      "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website.",
   };
 
   return (
     <>
-      <BetaAlert beta_strings={beta_strings}/>
+      <BetaAlert beta_strings={beta_strings} />
       <SearchCallToAction />
       <SearchForm
         initialSearchResults={initialSearchResults}

@@ -15,13 +15,16 @@ const Process: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("Process.meta_description")} />
-      <BetaAlert beta_strings={beta_strings}/>
+      <PageSEO
+        title={t("page_title")}
+        description={t("Process.meta_description")}
+      />
+      <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessContent />
       <div className="padding-top-4 bg-gray-5">

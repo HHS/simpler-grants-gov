@@ -15,9 +15,9 @@ const Layout = ({ children }: Props) => {
     nav_link_research: "Research",
     nav_link_newsletter: "Newsletter",
     nav_menu_toggle: "Menu",
-    title: "Simpler.Grants.gov"
+    title: "Simpler.Grants.gov",
   };
-  const footer_strings =  {
+  const footer_strings = {
     agency_name: "Grants.gov",
     agency_contact_center: "Grants.gov Program Management Office",
     telephone: "1-877-696-6775",
@@ -28,11 +28,13 @@ const Layout = ({ children }: Props) => {
     link_rss: "RSS",
     link_newsletter: "Newsletter",
     link_blog: "Blog",
-    logo_alt: "Grants.gov logo"
+    logo_alt: "Grants.gov logo",
   };
-  const identifier_strings =  {
-    identity: "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
-    gov_content: "Looking for U.S. government information and services? Visit <usaLink>USA.gov</usaLink>",
+  const identifier_strings = {
+    identity:
+      "An official website of the <hhsLink>U.S. Department of Health and Human Services</hhsLink>",
+    gov_content:
+      "Looking for U.S. government information and services? Visit <usaLink>USA.gov</usaLink>",
     link_about: "About HHS",
     link_accessibility: "Accessibility support",
     link_foia: "FOIA requests",
@@ -40,7 +42,7 @@ const Layout = ({ children }: Props) => {
     link_ig: "Office of the Inspector General",
     link_performance: "Performance reports",
     link_privacy: "Privacy Policy",
-    logo_alt: "HHS logo"
+    logo_alt: "HHS logo",
   };
   const skip_to_main = "Skip to main content";
   return (

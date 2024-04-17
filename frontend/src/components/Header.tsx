@@ -38,7 +38,6 @@ const primaryLinks: PrimaryLinks = [
 ];
 
 const Header = ({ header_strings, logoPath }: Props) => {
-
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
@@ -55,9 +54,7 @@ const Header = ({ header_strings, logoPath }: Props) => {
       <div
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
-      <GovBanner
-        language={"english"}
-      />
+      <GovBanner language={"english"} />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
           <div className="usa-navbar">
@@ -72,7 +69,9 @@ const Header = ({ header_strings, logoPath }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{header_strings.title}</span>
+                <span className="font-sans-lg flex-fill">
+                  {header_strings.title}
+                </span>
               </div>
             </Title>
             <NavMenuButton

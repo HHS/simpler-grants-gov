@@ -3,7 +3,7 @@ import { ExternalRoutes } from "src/constants/routes";
 
 import Footer from "src/components/Footer";
 
-const footer_strings =  {
+const footer_strings = {
   agency_name: "Grants.gov",
   agency_contact_center: "Grants.gov Program Management Office",
   telephone: "1-877-696-6775",
@@ -14,7 +14,7 @@ const footer_strings =  {
   link_rss: "RSS",
   link_newsletter: "Newsletter",
   link_blog: "Blog",
-  logo_alt: "Grants.gov logo"
+  logo_alt: "Grants.gov logo",
 };
 
 describe("Footer", () => {
@@ -25,7 +25,6 @@ describe("Footer", () => {
   });
 
   it("Renders social links", () => {
-
     render(<Footer footer_strings={footer_strings} />);
 
     const twitter = screen.getByTitle("Twitter");

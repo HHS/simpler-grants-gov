@@ -17,12 +17,15 @@ const Research: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
 
   return (
     <>
-      <PageSEO title={t("Research.page_title")} description={t("Research.meta_description")} />
+      <PageSEO
+        title={t("Research.page_title")}
+        description={t("Research.meta_description")}
+      />
       <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />

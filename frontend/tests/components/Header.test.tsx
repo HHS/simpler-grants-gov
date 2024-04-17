@@ -9,7 +9,7 @@ const header_strings = {
   nav_link_research: "Research",
   nav_link_newsletter: "Newsletter",
   nav_menu_toggle: "Menu",
-  title: "Simpler.Grants.gov"
+  title: "Simpler.Grants.gov",
 };
 
 const props = {

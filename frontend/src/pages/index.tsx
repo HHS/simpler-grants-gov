@@ -13,12 +13,15 @@ const Home: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
 
   return (
     <>
-      <PageSEO title={t("Index.page_title")} description={t("Index.meta_description")} />
+      <PageSEO
+        title={t("Index.page_title")}
+        description={t("Index.meta_description")}
+      />
       <Hero />
       <BetaAlert beta_strings={beta_strings} />
       <IndexGoalContent />

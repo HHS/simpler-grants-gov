@@ -29,25 +29,24 @@ const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
 );
 
 type FooterStrings = {
-  agency_name: string
-  agency_contact_center: string,
-  telephone: string,
-  return_to_top: string,
-  link_twitter: string,
-  link_youtube: string,
-  link_blog: string,
-  link_newsletter: string,
-  link_rss: string,
-  link_github: string,
-  logo_alt: string,
-}
+  agency_name: string;
+  agency_contact_center: string;
+  telephone: string;
+  return_to_top: string;
+  link_twitter: string;
+  link_youtube: string;
+  link_blog: string;
+  link_newsletter: string;
+  link_rss: string;
+  link_github: string;
+  logo_alt: string;
+};
 
 type Props = {
   footer_strings: FooterStrings;
 };
 
 const Footer = ({ footer_strings }: Props) => {
-
   const links = [
     {
       href: ExternalRoutes.GRANTS_TWITTER,
@@ -80,12 +79,7 @@ const Footer = ({ footer_strings }: Props) => {
       Tag: Icon.Github,
     },
   ].map(({ href, name, Tag }) => (
-    <SocialLink
-      href={href}
-      key={name}
-      name={name}
-      Tag={Tag}
-    />
+    <SocialLink href={href} key={name} name={name} Tag={Tag} />
   ));
 
   return (

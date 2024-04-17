@@ -14,13 +14,13 @@ const NewsletterConfirmation: NextPage = () => {
   const { t } = useTranslation("common");
   const beta_strings = {
     alert_title: t("Beta_alert.alert_title"),
-    alert: t("Beta_alert.alert")
+    alert: t("Beta_alert.alert"),
   };
 
   return (
     <>
       <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <BetaAlert beta_strings={beta_strings}/>
+      <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={NEWSLETTER_CONFIRMATION_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
@@ -52,7 +52,9 @@ const NewsletterConfirmation: NextPage = () => {
         </Grid>
       </GridContainer>
       <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
-        <p className="font-sans-3xs text-base-dark">{t("Newsletter.disclaimer")}</p>
+        <p className="font-sans-3xs text-base-dark">
+          {t("Newsletter.disclaimer")}
+        </p>
       </GridContainer>
     </>
   );
