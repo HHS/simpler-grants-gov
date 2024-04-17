@@ -63,17 +63,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "general_purpose" {
     }
   }
 
-  rule {
-    id     = "StorageClass"
-    status = "Enabled"
-    dynamic "transition" {
-      for_each = local.log_file_transition
-      content {
-        days          = transition.value
-        storage_class = transition.key
-      }
-    }
-  }
   # checkov:skip=CKV_AWS_300:There is a known issue where this check brings up false positives
 }
 
