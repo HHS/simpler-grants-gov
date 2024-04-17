@@ -75,37 +75,37 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] The following tools have been procured and implemented for internal and public use:
     * [x] **Slack** - chat-based community engagement
     * [x] **GitBook** - public-facing wiki and knowledge base
-    * [ ] **Zoom** - webinars, office hours, or other open source events
-    * [ ] **Google group** - email-based community engagement
-  * [ ] The following conditions have been satisfied for _all_ tools:
-    * [ ] Services are accessible to all people on the HHS network, public internet, and _preferably_ the White House network and most or all agency networks
-    * [ ] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in our public or internal wiki
-    * [ ] Code for managing these services is deployed to `main` & PROD (if necessary)
-    * [ ] An ADR has been recorded that documents why the tool was chosen
-  * [ ] There is a public page of information that explains how to onboard to all of the communication tools for the open source community (e.g., this could be hosted in the public wiki)&#x20;
-  * [ ] The onboarding page is linked from simpler.grants.gov
-  * [ ] The onboarding page is linked from the \`simpler-grants-gov\` GitHub repo
-  * [ ] Onboarding to communication channels ready for the public this includes:
-    * [ ] &#x20;onboarding to the selected chat tool, Slack
-    * [ ] &#x20;onboarding to Github
-    * [ ] &#x20;onboarding to Google Groups
-    * [ ] &#x20;materials such as a deck or another format for getting started with the project
-    * [ ] &#x20;onboarding guidance for developer tools and environments
+    * [x] **Zoom** - webinars, office hours, or other open source events
+    * [x] **Google group** - email-based community engagement
+  * [x] The following conditions have been satisfied for _all_ tools:
+    * [x] Services are accessible to all people on the HHS network, public internet, and _preferably_ the White House network and most or all agency networks
+    * [x] Instructions for the internal team that assists with onboarding new users are clearly and accessibly documented in our public or internal wiki
+    * [x] Code for managing these services is deployed to `main` & PROD (if necessary)
+    * [x] An ADR has been recorded that documents why the tool was chosen
+  * [x] There is a public page of information that explains how to onboard to all of the communication tools for the open source community (e.g., this could be hosted in the public wiki)&#x20;
+  * [x] The onboarding page is linked from simpler.grants.gov
+  * [x] The onboarding page is linked from the \`simpler-grants-gov\` GitHub repo
+  * [x] Onboarding to communication channels ready for the public this includes:
+    * [x] &#x20;onboarding to the selected chat tool, Slack
+    * [x] &#x20;onboarding to Github
+    * [x] &#x20;onboarding to Google Groups
+    * [x] &#x20;materials for getting started with the project
+    * [x] &#x20;onboarding guidance for developer tools and environments
   * [ ] We have onboarded three members of the general public to the following communication tools:
     * [ ] Slack
     * [ ] Google groups
     * [ ] GitHub
-  * [ ] We have a system for tracking the onboarding process for all new members, ensuring that they have agreed to the terms of use (such as community agreements and content sensitivity guidelines) and completed all necessary onboarding steps
-  * [ ] Tool-specific requirements:
-    * [ ] The public wiki can be accessed from a custom domain that is easy to remember and specific to the Simpler.Grants.gov initiative
-    * [ ] The public wiki includes copies of our deliverable specs and information about our roadmap and planning process
-    * [ ] The public wiki includes a user guides for all public-facing communication tools
-    * [ ] Public Slack channels have been reviewed and sensitive content has been removed or the channel has been made private
-    * [ ] At least three GitHub issues have been labeled with "help wanted"
-  * [ ] We've documented an information architecture for the public wiki, so that content has clear organizing principles and it is easy to know where to add or look for content
-  * [ ] We have a system for "offboarding" members of the community from all tools
-  * [ ] We are able to "block" users who violate community guidelines and offboard them from all tools without their participation in the offboarding process
-  * [ ] We have a process documented for what to do if anyone notices inappropriate content or behaviors and how to escalate and remove the content
+  * [x] We have a system for tracking the onboarding process for all new members, ensuring that they have agreed to the terms of use (such as community agreements and content sensitivity guidelines) and completed all necessary onboarding steps
+  * [x] Tool-specific requirements:
+    * [x] The public wiki can be accessed from a custom domain that is easy to remember and specific to the Simpler.Grants.gov initiative
+    * [x] The public wiki includes copies of our deliverable specs and information about our roadmap and planning process
+    * [x] The public wiki includes a user guides for all public-facing communication tools
+    * [x] Public Slack channels have been reviewed and sensitive content has been removed or the channel has been made private
+    * [x] At least three GitHub issues have been labeled with "help wanted"
+  * [x] We've documented an information architecture for the public wiki, so that content has clear organizing principles and it is easy to know where to add or look for content
+  * [x] We have a system for "offboarding" members of the community from all tools
+  * [x] We are able to "block" users who violate community guidelines and offboard them from all tools without their participation in the offboarding process
+  * [x] We have a process documented for what to do if anyone notices inappropriate content or behaviors and how to escalate and remove the content
 * **Nice to have**
   * [ ] Members of the public can suggest changes to content in the wiki through a pull request
   * [ ] Links to each of these communication tools are available on simpler.grants.gov and in the repository's main README
@@ -133,12 +133,12 @@ Following sections describe the conditions that must be met to consider this del
 What functionality do we expect to be in place _**before**_ work starts on this deliverable?
 
 * [x] **Static site:** The static site should be publicly deployed so that we can direct open source contributors to learn more about the program at simpler.grants.gov. We may also want to use the site to solicit requests to join the open source group.
-* [ ] **Tool procurement:** Procurement of the following tools tools should be in place as the procurement process can delay delivery.
+* [x] **Tool procurement:** Procurement of the following tools tools should be in place as the procurement process can delay delivery.
   * [x] Slack
   * [x] GitBook
   * [x] Github
-  * [ ] Zoom
-  * [ ] Google Groups
+  * [x] Zoom
+  * [x] Google Groups
 
 Is there any notable functionality we do _**not**_ expect to be in place before works starts on this deliverable?
 
@@ -232,4 +232,4 @@ Major updates to the content of this page will be added here.
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/17/2024</td><td>Checked off all criteria except for Onboarding 3 members of the public and Nice to Have Criteria</td><td>Only at 1/3 members of the public onboarded. Working to get the rest across the finish line.</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
