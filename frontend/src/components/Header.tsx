@@ -55,8 +55,10 @@ const Header = ({ header_strings, logoPath }: Props) => {
       <div
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
-      // TODO: Remove during move to app router and next-intl upgrade
-      <GovBanner language={"english"} />
+      <GovBanner
+        // TODO: Remove during move to app router and next-intl upgrade
+        language={"english"}
+      />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
           <div className="usa-navbar">
