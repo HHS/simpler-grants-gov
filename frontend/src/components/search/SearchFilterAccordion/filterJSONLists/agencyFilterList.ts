@@ -2,12 +2,6 @@ import { FilterOption } from "../SearchFilterAccordion";
 
 export const agencyFilterList: FilterOption[] = [
   {
-    // Required to see results from locally seeded db
-    id: "US-ABC",
-    label: "ABC demo to see results",
-    value: "US-ABC",
-  },
-  {
     id: "ARPAH",
     label: "All Advanced Research Projects Agency for Health [ARPAH]",
     value: "ARPAH",
@@ -32,364 +26,48 @@ export const agencyFilterList: FilterOption[] = [
         label: "Armenia USAID-Yerevan [USAID-ARM]",
         value: "USAID-ARM",
       },
-      //       {
-      //         id: "USAID-AZE",
-      //         label: "Azerbaijan USAID-Baku [USAID-AZE]",
-      //         value: "USAID-AZE",
-      //       },
-      //       {
-      //         id: "USAID-BAN",
-      //         label: "Bangladesh USAID-Dhaka [USAID-BAN]",
-      //         value: "USAID-BAN",
-      //       },
-      //       {
-      //         id: "USAID-BEN",
-      //         label: "Benin USAID-Cotonou [USAID-BEN]",
-      //         value: "USAID-BEN",
-      //       },
-      //       {
-      //         id: "USAID-BMA",
-      //         label: "Burma USAID - Rangoon [USAID-BMA]",
-      //         value: "USAID-BMA",
-      //       },
-      //       {
-      //         id: "USAID-BUR",
-      //         label: "Burundi USAID-Bujumbura [USAID-BUR]",
-      //         value: "USAID-BUR",
-      //       },
-      //       {
-      //         id: "USAID-CAM",
-      //         label: "Cambodia USAID-Phnom Penh [USAID-CAM]",
-      //         value: "USAID-CAM",
-      //       },
-      //       {
-      //         id: "USAID-COL",
-      //         label: "Colombia USAID-Bogota [USAID-COL]",
-      //         value: "USAID-COL",
-      //       },
-      //       {
-      //         id: "USAID-DEM",
-      //         label: "Democratic Republic of the Congo USAID-Kinshasa [USAID-DEM]",
-      //         value: "USAID-DEM",
-      //       },
-      //       {
-      //         id: "USAID-DOM",
-      //         label: "Dominican Republic USAID-Santo Domingo [USAID-DOM]",
-      //         value: "USAID-DOM",
-      //       },
-      //       {
-      //         id: "USAID-EAF",
-      //         label: "East Africa USAID-Kenya [USAID-EAF]",
-      //         value: "USAID-EAF",
-      //       },
-      //       {
-      //         id: "USAID-EGY",
-      //         label: "Egypt USAID-Cairo [USAID-EGY]",
-      //         value: "USAID-EGY",
-      //       },
-      //       {
-      //         id: "USAID-ELS",
-      //         label: "El Salvador USAID-San Salvador [USAID-ELS]",
-      //         value: "USAID-ELS",
-      //       },
-      //       {
-      //         id: "USAID-ETH",
-      //         label: "Ethiopia USAID-Addis Ababa [USAID-ETH]",
-      //         value: "USAID-ETH",
-      //       },
-      //       {
-      //         id: "USAID-GEO",
-      //         label: "Georgia USAID-Tbilisi [USAID-GEO]",
-      //         value: "USAID-GEO",
-      //       },
-      //       {
-      //         id: "USAID-GER",
-      //         label: "Germany USAID - Frankfurt [USAID-GER]",
-      //         value: "USAID-GER",
-      //       },
-      //       {
-      //         id: "USAID-GHA",
-      //         label: "Ghana USAID-Accra [USAID-GHA]",
-      //         value: "USAID-GHA",
-      //       },
-      //       {
-      //         id: "USAID-GUA",
-      //         label: "Guatemala USAID-Guatemala City [USAID-GUA]",
-      //         value: "USAID-GUA",
-      //       },
-      //       {
-      //         id: "USAID-GUI",
-      //         label: "Guinea USAID-Conakry [USAID-GUI]",
-      //         value: "USAID-GUI",
-      //       },
-      //       {
-      //         id: "USAID-HAI",
-      //         label: "Haiti USAID-Port Au Prince [USAID-HAI]",
-      //         value: "USAID-HAI",
-      //       },
-      //       {
-      //         id: "USAID-HON",
-      //         label: "Honduras USAID-Tegucigalpa [USAID-HON]",
-      //         value: "USAID-HON",
-      //       },
-      //       {
-      //         id: "USAID-INA",
-      //         label: "India USAID-New Delhi [USAID-INA]",
-      //         value: "USAID-INA",
-      //       },
-      //       {
-      //         id: "USAID-IND",
-      //         label: "Indonesia USAID-Jakarta [USAID-IND]",
-      //         value: "USAID-IND",
-      //       },
-      //       {
-      //         id: "USAID-IRA",
-      //         label: "Iraq USAID-Baghdad [USAID-IRA]",
-      //         value: "USAID-IRA",
-      //       },
-      //       {
-      //         id: "USAID-JOR",
-      //         label: "Jordan USAID-Amman [USAID-JOR]",
-      //         value: "USAID-JOR",
-      //       },
-      //       {
-      //         id: "USAID-KAZ",
-      //         label: "Kazakhstan USAID-Almaty [USAID-KAZ]",
-      //         value: "USAID-KAZ",
-      //       },
-      //       {
-      //         id: "USAID-KEN",
-      //         label: "Kenya USAID-Nairobi [USAID-KEN]",
-      //         value: "USAID-KEN",
-      //       },
-      //       {
-      //         id: "USAID-KOS",
-      //         label: "Kosovo USAID-Pristina [USAID-KOS]",
-      //         value: "USAID-KOS",
-      //       },
-      //       {
-      //         id: "USAID-LIB",
-      //         label: "Liberia USAID-Monrovia [USAID-LIB]",
-      //         value: "USAID-LIB",
-      //       },
-      //       {
-      //         id: "USAID-MAC",
-      //         label: "Macedonia USAID-Skopje [USAID-MAC]",
-      //         value: "USAID-MAC",
-      //       },
-      //       {
-      //         id: "USAID-MLW",
-      //         label: "Malawi USAID-Lilongwe [USAID-MLW]",
-      //         value: "USAID-MLW",
-      //       },
-      //       {
-      //         id: "USAID-MAL",
-      //         label: "Mali USAID -Bamako [USAID-MAL]",
-      //         value: "USAID-MAL",
-      //       },
-      //       {
-      //         id: "USAID-MEX",
-      //         label: "Mexico USAID-Mexico City [USAID-MEX]",
-      //         value: "USAID-MEX",
-      //       },
-      //       {
-      //         id: "USAID-MERP",
-      //         label: "Middle East Regional Platform USAID-MERP [USAID-MERP]",
-      //         value: "USAID-MERP",
-      //       },
-      //       {
-      //         id: "USAID-MOR",
-      //         label: "Morocco USAID-Rabat [USAID-MOR]",
-      //         value: "USAID-MOR",
-      //       },
-      //       {
-      //         id: "USAID-MOZ",
-      //         label: "Mozambique USAID-Maputo [USAID-MOZ]",
-      //         value: "USAID-MOZ",
-      //       },
-      //       {
-      //         id: "USAID-NEP",
-      //         label: "Nepal USAID-Kathmandu [USAID-NEP]",
-      //         value: "USAID-NEP",
-      //       },
-      //       {
-      //         id: "USAID-NIG",
-      //         label: "Nigeria USAID-Abuja [USAID-NIG]",
-      //         value: "USAID-NIG",
-      //       },
-      //       {
-      //         id: "USAID-PAK",
-      //         label: "Pakistan USAID-Islamabad [USAID-PAK]",
-      //         value: "USAID-PAK",
-      //       },
-      //       {
-      //         id: "USAID-PAR",
-      //         label: "Paraguay USAID-Asuncion [USAID-PAR]",
-      //         value: "USAID-PAR",
-      //       },
-      //       {
-      //         id: "USAID-PER",
-      //         label: "Peru USAID-Lima [USAID-PER]",
-      //         value: "USAID-PER",
-      //       },
-      //       {
-      //         id: "USAID-PHI",
-      //         label: "Philippines USAID-Manila [USAID-PHI]",
-      //         value: "USAID-PHI",
-      //       },
-      //       {
-      //         id: "USAID-RWA",
-      //         label: "Rwanda USAID-Kigali [USAID-RWA]",
-      //         value: "USAID-RWA",
-      //       },
-      //       {
-      //         id: "USAID-SEN",
-      //         label: "Senegal USAID-Dakar [USAID-SEN]",
-      //         value: "USAID-SEN",
-      //       },
-      //       {
-      //         id: "USAID-SER",
-      //         label: "Serbia USAID-Belgrade [USAID-SER]",
-      //         value: "USAID-SER",
-      //       },
-      //       {
-      //         id: "USAID-SAF",
-      //         label: "South Africa USAID-Pretoria [USAID-SAF]",
-      //         value: "USAID-SAF",
-      //       },
-      //       {
-      //         id: "USAID-SSD",
-      //         label: "South Sudan (USAID)-Juba [USAID-SSD]",
-      //         value: "USAID-SSD",
-      //       },
-      //       {
-      //         id: "USAID-SRI",
-      //         label: "Sri Lanka USAID-Colombo [USAID-SRI]",
-      //         value: "USAID-SRI",
-      //       },
-      //       {
-      //         id: "USAID-SUD",
-      //         label: "Sudan USAID-Khartoum [USAID-SUD]",
-      //         value: "USAID-SUD",
-      //       },
-      //       {
-      //         id: "USAID-TAN",
-      //         label: "Tanzania USAID-Dar es Salaam [USAID-TAN]",
-      //         value: "USAID-TAN",
-      //       },
-      //       {
-      //         id: "USAID-THA",
-      //         label: "Thailand USAID-Bangkok [USAID-THA]",
-      //         value: "USAID-THA",
-      //       },
-      //       {
-      //         id: "USAID-UGA",
-      //         label: "Uganda USAID-Kampala [USAID-UGA]",
-      //         value: "USAID-UGA",
-      //       },
-      //       {
-      //         id: "USAID-UKR",
-      //         label: "Ukraine USAID-Kiev [USAID-UKR]",
-      //         value: "USAID-UKR",
-      //       },
-      //       {
-      //         id: "USAID-BAR",
-      //         label: "USAID - Barbados and Eastern Caribbean [USAID-BAR]",
-      //         value: "USAID-BAR",
-      //       },
-      //       {
-      //         id: "USAID-VIE",
-      //         label: "USAID-VIETNAM [USAID-VIE]",
-      //         value: "USAID-VIE",
-      //       },
-      //       {
-      //         id: "USAID-WAF",
-      //         label: "West Africa USAID-Ghana [USAID-WAF]",
-      //         value: "USAID-WAF",
-      //       },
-      //       {
-      //         id: "USAID-WES",
-      //         label: "West Bank, Gaza USAID-West Bank [USAID-WES]",
-      //         value: "USAID-WES",
-      //       },
-      //       {
-      //         id: "USAID-YEM",
-      //         label: "Yemen USAID-Sanaa [USAID-YEM]",
-      //         value: "USAID-YEM",
-      //       },
-      //       {
-      //         id: "USAID-ZAM",
-      //         label: "Zambia USAID-Lusaka [USAID-ZAM]",
-      //         value: "USAID-ZAM",
-      //       },
-      //       {
-      //         id: "USAID-ZIM",
-      //         label: "Zimbabwe USAID-Harare [USAID-ZIM]",
-      //         value: "USAID-ZIM",
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     id: "AC",
-      //     label: "All AmeriCorps [AC]",
-      //     value: "AC",
-      //   },
-      //   {
-      //     id: "DC",
-      //     label: "All Denali Commission [DC]",
-      //     value: "DC",
-      //   },
-      //   {
-      //     id: "USDA",
-      //     label: "All Department of Agriculture [USDA]",
-      //     value: "USDA",
-      //     children: [
-      //       {
-      //         id: "USDA-AMS",
-      //         label: "Agricultural Marketing Service [USDA-AMS]",
-      //         value: "USDA-AMS",
-      //       },
-      //       {
-      //         id: "USDA-FNS1",
-      //         label: "Food and Nutrition Service [USDA-FNS1]",
-      //         value: "USDA-FNS1",
-      //       },
-      //       {
-      //         id: "USDA-FAS",
-      //         label: "Foreign Agricultural Service [USDA-FAS]",
-      //         value: "USDA-FAS",
-      //       },
-      //       { id: "USDA-FS", label: "Forest Service [USDA-FS]", value: "USDA-FS" },
-      //       {
-      //         id: "USDA-NIFA",
-      //         label: "National Institute of Food and Agriculture [USDA-NIFA]",
-      //         value: "USDA-NIFA",
-      //       },
-      //       {
-      //         id: "USDA-NRCS",
-      //         label: "Natural Resources Conservation Service [USDA-NRCS]",
-      //         value: "USDA-NRCS",
-      //       },
-      //       {
-      //         id: "USDA-RMA",
-      //         label: "Risk Management Agency [USDA-RMA]",
-      //         value: "USDA-RMA",
-      //       },
-      //       {
-      //         id: "USDA-RBCS",
-      //         label: "Rural Business-Cooperative Service [USDA-RBCS]",
-      //         value: "USDA-RBCS",
-      //       },
-      //       {
-      //         id: "USDA-RHS",
-      //         label: "Rural Housing Service [USDA-RHS]",
-      //         value: "USDA-RHS",
-      //       },
-      //       {
-      //         id: "USDA-RUS",
-      //         label: "Rural Utilities Service [USDA-RUS]",
-      //         value: "USDA-RUS",
-      //       },
+      {
+        id: "USAID-AZE",
+        label: "Azerbaijan USAID-Baku [USAID-AZE]",
+        value: "USAID-AZE",
+      },
+      {
+        id: "USAID-BAN",
+        label: "Bangladesh USAID-Dhaka [USAID-BAN]",
+        value: "USAID-BAN",
+      },
+      {
+        id: "USAID-BEN",
+        label: "Benin USAID-Cotonou [USAID-BEN]",
+        value: "USAID-BEN",
+      },
+    ],
+  },
+  {
+    id: "AC",
+    label: "All AmeriCorps [AC]",
+    value: "AC",
+  },
+  {
+    id: "DC",
+    label: "All Denali Commission [DC]",
+    value: "DC",
+  },
+  {
+    id: "USDA",
+    label: "All Department of Agriculture [USDA]",
+    value: "USDA",
+    children: [
+      {
+        id: "USDA-AMS",
+        label: "Agricultural Marketing Service [USDA-AMS]",
+        value: "USDA-AMS",
+      },
+      {
+        id: "USDA-FNS1",
+        label: "Food and Nutrition Service [USDA-FNS1]",
+        value: "USDA-FNS1",
+      },
     ],
   },
   {
@@ -397,7 +75,6 @@ export const agencyFilterList: FilterOption[] = [
     label: "All Department of Commerce [DOC]",
     value: "DOC",
     children: [
-      { id: "DOC", label: "Department of Commerce [DOC]", value: "DOC" },
       {
         id: "DOC-DOCNOAAERA",
         label: "DOC NOAA - ERA Production [DOC-DOCNOAAERA]",
@@ -414,5 +91,418 @@ export const agencyFilterList: FilterOption[] = [
         value: "DOC-NIST",
       },
     ],
+  },
+  {
+    id: "DOD",
+    label: "All Department of Defense [DOD]",
+    value: "DOD",
+    children: [
+      {
+        id: "DOD-AMC-ACCAPGN",
+        label: "ACC APG - Natick [DOD-AMC-ACCAPGN]",
+        value: "DOD-AMC-ACCAPGN",
+      },
+      {
+        id: "DOD-AMC-ACCAPGD",
+        label: "ACC-APG-Detrick [DOD-AMC-ACCAPGD]",
+        value: "DOD-AMC-ACCAPGD",
+      },
+      {
+        id: "DOD-AFRL-AFRLDET8",
+        label: "AFRL Kirtland AFB [DOD-AFRL-AFRLDET8]",
+        value: "DOD-AFRL-AFRLDET8",
+      },
+      {
+        id: "DOD-AFRL",
+        label: "Air Force -- Research Lab [DOD-AFRL]",
+        value: "DOD-AFRL",
+      },
+      {
+        id: "DOD-USAFA",
+        label: "Air Force Academy [DOD-USAFA]",
+        value: "DOD-USAFA",
+      },
+      {
+        id: "DOD-AFOSR",
+        label: "Air Force Office of Scientific Research [DOD-AFOSR]",
+        value: "DOD-AFOSR",
+      },
+      {
+        id: "DOD-DARPA-BTO",
+        label: "DARPA - Biological Technologies Office [DOD-DARPA-BTO]",
+        value: "DOD-DARPA-BTO",
+      },
+    ],
+  },
+  {
+    id: "ED",
+    label: "All Department of Education [ED]",
+    value: "ED",
+  },
+  {
+    id: "DOE",
+    label: "All Department of Energy [DOE]",
+    value: "DOE",
+    children: [
+      {
+        id: "DOE-ARPAE",
+        label: "Advanced Research Projects Agency Energy [DOE-ARPAE]",
+        value: "DOE-ARPAE",
+      },
+      {
+        id: "DOE-GFO",
+        label: "Golden Field Office [DOE-GFO]",
+        value: "DOE-GFO",
+      },
+      {
+        id: "DOE-01",
+        label: "Headquarters [DOE-01]",
+        value: "DOE-01",
+      },
+    ],
+  },
+  {
+    id: "PAMS",
+    label: "All Department of Energy - Office of Science [PAMS]",
+    value: "PAMS",
+    children: [
+      {
+        id: "PAMS-SC",
+        label: "Office of Science [PAMS-SC]",
+        value: "PAMS-SC",
+      },
+    ],
+  },
+  {
+    id: "HHS",
+    label: "All Department of Health and Human Services [HHS]",
+    value: "HHS",
+    children: [
+      {
+        id: "HHS-ACF-FYSB",
+        label:
+          "Administration for Children & Families - ACYF/FYSB [HHS-ACF-FYSB]",
+        value: "HHS-ACF-FYSB",
+      },
+      {
+        id: "HHS-ACF",
+        label: "Administration for Children and Families [HHS-ACF]",
+        value: "HHS-ACF",
+      },
+      {
+        id: "HHS-ACF-CB",
+        label:
+          "Administration for Children and Families - ACYF/CB [HHS-ACF-CB]",
+        value: "HHS-ACF-CB",
+      },
+    ],
+  },
+  {
+    id: "DHS",
+    label: "All Department of Homeland Security [DHS]",
+    value: "DHS",
+    children: [
+      {
+        id: "DHS-DHS",
+        label: "Department of Homeland Security - FEMA [DHS-DHS]",
+        value: "DHS-DHS",
+      },
+      {
+        id: "DHS-OPO",
+        label: "Office of Procurement Operations - Grants Division [DHS-OPO]",
+        value: "DHS-OPO",
+      },
+      {
+        id: "DHS-USCG",
+        label: "United States Coast Guard [DHS-USCG]",
+        value: "DHS-USCG",
+      },
+    ],
+  },
+  {
+    id: "HUD",
+    label: "All Department of Housing and Urban Development [HUD]",
+    value: "HUD",
+  },
+  {
+    id: "USDOJ",
+    label: "All Department of Justice [USDOJ]",
+    value: "USDOJ",
+    children: [
+      {
+        id: "USDOJ-OJP-BJA",
+        label: "Bureau of Justice Assistance [USDOJ-OJP-BJA]",
+        value: "USDOJ-OJP-BJA",
+      },
+      {
+        id: "USDOJ-OJP-COPS",
+        label: "Community Oriented Policing Services [USDOJ-OJP-COPS]",
+        value: "USDOJ-OJP-COPS",
+      },
+    ],
+  },
+  {
+    id: "DOL",
+    label: "All Department of Labor [DOL]",
+    value: "DOL",
+    children: [
+      {
+        id: "DOL-ETA-ILAB",
+        label: "Bureau of International Labor Affairs [DOL-ETA-ILAB]",
+        value: "DOL-ETA-ILAB",
+      },
+      {
+        id: "DOL-ETA-CEO",
+        label: "Chief Evaluation Office [DOL-ETA-CEO]",
+        value: "DOL-ETA-CEO",
+      },
+    ],
+  },
+  {
+    id: "DOS",
+    label: "All Department of State [DOS]",
+    value: "DOS",
+    children: [
+      {
+        id: "DOS-NEA-AC",
+        label: "Assistance Coordination [DOS-NEA-AC]",
+        value: "DOS-NEA-AC",
+      },
+      {
+        id: "DOS-DRL",
+        label: "Bureau of Democracy Human Rights and Labor [DOS-DRL]",
+        value: "DOS-DRL",
+      },
+      {
+        id: "DOS-ECA",
+        label: "Bureau Of Educational and Cultural Affairs [DOS-ECA]",
+        value: "DOS-ECA",
+      },
+    ],
+  },
+  {
+    id: "DOI",
+    label: "All Department of the Interior [DOI]",
+    value: "DOI",
+    children: [
+      {
+        id: "DOI-BIA",
+        label: "Bureau of Indian Affairs [DOI-BIA]",
+        value: "DOI-BIA",
+      },
+      {
+        id: "DOI-BLM",
+        label: "Bureau of Land Management [DOI-BLM]",
+        value: "DOI-BLM",
+      },
+      {
+        id: "DOI-BOR",
+        label: "Bureau of Reclamation [DOI-BOR]",
+        value: "DOI-BOR",
+      },
+    ],
+  },
+  {
+    id: "USDOT",
+    label: "All Department of the Treasury [USDOT]",
+    value: "USDOT",
+    children: [
+      {
+        id: "USDOT-ORP",
+        label: "Office of Capital Access [USDOT-ORP]",
+        value: "USDOT-ORP",
+      },
+      {
+        id: "USDOT-DO-SIPPRA",
+        label: "SIPPRA [USDOT-DO-SIPPRA]",
+        value: "USDOT-DO-SIPPRA",
+      },
+      {
+        id: "USDOT-GCR",
+        label: "U.S. Dept. of Treasury RESTORE Act Program [USDOT-GCR]",
+        value: "USDOT-GCR",
+      },
+    ],
+  },
+  {
+    id: "DOT",
+    label: "All Department of Transportation [DOT]",
+    value: "DOT",
+    children: [
+      {
+        id: "DOT-DOT X-50",
+        label: "69A345 Office of the Under Secretary for Policy [DOT-DOT X-50]",
+        value: "DOT-DOT X-50",
+      },
+      {
+        id: "DOT-RITA",
+        label: "69A355 Research and Technology [DOT-RITA]",
+        value: "DOT-RITA",
+      },
+      {
+        id: "DOT-FAA-FAA ARG",
+        label: "DOT - FAA Aviation Research Grants [DOT-FAA-FAA ARG]",
+        value: "DOT-FAA-FAA ARG",
+      },
+      {
+        id: "DOT-FRA",
+        label: "DOT - Federal Railroad Administration [DOT-FRA]",
+        value: "DOT-FRA",
+      },
+      {
+        id: "DOT-FHWA",
+        label: "DOT Federal Highway Administration [DOT-FHWA]",
+        value: "DOT-FHWA",
+      },
+      {
+        id: "DOT-FTA",
+        label: "DOT/Federal Transit Administration [DOT-FTA]",
+        value: "DOT-FTA",
+      },
+      {
+        id: "DOT-FAA-FAA COE-AJFE",
+        label: "FAA-COE-AJFE [DOT-FAA-FAA COE-AJFE]",
+        value: "DOT-FAA-FAA COE-AJFE",
+      },
+      {
+        id: "DOT-FAA-FAA COE-FAA JAMS",
+        label: "FAA-COE-JAMS [DOT-FAA-FAA COE-FAA JAMS]",
+        value: "DOT-FAA-FAA COE-FAA JAMS",
+      },
+      {
+        id: "DOT-FAA-FAA COE-TTHP",
+        label: "FAA-COE-TTHP [DOT-FAA-FAA COE-TTHP]",
+        value: "DOT-FAA-FAA COE-TTHP",
+      },
+      {
+        id: "DOT-MA",
+        label: "Maritime Administration [DOT-MA]",
+        value: "DOT-MA",
+      },
+      {
+        id: "DOT-NHTSA",
+        label: "National Highway Traffic Safety Administration [DOT-NHTSA]",
+        value: "DOT-NHTSA",
+      },
+    ],
+  },
+  {
+    id: "VA",
+    label: "All Department of Veterans Affairs [VA]",
+    value: "VA",
+    children: [
+      {
+        id: "VA-CSHF",
+        label: "Construction of State Home Facilities [VA-CSHF]",
+        value: "VA-CSHF",
+      },
+      {
+        id: "VA-HPGPDP",
+        label: "Homeless Providers Grant and Per Diem Program [VA-HPGPDP]",
+        value: "VA-HPGPDP",
+      },
+      {
+        id: "VA-LSV",
+        label: "Legal Services for Veterans [VA-LSV]",
+        value: "VA-LSV",
+      },
+      {
+        id: "VA-NVSP",
+        label: "National Veterans Sports Programs [VA-NVSP]",
+        value: "VA-NVSP",
+      },
+      {
+        id: "VA-NCAC",
+        label: "NCA Contracting [VA-NCAC]",
+        value: "VA-NCAC",
+      },
+      {
+        id: "VA-OMHSP",
+        label: "Office of Mental Health and Suicide Prevention [VA-OMHSP]",
+        value: "VA-OMHSP",
+      },
+      {
+        id: "VA-SSVF",
+        label: "Supportive Services for Veteran Families [VA-SSVF]",
+        value: "VA-SSVF",
+      },
+      {
+        id: "VA-NCA",
+        label: "VA National Cemetery Administration [VA-NCA]",
+        value: "VA-NCA",
+      },
+      {
+        id: "VA-VLGP",
+        label: "Veterans Legacy Grants Program [VA-VLGP]",
+        value: "VA-VLGP",
+      },
+    ],
+  },
+  {
+    id: "EPA",
+    label: "All Environmental Protection Agency [EPA]",
+    value: "EPA",
+  },
+  {
+    id: "IMLS",
+    label: "All Institute of Museum and Library Services [IMLS]",
+    value: "IMLS",
+  },
+  {
+    id: "MCC",
+    label: "All Millennium Challenge Corporation [MCC]",
+    value: "MCC",
+  },
+  {
+    id: "NASA",
+    label: "All National Aeronautics and Space Administration [NASA]",
+    value: "NASA",
+    children: [
+      {
+        id: "NASA-HQ",
+        label: "NASA Headquarters [NASA-HQ]",
+        value: "NASA-HQ",
+      },
+      {
+        id: "NASA-JSC",
+        label: "NASA Johnson Space Center [NASA-JSC]",
+        value: "NASA-JSC",
+      },
+      {
+        id: "NASA-SFC",
+        label: "NASA Marshall Space Flight Center [NASA-SFC]",
+        value: "NASA-SFC",
+      },
+      {
+        id: "NASA",
+        label: "National Aeronautics and Space Administration [NASA]",
+        value: "NASA",
+      },
+    ],
+  },
+  {
+    id: "NARA",
+    label: "All National Archives and Records Administration [NARA]",
+    value: "NARA",
+  },
+  {
+    id: "NEA",
+    label: "All National Endowment for the Arts [NEA]",
+    value: "NEA",
+  },
+  {
+    id: "NEH",
+    label: "All National Endowment for the Humanities [NEH]",
+    value: "NEH",
+  },
+  {
+    id: "NSF",
+    label: "All National Science Foundation [NSF]",
+    value: "NSF",
+  },
+  {
+    id: "SSA",
+    label: "All Social Security Administration [SSA]",
+    value: "SSA",
   },
 ];
