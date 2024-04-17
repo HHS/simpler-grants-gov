@@ -1,11 +1,13 @@
 import logging
-from dataclasses import dataclass
+import re
 
+import sqlalchemy
 from pydantic import Field
 from sqlalchemy import text
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.db.foreign
 from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
@@ -15,38 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ForeignTableConfig(PydanticBaseEnvConfig):
     is_local_foreign_table: bool = Field(False)
-    schema_name: str = Field(Schemas.API)
-
-
-@dataclass
-class Column:
-    column_name: str
-    postgres_type: str
-
-    is_nullable: bool = True
-    is_primary_key: bool = False
-
-
-OPPORTUNITY_COLUMNS: list[Column] = [
-    Column("OPPORTUNITY_ID", "numeric(20)", is_nullable=False, is_primary_key=True),
-    Column("OPPNUMBER", "character varying (40)"),
-    Column("REVISION_NUMBER", "numeric(20)"),
-    Column("OPPTITLE", "character varying (255)"),
-    Column("OWNINGAGENCY", "character varying (255)"),
-    Column("PUBLISHERUID", "character varying (255)"),
-    Column("LISTED", "CHAR(1)"),
-    Column("OPPCATEGORY", "CHAR(1)"),
-    Column("INITIAL_OPPORTUNITY_ID", "numeric(20)"),
-    Column("MODIFIED_COMMENTS", "character varying (2000)"),
-    Column("CREATED_DATE", "DATE"),
-    Column("LAST_UPD_DATE", "DATE"),
-    Column("CREATOR_ID", "character varying (50)"),
-    Column("LAST_UPD_ID", "character varying (50)"),
-    Column("FLAG_2006", "CHAR(1)"),
-    Column("CATEGORY_EXPLANATION", "character varying (255)"),
-    Column("PUBLISHER_PROFILE_ID", "numeric(20)"),
-    Column("IS_DRAFT", "character varying (1)"),
-]
+    schema_name: str = Field(Schemas.FOREIGN)
 
 
 @data_migration_blueprint.cli.command(
@@ -64,7 +35,7 @@ def setup_foreign_tables(db_session: db.Session) -> None:
     logger.info("Successfully ran setup-foreign-tables")
 
 
-def build_sql(table_name: str, columns: list[Column], is_local: bool, schema_name: str) -> str:
+def build_sql(table: sqlalchemy.schema.Table, is_local: bool, schema_name: str) -> str:
     """
     Build the SQL for creating a possibly foreign data table. If running
     with is_local, it instead creates a regular table.
@@ -86,18 +57,15 @@ def build_sql(table_name: str, columns: list[Column], is_local: bool, schema_nam
     """
 
     column_sql_parts = []
-    for column in columns:
-        column_sql = f"{column.column_name} {column.postgres_type}"
+    for column in table.columns:
+        column_sql = str(sqlalchemy.schema.CreateColumn(column))
 
         # Primary keys are defined as constraints in a regular table
         # and as options in a foreign data table
-        if column.is_primary_key and is_local:
-            column_sql += f" CONSTRAINT {table_name}_pkey PRIMARY KEY"
-        elif column.is_primary_key and not is_local:
-            column_sql += " OPTIONS (key 'true')"
-
-        if not column.is_nullable:
-            column_sql += " NOT NULL"
+        if column.primary_key and is_local:
+            column_sql += f" CONSTRAINT {table.name}_pkey PRIMARY KEY"
+        elif column.primary_key and not is_local:
+            column_sql = re.sub(r"^(.*?)( NOT NULL)?$", r"\1 OPTIONS (key 'true')\2", column_sql)
 
         column_sql_parts.append(column_sql)
 
@@ -106,24 +74,16 @@ def build_sql(table_name: str, columns: list[Column], is_local: bool, schema_nam
         # Don't make a foreign table if running locally
         create_table_command = "CREATE TABLE IF NOT EXISTS"
 
-    create_command_suffix = (
-        f" SERVER grants OPTIONS (schema 'EGRANTSADMIN', table '{table_name}')"  # noqa: B907
-    )
+    create_command_suffix = f" SERVER grants OPTIONS (schema 'EGRANTSADMIN', table '{table.name.upper()}')"  # noqa: B907
     if is_local:
         # We don't want the config at the end if we're running locally so unset it
         create_command_suffix = ""
 
-    return f"{create_table_command} {schema_name}.foreign_{table_name.lower()} ({','.join(column_sql_parts)}){create_command_suffix}"
+    return f"{create_table_command} {schema_name}.{table.name} ({','.join(column_sql_parts)}){create_command_suffix}"
 
 
 def _run_create_table_commands(db_session: db.Session, config: ForeignTableConfig) -> None:
-    db_session.execute(
-        text(
-            build_sql(
-                "TOPPORTUNITY",
-                OPPORTUNITY_COLUMNS,
-                config.is_local_foreign_table,
-                config.schema_name,
-            )
-        )
-    )
+    for table in src.db.foreign.metadata.tables.values():
+        sql = build_sql(table, config.is_local_foreign_table, config.schema_name)
+        logger.info("create table", extra={"table": table.name, "sql": sql})
+        db_session.execute(text(sql))
