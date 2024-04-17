@@ -8,18 +8,22 @@ import { GridContainer } from "@trussworks/react-uswds";
 import BetaAlert from "../components/BetaAlert";
 
 const PageNotFound: NextPage = () => {
-  const { t } = useTranslation("common", { keyPrefix: "ErrorPages" });
-
+  const { t } = useTranslation("common");
+  // TODO: Remove during move to app router and next-intl upgrade
+  const beta_strings = {
+    alert_title: t("Beta_alert.alert_title"),
+    alert: t("Beta_alert.alert"),
+  };
   return (
     <>
-      <BetaAlert />
+      <BetaAlert beta_strings={beta_strings} />
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15">
         <h1 className="nj-h1">{t("page_not_found.title")}</h1>
         <p className="margin-bottom-2">
-          {t("page_not_found.message_content_1")}
+          {t("ErrorPages.page_not_found.message_content_1")}
         </p>
         <Link className="usa-button" href="/" key="returnToHome">
-          {t("page_not_found.visit_homepage_button")}
+          {t("ErrorPages.page_not_found.visit_homepage_button")}
         </Link>
       </GridContainer>
     </>

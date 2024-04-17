@@ -2,7 +2,6 @@
 
 import { assetPath } from "src/utils/assetPath";
 
-import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import {
   GovBanner,
@@ -17,6 +16,21 @@ type PrimaryLinks = {
   href: string;
 }[];
 
+// TODO: Remove during move to app router and next-intl upgrade
+type HeaderStrings = {
+  nav_link_home: string;
+  nav_link_process: string;
+  nav_link_research: string;
+  nav_link_newsletter: string;
+  nav_menu_toggle: string;
+  title: string;
+};
+
+type Props = {
+  logoPath?: string;
+  header_strings: HeaderStrings;
+};
+
 const primaryLinks: PrimaryLinks = [
   { i18nKey: "nav_link_home", href: "/" },
   { i18nKey: "nav_link_process", href: "/process" },
@@ -24,15 +38,7 @@ const primaryLinks: PrimaryLinks = [
   { i18nKey: "nav_link_newsletter", href: "/newsletter" },
 ];
 
-type Props = {
-  logoPath?: string;
-};
-
-const Header = ({ logoPath }: Props) => {
-  const { t, i18n } = useTranslation("common", {
-    keyPrefix: "Header",
-  });
-
+const Header = ({ header_strings, logoPath }: Props) => {
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
@@ -40,7 +46,7 @@ const Header = ({ logoPath }: Props) => {
 
   const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
-      {t(link.i18nKey)}
+      {header_strings[link.i18nKey as keyof HeaderStrings]}
     </a>
   ));
 
@@ -50,7 +56,8 @@ const Header = ({ logoPath }: Props) => {
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
       <GovBanner
-        language={i18n.language?.match(/^es-?/) ? "spanish" : "english"}
+        // TODO: Remove during move to app router and next-intl upgrade
+        language={"english"}
       />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
@@ -66,12 +73,14 @@ const Header = ({ logoPath }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">
+                  {header_strings.title}
+                </span>
               </div>
             </Title>
             <NavMenuButton
               onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
+              label={header_strings.nav_menu_toggle}
             />
           </div>
           <PrimaryNav

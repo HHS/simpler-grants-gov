@@ -3,7 +3,6 @@
 import { ExternalRoutes } from "src/constants/routes";
 import { assetPath } from "src/utils/assetPath";
 
-import { useTranslation } from "next-i18next";
 import { ComponentType } from "react";
 import {
   Address,
@@ -29,49 +28,59 @@ const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
   </a>
 );
 
-const Footer = () => {
-  const { t } = useTranslation("common", {
-    keyPrefix: "Footer",
-  });
+// TODO: Remove during move to app router and next-intl upgrade
+type FooterStrings = {
+  agency_name: string;
+  agency_contact_center: string;
+  telephone: string;
+  return_to_top: string;
+  link_twitter: string;
+  link_youtube: string;
+  link_blog: string;
+  link_newsletter: string;
+  link_rss: string;
+  link_github: string;
+  logo_alt: string;
+};
 
+type Props = {
+  footer_strings: FooterStrings;
+};
+
+const Footer = ({ footer_strings }: Props) => {
   const links = [
     {
       href: ExternalRoutes.GRANTS_TWITTER,
-      name: t("link_twitter"),
+      name: footer_strings.link_twitter,
       Tag: Icon.Twitter,
     },
     {
       href: ExternalRoutes.GRANTS_YOUTUBE,
-      name: t("link_youtube"),
+      name: footer_strings.link_youtube,
       Tag: Icon.Youtube,
     },
     {
       href: ExternalRoutes.GRANTS_BLOG,
-      name: t("link_blog"),
+      name: footer_strings.link_blog,
       Tag: Icon.LocalLibrary,
     },
     {
       href: ExternalRoutes.GRANTS_NEWSLETTER,
-      name: t("link_newsletter"),
+      name: footer_strings.link_newsletter,
       Tag: Icon.Mail,
     },
     {
       href: ExternalRoutes.GRANTS_RSS,
-      name: t("link_rss"),
+      name: footer_strings.link_rss,
       Tag: Icon.RssFeed,
     },
     {
       href: ExternalRoutes.GITHUB_REPO,
-      name: t("link_github"),
+      name: footer_strings.link_github,
       Tag: Icon.Github,
     },
   ].map(({ href, name, Tag }) => (
-    <SocialLink
-      href={href}
-      key={name.toLocaleLowerCase()}
-      name={name}
-      Tag={Tag}
-    />
+    <SocialLink href={href} key={name} name={name} Tag={Tag} />
   ));
 
   return (
@@ -80,7 +89,7 @@ const Footer = () => {
       size="medium"
       returnToTop={
         <GridContainer className="usa-footer__return-to-top margin-top-5">
-          <a href="#">{t("return_to_top")}</a>
+          <a href="#">{footer_strings.return_to_top}</a>
         </GridContainer>
       }
       primary={null}
@@ -89,7 +98,7 @@ const Footer = () => {
           <Grid tablet={{ col: 4 }} desktop={{ col: 6 }}>
             <img
               className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
-              alt={t("logo_alt")}
+              alt={footer_strings.logo_alt}
               src={assetPath("/img/grants-gov-logo.png")}
             />
           </Grid>
@@ -100,13 +109,13 @@ const Footer = () => {
           >
             <SocialLinks links={links} />
             <h2 className="usa-footer__contact-heading">
-              {t("agency_contact_center")}
+              {footer_strings.agency_contact_center}
             </h2>
             <Address
               size="medium"
               items={[
-                <a key="telephone" href={`tel:${t("telephone")}`}>
-                  {t("telephone")}
+                <a key="telephone" href={`tel:${footer_strings.telephone}`}>
+                  {footer_strings.telephone}
                 </a>,
                 <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
                   {ExternalRoutes.EMAIL_SUPPORT}
