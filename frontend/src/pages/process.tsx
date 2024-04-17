@@ -21,7 +21,7 @@ const Process: NextPage = () => {
   return (
     <>
       <PageSEO
-        title={t("page_title")}
+        title={t("Process.page_title")}
         description={t("Process.meta_description")}
       />
       <BetaAlert beta_strings={beta_strings} />

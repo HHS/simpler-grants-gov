@@ -49,7 +49,7 @@ const Layout = ({ children }: Props) => {
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
       <a className="usa-skipnav" href="#main-content">
-        {t("skip_to_main")}
+        {t("Layout.skip_to_main")}
       </a>
       <Header header_strings={header_strings} />
       <main id="main-content">{children}</main>
