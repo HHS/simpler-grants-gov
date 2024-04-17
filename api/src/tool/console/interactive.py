@@ -120,7 +120,7 @@ def reload_repl() -> None:
 
         try:
             importlib.reload(module)
-        except:  # noqa: B001
+        except Exception:
             # there are some problems that are swept under the rug here
             pass
 

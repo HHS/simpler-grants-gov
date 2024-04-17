@@ -6,6 +6,12 @@ description: User guide for contributing code to our GitHub.
 
 GitHub is our primary platform for collaborative software development within the Simpler Grants community. This guide will help you get started and make the most out of your code contribution experience.
 
+{% hint style="info" %}
+**Looking for Work?**
+
+Our development team curates "help wanted" issues for open source developers like you to help out with on [GitHub](https://github.com/HHS/simpler-grants-gov/labels/help%20wanted).
+{% endhint %}
+
 ## Getting Started
 
 ### 1. Clone the Repository

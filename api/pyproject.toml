@@ -25,9 +25,6 @@ flask-cors = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
-flake8 = "^6.1.0"
-flake8-bugbear = "^23.9.16"
-flake8-alfred = "^1.1.1"
 isort = "^5.12.0"
 mypy = "^1.8.0"
 moto = {extras = ["s3"], version = "^4.0.2"}
@@ -43,6 +40,7 @@ types-pyyaml = "^6.0.12.11"
 setuptools = "^68.2.2"
 pydot = "1.4.2"
 sadisplay = "0.4.9"
+ruff = "^0.3.5"
 debugpy = "^1.8.1"
 
 [build-system]
@@ -67,6 +65,28 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 100
+
+[tool.ruff]
+line-length = 100
+# Some rules are considered preview-only, this allows them
+# assuming we enabled them below
+preview = true
+
+[tool.ruff.lint]
+# See: https://docs.astral.sh/ruff/rules/ for all possible rules
+select = ["B", "C", "E", "F", "W", "B9"]
+ignore = [
+  # too many leading '#' for block comment, we can format our comments however we want
+  "E266",
+  # Ignore line-too-long errors, assume the formatter handles that appropriately
+  "E501",
+  # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum]
+  "C4",
+  # Ignore rule that flags functions with many branches - sometimes we just have a lot of
+  # business rules that make sense to aggregate in one place.
+  "C901"
+]
+
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/stable/config_file.html

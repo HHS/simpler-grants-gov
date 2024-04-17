@@ -23,7 +23,7 @@ layout:
 {% hint style="warning" %}
 **In Progress** :construction:
 
-Pardon the construction dust! We're still setting up our public wiki, so pages may be changing names or getting moved. This document needs to be reviewed by the internal team before being shared with the public.
+Pardon the construction dust! We're still setting up our public wiki, so pages may be changing names or getting moved.&#x20;
 {% endhint %}
 
 Looking to join the Simpler Grants community? Start here:

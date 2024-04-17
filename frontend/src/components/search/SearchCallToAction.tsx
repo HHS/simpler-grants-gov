@@ -1,5 +1,3 @@
-import "server-only";
-
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { GridContainer } from "@trussworks/react-uswds";
 import React from "react";

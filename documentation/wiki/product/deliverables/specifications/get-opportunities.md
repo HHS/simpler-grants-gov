@@ -4,7 +4,7 @@ description: >-
   on grants.gov.
 ---
 
-# GET Opportunities
+# 🏁 GET Opportunities
 
 ## Summary details
 
