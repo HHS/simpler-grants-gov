@@ -37,32 +37,30 @@ Firstly, the current grant making system privileges certain groups above others 
 
 By identifying and directly involving representatives of the Novice archetype, [identified through previous research](https://simpler.grants.gov/research), along with other underserved communities in project design, Simpler.Grants.gov HHS decision makers increase the likelihood of identifying and solving the right problems, those that will increase grants access to underserved communities. Moreover, building relationships with these communities will allow internal stakeholders to identify and uplift existing community designed solutions with Simpler.Grants.gov work, thereby removing the risk of duplication of effort and increasing the chance of user adoption. To this end, value is rooted in [Design Justice Principles](https://designjustice.org/read-the-principles), which centers the experiences of underserved end users throughout the entire framing, execution, and evaluation of project planning and delivery and acknowledges and extends the reach of already existing community designed solutions. By improving the experience and access for the most underserved communities, we improve the experience and access for everyone who uses the service.
 
-Once created, the co-design group will enable Simpler.Grants.gov internal stakeholders to more effectively implement best practices in user research by identifying opportunities for research ahead of time, mitigating risk, and more quickly standing up generative and evaluative studies with a pre-screened target user panel. The co-design group will develop research protocols and obtain participant consent to ensure that participants are protected from harm that might arise from government stakeholders obtaining potentially sensitive data. &#x20;
+Once created, the co-design group will enable Simpler.Grants.gov internal stakeholders to more effectively implement best practices in user research by identifying opportunities for research ahead of time, mitigating risk, and more quickly standing up generative and evaluative studies with a pre-screened target user panel. The co-design group will develop research protocols and obtain participant consent to ensure that participants are protected from harm that might arise from government stakeholders obtaining potentially sensitive data.
 
 #### Goals
 
-This effort allows us to…&#x20;
+This effort allows us to…
 
 * Bring the most impacted applicants into partnership with grants.gov internal stakeholders to frame, plan, design, and solution grants experience
 * Create continuous feedback loop between community groups already working on behalf of marginalized community and allows grants.gov internal stakeholders to contribute to their existing solutions and build with (not for)
 * Increase speed of participant recruitment for studies that aim to gather insights center user needs and behaviors throughout the product development lifecycle
 * Improve strategy and proactive planning for future grants.gov work by inviting co-design group participants to frame problems and contribute insights that will guide roadmap development based on the real challenges users navigate in their lives
 
-
-
 ### User stories
 
 * As a **HHS staff member**, I want to:
-  * center the voices of those who are directly impacted by the outcome of the design process so that I can ensure that our solutions lead to sustainable positive outcomes&#x20;
-* As a **co-design group administrator and project maintainer**, I want:&#x20;
+  * center the voices of those who are directly impacted by the outcome of the design process so that I can ensure that our solutions lead to sustainable positive outcomes
+* As a **co-design group administrator and project maintainer**, I want:
   * a streamlined process for collaborating with co-design group members so that I can ensure that there is continuous feedback loop throughout strategic planning and product development
   * to ensure that the co-design group includes representatives from a range of communities facing limited access so that they can reflect diverse voices and perspectives of those impacted by the outcomes
   * a longer-term view and tactical plan for how we will leverage the co-design group so I can build trust with the group, set expectations, and right-size capacity needed to run the group for a defined duration of time
   * a manageable size of participants that matches the need of the project and capacity of the team
   * ensure that participants understand how their data will be used, obtain their consent, and that I have a way of protecting and anonymizing their data
-* As a **grantor**, I want:&#x20;
-  * Simpler Grants.gov to be simple, effective, and accessible and work for all communities and individuals in the grants ecosystem so that it’s easier to attract a wide range of candidates &#x20;
-* As an **applicant and a member of the general public**, I want:&#x20;
+* As a **grantor**, I want:
+  * Simpler Grants.gov to be simple, effective, and accessible and work for all communities and individuals in the grants ecosystem so that it’s easier to attract a wide range of candidates
+* As an **applicant and a member of the general public**, I want:
   * Simpler Grants.gov to be simple, effective, and accessible and work for all communities and individuals in the grants ecosystem so that it’s easier to find and apply for grants
 
 ## Technical description
@@ -74,17 +72,15 @@ This effort allows us to…&#x20;
 Define the scope and purpose of the co-design group, identify underserved communities, and establish the framework for engagement.
 
 * Define co-design group scope and purpose
-* Identify and prioritize underserved communities through quantitative and qualitative data analysis&#x20;
+* Identify and prioritize underserved communities through quantitative and qualitative data analysis
 * Determine budget and compensation strategy for co-design group participants
 * Develop a recruitment strategy to reach underserved communities
 
 The criteria that should inform this approach include:
 
-* How will we compensate co-design group participants so that it is worth their time?&#x20;
-* How will we recruit members of the public to ensure that we're reaching underserved communities and there are equal opportunities for people to join?&#x20;
+* How will we compensate co-design group participants so that it is worth their time?
+* How will we recruit members of the public to ensure that we're reaching underserved communities and there are equal opportunities for people to join?
 * Will the co-design group be invite only or will we put out a call for applications more broadly?
-
-
 
 ### Co-design group guidelines and roadmap planning
 
@@ -100,7 +96,7 @@ Set clear objectives for the co-design group and integrate their input into the 
 The criteria that should inform this approach include:
 
 * How will we ensure that our roadmap is informed by the co-design group and user research?
-* How can we set clear expectations with the co-design group candidates?&#x20;
+* How can we set clear expectations with the co-design group candidates?
 * How long will participants be expected to participate in the co-design group?
 * How many hours are participants expected to commit to the co-design group?
 
@@ -118,7 +114,7 @@ Recruit suitable co-design group participants and ensure ongoing engagement
 
 The criteria that should inform this approach include:
 
-* How can we ensure that participants feel safe sharing information and data with us?&#x20;
+* How can we ensure that participants feel safe sharing information and data with us?
 
 ### Definition of done
 
@@ -130,10 +126,10 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] All new services have completed a 508 compliance review (if necessary)
   * [ ] Data needed for metrics is actively being captured in PROD
   * [ ] Key architectural decisions made about this deliverable are documented publicly
-* [ ] Finalize the name of what we will call the participatory group and approval from HHS
+* [x] Finalize the name of what we will call the participatory group and approval from HHS
 * [ ] A screening and consent process has been defined and documented for the Co-design group, and this process:
   * [ ] Screens applicants against an explicitly documented set of selection criteria
-  * [ ] Sets clear guidelines and expectations for participation&#x20;
+  * [ ] Sets clear guidelines and expectations for participation
   * [ ] Explicitly communicates how consent and privacy will be handled in the different type of sessions held by the Co-design group
 * [ ] A panel of 12-24 participants have been selected, and these participants:
   * [ ] Represent underserved communities that have been determined to have unequal access to grants
@@ -145,10 +141,10 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Outlines how co-design group participants will be compensated (e.g. through gift cards, honorariums, etc.)
   * [ ] Provides an anticipated payment schedule for this compensation that is communicated to participants
 * [ ] The following requirements satisfied to facilitate collaboration with members of the co-design group:
-  * [ ] Ethn.io has been procured and configured
+  * [x] Ethn.io has been procured and configured
   * [ ] HHS security team has approved Simpler.Grants.gov to collect and store Personally Identifying Information (PII) in our systems
   * [ ] Our PRA (Paperwork Reduction Act) requests have been approved to conduct surveys or questionnaires
-* [ ] Project maintainers and co-design group facilitators have identified opportunities in the product roadmap where the co-design group will be leveraged in decision making by HHS
+* [x] Project maintainers and co-design group facilitators have identified opportunities in the product roadmap where the co-design group will be leveraged in decision making by HHS
 
 #### Nice to have
 
@@ -207,7 +203,7 @@ We can fast track specific approvals under the overall existing generic clearanc
 
 <summary>Will we provide translations for people for whom English is not their first language?</summary>
 
-It is likely that people whose first language is not English are more disadvantaged than other communities. We may be limited in our ability to provide real-time translations in this initial initiative, but we should plan how we can engage those communities. We should be able to provide text materials in other languages but real-time translations may be difficult.&#x20;
+It is likely that people whose first language is not English are more disadvantaged than other communities. We may be limited in our ability to provide real-time translations in this initial initiative, but we should plan how we can engage those communities. We should be able to provide text materials in other languages but real-time translations may be difficult.
 
 We could potentially focus on a demographic segment where users who are fluent in English but not their first language attend sessions that help us get some input into this underserved population
 
@@ -273,4 +269,4 @@ Major updates to the content of this page will be added here.
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>April 8, 2024</td><td>Finalize the name of what we will call the participatory group and approval from HHS</td><td><ul><li>New name: Co-Design Group approved by Lucas Brown — <a href="https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623">https://github.com/HHS/simpler-grants-gov/issues/1420#issuecomment-2043576623</a> </li></ul></td></tr><tr><td>April 12, 2024</td><td>Ethn.io has been procured and configured</td><td><ul><li>Ethnio procurement plan updated, separating concerns of participant management and incentives disbursement; Nava using their own limited access licenses — <a href="https://github.com/HHS/simpler-grants-gov/issues/891#issuecomment-2052520494">https://github.com/HHS/simpler-grants-gov/issues/891#issuecomment-2052520494</a></li></ul></td></tr><tr><td>March 18, 2024</td><td>Project maintainers and co-design group facilitators have identified opportunities in the product roadmap where the co-design group will be leveraged in decision making by HHS</td><td><ul><li>Investigate roadmap for opportunities for user research — <a href="https://github.com/HHS/simpler-grants-gov/issues/1338">https://github.com/HHS/simpler-grants-gov/issues/1338</a></li></ul></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
