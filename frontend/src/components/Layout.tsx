@@ -12,16 +12,39 @@ const Layout = ({ children }: Props) => {
 
   const { t } = useTranslation("common");
 
-  const title = t('Header.title');
-  const nav_menu_toggle = t("nav_menu_toggle");
-  const menuLinks = {
+  const header_strings = {
+    title: t('Header.title'),
+    nav_menu_toggle: t("nav_menu_toggle"),
     nav_link_home: t("Header.nav_link_home"),
     nav_link_process: t("Header.nav_link_process"),
     nav_link_research:  t("Header.nav_link_research"),
     nav_link_newsletter: t("Header.nav_link_newsletter")
   }
 
-  const link_twitter = t("Footer.link_twitter");
+  const footer_strings = {
+    agency_name: t("Footer.agency_name"),
+    agency_contact_center: t("Footer.agency_contact_center"),
+    telephone: t("Footer.telephone"),
+    return_to_top: t("Footer.return_to_top"),
+    link_twitter: t("Footer.link_twitter"),
+    link_youtube: t("Footer.link_youtube"),
+    link_blog: t("Footer.link_blog"),
+    link_newsletter: t("Footer.link_newsletter"),
+    link_rss: t("Footer.link_rss"),
+    link_github: t("Footer.link_github"),
+    logo_alt: t("Footer.logo_alt"),
+  }
+
+  const identifier_strings = {
+    link_about: t("Identifier.link_about"),
+    link_accessibility: t("Identifier.link_accessibility"),
+    link_foia: t("Identifier.link_foia"),
+    link_fear: t("Identifier.link_fear"),
+    link_ig: t("Identifier.link_ig"),
+    link_performance: t("Identifier.link_performance"),
+    link_privacy: t("Identifier.link_privacy"),
+    logo_alt: t("Identifier.logo_alt"),
+  }
 
   return (
     // Stick the footer to the bottom of the page
@@ -29,10 +52,10 @@ const Layout = ({ children }: Props) => {
       <a className="usa-skipnav" href="#main-content">
         {t("skip_to_main")}
       </a>
-      <Header title={title} nav_menu_toggle={nav_menu_toggle} menuLinks={menuLinks} />
+      <Header header_strings={header_strings} />
       <main id="main-content">{children}</main>
-      <Footer link_twitter={link_twitter} />
-      <GrantsIdentifier />
+      <Footer footer_strings={footer_strings} />
+      <GrantsIdentifier identifier_strings={identifier_strings}/>
     </div>
   );
 };

@@ -13,10 +13,6 @@ import { cookies } from "next/headers";
 import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
-interface RouteParams {
-  locale: string;
-}
-
 const searchFetcher = getSearchFetcher();
 
 // TODO: use for i18n when ready
@@ -29,7 +25,7 @@ interface ServerPageProps {
   searchParams: ServerSideSearchParams;
 }
 
-export async function generateMetadata({ params }: { params: RouteParams }) {
+export function generateMetadata() {
   // TODO: use the following for i18n const t = await getTranslations({ locale: params.locale });
   const meta: Metadata = {
     title: "Search Funding Opportunities | Simpler.Grants.gov",

@@ -2,7 +2,6 @@
 
 import { assetPath } from "src/utils/assetPath";
 
-import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import {
   GovBanner,
@@ -17,6 +16,20 @@ type PrimaryLinks = {
   href: string;
 }[];
 
+type HeaderStrings = {
+  nav_link_home: string;
+  nav_link_process: string;
+  nav_link_research: string;
+  nav_link_newsletter: string;
+  nav_menu_toggle: string;
+  title: string;
+};
+
+type Props = {
+  logoPath?: string;
+  header_strings: HeaderStrings;
+};
+
 const primaryLinks: PrimaryLinks = [
   { i18nKey: "nav_link_home", href: "/" },
   { i18nKey: "nav_link_process", href: "/process" },
@@ -24,14 +37,7 @@ const primaryLinks: PrimaryLinks = [
   { i18nKey: "nav_link_newsletter", href: "/newsletter" },
 ];
 
-type Props = {
-  logoPath?: string;
-  title?: string;
-  nav_menu_toggle?: string;
-  menuLinks: any;
-};
-
-const Header = ({ logoPath, title, nav_menu_toggle, menuLinks }: Props) => {
+const Header = ({ header_strings, logoPath }: Props) => {
 
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
@@ -40,7 +46,7 @@ const Header = ({ logoPath, title, nav_menu_toggle, menuLinks }: Props) => {
 
   const navItems = primaryLinks.map((link) => (
     <a href={link.href} key={link.href}>
-      {menuLinks[link.i18nKey]}
+      {header_strings[link.i18nKey]}
     </a>
   ));
 
@@ -66,12 +72,12 @@ const Header = ({ logoPath, title, nav_menu_toggle, menuLinks }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{title}</span>
+                <span className="font-sans-lg flex-fill">{header_strings.title}</span>
               </div>
             </Title>
             <NavMenuButton
               onClick={handleMobileNavToggle}
-              label={nav_menu_toggle}
+              label={header_strings.nav_menu_toggle}
             />
           </div>
           <PrimaryNav
