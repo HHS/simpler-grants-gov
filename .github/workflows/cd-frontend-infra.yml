@@ -40,8 +40,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["service"]
-        envs: ${{ (github.event_name == 'release' && 'prod') || ('dev' &&'staging') }} #fix
+        directory: ["database", "service"]
+        envs: ['dev', 'staging', 'prod']
+        exclude:
+          - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+
     permissions:
       contents: read
       id-token: write
@@ -61,5 +64,6 @@ jobs:
 
       - name: Terraform Init and Apply
         run: |
-          export TF_CLI_ARGS="-input=false -auto-approve" 
-          ./bin/terraform-init-and-apply.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
+          ./bin/terraform-init.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
+          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
+          ./bin/terraform-apply.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
