@@ -7,10 +7,10 @@ on:
   push:
     branches:
       - "main"
-      - "tf-debug" # <= for testing
+      - "tf-debug" # <= for testing purposes
     paths:
       - "api/**"
-      - ".github/workflows/cd-api.yml" # <= for testing
+      - ".github/workflows/cd-api.yml" # <= for testing purposes
   release:
     types: [published]
   workflow_dispatch:
