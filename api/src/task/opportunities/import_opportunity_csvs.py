@@ -52,7 +52,6 @@ def load_csv_stream_to_table(
     with file_util.open_stream(csv_filepath) as csvfile:
         reader = csv.DictReader(csvfile)
 
-        _ = reader.__next__
         field_names = cast(list[str], reader.fieldnames)
 
     with file_util.open_stream(csv_filepath) as csvfile:
