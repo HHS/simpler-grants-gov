@@ -7,6 +7,7 @@
 #  - Migrations are not used to manage creation and changes as the tables are actually defined in a different system.
 #
 
+import datetime
 from typing import Any, Iterable
 
 import sqlalchemy
@@ -20,6 +21,12 @@ class Base(sqlalchemy.orm.DeclarativeBase):
     metadata = metadata
 
     __table_args__ = {"schema": Schemas.FOREIGN}
+
+    type_annotation_map = {
+        int: sqlalchemy.BigInteger,
+        str: sqlalchemy.Text,
+        datetime.datetime: sqlalchemy.TIMESTAMP(timezone=True),
+    }
 
     def _dict(self) -> dict:
         return {c.key: getattr(self, c.key) for c in sqlalchemy.inspect(self).mapper.column_attrs}
