@@ -3,20 +3,28 @@ import type { GetStaticProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
-import PageSEO from "src/components/PageSEO";
 import BetaAlert from "../components/BetaAlert";
+import PageSEO from "src/components/PageSEO";
 import Hero from "../components/Hero";
 import IndexGoalContent from "./content/IndexGoalContent";
 import ProcessAndResearchContent from "./content/ProcessAndResearchContent";
 
 const Home: NextPage = () => {
-  const { t } = useTranslation("common", { keyPrefix: "Index" });
+  const { t } = useTranslation("common");
+  // TODO: Remove during move to app router and next-intl upgrade
+  const beta_strings = {
+    alert_title: t("Beta_alert.alert_title"),
+    alert: t("Beta_alert.alert"),
+  };
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
+      <PageSEO
+        title={t("Index.page_title")}
+        description={t("Index.meta_description")}
+      />
       <Hero />
-      <BetaAlert />
+      <BetaAlert beta_strings={beta_strings} />
       <IndexGoalContent />
       <ProcessAndResearchContent />
     </>

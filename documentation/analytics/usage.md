@@ -12,20 +12,6 @@ We have some automation set up in this repository that automatically runs our an
 3. On the browse channel page, search for `#z_bot-sprint-reporting` and select it from the list of results.
 4. On the channel page, select "Join channel" at the bottom of the page.
 
-## Trigger a report from GitHub
-
-> [!NOTE]
-> This option is only available to project maintainers with write access to the repo.
-
-If you're a project maintainer and want to run the reports outside of the daily schedule, you can also trigger the report to run manually using the following steps:
-
-1. Go to the [Run analytics package GitHub Action](https://github.com/HHS/simpler-grants-gov/actions/workflows/run-analytics.yml) page.
-2. Select the "Run workflow" dropdown menu, then click "Run workflow".
-3. For more information about triggering GitHub actions, including running a version of this workflow from another branch, checkout [the GitHub documentation](https://docs.github.com/en/actions/using-workflows/manually-running-a-workflow).
-
-<img alt="Screenshot triggering a GitHub action manually" src="../../analytics/static/screenshot-trigger-gh-action.png" width=750>
-
-
 ## Trigger a report from the command line
 
 > [!NOTE]
@@ -45,11 +31,11 @@ It should also open two new browser tabs, each with a separate report:
 
 **Sprint burndown by points for the current sprint**
 
-![Screenshot of burndown for sprint 10](static/screenshot-sprint-burndown.png)
+![Screenshot of burndown for sprint 10](../../analytics/static/screenshot-sprint-burndown.png)
 
 **Percent of points complete by deliverable**
 
-![Screenshot of deliverable percent complete by points](static/screenshot-deliverable-pct-complete-points.png)
+![Screenshot of deliverable percent complete by points](../../analytics/static/screenshot-deliverable-pct-complete-points.png)
 
 ### Other relevant make commands
 

@@ -6,7 +6,7 @@ description: Deploy basic search functionality behind a feature flag.
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/89">Issue 89</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-ui.md#overview">Overview</a></p><ul><li><a href="search-ui.md#business-value">Business value</a></li><li><a href="search-ui.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-ui.md#technical-description">Technical description</a></p><ul><li><a href="search-ui.md#definition-of-done">Definition of done</a></li><li><a href="search-ui.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-ui.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-ui.md#logs">Logs</a></p><ul><li><a href="search-ui.md#change-log">Change log</a></li><li><a href="search-ui.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/89">Issue 89</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-user-interface.md#overview">Overview</a></p><ul><li><a href="search-user-interface.md#business-value">Business value</a></li><li><a href="search-user-interface.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-user-interface.md#technical-description">Technical description</a></p><ul><li><a href="search-user-interface.md#definition-of-done">Definition of done</a></li><li><a href="search-user-interface.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-user-interface.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-user-interface.md#logs">Logs</a></p><ul><li><a href="search-user-interface.md#change-log">Change log</a></li><li><a href="search-user-interface.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -117,7 +117,7 @@ This effort focuses on implementing feature flags, strengthening infrastructure,
 
 Basic requirements:
 
-* [ ] Code is deployed to `main` & PROD through our CI/CD pipeline
+* [ ] Code is merged into `main` and deployed to PROD using our CI/D pipeline
 * [ ] Services are live in PROD (maybe behind feature flag)
 * [ ] All new services have passed a security review (if necessary)
 * [ ] All new services have completed a 508 compliance review (if necessary)
@@ -126,16 +126,16 @@ Basic requirements:
 
 Functional requirements:
 
-* [ ] Users can search for opportunities by key word
-* [ ] Users can filter search results by _at least one_ structured field (e.g. award date, opportunity type, etc.)
-* [ ] Users can sort search results by _at least_ one structured field (e.g. award date, title, etc.)
-* [ ] All of the search features available in the UI are also available via the API, and vice versa
-* [ ] Search criteria are reflected in the URL so that users can bookmark or share the link to the page with the results from that combination of criteria
-* [ ] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results
-* [ ] At least 1 user research participant has been compensated for their time
+* [x] Users can search for opportunities by key word
+* [x] Users can filter search results by _at least one_ structured field (e.g. award date, opportunity type, etc.)
+* [x] Users can sort search results by _at least_ one structured field (e.g. award date, title, etc.)
+* [x] All of the search features available in the UI are also available via the API, and vice versa
+* [x] Search criteria are reflected in the URL so that users can bookmark or share the link to the page with the results from that combination of criteria
+* [x] Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results
 * [ ] Any site downtime will generate automated notifications to project maintainers
-* [ ] Functionality can be hidden from users behind a URL-based feature flag, if desired
+* [x] Functionality can be hidden from users behind a URL-based feature flag, if desired
 * [ ] Documented findings for current search in grants.gov live and strategy for future search relevance
+* [ ] Our desired project metrics are captured and displayed in a public place
 
 **Nice-to-have:**
 
@@ -150,7 +150,6 @@ _Metrics alone shouldn't be the sole focus. Analyzing them alongside click-throu
 * Click-through-rate to the opportunity listing on grants.gov to measure the search accuracy for those top searched terms
 * Number of searches made per search term and the click conversion rate to the opportunity listing
 * Number of searches made per filter combination and the click-through-rate to the opportunity listing
-* Click-through-rate from search results to the opportunity listing&#x20;
 
 **Note:** While not in scope for this deliverable, we may want to track the accuracy of search results based on user feedback in the future.
 
@@ -265,10 +264,10 @@ If so, how are we addressing these risks?
 
 Major updates to the content of this page will be added here.
 
-<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="423">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/17/2024</td><td><ul><li>Removed “At least 1 user research participant has been compensated for their time” from DoD.</li><li>Reworded: “Code is deployed to main &#x26; PROD through our CI/CD pipeline” to “Code is merged into main and deployed to PROD using our CI/D pipeline”.</li><li>Added: “Our desired project metrics are captured and displayed in a public place” to DoD.</li><li>Removed: “Click-through-rate from search results to the opportunity listing” from proposed metrics.</li></ul></td><td>Updates discussed and decided on by the development team and P&#x26;D at the 30k review meeting on 4/17.</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
 
 ### Implementation log
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>March 22, 2024</td><td>Users can search for opportunities by key word</td><td><ul><li>Set up single search input component in basic layout, allowing for searching across <code>opportunity_title</code>, <code>opportunity_number</code>, <code>agency</code>, <code>summary_description</code>, <code>assistance_listing_number</code>, and <code>program_title</code> — <a href="https://github.com/HHS/simpler-grants-gov/commit/8b0111ff0be2359262912b5ad4046174e9822597">https://github.com/HHS/simpler-grants-gov/commit/8b0111ff0be2359262912b5ad4046174e9822597</a> </li><li>Hook up <code>query</code> query parameter to pass key words to the API — <a href="https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833">https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833</a></li></ul></td></tr><tr><td>March 19, 2024</td><td>Users can filter search results by <em>at least one</em> structured field</td><td><ul><li>Add filter component UI — <a href="https://github.com/HHS/simpler-grants-gov/commit/7e3429825cba0c95a9e4aae776bfe49b955552f9">https://github.com/HHS/simpler-grants-gov/commit/7e3429825cba0c95a9e4aae776bfe49b955552f9</a></li><li>Hook up UI inputs to API — <a href="https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833">https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833</a> </li></ul><p>(…among other improvements to UI/API)</p></td></tr><tr><td>March 27, 2024</td><td>Users can sort search results by <em>at least</em> one structured field</td><td><ul><li>Hook up <code>sortBy</code> filter — <a href="https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833">https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833</a></li><li>Improve UI/layout of sort <code>select</code> — <a href="https://github.com/HHS/simpler-grants-gov/commit/cace7771e33b8dc33e0667da3fcea973e6aeddeb">https://github.com/HHS/simpler-grants-gov/commit/cace7771e33b8dc33e0667da3fcea973e6aeddeb</a></li></ul></td></tr><tr><td>March 19, 2024</td><td>All of the search features available in the UI are also available via the API, and vice versa</td><td><ul><li>Hook up rest of inputs to live API — <a href="https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833">https://github.com/HHS/simpler-grants-gov/commit/74c948042bb68b6fc03cde06f1ed012ab562d833</a></li></ul></td></tr><tr><td>March 15, 2024</td><td>Search criteria are reflected in the URL so that users can bookmark or share the link to the page with the results from that combination of criteria</td><td><ul><li>Setup query param management / writing to the URL — <a href="https://github.com/HHS/simpler-grants-gov/commit/5d50bc407e6a55cdf941dae7184a1113d7b9c297">https://github.com/HHS/simpler-grants-gov/commit/5d50bc407e6a55cdf941dae7184a1113d7b9c297</a></li></ul></td></tr><tr><td>March 22, 2024</td><td>Users can access the corresponding grants.gov page for an opportunity they find on simpler.grants.gov via link on the search results</td><td><ul><li>Format in search results — <a href="https://github.com/HHS/simpler-grants-gov/commit/ffb9b8fd1fa62aa8e3644915d164717170ef79fa">https://github.com/HHS/simpler-grants-gov/commit/ffb9b8fd1fa62aa8e3644915d164717170ef79fa</a></li></ul></td></tr><tr><td>March 8, 2024</td><td>Functionality can be hidden from users behind a URL-based feature flag</td><td><ul><li>Implement Feature Flags — <a href="https://github.com/HHS/simpler-grants-gov/pull/1236">https://github.com/HHS/simpler-grants-gov/pull/1236</a></li><li>Search Page feature flag — <a href="https://github.com/HHS/simpler-grants-gov/pull/1251">https://github.com/HHS/simpler-grants-gov/pull/1251</a></li><li>Put search page behind feature flag — <a href="https://github.com/HHS/simpler-grants-gov/pull/1452">https://github.com/HHS/simpler-grants-gov/pull/1452</a></li></ul></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

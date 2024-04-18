@@ -50,7 +50,6 @@ locals {
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  api_auth_token_config                          = local.environment_config.api_auth_token
   domain                                         = local.environment_config.domain
 }
 
@@ -111,10 +110,6 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
-data "aws_ssm_parameter" "api_auth_token" {
-  name = local.api_auth_token_config.api_auth_token_param_name
-}
-
 module "service" {
   source                = "../../modules/service"
   service_name          = local.service_name
@@ -127,8 +122,7 @@ module "service" {
   cpu                   = 1024
   memory                = 2048
 
-  api_auth_token = data.aws_ssm_parameter.api_auth_token.value
-  cert_arn       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids

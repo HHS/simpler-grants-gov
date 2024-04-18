@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
 import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
@@ -16,11 +17,13 @@ import { useSearchFormState } from "../../hooks/useSearchFormState";
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
   requestURLQueryParams: SearchFetcherProps;
+  agencyNameLookup?: AgencyNamyLookup;
 }
 
 export function SearchForm({
   initialSearchResults,
   requestURLQueryParams,
+  agencyNameLookup,
 }: SearchFormProps) {
   // Capture top level logic, including useFormState in the useSearchFormState hook
   const {
@@ -78,13 +81,15 @@ export function SearchForm({
           <div className="tablet:grid-col-8">
             <SearchResultsHeader
               formRef={formRef}
-              searchResultsLength={searchResults.pagination_info.total_records}
+              searchResultsLength={
+                searchResults?.pagination_info?.total_records
+              }
               initialQueryParams={sortbyQueryParams}
             />
             <div className="usa-prose">
-              {searchResults.data.length >= 1 ? (
+              {searchResults?.data.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults.pagination_info.total_pages}
+                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
@@ -93,12 +98,14 @@ export function SearchForm({
               ) : null}
 
               <SearchResultsList
-                searchResults={searchResults.data}
+                searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
+                agencyNameLookup={agencyNameLookup}
+                errors={searchResults.errors}
               />
-              {searchResults.data.length >= 1 ? (
+              {searchResults?.data?.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults.pagination_info.total_pages}
+                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                 />

@@ -101,7 +101,7 @@ class OpportunityContainer:
         close_date: date | None = None,
         archive_date: date | None = None,
         is_forecast: bool = False,
-        revision_number: int = 0,
+        revision_number: int | None = None,
         is_deleted: bool = False,
         is_expected_current: bool = False,
         is_already_current: bool = False,
@@ -241,7 +241,6 @@ class TestProcessOpportunity(BaseTestClass):
         container = (
             OpportunityContainer()
             .with_summary(
-                revision_number=1,
                 is_forecast=summary_info.is_forecast,
                 post_date=summary_info.post_date,
                 close_date=summary_info.close_date,
@@ -249,7 +248,7 @@ class TestProcessOpportunity(BaseTestClass):
                 is_expected_current=True if expected_opportunity_status is not None else False,
             )
             .with_summary(
-                # this summary won't ever be chosen as its an older revision
+                # this summary won't ever be chosen as it has a revision number set
                 revision_number=0,
                 is_forecast=summary_info.is_forecast,
                 post_date=YESTERDAY,
@@ -401,7 +400,6 @@ class TestProcessOpportunity(BaseTestClass):
                 close_date=expected_summary_info.close_date,
                 archive_date=expected_summary_info.archive_date,
                 is_expected_current=True if expected_opportunity_status is not None else False,
-                revision_number=5,
             )
             .with_summary(
                 is_forecast=other_summary_info.is_forecast,
@@ -555,7 +553,6 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
             post_date=CURRENT_DATE - timedelta(days=5),
             archive_date=CURRENT_DATE + timedelta(days=120),
             is_expected_current=True,
-            revision_number=3,
         )
     )
 

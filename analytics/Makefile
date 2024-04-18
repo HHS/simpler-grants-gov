@@ -5,9 +5,11 @@
 ORG ?= HHS
 REPO ?= simpler-grants-gov
 SPRINT_PROJECT ?= 13
-SPRINT_FILE ?= data/sprint-data.json
-ISSUE_FILE ?= data/issue-data.json
+ROADMAP_PROJECT ?= 12
 OUTPUT_DIR ?= data
+SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
+ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
+ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
 SPRINT ?= @current
 UNIT ?= points
 ACTION ?= show-results
@@ -144,6 +146,14 @@ sprint-data-export:
 	--project $(SPRINT_PROJECT) \
 	--output-file $(SPRINT_FILE)
 
+roadmap-data-export:
+	@echo "=> Exporting project data from the product roadmap"
+	@echo "====================================================="
+	$(POETRY) analytics export gh_project_data \
+	--owner $(ORG) \
+	--project $(ROADMAP_PROJECT) \
+	--output-file $(ROADMAP_FILE)
+
 issue-data-export:
 	@echo "=> Exporting issue data from the repository"
 	@echo "====================================================="
@@ -152,7 +162,7 @@ issue-data-export:
 	--repo $(REPO) \
 	--output-file $(ISSUE_FILE)
 
-gh-data-export: sprint-data-export issue-data-export
+gh-data-export: sprint-data-export issue-data-export roadmap-data-export
 
 sprint-burndown:
 	@echo "=> Running sprint burndown report"
@@ -170,8 +180,11 @@ percent-complete:
 	@echo "====================================================="
 	$(POETRY) analytics calculate deliverable_percent_complete \
 	--sprint-file $(SPRINT_FILE) \
+	--roadmap-file $(ROADMAP_FILE) \
 	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
+	--include-status "In Progress" \
+  	--include-status "Planning" \
 	--unit $(UNIT) \
 	--$(ACTION)
 
