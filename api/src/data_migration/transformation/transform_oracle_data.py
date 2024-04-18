@@ -1,7 +1,7 @@
 import logging
 from enum import StrEnum
 
-from sqlalchemy import Select
+from sqlalchemy import select, delete
 
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
@@ -33,20 +33,21 @@ class TransformOracleData(Task):
             # One-to-many lookups
 
     def process_opportunities(self) -> None:
-        # todo handle deletes
-
+        # todo handle deletes and get a count somehow?
+        opportunity_ids_to_delete = select(TransferTopportunity.opportunity_id).where(TransferTopportunity.publisher_profile_id == None) # TODO - make this the real query
+        self.db_session.execute(delete(Opportunity).where(Opportunity.opportunity_id.in_(opportunity_ids_to_delete)))
 
         # TODO - add filters so it only contains updates
         # TODO - we can probably select a tuple with both in a join?
         source_opportunities: list[TransferTopportunity] = self.db_session.execute(
-            Select(TransferTopportunity)
+            select(TransferTopportunity)
         ).scalars()
 
         # TODO - this is just update/inserts
         # TODO - add the incrementer counter
         for source_opportunity in source_opportunities:
             target_opportunity: Opportunity | None = self.db_session.execute(
-                Select(Opportunity).where(
+                select(Opportunity).where(
                     Opportunity.opportunity_id == source_opportunity.opportunity_id
                 )
             ).scalar_one_or_none()
