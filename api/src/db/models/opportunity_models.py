@@ -42,7 +42,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     is_draft: Mapped[bool] = mapped_column(index=True)
 
-    revision_number: Mapped[str | None]
+    revision_number: Mapped[str | None]  # TODO: convert to numeric?
     modified_comments: Mapped[str | None]
 
     # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables

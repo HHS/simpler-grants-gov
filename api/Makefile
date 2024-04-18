@@ -166,8 +166,11 @@ db-migrate-history: ## Show migration history
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
-db-seed-local:
+db-seed-local: ## Populate tables with mock data
 	$(PY_RUN_CMD) db-seed-local $(args)
+
+db-seed-local-source-tables: ## Populate source tables with mock data
+	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_source_tables
 
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
