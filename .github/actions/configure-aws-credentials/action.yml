@@ -24,6 +24,8 @@ runs:
         export TF_LOG="${{ env.TF_LOG }}"
         export TF_LOG_PATH="${{ env.TF_LOG_PATH }}"
 
+        terraform --version
+
         # Get AWS account authentication details (AWS account, IAM role, AWS region)
         # associated with the application environment to figure out which AWS
         # account to log into, which IAM role to assume, and which AWS region to use
