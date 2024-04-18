@@ -2,6 +2,6 @@
 # SQLAlchemy models for foreign tables.
 #
 
-from . import base, opportunity
+from . import base, forecast, opportunity, synopsis
 
 metadata = base.metadata
