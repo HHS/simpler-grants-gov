@@ -5,9 +5,10 @@ run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == '
 on:
   push:
     branches:
-      - main
-    paths:
-      - "infra/analytics/**"
+      # - main
+      - alsia/create-infra-depoly-files
+    # paths:
+    #   - "infra/analytics/**"
   release:
     types: [published]
 
@@ -41,9 +42,9 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ['dev', 'staging', 'prod']
-        exclude:
-          - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+        envs: ${{ true && fromjson('prod') || fromjson('dev, stage') }}
+        # exclude:
+        #   - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
 
     permissions:
       contents: read
