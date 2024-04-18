@@ -2,8 +2,10 @@
 # SQLAlchemy models for foreign tables.
 #
 
+import datetime
+
 import sqlalchemy
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 from . import base
 
@@ -11,21 +13,21 @@ from . import base
 class Topportunity(base.Base):
     __tablename__ = "topportunity"
 
-    opportunity_id = mapped_column(sqlalchemy.NUMERIC(20), nullable=False, primary_key=True)
-    oppnumber = mapped_column(sqlalchemy.VARCHAR(40))
-    revision_number = mapped_column(sqlalchemy.NUMERIC(20))
-    opptitle = mapped_column(sqlalchemy.VARCHAR(255))
-    owningagency = mapped_column(sqlalchemy.VARCHAR(255))
-    publisheruid = mapped_column(sqlalchemy.VARCHAR(255))
-    listed = mapped_column(sqlalchemy.CHAR(1))
-    oppcategory = mapped_column(sqlalchemy.CHAR(1))
-    initial_opportunity_id = mapped_column(sqlalchemy.NUMERIC(20))
-    modified_comments = mapped_column(sqlalchemy.VARCHAR(2000))
-    created_date = mapped_column(sqlalchemy.DATE)
-    last_upd_date = mapped_column(sqlalchemy.DATE)
-    creator_id = mapped_column(sqlalchemy.VARCHAR(50))
-    last_upd_id = mapped_column(sqlalchemy.VARCHAR(50))
-    flag_2006 = mapped_column(sqlalchemy.CHAR(1))
-    category_explanation = mapped_column(sqlalchemy.VARCHAR(255))
-    publisher_profile_id = mapped_column(sqlalchemy.NUMERIC(20))
-    is_draft = mapped_column(sqlalchemy.VARCHAR(1))
+    opportunity_id: Mapped[int] = mapped_column(sqlalchemy.BigInteger, primary_key=True)
+    oppnumber: Mapped[str | None]
+    revision_number: Mapped[int] = mapped_column(sqlalchemy.BigInteger)
+    opptitle: Mapped[str | None]
+    owningagency: Mapped[str | None]
+    publisheruid: Mapped[str | None]
+    listed: Mapped[str | None]
+    oppcategory: Mapped[str | None]
+    initial_opportunity_id: Mapped[int] = mapped_column(sqlalchemy.BigInteger)
+    modified_comments: Mapped[str | None]
+    created_date: Mapped[datetime.datetime] = mapped_column(sqlalchemy.TIMESTAMP(timezone=True))
+    last_upd_date: Mapped[datetime.datetime] = mapped_column(sqlalchemy.TIMESTAMP(timezone=True))
+    creator_id: Mapped[str | None]
+    last_upd_id: Mapped[str | None]
+    flag_2006: Mapped[str | None]
+    category_explanation: Mapped[str | None]
+    publisher_profile_id: Mapped[int] = mapped_column(sqlalchemy.BigInteger)
+    is_draft: Mapped[str | None]
