@@ -6,7 +6,7 @@ import { formatDate } from "../../utils/dateUtil";
 
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
-  agencyFilterLookup: AgencyFilterLookup;
+  agencyFilterLookup?: AgencyFilterLookup;
 }
 
 export default function SearchResultsListItem({
@@ -103,7 +103,8 @@ export default function SearchResultsListItem({
               <span className={metadataBorderClasses}>
                 <strong>Agency:</strong>{" "}
                 {opportunity?.summary?.agency_name &&
-                opportunity?.summary?.agency_code
+                opportunity?.summary?.agency_code &&
+                agencyFilterLookup
                   ? agencyFilterLookup[opportunity?.summary?.agency_code]
                   : "--"}
               </span>

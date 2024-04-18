@@ -17,13 +17,13 @@ import { useSearchFormState } from "../../hooks/useSearchFormState";
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
   requestURLQueryParams: SearchFetcherProps;
-  agencyFilterLookup: AgencyFilterLookup;
+  agencyFilterLookup?: AgencyFilterLookup;
 }
 
 export function SearchForm({
   initialSearchResults,
   requestURLQueryParams,
-  agencyFilterLookup
+  agencyFilterLookup,
 }: SearchFormProps) {
   // Capture top level logic, including useFormState in the useSearchFormState hook
   const {

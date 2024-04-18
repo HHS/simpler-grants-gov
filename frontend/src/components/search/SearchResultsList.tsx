@@ -10,7 +10,7 @@ import { useFormStatus } from "react-dom";
 interface SearchResultsListProps {
   searchResults: SearchResponseData;
   maxPaginationError: boolean;
-  agencyFilterLookup: AgencyFilterLookup;
+  agencyFilterLookup?: AgencyFilterLookup;
   errors?: unknown[] | null | undefined; // If passed in, there's been an issue with the fetch call
 }
 
@@ -57,7 +57,10 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
       )}
       {searchResults?.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem opportunity={opportunity} agencyFilterLookup={agencyFilterLookup} />
+          <SearchResultsListItem
+            opportunity={opportunity}
+            agencyFilterLookup={agencyFilterLookup}
+          />
         </li>
       ))}
     </ul>
