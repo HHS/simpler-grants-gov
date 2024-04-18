@@ -9,6 +9,7 @@ on:
       - "main"
     paths:
       - "api/**"
+      - ".github/workflows/cd-api.yml" # <= for testing purposes
   release:
     types: [published]
   workflow_dispatch:
