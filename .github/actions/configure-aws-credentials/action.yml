@@ -19,6 +19,9 @@ runs:
         TF_LOG: DEBUG
         TF_LOG_PATH: "./terraform-debug.log"
       run: |
+        # Print the commands as you run them
+        set -o xtrace
+
         # Set up environment for detailed Terraform logging
         echo "Enabling Terraform Debug Logging"
         export TF_LOG="${{ env.TF_LOG }}"
