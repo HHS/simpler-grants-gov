@@ -44,7 +44,7 @@ jobs:
         directory: ["database", "service"]
         envs: ['dev', 'staging', 'prod']
         exclude:
-          - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+          - envs: ${{ (github.event_name != 'release' && 'prod') || 'dev'}} # exclude prod if event type is not release; or exclude dev
 
     permissions:
       contents: read
