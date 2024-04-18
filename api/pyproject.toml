@@ -80,7 +80,8 @@ ignore = [
   "E266",
   # Ignore line-too-long errors, assume the formatter handles that appropriately
   "E501",
-  # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum]  "C4",
+  # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum] #
+  "C4",
   # Ignore rule that flags functions with many branches - sometimes we just have a lot of
   # business rules that make sense to aggregate in one place.
   "C901",
