@@ -17,24 +17,20 @@ runs:
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
       env:
         TF_LOG: DEBUG
-        TF_LOG_PATH: "./terraform-debug.log"
       run: |
-        # Print the commands as you run them
-        set -o xtrace
-
-        # Set up environment for detailed Terraform logging
-        echo "Enabling Terraform Debug Logging"
-        export TF_LOG="${{ env.TF_LOG }}"
-        export TF_LOG_PATH="${{ env.TF_LOG_PATH }}"
-
-        terraform --version
-
         # Get AWS account authentication details (AWS account, IAM role, AWS region)
         # associated with the application environment to figure out which AWS
         # account to log into, which IAM role to assume, and which AWS region to use
 
         echo "::group::AWS account authentication details"
 
+        # Print the commands as you run them
+        set -o xtrace
+
+        # Set up environment for detailed Terraform logging
+        export TF_LOG="${{ env.TF_LOG }}"
+
+        terraform --version
         terraform -chdir=infra/project-config init
         terraform -chdir=infra/project-config apply -refresh-only -auto-approve
         AWS_REGION=$(terraform -chdir=infra/project-config output -raw default_region)
