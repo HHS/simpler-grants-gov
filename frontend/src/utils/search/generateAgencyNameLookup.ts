@@ -1,21 +1,21 @@
 import { agencyFilterList } from "src/components/search/SearchFilterAccordion/filterJSONLists/agencyFilterList";
 
-export interface AgencyFilterLookup {
+export interface AgencyNamyLookup {
   [key: string]: string;
 }
 
-export const generateAgencyFilterLookup = () => {
-  const valueLabelMap: AgencyFilterLookup = {};
+export const generateAgencyNameLookup = () => {
+  const agencyNameLookup: AgencyNamyLookup = {};
 
   agencyFilterList.forEach((agency) => {
     if (agency.children) {
       agency.children.forEach((child) => {
-        valueLabelMap[child.value] = child.label;
+        agencyNameLookup[child.value] = child.label;
       });
     } else {
-      valueLabelMap[agency.value] = agency.label;
+      agencyNameLookup[agency.value] = agency.label;
     }
   });
 
-  return valueLabelMap;
+  return agencyNameLookup;
 };
