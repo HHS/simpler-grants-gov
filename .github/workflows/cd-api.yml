@@ -4,13 +4,15 @@ name: Deploy API
 run-name: Deploy ${{ github.ref_name }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
 
 on:
+  # for testing purposes
+  pull_request:
+    paths:
+      - ".github/workflows/cd-api.yml"
   push:
     branches:
       - "main"
-      - "tf-debug" # <= for testing purposes
     paths:
       - "api/**"
-      - ".github/workflows/cd-api.yml" # <= for testing purposes
   release:
     types: [published]
   workflow_dispatch:
