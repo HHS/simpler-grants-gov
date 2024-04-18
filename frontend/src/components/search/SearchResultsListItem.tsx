@@ -1,14 +1,17 @@
 "use client";
 
+import { AgencyFilterLookup } from "src/utils/search/generateAgencyFilterLookup";
 import { Opportunity } from "src/types/search/searchResponseTypes";
 import { formatDate } from "../../utils/dateUtil";
 
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
+  agencyFilterLookup: AgencyFilterLookup;
 }
 
 export default function SearchResultsListItem({
   opportunity,
+  agencyFilterLookup,
 }: SearchResultsListItemProps) {
   // TODO: Confirm once deploying to lowers
   // relates to https://github.com/HHS/simpler-grants-gov/issues/1521
@@ -99,8 +102,9 @@ export default function SearchResultsListItem({
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
               <span className={metadataBorderClasses}>
                 <strong>Agency:</strong>{" "}
-                {opportunity?.summary?.agency_name
-                  ? opportunity?.summary?.agency_name
+                {opportunity?.summary?.agency_name &&
+                opportunity?.summary?.agency_code
+                  ? agencyFilterLookup[opportunity?.summary?.agency_code]
                   : "--"}
               </span>
               <span className={metadataBorderClasses}>

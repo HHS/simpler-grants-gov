@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyFilterLookup } from "src/utils/search/generateAgencyFilterLookup";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
 import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
@@ -16,11 +17,13 @@ import { useSearchFormState } from "../../hooks/useSearchFormState";
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
   requestURLQueryParams: SearchFetcherProps;
+  agencyFilterLookup: AgencyFilterLookup;
 }
 
 export function SearchForm({
   initialSearchResults,
   requestURLQueryParams,
+  agencyFilterLookup
 }: SearchFormProps) {
   // Capture top level logic, including useFormState in the useSearchFormState hook
   const {
@@ -97,6 +100,7 @@ export function SearchForm({
               <SearchResultsList
                 searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
+                agencyFilterLookup={agencyFilterLookup}
                 errors={searchResults.errors}
               />
               {searchResults?.data?.length >= 1 ? (
