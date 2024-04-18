@@ -51,6 +51,8 @@ jobs:
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
+        env:
+            TF_LOG: DEBUG
         with:
           app_name: ${{ inputs.app_name }}
           environment: shared
