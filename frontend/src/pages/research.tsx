@@ -14,12 +14,20 @@ import ResearchMethodology from "./content/ResearchMethodology";
 import ResearchThemes from "./content/ResearchThemes";
 
 const Research: NextPage = () => {
-  const { t } = useTranslation("common", { keyPrefix: "Research" });
+  const { t } = useTranslation("common");
+  // TODO: Remove during move to app router and next-intl upgrade
+  const beta_strings = {
+    alert_title: t("Beta_alert.alert_title"),
+    alert: t("Beta_alert.alert"),
+  };
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
-      <BetaAlert />
+      <PageSEO
+        title={t("Research.page_title")}
+        description={t("Research.meta_description")}
+      />
+      <BetaAlert beta_strings={beta_strings} />
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />
       <ResearchMethodology />

@@ -18,14 +18,30 @@ import {
 
 import logo from "../../public/img/logo-white-lg.webp";
 
-const GrantsIdentifier = () => {
+// TODO: Remove during move to app router and next-intl upgrade
+type IdentifierStrings = {
+  link_about: string;
+  link_accessibility: string;
+  link_foia: string;
+  link_fear: string;
+  link_ig: string;
+  link_performance: string;
+  link_privacy: string;
+  logo_alt: string;
+};
+
+type Props = {
+  identifier_strings: IdentifierStrings;
+};
+
+const GrantsIdentifier = ({ identifier_strings }: Props) => {
   const { t } = useTranslation("common", {
     keyPrefix: "Identifier",
   });
 
   const logoImage = (
     <Image
-      alt={t("logo_alt")}
+      alt={identifier_strings.logo_alt}
       src={logo}
       className="usa-identifier__logo-img"
     />
@@ -34,31 +50,31 @@ const GrantsIdentifier = () => {
   const IdentifierLinkList = [
     {
       href: ExternalRoutes.ABOUT_HHS,
-      text: t("link_about"),
+      text: identifier_strings.link_about,
     },
     {
       href: ExternalRoutes.ACCESSIBILITY_COMPLIANCE,
-      text: t("link_accessibility"),
+      text: identifier_strings.link_accessibility,
     },
     {
       href: ExternalRoutes.FOIA,
-      text: t("link_foia"),
+      text: identifier_strings.link_foia,
     },
     {
       href: ExternalRoutes.NO_FEAR,
-      text: t("link_fear"),
+      text: identifier_strings.link_fear,
     },
     {
       href: ExternalRoutes.INSPECTOR_GENERAL,
-      text: t("link_ig"),
+      text: identifier_strings.link_ig,
     },
     {
       href: ExternalRoutes.PERFORMANCE_REPORTS,
-      text: t("link_performance"),
+      text: identifier_strings.link_performance,
     },
     {
       href: ExternalRoutes.PRIVACY_POLICY,
-      text: t("link_privacy"),
+      text: identifier_strings.link_privacy,
     },
   ].map(({ text, href }) => (
     <IdentifierLinkItem key={text}>
