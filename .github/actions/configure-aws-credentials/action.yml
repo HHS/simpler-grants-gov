@@ -15,7 +15,15 @@ runs:
   using: "composite"
   steps:
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
+      env:
+        TF_LOG: DEBUG
+        TF_LOG_PATH: './terraform-debug.log'
       run: |
+        # Set up environment for detailed Terraform logging
+        echo "Enabling Terraform Debug Logging"
+        export TF_LOG="${{ env.TF_LOG }}"
+        export TF_LOG_PATH="${{ env.TF_LOG_PATH }}"
+
         # Get AWS account authentication details (AWS account, IAM role, AWS region)
         # associated with the application environment to figure out which AWS
         # account to log into, which IAM role to assume, and which AWS region to use
@@ -50,6 +58,9 @@ runs:
         echo "Setting env vars AWS_ROLE_TO_ASSUME and AWS_REGION..."
         echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME" >> "$GITHUB_ENV"
         echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
+
+        # Output Terraform log file contents
+        cat "$TF_LOG_PATH"
       shell: bash
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
