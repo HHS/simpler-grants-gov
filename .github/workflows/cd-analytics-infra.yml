@@ -65,5 +65,6 @@ jobs:
 
       - name: Terraform Init and Apply
         run: |
+          ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
           export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
-          ./bin/terraform-init-and-apply.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
+          ./bin/terraform-apply.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
