@@ -121,7 +121,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    revision_number: Mapped[int]
+    revision_number: Mapped[int | None]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]

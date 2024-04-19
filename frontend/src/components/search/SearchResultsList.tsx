@@ -1,5 +1,6 @@
 "use client";
 
+import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 import Loading from "../../app/search/loading";
 import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import { SearchResponseData } from "../../types/search/searchResponseTypes";
@@ -9,12 +10,14 @@ import { useFormStatus } from "react-dom";
 interface SearchResultsListProps {
   searchResults: SearchResponseData;
   maxPaginationError: boolean;
+  agencyNameLookup?: AgencyNamyLookup;
   errors?: unknown[] | null | undefined; // If passed in, there's been an issue with the fetch call
 }
 
 const SearchResultsList: React.FC<SearchResultsListProps> = ({
   searchResults,
   maxPaginationError,
+  agencyNameLookup,
   errors,
 }) => {
   const { pending } = useFormStatus();
@@ -54,7 +57,10 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
       )}
       {searchResults?.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem opportunity={opportunity} />
+          <SearchResultsListItem
+            opportunity={opportunity}
+            agencyNameLookup={agencyNameLookup}
+          />
         </li>
       ))}
     </ul>

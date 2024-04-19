@@ -144,19 +144,15 @@ class SetCurrentOpportunitiesTask(Task):
         latest_forecasted_summary: OpportunitySummary | None = None
         latest_non_forecasted_summary: OpportunitySummary | None = None
 
-        # Latest is based entirely off of the revision number, we don't
-        # care about update/create dates or any other fields
+        # Latest is based entirely off of the revision number, the latest
+        # will always have a null revision number, and because of how the
+        # data is structured that we import, we'll only ever have a single
+        # null value for forecast and non-forecast respectively
         for summary in opportunity.all_opportunity_summaries:
-            if summary.is_forecast:
-                if latest_forecasted_summary is None:
-                    latest_forecasted_summary = summary
-                elif summary.revision_number > latest_forecasted_summary.revision_number:
-                    latest_forecasted_summary = summary
-            else:
-                if latest_non_forecasted_summary is None:
-                    latest_non_forecasted_summary = summary
-                elif summary.revision_number > latest_non_forecasted_summary.revision_number:
-                    latest_non_forecasted_summary = summary
+            if summary.is_forecast and summary.revision_number is None:
+                latest_forecasted_summary = summary
+            elif not summary.is_forecast and summary.revision_number is None:
+                latest_non_forecasted_summary = summary
 
         # We need to make sure the latest can actually be publicly displayed
         # Note that if it cannot, we do not want to use an earlier revision
