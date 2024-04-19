@@ -1,6 +1,9 @@
 #
 # SQLAlchemy models for foreign tables.
 #
+# The order of the columns must match the remote Oracle database. The names are not required to
+# match by oracle_fdw, but we are matching them for maintainability.
+#
 
 import datetime
 
@@ -35,14 +38,14 @@ class Topportunity(base.Base):
 class TopportunityCfda(base.Base):
     __tablename__ = "topportunity_cfda"
 
-    programtitle: Mapped[str | None]
-    origtoppid: Mapped[int | None]
-    origoppnum: Mapped[str | None]
     opp_cfda_id: Mapped[int] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int]
+    cfdanumber: Mapped[str | None]
+    programtitle: Mapped[str | None]
+    origtoppid: Mapped[int | None]
     oppidcfdanum: Mapped[str | None]
-    last_upd_id: Mapped[str | None]
+    origoppnum: Mapped[str | None]
+    created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
-    created_date: Mapped[datetime.datetime | None]
-    cfdanumber: Mapped[str | None]
+    last_upd_id: Mapped[str | None]

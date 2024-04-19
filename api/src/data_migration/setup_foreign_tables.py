@@ -53,7 +53,10 @@ def build_sql(table: sqlalchemy.schema.Table, is_local: bool, schema_name: str) 
 
     create_table = sqlalchemy.schema.CreateTable(table, if_not_exists=True)
     if is_local:
-        compiler = create_table.compile(schema_translate_map={"grants": schema_name})
+        compiler = create_table.compile(
+            dialect=sqlalchemy.dialects.postgresql.dialect(),
+            schema_translate_map={"grants": schema_name},
+        )
     else:
         compiler = create_table.compile(
             dialect=src.db.foreign.dialect.ForeignTableDialect(),
