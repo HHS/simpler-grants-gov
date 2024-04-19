@@ -59,9 +59,6 @@ runs:
         echo "Setting env vars AWS_ROLE_TO_ASSUME and AWS_REGION..."
         echo "AWS_ROLE_TO_ASSUME=$AWS_ROLE_TO_ASSUME" >> "$GITHUB_ENV"
         echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
-
-        # Output Terraform log file contents
-        cat "$TF_LOG_PATH"
       shell: bash
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
