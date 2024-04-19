@@ -42,7 +42,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     is_draft: Mapped[bool] = mapped_column(index=True)
 
-    revision_number: Mapped[str | None]
+    revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
 
     # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
@@ -121,7 +121,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     forecasted_project_start_date: Mapped[date | None]
     fiscal_year: Mapped[int | None]
 
-    revision_number: Mapped[int]
+    revision_number: Mapped[int | None]
     modification_comments: Mapped[str | None]
 
     funding_category_description: Mapped[str | None]
@@ -136,6 +136,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 
     is_deleted: Mapped[bool | None]
 
+    version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
     publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
     publisher_user_id: Mapped[str | None]

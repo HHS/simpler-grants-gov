@@ -2,15 +2,16 @@ import {
   ServerSideRouteParams,
   ServerSideSearchParams,
 } from "../../types/searchRequestURLTypes";
-import { Metadata } from "next";
 
 import BetaAlert from "../../components/BetaAlert";
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
+import { Metadata } from "next";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
 import { convertSearchParamsToProperTypes } from "../../utils/search/convertSearchParamsToProperTypes";
 import { cookies } from "next/headers";
+import { generateAgencyNameLookup } from "src/utils/search/generateAgencyNameLookup";
 import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { notFound } from "next/navigation";
 
@@ -61,6 +62,7 @@ export default async function Search({ searchParams }: ServerPageProps) {
       <SearchForm
         initialSearchResults={initialSearchResults}
         requestURLQueryParams={convertedSearchParams}
+        agencyNameLookup={generateAgencyNameLookup()}
       />
     </>
   );
