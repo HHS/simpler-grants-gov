@@ -384,7 +384,8 @@ class OpportunitySummaryFactory(BaseFactory):
 
     is_deleted = False
 
-    revision_number = 1
+    # Generally, current summaries won't have the revision number set
+    revision_number = None
 
     funding_instruments = factory.Faker(
         "random_elements",
