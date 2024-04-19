@@ -27,7 +27,7 @@ runs:
         # Print the commands as you run them
         set -o xtrace
 
-        # Set up environment for detailed Terraform logging
+        # Set up environment for detailed Terraform logs
         export TF_LOG="${{ env.TF_LOG }}"
 
         terraform --version
