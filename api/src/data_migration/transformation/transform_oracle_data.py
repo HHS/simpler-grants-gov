@@ -1,5 +1,6 @@
 import logging
 from enum import StrEnum
+from typing import Tuple
 
 from sqlalchemy import select, delete
 
@@ -21,6 +22,8 @@ class TransformOracleData(Task):
         TOTAL_RECORDS_INSERTED = "total_records_inserted"
         TOTAL_RECORDS_UPDATED = "total_records_updated"
 
+
+
     def run_task(self) -> None:
         with self.db_session.begin():
             self.process_opportunities()
@@ -33,33 +36,63 @@ class TransformOracleData(Task):
             # One-to-many lookups
 
     def process_opportunities(self) -> None:
-        # todo handle deletes and get a count somehow?
-        opportunity_ids_to_delete = select(TransferTopportunity.opportunity_id).where(TransferTopportunity.publisher_profile_id == None) # TODO - make this the real query
-        self.db_session.execute(delete(Opportunity).where(Opportunity.opportunity_id.in_(opportunity_ids_to_delete)))
 
+        # Fetch all opportunities that were modified
+        # Alongside that, grab the existing opportunity record
         # TODO - add filters so it only contains updates
-        # TODO - we can probably select a tuple with both in a join?
-        source_opportunities: list[TransferTopportunity] = self.db_session.execute(
-            select(TransferTopportunity)
-        ).scalars()
+        # TODO - add a yield_per
+        opportunities: list[Tuple[TransferTopportunity, Opportunity | None]] = self.db_session.execute(
+            select(TransferTopportunity, Opportunity).join(Opportunity, TransferTopportunity.opportunity_id == Opportunity.opportunity_id, isouter=True)
+        ).all()
 
-        # TODO - this is just update/inserts
-        # TODO - add the incrementer counter
-        for source_opportunity in source_opportunities:
-            target_opportunity: Opportunity | None = self.db_session.execute(
-                select(Opportunity).where(
-                    Opportunity.opportunity_id == source_opportunity.opportunity_id
-                )
-            ).scalar_one_or_none()
+        for source_opportunity, target_opportunity in opportunities:
+            try:
+                self.process_opportunity(source_opportunity, target_opportunity)
+            except Exception:
+                # TODO - more info
+                # TODO - metric
+                logger.exception("Failed to process opportunity")
 
-            # transform
+    def process_opportunity(self, source_opportunity: TransferTopportunity, target_opportunity: Opportunity | None) -> None:
+        extra = {"opportunity_id": source_opportunity.opportunity_id}
+        logger.info("Processing opportunity", extra=extra)
+
+        # TODO - whatever check we need to do to see if something should be deleted
+        if source_opportunity.publisheruid == "should be deleted":
+            logger.info("Deleting opportunity", extra=extra)
+
+            if target_opportunity is None:
+                raise Exception("Cannot delete opportunity as it does not exist")
+
+            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
+            self.db_session.delete(target_opportunity)
+
+
+        else:
+            logger.info("Transforming and upserting opportunity", extra=extra)
             transformed_opportunity = self.transform_opportunity(
                 source_opportunity, target_opportunity
             )
             self.db_session.add(transformed_opportunity)
 
-            # TODO - set the field we query by to null (or set it? which way are we doing it?)
-            # target_opportunity.whatever_field = None
+
+        logger.info("Processed opportunity", extra=extra)
+        # TODO - set the field we query by to null (or set it? which way are we doing it?)
+        # target_opportunity.whatever_field = None
+
+    def process_assistance_listings(self) -> None:
+        # TODO - https://github.com/HHS/simpler-grants-gov/issues/1746
+
+        pass
+
+    def process_opportunity_summaries(self) -> None:
+        # TODO - https://github.com/HHS/simpler-grants-gov/issues/1747
+        pass
+
+    def process_one_to_many_lookup_tables(self) -> None:
+        # TODO - https://github.com/HHS/simpler-grants-gov/issues/1749
+        pass
+
 
     def transform_opportunity(
         self, source_opportunity: TransferTopportunity, target_opportunity: Opportunity | None

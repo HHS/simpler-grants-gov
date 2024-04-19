@@ -28,8 +28,6 @@ def _build_opportunities(db_session: db.Session, iterations: int) -> None:
     factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
 
     for i in range(iterations):
-        if True:
-            continue
         logger.info(f"Creating opportunity batch number {i}")
         # Create a few opportunities in various scenarios
         factories.OpportunityFactory.create_batch(size=5, is_forecasted_summary=True)
