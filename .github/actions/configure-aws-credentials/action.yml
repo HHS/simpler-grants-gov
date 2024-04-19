@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
       env:
-        TF_LOG: DEBUG
+        TF_LOG: INFO
       run: |
         # Get AWS account authentication details (AWS account, IAM role, AWS region)
         # associated with the application environment to figure out which AWS

@@ -4,10 +4,6 @@ name: Deploy API
 run-name: Deploy ${{ github.ref_name }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
 
 on:
-  # for testing purposes
-  pull_request:
-    paths:
-      - ".github/workflows/cd-api.yml"
   push:
     branches:
       - "main"
