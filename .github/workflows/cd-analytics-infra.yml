@@ -43,7 +43,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "stage"]') }} # add prod to matrix if event is release
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # add prod to matrix if event is release
 
     permissions:
       contents: read
