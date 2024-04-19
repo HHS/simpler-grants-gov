@@ -41,9 +41,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ['dev', 'staging', 'prod']
-        exclude:
-          - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+        envs: ${{ github.event_name == 'release' && fromJSON('['prod']') || fromJSON('['dev', 'stage']') }} # add prod to matrix if event is release
   
     permissions:
       contents: read

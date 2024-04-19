@@ -32,6 +32,7 @@ jobs:
         with:
           app_name: analytics
           environment: shared
+
       - name: Build Repository
         run: |
           ./bin/terraform-init-and-apply.sh infra/analytics/build-repository shared
@@ -42,9 +43,7 @@ jobs:
     strategy:
       matrix:
         directory: ["database", "service"]
-        envs: ${{ true && fromJSON('prod') || fromJSON('dev, stage') }}
-        # exclude:
-        #   - envs: ${{ (github.event_name != 'release' && 'prod') }} # exclude prod if event type is not release
+        envs: ${{ github.event_name == 'release' && fromJSON('['prod']') || fromJSON('['dev', 'stage']') }} # add prod to matrix if event is release
 
     permissions:
       contents: read
