@@ -59,4 +59,5 @@
 ## ANALYTICS
 
 * [Simpler Grants.gov Analytics](analytics/simpler-grants.gov-analytics/README.md)
+  * [Open source community metrics](analytics/simpler-grants.gov-analytics/open-source-community-metrics.md)
   * [API metrics](analytics/simpler-grants.gov-analytics/api-metrics.md)
