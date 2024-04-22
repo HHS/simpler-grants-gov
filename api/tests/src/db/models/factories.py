@@ -276,6 +276,12 @@ class OpportunityFactory(BaseFactory):
             opportunity_assistance_listings=None,
         )
 
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
+
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
