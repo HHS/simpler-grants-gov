@@ -172,6 +172,8 @@ resource "aws_opensearch_domain" "opensearch" {
   software_update_options {
     auto_software_update_enabled = true
   }
+
+  # checkov:skip=CKV_AWS_247:skip requirement to encrypt with customer managed KMS key
 }
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_vpc_endpoint
