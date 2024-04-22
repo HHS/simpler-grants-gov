@@ -1,5 +1,7 @@
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region
 data "aws_region" "current" {}
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity
 data "aws_caller_identity" "current" {}
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
@@ -12,6 +14,7 @@ resource "aws_cloudwatch_log_group" "opensearch" {
   # checkov:skip=CKV_AWS_158:skip requirement to encrypt with customer managed KMS key
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 resource "aws_security_group" "opensearch" {
   name   = "opensearch-${var.environment_name}"
   vpc_id = data.aws_vpc.network.id
@@ -27,6 +30,7 @@ resource "aws_security_group" "opensearch" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
 data "aws_iam_policy_document" "opensearch_access" {
   statement {
     effect = "Allow"
@@ -39,6 +43,7 @@ data "aws_iam_policy_document" "opensearch_access" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
 data "aws_iam_policy_document" "opensearch_cloudwatch" {
   statement {
     effect = "Allow"
@@ -55,12 +60,13 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_resource_policy
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
   policy_name     = "opensearch-${var.environment_name}"
   policy_document = data.aws_iam_policy_document.opensearch_cloudwatch.json
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_domain#multi_az_with_standby_enabled
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_domain
 resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.environment_name
   engine_version  = "OpenSearch_2.11"
@@ -121,6 +127,7 @@ resource "aws_opensearch_domain" "opensearch" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_vpc_endpoint
 resource "aws_opensearch_vpc_endpoint" "opensearch" {
   domain_arn = aws_opensearch_domain.opensearch.arn
   vpc_options {
