@@ -1,14 +1,11 @@
-import { GoogleTagManager } from "@next/third-parties/google";
-import { PUBLIC_ENV } from "src/constants/environments";
-
-import { appWithTranslation } from "next-i18next";
-import type { AppProps } from "next/app";
-import Head from "next/head";
-
-import Layout from "../components/Layout";
-
 import "../styles/styles.scss";
 
+import type { AppProps } from "next/app";
+import { GoogleTagManager } from "@next/third-parties/google";
+import Head from "next/head";
+import Layout from "../components/Layout";
+import { PUBLIC_ENV } from "src/constants/environments";
+import { appWithTranslation } from "next-i18next";
 import { assetPath } from "src/utils/assetPath";
 
 function MyApp({ Component, pageProps }: AppProps) {
