@@ -16,8 +16,9 @@ resource "aws_cloudwatch_log_group" "opensearch" {
 
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 resource "aws_security_group" "opensearch" {
-  name   = "opensearch-${var.environment_name}"
-  vpc_id = data.aws_vpc.network.id
+  name_prefix = "opensearch-${var.environment_name}"
+  description = "Security group for OpenSearch domain ${var.environment_name}"
+  vpc_id      = data.aws_vpc.network.id
 
   ingress {
     from_port = 443
@@ -27,6 +28,10 @@ resource "aws_security_group" "opensearch" {
     cidr_blocks = [
       data.aws_vpc.network.cidr_block,
     ]
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -60,6 +65,32 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
   }
 }
 
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_random_password
+data "aws_secretsmanager_random_password" "opensearch_username" {
+  password_length = 16
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
+resource "aws_ssm_parameter" "opensearch_username" {
+  name        = "/opensearch/${var.environment_name}/username"
+  description = "The username for the OpenSearch domain"
+  type        = "SecureString"
+  value       = data.aws_secretsmanager_random_password.opensearch_username.random_password
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_random_password
+data "aws_secretsmanager_random_password" "opensearch_password" {
+  password_length = 16
+}
+
+# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
+resource "aws_ssm_parameter" "opensearch_password" {
+  name        = "/opensearch/${var.environment_name}/password"
+  description = "The password for the OpenSearch domain"
+  type        = "SecureString"
+  value       = data.aws_secretsmanager_random_password.opensearch_password.random_password
+}
+
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_resource_policy
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
   policy_name     = "opensearch-${var.environment_name}"
@@ -83,8 +114,19 @@ resource "aws_opensearch_domain" "opensearch" {
     zone_awareness_enabled        = true
     dedicated_master_enabled      = true
     instance_count                = 3
+    dedicated_master_count        = 3
     zone_awareness_config {
       availability_zone_count = 3
+    }
+  }
+
+  advanced_security_options {
+    enabled                        = true
+    anonymous_auth_enabled         = true
+    internal_user_database_enabled = true
+    master_user_options {
+      master_user_name     = data.aws_secretsmanager_random_password.opensearch_username.random_password
+      master_user_password = data.aws_secretsmanager_random_password.opensearch_password.random_password
     }
   }
 
@@ -99,12 +141,17 @@ resource "aws_opensearch_domain" "opensearch" {
 
   domain_endpoint_options {
     enforce_https       = true
-    tls_security_policy = "Policy-Min-TLS-1-2-PFS-2023-10"
+    tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
   }
 
   vpc_options {
     subnet_ids         = data.aws_subnets.database.ids
     security_group_ids = [aws_security_group.opensearch.id]
+  }
+
+  log_publishing_options {
+    cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
+    log_type                 = "AUDIT_LOGS"
   }
 
   log_publishing_options {
