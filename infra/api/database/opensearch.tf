@@ -2,10 +2,6 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_service_linked_role" "opensearch" {
-  aws_service_name = "opensearchservice.amazonaws.com"
-}
-
 # docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
 resource "aws_cloudwatch_log_group" "opensearch" {
   name_prefix = "opensearch-${var.environment_name}"
@@ -69,7 +65,6 @@ resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.environment_name
   engine_version  = "OpenSearch_2.11"
   access_policies = data.aws_iam_policy_document.opensearch_access.json
-  depends_on      = [aws_iam_service_linked_role.opensearch]
 
   encrypt_at_rest {
     enabled = true
@@ -123,5 +118,13 @@ resource "aws_opensearch_domain" "opensearch" {
 
   software_update_options {
     auto_software_update_enabled = true
+  }
+}
+
+resource "aws_opensearch_vpc_endpoint" "opensearch" {
+  domain_arn = aws_opensearch_domain.opensearch.arn
+  vpc_options {
+    subnet_ids         = data.aws_subnets.database.ids
+    security_group_ids = [aws_security_group.opensearch.id]
   }
 }
