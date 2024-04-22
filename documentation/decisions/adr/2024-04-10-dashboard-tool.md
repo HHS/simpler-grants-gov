@@ -24,7 +24,7 @@ We will evaluate the BI tool based on the following capabilities and attributes:
 - Replicable for users outside of the project
 - Cost of ownership
 - Ease of deployment
-- Simple account creation
+- Account configuration
 
 ## Solution Options
 
@@ -50,7 +50,7 @@ Here's how QuickSight evaluates against our criteria:
 - ❌ Replicable for users outside of the project - AWS QuickSight is not open source, so its results can only replicated by having access to our AWS account
 - Cost of ownership - A rough estimate puts AWS QuickSight at about ~$300/month for our quantity of users. [Pricing page.](https://aws.amazon.com/quicksight/pricing/)
 - ✅✅ Ease of deployment - [AWS QuickSight can be deploy via Terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_account_subscription). The entire deployment would be AWS managed, we do not need to manage the deployment in any way.
-- ❌ Simple account creation - [AWS QuickSight users must be deployed via Terraform or the AWS console. These users require an associated IAM user to be created.](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_user)
+- ✅ Account configuration - [AWS QuickSight users must be deployed via Terraform or the AWS console. These users require an associated IAM user to be created.](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_user) These users can also be configured with AWS SSO and MFA.
 
 ### Metabase
 
@@ -66,15 +66,15 @@ Here's how Metabase evaluates against our criteria:
 - ✅ Replicable for users outside of the project - Metabase is open-source and could be replicated by people outside the project by giving them access to a copy of our analytics database.
 - Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
 - ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker). This ECS service would be managed by us, so we would be responsible for managing upgrades to the service.
-- ✅ Simple account creation - [Metabase uses simple username and password accounts](https://www.metabase.com/docs/latest/configuring-metabase/setting-up-metabase)
+- ❌❌ Account configuration - [Metabase uses Google SSO as its secure account configuration option](https://www.metabase.com/docs/latest/people-and-groups/google-and-ldap). But doing so requires that everyone who needs a login be given a login inside a specific, single, Google workspace. That means that, for example, everyone would need a @navapbc.com email, or some new domain that we create just for this purpose. That setup works fine for organizations that use a single Google Workspace instance as their source of truth, and does not work when you have multiple subcontracting organizations with their own Google workspace instances. That unfortunately means that it does not fit our setup.
 
 ### QuickSight and Metabase compared
 
-Metabase's more conventional account creation, and open-source nature, make it slightly beat out AWS QuickSight. That said, they both unambiguously satisfy the majority of our decision criteria. Either tool would be a good choice to implement.
+We are unfortunately blocked from using Metabase due to our security and account configuration requirements. That leaves AWS QuickSight as the remaining viable in-scope option.
 
 ## Decision
 
-This ADR supports Metabase as our chosen BI tool.
+This ADR supports AWS QuickSight as our chosen BI tool.
 
 ## Links
 
