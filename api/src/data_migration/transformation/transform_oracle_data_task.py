@@ -18,7 +18,7 @@ from src.constants.lookup_constants import OpportunityCategory
 logger = logging.getLogger(__name__)
 
 
-class TransformOracleData(Task):
+class TransformOracleDataTask(Task):
     class Metrics(StrEnum):
         TOTAL_RECORDS_PROCESSED = "total_records_processed"
         TOTAL_RECORDS_DELETED = "total_records_deleted"
@@ -48,14 +48,13 @@ class TransformOracleData(Task):
         # but MyPy is weird about this and the Row+Tuple causes some
         # confusion in the parsing so it ends up assuming everything is Any
         # So just cast it to a simpler type that doesn't confuse anything
-
-        # TODO - add a yield_per
         return cast(
             list[Tuple[S, D | None]],
             self.db_session.execute(
-                select(source_model, destination_model, Opportunity).join(
-                    destination_model, *join_clause, isouter=True
-                )
+                select(source_model, destination_model)
+                .join(destination_model, *join_clause, isouter=True)
+                .where(source_model.publisher_profile_id.is_(None))
+                .execution_options(yield_per=5000)
             ).all(),
         )
 
@@ -68,10 +67,10 @@ class TransformOracleData(Task):
             [TransferTopportunity.opportunity_id == Opportunity.opportunity_id],
         )
 
-        for source_opportunity, target_opportunity, x in opportunities:
+        for source_opportunity, target_opportunity in opportunities:
             try:
                 self.process_opportunity(source_opportunity, target_opportunity)
-            except Exception:
+            except ValueError:
                 self.increment(self.Metrics.ERROR_COUNT)
                 logger.exception(
                     "Failed to process opportunity",
@@ -85,11 +84,11 @@ class TransformOracleData(Task):
         logger.info("Processing opportunity", extra=extra)
 
         # TODO - whatever check we need to do to see if something should be deleted
-        if source_opportunity.publisheruid == "should be deleted":
+        if source_opportunity.publisheruid == "delete_me":
             logger.info("Deleting opportunity", extra=extra)
 
             if target_opportunity is None:
-                raise Exception("Cannot delete opportunity as it does not exist")
+                raise ValueError("Cannot delete opportunity as it does not exist")
 
             self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
             self.db_session.delete(target_opportunity)
@@ -102,8 +101,8 @@ class TransformOracleData(Task):
             self.db_session.add(transformed_opportunity)
 
         logger.info("Processed opportunity", extra=extra)
-        # TODO - set the field we query by to null (or set it? which way are we doing it?)
-        # target_opportunity.whatever_field = None
+        # TODO - set the field we query by correctly, using this field temporarily
+        source_opportunity.publisher_profile_id = 1
 
     def process_assistance_listings(self) -> None:
         # TODO - https://github.com/HHS/simpler-grants-gov/issues/1746
@@ -174,7 +173,7 @@ def main():
         db_client = PostgresDBClient()
 
         with db_client.get_session() as db_session:
-            TransformOracleData(db_session).run()
+            TransformOracleDataTask(db_session).run()
 
 
 main()

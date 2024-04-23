@@ -595,7 +595,7 @@ class TransferTopportunityFactory(BaseFactory):
     opportunity_id = factory.Sequence(lambda n: n)
 
     oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+    opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
 
     owningagency = factory.Faker("agency")
 
