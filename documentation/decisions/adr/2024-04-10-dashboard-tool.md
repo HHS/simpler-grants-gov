@@ -66,15 +66,15 @@ Here's how Metabase evaluates against our criteria:
 - ✅ Replicable for users outside of the project - Metabase is open-source and could be replicated by people outside the project by giving them access to a copy of our analytics database.
 - Cost of ownership - The cost of running Metabase is the cost of running an appropriately sized AWS Fargate task 24/7. That cost works out to about ~$100/month.
 - ✅ Ease of deployment - [Metabase provides an official docker image that we can run on AWS ECS](https://www.metabase.com/docs/latest/installation-and-operation/running-metabase-on-docker). This ECS service would be managed by us, so we would be responsible for managing upgrades to the service.
-- ❌❌ Account configuration - [Metabase uses Google SSO as its secure account configuration option](https://www.metabase.com/docs/latest/people-and-groups/google-and-ldap). But doing so requires that everyone who needs a login be given a login inside a specific, single, Google workspace. That means that, for example, everyone would need a @navapbc.com email, or some new domain that we create just for this purpose. That setup works fine for organizations that use a single Google Workspace instance as their source of truth, and does not work when you have multiple subcontracting organizations with their own Google workspace instances. That unfortunately means that it does not fit our setup.
+- ✅ Account configuration - [Metabase uses Google SSO as its secure account configuration option](https://www.metabase.com/docs/latest/people-and-groups/google-and-ldap). This works across multiple domains and multiple Google Workspaces. As it uses Google SSO, it also supports MFA.
 
 ### QuickSight and Metabase compared
 
-We are unfortunately blocked from using Metabase due to our security and account configuration requirements. That leaves AWS QuickSight as the remaining viable in-scope option.
+Metabase's UX, and open-source nature, make it slightly beat out AWS QuickSight. That said, they both unambiguously satisfy the majority of our decision criteria. Either tool would be a good choice to implement.
 
 ## Decision
 
-This ADR supports AWS QuickSight as our chosen BI tool.
+This ADR supports Metabase as our chosen BI tool.
 
 ## Links
 
