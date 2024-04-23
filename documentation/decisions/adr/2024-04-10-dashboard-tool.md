@@ -1,4 +1,4 @@
-# Dashboard Data Storage
+# Business Intelligence Tool
 
 - **Status:** Active
 - **Last Modified:** 2024-04-10
