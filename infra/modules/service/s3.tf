@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "general_purpose_put_access" {
       aws_s3_bucket.general_purpose.arn,
       "${aws_s3_bucket.general_purpose.arn}/*"
     ]
-    actions = ["s3:PutObject"]
+    actions = ["s3:*"]
 
     principals {
       type        = "AWS"
