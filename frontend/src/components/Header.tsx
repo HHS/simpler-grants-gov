@@ -1,8 +1,5 @@
 "use client";
 
-import { assetPath } from "src/utils/assetPath";
-
-import { useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -10,6 +7,10 @@ import {
   Title,
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
+import { useEffect, useRef, useState } from "react";
+
+import { assetPath } from "src/utils/assetPath";
+import { useFeatureFlags } from "../hooks/useFeatureFlags";
 
 type PrimaryLinks = {
   i18nKey: string;
@@ -19,6 +20,7 @@ type PrimaryLinks = {
 // TODO: Remove during move to app router and next-intl upgrade
 type HeaderStrings = {
   nav_link_home: string;
+  nav_link_search?: string;
   nav_link_process: string;
   nav_link_research: string;
   nav_link_newsletter: string;
@@ -31,20 +33,32 @@ type Props = {
   header_strings: HeaderStrings;
 };
 
-const primaryLinks: PrimaryLinks = [
-  { i18nKey: "nav_link_home", href: "/" },
-  { i18nKey: "nav_link_process", href: "/process" },
-  { i18nKey: "nav_link_research", href: "/research" },
-  { i18nKey: "nav_link_newsletter", href: "/newsletter" },
-];
-
 const Header = ({ header_strings, logoPath }: Props) => {
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const navItems = primaryLinks.map((link) => (
+  const primaryLinksRef = useRef<PrimaryLinks>([]);
+  const { featureFlagsManager } = useFeatureFlags();
+
+  useEffect(() => {
+    primaryLinksRef.current = [
+      { i18nKey: "nav_link_home", href: "/" },
+      { i18nKey: "nav_link_process", href: "/process" },
+      { i18nKey: "nav_link_research", href: "/research" },
+      { i18nKey: "nav_link_newsletter", href: "/newsletter" },
+    ];
+    const searchNavLink = {
+      i18nKey: "nav_link_search",
+      href: "/search?status=forecasted,posted",
+    };
+    if (featureFlagsManager.isFeatureEnabled("showSearchV0")) {
+      primaryLinksRef.current.splice(1, 0, searchNavLink);
+    }
+  }, [featureFlagsManager]);
+
+  const navItems = primaryLinksRef.current.map((link) => (
     <a href={link.href} key={link.href}>
       {header_strings[link.i18nKey as keyof HeaderStrings]}
     </a>

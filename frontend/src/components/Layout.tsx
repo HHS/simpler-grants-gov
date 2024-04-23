@@ -1,8 +1,7 @@
-import { useTranslation } from "next-i18next";
-
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
+import { useTranslation } from "next-i18next";
 
 type Props = {
   children: React.ReactNode;
@@ -16,6 +15,7 @@ const Layout = ({ children }: Props) => {
     title: t("Header.title"),
     nav_menu_toggle: t("nav_menu_toggle"),
     nav_link_home: t("Header.nav_link_home"),
+    nav_link_search: t("Search"),
     nav_link_process: t("Header.nav_link_process"),
     nav_link_research: t("Header.nav_link_research"),
     nav_link_newsletter: t("Header.nav_link_newsletter"),
