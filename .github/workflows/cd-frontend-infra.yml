@@ -1,0 +1,67 @@
+name: Deploy Frontend Infra
+
+run-name: Deploy ${{ github.ref_name }} to Frontend ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/frontend/**"
+  release:
+    types: [published]
+
+jobs:
+  build-repository:
+    name: Build Repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: analytics
+          environment: shared
+      - name: Build Repository
+        run: |
+          ./bin/terraform-init-and-apply.sh infra/frontend/build-repository shared
+
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ["database", "service"]
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # deploy prod on releases, otherwise deploy staging and dev
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.1
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: frontend
+          environment: shared
+
+      - name: Terraform Init and Apply
+        run: |
+          ./bin/terraform-init.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
+          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
+          ./bin/terraform-apply.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
