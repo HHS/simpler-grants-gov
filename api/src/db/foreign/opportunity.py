@@ -7,14 +7,13 @@
 
 import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, declarative_mixin
 
 from . import foreignbase
 
 
-class Topportunity(foreignbase.ForeignBase):
-    __tablename__ = "topportunity"
-
+@declarative_mixin
+class TopportunityColumnMixin:
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     oppnumber: Mapped[str | None]
     revision_number: Mapped[int | None]
@@ -33,6 +32,10 @@ class Topportunity(foreignbase.ForeignBase):
     category_explanation: Mapped[str | None]
     publisher_profile_id: Mapped[int | None]
     is_draft: Mapped[str | None]
+
+
+class Topportunity(foreignbase.ForeignBase, TopportunityColumnMixin):
+    __tablename__ = "topportunity"
 
 
 class TopportunityCfda(foreignbase.ForeignBase):
