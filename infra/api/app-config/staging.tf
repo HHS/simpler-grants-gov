@@ -6,6 +6,8 @@ module "staging_config" {
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  database_max_capacity           = 2
+  database_min_capacity           = 1
 
   service_override_extra_environment_variables = {
     # determines whether the v0.1 endpoints are available in the API

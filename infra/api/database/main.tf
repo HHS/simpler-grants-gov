@@ -91,6 +91,8 @@ module "database" {
   migrator_username = local.database_config.migrator_username
   schema_name       = local.database_config.schema_name
   instance_count    = local.database_config.instance_count
+  max_capacity      = local.database_config.max_capacity
+  min_capacity      = local.database_config.min_capacity
 
   enable_http_endpoint = local.database_config.enable_http_endpoint
 
