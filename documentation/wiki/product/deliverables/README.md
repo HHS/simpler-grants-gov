@@ -19,7 +19,7 @@ In addition to tracking our deliverables in a [GitHub-based product roadmap](htt
 #### Key Steps
 
 1. **Create an issue:** We beginning planning for a new feature by creating an issue[^1] using the [30k deliverable issue template](https://github.com/HHS/simpler-grants-gov/issues/new/choose), which describes the feature at a 30,000 foot view.
-2. **Draft a specification:** Next, we [create a change request](https://docs.gitbook.com/content-editor/editor/change-requests) to draft a new specification for this deliverable using [the deliverable specification template](specification-template.md).
+2. **Draft a specification:** Next, we [create a change request](https://docs.gitbook.com/content-editor/editor/change-requests) to draft a new specification for this deliverable using [the deliverable specification template](deliverable-spec-template.md).
 3. **Approve the specification:** Once the team reviews and approves the change request, the new deliverable specification will appear in [the specifications section](specifications/) of the public wiki.
 4. **Break work into 10k ft deliverables:** Next, we begin breaking out this 30k deliverable into a series of issues that describe the work that needs to be completed at a 10,000 foot view using the 10k deliverable issue template.
 5. **Create a delivery schedule:** The engineering team then estimates a delivery date and creates issues that describe individual tasks that are required to complete this deliverable.
@@ -37,7 +37,7 @@ A deliverable specification is an in depth planning document that identifies key
 
 #### Resources
 
-* [**Template:**](specification-template.md) Template used when drafting new deliverable specifications.
+* [**Template:**](deliverable-spec-template.md) Template used when drafting new deliverable specifications.
 * [**Specifications:**](specifications/) Section of the wiki that stores an archive of deliverable specifications.
 
 #### Steps to draft a new deliverable spec
@@ -45,7 +45,7 @@ A deliverable specification is an in depth planning document that identifies key
 Project maintainers should following these steps when drafting a new deliverable spec:
 
 1. Create a [new change request](https://docs.gitbook.com/content-editor/editor/change-requests) in this GitBook space.
-2. Within the change request, duplicate the [\[Specification Template\]](specification-template.md) page by clicking on the three dots to the right of page in the table of contents and selecting "duplicate".
+2. Within the change request, duplicate the [\[Specification Template\]](deliverable-spec-template.md) page by clicking on the three dots to the right of page in the table of contents and selecting "duplicate".
 3. Move the duplicated page (it should be named **"Copy of \[Specification Template]"**) under the Specifications sub-section and replace the title with the name of the 30k deliverable.
 4. Update the sections of the deliverable specification according to the guidance in the template.
 5. When the specification is ready for review, [submit the change request](https://docs.gitbook.com/content-editor/editor/change-requests#request-a-review-on-a-change-request) and schedule an in-person meeting to review the spec with the team.

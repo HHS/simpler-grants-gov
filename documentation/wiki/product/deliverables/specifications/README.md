@@ -10,7 +10,7 @@ description: >-
 
 The following deliverables have a specification but are still being planned. As a result, the scope of work and estimated timeline are still being refined.
 
-* [Delivery dashboard](delivery-dashboard/)
+* [Delivery dashboard](delivery-dashboard.md)
 * [Content translation](content-translation.md)
 * [Opportunity listing - synopsis](opportunity-listing-synopsis.md)
 
