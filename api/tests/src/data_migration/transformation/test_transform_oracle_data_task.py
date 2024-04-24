@@ -128,6 +128,7 @@ class TestTransformOracleDataTask(BaseTestClass):
         validate_opportunity(db_session, delete_but_current_missing, expect_in_db=False)
 
     def test_process_opportunity_invalid_category(self, db_session, transform_oracle_data_task):
+        # This will error in the transform as that isn't a category we have configured
         insert_that_will_fail = setup_opportunity(
             create_existing=False, transfer_values={"oppcategory": "X"}
         )
