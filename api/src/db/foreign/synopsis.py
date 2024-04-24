@@ -99,8 +99,8 @@ class TapplicanttypesSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_synopsis"
 
     at_syn_id: Mapped[int] = mapped_column(primary_key=True)
-    at_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    at_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
@@ -124,8 +124,8 @@ class TfundactcatSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_synopsis"
 
     fac_syn_id: Mapped[int] = mapped_column(primary_key=True)
-    fac_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fac_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
@@ -149,8 +149,8 @@ class TfundinstrSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_synopsis"
 
     fi_syn_id: Mapped[int] = mapped_column(primary_key=True)
-    fi_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fi_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]

@@ -97,8 +97,8 @@ class TapplicanttypesForecast(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_forecast"
 
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    at_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    at_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
@@ -109,8 +109,8 @@ class TapplicanttypesForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_forecast_hist"
 
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    at_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    at_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     revision_number: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
@@ -122,8 +122,8 @@ class TfundactcatForecast(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_forecast"
 
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    fac_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fac_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
@@ -134,8 +134,8 @@ class TfundactcatForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_forecast_hist"
 
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    fac_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fac_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     revision_number: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
@@ -147,8 +147,8 @@ class TfundinstrForecast(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_forecast"
 
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    fi_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fi_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
@@ -159,8 +159,8 @@ class TfundinstrForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_forecast_hist"
 
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)
-    fi_id: Mapped[str | None] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int | None] = mapped_column(primary_key=True)
+    fi_id: Mapped[str] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     revision_number: Mapped[int] = mapped_column(primary_key=True)
     created_date: Mapped[datetime.datetime | None]
     last_upd_date: Mapped[datetime.datetime | None]
