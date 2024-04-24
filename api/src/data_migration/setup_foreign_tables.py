@@ -66,17 +66,7 @@ def build_sql(table: sqlalchemy.schema.Table, is_local: bool, schema_name: str) 
 
 
 def _run_create_table_commands(db_session: db.Session, config: ForeignTableConfig) -> None:
-    sql_file = open("create_foreign_table.sql", "w")
-    sql_file.write("CREATE SCHEMA IF NOT EXISTS legacy\n")
     for table in src.db.foreign.metadata.tables.values():
         sql = build_sql(table, config.is_local_foreign_table, config.schema_name)
         logger.info("create table", extra={"table": table.name, "sql": sql})
         db_session.execute(sqlalchemy.text(sql))
-        sql_file.write(sql.replace("\n", " ").replace("__[SCHEMA_legacy]", "legacy"))
-        sql_file.write("\n")
-
-    sql_file = open("select_from_foreign_table.sql", "w")
-    for table in src.db.foreign.metadata.tables.values():
-        sql_file.write(
-            "SELECT * FROM legacy.%s ORDER BY created_date DESC LIMIT 8\n" % (table.name)
-        )
