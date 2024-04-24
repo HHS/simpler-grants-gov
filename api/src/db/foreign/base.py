@@ -20,7 +20,7 @@ metadata = sqlalchemy.MetaData()
 class Base(sqlalchemy.orm.DeclarativeBase):
     metadata = metadata
 
-    __table_args__ = {"schema": Schemas.FOREIGN}
+    __table_args__ = {"schema": Schemas.LEGACY}
 
     type_annotation_map = {
         int: sqlalchemy.BigInteger,

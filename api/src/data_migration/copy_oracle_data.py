@@ -55,7 +55,7 @@ def copy_oracle_data(db_session: db.Session) -> None:
 
     try:
         with db_session.begin():
-            _run_copy_commands(db_session, Schemas.API, Schemas.FOREIGN)
+            _run_copy_commands(db_session, Schemas.API, Schemas.LEGACY)
     except Exception:
         logger.exception("Failed to run copy-oracle-data command")
         raise

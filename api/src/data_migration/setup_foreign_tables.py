@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class ForeignTableConfig(PydanticBaseEnvConfig):
     is_local_foreign_table: bool = Field(False)
-    schema_name: str = Field(Schemas.FOREIGN)
+    schema_name: str = Field(Schemas.LEGACY)
 
 
 @data_migration_blueprint.cli.command(

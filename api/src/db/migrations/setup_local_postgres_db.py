@@ -1,7 +1,6 @@
 import logging
 
 import sqlalchemy
-from sqlalchemy import text
 
 import src.adapters.db as db
 import src.logging
