@@ -27,7 +27,30 @@ export interface ParsedError {
 export default function Error({ error }: ErrorProps) {
   // The error message is passed as an object that's been stringified.
   // Parse it here.
-  const parsedErrorData = JSON.parse(error.message) as ParsedError;
+
+  let parsedErrorData;
+  if (!isValidJSON(error.message)) {
+    // if we have no endpoints enabled,
+    // the API may return invalid JSON
+    parsedErrorData = {
+      type: "NetworkError",
+      searchInputs: {
+        status: [],
+        query: "",
+        fundingInstrument: [],
+        eligibility: [],
+        agency: [],
+        category: [],
+        sortby: null,
+        page: 1,
+        actionType: "initialLoad",
+      },
+      message: "Invalid JSON returned",
+      status: -1,
+    };
+  }
+
+  parsedErrorData = JSON.parse(error.message) as ParsedError;
 
   const pagination_info = getErrorPaginationInfo();
   const initialSearchResults: SearchAPIResponse = getErrorInitialSearchResults(
@@ -102,4 +125,13 @@ function convertSearchInputArraysToSets(
     agency: new Set(searchInputs.agency || []),
     category: new Set(searchInputs.category || []),
   };
+}
+
+function isValidJSON(str: string) {
+  try {
+    JSON.parse(str);
+    return true; // String is valid JSON
+  } catch (e) {
+    return false; // String is not valid JSON
+  }
 }

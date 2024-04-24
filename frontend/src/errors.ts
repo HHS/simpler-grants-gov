@@ -33,6 +33,7 @@ export class BaseFrontendError extends Error {
     type: string,
     status?: number,
   ) {
+    // Sets cannot be properly serialized so convert to arrays first
     const serializedSearchInputs = convertSearchInputSetsToArrays(searchInputs);
 
     const serializedData = JSON.stringify({
