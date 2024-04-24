@@ -9,10 +9,10 @@ import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import base
+from . import foreignbase
 
 
-class Tsynopsis(base.Base):
+class Tsynopsis(foreignbase.ForeignBase):
     __tablename__ = "tsynopsis"
 
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -52,7 +52,7 @@ class Tsynopsis(base.Base):
     publisher_profile_id: Mapped[int | None]
 
 
-class TsynopsisHist(base.Base):
+class TsynopsisHist(foreignbase.ForeignBase):
     __tablename__ = "tsynopsis_hist"
 
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -95,7 +95,7 @@ class TsynopsisHist(base.Base):
     publisher_profile_id: Mapped[int | None]
 
 
-class TapplicanttypesSynopsis(base.Base):
+class TapplicanttypesSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_synopsis"
 
     at_syn_id: Mapped[int] = mapped_column(primary_key=True)
@@ -107,7 +107,7 @@ class TapplicanttypesSynopsis(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TapplicanttypesSynopsisHist(base.Base):
+class TapplicanttypesSynopsisHist(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_synopsis_hist"
 
     at_syn_id: Mapped[int] = mapped_column(primary_key=True)
@@ -120,7 +120,7 @@ class TapplicanttypesSynopsisHist(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundactcatSynopsis(base.Base):
+class TfundactcatSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_synopsis"
 
     fac_syn_id: Mapped[int] = mapped_column(primary_key=True)
@@ -132,7 +132,7 @@ class TfundactcatSynopsis(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundactcatSynopsisHist(base.Base):
+class TfundactcatSynopsisHist(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_synopsis_hist"
 
     fac_syn_id: Mapped[int] = mapped_column(primary_key=True)
@@ -145,7 +145,7 @@ class TfundactcatSynopsisHist(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundinstrSynopsis(base.Base):
+class TfundinstrSynopsis(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_synopsis"
 
     fi_syn_id: Mapped[int] = mapped_column(primary_key=True)
@@ -157,7 +157,7 @@ class TfundinstrSynopsis(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundinstrSynopsisHist(base.Base):
+class TfundinstrSynopsisHist(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_synopsis_hist"
 
     fi_syn_id: Mapped[int] = mapped_column(primary_key=True)

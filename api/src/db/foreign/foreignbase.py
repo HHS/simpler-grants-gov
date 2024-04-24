@@ -17,11 +17,14 @@ from src.constants.schema import Schemas
 metadata = sqlalchemy.MetaData()
 
 
-class Base(sqlalchemy.orm.DeclarativeBase):
+class ForeignBase(sqlalchemy.orm.DeclarativeBase):
     metadata = metadata
 
     __table_args__ = {"schema": Schemas.LEGACY}
 
+    # These types are selected so that the underlying Oracle types are mapped to a more general
+    # type. For example all CHAR and VARCHAR types can be mapped to TEXT for simplicity. See
+    # https://github.com/laurenz/oracle_fdw?tab=readme-ov-file#data-types
     type_annotation_map = {
         int: sqlalchemy.BigInteger,
         str: sqlalchemy.Text,

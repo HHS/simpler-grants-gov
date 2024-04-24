@@ -9,10 +9,10 @@ import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import base
+from . import foreignbase
 
 
-class Topportunity(base.Base):
+class Topportunity(foreignbase.ForeignBase):
     __tablename__ = "topportunity"
 
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -35,7 +35,7 @@ class Topportunity(base.Base):
     is_draft: Mapped[str | None]
 
 
-class TopportunityCfda(base.Base):
+class TopportunityCfda(foreignbase.ForeignBase):
     __tablename__ = "topportunity_cfda"
 
     opp_cfda_id: Mapped[int] = mapped_column(primary_key=True)

@@ -7,7 +7,7 @@ import src.db.foreign
 from src.data_migration.setup_foreign_tables import build_sql
 
 EXPECTED_LOCAL_OPPORTUNITY_SQL = [
-    "CREATE TABLE IF NOT EXISTS __[SCHEMA_grants].topportunity (",
+    "CREATE TABLE IF NOT EXISTS __[SCHEMA_legacy].topportunity (",
     "opportunity_id BIGSERIAL NOT NULL,",
     "oppnumber TEXT,",
     "revision_number BIGINT,",
@@ -31,7 +31,7 @@ EXPECTED_LOCAL_OPPORTUNITY_SQL = [
 ]
 
 EXPECTED_NONLOCAL_OPPORTUNITY_SQL = [
-    "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_grants].topportunity (",
+    "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_legacy].topportunity (",
     "opportunity_id BIGINT OPTIONS (key 'true') NOT NULL,",
     "oppnumber TEXT,",
     "revision_number BIGINT,",
@@ -83,12 +83,12 @@ EXPECTED_NONLOCAL_TEST_SQL = [
         (TEST_TABLE, True, EXPECTED_LOCAL_TEST_SQL),
         (TEST_TABLE, False, EXPECTED_NONLOCAL_TEST_SQL),
         (
-            src.db.foreign.metadata.tables["grants.topportunity"],
+            src.db.foreign.metadata.tables["legacy.topportunity"],
             True,
             EXPECTED_LOCAL_OPPORTUNITY_SQL,
         ),
         (
-            src.db.foreign.metadata.tables["grants.topportunity"],
+            src.db.foreign.metadata.tables["legacy.topportunity"],
             False,
             EXPECTED_NONLOCAL_OPPORTUNITY_SQL,
         ),

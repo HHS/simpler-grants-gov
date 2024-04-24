@@ -9,10 +9,10 @@ import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from . import base
+from . import foreignbase
 
 
-class Tforecast(base.Base):
+class Tforecast(foreignbase.ForeignBase):
     __tablename__ = "tforecast"
 
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -51,7 +51,7 @@ class Tforecast(base.Base):
     publisher_profile_id: Mapped[int | None]
 
 
-class TforecastHist(base.Base):
+class TforecastHist(foreignbase.ForeignBase):
     __tablename__ = "tforecast_hist"
 
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -93,7 +93,7 @@ class TforecastHist(base.Base):
     publisher_profile_id: Mapped[int | None]
 
 
-class TapplicanttypesForecast(base.Base):
+class TapplicanttypesForecast(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_forecast"
 
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
@@ -105,7 +105,7 @@ class TapplicanttypesForecast(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TapplicanttypesForecastHist(base.Base):
+class TapplicanttypesForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tapplicanttypes_forecast_hist"
 
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
@@ -118,7 +118,7 @@ class TapplicanttypesForecastHist(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundactcatForecast(base.Base):
+class TfundactcatForecast(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_forecast"
 
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
@@ -130,7 +130,7 @@ class TfundactcatForecast(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundactcatForecastHist(base.Base):
+class TfundactcatForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tfundactcat_forecast_hist"
 
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
@@ -143,7 +143,7 @@ class TfundactcatForecastHist(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundinstrForecast(base.Base):
+class TfundinstrForecast(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_forecast"
 
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)
@@ -155,7 +155,7 @@ class TfundinstrForecast(base.Base):
     last_upd_id: Mapped[str | None]
 
 
-class TfundinstrForecastHist(base.Base):
+class TfundinstrForecastHist(foreignbase.ForeignBase):
     __tablename__ = "tfundinstr_forecast_hist"
 
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)

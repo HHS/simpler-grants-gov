@@ -2,8 +2,8 @@
 # SQLAlchemy models for foreign tables.
 #
 
-from . import base, forecast, opportunity, synopsis
+from . import forecast, foreignbase, opportunity, synopsis
 
-metadata = base.metadata
+metadata = foreignbase.metadata
 
 __all__ = ["metadata", "forecast", "opportunity", "synopsis"]
