@@ -8,7 +8,7 @@ module "prod_config" {
   database_instance_count         = 2
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
-  database_max_capacity           = 8
+  database_max_capacity           = 32
   database_min_capacity           = 2
 
   service_override_extra_environment_variables = {
