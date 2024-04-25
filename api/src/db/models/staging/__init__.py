@@ -1,4 +1,4 @@
-from . import opportunity, forecast, synopsis, staging_base
+from . import forecast, opportunity, staging_base, synopsis
 
 metadata = staging_base.metadata
 

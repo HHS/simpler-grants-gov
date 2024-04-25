@@ -7,10 +7,11 @@
 
 import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column, declarative_mixin
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+
+
 @declarative_mixin
 class TforecastMixin:
-
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     version_nbr: Mapped[int]
     posting_date: Mapped[datetime.datetime | None]
@@ -49,7 +50,6 @@ class TforecastMixin:
 
 @declarative_mixin
 class TforecastHistMixin:
-
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     revision_number: Mapped[int] = mapped_column(primary_key=True)
     version_nbr: Mapped[int]
@@ -88,9 +88,9 @@ class TforecastHistMixin:
     publisheruid: Mapped[str | None]
     publisher_profile_id: Mapped[int | None]
 
+
 @declarative_mixin
 class TapplicanttypesForecastMixin:
-
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     at_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -98,10 +98,10 @@ class TapplicanttypesForecastMixin:
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
+
 
 @declarative_mixin
 class TapplicanttypesForecastHistMixin:
-
     at_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     at_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -111,9 +111,9 @@ class TapplicanttypesForecastHistMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundactcatForecastMixin:
-
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     fac_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -122,9 +122,9 @@ class TfundactcatForecastMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundactcatForecastHistMixin:
-
     fac_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     fac_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -134,9 +134,9 @@ class TfundactcatForecastHistMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundinstrForecastMixin:
-
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     fi_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -145,9 +145,9 @@ class TfundinstrForecastMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundinstrForecastHistMixin:
-
     fi_frcst_id: Mapped[int] = mapped_column(primary_key=True)
     fi_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)

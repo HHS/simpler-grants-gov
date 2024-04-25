@@ -7,11 +7,11 @@
 
 import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column, declarative_mixin
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+
 
 @declarative_mixin
 class TopportunityMixin:
-
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     oppnumber: Mapped[str | None]
     revision_number: Mapped[int | None]
@@ -34,7 +34,6 @@ class TopportunityMixin:
 
 @declarative_mixin
 class TopportunityCfdaMixin:
-
     opp_cfda_id: Mapped[int] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int]
     cfdanumber: Mapped[str | None]

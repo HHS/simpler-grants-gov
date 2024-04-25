@@ -5,36 +5,31 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import datetime
-
-from sqlalchemy.orm import Mapped, mapped_column
-
-from . import foreignbase
 import src.db.legacy_mixins.forecast_mixin as forecast_mixin
 
-class Tforecast(foreignbase.ForeignBase, forecast_mixin.TforecastMixin):
-    __tablename__ = "tforecast"
+from . import foreignbase
+
 
 class Tforecast(foreignbase.ForeignBase, forecast_mixin.TforecastMixin):
     __tablename__ = "tforecast"
+
 
 class TforecastHist(foreignbase.ForeignBase, forecast_mixin.TforecastHistMixin):
     __tablename__ = "tforecast_hist"
-
 
 
 class TapplicanttypesForecast(foreignbase.ForeignBase, forecast_mixin.TapplicanttypesForecastMixin):
     __tablename__ = "tapplicanttypes_forecast"
 
 
-
-class TapplicanttypesForecastHist(foreignbase.ForeignBase, forecast_mixin.TapplicanttypesForecastHistMixin):
+class TapplicanttypesForecastHist(
+    foreignbase.ForeignBase, forecast_mixin.TapplicanttypesForecastHistMixin
+):
     __tablename__ = "tapplicanttypes_forecast_hist"
 
 
 class TfundactcatForecast(foreignbase.ForeignBase, forecast_mixin.TfundactcatForecastMixin):
     __tablename__ = "tfundactcat_forecast"
-
 
 
 class TfundactcatForecastHist(foreignbase.ForeignBase, forecast_mixin.TfundactcatForecastHistMixin):
@@ -43,7 +38,6 @@ class TfundactcatForecastHist(foreignbase.ForeignBase, forecast_mixin.Tfundactca
 
 class TfundinstrForecast(foreignbase.ForeignBase, forecast_mixin.TfundinstrForecastMixin):
     __tablename__ = "tfundinstr_forecast"
-
 
 
 class TfundinstrForecastHist(foreignbase.ForeignBase, forecast_mixin.TfundinstrForecastHistMixin):

@@ -18,8 +18,8 @@ from faker.providers import BaseProvider
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
-import src.db.models.staging as staging
 import src.db.models.opportunity_models as opportunity_models
+import src.db.models.staging as staging
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
@@ -582,8 +582,8 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 # Staging Table Factories
 ####################################
 
-class StagingTopportunityFactory(BaseFactory):
 
+class StagingTopportunityFactory(BaseFactory):
     class Meta:
         model = staging.opportunity.Topportunity
 

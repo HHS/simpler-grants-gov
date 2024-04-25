@@ -7,11 +7,11 @@
 
 import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column, declarative_mixin
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
+
 
 @declarative_mixin
 class TsynopsisMixin:
-
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     posting_date: Mapped[datetime.datetime | None]
     response_date: Mapped[datetime.datetime | None]
@@ -48,9 +48,9 @@ class TsynopsisMixin:
     publisheruid: Mapped[str | None]
     publisher_profile_id: Mapped[int | None]
 
+
 @declarative_mixin
 class TsynopsisHistMixin:
-
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     revision_number: Mapped[int] = mapped_column(primary_key=True)
     posting_date: Mapped[datetime.datetime | None]
@@ -90,9 +90,9 @@ class TsynopsisHistMixin:
     publisheruid: Mapped[str | None]
     publisher_profile_id: Mapped[int | None]
 
+
 @declarative_mixin
 class TapplicanttypesSynopsisMixin:
-
     at_syn_id: Mapped[int] = mapped_column(primary_key=True)
     at_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -100,10 +100,10 @@ class TapplicanttypesSynopsisMixin:
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
+
 
 @declarative_mixin
 class TapplicanttypesSynopsisHistMixin:
-
     at_syn_id: Mapped[int] = mapped_column(primary_key=True)
     at_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -113,9 +113,9 @@ class TapplicanttypesSynopsisHistMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundactcatSynopsisMixin:
-
     fac_syn_id: Mapped[int] = mapped_column(primary_key=True)
     fac_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -124,9 +124,9 @@ class TfundactcatSynopsisMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundactcatSynopsisHistMixin:
-
     fac_syn_id: Mapped[int] = mapped_column(primary_key=True)
     fac_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -136,9 +136,9 @@ class TfundactcatSynopsisHistMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundinstrSynopsisMixin:
-
     fi_syn_id: Mapped[int] = mapped_column(primary_key=True)
     fi_id: Mapped[str] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
@@ -147,9 +147,9 @@ class TfundinstrSynopsisMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 @declarative_mixin
 class TfundinstrSynopsisHistMixin:
-
     fi_syn_id: Mapped[int] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     fi_id: Mapped[str] = mapped_column(primary_key=True)

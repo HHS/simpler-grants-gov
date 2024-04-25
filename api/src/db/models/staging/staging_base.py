@@ -1,8 +1,8 @@
 import datetime
 from typing import Any, Iterable
 
-from sqlalchemy.orm import declarative_mixin, Mapped, mapped_column
 import sqlalchemy
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 from src.constants.schema import Schemas
 
@@ -46,6 +46,5 @@ class StagingBase(sqlalchemy.orm.DeclarativeBase):
 
 @declarative_mixin
 class StagingParamMixin:
-
     is_deleted: Mapped[bool]
     transformed_at: Mapped[datetime.datetime | None] = mapped_column(index=True)

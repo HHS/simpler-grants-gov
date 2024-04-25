@@ -5,12 +5,9 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import datetime
-
-from sqlalchemy.orm import Mapped, mapped_column
+import src.db.legacy_mixins.synopsis_mixin as synopsis_mixin
 
 from . import foreignbase
-import src.db.legacy_mixins.synopsis_mixin as synopsis_mixin
 
 
 class Tsynopsis(foreignbase.ForeignBase, synopsis_mixin.TsynopsisMixin):
@@ -24,27 +21,24 @@ class TsynopsisHist(foreignbase.ForeignBase, synopsis_mixin.TsynopsisHistMixin):
 class TapplicanttypesSynopsis(foreignbase.ForeignBase, synopsis_mixin.TapplicanttypesSynopsisMixin):
     __tablename__ = "tapplicanttypes_synopsis"
 
-class TapplicanttypesSynopsisHist(foreignbase.ForeignBase, synopsis_mixin.TapplicanttypesSynopsisHistMixin):
-    __tablename__ = "tapplicanttypes_synopsis_hist"
 
+class TapplicanttypesSynopsisHist(
+    foreignbase.ForeignBase, synopsis_mixin.TapplicanttypesSynopsisHistMixin
+):
+    __tablename__ = "tapplicanttypes_synopsis_hist"
 
 
 class TfundactcatSynopsis(foreignbase.ForeignBase, synopsis_mixin.TfundactcatSynopsisMixin):
     __tablename__ = "tfundactcat_synopsis"
 
 
-
-
 class TfundactcatSynopsisHist(foreignbase.ForeignBase, synopsis_mixin.TfundactcatSynopsisHistMixin):
     __tablename__ = "tfundactcat_synopsis_hist"
-
 
 
 class TfundinstrSynopsis(foreignbase.ForeignBase, synopsis_mixin.TfundinstrSynopsisMixin):
     __tablename__ = "tfundinstr_synopsis"
 
 
-
 class TfundinstrSynopsisHist(foreignbase.ForeignBase, synopsis_mixin.TfundinstrSynopsisHistMixin):
     __tablename__ = "tfundinstr_synopsis_hist"
-

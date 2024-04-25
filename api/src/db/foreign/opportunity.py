@@ -5,12 +5,10 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import datetime
-
-from sqlalchemy.orm import Mapped, mapped_column
+import src.db.legacy_mixins.opportunity_mixin as opportunity_mixin
 
 from . import foreignbase
-import src.db.legacy_mixins.opportunity_mixin as opportunity_mixin
+
 
 class Topportunity(foreignbase.ForeignBase, opportunity_mixin.TopportunityMixin):
     __tablename__ = "topportunity"
