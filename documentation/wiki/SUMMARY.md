@@ -11,7 +11,8 @@
 
 * [Product roadmap](product/product-roadmap.md)
 * [Deliverables](product/deliverables/README.md)
-  * [\[Specification Template\]](product/deliverables/specification-template.md)
+  * [\[Deliverable spec template\]](product/deliverables/deliverable-spec-template.md)
+  * [\[Technical spec template\]](product/deliverables/technical-spec-template.md)
   * [Specifications](product/deliverables/specifications/README.md)
     * [🏁 Static site soft launch](product/deliverables/specifications/static-site-soft-launch.md)
     * [Static site public launch](product/deliverables/specifications/static-site-public-launch.md)
@@ -20,7 +21,7 @@
     * [Search UI](product/deliverables/specifications/search-user-interface.md)
     * [Unified branding](product/deliverables/specifications/unified-branding.md)
     * [Content translation](product/deliverables/specifications/content-translation.md)
-    * [Delivery dashboard](product/deliverables/specifications/delivery-dashboard/README.md)
+    * [Delivery dashboard](product/deliverables/specifications/delivery-dashboard.md)
       * [Delivery dashboard - technical spec](product/deliverables/specifications/delivery-dashboard/delivery-dashboard-technical-spec.md)
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
     * [Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
