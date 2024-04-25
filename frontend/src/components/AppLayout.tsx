@@ -1,14 +1,24 @@
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
-import Header from "./Header";
+import Header from "./AppHeader";
+import { pick } from "lodash";
+import { GovBanner } from "@trussworks/react-uswds";
+
+import {
+  NextIntlClientProvider,
+  useMessages,
+  useTranslations,
+} from "next-intl";
 
 type Props = {
   children: React.ReactNode;
-  // TODO: pass locale into Layout when we setup i18n
-  // locale?: string;
+  locale?: string;
 };
 
-const Layout = ({ children }: Props) => {
+const Layout = ({ locale, children }: Props) => {
+  const t = useTranslations('Layout');
+  const messages = useMessages();
+
   // TODO: Remove during move to app router and next-intl upgrade
   const header_strings = {
     nav_link_home: "Home",
@@ -51,9 +61,14 @@ const Layout = ({ children }: Props) => {
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
       <a className="usa-skipnav" href="#main-content">
-        {skip_to_main}
+        t({skip_to_main})
       </a>
-      <Header header_strings={header_strings} />
+      <NextIntlClientProvider
+        locale={locale}
+        messages={pick(messages, "Header")}
+      >
+        <Header />
+      </NextIntlClientProvider>
       <main id="main-content">{children}</main>
       <Footer footer_strings={footer_strings} />
       <GrantsIdentifier identifier_strings={identifier_strings} />

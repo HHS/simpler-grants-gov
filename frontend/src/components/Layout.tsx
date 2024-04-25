@@ -2,6 +2,7 @@ import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
 import { pick } from "lodash";
+import { GovBanner } from "@trussworks/react-uswds";
 
 import {
   NextIntlClientProvider,
