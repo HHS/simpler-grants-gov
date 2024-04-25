@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import text
+import sqlalchemy
 
 import src.adapters.db as db
 import src.logging
@@ -24,4 +24,4 @@ def setup_local_postgres_db() -> None:
 
 def _create_schema(conn: db.Connection, schema_name: str) -> None:
     logger.info("Creating schema %s if it does not already exist", schema_name)
-    conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))
+    conn.execute(sqlalchemy.schema.CreateSchema(schema_name, if_not_exists=True))

@@ -171,7 +171,7 @@ Following sections describe the conditions that must be met to consider this del
       * [ ] Sort opportunities by at least one structured field from the new data model
     * [ ] We've received security approval to host (but not share) non-public data in the AWS Simpler environments
     * [x] Select a logging and monitoring tool for backend and frontend &#x20;
-    * [ ] Started the procurement process for the logging and monitoring tool
+    * [x] Started the procurement process for the logging and monitoring tool
 * **Nice to have**
   * [ ] S2S users can sign up for the API with a self-service authentication option that replaces the key management method established previously
   * [ ] S2S users can learn how to consume from the API by following a publicly documented user guide, in addition to referencing our OpenAPI specification
