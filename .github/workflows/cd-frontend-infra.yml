@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ["database", "service"]
+        directory: ["service"]
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # deploy prod on releases, otherwise deploy staging and dev
 
     permissions:
