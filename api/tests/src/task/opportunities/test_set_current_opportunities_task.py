@@ -6,6 +6,7 @@ import pytest
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import CurrentOpportunitySummary, OpportunitySummary
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
+from src.util.datetime_util import get_now_us_eastern_date
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
@@ -525,12 +526,14 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
     # note that the script will always use todays date as the current date, so we
     # need to generate the scenario from that instead
 
+    today = get_now_us_eastern_date()
+
     # A basic posted scenario
     container1 = OpportunityContainer().with_summary(
         is_forecast=False,
-        post_date=CURRENT_DATE - timedelta(days=10),
-        close_date=CURRENT_DATE + timedelta(days=30),
-        archive_date=CURRENT_DATE + timedelta(days=60),
+        post_date=today - timedelta(days=10),
+        close_date=today + timedelta(days=30),
+        archive_date=today + timedelta(days=60),
         is_expected_current=True,
     )
 
@@ -539,21 +542,21 @@ def test_via_cli(cli_runner, db_session, enable_factory_create):
         OpportunityContainer()
         .with_summary(
             is_forecast=True,
-            post_date=CURRENT_DATE - timedelta(days=5),
-            archive_date=CURRENT_DATE + timedelta(days=60),
+            post_date=today - timedelta(days=5),
+            archive_date=today + timedelta(days=60),
             is_already_current=True,
             revision_number=2,
         )
         .with_summary(
             is_forecast=True,
-            post_date=CURRENT_DATE - timedelta(days=5),
-            archive_date=CURRENT_DATE + timedelta(days=60),
+            post_date=today - timedelta(days=5),
+            archive_date=today + timedelta(days=60),
             revision_number=1,
         )
         .with_summary(
             is_forecast=True,
-            post_date=CURRENT_DATE - timedelta(days=5),
-            archive_date=CURRENT_DATE + timedelta(days=120),
+            post_date=today - timedelta(days=5),
+            archive_date=today + timedelta(days=120),
             is_expected_current=True,
             revision_number=3,
         )
