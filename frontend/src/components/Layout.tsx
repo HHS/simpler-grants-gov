@@ -1,15 +1,21 @@
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
-import { useTranslation } from "next-i18next";
+import { pick } from "lodash";
 
+import {
+  NextIntlClientProvider,
+  useMessages,
+  useTranslations,
+} from "next-intl";
 type Props = {
   children: React.ReactNode;
+  locale?: string;
 };
 
-const Layout = ({ children }: Props) => {
-  const { t } = useTranslation("common");
-
+const Layout = ({ children, locale }: Props) => {  
+  const t = useTranslations("components.Layout");
+  const messages = useMessages();
   // TODO: Remove during move to app router and next-intl upgrade
   const header_strings = {
     title: t("Header.title"),
@@ -47,12 +53,18 @@ const Layout = ({ children }: Props) => {
   };
 
   return (
+
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
       <a className="usa-skipnav" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <Header header_strings={header_strings} />
+      <NextIntlClientProvider
+        locale={locale}
+        messages={pick(messages, "components.Header")}
+       >
+        <Header header_strings={header_strings} />
+      </NextIntlClientProvider>
       <main id="main-content">{children}</main>
       <Footer footer_strings={footer_strings} />
       <GrantsIdentifier identifier_strings={identifier_strings} />
