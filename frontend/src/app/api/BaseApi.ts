@@ -222,6 +222,8 @@ const throwError = (
   searchInputs: SearchFetcherProps,
   firstError?: APIResponseError,
 ) => {
+  console.log("Throwing error: ", message, status_code, searchInputs);
+
   // Include just firstError for now, we can expand this
   // If we need ValidationErrors to be more expanded
   const error = firstError ? { message, firstError } : { message };
