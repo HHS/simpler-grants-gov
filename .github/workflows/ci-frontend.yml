@@ -49,10 +49,14 @@ jobs:
       - run: npm run test -- --testLocationInResults --json --outputFile=coverage/report.json
       - uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-            coverage-file: coverage/coverage-final.json
+            coverage-file: coverage/report.json
             test-script: npm test
             working-directory: ./frontend
             annotations: failed-tests
+            package-manager: npm
+            icons: emoji
+            skip-step: none
+            output: comment
 
       - name: Run e2e tests
         run: npm run test:e2e
