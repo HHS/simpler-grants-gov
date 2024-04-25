@@ -41,7 +41,7 @@ class SqlCommands:
                 last_upd_date,
                 creator_id,
                 created_date
-            from {}.foreign_topportunity
+            from {}.topportunity
             where is_draft = 'N'
     """
 
@@ -55,7 +55,7 @@ def copy_oracle_data(db_session: db.Session) -> None:
 
     try:
         with db_session.begin():
-            _run_copy_commands(db_session, Schemas.API)
+            _run_copy_commands(db_session, Schemas.API, Schemas.LEGACY)
     except Exception:
         logger.exception("Failed to run copy-oracle-data command")
         raise
@@ -63,11 +63,13 @@ def copy_oracle_data(db_session: db.Session) -> None:
     logger.info("Successfully ran copy-oracle-data")
 
 
-def _run_copy_commands(db_session: db.Session, api_schema: str) -> None:
+def _run_copy_commands(db_session: db.Session, api_schema: str, foreign_schema: str) -> None:
     logger.info("Running copy commands for TOPPORTUNITY")
 
     db_session.execute(text(SqlCommands.OPPORTUNITY_DELETE_QUERY.format(api_schema)))
-    db_session.execute(text(SqlCommands.OPPORTUNITY_INSERT_QUERY.format(api_schema, api_schema)))
+    db_session.execute(
+        text(SqlCommands.OPPORTUNITY_INSERT_QUERY.format(api_schema, foreign_schema))
+    )
     count = db_session.scalar(
         text(f"SELECT count(*) from {api_schema}.transfer_topportunity")  # nosec
     )
