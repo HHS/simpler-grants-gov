@@ -1,6 +1,6 @@
 
 
-import src.db.models.legacy_mixins.opportunity_mixin as opportunity_mixin
+import src.db.legacy_mixins.opportunity_mixin as opportunity_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 class Topportunity(StagingBase, opportunity_mixin.TopportunityMixin, StagingParamMixin):
     __tablename__ = "topportunity"

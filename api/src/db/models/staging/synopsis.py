@@ -1,4 +1,4 @@
-import src.db.models.legacy_mixins.synopsis_mixin as synopsis_mixin
+import src.db.legacy_mixins.synopsis_mixin as synopsis_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
 class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
