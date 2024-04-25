@@ -1,34 +1,31 @@
 #
 # Support for generating SQL for "CREATE FOREIGN TABLE".
 #
+# mypy: ignore-errors
 
 import re
-from typing import Any
 
 import sqlalchemy
-import sqlalchemy.dialects.postgresql
 
 
 class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
     """SQLAlchemy compiler for creating foreign tables."""
 
-    def create_table_constraints(
-        self, _table: Any, _include_foreign_key_constraints: Any = None, **kw: Any
-    ) -> str:
+    def create_table_constraints(self, _table, _include_foreign_key_constraints=None, **kw):
         return ""  # Don't generate any constraints.
 
-    def visit_create_table(self, create: Any, **kw: Any) -> str:
+    def visit_create_table(self, create, **kw):
         table = create.element
         table._prefixes = ("FOREIGN",)  # Add "FOREIGN" before "TABLE".
         sql = super().visit_create_table(create, **kw)
         table._prefixes = ()
         return sql
 
-    def post_create_table(self, table: Any) -> str:
+    def post_create_table(self, table):
         # Add foreign options at the end.
         return f" SERVER grants OPTIONS (schema 'EGRANTSADMIN', table '{table.name.upper()}')"
 
-    def visit_create_column(self, create: Any, first_pk: bool = False, **kw: Any) -> str:
+    def visit_create_column(self, create, first_pk=False, **kw):
         column = create.element
         sql = super().visit_create_column(create, first_pk, **kw)
         if sql and column.primary_key:
