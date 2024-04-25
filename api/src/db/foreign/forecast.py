@@ -5,7 +5,7 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import src.db.legacy_mixins.forecast_mixin as forecast_mixin
+from src.db.legacy_mixin import forecast_mixin
 
 from . import foreignbase
 

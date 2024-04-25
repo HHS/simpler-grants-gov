@@ -5,7 +5,7 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import src.db.legacy_mixins.opportunity_mixin as opportunity_mixin
+from src.db.legacy_mixin import opportunity_mixin
 
 from . import foreignbase
 

@@ -1,4 +1,4 @@
-import src.db.legacy_mixins.opportunity_mixin as opportunity_mixin
+from src.db.legacy_mixin import opportunity_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
 
