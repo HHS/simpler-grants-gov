@@ -612,10 +612,12 @@ class StagingTopportunityFactory(BaseFactory):
     is_deleted = False
     transformed_at = None
 
-
     class Params:
         never_updated = factory.Trait(last_upd_date=None)
-        already_transformed = factory.Trait(transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d"))
+        already_transformed = factory.Trait(
+            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
 
 ####################################
 # Transfer Table Factories
