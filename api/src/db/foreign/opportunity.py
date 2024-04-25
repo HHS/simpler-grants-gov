@@ -5,47 +5,14 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-import datetime
-
-from sqlalchemy.orm import Mapped, mapped_column
+from src.db.legacy_mixin import opportunity_mixin
 
 from . import foreignbase
 
 
-class Topportunity(foreignbase.ForeignBase):
+class Topportunity(foreignbase.ForeignBase, opportunity_mixin.TopportunityMixin):
     __tablename__ = "topportunity"
 
-    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
-    oppnumber: Mapped[str | None]
-    revision_number: Mapped[int | None]
-    opptitle: Mapped[str | None]
-    owningagency: Mapped[str | None]
-    publisheruid: Mapped[str | None]
-    listed: Mapped[str | None]
-    oppcategory: Mapped[str | None]
-    initial_opportunity_id: Mapped[int | None]
-    modified_comments: Mapped[str | None]
-    created_date: Mapped[datetime.datetime]
-    last_upd_date: Mapped[datetime.datetime]
-    creator_id: Mapped[str | None]
-    last_upd_id: Mapped[str | None]
-    flag_2006: Mapped[str | None]
-    category_explanation: Mapped[str | None]
-    publisher_profile_id: Mapped[int | None]
-    is_draft: Mapped[str | None]
 
-
-class TopportunityCfda(foreignbase.ForeignBase):
+class TopportunityCfda(foreignbase.ForeignBase, opportunity_mixin.TopportunityCfdaMixin):
     __tablename__ = "topportunity_cfda"
-
-    opp_cfda_id: Mapped[int] = mapped_column(primary_key=True)
-    opportunity_id: Mapped[int]
-    cfdanumber: Mapped[str | None]
-    programtitle: Mapped[str | None]
-    origtoppid: Mapped[int | None]
-    oppidcfdanum: Mapped[str | None]
-    origoppnum: Mapped[str | None]
-    created_date: Mapped[datetime.datetime | None]
-    last_upd_date: Mapped[datetime.datetime | None]
-    creator_id: Mapped[str | None]
-    last_upd_id: Mapped[str | None]
