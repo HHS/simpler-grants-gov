@@ -136,6 +136,11 @@ def test_api_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.API}"
 
 
+@pytest.fixture
+def test_foreign_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.LEGACY}"
+
+
 ####################
 # Test App & Client
 ####################

@@ -50,8 +50,8 @@ resource "aws_rds_cluster" "db" {
   backup_retention_period = 35
 
   serverlessv2_scaling_configuration {
-    max_capacity = 1.0
-    min_capacity = 0.5
+    max_capacity = var.max_capacity
+    min_capacity = var.min_capacity
   }
 
   vpc_security_group_ids = [aws_security_group.db.id]

@@ -28,6 +28,16 @@ variable "database_enable_http_endpoint" {
   default     = false
 }
 
+variable "database_max_capacity" {
+  description = "Maximum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+}
+
+variable "database_min_capacity" {
+  description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+}
+
 variable "has_incident_management_service" {
   type = bool
 }

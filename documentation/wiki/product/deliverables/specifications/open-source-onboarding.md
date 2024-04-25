@@ -72,7 +72,7 @@ Provide technical instructions for setting up developer tools and environments. 
 Following sections describe the conditions that must be met to consider this deliverable "done".
 
 * **Must have**
-  * [ ] The following tools have been procured and implemented for internal and public use:
+  * [x] The following tools have been procured and implemented for internal and public use:
     * [x] **Slack** - chat-based community engagement
     * [x] **GitBook** - public-facing wiki and knowledge base
     * [x] **Zoom** - webinars, office hours, or other open source events
@@ -91,10 +91,10 @@ Following sections describe the conditions that must be met to consider this del
     * [x] &#x20;onboarding to Google Groups
     * [x] &#x20;materials for getting started with the project
     * [x] &#x20;onboarding guidance for developer tools and environments
-  * [ ] We have onboarded three members of the general public to the following communication tools:
-    * [ ] Slack
-    * [ ] Google groups
-    * [ ] GitHub
+  * [x] We have onboarded three members of the general public to the following communication tools:
+    * [x] Slack
+    * [x] Google groups
+    * [x] GitHub
   * [x] We have a system for tracking the onboarding process for all new members, ensuring that they have agreed to the terms of use (such as community agreements and content sensitivity guidelines) and completed all necessary onboarding steps
   * [x] Tool-specific requirements:
     * [x] The public wiki can be accessed from a custom domain that is easy to remember and specific to the Simpler.Grants.gov initiative
@@ -232,4 +232,4 @@ Major updates to the content of this page will be added here.
 
 Use this section to indicate when acceptance criteria in the "Definition of done" section have been completed, and provide notes on steps taken to satisfy this criteria when appropriate.
 
-<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/17/2024</td><td>Checked off all criteria except for Onboarding 3 members of the public and Nice to Have Criteria</td><td>Only at 1/3 members of the public onboarded. Working to get the rest across the finish line.</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="138">Date</th><th width="284">Criteria completed</th><th>Notes</th></tr></thead><tbody><tr><td>4/17/2024</td><td>Checked off all criteria except for Onboarding 3 members of the public and Nice to Have Criteria</td><td>Only at 1/3 members of the public onboarded. Working to get the rest across the finish line.</td></tr><tr><td>4/24/2024</td><td>Updated and checked off onboarding criteria.</td><td></td></tr></tbody></table>
