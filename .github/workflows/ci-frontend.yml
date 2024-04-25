@@ -46,8 +46,13 @@ jobs:
       - name: Run format
         run: npm run format-check
 
-      - name: Run tests
-        run: npm run test
+      - run: npm run test -- --testLocationInResults --json --outputFile=coverage/report.json
+      - uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+            coverage-file: coverage/report.json
+            test-script: npm test
+            working-directory: ./
+            annotations: failed-tests
 
       - name: Run e2e tests
         run: npm run test:e2e
