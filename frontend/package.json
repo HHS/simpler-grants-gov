@@ -13,7 +13,7 @@
     "lint": "next lint --dir src --dir stories --dir .storybook --dir tests --dir scripts --dir frontend --dir lib --dir types",
     "lint-fix": "npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
-    "start": "node .next/standalone/server.js -p ${PORT:-3000}",
+    "start": "next start -p ${PORT:-3000}",
     "storybook": "storybook dev -p 6006",
     "storybook-build": "storybook build",
     "test": "jest --ci --coverage",
