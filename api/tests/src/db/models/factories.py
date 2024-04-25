@@ -606,18 +606,16 @@ class StagingTopportunityFactory(BaseFactory):
 
     revision_number = 0
 
-    # Make sure updated_at is after created_at just to make the data realistic
-    created_at = factory.Faker("date_time")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
-    )
-
-    created_date = factory.LazyAttribute(lambda o: o.created_at.date())
-    last_upd_date = factory.LazyAttribute(lambda o: o.updated_at.date())
+    created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
+    last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
 
     is_deleted = False
     transformed_at = None
 
+
+    class Params:
+        never_updated = factory.Trait(last_upd_date=None)
+        already_transformed = factory.Trait(transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d"))
 
 ####################################
 # Transfer Table Factories
