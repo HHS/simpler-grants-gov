@@ -1,10 +1,8 @@
 
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { ExternalRoutes } from "src/constants/routes";
 import FullWidthAlert from "./FullWidthAlert";
 
 const BetaAlert = () => {

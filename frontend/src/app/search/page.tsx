@@ -3,7 +3,6 @@ import {
   ServerSideSearchParams,
 } from "../../types/searchRequestURLTypes";
 
-import { pick } from "lodash";
 import BetaAlert from "../../components/AppBetaAlert";
 import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
 import { Metadata } from "next";

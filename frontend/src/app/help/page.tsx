@@ -1,28 +1,18 @@
 import { Metadata } from "next";
-import type { GetStaticProps, NextPage } from "next";
 import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
 
-import { useTranslation } from "next-i18next";
 import { getTranslations, getMessages } from "next-intl/server";
-
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import BetaAlert from "src/components/AppBetaAlert";
-import ProcessInvolved from "src/pages/content/ProcessInvolved";
+
+import { NextIntlClientProvider } from "next-intl";
+
 
 interface RouteParams {
   locale: string;
 }
-
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
-
-
 
 export async function generateMetadata({ params }: { params: RouteParams }) {
   const t = await getTranslations({ locale: params.locale });
@@ -51,4 +41,4 @@ export default async function Help() {
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
     </>
   );
-};
+}
