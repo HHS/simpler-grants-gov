@@ -38,7 +38,7 @@ variable "memory" {
 variable "container_port" {
   type        = number
   description = "The port number on the container that's bound to the user-specified"
-  default     = 8000
+  default     = 3000
 }
 
 variable "hostname" {
@@ -75,6 +75,14 @@ variable "secrets" {
   }))
   description = "List of configurations for defining environment variables that pull from SSM parameter store"
   default     = []
+}
+
+variable "db_vars" {
+  description = "Variables for integrating the app service with a database"
+  type = object({
+    security_group_ids = list(string)
+  })
+  default = null
 }
 
 variable "enable_autoscaling" {

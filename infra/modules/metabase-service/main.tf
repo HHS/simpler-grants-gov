@@ -10,11 +10,12 @@ locals {
   image_url               = "${var.image_repository_name}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
-  environment_variables = [
-    { name : "PORT", value : tostring(var.container_port) },
-    { name : "AWS_REGION", value : data.aws_region.current.name },
-    { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
-  ]
+  environment_variables = concat(
+    [
+      for name, value in var.extra_environment_variables :
+      { name : name, value : value }
+    ],
+  )
 }
 
 #-------------------

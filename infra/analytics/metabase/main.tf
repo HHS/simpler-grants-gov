@@ -75,20 +75,36 @@ module "app_config" {
 }
 
 data "aws_rds_cluster" "db_cluster" {
-  count              = 1
   cluster_identifier = local.database_config.cluster_name
 }
 
 module "service" {
-  source                      = "../../modules/metabase-service"
-  service_name                = local.service_name
-  image_repository_name       = "docker.io/metabase/metabase"
-  image_tag                   = local.image_tag
-  vpc_id                      = data.aws_vpc.network.id
-  public_subnet_ids           = data.aws_subnets.public.ids
-  private_subnet_ids          = data.aws_subnets.private.ids
-  cpu                         = 1024
-  memory                      = 2048
-  extra_environment_variables = {}
-  secrets                     = []
+  source                = "../../modules/metabase-service"
+  service_name          = local.service_name
+  image_repository_name = "docker.io/metabase/metabase"
+  image_tag             = local.image_tag
+  vpc_id                = data.aws_vpc.network.id
+  public_subnet_ids     = data.aws_subnets.public.ids
+  private_subnet_ids    = data.aws_subnets.private.ids
+  cpu                   = 1024
+  memory                = 2048
+  extra_environment_variables = {
+    MB_DB_TYPE   = "postgres"
+    MB_DB_DBNAME = "metabase"
+    MB_DB_PORT   = "5432"
+    MB_DB_HOST   = data.aws_rds_cluster.db_cluster.endpoint
+  }
+  secrets = [
+    {
+      name           = "MB_DB_USER"
+      ssm_param_name = "/metabase/${var.environment_name}/db_user"
+    },
+    {
+      name           = "MB_DB_PASS"
+      ssm_param_name = "/metabase/${var.environment_name}/db_pass"
+    },
+  ]
+  db_vars = {
+    security_group_ids = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+  }
 }
