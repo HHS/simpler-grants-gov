@@ -8,6 +8,7 @@ TEMP_DIR="./tmp"
 WIKI_FILES="${TEMP_DIR}/wiki-files.txt"
 SUMMARY_FILES="${TEMP_DIR}/summary-files.txt"
 MISSING_FILES="${TEMP_DIR}/missing-from-summary.txt"
+mkdir -p tmp # create tmp directory
 
 # list all of the markdown files in the wiki directory
 find "${WIKI_DIR}" -name "*.md" |\
