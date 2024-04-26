@@ -16,14 +16,14 @@ find "${WIKI_DIR}" -name "*.md" |\
  # filter out the SUMMARY.md file
  grep -Ev '(SUMMARY.md)' |\
  # sort the files alphabetically and write to a temporary file
- sort > "tmp/wiki-files.txt"
+ sort > $WIKI_FILES
 
 # list all of the markdown files linked in the SUMMARY.md file
 grep -oE '\((.*\.md)\)' "${WIKI_DIR}/SUMMARY.md" |\
  # remove the extra parantheses around the markdown files
  sed -E "s|\((.+)\)|\1|" |\
  # sort the files alphabetically and write to a temporary file
- sort > "tmp/summary-files.txt"
+ sort > $SUMMARY_FILES
 
 # find files that are in the wiki but not in the summary
 comm -2 -3 $WIKI_FILES $SUMMARY_FILES > $MISSING_FILES
