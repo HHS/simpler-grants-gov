@@ -1,4 +1,5 @@
 resource "aws_wafv2_web_acl" "waf" {
+  # checkov:skip=CKV2_AWS_31: The logging configuration is failing to deploy
   name  = "${var.service_name}-wafv2-web-acl"
   scope = "REGIONAL"
 
@@ -191,8 +192,6 @@ resource "aws_cloudwatch_log_group" "WafWebAclLoggroup" {
   retention_in_days = 1827 # 5 years
 }
 
-# checkov:skip=CKV2_AWS_31: The logging configuration is failing to deploy
-#
 # This resource fails to deploy with the following error message:
 #
 # WAFLogDestinationPermissionIssueException: Unable to deliver logs to the configured destination.
