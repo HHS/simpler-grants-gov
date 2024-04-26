@@ -27,3 +27,7 @@ def main():
 
         with db_client.get_session() as db_session:
             LoadOracleDataTask(db_session).run()
+
+
+if __name__ == "__main__":
+    main()
