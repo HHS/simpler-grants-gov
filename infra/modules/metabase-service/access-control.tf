@@ -109,26 +109,6 @@ data "aws_iam_policy_document" "task_executor" {
     resources = ["arn:aws:states:*:*:stateMachine:*"]
   }
 
-  # Allow ECS to authenticate with ECR
-  statement {
-    sid = "ECRAuth"
-    actions = [
-      "ecr:GetAuthorizationToken",
-    ]
-    resources = ["*"]
-  }
-
-  # Allow ECS to download images.
-  statement {
-    sid = "ECRPullAccess"
-    actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer",
-    ]
-    resources = [data.aws_ecr_repository.app.arn]
-  }
-
   dynamic "statement" {
     for_each = length(var.secrets) > 0 ? [1] : []
     content {
