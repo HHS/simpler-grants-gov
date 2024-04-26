@@ -35,6 +35,32 @@ def setup_opportunity(
     return source_opportunity
 
 
+def validate_matching_fields(
+    source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
+):
+    mismatched_fields = []
+
+    for source_field, destination_field in fields:
+        source_value = getattr(source, source_field)
+        destination_value = getattr(destination, destination_field)
+        if source_value != destination_value:
+            mismatched_fields.append(
+                f"{source_field}/{destination_field}: '{source_value}' != '{destination_value}'"
+            )
+
+    # If a values weren't copied in an update
+    # then we should expect most things to not match,
+    # but randomness in the factories might cause some overlap
+    if expect_all_to_match:
+        assert (
+            len(mismatched_fields) == 0
+        ), f"Expected all fields to match between {source.__class__} and {destination.__class__}, but found mismatched fields: {','.join(mismatched_fields)}"
+    else:
+        assert (
+            len(mismatched_fields) != 0
+        ), f"Did not expect all fields to match between {source.__class__} and {destination.__class__}, but they did which means an unexpected update occurred"
+
+
 def validate_opportunity(
     db_session,
     source_opportunity: Topportunity,
@@ -53,16 +79,23 @@ def validate_opportunity(
         # TODO - check created/updated at
         # assert opportunity.created_at > datetime.utcnow()
 
-        # TODO - there's gotta be a better way to do this compare
-        # just check a few basic fields as matching or not
-        # these are only on fields that can't generate the same
-        # based on how our factories work for the fields
-        if expect_values_to_match:
-            assert opportunity.opportunity_title == source_opportunity.opptitle
-            assert opportunity.opportunity_number == source_opportunity.oppnumber
-        else:
-            assert opportunity.opportunity_title != source_opportunity.opptitle
-            assert opportunity.opportunity_number != source_opportunity.oppnumber
+        # For fields that we expect to match 1:1, verify that they match as expected
+        validate_matching_fields(
+            source_opportunity,
+            opportunity,
+            [
+                ("oppnumber", "opportunity_number"),
+                ("opptitle", "opportunity_title"),
+                ("owningagency", "agency"),
+                ("category_explanation", "category_explanation"),
+                ("revision_number", "revision_number"),
+                ("modified_comments", "modified_comments"),
+                ("publisheruid", "publisher_user_id"),
+                ("publisher_profile_id", "publisher_profile_id"),
+            ],
+            expect_values_to_match,
+        )
+
     else:
         assert opportunity is None
 

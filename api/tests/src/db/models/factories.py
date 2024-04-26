@@ -611,17 +611,20 @@ class StagingTopportunityFactory(BaseFactory):
     # only set the category explanation if category is Other
     category_explanation = factory.Maybe(
         decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
-        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        yes_declaration=factory.Faker("sentence", nb_words=5),
         no_declaration=None,
     )
 
-    is_draft = "N"  # Because we filter out drafts, just default these to False
+    is_draft = "N"
 
     revision_number = 0
 
     created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
-    last_upd_date = sometimes_none(factory.Faker("date_between", start_date="-5y", end_date="today"))
+    last_upd_date = sometimes_none(
+        factory.Faker("date_between", start_date="-5y", end_date="today")
+    )
 
+    # Default to being a new insert/update
     is_deleted = False
     transformed_at = None
 

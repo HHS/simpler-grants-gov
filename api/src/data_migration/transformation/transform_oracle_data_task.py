@@ -139,14 +139,30 @@ class TransformOracleDataTask(Task):
         target_opportunity.agency = source_opportunity.owningagency
         target_opportunity.category = transform_opportunity_category(source_opportunity.oppcategory)
         target_opportunity.category_explanation = source_opportunity.category_explanation
-        target_opportunity.is_draft = source_opportunity.is_draft != "N"
         target_opportunity.revision_number = source_opportunity.revision_number
         target_opportunity.modified_comments = source_opportunity.modified_comments
         target_opportunity.publisher_user_id = source_opportunity.publisheruid
         target_opportunity.publisher_profile_id = source_opportunity.publisher_profile_id
 
-        # TODO - do we want to set created_at/updated_at using the values from the legacy
-        # system or just use "now" (the default)?
+        # The legacy system doesn't actually have this value as a boolean. There are several
+        # different letter codes. However, their API implementation also does this for their draft flag.
+        target_opportunity.is_draft = source_opportunity.is_draft != "N"
+
+        # TODO The timezones in the legacy system are stored in EST, so convert them to UTC here
+        # TODO - we'll need this for every transform, make it more generic in a function
+        if source_opportunity.created_date is not None:
+            target_opportunity.created_at = source_opportunity.created_date
+        else:
+            logger.warning("TODO")
+            target_opportunity.created_at = datetime_util.utcnow()
+
+        if source_opportunity.last_upd_date is not None:
+            target_opportunity.updated_at = source_opportunity.last_upd_date
+        else:
+            # In the legacy system, they don't set whether something was updated
+            # until it receives an update. We always set the value, and on initial insert
+            # want it to be the same as the created_at.
+            target_opportunity.updated_at = target_opportunity.created_at
 
         return target_opportunity
 
@@ -167,7 +183,7 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
     transformed_value = OPPORTUNITY_CATEGORY_MAP.get(value)
 
     if transformed_value is None:
-        raise ValueError(f"Unrecognized opportunity category: %s" % value)
+        raise ValueError("Unrecognized opportunity category: %s" % value)
 
     return transformed_value
 
@@ -175,7 +191,7 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
 # TODO - this is likely going to be run as part of a separate script
 # but just to help build it out at the moment and test it, setting
 # an entrypoint for easy local manual testing
-def main():
+def main() -> None:
     import src.logging
 
     with src.logging.init("transform_oracle_data"):
