@@ -23,4 +23,4 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Check all wiki files are linked in SUMMARY.md
-        run: .github/linters/scripts/check-wiki-pages-linked-to-summary.sh
+        run: ./scripts/check-wiki-pages-linked-to-summary.sh
