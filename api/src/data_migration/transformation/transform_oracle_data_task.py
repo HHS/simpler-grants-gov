@@ -153,7 +153,7 @@ class TransformOracleDataTask(Task):
         if source_opportunity.created_date is not None:
             target_opportunity.created_at = source_opportunity.created_date
         else:
-            logger.warning("TODO")
+            logger.warning("Opportunity does not have a create timestamp, setting value to now.", {"opportunity_id": source_opportunity.opportunity_id})
             target_opportunity.created_at = datetime_util.utcnow()
 
         if source_opportunity.last_upd_date is not None:

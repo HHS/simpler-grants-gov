@@ -619,9 +619,9 @@ class StagingTopportunityFactory(BaseFactory):
 
     revision_number = 0
 
-    created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
     last_upd_date = sometimes_none(
-        factory.Faker("date_between", start_date="-5y", end_date="today")
+        factory.Faker("date_time_between", start_date="-5y", end_date="today")
     )
 
     # Default to being a new insert/update

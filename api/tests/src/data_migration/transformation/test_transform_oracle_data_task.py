@@ -2,7 +2,8 @@ from typing import Tuple
 
 import pytest
 
-from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
+from src.constants.lookup_constants import OpportunityCategory
+from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask, transform_opportunity_category
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.opportunity import Topportunity
 from tests.conftest import BaseTestClass
@@ -61,6 +62,9 @@ def validate_matching_fields(
         ), f"Did not expect all fields to match between {source.__class__} and {destination.__class__}, but they did which means an unexpected update occurred"
 
 
+def validate_create_update_timestamps():
+    pass
+
 def validate_opportunity(
     db_session,
     source_opportunity: Topportunity,
@@ -95,6 +99,16 @@ def validate_opportunity(
             ],
             expect_values_to_match,
         )
+
+        # TODO - updated_at/created_at
+        if expect_values_to_match:
+            # Deliberately doing this in a more direct manner
+            if source_opportunity.is_draft == "N":
+                assert opportunity.is_draft is False
+            else:
+                assert opportunity.is_draft is True
+        else:
+            pass
 
     else:
         assert opportunity is None
@@ -149,7 +163,7 @@ class TestTransformOracleDataTask(BaseTestClass):
     def test_process_opportunity_delete_but_current_missing(
         self, db_session, transform_oracle_data_task
     ):
-        # Verify an error is raised when we try to delete
+        # Verify an error is raised when we try to delete something that doesn't exist
         delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
 
         with pytest.raises(ValueError, match="Cannot delete opportunity as it does not exist"):
@@ -167,3 +181,21 @@ class TestTransformOracleDataTask(BaseTestClass):
             transform_oracle_data_task.process_opportunity(insert_that_will_fail, None)
 
         validate_opportunity(db_session, insert_that_will_fail, expect_in_db=False)
+
+
+@pytest.mark.parametrize("value,expected_value", [
+    # Just check a few
+    ("D", OpportunityCategory.DISCRETIONARY),
+    ("M", OpportunityCategory.MANDATORY),
+    ("O", OpportunityCategory.OTHER),
+    (None, None),
+    ("", None)
+])
+def test_transform_opportunity_category(value, expected_value):
+    assert transform_opportunity_category(value) == expected_value
+
+@pytest.mark.parametrize("value", ["A", "B", "mandatory", "other", "hello"])
+def test_transform_opportunity_category_unexpected_value(value):
+    with pytest.raises(ValueError, match="Unrecognized opportunity category"):
+        transform_opportunity_category(value)
+    pass
