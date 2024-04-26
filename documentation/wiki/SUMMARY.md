@@ -120,4 +120,4 @@
   * [Database migration architecture](decisions/infra/0007-database-migration-architecture.md)
   * [Consolidate infra config from tfvars files into config module](decisions/infra/0008-consolidate-infra-config-from-tfvars-files-into-config-module.md)
   * [Environment use cases](decisions/infra/0009-environment-use-cases.md)
-  * [Production networking long term state](decisions/infra/0010-production-networking) # example broken link
+  * [Production networking long term state](decisions/infra/0010-production-networking-long-term-state.md)
