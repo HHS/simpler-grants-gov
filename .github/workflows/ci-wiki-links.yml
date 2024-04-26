@@ -17,8 +17,6 @@ jobs:
   check-wiki-links:
     name: Check wiki links in SUMMARY.md
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
     steps:
       - uses: actions/checkout@v3
 
