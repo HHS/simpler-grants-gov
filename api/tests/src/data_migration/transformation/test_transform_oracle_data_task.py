@@ -4,43 +4,40 @@ import pytest
 
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.topportunity_models import TransferTopportunity
+from src.db.models.staging.opportunity import Topportunity
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory, TransferTopportunityFactory
+from tests.src.db.models.factories import OpportunityFactory, StagingTopportunityFactory
 
 
 def setup_opportunity(
     create_existing: bool,
     is_delete: bool = False,
     is_already_processed: bool = False,
-    transfer_values: dict | None = None,
-) -> TransferTopportunity:
-    if transfer_values is None:
-        transfer_values = {}
+    source_values: dict | None = None,
+) -> Topportunity:
+    if source_values is None:
+        source_values = {}
 
-    # TODO - right transfer opportunity
-    transfer_opportunity = TransferTopportunityFactory.create(
-        **transfer_values,
-        # TODO - use is_delete
-        # TODO - use is_already_processed
-        publisheruid="delete_me" if is_delete else None,
-        publisher_profile_id=1 if is_already_processed else None,
+    source_opportunity = StagingTopportunityFactory.create(
+        **source_values,
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
     )
 
     if create_existing:
         OpportunityFactory.create(
-            opportunity_id=transfer_opportunity.opportunity_id,
+            opportunity_id=source_opportunity.opportunity_id,
             # set created_at/updated_at to an earlier time so its clear
             # when they were last updated
             timestamps_in_past=True,
         )
 
-    return transfer_opportunity
+    return source_opportunity
 
 
 def validate_opportunity(
     db_session,
-    source_opportunity: TransferTopportunity,
+    source_opportunity: Topportunity,
     expect_in_db: bool = True,
     expect_values_to_match: bool = True,
 ):
@@ -73,7 +70,7 @@ def validate_opportunity(
 class TestTransformOracleDataTask(BaseTestClass):
     @pytest.fixture()
     def transform_oracle_data_task(
-        self, db_session, enable_factory_create
+        self, db_session, enable_factory_create, truncate_opportunities
     ) -> TransformOracleDataTask:
         return TransformOracleDataTask(db_session)
 
@@ -95,7 +92,7 @@ class TestTransformOracleDataTask(BaseTestClass):
         )
 
         insert_that_will_fail = setup_opportunity(
-            create_existing=False, transfer_values={"oppcategory": "X"}
+            create_existing=False, source_values={"oppcategory": "X"}
         )
 
         transform_oracle_data_task.process_opportunities()
@@ -130,7 +127,7 @@ class TestTransformOracleDataTask(BaseTestClass):
     def test_process_opportunity_invalid_category(self, db_session, transform_oracle_data_task):
         # This will error in the transform as that isn't a category we have configured
         insert_that_will_fail = setup_opportunity(
-            create_existing=False, transfer_values={"oppcategory": "X"}
+            create_existing=False, source_values={"oppcategory": "X"}
         )
 
         with pytest.raises(ValueError, match="Unrecognized opportunity category"):

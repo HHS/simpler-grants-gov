@@ -32,6 +32,13 @@ from src.constants.lookup_constants import (
 )
 
 
+def sometimes_none(factory_value, none_chance: float = 0.5):
+    if random.random() > none_chance:
+        return factory_value
+
+    return None
+
+
 class CustomProvider(BaseProvider):
     """
     This class is a custom faker provider that can be used to generate
@@ -613,13 +620,12 @@ class StagingTopportunityFactory(BaseFactory):
     revision_number = 0
 
     created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
-    last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
+    last_upd_date = sometimes_none(factory.Faker("date_between", start_date="-5y", end_date="today"))
 
     is_deleted = False
     transformed_at = None
 
     class Params:
-        never_updated = factory.Trait(last_upd_date=None)
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )

@@ -1,19 +1,23 @@
 import logging
+from datetime import datetime
 from enum import StrEnum
 from typing import Tuple, Type, TypeVar, cast
 
 from sqlalchemy import select
 
+from src.adapters import db
 from src.adapters.db import PostgresDBClient
-from src.db.models.base import Base
-from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.topportunity_models import TransferTopportunity
-from src.task.task import Task
-
-S = TypeVar("S", bound=Base)
-D = TypeVar("D", bound=Base)
-
 from src.constants.lookup_constants import OpportunityCategory
+from src.db.models.base import ApiSchemaTable
+from src.db.models.opportunity_models import Opportunity
+from src.db.models.staging.opportunity import Topportunity
+from src.db.models.staging.staging_base import StagingParamMixin
+from src.task.task import Task
+from src.util import datetime_util
+
+S = TypeVar("S", bound=StagingParamMixin)
+D = TypeVar("D", bound=ApiSchemaTable)
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +30,13 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_UPDATED = "total_records_updated"
 
         ERROR_COUNT = "error_count"
+
+    def __init__(self, db_session: db.Session, transform_time: datetime | None = None) -> None:
+        super().__init__(db_session)
+
+        if transform_time is None:
+            transform_time = datetime_util.utcnow()
+        self.transform_time = transform_time
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -53,7 +64,7 @@ class TransformOracleDataTask(Task):
             self.db_session.execute(
                 select(source_model, destination_model)
                 .join(destination_model, *join_clause, isouter=True)
-                .where(source_model.publisher_profile_id.is_(None))
+                .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
             ).all(),
         )
@@ -61,10 +72,10 @@ class TransformOracleDataTask(Task):
     def process_opportunities(self) -> None:
         # Fetch all opportunities that were modified
         # Alongside that, grab the existing opportunity record
-        opportunities: list[Tuple[TransferTopportunity, Opportunity | None]] = self.fetch(
-            TransferTopportunity,
+        opportunities: list[Tuple[Topportunity, Opportunity | None]] = self.fetch(
+            Topportunity,
             Opportunity,
-            [TransferTopportunity.opportunity_id == Opportunity.opportunity_id],
+            [Topportunity.opportunity_id == Opportunity.opportunity_id],
         )
 
         for source_opportunity, target_opportunity in opportunities:
@@ -78,13 +89,12 @@ class TransformOracleDataTask(Task):
                 )
 
     def process_opportunity(
-        self, source_opportunity: TransferTopportunity, target_opportunity: Opportunity | None
+        self, source_opportunity: Topportunity, target_opportunity: Opportunity | None
     ) -> None:
         extra = {"opportunity_id": source_opportunity.opportunity_id}
         logger.info("Processing opportunity", extra=extra)
 
-        # TODO - whatever check we need to do to see if something should be deleted
-        if source_opportunity.publisheruid == "delete_me":
+        if source_opportunity.is_deleted:
             logger.info("Deleting opportunity", extra=extra)
 
             if target_opportunity is None:
@@ -101,8 +111,7 @@ class TransformOracleDataTask(Task):
             self.db_session.add(transformed_opportunity)
 
         logger.info("Processed opportunity", extra=extra)
-        # TODO - set the field we query by correctly, using this field temporarily
-        source_opportunity.publisher_profile_id = 1
+        source_opportunity.transformed_at = self.transform_time
 
     def process_assistance_listings(self) -> None:
         # TODO - https://github.com/HHS/simpler-grants-gov/issues/1746
@@ -117,7 +126,7 @@ class TransformOracleDataTask(Task):
         pass
 
     def transform_opportunity(
-        self, source_opportunity: TransferTopportunity, target_opportunity: Opportunity | None
+        self, source_opportunity: Topportunity, target_opportunity: Opportunity | None
     ) -> Opportunity:
         if target_opportunity is None:
             self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
