@@ -15,7 +15,7 @@
   * [\[Technical spec template\]](product/deliverables/technical-spec-template.md)
   * [Specifications](product/deliverables/specifications/README.md)
     * [🏁 Static site soft launch](product/deliverables/specifications/static-site-soft-launch.md)
-    * [🏁 Static site public launch](product/deliverables/specifications/static-site-public-launch.md)
+    * [Static site public launch](product/deliverables/specifications/static-site-public-launch.md)
     * [🏁 GET Opportunities](product/deliverables/specifications/get-opportunities.md)
     * [Search API](product/deliverables/specifications/search-api.md)
     * [Search UI](product/deliverables/specifications/search-user-interface.md)
@@ -24,7 +24,7 @@
     * [Delivery dashboard](product/deliverables/specifications/delivery-dashboard.md)
       * [Delivery dashboard - technical spec](product/deliverables/specifications/delivery-dashboard/delivery-dashboard-technical-spec.md)
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
-    * [Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
+    * [🏁 Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
     * [Co-design group](product/deliverables/specifications/co-design-group.md)
     * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
 
