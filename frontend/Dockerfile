@@ -62,6 +62,12 @@ RUN npm run build -- --no-lint
 FROM node:20-bullseye-slim AS release
 WORKDIR /frontend
 
+# Update system and install security updates
+RUN apt-get update \
+    && apt-get install -y --only-upgrade libc-bin libc6 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
 

@@ -12,7 +12,7 @@ This is a draft version of a new technical specification template. The contents 
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable</strong></td><td><a href="./">Delivery dashboard</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><a href="delivery-dashboard-technical-spec.md#architecture-decisions">Architecture decisions</a></li><li><a href="delivery-dashboard-technical-spec.md#technical-milestones">Technical milestones</a></li><li><a href="delivery-dashboard-technical-spec.md#integrations">Integrations</a></li><li><a href="delivery-dashboard-technical-spec.md#security-considerations">Security considerations</a></li><li><a href="delivery-dashboard-technical-spec.md#logs">Change log</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable</strong></td><td><a href="../delivery-dashboard.md">Delivery dashboard</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><a href="delivery-dashboard-technical-spec.md#architecture-decisions">Architecture decisions</a></li><li><a href="delivery-dashboard-technical-spec.md#technical-milestones">Technical milestones</a></li><li><a href="delivery-dashboard-technical-spec.md#integrations">Integrations</a></li><li><a href="delivery-dashboard-technical-spec.md#security-considerations">Security considerations</a></li><li><a href="delivery-dashboard-technical-spec.md#logs">Change log</a></li></ul></td></tr></tbody></table>
 
 ## Architecture decisions
 
