@@ -14,7 +14,7 @@ import { cookies } from "next/headers";
 import { generateAgencyNameLookup } from "src/utils/search/generateAgencyNameLookup";
 import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { getMessages, getTranslations } from "next-intl/server";
-import { NextIntlClientProvider } from 'next-intl';
+import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 
 const searchFetcher = getSearchFetcher();
@@ -53,10 +53,7 @@ export default async function Search({ searchParams }: ServerPageProps) {
 
   return (
     <>
-      <NextIntlClientProvider
-        locale="en"
-        messages={messages}
-      >
+      <NextIntlClientProvider locale="en" messages={messages}>
         <BetaAlert />
       </NextIntlClientProvider>
       <SearchCallToAction />

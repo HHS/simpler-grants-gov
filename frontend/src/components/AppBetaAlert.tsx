@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -6,12 +5,10 @@ import { useTranslations } from "next-intl";
 import FullWidthAlert from "./FullWidthAlert";
 
 const BetaAlert = () => {
-  const t = useTranslations("Beta_alert")
+  const t = useTranslations("Beta_alert");
   const heading = t.rich("alert_title", {
-    LinkToGrants: (content) => (
-      <a href="https://www.grants.gov">{content}</a>
-    ),
-  })
+    LinkToGrants: (content) => <a href="https://www.grants.gov">{content}</a>,
+  });
 
   return (
     <div

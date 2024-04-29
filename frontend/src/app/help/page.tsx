@@ -9,7 +9,6 @@ import BetaAlert from "src/components/AppBetaAlert";
 
 import { NextIntlClientProvider } from "next-intl";
 
-
 interface RouteParams {
   locale: string;
 }
@@ -32,10 +31,7 @@ export default async function Help() {
         title={t("Process.page_title")}
         description={t("Process.meta_description")}
       />
-      <NextIntlClientProvider
-        locale="en"
-        messages={messages}
-      >
+      <NextIntlClientProvider locale="en" messages={messages}>
         <BetaAlert />
       </NextIntlClientProvider>
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />

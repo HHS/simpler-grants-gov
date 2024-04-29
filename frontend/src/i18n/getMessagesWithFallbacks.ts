@@ -15,13 +15,13 @@ async function importMessages(locale: Locale) {
  * from the current locale, the missing key will fallback to the default locale
  */
 export async function getMessagesWithFallbacks(
-  requestedLocale: string = defaultLocale
+  requestedLocale: string = defaultLocale,
 ) {
   const isValidLocale = locales.includes(requestedLocale as Locale); // https://github.com/microsoft/TypeScript/issues/26255
   if (!isValidLocale) {
     console.error(
       "Unsupported locale was requested. Falling back to the default locale.",
-      { locale: requestedLocale, defaultLocale }
+      { locale: requestedLocale, defaultLocale },
     );
     requestedLocale = defaultLocale;
   }
