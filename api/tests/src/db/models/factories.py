@@ -595,11 +595,6 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 # Staging Table Factories
 ####################################
 
-class ForeignTopportunityFactory(BaseFactory):
-    class Meta:
-        model = x
-
-
 
 
 class StagingTopportunityFactory(BaseFactory):
