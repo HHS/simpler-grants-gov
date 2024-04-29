@@ -595,6 +595,12 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 # Staging Table Factories
 ####################################
 
+class ForeignTopportunityFactory(BaseFactory):
+    class Meta:
+        model = x
+
+
+
 
 class StagingTopportunityFactory(BaseFactory):
     class Meta:
@@ -628,6 +634,12 @@ class StagingTopportunityFactory(BaseFactory):
     is_deleted = False
     transformed_at = None
 
+    cfdas = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.StagingTopportunityCfdaFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
@@ -642,6 +654,29 @@ class StagingTopportunityFactory(BaseFactory):
             oppcategory=None,
             category_explanation=None,
         )
+
+class StagingTopportunityCfdaFactory(BaseFactory):
+    class Meta:
+        model = staging.opportunity.TopportunityCfda
+
+    opp_cfda_id = factory.Sequence(lambda n: n)
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    programtitle = factory.Faker("company")
+    cfdanumber = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
+    )
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    # Default to being a new insert/update
+    is_deleted = False
+    transformed_at = None
 
 
 ####################################
