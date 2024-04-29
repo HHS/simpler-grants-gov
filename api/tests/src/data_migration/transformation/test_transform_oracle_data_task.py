@@ -82,38 +82,35 @@ def validate_opportunity(
         .one_or_none()
     )
 
-    if expect_in_db:
-        assert opportunity is not None
-
-        # For fields that we expect to match 1:1, verify that they match as expected
-        validate_matching_fields(
-            source_opportunity,
-            opportunity,
-            [
-                ("oppnumber", "opportunity_number"),
-                ("opptitle", "opportunity_title"),
-                ("owningagency", "agency"),
-                ("category_explanation", "category_explanation"),
-                ("revision_number", "revision_number"),
-                ("modified_comments", "modified_comments"),
-                ("publisheruid", "publisher_user_id"),
-                ("publisher_profile_id", "publisher_profile_id"),
-            ],
-            expect_values_to_match,
-        )
-
-        # Validation of fields that aren't copied exactly
-        if expect_values_to_match:
-            # Deliberately validating is_draft with a different calculation
-            if source_opportunity.is_draft == "N":
-                assert opportunity.is_draft is False
-            else:
-                assert opportunity.is_draft is True
-        else:
-            pass
-
-    else:
+    if not expect_in_db:
         assert opportunity is None
+        return
+
+    assert opportunity is not None
+    # For fields that we expect to match 1:1, verify that they match as expected
+    validate_matching_fields(
+        source_opportunity,
+        opportunity,
+        [
+            ("oppnumber", "opportunity_number"),
+            ("opptitle", "opportunity_title"),
+            ("owningagency", "agency"),
+            ("category_explanation", "category_explanation"),
+            ("revision_number", "revision_number"),
+            ("modified_comments", "modified_comments"),
+            ("publisheruid", "publisher_user_id"),
+            ("publisher_profile_id", "publisher_profile_id"),
+        ],
+        expect_values_to_match,
+    )
+
+    # Validation of fields that aren't copied exactly
+    if expect_values_to_match:
+        # Deliberately validating is_draft with a different calculation
+        if source_opportunity.is_draft == "N":
+            assert opportunity.is_draft is False
+        else:
+            assert opportunity.is_draft is True
 
 
 class TestTransformOracleDataTask(BaseTestClass):
@@ -130,9 +127,7 @@ class TestTransformOracleDataTask(BaseTestClass):
         ordinary_delete2 = setup_opportunity(
             create_existing=True, is_delete=True, all_fields_null=False
         )
-        delete_but_current_missing = setup_opportunity(
-            create_existing=False, is_delete=True
-        )  # TODO - probably should verify it logged error
+        delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
 
         basic_insert = setup_opportunity(create_existing=False)
         basic_insert2 = setup_opportunity(create_existing=False, all_fields_null=True)
