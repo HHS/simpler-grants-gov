@@ -198,6 +198,8 @@ resource "aws_cloudwatch_log_group" "WafWebAclLoggroup" {
 # You might need to grant log delivery permissions for the destination.
 # If you're using S3 as your log destination, you might have exceeded your bucket limit.
 #
+# Ticket to resolve this issue: https://github.com/HHS/simpler-grants-gov/issues/1871
+#
 # # Associate WAF with the cloudwatch logging group
 # resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
 #   log_destination_configs = [aws_cloudwatch_log_group.WafWebAclLoggroup.arn]
