@@ -8,6 +8,7 @@ import src.adapters.db as db
 import src.logging
 from src.constants.schema import Schemas
 from src.db.models import metadata
+from src.db.models.staging import metadata as staging_metadata
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
 
@@ -23,7 +24,7 @@ with src.logging.init("migrations"):
     # for 'autogenerate' support
     # from myapp import mymodel
     # target_metadata = mymodel.Base.metadata
-    target_metadata = metadata
+    target_metadata = [metadata, staging_metadata]
 
     # other values from the config, defined by the needs of env.py,
     # can be acquired:

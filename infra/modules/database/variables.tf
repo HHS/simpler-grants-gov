@@ -71,6 +71,18 @@ variable "instance_count" {
   }
 }
 
+variable "max_capacity" {
+  description = "Maximum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 1.0
+}
+
+variable "min_capacity" {
+  description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 0.5
+}
+
 variable "enable_http_endpoint" {
   description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
   type        = bool
