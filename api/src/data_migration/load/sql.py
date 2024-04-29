@@ -33,11 +33,13 @@ def build_update_sql(
 ) -> sqlalchemy.Update:
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
     return (
+        # `UPDATE <destination_table>`
         sqlalchemy.update(destination_table)
+        # `SET col1=source_table.col1, col2=source_table.col2, ...`
+        .values(source_table.columns)
+        # `WHERE ...`
         .where(
-            source_table.c.opportunity_id == destination_table.c.opportunity_id,
+            destination_table.c.opportunity_id == source_table.c.opportunity_id,
             destination_table.c.last_upd_date < source_table.c.last_upd_date,
         )
-        .values(source_table.columns)
-        .values(transformed_at=None)
     )

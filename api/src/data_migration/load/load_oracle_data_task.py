@@ -61,7 +61,7 @@ class LoadOracleDataTask(src.task.task.Task):
             foreign_table, staging_table
         )
 
-        # print(insert_from_select_sql)
+        #print(insert_from_select_sql)
 
         # COUNT has to be a separate query as INSERTs don't return a rowcount.
         insert_count = self.db_session.query(select_sql.subquery()).count()
@@ -73,9 +73,9 @@ class LoadOracleDataTask(src.task.task.Task):
     def do_update(self, foreign_table, staging_table):
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
 
-        update_sql = sql.build_update_sql(foreign_table, staging_table)
+        update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
 
-        # print(update_sql)
+        #print(update_sql)
         result = self.db_session.execute(update_sql)
 
         return result.rowcount
