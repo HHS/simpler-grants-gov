@@ -31,6 +31,11 @@ def adjust_timezone(timestamp: datetime, timezone_str: str) -> datetime:
     return timestamp.astimezone(new_timezone)
 
 
+def make_timezone_aware(timestamp: datetime, timezone_str: str) -> datetime:
+    new_timezone = pytz.timezone(timezone_str)
+    return new_timezone.localize(timestamp)
+
+
 def get_now_us_eastern_datetime() -> datetime:
     """
     Return the current time in the eastern time zone. DST is handled based on the local time.

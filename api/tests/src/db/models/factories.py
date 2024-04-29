@@ -615,13 +615,13 @@ class StagingTopportunityFactory(BaseFactory):
         no_declaration=None,
     )
 
-    is_draft = "N"
+    is_draft = factory.fuzzy.FuzzyChoice(["N", "S"])
 
-    revision_number = 0
+    revision_number = factory.Faker("random_int", min=1, max=10)
 
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
     last_upd_date = sometimes_none(
-        factory.Faker("date_time_between", start_date="-5y", end_date="today")
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
 
     # Default to being a new insert/update
@@ -631,6 +631,16 @@ class StagingTopportunityFactory(BaseFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            oppnumber=None,
+            revision_number=None,
+            opptitle=None,
+            owningagency=None,
+            oppcategory=None,
+            category_explanation=None,
         )
 
 
