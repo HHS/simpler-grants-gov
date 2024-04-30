@@ -543,6 +543,8 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
 
+    opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
+
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
 
@@ -550,6 +552,13 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     assistance_listing_number = factory.LazyFunction(
         lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
     )
+
+    class Params:
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
 
 
 class LinkOpportunitySummaryFundingInstrumentFactory(BaseFactory):
@@ -594,7 +603,6 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 ####################################
 # Staging Table Factories
 ####################################
-
 
 
 class StagingTopportunityFactory(BaseFactory):
@@ -650,6 +658,7 @@ class StagingTopportunityFactory(BaseFactory):
             category_explanation=None,
         )
 
+
 class StagingTopportunityCfdaFactory(BaseFactory):
     class Meta:
         model = staging.opportunity.TopportunityCfda
@@ -672,6 +681,17 @@ class StagingTopportunityCfdaFactory(BaseFactory):
     # Default to being a new insert/update
     is_deleted = False
     transformed_at = None
+
+    class Params:
+        already_transformed = factory.Trait(
+            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            programtitle=None,
+            cfdanumber=None,
+        )
 
 
 ####################################

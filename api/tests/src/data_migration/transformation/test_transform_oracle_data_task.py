@@ -10,10 +10,15 @@ from src.data_migration.transformation.transform_oracle_data_task import (
     transform_opportunity_category,
     transform_update_create_timestamp,
 )
-from src.db.models.opportunity_models import Opportunity
-from src.db.models.staging.opportunity import Topportunity
+from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory, StagingTopportunityFactory
+from tests.src.db.models.factories import (
+    OpportunityAssistanceListingFactory,
+    OpportunityFactory,
+    StagingTopportunityCfdaFactory,
+    StagingTopportunityFactory,
+)
 
 
 def setup_opportunity(
@@ -31,6 +36,7 @@ def setup_opportunity(
         is_deleted=is_delete,
         already_transformed=is_already_processed,
         all_fields_null=all_fields_null,
+        cfdas=[],
     )
 
     if create_existing:
@@ -42,6 +48,41 @@ def setup_opportunity(
         )
 
     return source_opportunity
+
+
+def setup_cfda(
+    create_existing: bool,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    source_values: dict | None = None,
+    all_fields_null: bool = False,
+    opportunity: Opportunity | None = None,
+) -> TopportunityCfda:
+    if source_values is None:
+        source_values = {}
+
+    # If you don't provide an opportunity, you need to provide an ID
+    if opportunity is not None:
+        source_values["opportunity_id"] = opportunity.opportunity_id
+
+    source_cfda = StagingTopportunityCfdaFactory.create(
+        **source_values,
+        opportunity=None,  # To override the factory trying to create something
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+        all_fields_null=all_fields_null,
+    )
+
+    if create_existing:
+        OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity,
+            opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
+            # set created_at/updated_at to an earlier time so its clear
+            # when they were last updated
+            timestamps_in_past=True,
+        )
+
+    return source_cfda
 
 
 def validate_matching_fields(
@@ -113,7 +154,39 @@ def validate_opportunity(
             assert opportunity.is_draft is True
 
 
-class TestTransformOracleDataTask(BaseTestClass):
+def validate_assistance_listing(
+    db_session,
+    source_cfda: TopportunityCfda,
+    expect_in_db: bool = True,
+    expect_values_to_match: bool = True,
+):
+    assistance_listing = (
+        db_session.query(OpportunityAssistanceListing)
+        .filter(
+            OpportunityAssistanceListing.opportunity_assistance_listing_id
+            == source_cfda.opp_cfda_id
+        )
+        .one_or_none()
+    )
+
+    if not expect_in_db:
+        assert assistance_listing is None
+        return
+
+    assert assistance_listing is not None
+    # For fields that we expect to match 1:1, verify that they match as expected
+    validate_matching_fields(
+        source_cfda,
+        assistance_listing,
+        [
+            ("cfdanumber", "assistance_listing_number"),
+            ("programtitle", "program_title"),
+        ],
+        expect_values_to_match,
+    )
+
+
+class TestTransformOpportunity(BaseTestClass):
     @pytest.fixture()
     def transform_oracle_data_task(
         self, db_session, enable_factory_create, truncate_opportunities
@@ -211,6 +284,151 @@ class TestTransformOracleDataTask(BaseTestClass):
             transform_oracle_data_task.process_opportunity(insert_that_will_fail, None)
 
         validate_opportunity(db_session, insert_that_will_fail, expect_in_db=False)
+
+
+class TestTransformAssistanceListing(BaseTestClass):
+    @pytest.fixture()
+    def transform_oracle_data_task(
+        self, db_session, enable_factory_create, truncate_opportunities
+    ) -> TransformOracleDataTask:
+        return TransformOracleDataTask(db_session)
+
+    def test_process_opportunity_assistance_listings(self, db_session, transform_oracle_data_task):
+        opportunity1 = OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_insert1 = setup_cfda(create_existing=False, opportunity=opportunity1)
+        cfda_insert2 = setup_cfda(create_existing=False, opportunity=opportunity1)
+        cfda_update1 = setup_cfda(create_existing=True, opportunity=opportunity1)
+        cfda_delete1 = setup_cfda(create_existing=True, is_delete=True, opportunity=opportunity1)
+        cfda_update_already_processed1 = setup_cfda(
+            create_existing=True, is_already_processed=True, opportunity=opportunity1
+        )
+
+        opportunity2 = OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_insert3 = setup_cfda(create_existing=False, opportunity=opportunity2)
+        cfda_update_already_processed2 = setup_cfda(
+            create_existing=True, is_already_processed=True, opportunity=opportunity2
+        )
+        cfda_delete_already_processed1 = setup_cfda(
+            create_existing=False,
+            is_already_processed=True,
+            is_delete=True,
+            opportunity=opportunity2,
+        )
+        cfda_delete2 = setup_cfda(create_existing=True, is_delete=True, opportunity=opportunity2)
+
+        opportunity3 = OpportunityFactory.create(opportunity_assistance_listings=[])
+        cfda_update2 = setup_cfda(create_existing=True, opportunity=opportunity3)
+        cfda_delete_but_current_missing = setup_cfda(
+            create_existing=False, is_delete=True, opportunity=opportunity3
+        )
+
+        cfda_insert_without_opportunity = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": 12345678}, opportunity=None
+        )
+        cfda_delete_without_opportunity = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": 34567890}, opportunity=None
+        )
+
+        transform_oracle_data_task.process_assistance_listings()
+
+        validate_assistance_listing(db_session, cfda_insert1)
+        validate_assistance_listing(db_session, cfda_insert2)
+        validate_assistance_listing(db_session, cfda_insert3)
+        validate_assistance_listing(db_session, cfda_update1)
+        validate_assistance_listing(db_session, cfda_update2)
+        validate_assistance_listing(db_session, cfda_delete1, expect_in_db=False)
+        validate_assistance_listing(db_session, cfda_delete2, expect_in_db=False)
+
+        # Records that won't have been fetched
+        validate_assistance_listing(
+            db_session,
+            cfda_update_already_processed1,
+            expect_in_db=True,
+            expect_values_to_match=False,
+        )
+        validate_assistance_listing(
+            db_session,
+            cfda_update_already_processed2,
+            expect_in_db=True,
+            expect_values_to_match=False,
+        )
+        validate_assistance_listing(db_session, cfda_delete_already_processed1, expect_in_db=False)
+
+        validate_assistance_listing(db_session, cfda_delete_but_current_missing, expect_in_db=False)
+
+        validate_assistance_listing(db_session, cfda_insert_without_opportunity, expect_in_db=False)
+        validate_assistance_listing(db_session, cfda_delete_without_opportunity, expect_in_db=False)
+
+        metrics = transform_oracle_data_task.metrics
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 10
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
+
+        # Rerunning just attempts to re-process the error record, nothing else gets picked up
+        transform_oracle_data_task.process_assistance_listings()
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 11
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+
+    def test_process_assistance_listing_orphaned_record(
+        self, db_session, transform_oracle_data_task
+    ):
+        cfda_insert_without_opportunity = setup_cfda(
+            create_existing=False, source_values={"opportunity_id": 987654321}, opportunity=None
+        )
+
+        # Verify it gets marked as transformed
+        assert cfda_insert_without_opportunity.transformed_at is None
+        transform_oracle_data_task.process_assistance_listing(
+            cfda_insert_without_opportunity, None, None
+        )
+        assert cfda_insert_without_opportunity.transformed_at is not None
+        assert (
+            transform_oracle_data_task.metrics[
+                transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED
+            ]
+            == 1
+        )
+
+        # Verify nothing actually gets created
+        opportunity = (
+            db_session.query(Opportunity)
+            .filter(Opportunity.opportunity_id == cfda_insert_without_opportunity.opportunity_id)
+            .one_or_none()
+        )
+        assert opportunity is None
+        assistance_listing = (
+            db_session.query(OpportunityAssistanceListing)
+            .filter(
+                OpportunityAssistanceListing.opportunity_assistance_listing_id
+                == cfda_insert_without_opportunity.opp_cfda_id
+            )
+            .one_or_none()
+        )
+        assert assistance_listing is None
+
+    def test_process_assistance_listing_delete_but_current_missing(
+        self, db_session, transform_oracle_data_task
+    ):
+        opportunity = OpportunityFactory.create(opportunity_assistance_listings=[])
+        delete_but_current_missing = setup_cfda(
+            create_existing=False, is_delete=True, opportunity=opportunity
+        )
+
+        with pytest.raises(
+            ValueError, match="Cannot delete assistance listing as it does not exist"
+        ):
+            transform_oracle_data_task.process_assistance_listing(
+                delete_but_current_missing, None, opportunity
+            )
+
+        validate_assistance_listing(db_session, delete_but_current_missing, expect_in_db=False)
 
 
 @pytest.mark.parametrize(

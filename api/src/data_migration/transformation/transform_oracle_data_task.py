@@ -27,6 +27,7 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_DELETED = "total_records_deleted"
         TOTAL_RECORDS_INSERTED = "total_records_inserted"
         TOTAL_RECORDS_UPDATED = "total_records_updated"
+        TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
 
         TOTAL_ERROR_COUNT = "total_error_count"
 
@@ -68,14 +69,26 @@ class TransformOracleDataTask(Task):
             ).all(),
         )
 
-    def fetch_with_opportunity(self, source_model: Type[S], destination_model: Type[D], join_clause: list) -> list[Tuple[S, D | None, Opportunity | None]]:
-        return self.db_session.execute(
-            select(source_model, destination_model, Opportunity)
-            .join(destination_model, *join_clause, isouter=True)
-            .join(Opportunity, source_model.opportunity_id == Opportunity.opportunity_id)
-            .where(source_model.transformed_at.is_(None))
-            .execution_options(yield_per=5000)
-        ).all()
+    def fetch_with_opportunity(
+        self, source_model: Type[S], destination_model: Type[D], join_clause: list
+    ) -> list[Tuple[S, D | None, Opportunity | None]]:
+        # Similar to the above fetch function, but also grabs an opportunity record
+        # Note that this requires your source_model to have an opportunity_id field defined.
+
+        return cast(
+            list[Tuple[S, D | None, Opportunity | None]],
+            self.db_session.execute(
+                select(source_model, destination_model, Opportunity)
+                .join(destination_model, *join_clause, isouter=True)
+                .join(
+                    Opportunity,
+                    source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
+                    isouter=True,
+                )
+                .where(source_model.transformed_at.is_(None))
+                .execution_options(yield_per=5000)
+            ).all(),
+        )
 
     def process_opportunities(self) -> None:
         # Fetch all opportunities that were modified
@@ -130,34 +143,61 @@ class TransformOracleDataTask(Task):
         source_opportunity.transformed_at = self.transform_time
 
     def process_assistance_listings(self) -> None:
-
-        assistance_listings: list[Tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]] = self.fetch_with_opportunity(
+        assistance_listings: list[
+            Tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]
+        ] = self.fetch_with_opportunity(
             TopportunityCfda,
             OpportunityAssistanceListing,
-            [TopportunityCfda.opp_cfda_id == OpportunityAssistanceListing.opportunity_assistance_listing_id]
+            [
+                TopportunityCfda.opp_cfda_id
+                == OpportunityAssistanceListing.opportunity_assistance_listing_id
+            ],
         )
 
-        for source_assistance_listing, target_assistance_listing, opportunity in assistance_listings:
+        for (
+            source_assistance_listing,
+            target_assistance_listing,
+            opportunity,
+        ) in assistance_listings:
             try:
-                # TODO - docs & more detail
-                if opportunity is None:
-                    logger.warning("TODO")
-                    continue
-
-                self.process_assistance_listing(source_assistance_listing, target_assistance_listing)
+                self.process_assistance_listing(
+                    source_assistance_listing, target_assistance_listing, opportunity
+                )
             except ValueError:
                 self.increment(self.Metrics.TOTAL_ERROR_COUNT)
                 logger.exception(
                     "Failed to process assistance listing",
-                    extra={"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id},
+                    extra={
+                        "opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id
+                    },
                 )
 
-    def process_assistance_listing(self, source_assistance_listing: TopportunityCfda, target_assistance_listing: OpportunityAssistanceListing | None) -> None:
+    def process_assistance_listing(
+        self,
+        source_assistance_listing: TopportunityCfda,
+        target_assistance_listing: OpportunityAssistanceListing | None,
+        opportunity: Opportunity | None,
+    ) -> None:
         self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
-        extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
+        extra = {
+            "opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id,
+            "opportunity_id": source_assistance_listing.opportunity_id,
+        }
         logger.info("Processing assistance listing", extra=extra)
 
-        if source_assistance_listing.is_deleted:
+        if opportunity is None:
+            # The Oracle system we're importing these from does not have a foreign key between
+            # the opportunity ID in the TOPPORTUNITY_CFDA table and the TOPPORTUNITY table.
+            # There are many (2306 as of writing) orphaned CFDA records, created between 2007 and 2011
+            # We don't want to continuously process these, so won't error for these, and will just
+            # mark them as transformed below.
+            self.increment(self.Metrics.TOTAL_RECORDS_ORPHANED)
+            logger.info(
+                "Assistance listing is orphaned and does not connect to any opportunity",
+                extra=extra,
+            )
+
+        elif source_assistance_listing.is_deleted:
             logger.info("Deleting assistance listing", extra=extra)
 
             if target_assistance_listing is None:
@@ -172,7 +212,9 @@ class TransformOracleDataTask(Task):
             is_insert = target_assistance_listing is None
 
             logger.info("Transforming and upserting assistance listing", extra=extra)
-            transformed_assistance_listing = transform_assistance_listing(source_assistance_listing, target_assistance_listing)
+            transformed_assistance_listing = transform_assistance_listing(
+                source_assistance_listing, target_assistance_listing
+            )
             self.db_session.add(transformed_assistance_listing)
 
             if is_insert:
@@ -245,17 +287,28 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
     return transformed_value
 
 
-def transform_assistance_listing(source_assistance_listing: TopportunityCfda, target_assistance_listing: OpportunityAssistanceListing | None) -> OpportunityAssistanceListing:
+def transform_assistance_listing(
+    source_assistance_listing: TopportunityCfda,
+    target_assistance_listing: OpportunityAssistanceListing | None,
+) -> OpportunityAssistanceListing:
     log_extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
 
     if target_assistance_listing is None:
         logger.info("Creating new assistance listing record", extra=log_extra)
-        target_assistance_listing = OpportunityAssistanceListing(opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id, opportunity_id=source_assistance_listing.opportunity_id)
+        target_assistance_listing = OpportunityAssistanceListing(
+            opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
+            opportunity_id=source_assistance_listing.opportunity_id,
+        )
 
     target_assistance_listing.assistance_listing_number = source_assistance_listing.cfdanumber
     target_assistance_listing.program_title = source_assistance_listing.programtitle
 
-    transform_update_create_timestamp(source_assistance_listing, target_assistance_listing, log_extra=log_extra)
+    transform_update_create_timestamp(
+        source_assistance_listing, target_assistance_listing, log_extra=log_extra
+    )
+
+    return target_assistance_listing
+
 
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     if timestamp is None:
