@@ -52,7 +52,7 @@ const Layout = ({ children }: Props) => {
       <a className="usa-skipnav" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <Header header_strings={header_strings} />
+      <Header locale={"en"} header_strings={header_strings} />
       <main id="main-content">{children}</main>
       <Footer footer_strings={footer_strings} />
       <GrantsIdentifier identifier_strings={identifier_strings} />
