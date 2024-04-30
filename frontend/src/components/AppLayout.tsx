@@ -1,15 +1,15 @@
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 type Props = {
   children: React.ReactNode;
   locale: string;
 };
 
-export default function Layout({ children, locale }: Props) {
-  const t = useTranslations();
+export default async function Layout({ children, locale }: Props) {
+  const t = await getTranslations({ locale });
 
   const header_strings = {
     title: t("Header.title"),
