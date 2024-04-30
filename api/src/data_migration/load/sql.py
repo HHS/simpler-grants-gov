@@ -58,7 +58,7 @@ def build_mark_deleted_sql(
         # `WHERE`
         .where(
             # `is_deleted == FALSE`
-            destination_table.c.is_deleted == False,
+            destination_table.c.is_deleted == False,  # noqa: E712
             # `AND (id1, id2, id3, ...) NOT IN`    (id1, id2, ... is the multipart primary key)
             sqlalchemy.tuple_(*destination_table.primary_key.columns).not_in(
                 # `(SELECT (id1, id2, id3, ...) FROM <source_table>)`    (subquery)

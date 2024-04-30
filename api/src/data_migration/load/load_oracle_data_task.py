@@ -49,7 +49,7 @@ class LoadOracleDataTask(src.task.task.Task):
         update_count = self.do_update(foreign_table, staging_table)
         delete_count = self.do_mark_deleted(foreign_table, staging_table)
         logger.info(
-            "copy count",
+            "load count",
             extra={
                 "table": table_name,
                 "count.insert": insert_count,
@@ -57,6 +57,16 @@ class LoadOracleDataTask(src.task.task.Task):
                 "count.delete": delete_count,
             },
         )
+        self.set_metrics(
+            {
+                f"count.insert.{table_name}": insert_count,
+                f"count.update.{table_name}": update_count,
+                f"count.delete.{table_name}": delete_count,
+            }
+        )
+        self.increment("count.insert.total", insert_count)
+        self.increment("count.update.total", update_count)
+        self.increment("count.delete.total", delete_count)
 
         self.log_row_count("row count after", foreign_table, staging_table)
 
@@ -93,7 +103,7 @@ class LoadOracleDataTask(src.task.task.Task):
             transformed_at=None
         )
 
-        #print(update_sql)
+        # print(update_sql)
         result = self.db_session.execute(update_sql)
 
         return result.rowcount
@@ -101,7 +111,7 @@ class LoadOracleDataTask(src.task.task.Task):
     def log_row_count(self, message, *tables):
         extra = {}
         for table in tables:
-            extra["count." + table.schema + "." + table.name] = self.db_session.query(table).count()
+            extra[f"count.{table.schema}.{table.name}"] = self.db_session.query(table).count()
         logger.info(message, extra=extra, stacklevel=2)
 
 
