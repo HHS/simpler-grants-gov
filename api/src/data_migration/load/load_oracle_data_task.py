@@ -47,9 +47,15 @@ class LoadOracleDataTask(src.task.task.Task):
 
         insert_count = self.do_insert(foreign_table, staging_table)
         update_count = self.do_update(foreign_table, staging_table)
+        delete_count = self.do_mark_deleted(foreign_table, staging_table)
         logger.info(
             "copy count",
-            extra={"table": table_name, "count.insert": insert_count, "count.update": update_count},
+            extra={
+                "table": table_name,
+                "count.insert": insert_count,
+                "count.update": update_count,
+                "count.delete": delete_count,
+            },
         )
 
         self.log_row_count("row count after", foreign_table, staging_table)
@@ -61,7 +67,7 @@ class LoadOracleDataTask(src.task.task.Task):
             foreign_table, staging_table
         )
 
-        #print(insert_from_select_sql)
+        # print(insert_from_select_sql)
 
         # COUNT has to be a separate query as INSERTs don't return a rowcount.
         insert_count = self.db_session.query(select_sql.subquery()).count()
@@ -74,6 +80,18 @@ class LoadOracleDataTask(src.task.task.Task):
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
 
         update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
+
+        # print(update_sql)
+        result = self.db_session.execute(update_sql)
+
+        return result.rowcount
+
+    def do_mark_deleted(self, foreign_table, staging_table):
+        """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
+
+        update_sql = sql.build_mark_deleted_sql(foreign_table, staging_table).values(
+            transformed_at=None
+        )
 
         #print(update_sql)
         result = self.db_session.execute(update_sql)

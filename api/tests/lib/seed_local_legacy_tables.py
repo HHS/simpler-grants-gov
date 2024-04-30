@@ -2,6 +2,7 @@
 # Populate legacy tables with mock data.
 #
 
+import datetime
 import logging
 
 import factory
@@ -51,7 +52,7 @@ def update_existing_data(db_session, max_opportunity_id):
 
         updated_opportunity = ForeignTopportunityFactory.build()
         updated_opportunity.pop("created_date")
-        updated_opportunity.pop("last_upd_date")
+        updated_opportunity["last_upd_date"] = datetime.datetime.now()
 
         db_session.execute(
             sqlalchemy.update(foreign.opportunity.Topportunity)
