@@ -1,4 +1,6 @@
 import "src/styles/styles.scss";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { PUBLIC_ENV } from "/src/constants/environments";
 
 import Layout from "src/components/AppLayout";
 /**
@@ -30,6 +32,9 @@ export default function RootLayout({ children }: LayoutProps) {
         {/* TODO: Add locale="english" prop when ready for i18n */}
         <Layout>{children}</Layout>
       </body>
+      {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
+        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_TAG_ID} />
+      )}
     </html>
   );
 }
