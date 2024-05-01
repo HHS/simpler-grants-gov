@@ -45,7 +45,7 @@ def downall(revision: str = "base") -> None:
 def enable_query_logging() -> None:
     """Log each migration query as it happens along with timing.
 
-    Based on the example at https://docs.sqlalchemy.org/en/13/faq/performance.html#query-profiling
+    Based on the example at https://docs.sqlalchemy.org/en/20/faq/performance.html#query-profiling
     """
 
     @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, "before_cursor_execute", retval=True)
