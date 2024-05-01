@@ -35,6 +35,6 @@ export default function RootLayout({ children }: LayoutProps) {
       {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
         <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       )}
-   </html>
+    </html>
   );
 }
