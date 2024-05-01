@@ -48,8 +48,8 @@ class LoadOracleDataTask(src.task.task.Task):
 
         self.log_row_count("row count before", foreign_table, staging_table)
 
-        insert_count = self.do_insert(foreign_table, staging_table)
         update_count = self.do_update(foreign_table, staging_table)
+        insert_count = self.do_insert(foreign_table, staging_table)
         delete_count = self.do_mark_deleted(foreign_table, staging_table)
         logger.info(
             "load count",
