@@ -155,7 +155,7 @@ We could potentially focus on a demographic segment where users who are fluent i
 
 <summary>Would we need a 508-compliance review of any materials (PDFs, slide decks, etc.) we're preparing for the Co-Design Group?</summary>
 
-To be answered within this deliverable
+No 508 compliance review is required during planning. We'll be using standard, tested, accessible tools (email, Ethnio, etc.). We will evaluate subsequent materials and deliverables as needed during kickoff and ongoing operations.&#x20;
 
 </details>
 
