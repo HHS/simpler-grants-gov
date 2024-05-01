@@ -1,6 +1,7 @@
 import "src/styles/styles.scss";
 
 import Layout from "src/components/AppLayout";
+import { unstable_setRequestLocale } from "next-intl/server";
 /**
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
@@ -21,6 +22,9 @@ interface LayoutProps {
 export default function RootLayout({ children, params }: LayoutProps) {
   // Hardcoded until the [locale] routing is enabled.
   const locale = params.locale ? params.locale : "en";
+  // TODO: Remove when https://github.com/amannn/next-intl/issues/663 lands.
+  unstable_setRequestLocale(locale);
+
   return (
     <html lang={locale}>
       <body>
