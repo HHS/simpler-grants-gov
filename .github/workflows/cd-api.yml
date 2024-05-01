@@ -1,7 +1,7 @@
 name: Deploy API
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || fromJSON('["dev", "staging"]') }}
+run-name: Deploy ${{ github.ref_name }} to API ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -32,6 +32,9 @@ jobs:
     name: Deploy
     needs: api-checks
     uses: ./.github/workflows/deploy.yml
+    strategy:
+      matrix:
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }}
     with:
       app_name: "api"
-      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || fromJSON('["dev", "staging"]') }}
+      environment: ${{ matrix.envs }}

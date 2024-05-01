@@ -1,7 +1,7 @@
 name: Deploy Analytics
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}} # changed for consistency with other files
 
 on:
   push:
@@ -25,38 +25,18 @@ on:
           - prod
 
 jobs:
-  # analytics-checks:
-  #   name: Run Analyics Checks
-  #   uses: ./.github/workflows/ci-analytics.yml
-  #   secrets: inherit
+  analytics-checks:
+    name: Run Analyics Checks
+    uses: ./.github/workflows/ci-analytics.yml
+    secrets: inherit
 
-  # deploy:
-  #   name: Deploy
-  #   needs: analytics-checks
-  #   uses: ./.github/workflows/deploy.yml
-    # with:
-    #   app_name: "analytics"
-    #   environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
-  test:
-    name: matrix test output
-    runs-on: ubuntu-latest
+  deploy:
+    name: Deploy
+    needs: analytics-checks
+    uses: ./.github/workflows/deploy.yml
     strategy:
       matrix:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }}
-    steps:
-      - name: Test output
-        run: |
-          echo ${{ matrix.envs }}
-  
-  second-test:
-    name: logical grouping test output
-    runs-on: ubuntu-latest
-    env: 
-      location: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
-
-    steps:
-      - name: Test output
-        run: |
-          echo ${{ env.location }}
-
-
+    with:
+      app_name: "analytics"
+      environment: ${{ matrix.envs }}
