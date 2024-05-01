@@ -2,8 +2,6 @@
 # Load data from legacy (Oracle) tables to staging tables.
 #
 
-# TODO remove this line (trigger GH Action)
-
 import logging
 
 import sqlalchemy
