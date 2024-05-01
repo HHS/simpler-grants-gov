@@ -3,6 +3,8 @@
 # running on the production docker image from any directory.
 import logging
 import os
+import time
+from typing import Any
 
 import alembic.command as command
 import alembic.script as script
@@ -21,6 +23,7 @@ alembic_cfg.set_main_option("script_location", os.path.dirname(__file__))
 
 
 def up(revision: str = "head") -> None:
+    enable_query_logging()
     command.upgrade(alembic_cfg, revision)
 
     # We want logging for the lookups, but alembic already sets
@@ -30,11 +33,47 @@ def up(revision: str = "head") -> None:
 
 
 def down(revision: str = "-1") -> None:
+    enable_query_logging()
     command.downgrade(alembic_cfg, revision)
 
 
 def downall(revision: str = "base") -> None:
+    enable_query_logging()
     command.downgrade(alembic_cfg, revision)
+
+
+def enable_query_logging() -> None:
+    """Log each migration query as it happens along with timing.
+
+    Based on the example at https://docs.sqlalchemy.org/en/13/faq/performance.html#query-profiling
+    """
+
+    @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, "before_cursor_execute", retval=True)
+    def before_execute(
+        conn: sqlalchemy.Connection,
+        _cursor: Any,
+        statement: str,
+        _parameters: Any,
+        _context: Any,
+        _executemany: bool,
+    ) -> tuple[str, Any]:
+        conn.info.setdefault("query_start_time", []).append(time.monotonic())
+        logger.info("before execute", extra={"migrate.sql": statement.strip()})
+        return statement, _parameters
+
+    @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, "after_cursor_execute")
+    def after_execute(
+        conn: sqlalchemy.Connection,
+        _cursor: Any,
+        statement: str,
+        _parameters: Any,
+        _context: Any,
+        _executemany: bool,
+    ) -> None:
+        total = int(1000 * (time.monotonic() - conn.info["query_start_time"].pop(-1)))
+        logger.info(
+            "after execute", extra={"migrate.sql": statement.strip(), "migrate.time_ms": total}
+        )
 
 
 def have_all_migrations_run(db_engine: sqlalchemy.engine.Engine) -> None:
