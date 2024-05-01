@@ -1,14 +1,15 @@
 name: Deploy Analytics
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || fromJSON('["dev", "staging"]')}}
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
 
 on:
   push:
     branches:
-      - "main"
-    paths:
-      - "analytics/**"
+      # - "main"
+      - "alsia/patch-cd-files"
+    # paths:
+    #   - "analytics/**"
   release:
     types: [published]
   workflow_dispatch:
@@ -24,15 +25,38 @@ on:
           - prod
 
 jobs:
-  analytics-checks:
-    name: Run Analyics Checks
-    uses: ./.github/workflows/ci-analytics.yml
-    secrets: inherit
+  # analytics-checks:
+  #   name: Run Analyics Checks
+  #   uses: ./.github/workflows/ci-analytics.yml
+  #   secrets: inherit
 
-  deploy:
-    name: Deploy
-    needs: analytics-checks
-    uses: ./.github/workflows/deploy.yml
-    with:
-      app_name: "analytics"
-      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || fromJSON('["dev", "staging"]') }}
+  # deploy:
+  #   name: Deploy
+  #   needs: analytics-checks
+  #   uses: ./.github/workflows/deploy.yml
+    # with:
+    #   app_name: "analytics"
+    #   environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
+  test:
+    name: matrix test output
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }}
+    steps:
+      - name: Test output
+        run: |
+          echo ${{ matrix.envs }}
+  
+  second-test:
+    name: logical grouping test output
+    runs-on: ubuntu-latest
+    env: 
+      location: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || ('dev' && 'staging') }}
+
+    steps:
+      - name: Test output
+        run: |
+          echo ${{ env.location }}
+
+
