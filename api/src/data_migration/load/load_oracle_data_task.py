@@ -4,8 +4,11 @@
 
 import logging
 
+import sqlalchemy
+
 import src.db.foreign
 import src.db.models.staging
+import src.logging
 import src.task.task
 from src.adapters import db
 
@@ -17,18 +20,15 @@ logger = logging.getLogger(__package__)
 class LoadOracleDataTask(src.task.task.Task):
     """Task to load data from legacy tables to staging tables."""
 
-    def __init__(self, db_session: db.Session, foreign_tables=None, staging_tables=None):
+    def __init__(
+        self,
+        db_session: db.Session,
+        foreign_tables: dict[str, sqlalchemy.Table],
+        staging_tables: dict[str, sqlalchemy.Table],
+    ) -> None:
         super().__init__(db_session)
-        if foreign_tables:
-            self.foreign_tables = foreign_tables
-        else:
-            self.foreign_tables = {t.name: t for t in src.db.foreign.metadata.tables.values()}
-        if staging_tables:
-            self.staging_tables = staging_tables
-        else:
-            self.staging_tables = {
-                t.name: t for t in src.db.models.staging.metadata.tables.values()
-            }
+        self.foreign_tables = foreign_tables
+        self.staging_tables = staging_tables
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -38,7 +38,7 @@ class LoadOracleDataTask(src.task.task.Task):
         for table_name in self.foreign_tables:
             self.do_staging_copy(table_name)
 
-    def do_staging_copy(self, table_name: str):
+    def do_staging_copy(self, table_name: str) -> None:
         logger.info("process table", extra={"table": table_name})
         foreign_table = self.foreign_tables[table_name]
         staging_table = self.staging_tables[table_name]
@@ -70,7 +70,7 @@ class LoadOracleDataTask(src.task.task.Task):
 
         self.log_row_count("row count after", foreign_table, staging_table)
 
-    def do_insert(self, foreign_table, staging_table):
+    def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Determine new rows by primary key, and copy them into the staging table."""
 
         insert_from_select_sql, select_sql = sql.build_insert_select_sql(
@@ -86,7 +86,7 @@ class LoadOracleDataTask(src.task.task.Task):
 
         return insert_count
 
-    def do_update(self, foreign_table, staging_table):
+    def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
 
         update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
@@ -96,7 +96,9 @@ class LoadOracleDataTask(src.task.task.Task):
 
         return result.rowcount
 
-    def do_mark_deleted(self, foreign_table, staging_table):
+    def do_mark_deleted(
+        self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
+    ) -> int:
         """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
 
         update_sql = sql.build_mark_deleted_sql(foreign_table, staging_table).values(
@@ -108,21 +110,22 @@ class LoadOracleDataTask(src.task.task.Task):
 
         return result.rowcount
 
-    def log_row_count(self, message, *tables):
+    def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
         extra = {}
         for table in tables:
             extra[f"count.{table.schema}.{table.name}"] = self.db_session.query(table).count()
         logger.info(message, extra=extra, stacklevel=2)
 
 
-def main():
-    import src.logging
-
+def main() -> None:
     with src.logging.init(__package__):
         db_client = db.PostgresDBClient()
 
+        foreign_tables = {t.name: t for t in src.db.foreign.metadata.tables.values()}
+        staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
+
         with db_client.get_session() as db_session:
-            LoadOracleDataTask(db_session).run()
+            LoadOracleDataTask(db_session, foreign_tables, staging_tables).run()
 
 
 if __name__ == "__main__":

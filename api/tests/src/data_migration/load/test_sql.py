@@ -43,7 +43,7 @@ def test_build_insert_select_sql(source_table, destination_table):
     assert str(insert) == (
         "INSERT INTO test_destination_table (id1, id2, x, last_upd_date, is_deleted) "
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
-        "test_source_table.last_upd_date, false AS anon_1 \n"
+        "test_source_table.last_upd_date, FALSE AS is_deleted \n"
         "FROM test_source_table \n"
         "WHERE ((test_source_table.id1, test_source_table.id2) NOT IN "
         "(SELECT test_destination_table.id1, test_destination_table.id2 \n"
@@ -51,7 +51,7 @@ def test_build_insert_select_sql(source_table, destination_table):
     )
     assert str(select) == (
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
-        "test_source_table.last_upd_date, false AS anon_1 \n"
+        "test_source_table.last_upd_date, FALSE AS is_deleted \n"
         "FROM test_source_table \n"
         "WHERE ((test_source_table.id1, test_source_table.id2) NOT IN "
         "(SELECT test_destination_table.id1, test_destination_table.id2 \n"
