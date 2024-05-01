@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 import { axe } from "jest-axe";
 
 import AppLayout from "src/components/AppLayout";
