@@ -6,10 +6,9 @@ run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (
 on:
   push:
     branches:
-      # - "main"
-      - "alsia/patch-cd-files"
-    # paths:
-    #   - "analytics/**"
+      - "main"
+    paths:
+      - "analytics/**"
   release:
     types: [published]
   workflow_dispatch:
