@@ -8,7 +8,7 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.2.0, < 2.0.0"
+  required_version = ">= 1.7.0, < 1.8.5" # Pinning to 1.8.2 because that is the latest version as of 5/1/24
 
   required_providers {
     aws = {
