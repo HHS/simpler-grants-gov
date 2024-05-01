@@ -4,6 +4,7 @@
 
 import datetime
 
+import freezegun
 import pytest
 import sqlalchemy
 
@@ -38,6 +39,7 @@ def destination_table(sqlalchemy_metadata):
         sqlalchemy.Column("last_upd_date", sqlalchemy.TIMESTAMP),
         sqlalchemy.Column("is_deleted", sqlalchemy.Boolean),
         sqlalchemy.Column("transformed_at", sqlalchemy.TIMESTAMP),
+        sqlalchemy.Column("deleted_at", sqlalchemy.TIMESTAMP),
     )
 
 
@@ -47,10 +49,12 @@ def create_tables(db_client, sqlalchemy_metadata, source_table, destination_tabl
         sqlalchemy_metadata.create_all(bind=conn)
 
 
+@freezegun.freeze_time()
 def test_load_data(db_session, source_table, destination_table, create_tables):
     time1 = datetime.datetime(2024, 1, 20, 7, 15, 0)
     time2 = datetime.datetime(2024, 1, 20, 7, 15, 1)
     time3 = datetime.datetime(2024, 4, 10, 22, 0, 1)
+    now = datetime.datetime.now()
 
     db_session.execute(
         sqlalchemy.insert(source_table).values(
@@ -93,9 +97,9 @@ def test_load_data(db_session, source_table, destination_table, create_tables):
             )
         )
     ) == (
-        (1, 2, "a+", time1, False, None),
-        (1, 3, "b+", time1, False, None),
-        (2, 1, "c", time1, False, time3),
-        (3, 4, "d+", time2, False, None),
-        (4, 2, "e", time1, True, None),
+        (1, 2, "a+", time1, False, None, None),
+        (1, 3, "b+", time1, False, None, None),
+        (2, 1, "c", time1, False, time3, None),
+        (3, 4, "d+", time2, False, None, None),
+        (4, 2, "e", time1, True, None, now),
     )

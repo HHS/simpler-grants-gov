@@ -11,6 +11,7 @@ import src.db.models.staging
 import src.logging
 import src.task.task
 from src.adapters import db
+from src.util import datetime_util
 
 from . import sql
 
@@ -102,7 +103,8 @@ class LoadOracleDataTask(src.task.task.Task):
         """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
 
         update_sql = sql.build_mark_deleted_sql(foreign_table, staging_table).values(
-            transformed_at=None
+            transformed_at=None,
+            deleted_at=datetime_util.utcnow(),
         )
 
         # print(update_sql)
