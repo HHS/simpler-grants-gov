@@ -8,15 +8,18 @@ from sqlalchemy import select
 from src.adapters import db
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing, OpportunitySummary
+from src.db.models.staging.forecast import Tforecast, TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
+from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
 from src.task.task import Task
 from src.util import datetime_util
 
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
 
+type SourceSummary = Tforecast | Tsynopsis | TforecastHist | TsynopsisHist
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +73,12 @@ class TransformOracleDataTask(Task):
         )
 
     def fetch_with_opportunity(
-        self, source_model: Type[S], destination_model: Type[D], join_clause: list
+        self, source_model: Type[S], destination_model: Type[D], join_clause: list, additional_where_clause: list | None = None
     ) -> list[Tuple[S, D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
+        if additional_where_clause is None:
+            additional_where_clause = []
 
         return cast(
             list[Tuple[S, D | None, Opportunity | None]],
@@ -85,7 +90,7 @@ class TransformOracleDataTask(Task):
                     source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
                     isouter=True,
                 )
-                .where(source_model.transformed_at.is_(None))
+                .where(source_model.transformed_at.is_(None), *additional_where_clause)
                 .execution_options(yield_per=5000)
             ).all(),
         )
@@ -226,8 +231,67 @@ class TransformOracleDataTask(Task):
         source_assistance_listing.transformed_at = self.transform_time
 
     def process_opportunity_summaries(self) -> None:
-        # TODO - https://github.com/HHS/simpler-grants-gov/issues/1747
-        pass
+        synopsis_records = self.fetch_with_opportunity(Tsynopsis, OpportunitySummary, [Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id], additional_where_clause=[OpportunitySummary.is_forecast.is_(False), OpportunitySummary.revision_number.is_(None)])
+        self.process_opportunity_summary_group(synopsis_records)
+
+        synopsis_hist_records = self.fetch_with_opportunity(TsynopsisHist, OpportunitySummary, [TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id, TsynopsisHist.revision_number == OpportunitySummary.revision_number], additional_where_clause=[OpportunitySummary.is_forecast.is_(False)])
+        self.process_opportunity_summary_group(synopsis_hist_records)
+
+        forecast_records = self.fetch_with_opportunity(Tforecast, OpportunitySummary, [Tforecast.opportunity_id == OpportunitySummary.opportunity_id], additional_where_clause=[OpportunitySummary.is_forecast.is_(True), OpportunitySummary.revision_number.is_(None)])
+        self.process_opportunity_summary_group(forecast_records)
+
+        forecast_hist_records = self.fetch_with_opportunity(TforecastHist, OpportunitySummary, [TforecastHist.opportunity_id == OpportunitySummary.opportunity_id, TforecastHist.revision_number == OpportunitySummary.revision_number], additional_where_clause=[OpportunitySummary.is_forecast.is_(True)])
+        self.process_opportunity_summary_group(forecast_hist_records)
+
+
+    def process_opportunity_summary_group(self, records: list[Tuple[SourceSummary, OpportunitySummary | None, Opportunity | None]]) -> None:
+        for source_summary, target_summary, opportunity in records:
+            try:
+                self.process_opportunity_summary(
+                    source_summary, target_summary, opportunity
+                )
+            except ValueError:
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                logger.exception(
+                    "Failed to process opportunity summary",
+                    extra=get_log_extra_summary(source_summary),
+                )
+
+    def process_opportunity_summary(self, source_summary: SourceSummary, target_summary: OpportunitySummary | None, opportunity: Opportunity | None) -> None:
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        extra = get_log_extra_summary(source_summary)
+        logger.info("Processing opportunity summary", extra=extra)
+
+        if opportunity is None:
+            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
+            # we'll make sure the opportunity actually exists
+            raise ValueError("Opportunity summary cannot be processed as the opportunity for it does not exist")
+
+        if source_summary.is_deleted:
+            logger.info("Deleting opportunity summary", extra=extra)
+
+            if target_summary is None:
+                raise ValueError("Cannot delete opportunity summary as it does not exist")
+
+            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
+            self.db_session.delete(target_summary)
+
+        else:
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_summary is None
+
+            logger.info("Transforming and upserting opportunity summary", extra=extra)
+            transformed_opportunity_summary = transform_opportunity_summary(source_summary, target_summary)
+            self.db_session.add(transformed_opportunity_summary)
+
+            if is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+            else:
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+
+        logger.info("Processed opportunity summary", extra=extra)
+        source_summary.transformed_at = self.transform_time
 
     def process_one_to_many_lookup_tables(self) -> None:
         # TODO - https://github.com/HHS/simpler-grants-gov/issues/1749
@@ -310,6 +374,72 @@ def transform_assistance_listing(
     return target_assistance_listing
 
 
+def transform_opportunity_summary(source_summary: SourceSummary, target_summary: OpportunitySummary | None) -> OpportunitySummary:
+    log_extra = get_log_extra_summary(source_summary)
+
+    if target_summary is None:
+        logger.info("Creating new opportunity summary record", extra=log_extra)
+        target_summary = OpportunitySummary(opportunity_id=source_summary.opportunity_id, is_forecast=source_summary.is_forecast, revision_number=None)
+
+        # Revision number is only found in the historical table
+        if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
+            target_summary.revision_number = source_summary.revision_number
+
+    # Fields in both
+    target_summary.version_number = source_summary.version_nbr
+    target_summary.is_cost_sharing = convert_yn_bool(source_summary.cost_sharing)
+    target_summary.post_date = source_summary.posting_date
+    target_summary.archive_date = source_summary.archive_date
+    target_summary.unarchive_date = source_summary.unarchive_date
+    target_summary.expected_number_of_awards = convert_numeric_str_to_int(source_summary.number_of_awards)
+    target_summary.estimated_total_program_funding = convert_numeric_str_to_int(source_summary.est_funding)
+    target_summary.award_floor = convert_numeric_str_to_int(source_summary.award_floor)
+    target_summary.award_ceiling = convert_numeric_str_to_int(source_summary.award_ceiling)
+    target_summary.additional_info_url = source_summary.fd_link_url
+    target_summary.additional_info_url_description = source_summary.fd_link_desc
+    target_summary.modification_comments = source_summary.modification_comments
+    target_summary.funding_category_description = source_summary.oth_cat_fa_desc
+    target_summary.agency_name = source_summary.ac_name
+    target_summary.agency_phone_number = source_summary.ac_phone_number
+    target_summary.agency_contact_description = source_summary.agency_contact_desc
+    target_summary.agency_email_address = source_summary.ac_email_addr
+    target_summary.agency_email_address_description = source_summary.ac_email_desc
+    target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
+    target_summary.publisher_profile_id = source_summary.publisher_profile_id
+    target_summary.publisher_user_id = source_summary.publisheruid
+    target_summary.updated_by = source_summary.last_upd_id
+    target_summary.created_by = source_summary.creator_id
+
+    # Some fields either are named different in synopsis/forecast
+    # or only come from one of those tables, so handle those here
+    if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
+        target_summary.summary_description = source_summary.syn_desc
+        target_summary.agency_code = source_summary.a_sa_code
+
+        target_summary.close_date = source_summary.response_date
+        target_summary.close_date_description = source_summary.response_date_desc
+
+    else:
+        target_summary.summary_description = source_summary.forecast_desc
+        target_summary.agency_code = source_summary.agency_code
+
+        target_summary.forecasted_post_date = source_summary.est_synopsis_posting_date
+        target_summary.forecasted_close_date = source_summary.est_appl_response_date
+        target_summary.forecasted_close_date_description = source_summary.est_appl_response_date_desc
+        target_summary.forecasted_award_date = source_summary.est_award_date
+        target_summary.forecasted_project_start_date = source_summary.est_project_start_date
+        target_summary.fiscal_year = source_summary.fiscal_year
+
+    # Historical only
+    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
+        target_summary.is_deleted = convert_action_type_to_is_deleted(source_summary.action_type)
+
+    transform_update_create_timestamp(
+        source_summary, target_summary, log_extra=log_extra
+    )
+
+    return target_summary
+
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     if timestamp is None:
         return None
@@ -355,3 +485,51 @@ def transform_update_create_timestamp(
         # until it receives an update. We always set the value, and on initial insert
         # want it to be the same as the created_at.
         target.updated_at = target.created_at
+
+
+def convert_yn_bool(value: str | None) -> bool | None:
+    # Booleans in the Oracle database are stored as varchar/char
+    # columns with the values as Y/N
+    if value is None or value == "":
+        return None
+
+    if value == "Y":
+        return True
+
+    if value == "N":
+        return False
+
+    # Just in case the column isn't actually a boolean
+    raise ValueError("Unexpected Y/N bool value: %s" % value)
+
+def convert_action_type_to_is_deleted(value: str | None) -> bool | None:
+    if value is None or value == "":
+        return None
+
+    if value == "D": # D = Delete
+        return True
+
+    if value == "U": # U = Update
+        return False
+
+    raise ValueError("Unexpected action type value: %s" % value)
+
+def convert_numeric_str_to_int(value: str | None) -> int | None:
+    if value is None or value == "":
+        return None
+
+    if value.isnumeric():
+        return int(value)
+
+    # From what we've found in the legacy data, some of these numeric strings
+    # are written out as "none", "not available", "n/a" or similar. All of these
+    # we're fine with collectively treating as null-equivalent
+    return None
+
+
+def get_log_extra_summary(source_summary: SourceSummary) -> dict:
+    return {
+        "opportunity_id": source_summary.opportunity_id,
+        "is_forecast": source_summary.is_forecast,
+        "revision_number": getattr(source_summary, "revision_number", None)
+    }

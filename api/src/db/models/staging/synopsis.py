@@ -5,10 +5,15 @@ from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
     __tablename__ = "tsynopsis"
 
-
+    @property
+    def is_forecast(self) -> bool:
+        return False
 class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParamMixin):
     __tablename__ = "tsynopsis_hist"
 
+    @property
+    def is_forecast(self) -> bool:
+        return False
 
 class TapplicanttypesSynopsis(
     StagingBase, synopsis_mixin.TapplicanttypesSynopsisMixin, StagingParamMixin
