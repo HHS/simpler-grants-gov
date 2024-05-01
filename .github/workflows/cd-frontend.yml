@@ -33,7 +33,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     strategy:
       matrix:
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }}
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || 'dev' }}
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}
