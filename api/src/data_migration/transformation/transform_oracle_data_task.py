@@ -110,7 +110,7 @@ class TransformOracleDataTask(Task):
 
             logger.info("Transforming and upserting opportunity", extra=extra)
             transformed_opportunity = transform_opportunity(source_opportunity, target_opportunity)
-            self.db_session.add(transformed_opportunity)
+            self.db_session.merge(transformed_opportunity)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
@@ -139,13 +139,16 @@ class TransformOracleDataTask(Task):
 
 
 def transform_opportunity(
-    source_opportunity: Topportunity, target_opportunity: Opportunity | None
+    source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
     log_extra = {"opportunity_id": source_opportunity.opportunity_id}
 
-    if target_opportunity is None:
+    if existing_opportunity is None:
         logger.info("Creating new opportunity record", extra=log_extra)
-        target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+
+    # We always create a new opportunity record here and merge it in the calling function
+    # this way if there is any error doing the transformation, we don't modify the existing one.
+    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle

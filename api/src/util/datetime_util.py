@@ -32,6 +32,9 @@ def adjust_timezone(timestamp: datetime, timezone_str: str) -> datetime:
 
 
 def make_timezone_aware(timestamp: datetime, timezone_str: str) -> datetime:
+    # First make certain the tzinfo is truly None otherwise pytz will error
+    # if it actually had a tzinfo this means we're effectively ignoring anything about it.
+    timestamp.replace(tzinfo=None)
     new_timezone = pytz.timezone(timezone_str)
     return new_timezone.localize(timestamp)
 
