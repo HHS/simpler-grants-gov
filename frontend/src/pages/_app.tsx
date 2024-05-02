@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Layout>
         <Component {...pageProps} />
         {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
-          <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_ID} />
+          <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_MANAGER_ID} />
         )}
       </Layout>
     </>
