@@ -3,6 +3,7 @@
 #
 
 import logging
+import time
 
 import sqlalchemy
 
@@ -32,9 +33,9 @@ class LoadOracleDataTask(src.task.task.Task):
         self.staging_tables = staging_tables
 
     def run_task(self) -> None:
-        with self.db_session.begin():
+        with self.db_session.begin_nested():
             self.log_database_settings()
-            self.load_data()
+        self.load_data()
 
     def log_database_settings(self) -> None:
         metadata = sqlalchemy.MetaData()
@@ -62,9 +63,10 @@ class LoadOracleDataTask(src.task.task.Task):
     def load_data(self) -> None:
         for table_name in self.foreign_tables:
             try:
-                self.load_data_for_table(table_name)
+                with self.db_session.begin_nested():
+                    self.load_data_for_table(table_name)
             except Exception:
-                logger.exception("table load error")
+                logger.exception("table load error", extra={"table": table_name})
 
     def load_data_for_table(self, table_name: str) -> None:
         logger.info("process table", extra={"table": table_name})
@@ -73,28 +75,9 @@ class LoadOracleDataTask(src.task.task.Task):
 
         self.log_row_count("row count before", foreign_table, staging_table)
 
-        update_count = self.do_update(foreign_table, staging_table)
-        insert_count = self.do_insert(foreign_table, staging_table)
-        delete_count = self.do_mark_deleted(foreign_table, staging_table)
-        logger.info(
-            "load count",
-            extra={
-                "table": table_name,
-                "count.insert": insert_count,
-                "count.update": update_count,
-                "count.delete": delete_count,
-            },
-        )
-        self.set_metrics(
-            {
-                f"count.insert.{table_name}": insert_count,
-                f"count.update.{table_name}": update_count,
-                f"count.delete.{table_name}": delete_count,
-            }
-        )
-        self.increment("count.insert.total", insert_count)
-        self.increment("count.update.total", update_count)
-        self.increment("count.delete.total", delete_count)
+        self.do_update(foreign_table, staging_table)
+        self.do_insert(foreign_table, staging_table)
+        self.do_mark_deleted(foreign_table, staging_table)
 
         self.log_row_count("row count after", foreign_table, staging_table)
 
@@ -109,8 +92,16 @@ class LoadOracleDataTask(src.task.task.Task):
 
         # COUNT has to be a separate query as INSERTs don't return a rowcount.
         insert_count = self.db_session.query(select_sql.subquery()).count()
+
+        self.increment("count.insert.total", insert_count)
+        self.set_metrics({f"count.insert.{staging_table.name}": insert_count})
+
         # Execute the INSERT.
+        t0 = time.monotonic()
         self.db_session.execute(insert_from_select_sql)
+        t1 = time.monotonic()
+
+        self.set_metrics({f"time.insert.{staging_table.name}": round(t1 - t0, 3)})
 
         return insert_count
 
@@ -120,9 +111,16 @@ class LoadOracleDataTask(src.task.task.Task):
         update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
 
         # print(update_sql)
+        t0 = time.monotonic()
         result = self.db_session.execute(update_sql)
+        t1 = time.monotonic()
+        update_count = result.rowcount
 
-        return result.rowcount
+        self.increment("count.update.total", update_count)
+        self.set_metrics({f"count.update.{staging_table.name}": update_count})
+        self.set_metrics({f"time.update.{staging_table.name}": round(t1 - t0, 3)})
+
+        return update_count
 
     def do_mark_deleted(
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
@@ -135,9 +133,16 @@ class LoadOracleDataTask(src.task.task.Task):
         )
 
         # print(update_sql)
+        t0 = time.monotonic()
         result = self.db_session.execute(update_sql)
+        t1 = time.monotonic()
+        delete_count = result.rowcount
 
-        return result.rowcount
+        self.increment("count.delete.total", delete_count)
+        self.set_metrics({f"count.delete.{staging_table.name}": delete_count})
+        self.set_metrics({f"time.delete.{staging_table.name}": round(t1 - t0, 3)})
+
+        return delete_count
 
     def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
         extra = {}
