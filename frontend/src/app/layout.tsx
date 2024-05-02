@@ -1,4 +1,6 @@
 import "src/styles/styles.scss";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { PUBLIC_ENV } from "../constants/environments";
 
 import Layout from "src/components/AppLayout";
 import { unstable_setRequestLocale } from "next-intl/server";
@@ -34,6 +36,9 @@ export default function RootLayout({ children, params }: LayoutProps) {
         {/* TODO: Add locale="english" prop when ready for i18n */}
         <Layout locale={locale}>{children}</Layout>
       </body>
+      {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
+        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
+      )}
     </html>
   );
 }

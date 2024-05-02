@@ -16,12 +16,12 @@ description: >-
 ### Summary
 
 * **What:** Host a public event in which open source contributors are invited to submit designs and/or code for a focused area of the site, such as an updated opportunity listing page or improved search experience.
-* **Why:** Builds excitement within the open source community and allows us to incorporate ideas from our participatory processes and code from members of the public to improve the grants experience on simpler.grants.gov. It also helps us plan for repeated longer-term engagements that incentivize open source contributions in the future and ensures that we build products that includes a participatory process through which we build it.
+* **Why:**&#x20;
+  * Builds excitement within the open source community and allows us to incorporate ideas from our participatory processes and code from members of the public to improve the grants experience on simpler.grants.gov.&#x20;
+  * This effort helps us plan for future open source engagements and ensures that we build products and establish a roadmap that include a participatory process.
 * **Who**
-  * Members of the Co-Design Group who will help us design the goals of the code/design challenges&#x20;
   * Open source contributors who will be submitting code
-  * Members of the Co-Design Group and federal staff who will be providing feedback on submissions
-  * Internal developers who will iterate on open source contributions
+  * Internal and community developers who will iterate on open source contributions
 * **Out of scope**
   * Incorporating submissions into our codebase. If we decide to adopt code or designs contributed by the public, incorporating those submissions will happen outside this deliverable.
   * Months-long engagement. While it is an explicit goal to use this first challenge as a test run for future multi-phase challenges, this event is only scoped to run for a few days.
@@ -30,7 +30,7 @@ description: >-
 
 #### Problem
 
-While more participatory models for stakeholder engagement, such as Co-Design Groups, can surface user needs and feature requests that might not emerge through traditional user research, the ability to implement this feedback is often limited by internal capacity. Open source projects provide a valuable way for members of the public to contribute features or fix bugs that might otherwise linger in a product backlog, but the current model for open source projects often fails to appropriately reward contributors for the value they provide to projects. One of the main goals of the Simpler.Grants.gov initiative is to foster a participatory development process while simultaneously ensuring that participants are compensated fairly for their time and effort.
+While more participatory models for stakeholder engagement, such as co-design groups, can surface user needs and feature requests that might not emerge through traditional user research, the ability to implement this feedback is often limited by internal capacity. Open source projects provide a valuable way for members of the public to contribute features or fix bugs that might otherwise linger in a product backlog, but the current model for open source projects often fails to appropriately reward contributors for the value they provide to projects which limits the accessibility of open source contributions. One of the main goals of the Simpler.Grants.gov initiative is to foster a participatory development process while simultaneously ensuring that participants are compensated fairly for their time and effort.
 
 #### Value
 
@@ -41,11 +41,11 @@ Pairing the hackathon model with a financial incentive for a subset of submissio
 #### Goals
 
 * Build traction for the open source community to have meaningful engagement, and get the public and stakeholders excited about getting involved in the project
-* Enable members of federal staff and the Co-Design Group to provide feedback on contributions from the open source community
+* Enable members of federal staff and the co-design group to provide feedback on contributions from the open source community
 * Incentivize code contributions from the open source community
 * Lay the foundation for future, multi-phase code and design challenges in the future that may span multiple months
 * Build experience with tools and processes for participatory contributions such as upvoting ideas and receiving submissions
-* Allow engagement from underserved communities and users to form a more relational bond&#x20;
+* Allow engagement from underserved communities and contributors to form a more relational bond&#x20;
 
 ### User stories
 
@@ -54,8 +54,10 @@ Pairing the hackathon model with a financial incentive for a subset of submissio
   * to have access to real data during the challenge (e.g. through an API), so that my submission can demonstrate value to applicants who are actively searching for grants.
   * to have access to simpler.grants.gov design assets and guidelines, so that my submission supports a consistent user interface and experience for applicants.
   * to be able to communicate with other participants and event organizers during the challenge, so that I can ask questions, get updates, and collaborate with my team more easily.
+  * to get to learn more about the simpler.grants.gov project, goals, and the community, so that I can feel included, a part of a greater collaborative effort, and contribute to something meaningful,.
 * As an **event coordinator**, I want:
   * participants to be able to formally register for the event(s), so that we can estimate attendance and communicate with participants prior to the event(s).
+  * to gain useful data about the open source community members such as availability, location, and general feedback, so that we can make improvements to future coordination efforts.&#x20;
 * As a **project maintainer**, I want:
   * submissions to adopt shared tools and frameworks where possible, so that it will be easier to incorporate valuable features into our codebase.
 * As a **member of HHS staff**, I want:
@@ -83,21 +85,15 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] A clear rubric or set of criteria being used to evaluate their submissions
   * [ ] Communication channels for questions and collaboration
   * [ ] A mechanism to submit their code/design contributions for review
-* [ ] Following the event, submissions are reviewed by a feedback panel consisting of:
+* [ ] After submissions have been received, submissions are reviewed by a feedback panel consisting of:
   * [ ] Stakeholders from the federal government
   * [ ] Simpler.Grants.gov project maintainers
 * [ ] Following the review and feedback period, a subset (or all) of the public participant teams have received a financial reward for their submissions
+* [ ] Following the review and feedback period, a subset (or all) of the public participants teams are provided a mechanism to offer feedback on the event
 * [ ] A playbook is created that documents how to plan and host similar events in the future. This playbook includes guidance on how to:
-  * [ ] Effectively promote the event and increase participation
   * [ ] Select and configure tools to facilitate things like registration, collaboration, and voting
   * [ ] Budget and distribute rewards for challenge submissions
-* [ ] We have a method to track and share our metrics to measure:&#x20;
-  * [ ] Engagement metrics
-    * [ ] Open rate of emails sent to our selected mailing list about the event
-    * [ ] Total number of views, shares, etc. for posts about the event on social media
-  * [ ] Total number of registrations for the event
-  * [ ] Total number of active participants during the event
-  * [ ] Total number of code submissions
+* [ ] Our desired deliverable metrics are captured and displayed in a public place
 
 #### **Nice to have**
 
@@ -105,23 +101,17 @@ Following sections describe the conditions that must be met to consider this del
 * [ ] Participants can prepare their submission using a template repository and/or Figma board that the simpler.grants.gov team has created for the event
 * [ ] The event is extended beyond a code challenge and open to design submissions as well
 * [ ] The event is promoted across our main communication channels (e.g. mailing list, static site, Slack, public wiki, etc.)
+* [ ] The playbook contains recommendations on how to effectively the event and increase participation
 * [ ] Following the event, submissions are reviewed by a feedback panel consisting of:
-  * [ ] Rights-holders from the Co-Design Group
-* [ ] Engagement metrics
-  * [ ] Total number of views for event-related pages on the static site and wiki
+  * [ ] Participants from the co-design group
 * [ ] Create a queue or waitlist for the next code/design challenge when we reach capacity for this code challenge
-* [ ] The code challenge is determined by findings from the Co-Design Group
-* [ ] The event will have an accessibility specialist
+* [ ] The event will have an accessibility specialist based on participant needs (e.g., this could include sign language or closed captioning at the event)
 
 ### Proposed metrics
 
-* Engagement metrics for announcements about the event, for example:
-  * Total number of views for event-related pages on the static site and wiki
-  * Open rate of emails sent to our mailing list about the event
-  * Total number of views, shares, etc. for posts about the event on social media
 * Total number of registrations for the event
 * Total number of active participants during the event
-* Total number of code/design submissions
+* Total number of code submissions
 
 **Nice-to-have:**&#x20;
 
@@ -129,14 +119,12 @@ Engagement metrics for announcements about the event, for example:
 
 * Total number of views for event-related pages on the static site and wiki
 
-## Planning
-
 ### Assumptions and dependencies
 
 What functionality do we expect to be in place _**before**_ work starts on this deliverable?
 
-* We will need to ensure that the data needed to build or prototype new functionality are made available
-* Design assets and guidelines (logos, colors, etc.) for simpler.grants.gov are made available
+* We will need to ensure that the data needed to build or prototype new functionality are made available.
+* Design assets and guidelines (logos, colors, etc.) for simpler.grants.gov are made available. If they are not made available for public use, we should continue with the deliverable.
 
 Is there any notable functionality we do _**not**_ expect to be in place before works starts on this deliverable?
 
@@ -148,7 +136,6 @@ Is there any notable functionality we do _**not**_ expect to be in place before 
 List of functionality or features that are explicitly out of scope for this deliverable.
 
 * It is not a requirement for the challenge to produce usable code that our project maintainers can use
-*
 
 ### Open questions
 
@@ -156,7 +143,7 @@ List of functionality or features that are explicitly out of scope for this deli
 
 <summary>Will the challenge be hosted virtually or do we anticipate an in-person component?</summary>
 
-
+This will be determined when we start the "technical" specification and planning of this event.
 
 </details>
 
@@ -164,52 +151,14 @@ List of functionality or features that are explicitly out of scope for this deli
 
 <summary>Will the full text of opportunities be available via API prior to this deliverable?</summary>
 
-
+We should not have it be a blocker for this deliverable
 
 </details>
 
-## Integrations
 
-### Translations
-
-Does this deliverable involve delivering any content that needs translation?
-
-* Translations will not be available. We have listed as having a translator or accessibility support as a nice-to-have.
-
-If so, when will English-language content be locked? Then when will translation be started and completed?
-
-* In future code challenges, we recommend translations and accessibility support. We will document this in the future playbook as recommended guidance.
-
-### Services going into PROD for the first time
-
-This can include services going into PROD behind a feature flag that is not turned on.
-
-* \[to be added]
-
-### Services being integrated in PROD for the first time
-
-Are there multiple services that are being connected for the first time in PROD?
-
-* \[to be added]
-
-### Data being shared publicly for the first time
-
-Are there any fields being shared publicly that have never been shared in PROD before?
-
-* We have not determined the challenge criteria so this is to be determined in the technical specification documentation.
-
-### Security considerations
-
-Does this deliverable expose any new attack vectors or expand the attack surface of the product?
-
-* \[to be added]
-
-If so, how are we addressing these risks?
-
-* \[to be added]
 
 ## Change log
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td>Updated draft 2 of the </td><td><ul><li>Removed technical description. It will be included in the technical specification documentation</li><li>Update the DoD</li><li></li></ul></td></tr><tr><td>4/19/2024</td><td>Added comments to draft and reviewed.</td><td></td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td>Updated draft 2 of the spec</td><td><ul><li>Removed technical description. It will be included in the technical specification documentation</li><li>Update the DoD</li></ul></td></tr><tr><td>4/19/2024</td><td>Added comments to draft and reviewed.</td><td></td></tr><tr><td>4/24/2024</td><td>Updated deliverable spec</td><td><ul><li>Changed most sections of the deliverable spec - overview, user stories, DoD, proposed metrics to reflect the smaller, "scrappy" code challenge that we shifted to</li><li>Removed the technical description section which will be added in the tech spec of the code challenge</li></ul></td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
