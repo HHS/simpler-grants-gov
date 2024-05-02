@@ -604,3 +604,13 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
         "is_forecast": source_summary.is_forecast,
         "revision_number": getattr(source_summary, "revision_number", None),
     }
+
+
+def main():
+    import src.logging
+    with src.logging.init("tmp"):
+        db_client = db.PostgresDBClient()
+        with db_client.get_session() as session:
+            TransformOracleDataTask(session).run()
+
+main()

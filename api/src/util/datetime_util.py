@@ -1,3 +1,4 @@
+import zoneinfo
 from datetime import date, datetime, timezone
 from typing import Optional
 
@@ -32,9 +33,8 @@ def adjust_timezone(timestamp: datetime, timezone_str: str) -> datetime:
 
 
 def make_timezone_aware(timestamp: datetime, timezone_str: str) -> datetime:
-    timestamp = timestamp.replace(tzinfo=None)
-    new_timezone = pytz.timezone(timezone_str)
-    return new_timezone.localize(timestamp)
+    new_timezone = zoneinfo.ZoneInfo(timezone_str)
+    return timestamp.replace(tzinfo=new_timezone)
 
 
 def get_now_us_eastern_datetime() -> datetime:
