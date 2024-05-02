@@ -100,7 +100,7 @@ class Base(DeclarativeBase):
 class ApiSchemaTable(Base):
     __abstract__ = True
 
-    __table_args__ = {"schema": Schemas.API}
+    __table_args__: Any = {"schema": Schemas.API}
 
 
 @declarative_mixin

@@ -33,10 +33,11 @@ from src.constants.lookup_constants import (
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
-    if random.random() > none_chance:
-        return factory_value
-
-    return None
+    return factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: random.random() > none_chance),
+        yes_declaration=factory_value,
+        no_declaration=None,
+    )
 
 
 class CustomProvider(BaseProvider):
@@ -135,6 +136,8 @@ class CustomProvider(BaseProvider):
         "{{word}}-###-##",
     ]
 
+    YN_BOOLEAN_VALUES = ["Y", "N"]
+
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -169,6 +172,9 @@ class CustomProvider(BaseProvider):
     def summary_description(self) -> str:
         pattern = self.random_element(self.SUMMARY_DESCRIPTION_FORMATS)
         return self.generator.parse(pattern)
+
+    def yn_boolean(self) -> str:
+        return self.random_element(self.YN_BOOLEAN_VALUES)
 
 
 fake = faker.Faker()
@@ -693,6 +699,55 @@ class StagingTopportunityCfdaFactory(BaseFactory):
             cfdanumber=None,
         )
 
+class StagingTsynopsisFactory(BaseFactory):
+    class Meta:
+        model = staging.synopsis.Tsynopsis
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    posting_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+    response_date = factory.Faker("date_between", start_date="+2w", end_date="+3w")
+    archive_date = factory.Faker("date_between", start_date="+3w", end_date="+4w")
+    unarchive_date = sometimes_none(factory.Faker("date_between", start_date="+6w", end_date="+7w"), none_chance=0.9)
+    syn_desc = factory.Faker("summary_description")
+    oth_cat_fa_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+
+    cost_sharing = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.1)
+    # These int values are stored as strings
+    # TODO - sometimes_none locks in for an entire run, we need some sort of wrapper approach?
+    number_of_awards = sometimes_none(factory.LazyFunction(lambda: str(fake.random_int(1, 25))), none_chance=0.1)
+    est_funding = sometimes_none(factory.LazyFunction(lambda: str(fake.random_int(25_000, 25_000_000, step=5_000))), none_chance=0.1)
+    award_ceiling = sometimes_none(factory.LazyFunction(lambda: str(fake.random_int(10_000, 25_000, step=5_000))), none_chance=0.1)
+    award_floor = sometimes_none(factory.LazyFunction(lambda: str(fake.random_int(0, 10_000, step=5_000))), none_chance=0.1)
+
+    fd_link_url = factory.Faker("relevant_url")
+    fd_link_desc = factory.Faker("additional_info_desc")
+    agency_contact_desc = factory.Faker("agency_contact_description")
+    ac_email_addr = factory.Faker("email")
+    ac_email_desc = factory.LazyAttribute(
+        lambda s: f"Contact {s.ac_name} via email"
+    )
+    a_sa_code = factory.Faker("agency")
+    ac_phone_number = Generators.PhoneNumber
+    ac_name = factory.Faker("agency_name")
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+    create_ts = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    sendmail = sometimes_none(factory.Faker("yn_boolean"))
+    response_date_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=2))
+    applicant_elig_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=5))
+    version_nbr = factory.Faker("random_int", min=0, max=10)
+    modification_comments = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+    publisheruid = sometimes_none(factory.Faker("first_name"))
+    publisher_profile_id = sometimes_none(str(fake.random_int(1, 99_999)))
+
+    # Default to being a new insert/update
+    is_deleted = False
+    transformed_at = None
 
 ####################################
 # Transfer Table Factories

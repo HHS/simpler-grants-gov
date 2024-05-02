@@ -46,7 +46,6 @@ with src.logging.init("migrations"):
             return False
 
         if type_ == "table" and name is not None and name.startswith("foreign_"):
-
             # We create foreign tables to an Oracle database, if we see those locally
             # just ignore them as they aren't something we want included in Alembic
             return False

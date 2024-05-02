@@ -1,14 +1,18 @@
 import logging
 from datetime import datetime
 from enum import StrEnum
-from typing import Tuple, Type, TypeVar, cast
+from typing import Sequence, Tuple, Type, TypeAlias, TypeVar, cast
 
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from src.adapters import db
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing, OpportunitySummary
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityAssistanceListing,
+    OpportunitySummary,
+)
 from src.db.models.staging.forecast import Tforecast, TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
@@ -19,7 +23,7 @@ from src.util import datetime_util
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
 
-type SourceSummary = Tforecast | Tsynopsis | TforecastHist | TsynopsisHist
+SourceSummary: TypeAlias = Tforecast | Tsynopsis | TforecastHist | TsynopsisHist
 
 logger = logging.getLogger(__name__)
 
@@ -73,24 +77,24 @@ class TransformOracleDataTask(Task):
         )
 
     def fetch_with_opportunity(
-        self, source_model: Type[S], destination_model: Type[D], join_clause: list, additional_where_clause: list | None = None
+        self,
+        source_model: Type[S],
+        destination_model: Type[D],
+        join_clause: list,
     ) -> list[Tuple[S, D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
-        if additional_where_clause is None:
-            additional_where_clause = []
-
         return cast(
             list[Tuple[S, D | None, Opportunity | None]],
             self.db_session.execute(
                 select(source_model, destination_model, Opportunity)
-                .join(destination_model, *join_clause, isouter=True)
+                .join(destination_model, and_(*join_clause), isouter=True)
                 .join(
                     Opportunity,
                     source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
                     isouter=True,
                 )
-                .where(source_model.transformed_at.is_(None), *additional_where_clause)
+                .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
             ).all(),
         )
@@ -231,25 +235,46 @@ class TransformOracleDataTask(Task):
         source_assistance_listing.transformed_at = self.transform_time
 
     def process_opportunity_summaries(self) -> None:
-        synopsis_records = self.fetch_with_opportunity(Tsynopsis, OpportunitySummary, [Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id], additional_where_clause=[OpportunitySummary.is_forecast.is_(False), OpportunitySummary.revision_number.is_(None)])
+        logger.info("Starting processing of opportunity summaries")
+        synopsis_records = self.fetch_with_opportunity(
+            Tsynopsis,
+            OpportunitySummary,
+            [Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id, OpportunitySummary.is_forecast.is_(False), OpportunitySummary.revision_number.is_(None)],
+        )
         self.process_opportunity_summary_group(synopsis_records)
 
-        synopsis_hist_records = self.fetch_with_opportunity(TsynopsisHist, OpportunitySummary, [TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id, TsynopsisHist.revision_number == OpportunitySummary.revision_number], additional_where_clause=[OpportunitySummary.is_forecast.is_(False)])
+        synopsis_hist_records = self.fetch_with_opportunity(
+            TsynopsisHist,
+            OpportunitySummary,
+            [
+                TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id, TsynopsisHist.revision_number == OpportunitySummary.revision_number, OpportunitySummary.is_forecast.is_(False)
+            ],
+        )
         self.process_opportunity_summary_group(synopsis_hist_records)
 
-        forecast_records = self.fetch_with_opportunity(Tforecast, OpportunitySummary, [Tforecast.opportunity_id == OpportunitySummary.opportunity_id], additional_where_clause=[OpportunitySummary.is_forecast.is_(True), OpportunitySummary.revision_number.is_(None)])
+        forecast_records = self.fetch_with_opportunity(
+            Tforecast,
+            OpportunitySummary,
+            [Tforecast.opportunity_id == OpportunitySummary.opportunity_id, OpportunitySummary.is_forecast.is_(True), OpportunitySummary.revision_number.is_(None)],
+        )
         self.process_opportunity_summary_group(forecast_records)
 
-        forecast_hist_records = self.fetch_with_opportunity(TforecastHist, OpportunitySummary, [TforecastHist.opportunity_id == OpportunitySummary.opportunity_id, TforecastHist.revision_number == OpportunitySummary.revision_number], additional_where_clause=[OpportunitySummary.is_forecast.is_(True)])
+        forecast_hist_records = self.fetch_with_opportunity(
+            TforecastHist,
+            OpportunitySummary,
+            [
+                TforecastHist.opportunity_id == OpportunitySummary.opportunity_id,
+                TforecastHist.revision_number == OpportunitySummary.revision_number, OpportunitySummary.is_forecast.is_(True)
+            ],
+        )
         self.process_opportunity_summary_group(forecast_hist_records)
 
-
-    def process_opportunity_summary_group(self, records: list[Tuple[SourceSummary, OpportunitySummary | None, Opportunity | None]]) -> None:
+    def process_opportunity_summary_group(
+        self, records: Sequence[Tuple[SourceSummary, OpportunitySummary | None, Opportunity | None]]
+    ) -> None:
         for source_summary, target_summary, opportunity in records:
             try:
-                self.process_opportunity_summary(
-                    source_summary, target_summary, opportunity
-                )
+                self.process_opportunity_summary(source_summary, target_summary, opportunity)
             except ValueError:
                 self.increment(self.Metrics.TOTAL_ERROR_COUNT)
                 logger.exception(
@@ -257,7 +282,12 @@ class TransformOracleDataTask(Task):
                     extra=get_log_extra_summary(source_summary),
                 )
 
-    def process_opportunity_summary(self, source_summary: SourceSummary, target_summary: OpportunitySummary | None, opportunity: Opportunity | None) -> None:
+    def process_opportunity_summary(
+        self,
+        source_summary: SourceSummary,
+        target_summary: OpportunitySummary | None,
+        opportunity: Opportunity | None,
+    ) -> None:
         self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
         extra = get_log_extra_summary(source_summary)
         logger.info("Processing opportunity summary", extra=extra)
@@ -265,7 +295,9 @@ class TransformOracleDataTask(Task):
         if opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
-            raise ValueError("Opportunity summary cannot be processed as the opportunity for it does not exist")
+            raise ValueError(
+                "Opportunity summary cannot be processed as the opportunity for it does not exist"
+            )
 
         if source_summary.is_deleted:
             logger.info("Deleting opportunity summary", extra=extra)
@@ -282,7 +314,9 @@ class TransformOracleDataTask(Task):
             is_insert = target_summary is None
 
             logger.info("Transforming and upserting opportunity summary", extra=extra)
-            transformed_opportunity_summary = transform_opportunity_summary(source_summary, target_summary)
+            transformed_opportunity_summary = transform_opportunity_summary(
+                source_summary, target_summary
+            )
             self.db_session.add(transformed_opportunity_summary)
 
             if is_insert:
@@ -374,34 +408,42 @@ def transform_assistance_listing(
     return target_assistance_listing
 
 
-def transform_opportunity_summary(source_summary: SourceSummary, target_summary: OpportunitySummary | None) -> OpportunitySummary:
+def transform_opportunity_summary(
+    source_summary: SourceSummary, target_summary: OpportunitySummary | None
+) -> OpportunitySummary:
     log_extra = get_log_extra_summary(source_summary)
 
     if target_summary is None:
         logger.info("Creating new opportunity summary record", extra=log_extra)
-        target_summary = OpportunitySummary(opportunity_id=source_summary.opportunity_id, is_forecast=source_summary.is_forecast, revision_number=None)
+        target_summary = OpportunitySummary(
+            opportunity_id=source_summary.opportunity_id,
+            is_forecast=source_summary.is_forecast,
+            revision_number=None,
+        )
 
         # Revision number is only found in the historical table
         if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
             target_summary.revision_number = source_summary.revision_number
 
-    # Fields in both
+    # Fields in all 4 source tables
     target_summary.version_number = source_summary.version_nbr
     target_summary.is_cost_sharing = convert_yn_bool(source_summary.cost_sharing)
     target_summary.post_date = source_summary.posting_date
     target_summary.archive_date = source_summary.archive_date
-    target_summary.unarchive_date = source_summary.unarchive_date
-    target_summary.expected_number_of_awards = convert_numeric_str_to_int(source_summary.number_of_awards)
-    target_summary.estimated_total_program_funding = convert_numeric_str_to_int(source_summary.est_funding)
+    target_summary.expected_number_of_awards = convert_numeric_str_to_int(
+        source_summary.number_of_awards
+    )
+    target_summary.estimated_total_program_funding = convert_numeric_str_to_int(
+        source_summary.est_funding
+    )
     target_summary.award_floor = convert_numeric_str_to_int(source_summary.award_floor)
     target_summary.award_ceiling = convert_numeric_str_to_int(source_summary.award_ceiling)
     target_summary.additional_info_url = source_summary.fd_link_url
     target_summary.additional_info_url_description = source_summary.fd_link_desc
     target_summary.modification_comments = source_summary.modification_comments
     target_summary.funding_category_description = source_summary.oth_cat_fa_desc
+    target_summary.applicant_eligibility_description = source_summary.applicant_elig_desc
     target_summary.agency_name = source_summary.ac_name
-    target_summary.agency_phone_number = source_summary.ac_phone_number
-    target_summary.agency_contact_description = source_summary.agency_contact_desc
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
@@ -415,17 +457,25 @@ def transform_opportunity_summary(source_summary: SourceSummary, target_summary:
     if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
         target_summary.summary_description = source_summary.syn_desc
         target_summary.agency_code = source_summary.a_sa_code
+        target_summary.agency_phone_number = source_summary.ac_phone_number
 
+        # Synopsis only fields
+        target_summary.agency_contact_description = source_summary.agency_contact_desc
         target_summary.close_date = source_summary.response_date
         target_summary.close_date_description = source_summary.response_date_desc
+        target_summary.unarchive_date = source_summary.unarchive_date
 
-    else:
+    else:  # TForecast & TForecastHist
         target_summary.summary_description = source_summary.forecast_desc
         target_summary.agency_code = source_summary.agency_code
+        target_summary.agency_phone_number = source_summary.ac_phone
 
+        # Forecast only fields
         target_summary.forecasted_post_date = source_summary.est_synopsis_posting_date
         target_summary.forecasted_close_date = source_summary.est_appl_response_date
-        target_summary.forecasted_close_date_description = source_summary.est_appl_response_date_desc
+        target_summary.forecasted_close_date_description = (
+            source_summary.est_appl_response_date_desc
+        )
         target_summary.forecasted_award_date = source_summary.est_award_date
         target_summary.forecasted_project_start_date = source_summary.est_project_start_date
         target_summary.fiscal_year = source_summary.fiscal_year
@@ -433,12 +483,13 @@ def transform_opportunity_summary(source_summary: SourceSummary, target_summary:
     # Historical only
     if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
         target_summary.is_deleted = convert_action_type_to_is_deleted(source_summary.action_type)
+    else:
+        target_summary.is_deleted = False
 
-    transform_update_create_timestamp(
-        source_summary, target_summary, log_extra=log_extra
-    )
+    transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
     return target_summary
+
 
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     if timestamp is None:
@@ -502,17 +553,19 @@ def convert_yn_bool(value: str | None) -> bool | None:
     # Just in case the column isn't actually a boolean
     raise ValueError("Unexpected Y/N bool value: %s" % value)
 
+
 def convert_action_type_to_is_deleted(value: str | None) -> bool | None:
     if value is None or value == "":
         return None
 
-    if value == "D": # D = Delete
+    if value == "D":  # D = Delete
         return True
 
-    if value == "U": # U = Update
+    if value == "U":  # U = Update
         return False
 
     raise ValueError("Unexpected action type value: %s" % value)
+
 
 def convert_numeric_str_to_int(value: str | None) -> int | None:
     if value is None or value == "":
@@ -531,5 +584,22 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
     return {
         "opportunity_id": source_summary.opportunity_id,
         "is_forecast": source_summary.is_forecast,
-        "revision_number": getattr(source_summary, "revision_number", None)
+        "revision_number": getattr(source_summary, "revision_number", None),
     }
+
+
+
+def main():
+    import src.logging
+
+    with src.logging.init("TMP_THING"):
+        logger.info("starting")
+
+        db_client = db.PostgresDBClient()
+
+        with db_client.get_session() as db_session:
+            TransformOracleDataTask(db_session).run()
+
+
+main()
+

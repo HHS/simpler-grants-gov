@@ -8,12 +8,16 @@ class Tforecast(StagingBase, forecast_mixin.TforecastMixin, StagingParamMixin):
     @property
     def is_forecast(self) -> bool:
         return True
+
+
 class TforecastHist(StagingBase, forecast_mixin.TforecastHistMixin, StagingParamMixin):
     __tablename__ = "tforecast_hist"
 
     @property
     def is_forecast(self) -> bool:
         return True
+
+
 class TapplicanttypesForecast(
     StagingBase, forecast_mixin.TapplicanttypesForecastMixin, StagingParamMixin
 ):

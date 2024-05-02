@@ -88,10 +88,12 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 
     __table_args__ = (
         # nulls not distinct makes it so nulls work in the unique constraint
-        UniqueConstraint("is_forecast", "revision_number", "opportunity_id", postgresql_nulls_not_distinct=True),
+        UniqueConstraint(
+            "is_forecast", "revision_number", "opportunity_id", postgresql_nulls_not_distinct=True
+        ),
         # Need to define the table args like this to inherit whatever we set on the super table
         # otherwise we end up overwriting things and Alembic remakes the whole table
-        ApiSchemaTable.__table_args__
+        ApiSchemaTable.__table_args__,
     )
 
     opportunity_summary_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)

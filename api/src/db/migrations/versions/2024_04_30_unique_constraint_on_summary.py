@@ -5,7 +5,6 @@ Revises: e3a1be603d26
 Create Date: 2024-04-30 14:47:35.336878
 
 """
-import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -22,7 +21,7 @@ def upgrade():
         "opportunity_summary",
         ["is_forecast", "revision_number", "opportunity_id"],
         schema="api",
-        postgresql_nulls_not_distinct=True
+        postgresql_nulls_not_distinct=True,
     )
     # ### end Alembic commands ###
 

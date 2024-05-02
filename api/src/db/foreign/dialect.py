@@ -8,6 +8,8 @@ import re
 import sqlalchemy
 
 
+
+
 class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
     """SQLAlchemy compiler for creating foreign tables."""
 
@@ -34,7 +36,7 @@ class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
         return sql
 
 
-class ForeignTableDialect(sqlalchemy.dialects.postgresql.dialect):
+class ForeignTableDialect():
     """SQLAlchemy dialect for creating foreign tables.
 
     See https://docs.sqlalchemy.org/en/20/dialects/
