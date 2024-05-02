@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps) {
         <Layout>{children}</Layout>
       </body>
       {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
-        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_TAG_ID} />
+        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       )}
     </html>
   );

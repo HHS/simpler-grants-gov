@@ -5,6 +5,7 @@ import sqlalchemy
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 from src.constants.schema import Schemas
+from src.util import datetime_util
 
 metadata = sqlalchemy.MetaData(
     naming_convention={
@@ -44,7 +45,30 @@ class StagingBase(sqlalchemy.orm.DeclarativeBase):
         return self._dict().items()
 
 
+def same_as_created_at(context: Any) -> Any:
+    return context.get_current_parameters()["created_at"]
+
+
 @declarative_mixin
 class StagingParamMixin:
     is_deleted: Mapped[bool]
     transformed_at: Mapped[datetime.datetime | None] = mapped_column(index=True)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        nullable=False,
+        default=datetime_util.utcnow,
+        server_default=sqlalchemy.sql.functions.now(),
+    )
+
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        nullable=False,
+        default=same_as_created_at,
+        onupdate=datetime_util.utcnow,
+        server_default=sqlalchemy.sql.functions.now(),
+    )
+
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(
+        nullable=True,
+        default=None,
+        server_default=None,
+    )
