@@ -35,13 +35,40 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def run_task(self) -> None:
         with self.db_session.begin():
+            self.log_database_settings()
             self.load_data()
+
+    def log_database_settings(self) -> None:
+        metadata = sqlalchemy.MetaData()
+        engine = self.db_session.bind
+        # Use reflection to define built-in views as Table objects.
+        foreign_servers = sqlalchemy.Table(
+            "foreign_servers", metadata, autoload_with=engine, schema="information_schema"
+        )
+        foreign_server_options = sqlalchemy.Table(
+            "foreign_server_options", metadata, autoload_with=engine, schema="information_schema"
+        )
+
+        logger.info(
+            "foreign server settings",
+            extra={
+                "foreign_servers": self.db_session.execute(
+                    sqlalchemy.select(foreign_servers)
+                ).all(),
+                "foreign_server_options": self.db_session.execute(
+                    sqlalchemy.select(foreign_server_options)
+                ).all(),
+            },
+        )
 
     def load_data(self) -> None:
         for table_name in self.foreign_tables:
-            self.do_staging_copy(table_name)
+            try:
+                self.load_data_for_table(table_name)
+            except Exception:
+                logger.exception("table load error")
 
-    def do_staging_copy(self, table_name: str) -> None:
+    def load_data_for_table(self, table_name: str) -> None:
         logger.info("process table", extra={"table": table_name})
         foreign_table = self.foreign_tables[table_name]
         staging_table = self.staging_tables[table_name]
