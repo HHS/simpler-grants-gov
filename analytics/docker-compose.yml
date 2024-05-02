@@ -2,6 +2,16 @@ version: '3'
 
 services:
 
+  grants-analytics-db:
+    image: postgres:14-alpine
+    container_name: grants-analytics-db
+    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
+    env_file: ./local.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - grantsanalyticsdbdata:/var/lib/postgresql/data
+
   grants-analytics:
     build:
       context: .
@@ -13,3 +23,8 @@ services:
     volumes:
       - .:/analytics
       - ~/.ssh:/home/${RUN_USER:-analytics}/.ssh
+    depends_on:
+      - grants-analytics-db
+
+volumes:
+  grantsanalyticsdbdata:
