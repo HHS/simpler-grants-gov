@@ -1,7 +1,10 @@
-from .opportunity import Topportunity
+from sqlalchemy.orm import Mapped, relationship
+
 from src.db.legacy_mixin import synopsis_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
-from sqlalchemy.orm import Mapped, relationship
+
+from .opportunity import Topportunity
+
 
 class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
     __tablename__ = "tsynopsis"
@@ -10,6 +13,7 @@ class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
         Topportunity,
         primaryjoin="Tsynopsis.opportunity_id == foreign(Topportunity.opportunity_id)",
         uselist=False,
+        overlaps="opportunity",
     )
 
     @property
@@ -19,6 +23,13 @@ class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
 
 class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParamMixin):
     __tablename__ = "tsynopsis_hist"
+
+    opportunity: Mapped[Topportunity | None] = relationship(
+        Topportunity,
+        primaryjoin="TsynopsisHist.opportunity_id == foreign(Topportunity.opportunity_id)",
+        uselist=False,
+        overlaps="opportunity",
+    )
 
     @property
     def is_forecast(self) -> bool:

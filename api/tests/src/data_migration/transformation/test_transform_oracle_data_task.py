@@ -10,14 +10,25 @@ from src.data_migration.transformation.transform_oracle_data_task import (
     transform_opportunity_category,
     transform_update_create_timestamp,
 )
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.opportunity_models import (
+    Opportunity,
+    OpportunityAssistanceListing,
+    OpportunitySummary,
+)
+from src.db.models.staging.forecast import TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
+from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
+    OpportunitySummaryFactory,
+    StagingTforecastFactory,
+    StagingTforecastHistFactory,
     StagingTopportunityCfdaFactory,
     StagingTopportunityFactory,
+    StagingTsynopsisFactory,
+    StagingTsynopsisHistFactory,
 )
 
 
@@ -83,6 +94,54 @@ def setup_cfda(
         )
 
     return source_cfda
+
+
+def setup_synopsis_forecast(
+    is_forecast: bool,
+    revision_number: int | None,
+    create_existing: bool,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    source_values: dict | None = None,
+    all_fields_null: bool = False,
+    opportunity: Opportunity | None = None,
+):
+    if source_values is None:
+        source_values = {}
+
+    if is_forecast:
+        if revision_number is None:
+            factory_cls = StagingTforecastFactory
+        else:
+            factory_cls = StagingTforecastHistFactory
+    else:
+        if revision_number is None:
+            factory_cls = StagingTsynopsisFactory
+        else:
+            factory_cls = StagingTsynopsisHistFactory
+
+    # TODO - don't think we need this added complexity - not a possible scenario here
+    # If you don't provide an opportunity, you need to provide an ID
+    if opportunity is not None:
+        source_values["opportunity_id"] = opportunity.opportunity_id
+
+    if revision_number is not None:
+        source_values["revision_number"] = revision_number
+
+    source_summary = factory_cls.create(
+        **source_values,
+        opportunity=None,  # To override the factory trying to create something
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+        all_fields_null=all_fields_null,
+    )
+
+    if create_existing:
+        OpportunitySummaryFactory.create(
+            opportunity=opportunity, is_forecast=is_forecast, revision_number=revision_number
+        )
+
+    return source_summary
 
 
 def validate_matching_fields(
@@ -184,6 +243,97 @@ def validate_assistance_listing(
         ],
         expect_values_to_match,
     )
+
+
+def validate_opportunity_summary(
+    db_session, source_summary, expect_in_db: bool = True, expect_values_to_match: bool = True
+):
+    revision_number = None
+    is_forecast = source_summary.is_forecast
+    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
+        revision_number = source_summary.revision_number
+
+    opportunity_summary = (
+        db_session.query(OpportunitySummary)
+        .filter(
+            OpportunitySummary.opportunity_id == source_summary.opportunity_id,
+            OpportunitySummary.revision_number == revision_number,
+            OpportunitySummary.is_forecast == is_forecast,
+        )
+        .one_or_none()
+    )
+
+    if not expect_in_db:
+        assert opportunity_summary is None
+        return
+
+    matching_fields = [
+        ("version_nbr", "version_number"),
+        ("posting_date", "post_date"),
+        ("archive_date", "archive_date"),
+        ("fd_link_url", "additional_info_url"),
+        ("fd_link_desc", "additional_info_url_description"),
+        ("modification_comments", "modification_comments"),
+        ("oth_cat_fa_desc", "funding_category_description"),
+        ("applicant_elig_desc", "applicant_eligibility_description"),
+        ("ac_name", "agency_name"),
+        ("ac_email_addr", "agency_email_address"),
+        ("ac_email_desc", "agency_email_address_description"),
+        ("publisher_profile_id", "publisher_profile_id"),
+        ("publisheruid", "publisher_user_id"),
+        ("last_upd_id", "updated_by"),
+        ("creator_id", "created_by"),
+    ]
+
+    if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
+        matching_fields.extend(
+            [
+                ("syn_desc", "summary_description"),
+                ("a_sa_code", "agency_code"),
+                ("ac_phone_number", "agency_phone_number"),
+                ("agency_contact_desc", "agency_contact_description"),
+                ("response_date", "close_date"),
+                ("response_date_desc", "close_date_description"),
+                ("unarchive_date", "unarchive_date"),
+            ]
+        )
+    else:  # Forecast+ForecastHist
+        matching_fields.extend(
+            [
+                ("forecast_desc", "summary_description"),
+                ("agency_code", "agency_code"),
+                ("ac_phone", "agency_phone_number"),
+                ("est_synopsis_posting_date", "forecasted_post_date"),
+                ("est_appl_response_date", "forecasted_close_date"),
+                ("est_appl_response_date_desc", "forecasted_close_date_description"),
+                ("est_award_date", "forecasted_award_date"),
+                ("est_project_start_date", "forecasted_project_start_date"),
+                ("fiscal_year", "fiscal_year"),
+            ]
+        )
+
+    # History only fields
+    is_deleted = False
+    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
+        matching_fields.extend([("revision_number", "revision_number")])
+
+        is_deleted = source_summary.action_type == "D"
+
+    assert opportunity_summary is not None
+    validate_matching_fields(
+        source_summary, opportunity_summary, matching_fields, expect_values_to_match
+    )
+
+    """
+    TODO - validate these fields
+    is_cost_sharing
+    expected_number_of_awards
+    estimated_total_program_funding
+    award_floor
+    award_ceiling
+    sendmail
+    """
+    assert opportunity_summary.is_deleted == is_deleted
 
 
 class TestTransformOpportunity(BaseTestClass):
@@ -429,6 +579,229 @@ class TestTransformAssistanceListing(BaseTestClass):
             )
 
         validate_assistance_listing(db_session, delete_but_current_missing, expect_in_db=False)
+
+
+class TestTransformOpportunitySummary(BaseTestClass):
+    @pytest.fixture()
+    def transform_oracle_data_task(
+        self, db_session, enable_factory_create, truncate_opportunities
+    ) -> TransformOracleDataTask:
+        return TransformOracleDataTask(db_session)
+
+    def test_process_opportunity_summaries(self, db_session, transform_oracle_data_task):
+        # Basic inserts
+        opportunity1 = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        forecast_insert1 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=None, create_existing=False, opportunity=opportunity1
+        )
+        synopsis_insert1 = setup_synopsis_forecast(
+            is_forecast=False, revision_number=None, create_existing=False, opportunity=opportunity1
+        )
+        forecast_hist_insert1 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=1, create_existing=False, opportunity=opportunity1
+        )
+        synopsis_hist_insert1 = setup_synopsis_forecast(
+            is_forecast=False, revision_number=1, create_existing=False, opportunity=opportunity1
+        )
+
+        # Mix of updates and inserts, somewhat resembling what happens when summary objects
+        # get moved to the historical table (we'd update the synopsis/forecast records, and create new historical)
+        opportunity2 = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        forecast_update1 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=None, create_existing=True, opportunity=opportunity2
+        )
+        synopsis_update1 = setup_synopsis_forecast(
+            is_forecast=False, revision_number=None, create_existing=True, opportunity=opportunity2
+        )
+        forecast_hist_update1 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=1, create_existing=True, opportunity=opportunity2
+        )
+        synopsis_hist_update1 = setup_synopsis_forecast(
+            is_forecast=False, revision_number=1, create_existing=True, opportunity=opportunity2
+        )
+        forecast_hist_insert2 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity2
+        )
+        synopsis_hist_insert2 = setup_synopsis_forecast(
+            is_forecast=False, revision_number=2, create_existing=False, opportunity=opportunity2
+        )
+
+        # Mix of inserts, updates, and deletes
+        opportunity3 = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        forecast_delete1 = setup_synopsis_forecast(
+            is_forecast=True,
+            revision_number=None,
+            create_existing=True,
+            is_delete=True,
+            opportunity=opportunity3,
+        )
+        synopsis_delete1 = setup_synopsis_forecast(
+            is_forecast=False,
+            revision_number=None,
+            create_existing=True,
+            is_delete=True,
+            opportunity=opportunity3,
+        )
+        forecast_hist_insert3 = setup_synopsis_forecast(
+            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity3
+        )
+        synopsis_hist_update2 = setup_synopsis_forecast(
+            is_forecast=False,
+            revision_number=1,
+            create_existing=True,
+            source_values={"action_type": "D"},
+            opportunity=opportunity3,
+        )
+
+        # A few error scenarios
+        opportunity4 = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        forecast_delete_but_current_missing = setup_synopsis_forecast(
+            is_forecast=True,
+            revision_number=None,
+            create_existing=False,
+            is_delete=True,
+            opportunity=opportunity4,
+        )
+        synopsis_update_invalid_yn_field = setup_synopsis_forecast(
+            is_forecast=False,
+            revision_number=None,
+            create_existing=True,
+            source_values={"sendmail": "E"},
+            opportunity=opportunity4,
+        )
+        synopsis_hist_insert_invalid_yn_field = setup_synopsis_forecast(
+            is_forecast=False,
+            revision_number=1,
+            create_existing=False,
+            source_values={"cost_sharing": "1"},
+            opportunity=opportunity4,
+        )
+        forecast_hist_update_invalid_action_type = setup_synopsis_forecast(
+            is_forecast=True,
+            revision_number=2,
+            create_existing=True,
+            source_values={"action_type": "X"},
+            opportunity=opportunity4,
+        )
+
+        transform_oracle_data_task.process_opportunity_summaries()
+
+        validate_opportunity_summary(db_session, forecast_insert1)
+        validate_opportunity_summary(db_session, synopsis_insert1)
+        validate_opportunity_summary(db_session, forecast_hist_insert1)
+        validate_opportunity_summary(db_session, synopsis_hist_insert1)
+        validate_opportunity_summary(db_session, forecast_hist_insert2)
+        validate_opportunity_summary(db_session, synopsis_hist_insert2)
+        validate_opportunity_summary(db_session, forecast_hist_insert3)
+
+        validate_opportunity_summary(db_session, forecast_update1)
+        validate_opportunity_summary(db_session, synopsis_update1)
+        validate_opportunity_summary(db_session, forecast_hist_update1)
+        validate_opportunity_summary(db_session, synopsis_hist_update1)
+        validate_opportunity_summary(db_session, synopsis_hist_update2)
+
+        validate_opportunity_summary(db_session, forecast_delete1, expect_in_db=False)
+        validate_opportunity_summary(db_session, synopsis_delete1, expect_in_db=False)
+
+        validate_opportunity_summary(
+            db_session, forecast_delete_but_current_missing, expect_in_db=False
+        )
+        validate_opportunity_summary(
+            db_session,
+            synopsis_update_invalid_yn_field,
+            expect_in_db=True,
+            expect_values_to_match=False,
+        )
+        validate_opportunity_summary(
+            db_session, synopsis_hist_insert_invalid_yn_field, expect_in_db=False
+        )
+        validate_opportunity_summary(
+            db_session,
+            forecast_hist_update_invalid_action_type,
+            expect_in_db=True,
+            expect_values_to_match=False,
+        )
+
+        metrics = transform_oracle_data_task.metrics
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 18
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
+
+        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 4
+        transform_oracle_data_task.process_opportunity_summaries()
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 22
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 8
+
+    @pytest.mark.parametrize(
+        "is_forecast,revision_number", [(True, None), (False, None), (True, 5), (False, 10)]
+    )
+    def test_process_opportunity_summary_delete_but_current_missing(
+        self, db_session, transform_oracle_data_task, is_forecast, revision_number
+    ):
+        opportunity = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        delete_but_current_missing = setup_synopsis_forecast(
+            is_forecast=is_forecast,
+            revision_number=revision_number,
+            create_existing=False,
+            is_delete=True,
+            opportunity=opportunity,
+        )
+
+        with pytest.raises(
+            ValueError, match="Cannot delete opportunity summary as it does not exist"
+        ):
+            transform_oracle_data_task.process_opportunity_summary(
+                delete_but_current_missing, None, opportunity
+            )
+
+    @pytest.mark.parametrize(
+        "is_forecast,revision_number,source_values,expected_error",
+        [
+            (True, None, {"sendmail": "z"}, "Unexpected Y/N bool value: z"),
+            (False, None, {"cost_sharing": "v"}, "Unexpected Y/N bool value: v"),
+            (True, 5, {"action_type": "T"}, "Unexpected action type value: T"),
+            (False, 10, {"action_type": "5"}, "Unexpected action type value: 5"),
+        ],
+    )
+    def test_process_opportunity_summary_invalid_value_errors(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        is_forecast,
+        revision_number,
+        source_values,
+        expected_error,
+    ):
+        opportunity = OpportunityFactory.create(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        source_summary = setup_synopsis_forecast(
+            is_forecast=is_forecast,
+            revision_number=revision_number,
+            create_existing=False,
+            opportunity=opportunity,
+            source_values=source_values,
+        )
+
+        with pytest.raises(ValueError, match=expected_error):
+            transform_oracle_data_task.process_opportunity_summary(
+                source_summary, None, opportunity
+            )
 
 
 @pytest.mark.parametrize(

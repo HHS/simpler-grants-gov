@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Sequence, Tuple, Type, TypeAlias, TypeVar, cast
 
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 
 from src.adapters import db
 from src.constants.lookup_constants import OpportunityCategory
@@ -239,7 +239,11 @@ class TransformOracleDataTask(Task):
         synopsis_records = self.fetch_with_opportunity(
             Tsynopsis,
             OpportunitySummary,
-            [Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id, OpportunitySummary.is_forecast.is_(False), OpportunitySummary.revision_number.is_(None)],
+            [
+                Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id,
+                OpportunitySummary.is_forecast.is_(False),
+                OpportunitySummary.revision_number.is_(None),
+            ],
         )
         self.process_opportunity_summary_group(synopsis_records)
 
@@ -247,7 +251,9 @@ class TransformOracleDataTask(Task):
             TsynopsisHist,
             OpportunitySummary,
             [
-                TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id, TsynopsisHist.revision_number == OpportunitySummary.revision_number, OpportunitySummary.is_forecast.is_(False)
+                TsynopsisHist.opportunity_id == OpportunitySummary.opportunity_id,
+                TsynopsisHist.revision_number == OpportunitySummary.revision_number,
+                OpportunitySummary.is_forecast.is_(False),
             ],
         )
         self.process_opportunity_summary_group(synopsis_hist_records)
@@ -255,7 +261,11 @@ class TransformOracleDataTask(Task):
         forecast_records = self.fetch_with_opportunity(
             Tforecast,
             OpportunitySummary,
-            [Tforecast.opportunity_id == OpportunitySummary.opportunity_id, OpportunitySummary.is_forecast.is_(True), OpportunitySummary.revision_number.is_(None)],
+            [
+                Tforecast.opportunity_id == OpportunitySummary.opportunity_id,
+                OpportunitySummary.is_forecast.is_(True),
+                OpportunitySummary.revision_number.is_(None),
+            ],
         )
         self.process_opportunity_summary_group(forecast_records)
 
@@ -264,7 +274,8 @@ class TransformOracleDataTask(Task):
             OpportunitySummary,
             [
                 TforecastHist.opportunity_id == OpportunitySummary.opportunity_id,
-                TforecastHist.revision_number == OpportunitySummary.revision_number, OpportunitySummary.is_forecast.is_(True)
+                TforecastHist.revision_number == OpportunitySummary.revision_number,
+                OpportunitySummary.is_forecast.is_(True),
             ],
         )
         self.process_opportunity_summary_group(forecast_hist_records)
@@ -317,7 +328,7 @@ class TransformOracleDataTask(Task):
             transformed_opportunity_summary = transform_opportunity_summary(
                 source_summary, target_summary
             )
-            self.db_session.add(transformed_opportunity_summary)
+            self.db_session.merge(transformed_opportunity_summary)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
@@ -409,11 +420,11 @@ def transform_assistance_listing(
 
 
 def transform_opportunity_summary(
-    source_summary: SourceSummary, target_summary: OpportunitySummary | None
+    source_summary: SourceSummary, incoming_summary: OpportunitySummary | None
 ) -> OpportunitySummary:
     log_extra = get_log_extra_summary(source_summary)
 
-    if target_summary is None:
+    if incoming_summary is None:
         logger.info("Creating new opportunity summary record", extra=log_extra)
         target_summary = OpportunitySummary(
             opportunity_id=source_summary.opportunity_id,
@@ -424,6 +435,13 @@ def transform_opportunity_summary(
         # Revision number is only found in the historical table
         if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
             target_summary.revision_number = source_summary.revision_number
+    else:
+        # We create a new summary object and merge it outside this function
+        # that way if any modifications occur on the object and then it errors
+        # they aren't actually applied
+        target_summary = OpportunitySummary(
+            opportunity_summary_id=incoming_summary.opportunity_summary_id
+        )
 
     # Fields in all 4 source tables
     target_summary.version_number = source_summary.version_nbr
@@ -586,20 +604,3 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
         "is_forecast": source_summary.is_forecast,
         "revision_number": getattr(source_summary, "revision_number", None),
     }
-
-
-
-def main():
-    import src.logging
-
-    with src.logging.init("TMP_THING"):
-        logger.info("starting")
-
-        db_client = db.PostgresDBClient()
-
-        with db_client.get_session() as db_session:
-            TransformOracleDataTask(db_session).run()
-
-
-main()
-
