@@ -192,23 +192,43 @@ resource "aws_cloudwatch_log_group" "WafWebAclLoggroup" {
   retention_in_days = 1827 # 5 years
 }
 
-# This resource fails to deploy with the following error message:
-#
-# WAFLogDestinationPermissionIssueException: Unable to deliver logs to the configured destination.
-# You might need to grant log delivery permissions for the destination.
-# If you're using S3 as your log destination, you might have exceeded your bucket limit.
-#
-# Ticket to resolve this issue: https://github.com/HHS/simpler-grants-gov/issues/1871
-#
-# # Associate WAF with the cloudwatch logging group
-# resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
-#   log_destination_configs = [aws_cloudwatch_log_group.WafWebAclLoggroup.arn]
-#   resource_arn            = aws_wafv2_web_acl.waf.arn
-#   depends_on = [
-#     aws_wafv2_web_acl.waf,
-#     aws_cloudwatch_log_group.WafWebAclLoggroup
-#   ]
-# }
+# Associate WAF with the cloudwatch logging group
+resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
+  log_destination_configs = [aws_cloudwatch_log_group.WafWebAclLoggroup.arn]
+  resource_arn            = aws_wafv2_web_acl.waf.arn
+  depends_on = [
+    aws_wafv2_web_acl.waf,
+    aws_cloudwatch_log_group.WafWebAclLoggroup
+  ]
+}
+
+resource "aws_cloudwatch_log_resource_policy" "WafWebAclLoggingPolicy" {
+  policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc.json
+  policy_name     = "analytics-webacl-policy"
+}
+
+# Policy from terraform docs
+data "aws_iam_policy_document" "WafWebAclLoggingDoc" {
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.WafWebAclLoggroup.arn}:*"]
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+      variable = "aws:SourceArn"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [tostring(data.aws_caller_identity.current.account_id)]
+      variable = "aws:SourceAccount"
+    }
+  }
+}
 
 # Associate WAF with load balancer
 resource "aws_wafv2_web_acl_association" "WafWebAclAssociation" {
