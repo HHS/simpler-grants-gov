@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from enum import StrEnum
-from typing import Tuple, Type, TypeVar, cast
+from typing import Sequence, Tuple, Type, TypeVar, cast
 
 from sqlalchemy import select
 
@@ -52,7 +52,7 @@ class TransformOracleDataTask(Task):
             self.process_one_to_many_lookup_tables()
 
     def fetch(
-        self, source_model: Type[S], destination_model: Type[D], join_clause: list
+        self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
     ) -> list[Tuple[S, D | None]]:
         # The real type is: Sequence[Row[Tuple[S, D | None]]]
         # but MyPy is weird about this and the Row+Tuple causes some
@@ -65,7 +65,7 @@ class TransformOracleDataTask(Task):
                 .join(destination_model, *join_clause, isouter=True)
                 .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
-            ).all(),
+            ),
         )
 
     def process_opportunities(self) -> None:
@@ -181,12 +181,10 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
     if value is None or value == "":
         return None
 
-    transformed_value = OPPORTUNITY_CATEGORY_MAP.get(value)
-
-    if transformed_value is None:
+    if value not in OPPORTUNITY_CATEGORY_MAP:
         raise ValueError("Unrecognized opportunity category: %s" % value)
 
-    return transformed_value
+    return OPPORTUNITY_CATEGORY_MAP[value]
 
 
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
