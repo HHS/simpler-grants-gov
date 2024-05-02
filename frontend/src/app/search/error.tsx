@@ -27,18 +27,29 @@ export interface ParsedError {
 export default function Error({ error }: ErrorProps) {
   // The error message is passed as an object that's been stringified.
   // Parse it here.
-  const parsedErrorData = JSON.parse(error.message) as ParsedError;
 
+  let parsedErrorData;
   const pagination_info = getErrorPaginationInfo();
-  const initialSearchResults: SearchAPIResponse = getErrorInitialSearchResults(
-    parsedErrorData,
-    pagination_info,
-  );
+  let convertedSearchParams;
+  if (!isValidJSON(error.message)) {
+    // the error likely is just a string with a non-specific Server Component error when running the built app
+    // "An error occurred in the Server Components render. The specific message is omitted in production builds..."
+    parsedErrorData = getParsedError();
+    convertedSearchParams = parsedErrorData.searchInputs;
+  } else {
+    // Valid error thrown from server component
+    parsedErrorData = JSON.parse(error.message) as ParsedError;
 
-  // The error message search inputs had to be converted to arrays in order to be stringified,
-  // convert those back to sets as we do in non-error flow.
-  const convertedSearchParams = convertSearchInputArraysToSets(
-    parsedErrorData.searchInputs,
+    // The error message search inputs had to be converted to arrays in order to be stringified,
+    // convert those back to sets as we do in non-error flow.
+    convertedSearchParams = convertSearchInputArraysToSets(
+      parsedErrorData.searchInputs,
+    );
+  }
+
+  const initialSearchResults: SearchAPIResponse = getErrorInitialSearchResults(
+    pagination_info,
+    parsedErrorData,
   );
 
   useEffect(() => {
@@ -65,15 +76,15 @@ export default function Error({ error }: ErrorProps) {
  * which otherwise may not have any data.
  */
 function getErrorInitialSearchResults(
-  parsedError: ParsedError,
   pagination_info: PaginationInfo,
+  parsedError: ParsedError,
 ) {
   return {
-    errors: [{ ...parsedError }],
+    errors: parsedError ? [{ ...parsedError }] : [{}],
     data: [],
     pagination_info,
-    status_code: parsedError.status,
-    message: parsedError.message,
+    status_code: parsedError?.status || -1,
+    message: parsedError?.message || "Unable to parse thrown error",
   };
 }
 
@@ -102,4 +113,31 @@ function convertSearchInputArraysToSets(
     agency: new Set(searchInputs.agency || []),
     category: new Set(searchInputs.category || []),
   };
+}
+
+function isValidJSON(str: string) {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false; // String is not valid JSON
+  }
+}
+
+function getParsedError() {
+  return {
+    type: "NetworkError",
+    searchInputs: {
+      status: new Set(),
+      fundingInstrument: new Set(),
+      eligibility: new Set(),
+      agency: new Set(),
+      category: new Set(),
+      sortby: null,
+      page: 1,
+      actionType: "initialLoad",
+    },
+    message: "Invalid JSON returned",
+    status: -1,
+  } as ParsedError;
 }

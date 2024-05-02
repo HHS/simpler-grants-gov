@@ -8,6 +8,7 @@ import src.adapters.db as db
 import src.logging
 from src.constants.schema import Schemas
 from src.db.models import metadata
+from src.db.models.staging import metadata as staging_metadata
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn  # isort:skip
 
@@ -23,7 +24,7 @@ with src.logging.init("migrations"):
     # for 'autogenerate' support
     # from myapp import mymodel
     # target_metadata = mymodel.Base.metadata
-    target_metadata = metadata
+    target_metadata = [metadata, staging_metadata]
 
     # other values from the config, defined by the needs of env.py,
     # can be acquired:
@@ -46,6 +47,8 @@ with src.logging.init("migrations"):
         if type_ == "table" and name is not None and name.startswith("foreign_"):
             # We create foreign tables to an Oracle database, if we see those locally
             # just ignore them as they aren't something we want included in Alembic
+            return False
+        if type_ == "table" and getattr(object, "schema", None) == Schemas.LEGACY:
             return False
         else:
             return True

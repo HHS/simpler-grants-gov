@@ -15,8 +15,14 @@ The diagrams generated are based on our SQLAlchemy models, and not the database 
 
 # Files
 
-## Full Schema
-![Postgres ERD](full-schema.png)
+## API Schema
+![API Table ERD](api-schema.png)
+
+## Staging Schema
+![Staging Table ERD](staging-schema.png)
 
 ## Transfer Table Schema
 ![Transfer Table ERD](transfer-schema.png)
+
+## Full Schema
+![Postgres ERD](full-schema.png)
