@@ -39,7 +39,8 @@ export function generateMetadata() {
 
 export default async function Search({ searchParams }: ServerPageProps) {
   const ffManager = new FeatureFlagsManager(cookies());
-  if (!ffManager.isFeatureEnabled("showSearchV0")) {
+
+  if (ffManager.isFeatureDisabled("showSearchV0", searchParams)) {
     return notFound();
   }
 

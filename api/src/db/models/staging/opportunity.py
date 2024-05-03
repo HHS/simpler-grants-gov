@@ -12,8 +12,6 @@ class Topportunity(StagingBase, opportunity_mixin.TopportunityMixin, StagingPara
         uselist=True,
     )
 
-    # synopsis: Mapped[Tsynopsis] = relationship(primaryjoin="Topportunity.opportunity_id == foreign(Tsynopsis.opportunity_id)", uselist=False)
-
 
 class TopportunityCfda(StagingBase, opportunity_mixin.TopportunityCfdaMixin, StagingParamMixin):
     __tablename__ = "topportunity_cfda"

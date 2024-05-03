@@ -29,6 +29,8 @@ from tests.src.db.models.factories import (
     StagingTopportunityFactory,
     StagingTsynopsisFactory,
     StagingTsynopsisHistFactory,
+    StagingTopportunityCfdaFactory,
+    StagingTopportunityFactory,
 )
 
 
@@ -334,7 +336,6 @@ def validate_opportunity_summary(
     sendmail
     """
     assert opportunity_summary.is_deleted == is_deleted
-
 
 class TestTransformOpportunity(BaseTestClass):
     @pytest.fixture()

@@ -1,15 +1,15 @@
-"""unique constraint on summary
+"""add unique constraint for summary
 
-Revision ID: 103db9c2afe6
-Revises: e3a1be603d26
-Create Date: 2024-04-30 14:47:35.336878
+Revision ID: 24061ff82646
+Revises: 1ddd1d051a99
+Create Date: 2024-05-02 10:11:35.832837
 
 """
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "103db9c2afe6"
-down_revision = "e3a1be603d26"
+revision = "24061ff82646"
+down_revision = "1ddd1d051a99"
 branch_labels = None
 depends_on = None
 

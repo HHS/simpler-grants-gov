@@ -52,7 +52,7 @@ Amazon CloudWatch Synthetics uses "canaries", configurable scripts that run on a
 
 ### Pingdom
 
-Pingdom offers uptime monitoring from over 100+ locations worldwide, page speed analysis, and transaction monitoring ( test simple or highly complex transactions, such as: new user registrations, user login, search, shopping cart checkout, URL hijacking, etc.). Creating uptime checks and alerts is easy in the third party dashboard. Priced starting at 10$/month for 10 uptime check configurations. PCI, HIPAA, and EU data protection certified. 
+Pingdom offers uptime monitoring from over 100+ locations worldwide, page speed analysis, and transaction monitoring ( test simple or highly complex transactions, such as: new user registrations, user login, search, shopping cart checkout, URL hijacking, etc.). Creating uptime checks and alerts is easy in the third party dashboard. Priced starting at 10$/month for 10 uptime check configurations. PCI, HIPAA, and EU data protection certified.
 
 - **Pros**
   - Quick and easy to configure
@@ -65,7 +65,7 @@ Pingdom offers uptime monitoring from over 100+ locations worldwide, page speed 
 
 ### New Relic
 
-New Relic is an observability platform that provides monitoring of infrastructure, application performance, and availability. With convenient automated configuration tools, including for node.js and python applications, as well as aws accounts, it is easy to get started with a sophisticated and holistic monitoring system. New Relic is FedRAMP certified. New Relic charges by data ingest ($0.30 or $0.50 per GB after the first 100GB) as well as for user licenses from $50/user/month to $658/user/month. 
+New Relic is an observability platform that provides monitoring of infrastructure, application performance, and availability. With convenient automated configuration tools, including for node.js and python applications, as well as aws accounts, it is easy to get started with a sophisticated and holistic monitoring system. New Relic is FedRAMP certified. New Relic charges by data ingest ($0.30 or $0.50 per GB after the first 100GB) as well as for user licenses from $50/user/month to $658/user/month.
 
 - **Pros**
   - Easy to set up by having it scan the codebase or aws tenant

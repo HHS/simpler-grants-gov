@@ -49,6 +49,8 @@ with src.logging.init("migrations"):
             # We create foreign tables to an Oracle database, if we see those locally
             # just ignore them as they aren't something we want included in Alembic
             return False
+        if type_ == "table" and getattr(object, "schema", None) == Schemas.LEGACY:
+            return False
         else:
             return True
 

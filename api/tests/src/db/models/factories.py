@@ -39,6 +39,10 @@ def sometimes_none(factory_value, none_chance: float = 0.5):
         yes_declaration=factory_value,
         no_declaration=None,
     )
+    if random.random() > none_chance:
+        return factory_value
+
+    return None
 
 
 class CustomProvider(BaseProvider):
@@ -563,6 +567,8 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
 class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
+
+    opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
