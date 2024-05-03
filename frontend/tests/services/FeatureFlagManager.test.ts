@@ -438,5 +438,27 @@ describe("FeatureFlagsManager", () => {
         featureFlagsManager.isFeatureEnabled("invalidFeature"),
       ).toThrow();
     });
+
+    test("`searchParams` override takes precedence over default and cookie-based feature flags", () => {
+      // Set a different state in cookies to test precedence
+      const modifiedCookieValue = { feature1: true };
+      mockFeatureFlagsCookie(modifiedCookieValue);
+      const serverFeatureFlagsManager = new FeatureFlagsManager(
+        MockServerCookiesModule,
+      );
+
+      // Now provide searchParams with a conflicting setup
+      const searchParams = {
+        _ff: "feature1:false",
+      };
+
+      expect(
+        serverFeatureFlagsManager.isFeatureEnabled("feature1", searchParams),
+      ).toBe(false);
+
+      expect(
+        serverFeatureFlagsManager.isFeatureDisabled("feature1", searchParams),
+      ).toBe(true);
+    });
   });
 });

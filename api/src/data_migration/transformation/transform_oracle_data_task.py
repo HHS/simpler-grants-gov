@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from enum import StrEnum
-from typing import Tuple, Type, TypeVar, cast
+from typing import Sequence, Tuple, Type, TypeVar, cast
 
 from sqlalchemy import select
 
@@ -53,7 +53,7 @@ class TransformOracleDataTask(Task):
             self.process_one_to_many_lookup_tables()
 
     def fetch(
-        self, source_model: Type[S], destination_model: Type[D], join_clause: list
+        self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
     ) -> list[Tuple[S, D | None]]:
         # The real type is: Sequence[Row[Tuple[S, D | None]]]
         # but MyPy is weird about this and the Row+Tuple causes some
@@ -66,11 +66,11 @@ class TransformOracleDataTask(Task):
                 .join(destination_model, *join_clause, isouter=True)
                 .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
-            ).all(),
+            ),
         )
 
     def fetch_with_opportunity(
-        self, source_model: Type[S], destination_model: Type[D], join_clause: list
+        self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
     ) -> list[Tuple[S, D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
@@ -87,7 +87,7 @@ class TransformOracleDataTask(Task):
                 )
                 .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
-            ).all(),
+            ),
         )
 
     def process_opportunities(self) -> None:
@@ -132,7 +132,7 @@ class TransformOracleDataTask(Task):
 
             logger.info("Transforming and upserting opportunity", extra=extra)
             transformed_opportunity = transform_opportunity(source_opportunity, target_opportunity)
-            self.db_session.add(transformed_opportunity)
+            self.db_session.merge(transformed_opportunity)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
@@ -215,7 +215,7 @@ class TransformOracleDataTask(Task):
             transformed_assistance_listing = transform_assistance_listing(
                 source_assistance_listing, target_assistance_listing
             )
-            self.db_session.add(transformed_assistance_listing)
+            self.db_session.merge(transformed_assistance_listing)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
@@ -240,13 +240,16 @@ class TransformOracleDataTask(Task):
 
 
 def transform_opportunity(
-    source_opportunity: Topportunity, target_opportunity: Opportunity | None
+    source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
     log_extra = {"opportunity_id": source_opportunity.opportunity_id}
 
-    if target_opportunity is None:
+    if existing_opportunity is None:
         logger.info("Creating new opportunity record", extra=log_extra)
-        target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+
+    # We always create a new opportunity record here and merge it in the calling function
+    # this way if there is any error doing the transformation, we don't modify the existing one.
+    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle
@@ -279,26 +282,27 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
     if value is None or value == "":
         return None
 
-    transformed_value = OPPORTUNITY_CATEGORY_MAP.get(value)
-
-    if transformed_value is None:
+    if value not in OPPORTUNITY_CATEGORY_MAP:
         raise ValueError("Unrecognized opportunity category: %s" % value)
 
-    return transformed_value
+    return OPPORTUNITY_CATEGORY_MAP[value]
 
 
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
-    target_assistance_listing: OpportunityAssistanceListing | None,
+    existing_assistance_listing: OpportunityAssistanceListing | None,
 ) -> OpportunityAssistanceListing:
     log_extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
 
-    if target_assistance_listing is None:
+    if existing_assistance_listing is None:
         logger.info("Creating new assistance listing record", extra=log_extra)
-        target_assistance_listing = OpportunityAssistanceListing(
-            opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
-            opportunity_id=source_assistance_listing.opportunity_id,
-        )
+
+    # We always create a new assistance listing record here and merge it in the calling function
+    # this way if there is any error doing the transformation, we don't modify the existing one.
+    target_assistance_listing = OpportunityAssistanceListing(
+        opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
+        opportunity_id=source_assistance_listing.opportunity_id,
+    )
 
     target_assistance_listing.assistance_listing_number = source_assistance_listing.cfdanumber
     target_assistance_listing.program_title = source_assistance_listing.programtitle
