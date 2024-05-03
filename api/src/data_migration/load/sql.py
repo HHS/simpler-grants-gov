@@ -56,9 +56,11 @@ def build_update_sql(
         .values(dict(source_table.columns))
         # `WHERE ...`
         .where(
+            sqlalchemy.tuple_(*destination_table.primary_key.columns)
+            == sqlalchemy.tuple_(*source_table.primary_key.columns),
             sqlalchemy.tuple_(*destination_table.primary_key.columns).in_(
                 sqlalchemy.select(*cte.columns)
-            )
+            ),
         )
     )
 
