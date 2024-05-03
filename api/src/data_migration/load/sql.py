@@ -34,6 +34,9 @@ def build_update_sql(
     source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
 ) -> sqlalchemy.Update:
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
+
+    # Optimization: use a Common Table Expression (`WITH`) marked as MATERIALIZED. This directs the PostgreSQL
+    # optimizer to run it first (prevents folding it into the parent query).
     cte = (
         sqlalchemy.select(*destination_table.primary_key.columns)
         .join(
@@ -53,7 +56,9 @@ def build_update_sql(
         .values(dict(source_table.columns))
         # `WHERE ...`
         .where(
-            sqlalchemy.tuple_(*destination_table.primary_key.columns).in_(sqlalchemy.select(cte.c))
+            sqlalchemy.tuple_(*destination_table.primary_key.columns).in_(
+                sqlalchemy.select(*cte.columns)
+            )
         )
     )
 

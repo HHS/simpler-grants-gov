@@ -74,9 +74,6 @@ class LoadOracleDataTask(src.task.task.Task):
         foreign_table = self.foreign_tables[table_name]
         staging_table = self.staging_tables[table_name]
 
-        if table_name == "tfundactcat_forecast":
-            raise RuntimeError("injected error")
-
         self.log_row_count("row count before", foreign_table, staging_table)
 
         self.do_update(foreign_table, staging_table)
