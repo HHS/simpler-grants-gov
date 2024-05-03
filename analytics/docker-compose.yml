@@ -26,5 +26,14 @@ services:
     depends_on:
       - grants-analytics-db
 
+  grants-metabase:
+    image: metabase/metabase:latest
+    container_name: grants-metabase
+    volumes:
+    - /dev/urandom:/dev/random:ro
+    ports:
+      - 3000:3000
+    env_file: ./local.env
+
 volumes:
   grantsanalyticsdbdata:
