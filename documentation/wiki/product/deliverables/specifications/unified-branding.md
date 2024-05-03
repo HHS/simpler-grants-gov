@@ -112,11 +112,11 @@ A set of activities that use the audit, brand behaviors, and key messaging frame
 
 **Description**
 
-Develop a final brand identity and all the associated assets, templates, and guidelines.
+Develop a final brand identity and specified associated assets, templates, and guidelines.
 
 **Goals**
 
-* Deliver a final brand guidelines and all the associated assets and rules
+* Deliver a final brand guidelines and specified associated assets and rules
 * Gain alignment from all key stakeholders on the brand direction&#x20;
 
 ### Definition of done
@@ -142,12 +142,6 @@ Following sections describe the conditions that must be met to consider this del
   * [ ] Final visual direction presentation and documentation
   * [ ] Final visual identity system, including color, typography, logo, templates, assets, comms materials, illustrations and photography accessible and usable by intended stakeholders
   * [ ] Final brand identity presentation and documentation
-  * [ ] Exact method of measurement for proposed metrics to be designed, determined, and implemented
-
-### Proposed metrics
-
-* Send a survey link to at least 10 HHS stakeholders to measure brand recognition, impact, how easy it is to use new tools and guidelines
-* Method to measure the usability of the brand in the grants process itself, such as accessible colors and ranking of key message&#x20;
 
 ## Planning
 
@@ -224,7 +218,7 @@ If so, how are we addressing these risks?
 
 Major updates to the content of this page will be added here.
 
-<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>4/30/24</td><td>Agreed with HHS Project leadership to descope brand metrics &#x26; potentially narrowing the required Brand identity assets to be developed. </td><td>Scope reduction is with the goal of <em>hopefully</em> keeping scope within range to be completed by May 14th. If additional review cycles are necessary to achieve a visual direction that project leadership is confident in, delivery of final presentations and brand identity assets will extend past Sprint 23.  </td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
 
 ### Implementation log
 
