@@ -93,10 +93,10 @@ def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
+    opportunity: Opportunity,
     is_delete: bool = False,
     is_already_processed: bool = False,
     source_values: dict | None = None,
-    opportunity: Opportunity | None = None,
 ):
     if source_values is None:
         source_values = {}
@@ -112,17 +112,13 @@ def setup_synopsis_forecast(
         else:
             factory_cls = StagingTsynopsisHistFactory
 
-    # TODO - don't think we need this added complexity - not a possible scenario here
-    # If you don't provide an opportunity, you need to provide an ID
-    if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
-
     if revision_number is not None:
         source_values["revision_number"] = revision_number
 
     source_summary = factory_cls.create(
         **source_values,
         opportunity=None,  # To override the factory trying to create something
+        opportunity_id=opportunity.opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
     )
