@@ -47,6 +47,9 @@ def destination_table(sqlalchemy_metadata):
 def create_tables(db_client, sqlalchemy_metadata, source_table, destination_table):
     with db_client.get_connection() as conn, conn.begin():
         sqlalchemy_metadata.create_all(bind=conn)
+    yield
+    with db_client.get_connection() as conn, conn.begin():
+        sqlalchemy_metadata.drop_all(bind=conn)
 
 
 @freezegun.freeze_time()

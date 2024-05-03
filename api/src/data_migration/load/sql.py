@@ -34,6 +34,18 @@ def build_update_sql(
     source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
 ) -> sqlalchemy.Update:
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
+    cte = (
+        sqlalchemy.select(*destination_table.primary_key.columns)
+        .join(
+            source_table,
+            sqlalchemy.tuple_(*destination_table.primary_key.columns)
+            == sqlalchemy.tuple_(*source_table.primary_key.columns),
+        )
+        .where(destination_table.c.last_upd_date < source_table.c.last_upd_date)
+        .cte("update_pks")
+        .prefix_with("MATERIALIZED")
+    )
+
     return (
         # `UPDATE <destination_table>`
         sqlalchemy.update(destination_table)
@@ -41,9 +53,7 @@ def build_update_sql(
         .values(dict(source_table.columns))
         # `WHERE ...`
         .where(
-            sqlalchemy.tuple_(*destination_table.primary_key.columns)
-            == sqlalchemy.tuple_(*source_table.primary_key.columns),
-            destination_table.c.last_upd_date < source_table.c.last_upd_date,
+            sqlalchemy.tuple_(*destination_table.primary_key.columns).in_(sqlalchemy.select(cte.c))
         )
     )
 

@@ -62,12 +62,20 @@ def test_build_insert_select_sql(source_table, destination_table):
 def test_build_update_sql(source_table, destination_table):
     update = sql.build_update_sql(source_table, destination_table)
     assert str(update) == (
+        "WITH update_pks AS MATERIALIZED \n"
+        "(SELECT test_destination_table.id1 AS id1, test_destination_table.id2 AS id2 \n"
+        "FROM test_destination_table "
+        "JOIN test_source_table "
+        "ON (test_destination_table.id1, test_destination_table.id2) = "
+        "(test_source_table.id1, test_source_table.id2) \n"
+        "WHERE test_destination_table.last_upd_date < "
+        "test_source_table.last_upd_date)\n "
         "UPDATE test_destination_table "
         "SET id1=test_source_table.id1, id2=test_source_table.id2, x=test_source_table.x, "
         "last_upd_date=test_source_table.last_upd_date FROM test_source_table "
-        "WHERE (test_destination_table.id1, test_destination_table.id2) = "
-        "(test_source_table.id1, test_source_table.id2) "
-        "AND test_destination_table.last_upd_date < test_source_table.last_upd_date"
+        "WHERE (test_destination_table.id1, test_destination_table.id2) "
+        "IN (SELECT update_pks.id1, update_pks.id2 \n"
+        "FROM update_pks)"
     )
 
 
