@@ -311,15 +311,6 @@ def validate_opportunity_summary(
         source_summary, opportunity_summary, matching_fields, expect_values_to_match
     )
 
-    """
-    TODO - validate these fields
-    is_cost_sharing
-    expected_number_of_awards
-    estimated_total_program_funding
-    award_floor
-    award_ceiling
-    sendmail
-    """
     assert opportunity_summary.is_deleted == is_deleted
 
 
