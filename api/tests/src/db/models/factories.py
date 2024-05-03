@@ -783,12 +783,6 @@ class StagingTsynopsisFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
-        # Trait to set all nullable fields to None
-        all_fields_null = factory.Trait(
-            # TODO
-            posting_date=None
-        )
-
 
 class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
     class Meta:
@@ -800,12 +794,6 @@ class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
-        # Trait to set all nullable fields to None
-        all_fields_null = factory.Trait(
-            # TODO
-            posting_date=None
         )
 
 
@@ -884,12 +872,6 @@ class StagingTforecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
-        # Trait to set all nullable fields to None
-        all_fields_null = factory.Trait(
-            # TODO
-            posting_date=None
-        )
-
 
 class StagingTforecastHistFactory(StagingTforecastFactory):
     class Meta:
@@ -901,12 +883,6 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
-        # Trait to set all nullable fields to None
-        all_fields_null = factory.Trait(
-            # TODO
-            posting_date=None
         )
 
 

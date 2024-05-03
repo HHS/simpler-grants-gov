@@ -263,13 +263,13 @@ def convert_numeric_str_to_int(value: str | None) -> int | None:
     if value is None or value == "":
         return None
 
-    if value.isnumeric():
+    try:
         return int(value)
-
-    # From what we've found in the legacy data, some of these numeric strings
-    # are written out as "none", "not available", "n/a" or similar. All of these
-    # we're fine with collectively treating as null-equivalent
-    return None
+    except ValueError:
+        # From what we've found in the legacy data, some of these numeric strings
+        # are written out as "none", "not available", "n/a" or similar. All of these
+        # we're fine with collectively treating as null-equivalent
+        return None
 
 
 def get_log_extra_summary(source_summary: SourceSummary) -> dict:

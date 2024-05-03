@@ -96,7 +96,6 @@ def setup_synopsis_forecast(
     is_delete: bool = False,
     is_already_processed: bool = False,
     source_values: dict | None = None,
-    all_fields_null: bool = False,
     opportunity: Opportunity | None = None,
 ):
     if source_values is None:
@@ -126,7 +125,6 @@ def setup_synopsis_forecast(
         opportunity=None,  # To override the factory trying to create something
         is_deleted=is_delete,
         already_transformed=is_already_processed,
-        all_fields_null=all_fields_null,
     )
 
     if create_existing:
