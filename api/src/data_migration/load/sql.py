@@ -12,15 +12,30 @@ def build_insert_select_sql(
 
     all_columns = tuple(c.name for c in source_table.columns)
 
+    # Optimization: use a Common Table Expression (`WITH`) marked as MATERIALIZED. This directs the PostgreSQL
+    # optimizer to run it first (prevents folding it into the parent query), so it only fetches the primary keys and
+    # last_upd_date columns from Oracle to perform the date comparison. Without this materialized CTE, it fetches all
+    # columns and all rows from Oracle before applying the WHERE, which is very slow for large tables.
+    #
+    # See https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-CTE-MATERIALIZATION
+    cte = (
+        sqlalchemy.select(*source_table.primary_key.columns)
+        .where(
+            # `WHERE (id1, id2, id3, ...) NOT IN`    (id1, id2, ... is the multipart primary key)
+            sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
+                # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
+                sqlalchemy.select(*destination_table.primary_key.columns)
+            )
+        )
+        .cte("insert_pks")
+        .prefix_with("MATERIALIZED")
+    )
+
     # `SELECT col1, col2, ..., FALSE AS is_deleted FROM <source_table>`
     select_sql = sqlalchemy.select(
         source_table, sqlalchemy.literal_column("FALSE").label("is_deleted")
     ).where(
-        # `WHERE (id1, id2, id3, ...) NOT IN`    (id1, id2, ... is the multipart primary key)
-        sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
-            # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
-            sqlalchemy.select(*destination_table.primary_key.columns)
-        )
+        sqlalchemy.tuple_(*source_table.primary_key.columns).in_(sqlalchemy.select(*cte.columns)),
     )
     # `INSERT INTO <destination_table> (col1, col2, ..., is_deleted) SELECT ...`
     insert_from_select_sql = sqlalchemy.insert(destination_table).from_select(
@@ -36,7 +51,11 @@ def build_update_sql(
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
 
     # Optimization: use a Common Table Expression (`WITH`) marked as MATERIALIZED. This directs the PostgreSQL
-    # optimizer to run it first (prevents folding it into the parent query).
+    # optimizer to run it first (prevents folding it into the parent query), so it only fetches the primary keys and
+    # last_upd_date columns from Oracle to perform the date comparison. Without this materialized CTE, it fetches all
+    # columns and all rows from Oracle before applying the WHERE, which is very slow for large tables.
+    #
+    # See https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-CTE-MATERIALIZATION
     cte = (
         sqlalchemy.select(*destination_table.primary_key.columns)
         .join(

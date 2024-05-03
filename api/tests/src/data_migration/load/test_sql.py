@@ -41,21 +41,33 @@ def destination_table(sqlalchemy_metadata):
 def test_build_insert_select_sql(source_table, destination_table):
     insert, select = sql.build_insert_select_sql(source_table, destination_table)
     assert str(insert) == (
+        "WITH insert_pks AS MATERIALIZED \n"
+        "(SELECT test_source_table.id1 AS id1, test_source_table.id2 AS id2 \n"
+        "FROM test_source_table \n"
+        "WHERE ((test_source_table.id1, test_source_table.id2) "
+        "NOT IN (SELECT test_destination_table.id1, test_destination_table.id2 \n"
+        "FROM test_destination_table)))\n "
         "INSERT INTO test_destination_table (id1, id2, x, last_upd_date, is_deleted) "
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
         "test_source_table.last_upd_date, FALSE AS is_deleted \n"
         "FROM test_source_table \n"
-        "WHERE ((test_source_table.id1, test_source_table.id2) NOT IN "
-        "(SELECT test_destination_table.id1, test_destination_table.id2 \n"
-        "FROM test_destination_table))"
+        "WHERE (test_source_table.id1, test_source_table.id2) IN "
+        "(SELECT insert_pks.id1, insert_pks.id2 \n"
+        "FROM insert_pks)"
     )
     assert str(select) == (
+        "WITH insert_pks AS MATERIALIZED \n"
+        "(SELECT test_source_table.id1 AS id1, test_source_table.id2 AS id2 \n"
+        "FROM test_source_table \n"
+        "WHERE ((test_source_table.id1, test_source_table.id2) "
+        "NOT IN (SELECT test_destination_table.id1, test_destination_table.id2 \n"
+        "FROM test_destination_table)))\n "
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
         "test_source_table.last_upd_date, FALSE AS is_deleted \n"
         "FROM test_source_table \n"
-        "WHERE ((test_source_table.id1, test_source_table.id2) NOT IN "
-        "(SELECT test_destination_table.id1, test_destination_table.id2 \n"
-        "FROM test_destination_table))"
+        "WHERE (test_source_table.id1, test_source_table.id2) IN "
+        "(SELECT insert_pks.id1, insert_pks.id2 \n"
+        "FROM insert_pks)"
     )
 
 
