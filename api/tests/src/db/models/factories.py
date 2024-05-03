@@ -32,6 +32,13 @@ from src.constants.lookup_constants import (
 )
 
 
+def sometimes_none(factory_value, none_chance: float = 0.5):
+    if random.random() > none_chance:
+        return factory_value
+
+    return None
+
+
 class CustomProvider(BaseProvider):
     """
     This class is a custom faker provider that can be used to generate
@@ -275,6 +282,12 @@ class OpportunityFactory(BaseFactory):
             category_explanation=None,
             current_opportunity_summary=None,
             opportunity_assistance_listings=None,
+        )
+
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
         )
 
 
@@ -598,24 +611,36 @@ class StagingTopportunityFactory(BaseFactory):
     # only set the category explanation if category is Other
     category_explanation = factory.Maybe(
         decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
-        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
+        yes_declaration=factory.Faker("sentence", nb_words=5),
         no_declaration=None,
     )
 
-    is_draft = "N"  # Because we filter out drafts, just default these to False
+    is_draft = factory.fuzzy.FuzzyChoice(["N", "S"])
 
-    revision_number = 0
+    revision_number = factory.Faker("random_int", min=1, max=10)
 
-    created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
-    last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
 
+    # Default to being a new insert/update
     is_deleted = False
     transformed_at = None
 
     class Params:
-        never_updated = factory.Trait(last_upd_date=None)
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            oppnumber=None,
+            revision_number=None,
+            opptitle=None,
+            owningagency=None,
+            oppcategory=None,
+            category_explanation=None,
         )
 
 
@@ -631,7 +656,7 @@ class TransferTopportunityFactory(BaseFactory):
     opportunity_id = factory.Sequence(lambda n: n)
 
     oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+    opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
 
     owningagency = factory.Faker("agency")
 

@@ -42,6 +42,7 @@ pydot = "1.4.2"
 sadisplay = "0.4.9"
 ruff = "^0.4.0"
 debugpy = "^1.8.1"
+freezegun = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
