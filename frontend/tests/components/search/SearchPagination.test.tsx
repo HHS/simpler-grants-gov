@@ -24,7 +24,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
-        type={PaginationType.Top}
+        position={PaginationType.Top}
       />,
     );
     const results = await axe(container, {
@@ -44,7 +44,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
-        type={PaginationType.Top}
+        position={PaginationType.Top}
       />,
     );
 
@@ -59,7 +59,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
-        type={PaginationType.Top}
+        position={PaginationType.Top}
       />,
     );
     expect(screen.queryByTestId("hiddenCurrentPage")).not.toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
-        type={PaginationType.Top}
+        position={PaginationType.Top}
       />,
     );
     fireEvent.click(screen.getByLabelText("Next page"));
@@ -86,7 +86,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={2} // Set to second page to test going back to first page
         handlePageChange={mockHandlePageChange}
-        type={PaginationType.Top}
+        position={PaginationType.Top}
       />,
     );
     fireEvent.click(screen.getByLabelText("Previous page"));

@@ -14,7 +14,7 @@ interface SearchPaginationProps {
   page: number;
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
-  type: PaginationType;
+  position: PaginationType;
 }
 
 const MAX_SLOTS = 5;
@@ -25,11 +25,11 @@ export default function SearchPagination({
   page,
   handlePageChange,
   paginationRef,
-  type,
+  position,
 }: SearchPaginationProps) {
   const { pending } = useFormStatus();
 
-  if (pending && type === PaginationType.Bottom) {
+  if (pending && position === PaginationType.Bottom) {
     return null;
   }
   return (

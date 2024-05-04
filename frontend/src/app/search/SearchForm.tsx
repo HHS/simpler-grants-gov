@@ -97,7 +97,7 @@ export function SearchForm({
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
                   paginationRef={topPaginationRef}
-                  type={PaginationType.Top}
+                  position={PaginationType.Top}
                 />
               ) : null}
 
@@ -112,7 +112,7 @@ export function SearchForm({
                   totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
-                  type={PaginationType.Bottom}
+                  position={PaginationType.Bottom}
                 />
               ) : null}
             </div>
