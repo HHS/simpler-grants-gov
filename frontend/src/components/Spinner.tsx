@@ -2,8 +2,8 @@ import React from "react";
 
 const Spinner = () => (
   <svg
-    width="24"
-    height="24"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >

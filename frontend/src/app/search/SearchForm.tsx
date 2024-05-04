@@ -1,5 +1,9 @@
 "use client";
 
+import SearchPagination, {
+  PaginationType,
+} from "../../components/search/SearchPagination";
+
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
@@ -9,7 +13,6 @@ import SearchFilterCategory from "../../components/search/SearchFilterCategory";
 import SearchFilterEligibility from "../../components/search/SearchFilterEligibility";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
-import SearchPagination from "../../components/search/SearchPagination";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
 import { useSearchFormState } from "../../hooks/useSearchFormState";
@@ -94,6 +97,7 @@ export function SearchForm({
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
                   paginationRef={topPaginationRef}
+                  type={PaginationType.Top}
                 />
               ) : null}
 
@@ -108,6 +112,7 @@ export function SearchForm({
                   totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
+                  type={PaginationType.Bottom}
                 />
               ) : null}
             </div>

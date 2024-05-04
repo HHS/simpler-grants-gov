@@ -3,9 +3,11 @@ import Spinner from "../../components/Spinner";
 
 export default function Loading() {
   return (
-    <div className="usa-flex usa-align-center">
+    <div className="display-flex flex-align-center flex-justify-center margin-bottom-15 margin-top-15">
       <Spinner />
-      <span className="margin-left-3 bold">Loading results...</span>
+      <span className="font-body-2xl text-bold margin-left-2">
+        Loading results...
+      </span>
     </div>
   );
 }

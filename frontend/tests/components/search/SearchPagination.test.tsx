@@ -1,9 +1,11 @@
 import "@testing-library/jest-dom";
 
+import SearchPagination, {
+  PaginationType,
+} from "../../../src/components/search/SearchPagination";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import React from "react";
-import SearchPagination from "../../../src/components/search/SearchPagination";
 import { axe } from "jest-axe";
 
 describe("SearchPagination", () => {
@@ -22,6 +24,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
+        type={PaginationType.Top}
       />,
     );
     const results = await axe(container, {
@@ -41,6 +44,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
+        type={PaginationType.Top}
       />,
     );
 
@@ -55,6 +59,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
+        type={PaginationType.Top}
       />,
     );
     expect(screen.queryByTestId("hiddenCurrentPage")).not.toBeInTheDocument();
@@ -67,6 +72,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
+        type={PaginationType.Top}
       />,
     );
     fireEvent.click(screen.getByLabelText("Next page"));
@@ -80,6 +86,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={2} // Set to second page to test going back to first page
         handlePageChange={mockHandlePageChange}
+        type={PaginationType.Top}
       />,
     );
     fireEvent.click(screen.getByLabelText("Previous page"));
