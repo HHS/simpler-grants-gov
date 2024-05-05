@@ -91,4 +91,17 @@ describe("SearchPagination", () => {
     fireEvent.click(screen.getByLabelText("Previous page"));
     expect(mockHandlePageChange).toHaveBeenCalledWith(1);
   });
+
+  it("returns null when searchResultsLength is less than 1", () => {
+    const { container } = render(
+      <SearchPagination
+        showHiddenInput={true}
+        totalPages={totalPages}
+        page={page}
+        handlePageChange={mockHandlePageChange}
+        searchResultsLength={0} // No results, pagination should be hidden
+      />,
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
 });
