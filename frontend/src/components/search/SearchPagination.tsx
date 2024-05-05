@@ -8,6 +8,7 @@ interface SearchPaginationProps {
   page: number;
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
+  searchResultsLength: number;
 }
 
 const MAX_SLOTS = 5;
@@ -18,7 +19,12 @@ export default function SearchPagination({
   page,
   handlePageChange,
   paginationRef,
+  searchResultsLength,
 }: SearchPaginationProps) {
+  if (searchResultsLength < 1) {
+    return null;
+  }
+
   return (
     <>
       {showHiddenInput === true && (
