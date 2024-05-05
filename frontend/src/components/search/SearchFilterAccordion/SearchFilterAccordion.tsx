@@ -116,7 +116,7 @@ export function SearchFilterAccordion({
       content: getAccordionContent(),
       expanded: false,
       id: "funding-instrument-filter",
-      headingLevel: "h4",
+      headingLevel: "h2",
     },
   ];
 
