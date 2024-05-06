@@ -48,7 +48,7 @@ Sentry is a frontend-focused APM (application performance monitoring) platform t
   - Great UX
 - **Cons**
   - Not a fully featured platform
- 
+
 ### Datadog
 
 Datadog is a fully featured platform with support for logging, metrics dashboards, and APM. Several members of our team have prior experience with Datadog. Datadog excels in the market, is listed on [FedRAMP](https://marketplace.fedramp.gov/products), and would be an excellent choice of platform. It has fantastic UX, for both backend and frontend applications. The only "flaw" is that, at a high level, Datadog's product offering is hard to distinguish from New Relic's. The bulk of this paragraph is copied into the New Relic description, to emphasize that point.
@@ -65,7 +65,7 @@ Grants.gov used Datadog in the past and then decided to move to Cloudwatch, due 
   - Best for API-driven applications
 - **Cons**
   - Likely more expensive than its closest competitor
- 
+
 Links:
 - [Pricing](https://www.datadoghq.com/pricing/)
 
@@ -86,7 +86,7 @@ New Relic was built around its APM capability, so it will have better capabiliti
 
 Links:
 - [Pricing](https://newrelic.com/pricing)
- 
+
 ### Splunk
 
 Splunk is a fully featured platform with support for logging, metrics dashboards, and APM. At least one member of our current team has used Splunk, and would not recommend it. Splunk is listed on [FedRAMP](https://marketplace.fedramp.gov/products), and would likely be a good choice of platform. There are some notable high-level differences between Splunk and [New Relic or Datadog]. Splunk is a fully featured platform yes, but at its core, it's an enterprise data-driven platform. Splunk is best at helping understand data flow in large and complex applications. Simpler.grants.gov is not a data-driven platform and is not looking to reach an "enterprise application" scale. Therefore, Splunk's core product offering would likely be slightly mismatched for our needs, despite being outwardly very similar to [New Relic or Datadog].
@@ -112,4 +112,4 @@ Grafana is a fully open-source metrics platform that comes with other services t
 
 Having collected all this information, it is the opinion of the author that both New Relic and Datadog would be strong choices. New Relic is the safer option due to its less complex pricing scheme. Datadog is more likely to have niche features that we find incredibly valuable (like public dashboards). We should move forward from here with a New Relic trial, and consider an additional Datadog trial if New Relic turns out non-ideal in some way.
 
-Here are some blog posts comparing Datadog with New Relic. This ADR is generally aligned with the contents of these posts. [1](https://betterstack.com/community/comparisons/datadog-vs-newrelic/) [2](https://sematext.com/blog/datadog-vs-new-relic/) [3](https://www.upguard.com/blog/datadog-vs-newrelic) [4](https://signoz.io/blog/datadog-vs-newrelic/) 
+Here are some blog posts comparing Datadog with New Relic. This ADR is generally aligned with the contents of these posts. [1](https://betterstack.com/community/comparisons/datadog-vs-newrelic/) [2](https://sematext.com/blog/datadog-vs-new-relic/) [3](https://www.upguard.com/blog/datadog-vs-newrelic) [4](https://signoz.io/blog/datadog-vs-newrelic/)

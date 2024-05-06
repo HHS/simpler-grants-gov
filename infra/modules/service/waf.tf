@@ -201,6 +201,34 @@ resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
   ]
 }
 
+resource "aws_cloudwatch_log_resource_policy" "WafWebAclLoggingPolicy" {
+  policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc.json
+  policy_name     = "service-webacl-policy"
+}
+
+# Policy from terraform docs
+data "aws_iam_policy_document" "WafWebAclLoggingDoc" {
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.WafWebAclLoggroup.arn}:*"]
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+      variable = "aws:SourceArn"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [tostring(data.aws_caller_identity.current.account_id)]
+      variable = "aws:SourceAccount"
+    }
+  }
+}
+
 # Associate WAF with load balancer
 resource "aws_wafv2_web_acl_association" "WafWebAclAssociation" {
   resource_arn = aws_lb.alb.arn

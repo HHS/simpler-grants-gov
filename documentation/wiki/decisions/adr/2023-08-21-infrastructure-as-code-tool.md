@@ -1,4 +1,4 @@
-# Infrastructure as Code Tool 
+# Infrastructure as Code Tool
 
 - **Status:** Accepted
 - **Last Modified:** 2023-07-14 <!-- REQUIRED -->
@@ -10,7 +10,7 @@
 
 Infrastructure as Code (IaC) is the process of using code to manage hosting infrastructure. IaC is desirable because it produces more efficient, reproducable, readable, and interoperable deployment workflows.
 
-IaC tools often have overlapping feature-sets and strategies, however they can be broadly characterized by provisioning versus configuration, mutable versus immutable, and procedural versus declarative. A tool or set of tools should should be selected for the project in order to best facilitate change management. 
+IaC tools often have overlapping feature-sets and strategies, however they can be broadly characterized by provisioning versus configuration, mutable versus immutable, and procedural versus declarative. A tool or set of tools should should be selected for the project in order to best facilitate change management.
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
@@ -25,7 +25,7 @@ IaC tools often have overlapping feature-sets and strategies, however they can b
 - Terraform with Docker
 - CloudFormation with Docker
 - Cloud Development Kit with Docker
-- Chef with Ansible 
+- Chef with Ansible
 
 ## Decision Outcome <!-- REQUIRED -->
 
@@ -80,7 +80,7 @@ The project will use Terraform with Docker for provisioning infrastructure and c
   - Engineers on the team and supporting instutions have low level of experience with the tool.
 
 
-### Chef with Ansible 
+### Chef with Ansible
 
 - **Pros**
   - Chef and Ansible are open source, interoperable, widely adopted, and well-documented.
