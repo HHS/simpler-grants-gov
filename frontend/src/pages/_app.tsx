@@ -1,7 +1,7 @@
 import "../styles/styles.scss";
 
 import type { AppProps } from "next/app";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import Head from "next/head";
 import Layout from "../components/Layout";
 import { PUBLIC_ENV } from "src/constants/environments";
