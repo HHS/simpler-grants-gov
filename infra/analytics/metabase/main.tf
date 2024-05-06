@@ -78,6 +78,16 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
+data "aws_iam_policy" "app_db_access_policy" {
+  count = module.app_config.has_database ? 1 : 0
+  name  = local.database_config.app_access_policy_name
+}
+
+data "aws_iam_policy" "migrator_db_access_policy" {
+  count = module.app_config.has_database ? 1 : 0
+  name  = local.database_config.migrator_access_policy_name
+}
+
 module "service" {
   source                   = "../../modules/service"
   service_name             = local.service_name
@@ -108,9 +118,15 @@ module "service" {
     },
   ]
   db_vars = {
-    security_group_ids = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+    security_group_ids         = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
+    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
     connection_info = {
-      port = data.aws_rds_cluster.db_cluster.port
+      host        = data.aws_rds_cluster.db_cluster.endpoint
+      port        = data.aws_rds_cluster.db_cluster.port
+      user        = local.database_config.app_username
+      db_name     = data.aws_rds_cluster.db_cluster.database_name
+      schema_name = local.database_config.schema_name
     }
   }
   is_temporary = false
