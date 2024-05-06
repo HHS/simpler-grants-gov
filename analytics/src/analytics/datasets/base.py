@@ -4,6 +4,7 @@ from typing import Self
 
 import pandas as pd
 
+from sqlalchemy import Engine
 
 class BaseDataset:
     """Base class for all datasets."""
@@ -21,6 +22,16 @@ class BaseDataset:
     def from_dict(cls, data: list[dict]) -> Self:
         """Load the dataset from a list of python dictionaries representing records."""
         return cls(df=pd.DataFrame(data))
+    
+    def to_sql(
+        self,
+        output_table: str,
+          # to be updated: force include_index to be passed as keyword instead of positional arg
+        engine: Engine
+        
+    ) -> None:
+        """Export the dataset to a csv."""
+        return self.df.to_sql(output_table, engine)
 
     def to_csv(
         self,

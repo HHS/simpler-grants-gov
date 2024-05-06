@@ -11,6 +11,7 @@ TEST_DATA = [
     {"Col A": 3, "Col b": "Three"},
 ]
 
+#add a test for sql
 
 def test_to_and_from_csv(tmp_path: Path):
     """BaseDataset should write to csv with to_csv() and load from a csv with from_csv()."""
