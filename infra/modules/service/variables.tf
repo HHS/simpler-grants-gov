@@ -145,7 +145,7 @@ variable "readonly_root_filesystem" {
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "healthcheck_command" {
