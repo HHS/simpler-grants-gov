@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <Layout>
         <Component {...pageProps} />
-        <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_MANAGER_ID} />
+        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       </Layout>
     </>
   );
