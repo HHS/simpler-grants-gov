@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 
 import SearchPagination, {
-  PaginationType,
+  PaginationPosition,
 } from "../../../src/components/search/SearchPagination";
 import { render, screen } from "@testing-library/react";
 
@@ -48,7 +48,7 @@ describe("SearchPagination", () => {
         totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
-        position={PaginationType.Top}
+        position={PaginationPosition.Top}
       />,
     );
 

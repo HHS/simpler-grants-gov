@@ -1,7 +1,7 @@
 "use client";
 
 import SearchPagination, {
-  PaginationType,
+  PaginationPosition,
 } from "../../components/search/SearchPagination";
 
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
@@ -97,7 +97,7 @@ export function SearchForm({
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
                   paginationRef={topPaginationRef}
-                  position={PaginationType.Top}
+                  position={PaginationPosition.Top}
                 />
               ) : null}
 
@@ -112,7 +112,7 @@ export function SearchForm({
                   totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
-                  position={PaginationType.Bottom}
+                  position={PaginationPosition.Bottom}
                 />
               ) : null}
             </div>

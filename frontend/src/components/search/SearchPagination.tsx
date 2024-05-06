@@ -3,7 +3,7 @@
 import { Pagination } from "@trussworks/react-uswds";
 import { useFormStatus } from "react-dom";
 
-export enum PaginationType {
+export enum PaginationPosition {
   Top = "topPagination",
   Bottom = "bottomPagination",
 }
@@ -14,7 +14,7 @@ interface SearchPaginationProps {
   page: number;
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
-  position: PaginationType;
+  position: PaginationPosition;
 }
 
 const MAX_SLOTS = 5;
@@ -29,7 +29,7 @@ export default function SearchPagination({
 }: SearchPaginationProps) {
   const { pending } = useFormStatus();
 
-  if (pending && position === PaginationType.Bottom) {
+  if (pending && position === PaginationPosition.Bottom) {
     return null;
   }
   return (
