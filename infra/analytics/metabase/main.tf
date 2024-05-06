@@ -78,20 +78,10 @@ data "aws_rds_cluster" "db_cluster" {
   cluster_identifier = local.database_config.cluster_name
 }
 
-data "aws_iam_policy" "app_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.app_access_policy_name
-}
-
-data "aws_iam_policy" "migrator_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.migrator_access_policy_name
-}
-
 module "service" {
   source                   = "../../modules/service"
   service_name             = local.service_name
-  image_repository_name    = "docker.io/metabase/metabase"
+  image_repository_url     = "docker.io/metabase/metabase"
   image_tag                = local.image_tag
   vpc_id                   = data.aws_vpc.network.id
   public_subnet_ids        = data.aws_subnets.public.ids
@@ -101,6 +91,8 @@ module "service" {
   container_port           = 3000
   readonly_root_filesystem = false
   drop_linux_capabilities  = false
+  healthcheck_command      = null
+  healthcheck_path         = "/"
   extra_environment_variables = {
     MB_DB_TYPE   = "postgres"
     MB_DB_DBNAME = "metabase"
@@ -119,8 +111,8 @@ module "service" {
   ]
   db_vars = {
     security_group_ids         = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
-    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+    app_access_policy_arn      = null
+    migrator_access_policy_arn = null
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster.endpoint
       port        = data.aws_rds_cluster.db_cluster.port

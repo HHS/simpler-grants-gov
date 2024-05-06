@@ -11,9 +11,16 @@ variable "image_tag" {
   description = "The tag of the image to deploy"
 }
 
+variable "image_repository_url" {
+  type        = string
+  description = "The full URL of the container image repository, used instead of image_repository_name if set."
+  default     = null
+}
+
 variable "image_repository_name" {
   type        = string
   description = "The name of the container image repository"
+  default     = null
 }
 
 variable "desired_instance_count" {
@@ -139,4 +146,19 @@ variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
   default     = false
+}
+
+variable "healthcheck_command" {
+  description = "The command to run to check the health of the container, used on the container health check"
+  type        = list(string)
+  default = [
+    "CMD-SHELL",
+    "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1"
+  ]
+}
+
+variable "healthcheck_path" {
+  description = "The path to check the health of the container, used on the load balancer health check"
+  type        = string
+  default     = "/health"
 }
