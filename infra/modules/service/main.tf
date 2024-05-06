@@ -1,7 +1,8 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 data "aws_ecr_repository" "app" {
-  name = var.image_repository_name
+  count = var.image_repository_name != null ? 1 : 0
+  name  = var.image_repository_name
 }
 
 locals {
@@ -10,7 +11,7 @@ locals {
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
-  image_url               = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
+  image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
   base_environment_variables = concat([
@@ -78,19 +79,17 @@ resource "aws_ecs_task_definition" "app" {
       cpu                    = var.cpu,
       networkMode            = "awsvpc",
       essential              = true,
-      readonlyRootFilesystem = true,
+      readonlyRootFilesystem = var.readonly_root_filesystem,
 
       # Need to define all parameters in the healthCheck block even if we want
       # to use AWS's defaults, otherwise the terraform plan will show a diff
       # that will force a replacement of the task definition
-      healthCheck = {
+      healthCheck = var.healthcheck_command != null ? {
         interval = 30,
         retries  = 3,
         timeout  = 5,
-        command = ["CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:${var.container_port}/health || exit 1"
-        ]
-      },
+        command  = var.healthcheck_command
+      } : null,
       environment = local.environment_variables,
       secrets     = local.secrets,
       portMappings = [
@@ -98,12 +97,12 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port,
         }
       ],
-      linuxParameters = {
+      linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
           drop = ["ALL"]
         },
         initProcessEnabled = true
-      },
+      } : null,
       logConfiguration = {
         logDriver = "awslogs",
         options = {
