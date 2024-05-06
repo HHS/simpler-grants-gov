@@ -108,10 +108,10 @@ describe("SearchFilterAccordion", () => {
     );
 
     const accordionToggleButton = screen.getByTestId(
-      "accordionButton_funding-instrument-filter",
+      "accordionButton_funding-instrument-filter-status",
     );
     const contentDiv = screen.getByTestId(
-      "accordionItem_funding-instrument-filter",
+      "accordionItem_funding-instrument-filter-status",
     );
     expect(contentDiv).toHaveAttribute("hidden");
 
