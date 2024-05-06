@@ -68,7 +68,7 @@ const SearchOpportunityStatus: React.FC<SearchOpportunityStatusProps> = ({
 
   return (
     <>
-      <h2 className="margin-bottom-1 font-sans-md">Opportunity status</h2>
+      <h2 className="margin-bottom-1 font-sans-xs">Opportunity status</h2>
       <div className="grid-row flex-wrap">
         {statusOptions.map((option) => (
           <div key={option.id} className="grid-col-6 padding-right-1">
