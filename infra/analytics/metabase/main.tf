@@ -100,7 +100,7 @@ module "service" {
   memory                   = 2048
   container_port           = 3000
   readonly_root_filesystem = false
-  drop_linux_parameters    = false
+  drop_linux_capabilities  = false
   extra_environment_variables = {
     MB_DB_TYPE   = "postgres"
     MB_DB_DBNAME = "metabase"

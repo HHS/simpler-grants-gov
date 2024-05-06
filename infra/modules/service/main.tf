@@ -98,12 +98,12 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port,
         }
       ],
-      linuxParameters = var.drop_linux_parameters ? {
+      linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
           drop = ["ALL"]
         },
         initProcessEnabled = true
-      } : {},
+      } : null,
       logConfiguration = {
         logDriver = "awslogs",
         options = {

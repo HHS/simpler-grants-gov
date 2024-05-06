@@ -135,7 +135,7 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
-variable "drop_linux_parameters" {
+variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
   default     = false
