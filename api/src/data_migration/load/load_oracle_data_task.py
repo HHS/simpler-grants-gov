@@ -16,7 +16,7 @@ from src.util import datetime_util
 
 from . import sql
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger(__name__)
 
 
 class LoadOracleDataTask(src.task.task.Task):
@@ -28,18 +28,24 @@ class LoadOracleDataTask(src.task.task.Task):
         foreign_tables: dict[str, sqlalchemy.Table],
         staging_tables: dict[str, sqlalchemy.Table],
     ) -> None:
+        if foreign_tables.keys() != staging_tables.keys():
+            raise ValueError("keys of foreign_tables and staging_tables must be equal")
+
         super().__init__(db_session)
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
 
     def run_task(self) -> None:
+        """Main task process, called by run()."""
         with self.db_session.begin_nested():
             self.log_database_settings()
         self.load_data()
 
     def log_database_settings(self) -> None:
+        """Log database settings related to foreign tables for easier troubleshooting."""
         metadata = sqlalchemy.MetaData()
         engine = self.db_session.bind
+
         # Use reflection to define built-in views as Table objects.
         foreign_servers = sqlalchemy.Table(
             "foreign_servers", metadata, autoload_with=engine, schema="information_schema"
@@ -61,6 +67,7 @@ class LoadOracleDataTask(src.task.task.Task):
         )
 
     def load_data(self) -> None:
+        """Load the data for all tables defined in the mapping."""
         for table_name in self.foreign_tables:
             try:
                 with self.db_session.begin_nested():
@@ -70,6 +77,7 @@ class LoadOracleDataTask(src.task.task.Task):
                 logger.exception("table load error", extra={"table": table_name})
 
     def load_data_for_table(self, table_name: str) -> None:
+        """Load new and updated rows for a single table from the foreign table to the staging table."""
         logger.info("process table", extra={"table": table_name})
         foreign_table = self.foreign_tables[table_name]
         staging_table = self.staging_tables[table_name]
@@ -146,6 +154,7 @@ class LoadOracleDataTask(src.task.task.Task):
         return delete_count
 
     def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
+        """Log the number of rows in each of the tables using SQL COUNT()."""
         extra = {}
         for table in tables:
             extra[f"count.{table.schema}.{table.name}"] = self.db_session.query(table).count()

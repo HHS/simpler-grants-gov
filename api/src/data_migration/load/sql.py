@@ -18,10 +18,13 @@ def build_insert_select_sql(
     # columns and all rows from Oracle before applying the WHERE, which is very slow for large tables.
     #
     # See https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-CTE-MATERIALIZATION
+
+    # `WITH insert_pks AS MATERIALIZED (`
     cte = (
+        # `SELECT id1, id2, id3, ... FROM <source_table>`    (id1, id2, ... is the multipart primary key)
         sqlalchemy.select(*source_table.primary_key.columns)
         .where(
-            # `WHERE (id1, id2, id3, ...) NOT IN`    (id1, id2, ... is the multipart primary key)
+            # `WHERE (id1, id2, id3, ...) NOT IN`
             sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
                 # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
                 sqlalchemy.select(*destination_table.primary_key.columns)
@@ -35,6 +38,9 @@ def build_insert_select_sql(
     select_sql = sqlalchemy.select(
         source_table, sqlalchemy.literal_column("FALSE").label("is_deleted")
     ).where(
+        # `WHERE (id1, id2, ...)
+        #  IN (SELECT insert_pks.id1, insert_pks.id2
+        #      FROM insert_pks)`
         sqlalchemy.tuple_(*source_table.primary_key.columns).in_(sqlalchemy.select(*cte.columns)),
     )
     # `INSERT INTO <destination_table> (col1, col2, ..., is_deleted) SELECT ...`
@@ -56,13 +62,19 @@ def build_update_sql(
     # columns and all rows from Oracle before applying the WHERE, which is very slow for large tables.
     #
     # See https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-CTE-MATERIALIZATION
+
+    # `WITH update_pks AS MATERIALIZED (`
     cte = (
+        # `SELECT id1, id2, id3, ... FROM <destination_table>`
         sqlalchemy.select(*destination_table.primary_key.columns)
         .join(
+            # `JOIN <source_table>
+            #  ON (id1, id2, ...) = (id1, id2, ...)`
             source_table,
             sqlalchemy.tuple_(*destination_table.primary_key.columns)
             == sqlalchemy.tuple_(*source_table.primary_key.columns),
         )
+        # `WHERE ...`
         .where(destination_table.c.last_upd_date < source_table.c.last_upd_date)
         .cte("update_pks")
         .prefix_with("MATERIALIZED")

@@ -106,3 +106,10 @@ def test_load_data(db_session, source_table, destination_table, create_tables):
         (3, 4, "d+", time2, False, None, None),
         (4, 2, "e", time1, True, None, now),
     )
+
+
+def test_raises_if_table_dicts_different(db_session, source_table, destination_table):
+    with pytest.raises(ValueError, match="keys of foreign_tables and staging_tables must be equal"):
+        load_oracle_data_task.LoadOracleDataTask(
+            db_session, {"table1": source_table}, {"table2": destination_table}
+        )
