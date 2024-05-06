@@ -10,6 +10,7 @@ import "@testing-library/jest-dom";
 // } from "../../../src/components/search/SearchPagination";
 // import { fireEvent, render, screen } from "@testing-library/react";
 
+// TODO (Issue #1936): Uncomment tests after React 19 upgrade
 describe("SearchPagination", () => {
   //   const mockHandlePageChange = jest.fn();
   //   const totalPages = 10;
