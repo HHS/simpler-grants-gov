@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "app" {
       cpu                    = var.cpu,
       networkMode            = "awsvpc",
       essential              = true,
-      readonlyRootFilesystem = true,
+      readonlyRootFilesystem = var.readonly_root_filesystem,
 
       # Need to define all parameters in the healthCheck block even if we want
       # to use AWS's defaults, otherwise the terraform plan will show a diff
@@ -98,12 +98,12 @@ resource "aws_ecs_task_definition" "app" {
           containerPort = var.container_port,
         }
       ],
-      linuxParameters = {
+      linuxParameters = var.drop_linux_parameters ? {
         capabilities = {
           drop = ["ALL"]
         },
         initProcessEnabled = true
-      },
+      } : {},
       logConfiguration = {
         logDriver = "awslogs",
         options = {

@@ -128,3 +128,15 @@ variable "is_temporary" {
   description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
   type        = bool
 }
+
+variable "readonly_root_filesystem" {
+  description = "Whether the container has a read-only root filesystem"
+  type        = bool
+  default     = true
+}
+
+variable "drop_linux_parameters" {
+  description = "Whether to drop linux parameters"
+  type        = bool
+  default     = false
+}
