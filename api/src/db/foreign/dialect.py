@@ -6,6 +6,7 @@
 import re
 
 import sqlalchemy
+import sqlalchemy.dialects.postgresql
 
 
 class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
