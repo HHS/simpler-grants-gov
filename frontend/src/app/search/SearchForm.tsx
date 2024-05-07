@@ -90,29 +90,26 @@ export function SearchForm({
               initialQueryParams={sortbyQueryParams}
             />
             <div className="usa-prose">
-              {searchResults?.data.length >= 1 ? (
-                <SearchPagination
-                  page={page}
-                  handlePageChange={handlePageChange}
-                  showHiddenInput={true}
-                  paginationRef={topPaginationRef}
-                  position={PaginationPosition.Top}
-                />
-              ) : null}
-
+              <SearchPagination
+                page={page}
+                handlePageChange={handlePageChange}
+                showHiddenInput={true}
+                paginationRef={topPaginationRef}
+                position={PaginationPosition.Top}
+                searchResultsLength={searchResults.data.length}
+              />
               <SearchResultsList
                 searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
                 agencyNameLookup={agencyNameLookup}
                 errors={searchResults.errors}
               />
-              {searchResults?.data?.length >= 1 ? (
-                <SearchPagination
-                  page={page}
-                  handlePageChange={handlePageChange}
-                  position={PaginationPosition.Bottom}
-                />
-              ) : null}
+              <SearchPagination
+                page={page}
+                handlePageChange={handlePageChange}
+                position={PaginationPosition.Bottom}
+                searchResultsLength={searchResults.data.length}
+              />
             </div>
           </div>
         </div>

@@ -14,6 +14,7 @@ interface SearchPaginationProps {
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
   position: PaginationPosition;
+  searchResultsLength: number;
 }
 
 const MAX_SLOTS = 5;
@@ -24,12 +25,21 @@ export default function SearchPagination({
   handlePageChange,
   paginationRef,
   position,
+  searchResultsLength,
 }: SearchPaginationProps) {
   const { pending } = useFormStatus();
 
+  // If there's no results, don't show pagination
+  if (searchResultsLength < 1) {
+    return null;
+  }
+
+  // When we're in pending state (updates are being requested)
+  // hide the bottom pagination
   if (pending && position === PaginationPosition.Bottom) {
     return null;
   }
+
   return (
     <>
       {showHiddenInput === true && (
