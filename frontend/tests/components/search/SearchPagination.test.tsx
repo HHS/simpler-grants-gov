@@ -10,7 +10,6 @@ import { render } from "@testing-library/react";
 // TODO (Issue #1936): Uncomment tests after React 19 upgrade
 describe("SearchPagination", () => {
   const mockHandlePageChange = jest.fn();
-  const totalPages = 10;
   const page = 1;
   beforeEach(() => {
     jest.clearAllMocks();
@@ -98,7 +97,6 @@ describe("SearchPagination", () => {
     const { container } = render(
       <SearchPagination
         showHiddenInput={true}
-        totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
         searchResultsLength={0} // No results, pagination should be hidden

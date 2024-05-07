@@ -91,7 +91,6 @@ export function SearchForm({
             />
             <div className="usa-prose">
               <SearchPagination
-                totalPages={searchResults?.pagination_info?.total_pages}
                 page={page}
                 handlePageChange={handlePageChange}
                 showHiddenInput={true}
@@ -106,7 +105,6 @@ export function SearchForm({
                 errors={searchResults.errors}
               />
               <SearchPagination
-                totalPages={searchResults?.pagination_info?.total_pages}
                 page={page}
                 handlePageChange={handlePageChange}
                 position={PaginationPosition.Bottom}
