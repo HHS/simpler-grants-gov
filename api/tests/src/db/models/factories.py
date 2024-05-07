@@ -909,6 +909,9 @@ class StagingTapplicanttypesForecastFactory(BaseFactory):
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
 
+    last_upd_id = factory.Faker("first_name")
+    creator_id = factory.Faker("first_name")
+
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
@@ -946,6 +949,9 @@ class StagingTapplicanttypesSynopsisFactory(BaseFactory):
     last_upd_date = sometimes_none(
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
+
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
 
     class Params:
         already_transformed = factory.Trait(
@@ -986,6 +992,9 @@ class StagingTfundactcatForecastFactory(BaseFactory):
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
 
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
@@ -1023,6 +1032,9 @@ class StagingTfundactcatSynopsisFactory(BaseFactory):
     last_upd_date = sometimes_none(
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
+
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
 
     class Params:
         already_transformed = factory.Trait(
@@ -1062,6 +1074,9 @@ class StagingTfundinstrForecastFactory(BaseFactory):
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
 
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
@@ -1099,6 +1114,9 @@ class StagingTfundinstrSynopsisFactory(BaseFactory):
     last_upd_date = sometimes_none(
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
+
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
 
     class Params:
         already_transformed = factory.Trait(

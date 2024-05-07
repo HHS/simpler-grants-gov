@@ -287,55 +287,71 @@ def convert_opportunity_summary_applicant_type(source_applicant_type: SourceAppl
     target_applicant_type = LinkOpportunitySummaryApplicantType(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_applicant_type_id=legacy_applicant_type_id,
-        applicant_type=applicant_type
+        applicant_type=applicant_type,
+        updated_by=source_applicant_type.last_upd_id,
+        created_by=source_applicant_type.creator_id
     )
-
-    target_applicant_type.updated_by = source_applicant_type.last_upd_id
-    target_applicant_type.created_by = source_applicant_type.creator_id
+    transform_update_create_timestamp(source_applicant_type, target_applicant_type, log_extra=log_extra)
 
     return target_applicant_type
 
 def convert_opportunity_summary_funding_instrument(source_funding_instrument: SourceFundingInstrument, existing_funding_instrument: LinkOpportunitySummaryFundingInstrument | None, opportunity_summary: OpportunitySummary) -> LinkOpportunitySummaryFundingInstrument:
     log_extra = get_log_extra_funding_instrument(source_funding_instrument)
 
+    # NOTE: The columns we're working with here are mostly the primary keys
+    #       While we do support updates, that's really only going to affect
+    #       the last update user + timestamps. From checking the prod data
+    #       there are basically zero updates to this data (~5 occurred 10+ years ago)
     if existing_funding_instrument is None:
         logger.info("Creating new funding instrument record", extra=log_extra)
 
-    target_funding_instrument = LinkOpportunitySummaryFundingInstrument(
-        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
-    )
-
-    target_funding_instrument.funding_instrument = transform_funding_instrument(source_funding_instrument.fi_id)
-    target_funding_instrument.updated_by = source_funding_instrument.last_upd_id
-    target_funding_instrument.created_by = source_funding_instrument.creator_id
+    funding_instrument = transform_funding_instrument(source_funding_instrument.fi_id)
 
     # The legacy ID is named differently in the forecast/synopsis tables
-    if isinstance(target_funding_instrument, (TfundinstrForecast, TfundinstrForecastHist)):
-        target_funding_instrument.legacy_funding_instrument_id = source_funding_instrument.fi_syn_id
+    if isinstance(source_funding_instrument, (TfundinstrForecast, TfundinstrForecastHist)):
+        legacy_funding_instrument_id = source_funding_instrument.fi_syn_id
     else:
-        target_funding_instrument.legacy_funding_instrument_id = source_funding_instrument.fi_frcst_id
+        legacy_funding_instrument_id = source_funding_instrument.fi_frcst_id
+
+    target_funding_instrument = LinkOpportunitySummaryFundingInstrument(
+        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
+        legacy_funding_instrument_id=legacy_funding_instrument_id,
+        funding_instrument=funding_instrument,
+        updated_by=source_funding_instrument.last_upd_id,
+        created_by=source_funding_instrument.creator_id
+    )
+
+    transform_update_create_timestamp(source_funding_instrument, target_funding_instrument, log_extra=log_extra)
 
     return target_funding_instrument
 
 def convert_opportunity_summary_funding_category(source_funding_category: SourceFundingCategory, existing_funding_category: LinkOpportunitySummaryFundingCategory | None, opportunity_summary: OpportunitySummary) -> LinkOpportunitySummaryFundingCategory:
     log_extra = get_log_extra_funding_category(source_funding_category)
 
+    # NOTE: The columns we're working with here are mostly the primary keys
+    #       While we do support updates, that's really only going to affect
+    #       the last update user + timestamps. From checking the prod data
+    #       there are basically zero updates to this data (~5 occurred 10+ years ago)
     if existing_funding_category is None:
         logger.info("Creating new funding category record", extra=log_extra)
 
-    target_funding_category = LinkOpportunitySummaryFundingCategory(
-        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
-    )
-
-    target_funding_category.funding_category = transform_funding_category(source_funding_category.fac_id)
-    target_funding_category.updated_by = source_funding_category.last_upd_id
-    target_funding_category.created_by = source_funding_category.creator_id
+    funding_category = transform_funding_category(source_funding_category.fac_id)
 
     # The legacy ID is named differently in the forecast/synopsis tables
-    if isinstance(target_funding_category, (TfundactcatForecast, TfundactcatForecastHist)):
-        target_funding_category.legacy_funding_category_id = source_funding_category.fac_frcst_id
+    if isinstance(source_funding_category, (TfundactcatForecast, TfundactcatForecastHist)):
+        legacy_funding_category_id = source_funding_category.fac_frcst_id
     else:
-        target_funding_category.legacy_funding_category_id = source_funding_category.fac_syn_id
+        legacy_funding_category_id = source_funding_category.fac_syn_id
+
+    target_funding_category = LinkOpportunitySummaryFundingCategory(
+        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
+        legacy_funding_category_id=legacy_funding_category_id,
+        funding_category=funding_category,
+        updated_by=source_funding_category.last_upd_id,
+        created_by=source_funding_category.creator_id
+    )
+
+    transform_update_create_timestamp(source_funding_category, target_funding_category, log_extra=log_extra)
 
     return target_funding_category
 

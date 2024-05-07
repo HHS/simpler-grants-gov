@@ -45,6 +45,7 @@ class TapplicanttypesSynopsis(
         Tsynopsis,
         primaryjoin="TapplicanttypesSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
         uselist=False,
+        overlaps="synopsis"
     )
 
 class TapplicanttypesSynopsisHist(
@@ -56,6 +57,7 @@ class TapplicanttypesSynopsisHist(
         TsynopsisHist,
         primaryjoin="and_(TapplicanttypesSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TapplicanttypesSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
         uselist=False,
+        overlaps="synopsis"
     )
 
 class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, StagingParamMixin):
@@ -65,6 +67,7 @@ class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, 
         Tsynopsis,
         primaryjoin="TfundactcatSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
         uselist=False,
+        overlaps="synopsis"
     )
 
 class TfundactcatSynopsisHist(
@@ -76,6 +79,7 @@ class TfundactcatSynopsisHist(
         TsynopsisHist,
         primaryjoin="and_(TfundactcatSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TfundactcatSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
         uselist=False,
+        overlaps="synopsis"
     )
 
 class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, StagingParamMixin):
@@ -85,6 +89,7 @@ class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, St
         Tsynopsis,
         primaryjoin="TfundinstrSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
         uselist=False,
+        overlaps="synopsis"
     )
 
 class TfundinstrSynopsisHist(
@@ -96,4 +101,5 @@ class TfundinstrSynopsisHist(
         TsynopsisHist,
         primaryjoin="and_(TfundinstrSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TfundinstrSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
         uselist=False,
+        overlaps="synopsis"
     )

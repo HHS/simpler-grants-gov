@@ -46,6 +46,7 @@ class TapplicanttypesForecast(
         Tforecast,
         primaryjoin="TapplicanttypesForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
         uselist=False,
+        overlaps="forecast"
     )
 
 class TapplicanttypesForecastHist(
@@ -57,6 +58,7 @@ class TapplicanttypesForecastHist(
         TforecastHist,
         primaryjoin="and_(TapplicanttypesForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TapplicanttypesForecastHist.revision_number == foreign(TforecastHist.revision_number))",
         uselist=False,
+        overlaps="forecast"
     )
 
 class TfundactcatForecast(StagingBase, forecast_mixin.TfundactcatForecastMixin, StagingParamMixin):
@@ -66,6 +68,7 @@ class TfundactcatForecast(StagingBase, forecast_mixin.TfundactcatForecastMixin, 
         Tforecast,
         primaryjoin="TfundactcatForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
         uselist=False,
+        overlaps="forecast"
     )
 
 class TfundactcatForecastHist(
@@ -77,6 +80,7 @@ class TfundactcatForecastHist(
         TforecastHist,
         primaryjoin="and_(TfundactcatForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TfundactcatForecastHist.revision_number == foreign(TforecastHist.revision_number))",
         uselist=False,
+        overlaps="forecast"
     )
 
 class TfundinstrForecast(StagingBase, forecast_mixin.TfundinstrForecastMixin, StagingParamMixin):
@@ -86,6 +90,7 @@ class TfundinstrForecast(StagingBase, forecast_mixin.TfundinstrForecastMixin, St
         Tforecast,
         primaryjoin="TfundinstrForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
         uselist=False,
+        overlaps="forecast"
     )
 
 class TfundinstrForecastHist(
@@ -97,4 +102,5 @@ class TfundinstrForecastHist(
         TforecastHist,
         primaryjoin="and_(TfundinstrForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TfundinstrForecastHist.revision_number == foreign(TforecastHist.revision_number))",
         uselist=False,
+        overlaps="forecast"
     )
