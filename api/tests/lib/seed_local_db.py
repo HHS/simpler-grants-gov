@@ -7,7 +7,6 @@ import src.adapters.db as db
 import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 
@@ -17,16 +16,6 @@ logger = logging.getLogger(__name__)
 def _build_opportunities(db_session: db.Session, iterations: int) -> None:
     # Just create a variety of opportunities for local testing
     # we can eventually look into creating more specific scenarios
-
-    # Since the factory always starts counting at the same value for the opportunity ID, we
-    # need to configure that so it doesn't clash with values already in the DB
-    max_opportunity_id = db_session.query(func.max(Opportunity.opportunity_id)).scalar()
-    if max_opportunity_id is None:
-        max_opportunity_id = 0
-
-    logger.info(f"Creating opportunities starting with opportunity_id {max_opportunity_id + 1}")
-    factories.OpportunityFactory.reset_sequence(value=max_opportunity_id + 1)
-
     for i in range(iterations):
         logger.info(f"Creating opportunity batch number {i}")
         # Create a few opportunities in various scenarios

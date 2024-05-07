@@ -39,10 +39,6 @@ def sometimes_none(factory_value, none_chance: float = 0.5):
         yes_declaration=factory_value,
         no_declaration=None,
     )
-    if random.random() > none_chance:
-        return factory_value
-
-    return None
 
 
 class CustomProvider(BaseProvider):
@@ -234,17 +230,14 @@ class OpportunityFactory(BaseFactory):
 
     @classmethod
     def _setup_next_sequence(cls):
-        try:
-            value = (
-                get_db_session()
-                .query(func.max(opportunity_models.Opportunity.opportunity_id))
-                .scalar()
-            )
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(opportunity_models.Opportunity.opportunity_id)
+            ).scalar()
             if value is not None:
                 return value + 1
-            return 1
-        except Exception:
-            return 1
+
+        return 1
 
     opportunity_id = factory.Sequence(lambda n: n)
 
@@ -567,6 +560,19 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
 class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(
+                    opportunity_models.OpportunityAssistanceListing.opportunity_assistance_listing_id
+                )
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
 
     opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
 
