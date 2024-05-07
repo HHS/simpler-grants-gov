@@ -1,13 +1,39 @@
+from sqlalchemy.orm import Mapped, relationship
+
 from src.db.legacy_mixin import synopsis_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
+
+from .opportunity import Topportunity
 
 
 class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
     __tablename__ = "tsynopsis"
 
+    opportunity: Mapped[Topportunity | None] = relationship(
+        Topportunity,
+        primaryjoin="Tsynopsis.opportunity_id == foreign(Topportunity.opportunity_id)",
+        uselist=False,
+        overlaps="opportunity",
+    )
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
 
 class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParamMixin):
     __tablename__ = "tsynopsis_hist"
+
+    opportunity: Mapped[Topportunity | None] = relationship(
+        Topportunity,
+        primaryjoin="TsynopsisHist.opportunity_id == foreign(Topportunity.opportunity_id)",
+        uselist=False,
+        overlaps="opportunity",
+    )
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
 
 
 class TapplicanttypesSynopsis(

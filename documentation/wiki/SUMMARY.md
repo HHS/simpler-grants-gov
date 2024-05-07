@@ -27,6 +27,9 @@
     * [🏁 Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
     * [Co-Design Group planning](product/deliverables/specifications/co-design-group.md)
     * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
+    * [Co-Design Group kickoff](product/deliverables/specifications/co-design-group-kickoff.md)
+* [Design](product/design.md)
+* [📖 Voice and Tone Guide](product/voice-and-tone-guide.md)
 
 ## Collaborating
 

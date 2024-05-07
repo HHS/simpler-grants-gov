@@ -137,7 +137,7 @@ resource "aws_lb_target_group" "app_tg" {
   deregistration_delay = "30"
 
   health_check {
-    path                = "/health"
+    path                = var.healthcheck_path
     port                = var.container_port
     healthy_threshold   = 2
     unhealthy_threshold = 10
