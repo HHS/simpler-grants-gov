@@ -82,7 +82,6 @@ FUNDING_INSTRUMENT_MAP = {
     "O": FundingInstrument.OTHER,
 }
 
-
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
@@ -150,7 +149,6 @@ def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
         raise ValueError("Unrecognized funding instrument: %s" % value)
 
     return FUNDING_INSTRUMENT_MAP[value]
-
 
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
@@ -439,6 +437,7 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
         "revision_number": getattr(source_summary, "revision_number", None),
         "table_name": source_summary.__tablename__,
     }
+
 
 def get_log_extra_applicant_type(source_applicant_type: SourceApplicantType) -> dict:
     return {

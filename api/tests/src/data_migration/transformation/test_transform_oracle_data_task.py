@@ -403,7 +403,6 @@ def validate_applicant_type(db_session, source_applicant_type, expect_in_db: boo
     assert link_applicant_type.applicant_type == expected_applicant_type
 
 
-
 class TestTransformOpportunity(BaseTestClass):
     @pytest.fixture()
     def transform_oracle_data_task(
@@ -926,3 +925,4 @@ class TestTransformApplicantType(BaseTestClass):
 
         validate_applicant_type(db_session, forecast_update1, expected_applicant_type=ApplicantType.COUNTY_GOVERNMENTS)
         validate_applicant_type(db_session, forecast_update2, expected_applicant_type=ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS)
+

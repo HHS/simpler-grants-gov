@@ -1,5 +1,4 @@
 from typing import TypeAlias
-
 from src.db.models.staging.forecast import Tforecast, TforecastHist, TapplicanttypesForecast, TapplicanttypesForecastHist, TfundinstrForecastHist, TfundinstrForecast, TfundactcatForecastHist, TfundactcatForecast
 from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist, TapplicanttypesSynopsis, TapplicanttypesSynopsisHist, TfundinstrSynopsisHist, TfundinstrSynopsis, TfundactcatSynopsisHist, TfundactcatSynopsis
 

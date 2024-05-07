@@ -203,7 +203,7 @@ resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
 
 resource "aws_cloudwatch_log_resource_policy" "WafWebAclLoggingPolicy" {
   policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc.json
-  policy_name     = "service-webacl-policy"
+  policy_name     = "service-${var.service_name}-webacl-policy"
 }
 
 # Policy from terraform docs

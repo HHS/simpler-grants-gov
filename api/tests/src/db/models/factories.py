@@ -883,6 +883,7 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+
 # TODO - move these to the top?
 APPLICANT_TYPE_IDS = ["00", "01", "02", "04", "05", "06", "07", "08", "11", "12", "13", "20", "21", "22", "23", "25", "99"]
 FUNDING_CATEGORY_IDS = ["RA", "AG", "AR", "BC", "CD", "CP", "DPR", "ED", "ELT", "EN", "ENV", "FN", "HL", "HO", "HU", "IIJ", "IS", "ISS", "LJL", "NR", "OZ", "RD", "ST", "T", "ACA", "O"]
@@ -1116,6 +1117,7 @@ class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 ####################################
 # Transfer Table Factories
