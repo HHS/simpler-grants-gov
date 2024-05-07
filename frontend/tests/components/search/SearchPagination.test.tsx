@@ -8,7 +8,6 @@ import { axe } from "jest-axe";
 
 describe("SearchPagination", () => {
   const mockHandlePageChange = jest.fn();
-  const totalPages = 10;
   const page = 1;
 
   beforeEach(() => {
@@ -19,7 +18,6 @@ describe("SearchPagination", () => {
     const { container } = render(
       <SearchPagination
         showHiddenInput={true}
-        totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
       />,
@@ -38,7 +36,6 @@ describe("SearchPagination", () => {
     render(
       <SearchPagination
         showHiddenInput={true}
-        totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
       />,
@@ -52,7 +49,6 @@ describe("SearchPagination", () => {
     render(
       <SearchPagination
         showHiddenInput={false}
-        totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
       />,
@@ -64,7 +60,6 @@ describe("SearchPagination", () => {
     render(
       <SearchPagination
         showHiddenInput={true}
-        totalPages={totalPages}
         page={page}
         handlePageChange={mockHandlePageChange}
       />,
@@ -77,7 +72,6 @@ describe("SearchPagination", () => {
     render(
       <SearchPagination
         showHiddenInput={true}
-        totalPages={totalPages}
         page={2} // Set to second page to test going back to first page
         handlePageChange={mockHandlePageChange}
       />,

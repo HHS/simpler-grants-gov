@@ -89,7 +89,6 @@ export function SearchForm({
             <div className="usa-prose">
               {searchResults?.data.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                   showHiddenInput={true}
@@ -105,7 +104,6 @@ export function SearchForm({
               />
               {searchResults?.data?.length >= 1 ? (
                 <SearchPagination
-                  totalPages={searchResults?.pagination_info?.total_pages}
                   page={page}
                   handlePageChange={handlePageChange}
                 />
