@@ -41,7 +41,7 @@ export default function SearchPagination({
   if (pending && position === PaginationPosition.Bottom) {
     return null;
   }
-  
+
   return (
     <>
       {showHiddenInput === true && (
