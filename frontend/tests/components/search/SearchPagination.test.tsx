@@ -7,15 +7,6 @@ import SearchPagination, {
 
 import { render } from "@testing-library/react";
 
-// import React from "react";
-// import { axe } from "jest-axe";
-// import { jest } from "@jest/globals";
-
-// import SearchPagination, {
-//   PaginationPosition,
-// } from "../../../src/components/search/SearchPagination";
-// import { fireEvent, render, screen } from "@testing-library/react";
-
 // TODO (Issue #1936): Uncomment tests after React 19 upgrade
 describe("SearchPagination", () => {
   const mockHandlePageChange = jest.fn();
@@ -101,6 +92,8 @@ describe("SearchPagination", () => {
   //     expect(mockHandlePageChange).toHaveBeenCalledWith(1);
   //   });
 
+  // this test works (before we've moved to React 19) for now since
+  // it exits the component with null before hitting useFormStatus
   it("returns null when searchResultsLength is less than 1", () => {
     const { container } = render(
       <SearchPagination
