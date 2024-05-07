@@ -206,12 +206,13 @@ resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
 
 resource "aws_cloudwatch_log_resource_policy" "WafWebAclLoggingPolicy" {
   count           = var.enable_load_balancer ? 1 : 0
-  policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc.json
+  policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc[0].json
   policy_name     = "service-${var.service_name}-webacl-policy"
 }
 
 # Policy from terraform docs
 data "aws_iam_policy_document" "WafWebAclLoggingDoc" {
+  count = var.enable_load_balancer ? 1 : 0
   statement {
     effect = "Allow"
     principals {
