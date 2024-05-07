@@ -109,10 +109,12 @@ module "service" {
       ssm_param_name = "/metabase/${var.environment_name}/db_pass"
     },
   ]
+
+  app_access_policy_arn      = null
+  migrator_access_policy_arn = null
+
   db_vars = {
-    security_group_ids         = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
-    app_access_policy_arn      = null
-    migrator_access_policy_arn = null
+    security_group_ids = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster.endpoint
       port        = data.aws_rds_cluster.db_cluster.port

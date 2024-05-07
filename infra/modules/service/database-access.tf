@@ -15,15 +15,15 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_from_service" {
 }
 
 resource "aws_iam_role_policy_attachment" "app_service_db_access" {
-  count = var.db_vars != null && var.db_vars.app_access_policy_arn != null ? 1 : 0
+  count = var.app_access_policy_arn != null ? 1 : 0
 
   role       = aws_iam_role.app_service.name
-  policy_arn = var.db_vars.app_access_policy_arn
+  policy_arn = var.app_access_policy_arn
 }
 
 resource "aws_iam_role_policy_attachment" "migrator_db_access" {
-  count = var.db_vars != null && var.db_vars.migrator_access_policy_arn != null ? 1 : 0
+  count = var.migrator_access_policy_arn != null ? 1 : 0
 
   role       = aws_iam_role.migrator_task[0].name
-  policy_arn = var.db_vars.migrator_access_policy_arn
+  policy_arn = var.migrator_access_policy_arn
 }
