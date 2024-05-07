@@ -99,14 +99,12 @@ export function SearchForm({
                 position={PaginationPosition.Top}
                 searchResultsLength={searchResults.data.length}
               />
-
               <SearchResultsList
                 searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
                 agencyNameLookup={agencyNameLookup}
                 errors={searchResults.errors}
               />
-
               <SearchPagination
                 totalPages={searchResults?.pagination_info?.total_pages}
                 page={page}
