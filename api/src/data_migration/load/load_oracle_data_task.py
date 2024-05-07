@@ -72,7 +72,6 @@ class LoadOracleDataTask(src.task.task.Task):
             try:
                 with self.db_session.begin():
                     self.load_data_for_table(table_name)
-                    self.db_session.commit()
             except Exception:
                 logger.exception("table load error", extra={"table": table_name})
 
