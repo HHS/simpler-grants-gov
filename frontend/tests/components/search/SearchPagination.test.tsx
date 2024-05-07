@@ -1,6 +1,12 @@
 /* eslint-disable jest/no-commented-out-tests */
 import "@testing-library/jest-dom";
 
+import SearchPagination, {
+  PaginationPosition,
+} from "../../../src/components/search/SearchPagination";
+
+import { render } from "@testing-library/react";
+
 // import React from "react";
 // import { axe } from "jest-axe";
 // import { jest } from "@jest/globals";
@@ -12,15 +18,11 @@ import "@testing-library/jest-dom";
 
 // TODO (Issue #1936): Uncomment tests after React 19 upgrade
 describe("SearchPagination", () => {
-  //   const mockHandlePageChange = jest.fn();
-  //   const totalPages = 10;
-  //   const page = 1;
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //   });
-
-  it("passes test", () => {
-    expect(1).toBe(1);
+  const mockHandlePageChange = jest.fn();
+  const totalPages = 10;
+  const page = 1;
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   //   it("should not have basic accessibility issues", async () => {
@@ -57,7 +59,6 @@ describe("SearchPagination", () => {
   //     const hiddenInput = screen.getByTestId("hiddenCurrentPage");
   //     expect(hiddenInput).toHaveValue("1");
   //   });
-
 
   //   it("does not render hidden input when showHiddenInput is false", () => {
   //     render(
@@ -99,4 +100,18 @@ describe("SearchPagination", () => {
   //     fireEvent.click(screen.getByLabelText("Previous page"));
   //     expect(mockHandlePageChange).toHaveBeenCalledWith(1);
   //   });
+
+  it("returns null when searchResultsLength is less than 1", () => {
+    const { container } = render(
+      <SearchPagination
+        showHiddenInput={true}
+        totalPages={totalPages}
+        page={page}
+        handlePageChange={mockHandlePageChange}
+        searchResultsLength={0} // No results, pagination should be hidden
+        position={PaginationPosition.Top}
+      />,
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
 });
