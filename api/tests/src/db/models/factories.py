@@ -627,6 +627,55 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
 # Staging Table Factories
 ####################################
 
+LEGACY_APPLICANT_TYPE_IDS = [
+    "00",
+    "01",
+    "02",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "11",
+    "12",
+    "13",
+    "20",
+    "21",
+    "22",
+    "23",
+    "25",
+    "99",
+]
+LEGACY_FUNDING_CATEGORY_IDS = [
+    "RA",
+    "AG",
+    "AR",
+    "BC",
+    "CD",
+    "CP",
+    "DPR",
+    "ED",
+    "ELT",
+    "EN",
+    "ENV",
+    "FN",
+    "HL",
+    "HO",
+    "HU",
+    "IIJ",
+    "IS",
+    "ISS",
+    "LJL",
+    "NR",
+    "OZ",
+    "RD",
+    "ST",
+    "T",
+    "ACA",
+    "O",
+]
+LEGACY_FUNDING_INSTRUMENT_IDS = ["CA", "G", "PC", "O"]
+
 
 class StagingTopportunityFactory(BaseFactory):
     class Meta:
@@ -884,64 +933,13 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
         )
 
 
-# TODO - move these to the top?
-APPLICANT_TYPE_IDS = [
-    "00",
-    "01",
-    "02",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "11",
-    "12",
-    "13",
-    "20",
-    "21",
-    "22",
-    "23",
-    "25",
-    "99",
-]
-FUNDING_CATEGORY_IDS = [
-    "RA",
-    "AG",
-    "AR",
-    "BC",
-    "CD",
-    "CP",
-    "DPR",
-    "ED",
-    "ELT",
-    "EN",
-    "ENV",
-    "FN",
-    "HL",
-    "HO",
-    "HU",
-    "IIJ",
-    "IS",
-    "ISS",
-    "LJL",
-    "NR",
-    "OZ",
-    "RD",
-    "ST",
-    "T",
-    "ACA",
-    "O",
-]
-FUNDING_INSTRUMENT_IDS = ["CA", "G", "PC", "O"]
-
-
 class StagingTapplicanttypesForecastFactory(BaseFactory):
     class Meta:
         model = staging.forecast.TapplicanttypesForecast
 
     at_frcst_id = factory.Sequence(lambda n: n)
 
-    at_id = factory.Iterator(APPLICANT_TYPE_IDS)
+    at_id = factory.Iterator(LEGACY_APPLICANT_TYPE_IDS)
 
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
@@ -984,7 +982,7 @@ class StagingTapplicanttypesSynopsisFactory(BaseFactory):
 
     at_syn_id = factory.Sequence(lambda n: n)
 
-    at_id = factory.Iterator(APPLICANT_TYPE_IDS)
+    at_id = factory.Iterator(LEGACY_APPLICANT_TYPE_IDS)
 
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
@@ -1027,7 +1025,7 @@ class StagingTfundactcatForecastFactory(BaseFactory):
 
     fac_frcst_id = factory.Sequence(lambda n: n)
 
-    fac_id = factory.Iterator(FUNDING_CATEGORY_IDS)
+    fac_id = factory.Iterator(LEGACY_FUNDING_CATEGORY_IDS)
 
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
@@ -1070,7 +1068,7 @@ class StagingTfundactcatSynopsisFactory(BaseFactory):
 
     fac_syn_id = factory.Sequence(lambda n: n)
 
-    fac_id = factory.Iterator(FUNDING_CATEGORY_IDS)
+    fac_id = factory.Iterator(LEGACY_FUNDING_CATEGORY_IDS)
 
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
@@ -1113,7 +1111,7 @@ class StagingTfundinstrForecastFactory(BaseFactory):
 
     fi_frcst_id = factory.Sequence(lambda n: n)
 
-    fi_id = factory.Iterator(FUNDING_INSTRUMENT_IDS)
+    fi_id = factory.Iterator(LEGACY_FUNDING_INSTRUMENT_IDS)
 
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
@@ -1156,7 +1154,7 @@ class StagingTfundinstrSynopsisFactory(BaseFactory):
 
     fi_syn_id = factory.Sequence(lambda n: n)
 
-    fi_id = factory.Iterator(FUNDING_INSTRUMENT_IDS)
+    fi_id = factory.Iterator(LEGACY_FUNDING_INSTRUMENT_IDS)
 
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
