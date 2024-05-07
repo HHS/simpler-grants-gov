@@ -126,14 +126,17 @@ data "aws_iam_policy_document" "task_executor" {
   }
 
   # Allow ECS to download images.
-  statement {
-    sid = "ECRPullAccess"
-    actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:GetDownloadUrlForLayer",
-    ]
-    resources = [data.aws_ecr_repository.app.arn]
+  dynamic "statement" {
+    for_each = var.image_repository_name != null ? [1] : []
+    content {
+      sid = "ECRPullAccess"
+      actions = [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+      ]
+      resources = [data.aws_ecr_repository.app[0].arn]
+    }
   }
 
   dynamic "statement" {

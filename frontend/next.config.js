@@ -1,5 +1,6 @@
 // @ts-check
 const { i18n } = require("./next-i18next.config");
+const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
 const sassOptions = require("./scripts/sassOptions");
 
 /**
@@ -28,4 +29,4 @@ const nextConfig = {
   ],
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);

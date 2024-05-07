@@ -1,6 +1,12 @@
 "use client";
 
 import { Pagination } from "@trussworks/react-uswds";
+import { useFormStatus } from "react-dom";
+
+export enum PaginationPosition {
+  Top = "topPagination",
+  Bottom = "bottomPagination",
+}
 
 interface SearchPaginationProps {
   showHiddenInput?: boolean; // Only one of the two SearchPagination should have this set
@@ -8,7 +14,7 @@ interface SearchPaginationProps {
   page: number;
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
-  searchResultsLength: number;
+  position: PaginationPosition;
 }
 
 const MAX_SLOTS = 5;
@@ -19,12 +25,13 @@ export default function SearchPagination({
   page,
   handlePageChange,
   paginationRef,
-  searchResultsLength,
+  position,
 }: SearchPaginationProps) {
-  if (searchResultsLength < 1) {
+  const { pending } = useFormStatus();
+
+  if (pending && position === PaginationPosition.Bottom) {
     return null;
   }
-
   return (
     <>
       {showHiddenInput === true && (
