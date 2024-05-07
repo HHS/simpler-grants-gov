@@ -195,12 +195,13 @@ class TransformOracleDataTask(Task):
             transformed_opportunity = transform_util.transform_opportunity(
                 source_opportunity, target_opportunity
             )
-            self.db_session.merge(transformed_opportunity)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_opportunity)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_opportunity)
 
         logger.info("Processed opportunity", extra=extra)
         source_opportunity.transformed_at = self.transform_time
@@ -278,12 +279,13 @@ class TransformOracleDataTask(Task):
             transformed_assistance_listing = transform_util.transform_assistance_listing(
                 source_assistance_listing, target_assistance_listing
             )
-            self.db_session.merge(transformed_assistance_listing)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_assistance_listing)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_assistance_listing)
 
         logger.info("Processed assistance listing", extra=extra)
         source_assistance_listing.transformed_at = self.transform_time
@@ -386,12 +388,13 @@ class TransformOracleDataTask(Task):
             transformed_opportunity_summary = transform_util.transform_opportunity_summary(
                 source_summary, target_summary
             )
-            self.db_session.merge(transformed_opportunity_summary)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_opportunity_summary)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_opportunity_summary)
 
         logger.info("Processed opportunity summary", extra=extra)
         source_summary.transformed_at = self.transform_time
@@ -514,12 +517,13 @@ class TransformOracleDataTask(Task):
             transformed_applicant_type = transform_util.convert_opportunity_summary_applicant_type(
                 source_applicant_type, target_applicant_type, opportunity_summary
             )
-            self.db_session.merge(transformed_applicant_type)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_applicant_type)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_applicant_type)
 
         logger.info("Processed applicant type", extra=extra)
         source_applicant_type.transformed_at = self.transform_time
@@ -639,12 +643,12 @@ class TransformOracleDataTask(Task):
                     source_funding_category, target_funding_category, opportunity_summary
                 )
             )
-            self.db_session.merge(transformed_funding_category)
-
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_funding_category)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_funding_category)
 
         logger.info("Processed funding category", extra=extra)
         source_funding_category.transformed_at = self.transform_time
@@ -766,12 +770,12 @@ class TransformOracleDataTask(Task):
                     source_funding_instrument, target_funding_instrument, opportunity_summary
                 )
             )
-            self.db_session.merge(transformed_funding_instrument)
-
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_funding_instrument)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_funding_instrument)
 
         logger.info("Processed funding instrument", extra=extra)
         source_funding_instrument.transformed_at = self.transform_time
