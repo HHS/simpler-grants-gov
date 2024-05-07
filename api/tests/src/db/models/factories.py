@@ -15,6 +15,7 @@ import factory
 import factory.fuzzy
 import faker
 from faker.providers import BaseProvider
+from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
@@ -220,6 +221,17 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(opportunity_models.Opportunity.opportunity_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
 
     opportunity_id = factory.Sequence(lambda n: n)
 
@@ -542,6 +554,19 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
 class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(
+                    opportunity_models.OpportunityAssistanceListing.opportunity_assistance_listing_id
+                )
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
 
     opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
 
