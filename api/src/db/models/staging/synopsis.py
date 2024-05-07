@@ -41,28 +41,59 @@ class TapplicanttypesSynopsis(
 ):
     __tablename__ = "tapplicanttypes_synopsis"
 
+    synopsis: Mapped[Tsynopsis | None] = relationship(
+        Tsynopsis,
+        primaryjoin="TapplicanttypesSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
+        uselist=False,
+    )
 
 class TapplicanttypesSynopsisHist(
     StagingBase, synopsis_mixin.TapplicanttypesSynopsisHistMixin, StagingParamMixin
 ):
     __tablename__ = "tapplicanttypes_synopsis_hist"
 
+    synopsis: Mapped[TsynopsisHist | None] = relationship(
+        TsynopsisHist,
+        primaryjoin="and_(TapplicanttypesSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TapplicanttypesSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
+        uselist=False,
+    )
 
 class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, StagingParamMixin):
     __tablename__ = "tfundactcat_synopsis"
 
+    synopsis: Mapped[Tsynopsis | None] = relationship(
+        Tsynopsis,
+        primaryjoin="TfundactcatSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
+        uselist=False,
+    )
 
 class TfundactcatSynopsisHist(
     StagingBase, synopsis_mixin.TfundactcatSynopsisHistMixin, StagingParamMixin
 ):
     __tablename__ = "tfundactcat_synopsis_hist"
 
+    synopsis: Mapped[TsynopsisHist | None] = relationship(
+        TsynopsisHist,
+        primaryjoin="and_(TfundactcatSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TfundactcatSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
+        uselist=False,
+    )
 
 class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, StagingParamMixin):
     __tablename__ = "tfundinstr_synopsis"
 
+    synopsis: Mapped[Tsynopsis | None] = relationship(
+        Tsynopsis,
+        primaryjoin="TfundinstrSynopsis.opportunity_id == foreign(Tsynopsis.opportunity_id)",
+        uselist=False,
+    )
 
 class TfundinstrSynopsisHist(
     StagingBase, synopsis_mixin.TfundinstrSynopsisHistMixin, StagingParamMixin
 ):
     __tablename__ = "tfundinstr_synopsis_hist"
+
+    synopsis: Mapped[TsynopsisHist | None] = relationship(
+        TsynopsisHist,
+        primaryjoin="and_(TfundinstrSynopsisHist.opportunity_id == foreign(TsynopsisHist.opportunity_id), TfundinstrSynopsisHist.revision_number == foreign(TsynopsisHist.revision_number))",
+        uselist=False,
+    )

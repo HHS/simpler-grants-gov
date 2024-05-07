@@ -2,15 +2,16 @@ from typing import Tuple
 
 import pytest
 
+from src.constants.lookup_constants import ApplicantType
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models.opportunity_models import (
     Opportunity,
     OpportunityAssistanceListing,
-    OpportunitySummary,
+    OpportunitySummary, LinkOpportunitySummaryApplicantType,
 )
-from src.db.models.staging.forecast import TforecastHist
+from src.db.models.staging.forecast import TforecastHist, TapplicanttypesForecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
+from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist, TapplicanttypesSynopsis, TapplicanttypesSynopsisHist
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
@@ -21,8 +22,10 @@ from tests.src.db.models.factories import (
     StagingTopportunityCfdaFactory,
     StagingTopportunityFactory,
     StagingTsynopsisFactory,
-    StagingTsynopsisHistFactory,
+    StagingTsynopsisHistFactory, StagingTapplicanttypesForecastFactory, StagingTapplicanttypesForecastHistFactory, LinkOpportunitySummaryApplicantTypeFactory, StagingTapplicanttypesSynopsisFactory,
+    StagingTapplicanttypesSynopsisHistFactory,
 )
+from sqlalchemy import and_
 
 
 def setup_opportunity(
@@ -130,6 +133,58 @@ def setup_synopsis_forecast(
 
     return source_summary
 
+
+def setup_applicant_type(
+    create_existing: bool,
+    opportunity_summary: OpportunitySummary,
+    legacy_lookup_value: str,
+    applicant_type: ApplicantType | None = None,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    source_values: dict | None = None,
+):
+    if create_existing and is_delete is False and applicant_type is None:
+        raise Exception("If create_existing is True, is_delete is False - must provide the properly converted / mapped value for applicant_type")
+
+    if source_values is None:
+        source_values = {}
+
+    if opportunity_summary.is_forecast:
+        source_values["forecast"] = None
+        if opportunity_summary.revision_number is None:
+            factory_cls = StagingTapplicanttypesForecastFactory
+        else:
+            factory_cls = StagingTapplicanttypesForecastHistFactory
+            source_values["revision_number"] = opportunity_summary.revision_number
+    else:
+        source_values["synopsis"] = None
+        if opportunity_summary.revision_number is None:
+            factory_cls = StagingTapplicanttypesSynopsisFactory
+        else:
+            factory_cls = StagingTapplicanttypesSynopsisHistFactory
+            source_values["revision_number"] = opportunity_summary.revision_number
+
+    source_applicant_type = factory_cls.create(
+        **source_values,
+        opportunity_id=opportunity_summary.opportunity_id,
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+        at_id=legacy_lookup_value,
+    )
+
+    if create_existing:
+        if opportunity_summary.is_forecast:
+            legacy_id = source_applicant_type.at_frcst_id
+        else:
+            legacy_id = source_applicant_type.at_syn_id
+
+        LinkOpportunitySummaryApplicantTypeFactory.create(
+            opportunity_summary=opportunity_summary,
+            legacy_applicant_type_id=legacy_id,
+            applicant_type=applicant_type
+        )
+
+    return source_applicant_type
 
 def validate_matching_fields(
     source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
@@ -312,6 +367,41 @@ def validate_opportunity_summary(
     )
 
     assert opportunity_summary.is_deleted == is_deleted
+
+def validate_applicant_type(db_session, source_applicant_type, expect_in_db: bool = True, expected_applicant_type: ApplicantType | None = None):
+    if isinstance(source_applicant_type, (TapplicanttypesSynopsis, TapplicanttypesSynopsisHist)):
+        is_forecast = False
+        legacy_id = source_applicant_type.at_syn_id
+    else:
+        is_forecast = True
+        legacy_id = source_applicant_type.at_frcst_id
+
+    revision_number = None
+    if isinstance(source_applicant_type, (TapplicanttypesSynopsisHist, TapplicanttypesForecastHist)):
+        revision_number = source_applicant_type.revision_number
+
+    # In order to properly find the link table value, need to first determine
+    # the opportunity summary in a subquery
+    opportunity_summary_id = db_session.query(OpportunitySummary.opportunity_summary_id).filter(
+        OpportunitySummary.revision_number == revision_number, OpportunitySummary.is_forecast == is_forecast, OpportunitySummary.opportunity_id == source_applicant_type.opportunity_id
+    ).scalar()
+
+    link_applicant_type = (
+        db_session.query(LinkOpportunitySummaryApplicantType)
+        .filter(
+            LinkOpportunitySummaryApplicantType.legacy_applicant_type_id == legacy_id,
+            LinkOpportunitySummaryApplicantType.opportunity_summary_id == opportunity_summary_id
+        )
+        .one_or_none()
+    )
+
+    if not expect_in_db:
+        assert link_applicant_type is None
+        return
+
+    assert link_applicant_type is not None
+    assert link_applicant_type.applicant_type == expected_applicant_type
+
 
 
 class TestTransformOpportunity(BaseTestClass):
@@ -780,3 +870,59 @@ class TestTransformOpportunitySummary(BaseTestClass):
             transform_oracle_data_task.process_opportunity_summary(
                 source_summary, None, opportunity
             )
+
+
+class TestTransformApplicantType(BaseTestClass):
+    @pytest.fixture()
+    def transform_oracle_data_task(
+        self, db_session, enable_factory_create, truncate_opportunities
+    ) -> TransformOracleDataTask:
+        return TransformOracleDataTask(db_session)
+
+    def test_process_applicant_types(self, db_session, transform_oracle_data_task):
+        opportunity_summary_forecast = OpportunitySummaryFactory.create(is_forecast=True, revision_number=None, no_link_values=True)
+        forecast_insert1 = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="00")
+        forecast_update1 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="01", applicant_type=ApplicantType.COUNTY_GOVERNMENTS)
+        forecast_update2 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="02", applicant_type=ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS)
+        forecast_delete1 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="04", applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS)
+        forecast_delete2 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="05", applicant_type=ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS)
+        forecast_update_already_processed = setup_applicant_type(create_existing=True, is_already_processed=True, opportunity_summary=opportunity_summary_forecast, legacy_lookup_value="06", applicant_type=ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION)
+
+
+        opportunity_summary_forecast_hist = OpportunitySummaryFactory.create(is_forecast=True, revision_number=3, no_link_values=True)
+        forecast_hist_insert1 = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_forecast_hist, legacy_lookup_value="07")
+        forecast_hist_update1 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_forecast_hist, legacy_lookup_value="08", applicant_type=ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES)
+        forecast_hist_update2 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_forecast_hist, legacy_lookup_value="11", applicant_type=ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS)
+        forecast_hist_delete1 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_forecast_hist, legacy_lookup_value="12", applicant_type=ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3)
+        forecast_hist_already_processed = setup_applicant_type(create_existing=False, is_delete=True, is_already_processed=True, opportunity_summary=opportunity_summary_forecast_hist, legacy_lookup_value="13", applicant_type=ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3)
+
+        opportunity_summary_syn = OpportunitySummaryFactory.create(is_forecast=False, revision_number=None, no_link_values=True)
+        syn_insert1 = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="20")
+        syn_insert2 = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="21")
+        syn_update1 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="22", applicant_type=ApplicantType.FOR_PROFIT_ORGANIZATIONS_OTHER_THAN_SMALL_BUSINESSES)
+        syn_update2 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="23", applicant_type=ApplicantType.SMALL_BUSINESSES)
+        syn_delete1 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="25", applicant_type=ApplicantType.OTHER)
+        syn_delete2 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="99", applicant_type=ApplicantType.UNRESTRICTED)
+        syn_delete_but_current_missing = setup_applicant_type(create_existing=False, is_delete=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="07", applicant_type=ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS)
+        syn_update_already_processed = setup_applicant_type(create_existing=True, is_already_processed=True, opportunity_summary=opportunity_summary_syn, legacy_lookup_value="08", applicant_type=ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES)
+
+        opportunity_summary_syn_hist = OpportunitySummaryFactory.create(is_forecast=False, revision_number=21, no_link_values=True)
+        syn_hist_insert1 = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="11")
+        syn_hist_update1 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="12", applicant_type=ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3)
+        syn_hist_update2 = setup_applicant_type(create_existing=True, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="13", applicant_type=ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3)
+        syn_hist_delete1 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="25", applicant_type=ApplicantType.OTHER)
+        syn_hist_delete2 = setup_applicant_type(create_existing=True, is_delete=True, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="99", applicant_type=ApplicantType.UNRESTRICTED)
+        # TODO - note this one
+        syn_hist_insert_invalid_type = setup_applicant_type(create_existing=False, opportunity_summary=opportunity_summary_syn_hist, legacy_lookup_value="X", applicant_type=ApplicantType.STATE_GOVERNMENTS)
+
+        transform_oracle_data_task.process_link_applicant_types()
+        print(transform_oracle_data_task.metrics)
+
+        validate_applicant_type(db_session, forecast_insert1, expected_applicant_type=ApplicantType.STATE_GOVERNMENTS)
+        validate_applicant_type(db_session, forecast_hist_insert1, expected_applicant_type=ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS)
+        validate_applicant_type(db_session, syn_insert1, expected_applicant_type=ApplicantType.PRIVATE_INSTITUTIONS_OF_HIGHER_EDUCATION)
+        validate_applicant_type(db_session, syn_insert2, expected_applicant_type=ApplicantType.INDIVIDUALS)
+        validate_applicant_type(db_session, syn_hist_insert1, expected_applicant_type=ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS)
+
+        validate_applicant_type(db_session, forecast_update1, expected_applicant_type=ApplicantType.COUNTY_GOVERNMENTS)
+        validate_applicant_type(db_session, forecast_update2, expected_applicant_type=ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS)
