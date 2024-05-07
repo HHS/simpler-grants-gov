@@ -103,9 +103,10 @@ data "aws_iam_policy" "migrator_db_access_policy" {
 }
 
 module "service" {
-  source                = "../../modules/task-service"
+  source                = "../../modules/service"
   service_name          = local.service_name
   is_temporary          = false
+  enable_load_balancer  = false
   image_repository_name = module.app_config.image_repository_name
   image_tag             = local.image_tag
   vpc_id                = data.aws_vpc.network.id
@@ -119,10 +120,11 @@ module "service" {
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
+  app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
+  migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+
   db_vars = {
-    security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster[0].endpoint
       port        = data.aws_rds_cluster.db_cluster[0].port

@@ -158,6 +158,12 @@ variable "drop_linux_capabilities" {
   default     = true
 }
 
+variable "enable_load_balancer" {
+  description = "Whether to enable a load balancer for the service"
+  type        = bool
+  default     = true
+}
+
 variable "healthcheck_command" {
   description = "The command to run to check the health of the container, used on the container health check"
   type        = list(string)
