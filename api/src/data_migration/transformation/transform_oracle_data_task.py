@@ -9,20 +9,39 @@ from src.adapters import db
 from src.data_migration.transformation import transform_util
 from src.db.models.base import ApiSchemaTable
 from src.db.models.opportunity_models import (
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
-    OpportunitySummary, LinkOpportunitySummaryApplicantType, LinkOpportunitySummaryFundingCategory, LinkOpportunitySummaryFundingInstrument,
+    OpportunitySummary,
 )
-from src.db.models.staging.forecast import Tforecast, TforecastHist, TapplicanttypesForecast, TapplicanttypesForecastHist, TfundactcatForecast, TfundactcatForecastHist, TfundinstrForecast, \
-    TfundinstrForecastHist
+from src.db.models.staging.forecast import (
+    TapplicanttypesForecast,
+    TapplicanttypesForecastHist,
+    Tforecast,
+    TforecastHist,
+    TfundactcatForecast,
+    TfundactcatForecastHist,
+    TfundinstrForecast,
+    TfundinstrForecastHist,
+)
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingParamMixin
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist, TapplicanttypesSynopsis, TapplicanttypesSynopsisHist, TfundactcatSynopsis, TfundactcatSynopsisHist, TfundinstrSynopsis, \
-    TfundinstrSynopsisHist
+from src.db.models.staging.synopsis import (
+    TapplicanttypesSynopsis,
+    TapplicanttypesSynopsisHist,
+    TfundactcatSynopsis,
+    TfundactcatSynopsisHist,
+    TfundinstrSynopsis,
+    TfundinstrSynopsisHist,
+    Tsynopsis,
+    TsynopsisHist,
+)
 from src.task.task import Task
 from src.util import datetime_util
 
-from . import SourceSummary, SourceApplicantType, SourceFundingInstrument, SourceFundingCategory
+from . import SourceApplicantType, SourceFundingCategory, SourceFundingInstrument, SourceSummary
 
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
@@ -99,30 +118,37 @@ class TransformOracleDataTask(Task):
             ),
         )
 
-    def fetch_with_opportunity_summary(self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence, is_forecast: bool, is_historical_table: bool) -> list[Tuple[S, D | None, OpportunitySummary | None]]:
+    def fetch_with_opportunity_summary(
+        self,
+        source_model: Type[S],
+        destination_model: Type[D],
+        join_clause: Sequence,
+        is_forecast: bool,
+        is_historical_table: bool,
+    ) -> list[Tuple[S, D | None, OpportunitySummary | None]]:
         # setup the join clause for getting the opportunity summary
 
+        opportunity_summary_join_clause = [
+            source_model.opportunity_id == OpportunitySummary.opportunity_id,  # type: ignore[attr-defined]
+            OpportunitySummary.is_forecast.is_(is_forecast),
+        ]
+
         if is_historical_table:
-            opportunity_summary_join_clause = [
-                source_model.opportunity_id == OpportunitySummary.opportunity_id,
-                OpportunitySummary.is_forecast.is_(is_forecast),
-                source_model.revision_number == OpportunitySummary.revision_number,
-            ]
+            opportunity_summary_join_clause.append(
+                source_model.revision_number == OpportunitySummary.revision_number  # type: ignore[attr-defined]
+            )
         else:
-            # TODO - can simplify this a bit
-            opportunity_summary_join_clause = [
-                source_model.opportunity_id == OpportunitySummary.opportunity_id,
-                OpportunitySummary.is_forecast.is_(is_forecast),
-                OpportunitySummary.revision_number.is_(None),
-            ]
+            opportunity_summary_join_clause.append(OpportunitySummary.revision_number.is_(None))
 
-
-        return self.db_session.execute(
-            select(source_model, destination_model, OpportunitySummary)
-            .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
-            .join(destination_model, and_(*join_clause), isouter=True)
-            .where(source_model.transformed_at.is_(None))
-            .execution_options(yield_per=5000)
+        return cast(
+            list[Tuple[S, D | None, OpportunitySummary | None]],
+            self.db_session.execute(
+                select(source_model, destination_model, OpportunitySummary)
+                .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
+                .join(destination_model, and_(*join_clause), isouter=True)
+                .where(source_model.transformed_at.is_(None))
+                .execution_options(yield_per=5000)
+            ),
         )
 
     def process_opportunities(self) -> None:
@@ -376,34 +402,77 @@ class TransformOracleDataTask(Task):
         self.process_link_funding_categories()
 
     def process_link_applicant_types(self) -> None:
-        forecast_applicant_type_records = self.fetch_with_opportunity_summary(TapplicanttypesForecast, LinkOpportunitySummaryApplicantType, [
-            TapplicanttypesForecast.at_frcst_id == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryApplicantType.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=False)
+        forecast_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesForecast,
+            LinkOpportunitySummaryApplicantType,
+            [
+                TapplicanttypesForecast.at_frcst_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+        )
         self.process_link_applicant_types_group(forecast_applicant_type_records)
 
-        forecast_applicant_type_hist_records = self.fetch_with_opportunity_summary(TapplicanttypesForecastHist, LinkOpportunitySummaryApplicantType, [
-            TapplicanttypesForecastHist.at_frcst_id == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryApplicantType.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=True)
+        forecast_applicant_type_hist_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesForecastHist,
+            LinkOpportunitySummaryApplicantType,
+            [
+                TapplicanttypesForecastHist.at_frcst_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+        )
         self.process_link_applicant_types_group(forecast_applicant_type_hist_records)
 
-        synopsis_applicant_type_records = self.fetch_with_opportunity_summary(TapplicanttypesSynopsis, LinkOpportunitySummaryApplicantType, [
-            TapplicanttypesSynopsis.at_syn_id == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryApplicantType.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=False)
+        synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesSynopsis,
+            LinkOpportunitySummaryApplicantType,
+            [
+                TapplicanttypesSynopsis.at_syn_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+        )
         self.process_link_applicant_types_group(synopsis_applicant_type_records)
 
-        synopsis_applicant_type_hist_records = self.fetch_with_opportunity_summary(TapplicanttypesSynopsisHist, LinkOpportunitySummaryApplicantType, [
-            TapplicanttypesSynopsisHist.at_syn_id == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryApplicantType.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=True)
+        synopsis_applicant_type_hist_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesSynopsisHist,
+            LinkOpportunitySummaryApplicantType,
+            [
+                TapplicanttypesSynopsisHist.at_syn_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+        )
         self.process_link_applicant_types_group(synopsis_applicant_type_hist_records)
 
-    def process_link_applicant_types_group(self, records: Sequence[Tuple[SourceApplicantType, LinkOpportunitySummaryApplicantType | None, OpportunitySummary | None]]) -> None:
+    def process_link_applicant_types_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceApplicantType,
+                LinkOpportunitySummaryApplicantType | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
         for source_applicant_type, target_applicant_type, opportunity_summary in records:
             try:
-                self.process_link_applicant_type(source_applicant_type, target_applicant_type, opportunity_summary)
+                self.process_link_applicant_type(
+                    source_applicant_type, target_applicant_type, opportunity_summary
+                )
             except ValueError:
                 self.increment(self.Metrics.TOTAL_ERROR_COUNT)
                 logger.exception(
@@ -411,8 +480,12 @@ class TransformOracleDataTask(Task):
                     extra=transform_util.get_log_extra_applicant_type(source_applicant_type),
                 )
 
-
-    def process_link_applicant_type(self, source_applicant_type: SourceApplicantType, target_applicant_type: LinkOpportunitySummaryApplicantType | None, opportunity_summary: OpportunitySummary | None) -> None:
+    def process_link_applicant_type(
+        self,
+        source_applicant_type: SourceApplicantType,
+        target_applicant_type: LinkOpportunitySummaryApplicantType | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
         self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
         extra = transform_util.get_log_extra_applicant_type(source_applicant_type)
         logger.info("Processing applicant type", extra=extra)
@@ -452,34 +525,77 @@ class TransformOracleDataTask(Task):
         source_applicant_type.transformed_at = self.transform_time
 
     def process_link_funding_categories(self) -> None:
-        forecast_funding_category_records = self.fetch_with_opportunity_summary(TfundactcatForecast, LinkOpportunitySummaryFundingCategory, [
-            TfundactcatForecast.fac_frcst_id == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingCategory.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=False)
+        forecast_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatForecast,
+            LinkOpportunitySummaryFundingCategory,
+            [
+                TfundactcatForecast.fac_frcst_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+        )
         self.process_link_funding_categories_group(forecast_funding_category_records)
 
-        forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(TfundactcatForecastHist, LinkOpportunitySummaryFundingCategory, [
-            TfundactcatForecastHist.fac_frcst_id == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingCategory.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=True)
+        forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(
+            TfundactcatForecastHist,
+            LinkOpportunitySummaryFundingCategory,
+            [
+                TfundactcatForecastHist.fac_frcst_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+        )
         self.process_link_funding_categories_group(forecast_funding_category_hist_records)
 
-        synopsis_funding_category_records = self.fetch_with_opportunity_summary(TfundactcatSynopsis, LinkOpportunitySummaryFundingCategory, [
-            TfundactcatSynopsis.fac_syn_id == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingCategory.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=False)
+        synopsis_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatSynopsis,
+            LinkOpportunitySummaryFundingCategory,
+            [
+                TfundactcatSynopsis.fac_syn_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+        )
         self.process_link_funding_categories_group(synopsis_funding_category_records)
 
-        synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(TfundactcatSynopsisHist, LinkOpportunitySummaryFundingCategory, [
-            TfundactcatSynopsisHist.fac_syn_id == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingCategory.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=True)
+        synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(
+            TfundactcatSynopsisHist,
+            LinkOpportunitySummaryFundingCategory,
+            [
+                TfundactcatSynopsisHist.fac_syn_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+        )
         self.process_link_funding_categories_group(synopsis_funding_category_hist_records)
 
-    def process_link_funding_categories_group(self, records: Sequence[Tuple[SourceFundingCategory, LinkOpportunitySummaryFundingCategory | None, OpportunitySummary | None]]) -> None:
+    def process_link_funding_categories_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceFundingCategory,
+                LinkOpportunitySummaryFundingCategory | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
         for source_funding_category, target_funding_category, opportunity_summary in records:
             try:
-                self.process_link_funding_category(source_funding_category, target_funding_category, opportunity_summary)
+                self.process_link_funding_category(
+                    source_funding_category, target_funding_category, opportunity_summary
+                )
             except ValueError:
                 self.increment(self.Metrics.TOTAL_ERROR_COUNT)
                 logger.exception(
@@ -487,8 +603,12 @@ class TransformOracleDataTask(Task):
                     extra=transform_util.get_log_extra_funding_category(source_funding_category),
                 )
 
-
-    def process_link_funding_category(self, source_funding_category: SourceFundingCategory, target_funding_category: LinkOpportunitySummaryFundingCategory | None, opportunity_summary: OpportunitySummary | None) -> None:
+    def process_link_funding_category(
+        self,
+        source_funding_category: SourceFundingCategory,
+        target_funding_category: LinkOpportunitySummaryFundingCategory | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
         self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
         extra = transform_util.get_log_extra_funding_category(source_funding_category)
         logger.info("Processing funding category", extra=extra)
@@ -511,11 +631,13 @@ class TransformOracleDataTask(Task):
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
-            is_insert = source_funding_category is None
+            is_insert = target_funding_category is None
 
             logger.info("Transforming and upserting funding category", extra=extra)
-            transformed_funding_category = transform_util.convert_opportunity_summary_funding_category(
-                source_funding_category, target_funding_category, opportunity_summary
+            transformed_funding_category = (
+                transform_util.convert_opportunity_summary_funding_category(
+                    source_funding_category, target_funding_category, opportunity_summary
+                )
             )
             self.db_session.merge(transformed_funding_category)
 
@@ -528,42 +650,92 @@ class TransformOracleDataTask(Task):
         source_funding_category.transformed_at = self.transform_time
 
     def process_link_funding_instruments(self) -> None:
-        forecast_funding_instrument_records = self.fetch_with_opportunity_summary(TfundinstrForecast, LinkOpportunitySummaryFundingInstrument, [
-            TfundinstrForecast.fi_frcst_id == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=False)
+        forecast_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrForecast,
+            LinkOpportunitySummaryFundingInstrument,
+            [
+                TfundinstrForecast.fi_frcst_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+        )
         self.process_link_funding_instruments_group(forecast_funding_instrument_records)
 
-        forecast_funding_instrument_hist_records = self.fetch_with_opportunity_summary(TfundinstrForecastHist, LinkOpportunitySummaryFundingInstrument, [
-            TfundinstrForecastHist.fi_frcst_id == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id
-        ], is_forecast=True, is_historical_table=True)
+        forecast_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
+            TfundinstrForecastHist,
+            LinkOpportunitySummaryFundingInstrument,
+            [
+                TfundinstrForecastHist.fi_frcst_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+        )
         self.process_link_funding_instruments_group(forecast_funding_instrument_hist_records)
 
-        synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(TfundinstrSynopsis, LinkOpportunitySummaryFundingInstrument, [
-            TfundinstrSynopsis.fi_syn_id == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=False)
+        synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrSynopsis,
+            LinkOpportunitySummaryFundingInstrument,
+            [
+                TfundinstrSynopsis.fi_syn_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+        )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_records)
 
-        synopsis_funding_instrument_hist_records = self.fetch_with_opportunity_summary(TfundinstrSynopsisHist, LinkOpportunitySummaryFundingInstrument, [
-            TfundinstrSynopsisHist.fi_syn_id == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-            OpportunitySummary.opportunity_summary_id == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id
-        ], is_forecast=False, is_historical_table=True)
+        synopsis_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
+            TfundinstrSynopsisHist,
+            LinkOpportunitySummaryFundingInstrument,
+            [
+                TfundinstrSynopsisHist.fi_syn_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+        )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_hist_records)
 
-    def process_link_funding_instruments_group(self, records: Sequence[Tuple[SourceFundingInstrument, LinkOpportunitySummaryFundingInstrument | None, OpportunitySummary | None]]) -> None:
+    def process_link_funding_instruments_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceFundingInstrument,
+                LinkOpportunitySummaryFundingInstrument | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
         for source_funding_instrument, target_funding_instrument, opportunity_summary in records:
             try:
-                self.process_link_funding_category(source_funding_instrument, target_funding_instrument, opportunity_summary)
+                self.process_link_funding_instrument(
+                    source_funding_instrument, target_funding_instrument, opportunity_summary
+                )
             except ValueError:
                 self.increment(self.Metrics.TOTAL_ERROR_COUNT)
                 logger.exception(
                     "Failed to process opportunity summary funding instrument",
-                    extra=transform_util.get_log_extra_funding_category(source_funding_instrument),
+                    extra=transform_util.get_log_extra_funding_instrument(
+                        source_funding_instrument
+                    ),
                 )
 
-    def process_link_funding_instrument(self, source_funding_instrument: SourceFundingInstrument, target_funding_instrument: LinkOpportunitySummaryFundingInstrument | None, opportunity_summary: OpportunitySummary | None) -> None:
+    def process_link_funding_instrument(
+        self,
+        source_funding_instrument: SourceFundingInstrument,
+        target_funding_instrument: LinkOpportunitySummaryFundingInstrument | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
         self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
         extra = transform_util.get_log_extra_funding_instrument(source_funding_instrument)
         logger.info("Processing funding instrument", extra=extra)
@@ -586,11 +758,13 @@ class TransformOracleDataTask(Task):
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
-            is_insert = source_funding_instrument is None
+            is_insert = target_funding_instrument is None
 
             logger.info("Transforming and upserting funding instrument", extra=extra)
-            transformed_funding_instrument = transform_util.convert_opportunity_summary_funding_instrument(
-                source_funding_instrument, target_funding_instrument, opportunity_summary
+            transformed_funding_instrument = (
+                transform_util.convert_opportunity_summary_funding_instrument(
+                    source_funding_instrument, target_funding_instrument, opportunity_summary
+                )
             )
             self.db_session.merge(transformed_funding_instrument)
 

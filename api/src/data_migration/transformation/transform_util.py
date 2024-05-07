@@ -1,20 +1,36 @@
 import logging
 from datetime import datetime
 
-from src.constants.lookup_constants import OpportunityCategory, ApplicantType, FundingInstrument, FundingCategory
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+)
 from src.db.models.base import TimestampMixin
 from src.db.models.opportunity_models import (
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
-    OpportunitySummary, LinkOpportunitySummaryApplicantType, LinkOpportunitySummaryFundingInstrument, LinkOpportunitySummaryFundingCategory,
+    OpportunitySummary,
 )
-from src.db.models.staging.forecast import TforecastHist, TapplicanttypesForecast, TapplicanttypesForecastHist, TfundactcatForecastHist, TfundactcatForecast, TfundinstrForecastHist, TfundinstrForecast
+from src.db.models.staging.forecast import (
+    TapplicanttypesForecast,
+    TapplicanttypesForecastHist,
+    TforecastHist,
+    TfundactcatForecast,
+    TfundactcatForecastHist,
+    TfundinstrForecast,
+    TfundinstrForecastHist,
+)
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
 from src.util import datetime_util
 
-from . import SourceSummary, SourceApplicantType, SourceFundingCategory, SourceFundingInstrument
+from . import SourceApplicantType, SourceFundingCategory, SourceFundingInstrument, SourceSummary
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +59,7 @@ APPLICANT_TYPE_MAP = {
     "22": ApplicantType.FOR_PROFIT_ORGANIZATIONS_OTHER_THAN_SMALL_BUSINESSES,
     "23": ApplicantType.SMALL_BUSINESSES,
     "25": ApplicantType.OTHER,
-    "99": ApplicantType.UNRESTRICTED
+    "99": ApplicantType.UNRESTRICTED,
 }
 
 FUNDING_CATEGORY_MAP = {
@@ -81,6 +97,7 @@ FUNDING_INSTRUMENT_MAP = {
     "PC": FundingInstrument.PROCUREMENT_CONTRACT,
     "O": FundingInstrument.OTHER,
 }
+
 
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
@@ -131,6 +148,7 @@ def transform_applicant_type(value: str | None) -> ApplicantType | None:
 
     return APPLICANT_TYPE_MAP[value]
 
+
 def transform_funding_category(value: str | None) -> FundingCategory | None:
     if value is None or value == "":
         return None
@@ -149,6 +167,7 @@ def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
         raise ValueError("Unrecognized funding instrument: %s" % value)
 
     return FUNDING_INSTRUMENT_MAP[value]
+
 
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
@@ -266,7 +285,11 @@ def transform_opportunity_summary(
     return target_summary
 
 
-def convert_opportunity_summary_applicant_type(source_applicant_type: SourceApplicantType, existing_applicant_type: LinkOpportunitySummaryApplicantType | None, opportunity_summary: OpportunitySummary) -> LinkOpportunitySummaryApplicantType:
+def convert_opportunity_summary_applicant_type(
+    source_applicant_type: SourceApplicantType,
+    existing_applicant_type: LinkOpportunitySummaryApplicantType | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryApplicantType:
     log_extra = get_log_extra_applicant_type(source_applicant_type)
 
     # NOTE: The columns we're working with here are mostly the primary keys
@@ -289,13 +312,20 @@ def convert_opportunity_summary_applicant_type(source_applicant_type: SourceAppl
         legacy_applicant_type_id=legacy_applicant_type_id,
         applicant_type=applicant_type,
         updated_by=source_applicant_type.last_upd_id,
-        created_by=source_applicant_type.creator_id
+        created_by=source_applicant_type.creator_id,
     )
-    transform_update_create_timestamp(source_applicant_type, target_applicant_type, log_extra=log_extra)
+    transform_update_create_timestamp(
+        source_applicant_type, target_applicant_type, log_extra=log_extra
+    )
 
     return target_applicant_type
 
-def convert_opportunity_summary_funding_instrument(source_funding_instrument: SourceFundingInstrument, existing_funding_instrument: LinkOpportunitySummaryFundingInstrument | None, opportunity_summary: OpportunitySummary) -> LinkOpportunitySummaryFundingInstrument:
+
+def convert_opportunity_summary_funding_instrument(
+    source_funding_instrument: SourceFundingInstrument,
+    existing_funding_instrument: LinkOpportunitySummaryFundingInstrument | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryFundingInstrument:
     log_extra = get_log_extra_funding_instrument(source_funding_instrument)
 
     # NOTE: The columns we're working with here are mostly the primary keys
@@ -309,23 +339,30 @@ def convert_opportunity_summary_funding_instrument(source_funding_instrument: So
 
     # The legacy ID is named differently in the forecast/synopsis tables
     if isinstance(source_funding_instrument, (TfundinstrForecast, TfundinstrForecastHist)):
-        legacy_funding_instrument_id = source_funding_instrument.fi_syn_id
-    else:
         legacy_funding_instrument_id = source_funding_instrument.fi_frcst_id
+    else:
+        legacy_funding_instrument_id = source_funding_instrument.fi_syn_id
 
     target_funding_instrument = LinkOpportunitySummaryFundingInstrument(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_instrument_id=legacy_funding_instrument_id,
         funding_instrument=funding_instrument,
         updated_by=source_funding_instrument.last_upd_id,
-        created_by=source_funding_instrument.creator_id
+        created_by=source_funding_instrument.creator_id,
     )
 
-    transform_update_create_timestamp(source_funding_instrument, target_funding_instrument, log_extra=log_extra)
+    transform_update_create_timestamp(
+        source_funding_instrument, target_funding_instrument, log_extra=log_extra
+    )
 
     return target_funding_instrument
 
-def convert_opportunity_summary_funding_category(source_funding_category: SourceFundingCategory, existing_funding_category: LinkOpportunitySummaryFundingCategory | None, opportunity_summary: OpportunitySummary) -> LinkOpportunitySummaryFundingCategory:
+
+def convert_opportunity_summary_funding_category(
+    source_funding_category: SourceFundingCategory,
+    existing_funding_category: LinkOpportunitySummaryFundingCategory | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryFundingCategory:
     log_extra = get_log_extra_funding_category(source_funding_category)
 
     # NOTE: The columns we're working with here are mostly the primary keys
@@ -348,12 +385,15 @@ def convert_opportunity_summary_funding_category(source_funding_category: Source
         legacy_funding_category_id=legacy_funding_category_id,
         funding_category=funding_category,
         updated_by=source_funding_category.last_upd_id,
-        created_by=source_funding_category.creator_id
+        created_by=source_funding_category.creator_id,
     )
 
-    transform_update_create_timestamp(source_funding_category, target_funding_category, log_extra=log_extra)
+    transform_update_create_timestamp(
+        source_funding_category, target_funding_category, log_extra=log_extra
+    )
 
     return target_funding_category
+
 
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     if timestamp is None:
@@ -464,6 +504,7 @@ def get_log_extra_applicant_type(source_applicant_type: SourceApplicantType) -> 
         "table_name": source_applicant_type.__tablename__,
     }
 
+
 def get_log_extra_funding_category(source_funding_category: SourceFundingCategory) -> dict:
     return {
         "opportunity_id": source_funding_category.opportunity_id,
@@ -472,6 +513,7 @@ def get_log_extra_funding_category(source_funding_category: SourceFundingCategor
         "revision_number": getattr(source_funding_category, "revision_number", None),
         "table_name": source_funding_category.__tablename__,
     }
+
 
 def get_log_extra_funding_instrument(source_funding_instrument: SourceFundingInstrument) -> dict:
     return {

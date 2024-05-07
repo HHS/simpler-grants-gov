@@ -885,9 +885,55 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
 
 
 # TODO - move these to the top?
-APPLICANT_TYPE_IDS = ["00", "01", "02", "04", "05", "06", "07", "08", "11", "12", "13", "20", "21", "22", "23", "25", "99"]
-FUNDING_CATEGORY_IDS = ["RA", "AG", "AR", "BC", "CD", "CP", "DPR", "ED", "ELT", "EN", "ENV", "FN", "HL", "HO", "HU", "IIJ", "IS", "ISS", "LJL", "NR", "OZ", "RD", "ST", "T", "ACA", "O"]
+APPLICANT_TYPE_IDS = [
+    "00",
+    "01",
+    "02",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "11",
+    "12",
+    "13",
+    "20",
+    "21",
+    "22",
+    "23",
+    "25",
+    "99",
+]
+FUNDING_CATEGORY_IDS = [
+    "RA",
+    "AG",
+    "AR",
+    "BC",
+    "CD",
+    "CP",
+    "DPR",
+    "ED",
+    "ELT",
+    "EN",
+    "ENV",
+    "FN",
+    "HL",
+    "HO",
+    "HU",
+    "IIJ",
+    "IS",
+    "ISS",
+    "LJL",
+    "NR",
+    "OZ",
+    "RD",
+    "ST",
+    "T",
+    "ACA",
+    "O",
+]
 FUNDING_INSTRUMENT_IDS = ["CA", "G", "PC", "O"]
+
 
 class StagingTapplicanttypesForecastFactory(BaseFactory):
     class Meta:
@@ -917,6 +963,7 @@ class StagingTapplicanttypesForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+
 class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFactory):
     class Meta:
         model = staging.forecast.TapplicanttypesForecastHist
@@ -929,6 +976,7 @@ class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFa
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTapplicanttypesSynopsisFactory(BaseFactory):
     class Meta:
@@ -957,6 +1005,7 @@ class StagingTapplicanttypesSynopsisFactory(BaseFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTapplicanttypesSynopsisHistFactory(StagingTapplicanttypesSynopsisFactory):
     class Meta:
@@ -1000,6 +1049,7 @@ class StagingTfundactcatForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+
 class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
     class Meta:
         model = staging.forecast.TfundactcatForecastHist
@@ -1012,6 +1062,7 @@ class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTfundactcatSynopsisFactory(BaseFactory):
     class Meta:
@@ -1041,6 +1092,7 @@ class StagingTfundactcatSynopsisFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+
 class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
     class Meta:
         model = staging.synopsis.TfundactcatSynopsisHist
@@ -1053,6 +1105,7 @@ class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTfundinstrForecastFactory(BaseFactory):
     class Meta:
@@ -1082,6 +1135,7 @@ class StagingTfundinstrForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+
 class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
     class Meta:
         model = staging.forecast.TfundinstrForecastHist
@@ -1094,6 +1148,7 @@ class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTfundinstrSynopsisFactory(BaseFactory):
     class Meta:
@@ -1122,6 +1177,7 @@ class StagingTfundinstrSynopsisFactory(BaseFactory):
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
+
 
 class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
     class Meta:
