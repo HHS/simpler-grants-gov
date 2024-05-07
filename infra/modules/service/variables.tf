@@ -87,9 +87,7 @@ variable "secrets" {
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
-    security_group_ids         = list(string)
-    app_access_policy_arn      = string
-    migrator_access_policy_arn = string
+    security_group_ids = list(string)
     connection_info = object({
       host        = string
       port        = string
@@ -99,6 +97,18 @@ variable "db_vars" {
     })
   })
   default = null
+}
+
+variable "app_access_policy_arn" {
+  description = "The ARN of the IAM policy to attach to the app service role for database access"
+  type        = string
+  default     = null
+}
+
+variable "migrator_access_policy_arn" {
+  description = "The ARN of the IAM policy to attach to the migrator task role for database access"
+  type        = string
+  default     = null
 }
 
 variable "extra_policies" {
