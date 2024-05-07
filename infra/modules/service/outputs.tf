@@ -1,6 +1,6 @@
 output "public_endpoint" {
   description = "The public endpoint for the service."
-  value       = "http://${aws_lb.alb.dns_name}"
+  value       = "http://${aws_lb.alb[0].dns_name}"
 }
 
 output "cluster_name" {
@@ -9,7 +9,7 @@ output "cluster_name" {
 
 output "load_balancer_arn_suffix" {
   description = "The ARN suffix for use with CloudWatch Metrics."
-  value       = aws_lb.alb.arn_suffix
+  value       = aws_lb.alb[0].arn_suffix
 }
 
 output "application_log_group" {
