@@ -31,9 +31,10 @@ type HeaderStrings = {
 type Props = {
   logoPath?: string;
   header_strings: HeaderStrings;
+  locale?: string;
 };
 
-const Header = ({ header_strings, logoPath }: Props) => {
+const Header = ({ header_strings, logoPath, locale }: Props) => {
   const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
@@ -63,16 +64,14 @@ const Header = ({ header_strings, logoPath }: Props) => {
       {header_strings[link.i18nKey as keyof HeaderStrings]}
     </a>
   ));
+  const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   return (
     <>
       <div
         className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
       />
-      <GovBanner
-        // TODO: Remove during move to app router and next-intl upgrade
-        language={"english"}
-      />
+      <GovBanner language={language} />
       <USWDSHeader basic={true}>
         <div className="usa-nav-container">
           <div className="usa-navbar">
