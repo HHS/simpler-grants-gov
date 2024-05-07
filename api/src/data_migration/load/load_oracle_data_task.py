@@ -37,7 +37,7 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
-        with self.db_session.begin_nested():
+        with self.db_session.begin():
             self.log_database_settings()
         self.load_data()
 
@@ -70,7 +70,7 @@ class LoadOracleDataTask(src.task.task.Task):
         """Load the data for all tables defined in the mapping."""
         for table_name in self.foreign_tables:
             try:
-                with self.db_session.begin_nested():
+                with self.db_session.begin():
                     self.load_data_for_table(table_name)
                     self.db_session.commit()
             except Exception:
@@ -82,13 +82,13 @@ class LoadOracleDataTask(src.task.task.Task):
         foreign_table = self.foreign_tables[table_name]
         staging_table = self.staging_tables[table_name]
 
-        self.log_row_count("row count before", foreign_table, staging_table)
+        self.log_row_count("before", foreign_table, staging_table)
 
         self.do_update(foreign_table, staging_table)
         self.do_insert(foreign_table, staging_table)
         self.do_mark_deleted(foreign_table, staging_table)
 
-        self.log_row_count("row count after", foreign_table, staging_table)
+        self.log_row_count("after", staging_table)
 
     def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Determine new rows by primary key, and copy them into the staging table."""
@@ -96,8 +96,6 @@ class LoadOracleDataTask(src.task.task.Task):
         insert_from_select_sql, select_sql = sql.build_insert_select_sql(
             foreign_table, staging_table
         )
-
-        # print(insert_from_select_sql)
 
         # COUNT has to be a separate query as INSERTs don't return a rowcount.
         insert_count = self.db_session.query(select_sql.subquery()).count()
@@ -119,7 +117,6 @@ class LoadOracleDataTask(src.task.task.Task):
 
         update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
 
-        # print(update_sql)
         t0 = time.monotonic()
         result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
@@ -141,7 +138,6 @@ class LoadOracleDataTask(src.task.task.Task):
             deleted_at=datetime_util.utcnow(),
         )
 
-        # print(update_sql)
         t0 = time.monotonic()
         result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
@@ -157,8 +153,10 @@ class LoadOracleDataTask(src.task.task.Task):
         """Log the number of rows in each of the tables using SQL COUNT()."""
         extra = {}
         for table in tables:
-            extra[f"count.{table.schema}.{table.name}"] = self.db_session.query(table).count()
-        logger.info(message, extra=extra, stacklevel=2)
+            count = self.db_session.query(table).count()
+            extra[f"count.{table.schema}.{table.name}"] = count
+            self.set_metrics({f"count.{message}.{table.schema}.{table.name}": count})
+        logger.info(f"row count {message}", extra=extra, stacklevel=2)
 
 
 def main() -> None:

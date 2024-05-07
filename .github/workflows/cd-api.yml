@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - "main"
-      - "jamesbursa/1686-load-legacy-to-staging"  # TODO remove
     paths:
       - "api/**"
   release:

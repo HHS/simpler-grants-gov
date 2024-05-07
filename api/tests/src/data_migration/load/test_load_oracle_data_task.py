@@ -84,11 +84,12 @@ def test_load_data(db_session, source_table, destination_table, create_tables):
             ]
         )
     )
+    db_session.commit()
 
     task = load_oracle_data_task.LoadOracleDataTask(
         db_session, {"table1": source_table}, {"table1": destination_table}
     )
-    task.load_data()
+    task.run()
 
     assert db_session.query(source_table).count() == 4
     assert db_session.query(destination_table).count() == 5
@@ -106,6 +107,13 @@ def test_load_data(db_session, source_table, destination_table, create_tables):
         (3, 4, "d+", time2, False, None, None),
         (4, 2, "e", time1, True, None, now),
     )
+
+    assert task.metrics["count.delete.test_destination_table"] == 1
+    assert task.metrics["count.insert.test_destination_table"] == 2
+    assert task.metrics["count.update.test_destination_table"] == 1
+    assert task.metrics["count.delete.total"] == 1
+    assert task.metrics["count.insert.total"] == 2
+    assert task.metrics["count.update.total"] == 1
 
 
 def test_raises_if_table_dicts_different(db_session, source_table, destination_table):
