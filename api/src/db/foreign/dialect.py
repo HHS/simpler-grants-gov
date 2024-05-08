@@ -24,7 +24,10 @@ class ForeignTableDDLCompiler(sqlalchemy.sql.compiler.DDLCompiler):
 
     def post_create_table(self, table):
         # Add foreign options at the end.
-        return f" SERVER grants OPTIONS (schema 'EGRANTSADMIN', table '{table.name.upper()}')"
+        return (
+            f" SERVER grants OPTIONS (schema 'EGRANTSADMIN', table '{table.name.upper()}', "
+            "readonly 'true', prefetch '1000')"
+        )
 
     def visit_create_column(self, create, first_pk=False, **kw):
         column = create.element
