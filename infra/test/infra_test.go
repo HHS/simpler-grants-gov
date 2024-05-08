@@ -12,7 +12,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/shell"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
-
+test
 var uniqueId = strings.ToLower(random.UniqueId())
 var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 var appName = flag.String("app_name", "", "name of subdirectory that holds the app's infrastructure code")
