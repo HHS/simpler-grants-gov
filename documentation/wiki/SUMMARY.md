@@ -25,7 +25,7 @@
       * [Delivery dashboard - technical spec](product/deliverables/specifications/delivery-dashboard/delivery-dashboard-technical-spec.md)
     * [Opportunity listing - Synopsis](product/deliverables/specifications/opportunity-listing-synopsis.md)
     * [🏁 Open source onboarding](product/deliverables/specifications/open-source-onboarding.md)
-    * [Co-Design Group planning](product/deliverables/specifications/co-design-group.md)
+    * [🏁 Co-Design Group planning](product/deliverables/specifications/co-design-group.md)
     * [Collaborative code challenge](product/deliverables/specifications/collaborative-code-challenge.md)
     * [Co-Design Group kickoff](product/deliverables/specifications/co-design-group-kickoff.md)
 * [Design](product/design.md)
