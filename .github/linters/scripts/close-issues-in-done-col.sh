@@ -71,6 +71,8 @@ gh api graphql \
 
 # iterate through the list of URLs written to the to_close_file
 # and close them with a comment indicating the reason for closing
+comment="Beep boop: Automatically closing this issue because it was marked as '${STATUS}' "
+comment+="in https://github.com/orgs/${ORG}/projects/${PROJECT}. This action was performed by a bot."
 while read URL; do
   if [[ $DRY_RUN == "YES" ]];
   then
@@ -78,6 +80,6 @@ while read URL; do
   else
     echo "Closing issue with URL: ${URL}"
     gh issue close $URL \
-    --comment "Closing because issue was marked as '${STATUS}' in https://github.com/orgs/${ORG}/projects/${PROJECT}"
+    --comment "${comment}"
   fi
 done < $to_close_file
