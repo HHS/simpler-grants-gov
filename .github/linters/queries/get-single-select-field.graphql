@@ -1,0 +1,21 @@
+query (
+  $org: String!
+  $project: Int!
+  $fieldName: String!
+  $fieldValue: [String!]
+) {
+  login: organization(login: $org) {
+    projectV2(number: $project) {
+      projectId: id
+      field(name: $fieldName) {
+        ... on ProjectV2SingleSelectField {
+          fieldId: id
+          options(names: $fieldValue) {
+            optionId: id
+            name
+          }
+        }
+      }
+    }
+  }
+}
