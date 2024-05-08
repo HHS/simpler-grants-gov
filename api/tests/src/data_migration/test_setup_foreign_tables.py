@@ -50,7 +50,7 @@ EXPECTED_NONLOCAL_OPPORTUNITY_SQL = [
     "category_explanation TEXT,",
     "publisher_profile_id BIGINT,",
     "is_draft TEXT",
-    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TOPPORTUNITY')",
+    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TOPPORTUNITY', readonly 'true', prefetch '1000')",
 ]
 
 
@@ -73,7 +73,7 @@ EXPECTED_NONLOCAL_TEST_SQL = [
     "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table (",
     "id INTEGER OPTIONS (key 'true') NOT NULL,",
     "description TEXT",
-    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE')",
+    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE', readonly 'true', prefetch '1000')",
 ]
 
 

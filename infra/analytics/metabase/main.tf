@@ -79,19 +79,24 @@ data "aws_rds_cluster" "db_cluster" {
 }
 
 module "service" {
-  source                = "../../modules/metabase-service"
-  service_name          = local.service_name
-  image_repository_name = "docker.io/metabase/metabase"
-  image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.network.id
-  public_subnet_ids     = data.aws_subnets.public.ids
-  private_subnet_ids    = data.aws_subnets.private.ids
-  cpu                   = 1024
-  memory                = 2048
+  source                   = "../../modules/service"
+  service_name             = local.service_name
+  image_repository_url     = "docker.io/metabase/metabase"
+  image_tag                = local.image_tag
+  vpc_id                   = data.aws_vpc.network.id
+  public_subnet_ids        = data.aws_subnets.public.ids
+  private_subnet_ids       = data.aws_subnets.private.ids
+  cpu                      = 1024
+  memory                   = 2048
+  container_port           = 3000
+  readonly_root_filesystem = false
+  drop_linux_capabilities  = false
+  healthcheck_command      = null
+  healthcheck_path         = "/"
   extra_environment_variables = {
     MB_DB_TYPE   = "postgres"
     MB_DB_DBNAME = "metabase"
-    MB_DB_PORT   = "5432"
+    MB_DB_PORT   = data.aws_rds_cluster.db_cluster.port
     MB_DB_HOST   = data.aws_rds_cluster.db_cluster.endpoint
   }
   secrets = [
@@ -104,7 +109,19 @@ module "service" {
       ssm_param_name = "/metabase/${var.environment_name}/db_pass"
     },
   ]
+
+  app_access_policy_arn      = null
+  migrator_access_policy_arn = null
+
   db_vars = {
     security_group_ids = data.aws_rds_cluster.db_cluster.vpc_security_group_ids
+    connection_info = {
+      host        = data.aws_rds_cluster.db_cluster.endpoint
+      port        = data.aws_rds_cluster.db_cluster.port
+      user        = local.database_config.app_username
+      db_name     = data.aws_rds_cluster.db_cluster.database_name
+      schema_name = local.database_config.schema_name
+    }
   }
+  is_temporary = false
 }

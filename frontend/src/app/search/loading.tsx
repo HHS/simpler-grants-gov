@@ -1,27 +1,14 @@
 import React from "react";
+import Spinner from "../../components/Spinner";
 
 export default function Loading() {
-  const listStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    height: "50vh",
-    listStyleType: "none",
-  };
-
-  const skeletonStyle = {
-    backgroundColor: "#eee",
-    borderRadius: "4px",
-    height: "20px",
-    margin: "10px 0",
-    width: "50%",
-  };
-
+  // TODO (Issue #1937): Use translation utility for strings in this file
   return (
-    <ul style={listStyle}>
-      {Array.from({ length: 10 }).map((_, index) => (
-        <li key={index} style={skeletonStyle} />
-      ))}
-    </ul>
+    <div className="display-flex flex-align-center flex-justify-center margin-bottom-15 margin-top-15">
+      <Spinner />
+      <span className="font-body-2xl text-bold margin-left-2">
+        Loading results...
+      </span>
+    </div>
   );
 }

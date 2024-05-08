@@ -1,6 +1,6 @@
 output "public_endpoint" {
   description = "The public endpoint for the service."
-  value       = "http://${aws_lb.alb.dns_name}"
+  value       = var.enable_load_balancer ? "http://${aws_lb.alb[0].dns_name}" : null
 }
 
 output "cluster_name" {
@@ -9,7 +9,7 @@ output "cluster_name" {
 
 output "load_balancer_arn_suffix" {
   description = "The ARN suffix for use with CloudWatch Metrics."
-  value       = aws_lb.alb.arn_suffix
+  value       = var.enable_load_balancer ? aws_lb.alb[0].arn_suffix : null
 }
 
 output "application_log_group" {
