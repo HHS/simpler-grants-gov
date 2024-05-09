@@ -15,6 +15,7 @@ from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.staging import metadata as staging_metadata
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 
@@ -99,6 +100,7 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
     with db_testing.create_isolated_db(monkeypatch_session, db_schema_prefix) as db_client:
         with db_client.get_connection() as conn, conn.begin():
             models.metadata.create_all(bind=conn)
+            staging_metadata.create_all(bind=conn)
 
         sync_lookup_values(db_client)
         yield db_client
@@ -134,6 +136,11 @@ def db_schema_prefix():
 @pytest.fixture
 def test_api_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.API}"
+
+
+@pytest.fixture
+def test_foreign_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.LEGACY}"
 
 
 ####################

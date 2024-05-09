@@ -1,5 +1,9 @@
 "use client";
 
+import SearchPagination, {
+  PaginationPosition,
+} from "../../components/search/SearchPagination";
+
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
@@ -9,7 +13,6 @@ import SearchFilterCategory from "../../components/search/SearchFilterCategory";
 import SearchFilterEligibility from "../../components/search/SearchFilterEligibility";
 import SearchFilterFundingInstrument from "../../components/search/SearchFilterFundingInstrument";
 import SearchOpportunityStatus from "../../components/search/SearchOpportunityStatus";
-import SearchPagination from "../../components/search/SearchPagination";
 import SearchResultsHeader from "../../components/search/SearchResultsHeader";
 import SearchResultsList from "../../components/search/SearchResultsList";
 import { useSearchFormState } from "../../hooks/useSearchFormState";
@@ -87,29 +90,26 @@ export function SearchForm({
               initialQueryParams={sortbyQueryParams}
             />
             <div className="usa-prose">
-              {searchResults?.data.length >= 1 ? (
-                <SearchPagination
-                  totalPages={searchResults?.pagination_info?.total_pages}
-                  page={page}
-                  handlePageChange={handlePageChange}
-                  showHiddenInput={true}
-                  paginationRef={topPaginationRef}
-                />
-              ) : null}
-
+              <SearchPagination
+                page={page}
+                handlePageChange={handlePageChange}
+                showHiddenInput={true}
+                paginationRef={topPaginationRef}
+                position={PaginationPosition.Top}
+                searchResultsLength={searchResults.data.length}
+              />
               <SearchResultsList
                 searchResults={searchResults?.data}
                 maxPaginationError={maxPaginationError}
                 agencyNameLookup={agencyNameLookup}
                 errors={searchResults.errors}
               />
-              {searchResults?.data?.length >= 1 ? (
-                <SearchPagination
-                  totalPages={searchResults?.pagination_info?.total_pages}
-                  page={page}
-                  handlePageChange={handlePageChange}
-                />
-              ) : null}
+              <SearchPagination
+                page={page}
+                handlePageChange={handlePageChange}
+                position={PaginationPosition.Bottom}
+                searchResultsLength={searchResults.data.length}
+              />
             </div>
           </div>
         </div>

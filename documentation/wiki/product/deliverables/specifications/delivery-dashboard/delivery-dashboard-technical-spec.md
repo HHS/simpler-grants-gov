@@ -12,86 +12,50 @@ This is a draft version of a new technical specification template. The contents 
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable</strong></td><td><a href="./">Delivery dashboard</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><a href="delivery-dashboard-technical-spec.md#architecture-decisions">Architecture decisions</a></li><li><a href="delivery-dashboard-technical-spec.md#technical-milestones">Technical milestones</a></li><li><a href="delivery-dashboard-technical-spec.md#integrations">Integrations</a></li><li><a href="delivery-dashboard-technical-spec.md#security-considerations">Security considerations</a></li><li><a href="delivery-dashboard-technical-spec.md#logs">Change log</a></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable</strong></td><td><a href="../delivery-dashboard.md">Delivery dashboard</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><a href="delivery-dashboard-technical-spec.md#architecture-decisions">Architecture decisions</a></li><li><a href="delivery-dashboard-technical-spec.md#technical-milestones">Technical milestones</a></li><li><a href="delivery-dashboard-technical-spec.md#integrations">Integrations</a></li><li><a href="delivery-dashboard-technical-spec.md#security-considerations">Security considerations</a></li><li><a href="delivery-dashboard-technical-spec.md#logs">Change log</a></li></ul></td></tr></tbody></table>
 
 ## Architecture decisions
 
 ### Dashboard
 
-This deliverable should implement the architecture to build and host dashboards that enables us to iteratively publish operational metrics related to the project.
+Several options were tested for a solution for displaying the delivery metric graphs.&#x20;
 
-Some options to consider include:
-
-* S3 bucket (or database connection) + dashboard UI (e.g. jupyter notebook, static site, etc.)
-* Analytics API + dashboard UI
-* Custom dashboard application (e.g. Plotly Dash or R Shiny app)
-* Open source dashboard solution (e.g. Metabase or Redash)
-* Software as a Service (SaaS) dashboard solutions (e.g. PowerBI, Tableau, Looker, etc.)
-
-The criteria that should inform this decision include:
-
-* How will members of the public access this dashboard? **Note:** This a core requirement for this deliverable.
-* How much control do we have over the look and feel of the dashboard?
-* How easy is it to add new charts and metrics?
-* Can users can export or download the data behind a given dashboard?
-* Can system-to-system users access the data via API?
-* Can open source contributors host the dashboard locally?
-* Does the platform used to build the dashboard also support ad hoc data analysis?
-* Can the dashboard include narrative text that explains how the metrics are calculated or expand on qualitative data and findings?
-* Can the dashboard UI be easily translated?&#x20;
-* Can the dashboard tool be used to grant individual stakeholders access to personalized views or subsets of the source data? For example, can we use this dashboard tool to enable grantors to view agency specific metrics for their grant pipeline.
+**ADR:** [**Business Intelligence Tool**](../../../../../decisions/adr/2024-04-10-dashboard-tool.md)
 
 ### ETL pipeline
 
-This deliverable should implement a strategy for extracting, transforming, and loading the data needed to calculate the operational metrics being published.
+It was decided to adapt the current analytics folder to run in an ECS container and push data to the data warehouse in Postgres.&#x20;
 
-Some options to consider include:
-
-* GitHub actions + custom scripts
-* Orchestration tool (e.g. Airflow, Prefect, Dagster, etc.)
-* SaaS ETL tools (e.g. Talend, Informatica, etc.)
-
-The criteria that should inform this decision include:
-
-* How easy is it to build and maintain new ETL pipelines?
-* How easy is it to connect to new sources or targets?
-* Can the ETL pipeline execute transformations written in different languages (e.g. Python, SQL, Node.js)?
-* What options are supported for scheduling, retries, and dependencies between steps?
-* Can open source contributors host and execute their own version of this pipeline?
+**ADR (ticketed):** [**\[ADR\]: Dashboard ETL orchestration strategy**](https://github.com/HHS/simpler-grants-gov/issues/1248)
 
 ### Data warehouse
 
-This deliverable should also implement a strategy for storing the data needed to calculate operational metrics and (potentially) the results of those calculations.
+Several options were considered including S3, Postgres, and Redshift. Postgres was chosen since it is not clear the storage requirements will necessitate a database like Redshift and Postgres is already used by the team so it is faster to deliver and easier to maintain.
 
-Some options to consider include:
-
-* Files stored in S3 buckets (e.g. json, csv)
-* Separate schema in our existing Postgres database
-* Self-hosted OLAP database (e.g. ClickHouse)
-* Third-party managed data warehouse (e.g. Snowflake)
-
-The criteria that should inform this decision include:
-
-* Can the warehouse support both structured and unstructured data?
-* How easy is it to query the data for ad hoc reporting and analysis?
-* What kind of access controls does the warehouse provide?
-* Can open source contributors host their own version of this data warehouse?
+**ADR:** [**Dashboard Data Storage**](../../../../../decisions/adr/2024-03-19-dashboard-storage.md)
 
 ## Technical milestones
 
-\[TODO] Add descriptions of technical milestones here
+* ### [Delivery dashboard - Planning](https://github.com/HHS/simpler-grants-gov/milestone/137)
+  * Testing storage and BI tools and writing ADRs
+* ### [Delivery dashboard - Infrastructure](https://github.com/HHS/simpler-grants-gov/milestone/139)
+  * Infra to setup BI tool, storage, and run ETL task
+* ### [Delivery dashboard - UI](https://github.com/HHS/simpler-grants-gov/milestone/138)
+  * Setting up dashboards once BI tool is setup and data is loaded
+* ### [Delivery dashboard - ETL](https://github.com/HHS/simpler-grants-gov/milestone/136)
+  * Extending existing analytics folder to run in AWS and push to Postgres
 
 ## Integrations
 
 ### Translations
 
-Does this milestone involve delivering any content that needs translation?
+**Does this milestone involve delivering any content that needs translation?**
 
-* **Metric explanations:** If we include explanations of the metrics included in the dashboard, those explanations should be translated. The ability to translate this content will depend on the architecture we choose for the dashboard.
+Dashboard explanatory material could be translated. This is out of scope since we don't have a translation service.
 
-If so, when will English-language content be locked? Then when will translation be started and completed?
+**If so, when will English-language content be locked? Then when will translation be started and completed?**
 
-* **Translations after launch:** The content will be finalized by when the dashboard is launched. We will create tickets that represent the translations need them and complete them as part of the translation process created for the static site, once that translation process is launched.
+Dashboard explanatory material could be translated. This is out of scope since we don't have a translation service.
 
 ### Services going into PROD for the first time
 
@@ -107,7 +71,7 @@ Are there multiple services that are being connected for the first time in PROD?
 
 * **ETL pipeline + GitHub:** We'll need to connect the ETL pipeline to GitHub in order to extract the data needed for sprint and delivery metrics.
 * **ETL pipeline + data warehouse:** We'll also need to connect the ETL pipeline to the data warehouse where it will load the data for analysis.
-* **Dashboard + static site:** The static site will, at a minimum, link to the dashboard. Depending on the architectural pattern we choose, the dashboard _may_ be embedded directly within the static site.
+* **BI Tool + data warehouse:** The BI tool will connect to the data warehouse, and dashboards will be shared publicly and embedded in Gitbook.
 
 ### Data being shared publicly for the first time
 
@@ -122,6 +86,7 @@ Are there any fields being shared publicly that have never been shared in PROD b
 Does this milestone expose any new attack vectors or expand the attack surface of the product?
 
 * **API keys or tokens:** In order to connect the ETL pipeline to GitHub and our data warehouse, we'll need to maintain a set of secrets (e.g. API tokens, database connection URI, etc.) that enable these integrations. Securely managing these secrets and integrations increases the attack surface of the product.
+* **BI tool:** The BI tool will be able to connect to the data warehouse
 
 ### Mitigation strategies
 
@@ -129,3 +94,4 @@ If so, how are we addressing these risks?
 
 * **Secrets manager:** We'll use the appropriate secrets manager for the tool we choose to orchestrate our ETL pipeline. For example, if we are using GitHub actions as a lightweight scheduler, we'll use [GitHub secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions). If we're using a more mature orchestration tool, like Airflow, we'll use its [secrets backend](https://airflow.apache.org/docs/apache-airflow-providers/core-extensions/secrets-backends.html) feature.
 * **Least privilege:** In addition to managing these secrets securely, we'll also follow the principle of least privilege when creating and managing the scopes or roles associated with these integrations.
+* **SSO and MFA**: Single-sign on and Multi-Factor auth will be required for the BI tool.

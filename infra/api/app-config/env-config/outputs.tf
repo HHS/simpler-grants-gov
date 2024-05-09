@@ -10,6 +10,8 @@ output "database_config" {
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
     instance_count              = var.database_instance_count
     enable_http_endpoint        = var.database_enable_http_endpoint
+    max_capacity                = var.database_max_capacity
+    min_capacity                = var.database_min_capacity
   } : null
 }
 

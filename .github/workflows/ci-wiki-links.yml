@@ -1,0 +1,24 @@
+# Checks that all of the markdown files in /documentation/wiki/
+# have been added to documenation/wiki/SUMMARY.md
+name: CI - Check wiki links
+
+on:
+  pull_request:
+    paths:
+      - documentation/wiki/**
+      - .github/workflows/ci-wiki-links.yml
+      - .github/linters/scripts/check-wiki-pages-linked-to-summary.sh
+
+defaults:
+  run:
+    working-directory: ./.github/linters # ensures that this job runs from the ./linters sub-directory
+
+jobs:
+  check-wiki-links:
+    name: Check wiki links in SUMMARY.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check all wiki files are linked in SUMMARY.md
+        run: ./scripts/check-wiki-pages-linked-to-summary.sh

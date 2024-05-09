@@ -54,7 +54,7 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.2.0, < 2.0.0"
+  required_version = ">= 1.8.0, < 1.9.0"
 
   required_providers {
     aws = {
@@ -124,10 +124,11 @@ module "service" {
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
+  app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
+  migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+
   db_vars = module.app_config.has_database ? {
-    security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
     connection_info = {
       host        = data.aws_rds_cluster.db_cluster[0].endpoint
       port        = data.aws_rds_cluster.db_cluster[0].port

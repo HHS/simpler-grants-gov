@@ -13,7 +13,7 @@ const Layout = ({ children }: Props) => {
   // TODO: Remove during move to app router and next-intl upgrade
   const header_strings = {
     title: t("Header.title"),
-    nav_menu_toggle: t("nav_menu_toggle"),
+    nav_menu_toggle: t("Header.nav_menu_toggle"),
     nav_link_home: t("Header.nav_link_home"),
     nav_link_search: t("Search"),
     nav_link_process: t("Header.nav_link_process"),
@@ -52,7 +52,7 @@ const Layout = ({ children }: Props) => {
       <a className="usa-skipnav" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <Header header_strings={header_strings} />
+      <Header locale={"en"} header_strings={header_strings} />
       <main id="main-content">{children}</main>
       <Footer footer_strings={footer_strings} />
       <GrantsIdentifier identifier_strings={identifier_strings} />

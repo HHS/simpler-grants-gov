@@ -31,12 +31,14 @@ TASK_NAME = "set-current-opportunities"
 @ecs_background_task(TASK_NAME)
 @flask_db.with_db_session()
 def set_current_opportunities(db_session: db.Session) -> None:
-    SetCurrentOpportunitiesTask(db_session, get_now_us_eastern_date()).run()
+    SetCurrentOpportunitiesTask(db_session).run()
 
 
 class SetCurrentOpportunitiesTask(Task):
-    def __init__(self, db_session: db.Session, current_date: date) -> None:
+    def __init__(self, db_session: db.Session, current_date: date | None = None) -> None:
         super().__init__(db_session)
+        if current_date is None:
+            current_date = get_now_us_eastern_date()
         self.current_date = current_date
 
     class Metrics(StrEnum):
