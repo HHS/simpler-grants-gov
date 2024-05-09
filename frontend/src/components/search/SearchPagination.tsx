@@ -13,6 +13,7 @@ interface SearchPaginationProps {
   page: number;
   handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
   paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
+  totalPages: number;
   position: PaginationPosition;
   searchResultsLength: number;
 }
@@ -24,6 +25,7 @@ export default function SearchPagination({
   page,
   handlePageChange,
   paginationRef,
+  totalPages,
   position,
   searchResultsLength,
 }: SearchPaginationProps) {
@@ -54,6 +56,7 @@ export default function SearchPagination({
       )}
       <Pagination
         pathname="/search"
+        totalPages={totalPages}
         currentPage={page}
         maxSlots={MAX_SLOTS}
         onClickNext={() => handlePageChange(page + 1)}
