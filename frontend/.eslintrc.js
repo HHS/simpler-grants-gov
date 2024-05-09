@@ -49,6 +49,8 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": "error",
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
         "@typescript-eslint/no-explicit-any": "error",
+        // Just warn since playwright tests may not use screen the way jest would
+        "testing-library/prefer-screen-queries": "warn",
       },
     },
   ],
