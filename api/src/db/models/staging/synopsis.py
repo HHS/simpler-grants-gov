@@ -48,6 +48,18 @@ class TapplicanttypesSynopsis(
         overlaps="synopsis",
     )
 
+    @property
+    def legacy_applicant_type_id(self) -> int:
+        return self.at_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
+    @property
+    def revision_number(self) -> None:
+        return None
+
 
 class TapplicanttypesSynopsisHist(
     StagingBase, synopsis_mixin.TapplicanttypesSynopsisHistMixin, StagingParamMixin
@@ -61,6 +73,14 @@ class TapplicanttypesSynopsisHist(
         overlaps="synopsis",
     )
 
+    @property
+    def legacy_applicant_type_id(self) -> int:
+        return self.at_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
 
 class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, StagingParamMixin):
     __tablename__ = "tfundactcat_synopsis"
@@ -71,6 +91,18 @@ class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, 
         uselist=False,
         overlaps="synopsis",
     )
+
+    @property
+    def legacy_funding_category_id(self) -> int:
+        return self.fac_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
+    @property
+    def revision_number(self) -> None:
+        return None
 
 
 class TfundactcatSynopsisHist(
@@ -85,6 +117,14 @@ class TfundactcatSynopsisHist(
         overlaps="synopsis",
     )
 
+    @property
+    def legacy_funding_category_id(self) -> int:
+        return self.fac_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
 
 class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, StagingParamMixin):
     __tablename__ = "tfundinstr_synopsis"
@@ -95,6 +135,18 @@ class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, St
         uselist=False,
         overlaps="synopsis",
     )
+
+    @property
+    def legacy_funding_instrument_id(self) -> int:
+        return self.fi_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False
+
+    @property
+    def revision_number(self) -> None:
+        return None
 
 
 class TfundinstrSynopsisHist(
@@ -108,3 +160,11 @@ class TfundinstrSynopsisHist(
         uselist=False,
         overlaps="synopsis",
     )
+
+    @property
+    def legacy_funding_instrument_id(self) -> int:
+        return self.fi_syn_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return False

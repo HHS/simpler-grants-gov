@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
 from enum import StrEnum
-from typing import Sequence, Tuple, Type, TypeVar, cast
+from typing import Any, Sequence, Tuple, Type, TypeVar, cast
 
 from sqlalchemy import and_, select
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.data_migration.transformation import transform_util
@@ -56,6 +57,7 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_INSERTED = "total_records_inserted"
         TOTAL_RECORDS_UPDATED = "total_records_updated"
         TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
+        TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
 
         TOTAL_ERROR_COUNT = "total_error_count"
 
@@ -78,7 +80,9 @@ class TransformOracleDataTask(Task):
             self.process_opportunity_summaries()
 
             # One-to-many lookups
-            self.process_one_to_many_lookup_tables()
+            self.process_link_applicant_types()
+            self.process_link_funding_categories()
+            self.process_link_funding_instruments()
 
     def fetch(
         self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
@@ -125,6 +129,7 @@ class TransformOracleDataTask(Task):
         join_clause: Sequence,
         is_forecast: bool,
         is_historical_table: bool,
+        relationship_load_value: Any,
     ) -> list[Tuple[S, D | None, OpportunitySummary | None]]:
         # setup the join clause for getting the opportunity summary
 
@@ -147,7 +152,8 @@ class TransformOracleDataTask(Task):
                 .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
                 .join(destination_model, and_(*join_clause), isouter=True)
                 .where(source_model.transformed_at.is_(None))
-                .execution_options(yield_per=5000)
+                .options(selectinload(relationship_load_value))
+                .execution_options(yield_per=5000, populate_existing=True)
             ),
         )
 
@@ -399,15 +405,13 @@ class TransformOracleDataTask(Task):
         logger.info("Processed opportunity summary", extra=extra)
         source_summary.transformed_at = self.transform_time
 
-    def process_one_to_many_lookup_tables(self) -> None:
-        self.process_link_applicant_types()
-        self.process_link_funding_categories()
-        self.process_link_funding_categories()
-
     def process_link_applicant_types(self) -> None:
+        link_table = LinkOpportunitySummaryApplicantType
+        relationship_load_value = OpportunitySummary.link_applicant_types
+
         forecast_applicant_type_records = self.fetch_with_opportunity_summary(
             TapplicanttypesForecast,
-            LinkOpportunitySummaryApplicantType,
+            link_table,
             [
                 TapplicanttypesForecast.at_frcst_id
                 == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
@@ -416,12 +420,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(forecast_applicant_type_records)
 
         forecast_applicant_type_hist_records = self.fetch_with_opportunity_summary(
             TapplicanttypesForecastHist,
-            LinkOpportunitySummaryApplicantType,
+            link_table,
             [
                 TapplicanttypesForecastHist.at_frcst_id
                 == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
@@ -430,12 +435,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(forecast_applicant_type_hist_records)
 
         synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
             TapplicanttypesSynopsis,
-            LinkOpportunitySummaryApplicantType,
+            link_table,
             [
                 TapplicanttypesSynopsis.at_syn_id
                 == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
@@ -444,12 +450,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(synopsis_applicant_type_records)
 
         synopsis_applicant_type_hist_records = self.fetch_with_opportunity_summary(
             TapplicanttypesSynopsisHist,
-            LinkOpportunitySummaryApplicantType,
+            link_table,
             [
                 TapplicanttypesSynopsisHist.at_syn_id
                 == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
@@ -458,6 +465,7 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(synopsis_applicant_type_hist_records)
 
@@ -519,8 +527,21 @@ class TransformOracleDataTask(Task):
             )
 
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                self.db_session.add(transformed_applicant_type)
+                # Before we insert, we have to still be certain we're not adding a duplicate record
+                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+                # its possible for the same lookup value to appear multiple times because the legacy ID is different
+                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+                if transformed_applicant_type.applicant_type in opportunity_summary.applicant_types:
+                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                    logger.warning(
+                        "Skipping applicant type record",
+                        extra=extra | {"applicant_type": transformed_applicant_type.applicant_type},
+                    )
+                else:
+                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                    # opportunity summary object so that the above check works when we receive dupes in the same batch
+                    opportunity_summary.link_applicant_types.append(transformed_applicant_type)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_applicant_type)
@@ -529,9 +550,12 @@ class TransformOracleDataTask(Task):
         source_applicant_type.transformed_at = self.transform_time
 
     def process_link_funding_categories(self) -> None:
+        link_table = LinkOpportunitySummaryFundingCategory
+        relationship_load_value = OpportunitySummary.link_funding_categories
+
         forecast_funding_category_records = self.fetch_with_opportunity_summary(
             TfundactcatForecast,
-            LinkOpportunitySummaryFundingCategory,
+            link_table,
             [
                 TfundactcatForecast.fac_frcst_id
                 == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
@@ -540,12 +564,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(forecast_funding_category_records)
 
         forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(
             TfundactcatForecastHist,
-            LinkOpportunitySummaryFundingCategory,
+            link_table,
             [
                 TfundactcatForecastHist.fac_frcst_id
                 == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
@@ -554,12 +579,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(forecast_funding_category_hist_records)
 
         synopsis_funding_category_records = self.fetch_with_opportunity_summary(
             TfundactcatSynopsis,
-            LinkOpportunitySummaryFundingCategory,
+            link_table,
             [
                 TfundactcatSynopsis.fac_syn_id
                 == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
@@ -568,12 +594,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(synopsis_funding_category_records)
 
         synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(
             TfundactcatSynopsisHist,
-            LinkOpportunitySummaryFundingCategory,
+            link_table,
             [
                 TfundactcatSynopsisHist.fac_syn_id
                 == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
@@ -582,6 +609,7 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(synopsis_funding_category_hist_records)
 
@@ -644,8 +672,25 @@ class TransformOracleDataTask(Task):
                 )
             )
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                self.db_session.add(transformed_funding_category)
+                # Before we insert, we have to still be certain we're not adding a duplicate record
+                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+                # its possible for the same lookup value to appear multiple times because the legacy ID is different
+                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+                if (
+                    transformed_funding_category.funding_category
+                    in opportunity_summary.funding_categories
+                ):
+                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                    logger.warning(
+                        "Skipping funding category record",
+                        extra=extra
+                        | {"funding_category": transformed_funding_category.funding_category},
+                    )
+                else:
+                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                    # opportunity summary object so that the above check works when we receive dupes in the same batch
+                    opportunity_summary.link_funding_categories.append(transformed_funding_category)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_funding_category)
@@ -654,9 +699,12 @@ class TransformOracleDataTask(Task):
         source_funding_category.transformed_at = self.transform_time
 
     def process_link_funding_instruments(self) -> None:
+        link_table = LinkOpportunitySummaryFundingInstrument
+        relationship_load_value = OpportunitySummary.link_funding_instruments
+
         forecast_funding_instrument_records = self.fetch_with_opportunity_summary(
             TfundinstrForecast,
-            LinkOpportunitySummaryFundingInstrument,
+            link_table,
             [
                 TfundinstrForecast.fi_frcst_id
                 == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
@@ -665,12 +713,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(forecast_funding_instrument_records)
 
         forecast_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
             TfundinstrForecastHist,
-            LinkOpportunitySummaryFundingInstrument,
+            link_table,
             [
                 TfundinstrForecastHist.fi_frcst_id
                 == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
@@ -679,12 +728,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=True,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(forecast_funding_instrument_hist_records)
 
         synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
             TfundinstrSynopsis,
-            LinkOpportunitySummaryFundingInstrument,
+            link_table,
             [
                 TfundinstrSynopsis.fi_syn_id
                 == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
@@ -693,12 +743,13 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=False,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_records)
 
         synopsis_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
             TfundinstrSynopsisHist,
-            LinkOpportunitySummaryFundingInstrument,
+            link_table,
             [
                 TfundinstrSynopsisHist.fi_syn_id
                 == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
@@ -707,6 +758,7 @@ class TransformOracleDataTask(Task):
             ],
             is_forecast=False,
             is_historical_table=True,
+            relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_hist_records)
 
@@ -771,8 +823,27 @@ class TransformOracleDataTask(Task):
                 )
             )
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                self.db_session.add(transformed_funding_instrument)
+                # Before we insert, we have to still be certain we're not adding a duplicate record
+                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+                # its possible for the same lookup value to appear multiple times because the legacy ID is different
+                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+                if (
+                    transformed_funding_instrument.funding_instrument
+                    in opportunity_summary.funding_instruments
+                ):
+                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                    logger.warning(
+                        "Skipping funding instrument record",
+                        extra=extra
+                        | {"funding_instrument": transformed_funding_instrument.funding_instrument},
+                    )
+                else:
+                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                    # opportunity summary object so that the above check works when we receive dupes in the same batch
+                    opportunity_summary.link_funding_instruments.append(
+                        transformed_funding_instrument
+                    )
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_funding_instrument)

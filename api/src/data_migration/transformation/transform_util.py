@@ -16,15 +16,7 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import (
-    TapplicanttypesForecast,
-    TapplicanttypesForecastHist,
-    TforecastHist,
-    TfundactcatForecast,
-    TfundactcatForecastHist,
-    TfundinstrForecast,
-    TfundinstrForecastHist,
-)
+from src.db.models.staging.forecast import TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
@@ -301,15 +293,9 @@ def convert_opportunity_summary_applicant_type(
 
     applicant_type = transform_applicant_type(source_applicant_type.at_id)
 
-    # The legacy ID is named differently in the forecast/synopsis tables
-    if isinstance(source_applicant_type, (TapplicanttypesForecast, TapplicanttypesForecastHist)):
-        legacy_applicant_type_id = source_applicant_type.at_frcst_id
-    else:
-        legacy_applicant_type_id = source_applicant_type.at_syn_id
-
     target_applicant_type = LinkOpportunitySummaryApplicantType(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
-        legacy_applicant_type_id=legacy_applicant_type_id,
+        legacy_applicant_type_id=source_applicant_type.legacy_applicant_type_id,
         applicant_type=applicant_type,
         updated_by=source_applicant_type.last_upd_id,
         created_by=source_applicant_type.creator_id,
@@ -337,15 +323,9 @@ def convert_opportunity_summary_funding_instrument(
 
     funding_instrument = transform_funding_instrument(source_funding_instrument.fi_id)
 
-    # The legacy ID is named differently in the forecast/synopsis tables
-    if isinstance(source_funding_instrument, (TfundinstrForecast, TfundinstrForecastHist)):
-        legacy_funding_instrument_id = source_funding_instrument.fi_frcst_id
-    else:
-        legacy_funding_instrument_id = source_funding_instrument.fi_syn_id
-
     target_funding_instrument = LinkOpportunitySummaryFundingInstrument(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
-        legacy_funding_instrument_id=legacy_funding_instrument_id,
+        legacy_funding_instrument_id=source_funding_instrument.legacy_funding_instrument_id,
         funding_instrument=funding_instrument,
         updated_by=source_funding_instrument.last_upd_id,
         created_by=source_funding_instrument.creator_id,
@@ -374,15 +354,9 @@ def convert_opportunity_summary_funding_category(
 
     funding_category = transform_funding_category(source_funding_category.fac_id)
 
-    # The legacy ID is named differently in the forecast/synopsis tables
-    if isinstance(source_funding_category, (TfundactcatForecast, TfundactcatForecastHist)):
-        legacy_funding_category_id = source_funding_category.fac_frcst_id
-    else:
-        legacy_funding_category_id = source_funding_category.fac_syn_id
-
     target_funding_category = LinkOpportunitySummaryFundingCategory(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
-        legacy_funding_category_id=legacy_funding_category_id,
+        legacy_funding_category_id=source_funding_category.legacy_funding_category_id,
         funding_category=funding_category,
         updated_by=source_funding_category.last_upd_id,
         created_by=source_funding_category.creator_id,
