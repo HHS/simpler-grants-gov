@@ -2,15 +2,15 @@
 
 import { useRef, useState } from "react";
 
+import { QueryParamData } from "../services/search/searchfetcher/SearchFetcher";
 import { SearchAPIResponse } from "../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "../services/search/searchfetcher/SearchFetcher";
 import { updateResults } from "../app/search/actions";
 import { useFormState } from "react-dom";
 import { useSearchParamUpdater } from "./useSearchParamUpdater";
 
 export function useSearchFormState(
   initialSearchResults: SearchAPIResponse,
-  requestURLQueryParams: SearchFetcherProps,
+  requestURLQueryParams: QueryParamData,
 ) {
   const { updateQueryParams } = useSearchParamUpdater();
   const formRef = useRef<HTMLFormElement>(null);

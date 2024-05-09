@@ -1,9 +1,9 @@
 import { BadRequestError } from "src/errors";
 import { ParsedError } from "src/app/search/error";
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
 describe("BadRequestError", () => {
-  const dummySearchInputs: SearchFetcherProps = {
+  const dummySearchInputs: QueryParamData = {
     status: new Set(["active"]),
     fundingInstrument: new Set(["grant"]),
     eligibility: new Set(["public"]),

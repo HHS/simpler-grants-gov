@@ -4,17 +4,15 @@ import {
 } from "../../types/searchRequestURLTypes";
 
 import BetaAlert from "../../components/AppBetaAlert";
-import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
+import { Metadata } from "next";
 import React from "react";
 import SearchCallToAction from "../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
 import { convertSearchParamsToProperTypes } from "../../utils/search/convertSearchParamsToProperTypes";
-import { cookies } from "next/headers";
 import { generateAgencyNameLookup } from "src/utils/search/generateAgencyNameLookup";
 import { getSearchFetcher } from "../../services/search/searchfetcher/SearchFetcherUtil";
 import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
+import withFeatureFlag from "../../hoc/search/withFeatureFlag";
 
 const searchFetcher = getSearchFetcher();
 
@@ -31,14 +29,7 @@ export async function generateMetadata() {
 
   return meta;
 }
-
-export default async function Search({ searchParams }: ServerPageProps) {
-  const ffManager = new FeatureFlagsManager(cookies());
-
-  if (ffManager.isFeatureDisabled("showSearchV0", searchParams)) {
-    return notFound();
-  }
-
+async function Search({ searchParams }: ServerPageProps) {
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const initialSearchResults = await searchFetcher.fetchOpportunities(
     convertedSearchParams,
@@ -56,3 +47,6 @@ export default async function Search({ searchParams }: ServerPageProps) {
     </>
   );
 }
+
+// Exports page behind a feature flag
+export default withFeatureFlag(Search, "showSearchV0");

@@ -10,7 +10,7 @@ import {
 } from "../../types/search/searchRequestTypes";
 
 import BaseApi from "./BaseApi";
-import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "../../services/search/searchfetcher/SearchFetcher";
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {
@@ -27,7 +27,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return { ...baseHeaders, ...searchHeaders };
   }
 
-  async searchOpportunities(searchInputs: SearchFetcherProps) {
+  async searchOpportunities(searchInputs: QueryParamData) {
     const { query } = searchInputs;
     const filters = this.buildFilters(searchInputs);
     const pagination = this.buildPagination(searchInputs);
@@ -57,9 +57,7 @@ export default class SearchOpportunityAPI extends BaseApi {
   }
 
   // Build with one_of syntax
-  private buildFilters(
-    searchInputs: SearchFetcherProps,
-  ): SearchFilterRequestBody {
+  private buildFilters(searchInputs: QueryParamData): SearchFilterRequestBody {
     const { status, fundingInstrument, eligibility, agency, category } =
       searchInputs;
     const filters: SearchFilterRequestBody = {};
@@ -88,9 +86,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return filters;
   }
 
-  private buildPagination(
-    searchInputs: SearchFetcherProps,
-  ): PaginationRequestBody {
+  private buildPagination(searchInputs: QueryParamData): PaginationRequestBody {
     const { sortby, page, fieldChanged } = searchInputs;
 
     // When performing an update (query, filter, sortby change) - we want to
