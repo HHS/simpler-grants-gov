@@ -7,16 +7,16 @@ type SortOption = {
 };
 
 const SORT_OPTIONS: SortOption[] = [
-  { label: "Opportunity Number (Ascending)", value: "opportunityNumberAsc" },
-  { label: "Opportunity Number (Descending)", value: "opportunityNumberDesc" },
-  { label: "Opportunity Title (Ascending)", value: "opportunityTitleAsc" },
-  { label: "Opportunity Title (Descending)", value: "opportunityTitleDesc" },
-  { label: "Agency (Ascending)", value: "agencyAsc" },
-  { label: "Agency (Descending)", value: "agencyDesc" },
-  { label: "Posted Date (Ascending)", value: "postedDateAsc" },
   { label: "Posted Date (Descending)", value: "postedDateDesc" },
-  { label: "Close Date (Ascending)", value: "closeDateAsc" },
+  { label: "Posted Date (Ascending)", value: "postedDateAsc" },
+  { label: "Opportunity Number (Descending)", value: "opportunityNumberDesc" },
+  { label: "Opportunity Number (Ascending)", value: "opportunityNumberAsc" },
+  { label: "Opportunity Title (Descending)", value: "opportunityTitleDesc" },
+  { label: "Opportunity Title (Ascending)", value: "opportunityTitleAsc" },
+  { label: "Agency (Descending)", value: "agencyDesc" },
+  { label: "Agency (Ascending)", value: "agencyAsc" },
   { label: "Close Date (Descending)", value: "closeDateDesc" },
+  { label: "Close Date (Ascending)", value: "closeDateAsc" },
 ];
 
 interface SearchSortByProps {
