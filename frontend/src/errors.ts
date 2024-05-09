@@ -2,7 +2,7 @@
  * @file Custom Error classes. Useful as a way to see all potential errors that our system may throw/catch
  */
 
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
 /**
  * A fetch request failed due to a network error. The error wasn't the fault of the user,
@@ -12,7 +12,7 @@ import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetc
  */
 
 export class NetworkError extends Error {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     const serializedSearchInputs = convertSearchInputSetsToArrays(searchInputs);
 
     const serializedData = JSON.stringify({
@@ -29,7 +29,7 @@ export class NetworkError extends Error {
 export class BaseFrontendError extends Error {
   constructor(
     error: unknown,
-    searchInputs: SearchFetcherProps,
+    searchInputs: QueryParamData,
     type: string,
     status?: number,
   ) {
@@ -61,7 +61,7 @@ export class BaseFrontendError extends Error {
 export class ApiRequestError extends BaseFrontendError {
   constructor(
     error: unknown,
-    searchInputs: SearchFetcherProps,
+    searchInputs: QueryParamData,
     type: string,
     status: number,
   ) {
@@ -73,7 +73,7 @@ export class ApiRequestError extends BaseFrontendError {
  * An API response returned a 400 status code and its JSON body didn't include any `errors`
  */
 export class BadRequestError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "BadRequestError", 400);
   }
 }
@@ -82,7 +82,7 @@ export class BadRequestError extends ApiRequestError {
  * An API response returned a 401 status code
  */
 export class UnauthorizedError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "UnauthorizedError", 401);
   }
 }
@@ -93,7 +93,7 @@ export class UnauthorizedError extends ApiRequestError {
  * being created, or the user hasn't consented to the data sharing agreement.
  */
 export class ForbiddenError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "ForbiddenError", 403);
   }
 }
@@ -102,7 +102,7 @@ export class ForbiddenError extends ApiRequestError {
  * A fetch request failed due to a 404 error
  */
 export class NotFoundError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "NotFoundError", 404);
   }
 }
@@ -111,7 +111,7 @@ export class NotFoundError extends ApiRequestError {
  * An API response returned a 408 status code
  */
 export class RequestTimeoutError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "RequestTimeoutError", 408);
   }
 }
@@ -120,7 +120,7 @@ export class RequestTimeoutError extends ApiRequestError {
  * An API response returned a 422 status code
  */
 export class ValidationError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "ValidationError", 422);
   }
 }
@@ -133,7 +133,7 @@ export class ValidationError extends ApiRequestError {
  * An API response returned a 500 status code
  */
 export class InternalServerError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "InternalServerError", 500);
   }
 }
@@ -142,7 +142,7 @@ export class InternalServerError extends ApiRequestError {
  *  An API response returned a 503 status code
  */
 export class ServiceUnavailableError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: SearchFetcherProps) {
+  constructor(error: unknown, searchInputs: QueryParamData) {
     super(error, searchInputs, "ServiceUnavailableError", 503);
   }
 }
@@ -152,7 +152,7 @@ type SearchInputsSimple = {
 };
 
 function convertSearchInputSetsToArrays(
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
 ): SearchInputsSimple {
   return {
     ...searchInputs,
