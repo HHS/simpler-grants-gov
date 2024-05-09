@@ -2,14 +2,14 @@ import { expect, test } from "@playwright/test";
 
 test("should navigate to the search page", async ({ page }) => {
   // Start from the index page with feature flag set
-  await page.goto("http://localhost:3000/?_ff=showSearchV0:true");
+  await page.goto("/?_ff=showSearchV0:true");
 
   // Locate the 'Search' link in the navigation bar and click on it
   await page.click("nav >> text=Search");
 
   // Verify that the new URL is correct
   await expect(page).toHaveURL(
-    "http://localhost:3000/search?status=forecasted,posted",
+    "/search?status=forecasted,posted",
   );
 
   // Verify the presence of "Search" content on the page
@@ -25,6 +25,3 @@ test("should navigate to the search page", async ({ page }) => {
   const postedCheckbox = page.locator("#status-posted");
   await expect(postedCheckbox).toBeChecked();
 });
-
-
-
