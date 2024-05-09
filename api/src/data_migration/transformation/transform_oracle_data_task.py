@@ -526,22 +526,24 @@ class TransformOracleDataTask(Task):
                 source_applicant_type, target_applicant_type, opportunity_summary
             )
 
-            if is_insert:
-                # Before we insert, we have to still be certain we're not adding a duplicate record
-                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
-                # its possible for the same lookup value to appear multiple times because the legacy ID is different
-                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
-                if transformed_applicant_type.applicant_type in opportunity_summary.applicant_types:
-                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
-                    logger.warning(
-                        "Skipping applicant type record",
-                        extra=extra | {"applicant_type": transformed_applicant_type.applicant_type},
-                    )
-                else:
-                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
-                    # opportunity summary object so that the above check works when we receive dupes in the same batch
-                    opportunity_summary.link_applicant_types.append(transformed_applicant_type)
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_applicant_type.applicant_type in opportunity_summary.applicant_types
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping applicant type record",
+                    extra=extra | {"applicant_type": transformed_applicant_type.applicant_type},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_applicant_types.append(transformed_applicant_type)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_applicant_type)
@@ -671,26 +673,27 @@ class TransformOracleDataTask(Task):
                     source_funding_category, target_funding_category, opportunity_summary
                 )
             )
-            if is_insert:
-                # Before we insert, we have to still be certain we're not adding a duplicate record
-                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
-                # its possible for the same lookup value to appear multiple times because the legacy ID is different
-                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
-                if (
-                    transformed_funding_category.funding_category
-                    in opportunity_summary.funding_categories
-                ):
-                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
-                    logger.warning(
-                        "Skipping funding category record",
-                        extra=extra
-                        | {"funding_category": transformed_funding_category.funding_category},
-                    )
-                else:
-                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
-                    # opportunity summary object so that the above check works when we receive dupes in the same batch
-                    opportunity_summary.link_funding_categories.append(transformed_funding_category)
+
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_funding_category.funding_category
+                in opportunity_summary.funding_categories
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping funding category record",
+                    extra=extra
+                    | {"funding_category": transformed_funding_category.funding_category},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_funding_categories.append(transformed_funding_category)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_funding_category)
@@ -822,28 +825,27 @@ class TransformOracleDataTask(Task):
                     source_funding_instrument, target_funding_instrument, opportunity_summary
                 )
             )
-            if is_insert:
-                # Before we insert, we have to still be certain we're not adding a duplicate record
-                # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
-                # its possible for the same lookup value to appear multiple times because the legacy ID is different
-                # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
-                if (
-                    transformed_funding_instrument.funding_instrument
-                    in opportunity_summary.funding_instruments
-                ):
-                    self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
-                    logger.warning(
-                        "Skipping funding instrument record",
-                        extra=extra
-                        | {"funding_instrument": transformed_funding_instrument.funding_instrument},
-                    )
-                else:
-                    self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
-                    # We append to the relationship so SQLAlchemy immediately attaches it to its cached
-                    # opportunity summary object so that the above check works when we receive dupes in the same batch
-                    opportunity_summary.link_funding_instruments.append(
-                        transformed_funding_instrument
-                    )
+
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_funding_instrument.funding_instrument
+                in opportunity_summary.funding_instruments
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping funding instrument record",
+                    extra=extra
+                    | {"funding_instrument": transformed_funding_instrument.funding_instrument},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_funding_instruments.append(transformed_funding_instrument)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
                 self.db_session.merge(transformed_funding_instrument)
