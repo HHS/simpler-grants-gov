@@ -71,7 +71,7 @@ Following sections describe the conditions that must be met to consider this del
 
 ## Measurement
 
-### Metrics
+### Proposed metrics
 
 * \[Metric 1]
 * \[Metric 2]

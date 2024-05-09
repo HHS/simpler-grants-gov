@@ -1,4 +1,5 @@
 resource "aws_wafv2_web_acl" "waf" {
+  count = var.enable_load_balancer ? 1 : 0
   name  = "${var.service_name}-wafv2-web-acl"
   scope = "REGIONAL"
 
@@ -187,26 +188,59 @@ resource "aws_wafv2_web_acl" "waf" {
 
 resource "aws_cloudwatch_log_group" "WafWebAclLoggroup" {
   # checkov:skip=CKV_AWS_158: The KMS key triggered an operation error
+  count             = var.enable_load_balancer ? 1 : 0
   name              = "aws-waf-logs-wafv2-web-acl-${var.service_name}"
   retention_in_days = 1827 # 5 years
 }
 
 # Associate WAF with the cloudwatch logging group
 resource "aws_wafv2_web_acl_logging_configuration" "WafWebAclLogging" {
-  log_destination_configs = [aws_cloudwatch_log_group.WafWebAclLoggroup.arn]
-  resource_arn            = aws_wafv2_web_acl.waf.arn
+  count                   = var.enable_load_balancer ? 1 : 0
+  log_destination_configs = [aws_cloudwatch_log_group.WafWebAclLoggroup[0].arn]
+  resource_arn            = aws_wafv2_web_acl.waf[0].arn
   depends_on = [
-    aws_wafv2_web_acl.waf,
-    aws_cloudwatch_log_group.WafWebAclLoggroup
+    aws_wafv2_web_acl.waf[0],
+    aws_cloudwatch_log_group.WafWebAclLoggroup[0]
   ]
+}
+
+resource "aws_cloudwatch_log_resource_policy" "WafWebAclLoggingPolicy" {
+  count           = var.enable_load_balancer ? 1 : 0
+  policy_document = data.aws_iam_policy_document.WafWebAclLoggingDoc[0].json
+  policy_name     = "service-${var.service_name}-webacl-policy"
+}
+
+# Policy from terraform docs
+data "aws_iam_policy_document" "WafWebAclLoggingDoc" {
+  count = var.enable_load_balancer ? 1 : 0
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.WafWebAclLoggroup[0].arn}:*"]
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+      variable = "aws:SourceArn"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [tostring(data.aws_caller_identity.current.account_id)]
+      variable = "aws:SourceAccount"
+    }
+  }
 }
 
 # Associate WAF with load balancer
 resource "aws_wafv2_web_acl_association" "WafWebAclAssociation" {
-  resource_arn = aws_lb.alb.arn
-  web_acl_arn  = aws_wafv2_web_acl.waf.arn
+  count        = var.enable_load_balancer ? 1 : 0
+  resource_arn = aws_lb.alb[0].arn
+  web_acl_arn  = aws_wafv2_web_acl.waf[0].arn
   depends_on = [
-    aws_wafv2_web_acl.waf,
-    aws_cloudwatch_log_group.WafWebAclLoggroup
+    aws_wafv2_web_acl.waf[0],
+    aws_cloudwatch_log_group.WafWebAclLoggroup[0]
   ]
 }

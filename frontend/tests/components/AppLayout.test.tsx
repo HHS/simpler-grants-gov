@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 import { axe } from "jest-axe";
 
 import AppLayout from "src/components/AppLayout";
@@ -6,7 +6,7 @@ import AppLayout from "src/components/AppLayout";
 describe("AppLayout", () => {
   it("renders children in main section", () => {
     render(
-      <AppLayout>
+      <AppLayout locale="en">
         <h1>child</h1>
       </AppLayout>,
     );
@@ -18,7 +18,7 @@ describe("AppLayout", () => {
 
   it("passes accessibility scan", async () => {
     const { container } = render(
-      <AppLayout>
+      <AppLayout locale="en">
         <h1>child</h1>
       </AppLayout>,
     );

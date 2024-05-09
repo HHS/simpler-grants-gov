@@ -1,5 +1,5 @@
+import { QueryParamData } from "../../services/search/searchfetcher/SearchFetcher";
 import { SearchFetcherActionType } from "../../types/search/searchRequestTypes";
-import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 import { ServerSideSearchParams } from "../../types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server
@@ -7,7 +7,7 @@ import { ServerSideSearchParams } from "../../types/searchRequestURLTypes";
 // Process all of them so they're just a string (or number for page)
 export function convertSearchParamsToProperTypes(
   params: ServerSideSearchParams,
-): SearchFetcherProps {
+): QueryParamData {
   return {
     ...params,
     query: params.query || "", // Convert empty string to null if needed

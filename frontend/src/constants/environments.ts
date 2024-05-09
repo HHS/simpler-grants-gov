@@ -4,13 +4,13 @@
  */
 const PUBLIC_ENV_VARS_BY_ENV = {
   development: {
-    GOOGLE_TAG_ID: "GTM-MV57HMHS",
+    GOOGLE_ANALYTICS_ID: "G-GWJZD3DL8W",
   },
   test: {
-    GOOGLE_TAG_ID: "GTM-MV57HMHS",
+    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
   },
   production: {
-    GOOGLE_TAG_ID: "GTM-MV57HMHS",
+    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
   },
 } as const;
 

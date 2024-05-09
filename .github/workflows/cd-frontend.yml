@@ -1,8 +1,7 @@
 name: Deploy Frontend
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
-
+run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 on:
   push:
     branches:
@@ -20,6 +19,7 @@ on:
         type: choice
         options:
           - dev
+          - staging
           - prod
 
 jobs:
@@ -31,6 +31,9 @@ jobs:
     name: Deploy
     needs: frontend-checks
     uses: ./.github/workflows/deploy.yml
+    strategy:
+      matrix:
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev"]') || fromJSON('["dev"]') }} # temporarily removing staging from matrix. See: https://github.com/HHS/simpler-grants-gov/issues/1919
     with:
       app_name: "frontend"
-      environment: ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'dev' }}
+      environment: ${{ matrix.envs }}

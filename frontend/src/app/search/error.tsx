@@ -6,8 +6,8 @@ import {
 } from "src/types/search/searchResponseTypes";
 
 import PageSEO from "src/components/PageSEO";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
 import { SearchForm } from "src/app/search/SearchForm";
 import { useEffect } from "react";
 
@@ -19,7 +19,7 @@ interface ErrorProps {
 
 export interface ParsedError {
   message: string;
-  searchInputs: SearchFetcherProps;
+  searchInputs: QueryParamData;
   status: number;
   type: string;
 }
@@ -103,8 +103,8 @@ function getErrorPaginationInfo() {
 }
 
 function convertSearchInputArraysToSets(
-  searchInputs: SearchFetcherProps,
-): SearchFetcherProps {
+  searchInputs: QueryParamData,
+): QueryParamData {
   return {
     ...searchInputs,
     status: new Set(searchInputs.status || []),

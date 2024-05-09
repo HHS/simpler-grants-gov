@@ -1,7 +1,7 @@
 import "../styles/styles.scss";
 
 import type { AppProps } from "next/app";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import Head from "next/head";
 import Layout from "../components/Layout";
 import { PUBLIC_ENV } from "src/constants/environments";
@@ -19,9 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <Layout>
         <Component {...pageProps} />
-        {process.env.NEXT_PUBLIC_ENVIRONMENT === "prod" && (
-          <GoogleTagManager gtmId={PUBLIC_ENV.GOOGLE_TAG_ID} />
-        )}
+        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       </Layout>
     </>
   );

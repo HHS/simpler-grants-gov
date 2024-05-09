@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { CookiesStatic } from "js-cookie";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { ServerSideSearchParams } from "../types/searchRequestURLTypes";
 import { featureFlags } from "src/constants/featureFlags";
 
 export type FeatureFlags = { [name: string]: boolean };
@@ -127,8 +128,11 @@ export class FeatureFlagsManager {
    * @param name - Feature flag name
    * @example isFeatureEnabled("featureFlagName")
    */
-  isFeatureDisabled(name: string): boolean {
-    return !this.isFeatureEnabled(name);
+  isFeatureDisabled(
+    name: string,
+    searchParams?: ServerSideSearchParams,
+  ): boolean {
+    return !this.isFeatureEnabled(name, searchParams);
   }
 
   /**
@@ -136,12 +140,27 @@ export class FeatureFlagsManager {
    * @param name - Feature flag name
    * @example isFeatureEnabled("featureFlagName")
    */
-  isFeatureEnabled(name: string): boolean {
+  isFeatureEnabled(
+    name: string,
+    searchParams?: ServerSideSearchParams,
+  ): boolean {
     if (!this.isValidFeatureFlag(name)) {
       throw new Error(`\`${name}\` is not a valid feature flag`);
     }
+
+    // Start with the default feature flag setting
     const currentFeatureFlags = this.featureFlags;
-    return currentFeatureFlags[name];
+    let featureFlagBoolean = currentFeatureFlags[name];
+
+    // Query params take precedent. Override the returned value if we see them
+    if (searchParams && searchParams._ff) {
+      const featureFlagsObject = this.parseFeatureFlagsFromString(
+        searchParams._ff,
+      );
+      featureFlagBoolean = featureFlagsObject[name];
+    }
+
+    return featureFlagBoolean;
   }
 
   /**

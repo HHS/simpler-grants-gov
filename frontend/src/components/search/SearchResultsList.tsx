@@ -34,7 +34,6 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
     return (
       <div>
         <h2>Your search did not return any results.</h2>
-        <p>Select at least one status.</p>
         <ul>
           <li>{"Check any terms you've entered for typos"}</li>
           <li>Try different keywords</li>

@@ -1,6 +1,9 @@
 import "src/styles/styles.scss";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { PUBLIC_ENV } from "../constants/environments";
 
 import Layout from "src/components/AppLayout";
+import { unstable_setRequestLocale } from "next-intl/server";
 /**
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
@@ -13,23 +16,27 @@ export const metadata: Metadata = {
 
 interface LayoutProps {
   children: React.ReactNode;
-
-  // TODO: use for i18n when ready
-  //   params: {
-  //     locale: string;
-  //   };
+  params: {
+    locale: string;
+  };
 }
 
-export default function RootLayout({ children }: LayoutProps) {
+export default function RootLayout({ children, params }: LayoutProps) {
+  // Hardcoded until the [locale] routing is enabled.
+  const locale = params.locale ? params.locale : "en";
+  // TODO: Remove when https://github.com/amannn/next-intl/issues/663 lands.
+  unstable_setRequestLocale(locale);
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
         {/* Separate layout component for the inner-body UI elements since Storybook
             and tests trip over the fact that this file renders an <html> tag */}
 
         {/* TODO: Add locale="english" prop when ready for i18n */}
-        <Layout>{children}</Layout>
+        <Layout locale={locale}>{children}</Layout>
       </body>
+      <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
     </html>
   );
 }
