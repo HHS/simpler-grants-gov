@@ -18,7 +18,7 @@ interface SearchPaginationProps {
   searchResultsLength: number;
 }
 
-const MAX_SLOTS = 5;
+const MAX_SLOTS = 7;
 
 export default function SearchPagination({
   showHiddenInput,
