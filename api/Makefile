@@ -249,6 +249,9 @@ copy-oracle-data:
 setup-foreign-tables:
 	$(FLASK_CMD) data-migration setup-foreign-tables
 
+seed-local-legacy-tables:
+	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
+
 ##################################################
 # Miscellaneous Utilities
 ##################################################

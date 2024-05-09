@@ -59,10 +59,13 @@ resource "aws_ecs_service" "app" {
     security_groups  = [aws_security_group.app.id]
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.app_tg.arn
-    container_name   = var.service_name
-    container_port   = var.container_port
+  dynamic "load_balancer" {
+    for_each = var.enable_load_balancer ? [1] : []
+    content {
+      target_group_arn = aws_lb_target_group.app_tg[0].arn
+      container_name   = var.service_name
+      container_port   = var.container_port
+    }
   }
 }
 
