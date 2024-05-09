@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("should navigate to the search page", async ({ page }) => {
+test("should navigate from index to search page", async ({ page }) => {
   // Start from the index page with feature flag set
   await page.goto("/?_ff=showSearchV0:true");
 
@@ -8,9 +8,7 @@ test("should navigate to the search page", async ({ page }) => {
   await page.click("nav >> text=Search");
 
   // Verify that the new URL is correct
-  await expect(page).toHaveURL(
-    "/search?status=forecasted,posted",
-  );
+  await expect(page).toHaveURL("/search?status=forecasted,posted");
 
   // Verify the presence of "Search" content on the page
   await expect(page.locator("h1")).toContainText(
@@ -21,7 +19,7 @@ test("should navigate to the search page", async ({ page }) => {
   const forecastedCheckbox = page.locator("#status-forecasted");
   await expect(forecastedCheckbox).toBeChecked();
 
-  // Verify that the 'posted' checkbox is checked
+  // Verify that correct status checkboxes are checked
   const postedCheckbox = page.locator("#status-posted");
   await expect(postedCheckbox).toBeChecked();
 });
