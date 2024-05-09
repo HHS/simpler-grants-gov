@@ -30,6 +30,16 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
     return <SearchErrorAlert />;
   }
 
+  if (maxPaginationError) {
+    return (
+      <h4>
+        {
+          "You''re trying to access opportunity results that are beyond the last page of data."
+        }
+      </h4>
+    );
+  }
+
   if (searchResults?.length === 0) {
     return (
       <div>
@@ -47,14 +57,6 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
 
   return (
     <ul className="usa-list--unstyled">
-      {/* TODO #1485: show proper USWDS error  */}
-      {maxPaginationError && (
-        <h4>
-          {
-            "You''re trying to access opportunity results that are beyond the last page of data."
-          }
-        </h4>
-      )}
       {searchResults?.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem
