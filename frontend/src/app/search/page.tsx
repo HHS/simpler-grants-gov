@@ -30,8 +30,6 @@ export async function generateMetadata() {
   return meta;
 }
 async function Search({ searchParams }: ServerPageProps) {
-
-
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const initialSearchResults = await searchFetcher.fetchOpportunities(
     convertedSearchParams,
