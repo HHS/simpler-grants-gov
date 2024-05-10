@@ -3,7 +3,7 @@ import { FilterOption } from "../SearchFilterAccordion";
 export const agencyFilterList: FilterOption[] = [
   {
     id: "ARPAH",
-    label: " Advanced Research Projects Agency for Health (ARPAH)",
+    label: "Advanced Research Projects Agency for Health (ARPAH)",
     value: "ARPAH",
   },
   {
