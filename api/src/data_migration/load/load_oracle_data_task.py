@@ -27,6 +27,7 @@ class LoadOracleDataTask(src.task.task.Task):
         db_session: db.Session,
         foreign_tables: dict[str, sqlalchemy.Table],
         staging_tables: dict[str, sqlalchemy.Table],
+        insert_chunk_size: int = 4000,
     ) -> None:
         if foreign_tables.keys() != staging_tables.keys():
             raise ValueError("keys of foreign_tables and staging_tables must be equal")
@@ -34,6 +35,7 @@ class LoadOracleDataTask(src.task.task.Task):
         super().__init__(db_session)
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
+        self.insert_chunk_size = insert_chunk_size
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
@@ -93,23 +95,36 @@ class LoadOracleDataTask(src.task.task.Task):
         """Determine new rows by primary key, and copy them into the staging table."""
 
         insert_from_select_sql, select_sql = sql.build_insert_select_sql(
-            foreign_table, staging_table
+            foreign_table, staging_table, self.insert_chunk_size
         )
 
-        # COUNT has to be a separate query as INSERTs don't return a rowcount.
-        insert_count = self.db_session.query(select_sql.subquery()).count()
-
-        self.increment("count.insert.total", insert_count)
-        self.set_metrics({f"count.insert.{staging_table.name}": insert_count})
-
-        # Execute the INSERT.
         t0 = time.monotonic()
-        self.db_session.execute(insert_from_select_sql)
+        insert_chunk_count = []
+        while True:
+            insert_count = self.db_session.query(select_sql.subquery()).count()
+            if insert_count == 0:
+                break
+
+            # Execute the INSERT.
+            self.db_session.execute(insert_from_select_sql)
+
+            insert_chunk_count.append(insert_count)
+            logger.info(
+                "insert chunk done", extra={"count": insert_count, "total": sum(insert_chunk_count)}
+            )
+
         t1 = time.monotonic()
+        total_insert_count = sum(insert_chunk_count)
+        self.increment("count.insert.total", total_insert_count)
+        self.increment(f"count.insert.{staging_table.name}", total_insert_count)
+        self.set_metrics(
+            {
+                f"count.insert.chunk.{staging_table.name}": ",".join(map(str, insert_chunk_count)),
+                f"time.insert.{staging_table.name}": round(t1 - t0, 3),
+            }
+        )
 
-        self.set_metrics({f"time.insert.{staging_table.name}": round(t1 - t0, 3)})
-
-        return insert_count
+        return total_insert_count
 
     def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""

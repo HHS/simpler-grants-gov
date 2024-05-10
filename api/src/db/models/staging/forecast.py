@@ -41,15 +41,68 @@ class TapplicanttypesForecast(
 ):
     __tablename__ = "tapplicanttypes_forecast"
 
+    forecast: Mapped[Tforecast | None] = relationship(
+        Tforecast,
+        primaryjoin="TapplicanttypesForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_applicant_type_id(self) -> int:
+        return self.at_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def revision_number(self) -> None:
+        return None
+
 
 class TapplicanttypesForecastHist(
     StagingBase, forecast_mixin.TapplicanttypesForecastHistMixin, StagingParamMixin
 ):
     __tablename__ = "tapplicanttypes_forecast_hist"
 
+    forecast: Mapped[TforecastHist | None] = relationship(
+        TforecastHist,
+        primaryjoin="and_(TapplicanttypesForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TapplicanttypesForecastHist.revision_number == foreign(TforecastHist.revision_number))",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_applicant_type_id(self) -> int:
+        return self.at_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
+
 
 class TfundactcatForecast(StagingBase, forecast_mixin.TfundactcatForecastMixin, StagingParamMixin):
     __tablename__ = "tfundactcat_forecast"
+
+    forecast: Mapped[Tforecast | None] = relationship(
+        Tforecast,
+        primaryjoin="TfundactcatForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_funding_category_id(self) -> int:
+        return self.fac_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def revision_number(self) -> None:
+        return None
 
 
 class TfundactcatForecastHist(
@@ -57,12 +110,61 @@ class TfundactcatForecastHist(
 ):
     __tablename__ = "tfundactcat_forecast_hist"
 
+    forecast: Mapped[TforecastHist | None] = relationship(
+        TforecastHist,
+        primaryjoin="and_(TfundactcatForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TfundactcatForecastHist.revision_number == foreign(TforecastHist.revision_number))",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_funding_category_id(self) -> int:
+        return self.fac_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
+
 
 class TfundinstrForecast(StagingBase, forecast_mixin.TfundinstrForecastMixin, StagingParamMixin):
     __tablename__ = "tfundinstr_forecast"
+
+    forecast: Mapped[Tforecast | None] = relationship(
+        Tforecast,
+        primaryjoin="TfundinstrForecast.opportunity_id == foreign(Tforecast.opportunity_id)",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_funding_instrument_id(self) -> int:
+        return self.fi_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def revision_number(self) -> None:
+        return None
 
 
 class TfundinstrForecastHist(
     StagingBase, forecast_mixin.TfundinstrForecastHistMixin, StagingParamMixin
 ):
     __tablename__ = "tfundinstr_forecast_hist"
+
+    forecast: Mapped[TforecastHist | None] = relationship(
+        TforecastHist,
+        primaryjoin="and_(TfundinstrForecastHist.opportunity_id == foreign(TforecastHist.opportunity_id), TfundinstrForecastHist.revision_number == foreign(TforecastHist.revision_number))",
+        uselist=False,
+        overlaps="forecast",
+    )
+
+    @property
+    def legacy_funding_instrument_id(self) -> int:
+        return self.fi_frcst_id
+
+    @property
+    def is_forecast(self) -> bool:
+        return True
