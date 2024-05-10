@@ -37,7 +37,7 @@ const SearchFilterCheckbox: React.FC<SearchFilterCheckboxProps> = ({
       onChange={handleChange}
       disabled={!mounted}
       checked={option.isChecked === true}
-      //   value={option.id} // TODO: consider poassing explicit value
+      //   value={option.id} // TODO: consider passing explicit value
     />
   );
 };
