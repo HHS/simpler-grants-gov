@@ -1,4 +1,4 @@
-import { SearchFetcherProps } from "../../src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "../../src/services/search/searchfetcher/SearchFetcher";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
 import { SearchRequestBody } from "../../src/types/search/searchRequestTypes";
 
@@ -47,7 +47,7 @@ describe("SearchOpportunityAPI", () => {
     });
 
     it("sends POST request to search opportunities endpoint with query parameters", async () => {
-      const searchProps: SearchFetcherProps = {
+      const searchProps: QueryParamData = {
         page: 1,
         status: new Set(["forecasted", "posted"]),
         fundingInstrument: new Set(["grant", "cooperative_agreement"]),

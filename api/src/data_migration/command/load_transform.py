@@ -27,15 +27,20 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--set-current/--no-set-current", default=True, help="run SetCurrentOpportunitiesTask"
 )
+@click.option(
+    "--insert-chunk-size", default=4000, help="chunk size for load inserts", show_default=True
+)
 @flask_db.with_db_session()
-def load_transform(db_session: db.Session, load: bool, transform: bool, set_current: bool) -> None:
+def load_transform(
+    db_session: db.Session, load: bool, transform: bool, set_current: bool, insert_chunk_size: int
+) -> None:
     logger.info("load and transform start")
 
     foreign_tables = {t.name: t for t in src.db.foreign.metadata.tables.values()}
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
     if load:
-        LoadOracleDataTask(db_session, foreign_tables, staging_tables).run()
+        LoadOracleDataTask(db_session, foreign_tables, staging_tables, insert_chunk_size).run()
     if transform:
         TransformOracleDataTask(db_session).run()
     if set_current:

@@ -18,10 +18,10 @@ import {
 } from "src/errors";
 import { compact, isEmpty } from "lodash";
 
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -70,7 +70,7 @@ export default abstract class BaseApi {
     namespace: string,
     subPath: string,
 
-    searchInputs: SearchFetcherProps,
+    searchInputs: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -110,7 +110,7 @@ export default abstract class BaseApi {
   private async sendRequest(
     url: string,
     fetchOptions: RequestInit,
-    searchInputs: SearchFetcherProps,
+    searchInputs: QueryParamData,
   ) {
     let response: Response;
     let responseBody: SearchAPIResponse;
@@ -190,7 +190,7 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
  */
 export function fetchErrorToNetworkError(
   error: unknown,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
@@ -202,7 +202,7 @@ function handleNotOkResponse(
   response: SearchAPIResponse,
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
 ) {
   const { errors } = response;
   if (isEmpty(errors)) {
@@ -219,7 +219,7 @@ function handleNotOkResponse(
 const throwError = (
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
   firstError?: APIResponseError,
 ) => {
   console.log("Throwing error: ", message, status_code, searchInputs);

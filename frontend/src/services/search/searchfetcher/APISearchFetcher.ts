@@ -1,6 +1,6 @@
 import "server-only";
 
-import { SearchFetcher, SearchFetcherProps } from "./SearchFetcher";
+import { QueryParamData, SearchFetcher } from "./SearchFetcher";
 
 import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
 import SearchOpportunityAPI from "../../../app/api/SearchOpportunityAPI";
@@ -14,7 +14,7 @@ export class APISearchFetcher extends SearchFetcher {
   }
 
   async fetchOpportunities(
-    searchInputs: SearchFetcherProps,
+    searchInputs: QueryParamData,
   ): Promise<SearchAPIResponse> {
     try {
       // Keep commented in case we need to simulate a delay to test loaders

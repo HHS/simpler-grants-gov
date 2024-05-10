@@ -375,6 +375,11 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_summary(source_summary)
         logger.info("Processing opportunity summary", extra=extra)
 
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we don't have anything to link these to. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
         if opportunity is None and source_summary.is_historical_table:
             logger.warning(
                 "Historical opportunity summary does not have a corresponding opportunity - cannot import, but will mark as processed",
@@ -515,6 +520,11 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_applicant_type(source_applicant_type)
         logger.info("Processing applicant type", extra=extra)
 
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
         if opportunity_summary is None and source_applicant_type.is_historical_table:
             logger.warning(
                 "Historical applicant type does not have a corresponding opportunity summary - cannot import, but will mark as processed",
@@ -669,6 +679,11 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_funding_category(source_funding_category)
         logger.info("Processing funding category", extra=extra)
 
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
         if opportunity_summary is None and source_funding_category.is_historical_table:
             logger.warning(
                 "Historical funding category does not have a corresponding opportunity summary - cannot import, but will mark as processed",
@@ -829,7 +844,11 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_funding_instrument(source_funding_instrument)
         logger.info("Processing funding instrument", extra=extra)
 
-        # TODO - add some notes
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
         if opportunity_summary is None and source_funding_instrument.is_historical_table:
             logger.warning(
                 "Historical funding instrument does not have a corresponding opportunity summary - cannot import, but will mark as processed",

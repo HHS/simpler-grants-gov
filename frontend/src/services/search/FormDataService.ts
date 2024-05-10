@@ -1,5 +1,5 @@
+import { QueryParamData } from "./searchfetcher/SearchFetcher";
 import { SearchFetcherActionType } from "../../types/search/searchRequestTypes";
-import { SearchFetcherProps } from "./searchfetcher/SearchFetcher";
 
 export class FormDataService {
   formData: FormData;
@@ -11,7 +11,7 @@ export class FormDataService {
   // Processes formData entries and returns a searchProps
   // object to get updated results
   processFormData() {
-    const searchProps: SearchFetcherProps = {
+    const searchProps: QueryParamData = {
       page: this.page,
       status: this.status,
       fundingInstrument: this.fundingInstrument,
