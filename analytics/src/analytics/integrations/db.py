@@ -1,23 +1,21 @@
 # pylint: disable=invalid-name
-"""Manage connection to the database using a SQLAlchemy session factory."""
+"""Get a connection to the database using a SQLAlchemy engine object."""
 
-from typing import Generator
+from sqlalchemy import Engine, create_engine
 
-from sqlalchemy import create_engine, Engine
-# from sqlalchemy.orm import Session, sessionmaker
-
+from config import settings
 
 
-def get_db(database_url:str) -> Engine:
+def get_db() -> Engine:
     """
-    #To be updated: Yield a connection to the database to manage transactions.
+    Get a connection to the database using a SQLAlchemy engine object.
+
+    This function retrieves the database connection URL from the configuration
+    and creates a SQLAlchemy engine object.
 
     Yields
     ------
-    Session
-        A SQLAlechemy session that manages a connection to the database
-
+    sqlalchemy.engine.Engine
+    A SQLAlchemy engine object representing the connection to the database.
     """
-    engine = create_engine("sqlite:///mock.db", pool_pre_ping=True)
-
-   
+    return create_engine(settings.database_url, pool_pre_ping=True)

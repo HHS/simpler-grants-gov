@@ -5,13 +5,37 @@ import pandas as pd
 
 from analytics.datasets.base import BaseDataset
 
+from analytics.integrations.db import get_db
+
+from config import settings
+
 TEST_DATA = [
     {"Col A": 1, "Col b": "One"},
     {"Col A": 2, "Col b": "Two"},
     {"Col A": 3, "Col b": "Three"},
 ]
 
-#add a test for sql
+
+# add a test for sql
+def test_to_and_from_sql():
+    """BaseDataset should write to and load from SQL table with to_sql() and from_sql()."""
+    # Setup - create sample dataframe and instantiate class
+    test_df = pd.DataFrame(TEST_DATA)
+    dataset_in = BaseDataset(test_df)
+
+    # Setup - configure SQL connection
+    db_url = settings.database_url
+    # Assert the value of db_url
+    assert db_url == "sqlite:///mock.db"
+    engine = get_db() 
+    table_name = "your_table_name"  # Replace with actual table name
+
+    # Execution - write to SQL table and read from SQL table
+    dataset_in.to_sql(table_name, engine)
+    dataset_out = BaseDataset.from_sql(table_name, engine)
+    # Validation - check that datasets match
+    assert dataset_in.df.equals(dataset_out.df)
+
 
 def test_to_and_from_csv(tmp_path: Path):
     """BaseDataset should write to csv with to_csv() and load from a csv with from_csv()."""
