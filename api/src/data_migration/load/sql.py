@@ -6,7 +6,7 @@ import sqlalchemy
 
 
 def build_insert_select_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
+    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table, limit: int = 1000
 ) -> tuple[sqlalchemy.Insert, sqlalchemy.Select]:
     """Build an `INSERT INTO ... SELECT ... FROM ...` query for new rows."""
 
@@ -30,6 +30,7 @@ def build_insert_select_sql(
                 sqlalchemy.select(*destination_table.primary_key.columns)
             )
         )
+        .limit(limit)
         .cte("insert_pks")
         .prefix_with("MATERIALIZED")
     )
