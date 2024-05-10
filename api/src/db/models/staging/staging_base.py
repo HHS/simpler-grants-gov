@@ -72,3 +72,5 @@ class StagingParamMixin:
         default=None,
         server_default=None,
     )
+
+    transformation_notes: Mapped[str | None]
