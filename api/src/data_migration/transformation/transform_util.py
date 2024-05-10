@@ -416,16 +416,20 @@ def transform_update_create_timestamp(
         target.updated_at = target.created_at
 
 
+TRUTHY = {"Y", "Yes"}
+FALSEY = {"N", "No"}
+
+
 def convert_yn_bool(value: str | None) -> bool | None:
     # Booleans in the Oracle database are stored as varchar/char
     # columns with the values as Y/N (very rarely Yes/No)
     if value is None or value == "":
         return None
 
-    if value == "Y" or value == "Yes":
+    if value in TRUTHY:
         return True
 
-    if value == "N" or value == "No":
+    if value in FALSEY:
         return False
 
     # Just in case the column isn't actually a boolean

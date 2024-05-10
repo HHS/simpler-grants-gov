@@ -79,7 +79,8 @@ def test_transform_update_create_timestamp(
 
 
 @pytest.mark.parametrize(
-    "value,expected_value", [("Y", True), ("N", False), ("Yes", True), ("No", False), ("", None), (None, None)]
+    "value,expected_value",
+    [("Y", True), ("N", False), ("Yes", True), ("No", False), ("", None), (None, None)],
 )
 def test_convert_yn_boolean(value, expected_value):
     assert transform_util.convert_yn_bool(value) == expected_value
