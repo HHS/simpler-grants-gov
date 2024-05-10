@@ -1,4 +1,4 @@
-import { BrowserContext, Locator, Page, expect, test } from "@playwright/test";
+import { Locator, Page, expect, test } from "@playwright/test";
 
 test("should navigate from index to search page", async ({ page }) => {
   // Start from the index page with feature flag set
@@ -63,7 +63,7 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
   });
-  test("should retain filters in a new tab", async ({ page, context }) => {
+  test("should retain filters in a new tab", async ({ page }) => {
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-forecasted": "forecasted",
