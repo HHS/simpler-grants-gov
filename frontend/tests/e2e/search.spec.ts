@@ -21,8 +21,8 @@ test("should navigate from index to search page", async ({ page }) => {
   );
 
   // Verify that the 'forecasted' and 'posted' are checked
-  await expectIDIsChecked(page, "#status-forecasted");
-  await expectIDIsChecked(page, "#status-posted");
+  await expectCheckboxIDIsChecked(page, "#status-forecasted");
+  await expectCheckboxIDIsChecked(page, "#status-posted");
 });
 
 test.describe("Search page tests", () => {
@@ -63,34 +63,79 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
   });
-
   test("should retain filters in a new tab", async ({ page, context }) => {
     const searchTerm = "education";
-    const checkboxIDs = ["#status-forecasted", "#status-posted"];
+    const statusCheckboxes = {
+      "status-forecasted": "forecasted",
+      "status-posted": "posted",
+    };
+    const fundingInstrumentCheckboxes = {
+      "funding-instrument-cooperative_agreement": "cooperative_agreement",
+      "funding-instrument-grant": "grant",
+    };
 
-    // await waitForSearchResultsLoaded(page);
+    const eligibilityCheckboxes = {
+      "eligibility-state_governments": "state_governments",
+      "eligibility-county_governments": "county_governments",
+    };
+    const agencyCheckboxes = {
+      ARPAH: "ARPAH",
+      AC: "AC",
+    };
+    const categoryCheckboxes = {
+      "category-recovery_act": "recovery_act",
+      "category-agriculture": "agriculture",
+    };
 
+    await selectSortBy(page, "agencyDesc");
+
+    await waitForSearchResultsLoaded(page);
     await fillSearchInputAndSubmit(searchTerm, page);
+    await toggleCheckboxes(page, statusCheckboxes, "status");
 
-    for (const checkboxId of checkboxIDs) {
-      await toggleCheckbox(page, checkboxId, true);
-    }
-    // Ensure URL contains all query parameters
-    expectURLContainsQueryParam(page, "query", searchTerm);
-    expectURLContainsQueryParam(page, "status", checkboxIDs.join(","));
+    await clickAccordionWithTitle(page, "Funding instrument");
+    await toggleCheckboxes(
+      page,
+      fundingInstrumentCheckboxes,
+      "fundingInstrument",
+    );
 
-    const newPage = await goToNewPageUsingCurrentURL(page, context);
+    await clickAccordionWithTitle(page, "Eligibility");
+    await toggleCheckboxes(page, eligibilityCheckboxes, "eligibility");
 
+    await clickAccordionWithTitle(page, "Agency");
+    await toggleCheckboxes(page, agencyCheckboxes, "agency");
+
+    await clickAccordionWithTitle(page, "Category");
+    await toggleCheckboxes(page, categoryCheckboxes, "category");
+
+    /***********************************************************/
+    /* Page refreshed should have all the same inputs selected
+    /***********************************************************/
+
+    await goToNewPageUsingCurrentURL(page);
+
+    await expectSortBy(page, "agencyDesc");
     // Ensure search term and checkboxes are retained in the new tab
     const searchInput = getSearchInput(page);
     await expect(searchInput).toHaveValue(searchTerm);
 
-    for (const checkboxID of checkboxIDs) {
-      await expectIDIsChecked(newPage, checkboxID);
+    for (const [checkboxID] of Object.entries(statusCheckboxes)) {
+      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
 
-    // Close the new tab
-    await newPage.close();
+    for (const [checkboxID] of Object.entries(fundingInstrumentCheckboxes)) {
+      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+    }
+    for (const [checkboxID] of Object.entries(eligibilityCheckboxes)) {
+      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+    }
+    for (const [checkboxID] of Object.entries(agencyCheckboxes)) {
+      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+    }
+    for (const [checkboxID] of Object.entries(categoryCheckboxes)) {
+      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+    }
   });
 });
 
@@ -106,6 +151,7 @@ async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   await searchInput.fill(term);
   await page.click(".usa-search >> button[type='submit']");
+  expectURLContainsQueryParam(page, "query", term);
 }
 
 function expectURLContainsQueryParam(
@@ -115,6 +161,31 @@ function expectURLContainsQueryParam(
 ) {
   const currentURL = page.url();
   expect(currentURL).toContain(`${queryParamName}=${queryParamValue}`);
+}
+
+async function waitForURLContainsQueryParam(
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+  timeout = 30000, // query params get set after a debounce period
+) {
+  const endTime = Date.now() + timeout;
+
+  while (Date.now() < endTime) {
+    const url = new URL(page.url());
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+
+    if (actualValue === queryParamValue) {
+      return;
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error(
+    `URL did not contain query parameter ${queryParamName}=${queryParamValue} within ${timeout}ms`,
+  );
 }
 
 async function clickSearchNavLink(page: Page) {
@@ -134,46 +205,61 @@ async function clickMobileNavMenu(menuButton: Locator) {
   await menuButton.click();
 }
 
-async function expectIDIsChecked(page: Page, idWithHash: string) {
+async function expectCheckboxIDIsChecked(page: Page, idWithHash: string) {
   const checkbox: Locator = page.locator(idWithHash);
   await expect(checkbox).toBeChecked();
 }
 
-async function toggleCheckbox(
+async function toggleCheckboxes(
   page: Page,
-  idWithHash: string,
-  shouldBeChecked: boolean,
+  checkboxObject: Record<string, string>,
+  queryParamName: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash);
-  // Wait for the checkbox to be enabled and then scroll into view
-  await checkbox.isEnabled();
-  await checkbox.scrollIntoViewIfNeeded();
-
-  const isChecked = await checkbox.isChecked();
-  if (isChecked !== shouldBeChecked) {
-    await checkbox.click({ timeout: 5000 });
-    await checkbox.dispatchEvent("click");
+  let runningQueryParams = "";
+  for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
+    await toggleCheckbox(page, checkboxID);
+    runningQueryParams += runningQueryParams
+      ? `,${queryParamValue}`
+      : queryParamValue;
+    await waitForURLContainsQueryParam(
+      page,
+      queryParamName,
+      runningQueryParams,
+    );
   }
 }
 
-async function goToNewPageUsingCurrentURL(page: Page, context: BrowserContext) {
-  // Copy the current URL
-  const currentURL = page.url();
-
-  // Open a new tab with the copied URL
-  const newPage = await context.newPage();
-  await newPage.goto(currentURL);
-
-  return newPage;
+async function toggleCheckbox(page: Page, idWithoutHash: string) {
+  const checkBox = page.locator(`label[for=${idWithoutHash}]`);
+  await checkBox.isEnabled();
+  await checkBox.click();
 }
 
-// async function waitForSearchResultsLoaded(page: Page) {
-//   // Wait specifically for the heading indicating the number of opportunities
-//   //   await page
-//   //     .locator("div.usa-prose h2:has-text('Opportunities')")
-//   //     .waitFor({ state: "visible" });
-//   await page
-//     .locator("ul.usa-list--unstyled")
-//     .first()
-//     .waitFor({ state: "visible", timeout: 60000 });
-// }
+async function goToNewPageUsingCurrentURL(page: Page) {
+  const currentURL = page.url();
+  await page.goto(currentURL); // go to new url in same tab
+  return page;
+}
+
+async function selectSortBy(page: Page, sortByValue: string) {
+  await page.locator("#search-sort-by-select").selectOption(sortByValue);
+}
+
+async function expectSortBy(page: Page, value: string) {
+  const selectedValue = await page
+    .locator('select[name="search-sort-by"]')
+    .inputValue();
+  expect(selectedValue).toBe(value);
+}
+
+async function waitForSearchResultsLoaded(page: Page) {
+  // Wait for number of opportunities to show
+  const resultsHeading = page.locator('h2:has-text("Opportunities")');
+  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+}
+
+async function clickAccordionWithTitle(page: Page, accordionTitle: string) {
+  await page
+    .locator(`button.usa-accordion__button:has-text("${accordionTitle}")`)
+    .click();
+}
