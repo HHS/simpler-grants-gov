@@ -6,7 +6,7 @@ description: Extend and transform the opportunity data model
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Ready for approval</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/972">Issue 972</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-api.md#overview">Overview</a></p><ul><li><a href="search-api.md#business-value">Business value</a></li><li><a href="search-api.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-api.md#technical-description">Technical description</a></p><ul><li><a href="search-api.md#definition-of-done">Definition of done</a></li><li><a href="search-api.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-api.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-api.md#logs">Logs</a></p><ul><li><a href="search-api.md#change-log">Change log</a></li><li><a href="search-api.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>In progress</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/972">Issue 972</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="search-api.md#overview">Overview</a></p><ul><li><a href="search-api.md#business-value">Business value</a></li><li><a href="search-api.md#user-stories">User stories</a></li></ul></li><li><p><a href="search-api.md#technical-description">Technical description</a></p><ul><li><a href="search-api.md#definition-of-done">Definition of done</a></li><li><a href="search-api.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="search-api.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="search-api.md#logs">Logs</a></p><ul><li><a href="search-api.md#change-log">Change log</a></li><li><a href="search-api.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -292,7 +292,7 @@ If so, how are we addressing these risks?
 
 Major updates to the content of this page will be added here.
 
-<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table data-full-width="true"><thead><tr><th width="137">Date</th><th width="282">Update</th><th>Notes</th></tr></thead><tbody><tr><td>4/5/2024</td><td>Added change log and implementation log</td><td>This is part of the April onsite follow-up</td></tr><tr><td>5/10/2024</td><td>Updated deliverable status to "In progress" to reflect current state</td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
 
 ### Implementation log
 
