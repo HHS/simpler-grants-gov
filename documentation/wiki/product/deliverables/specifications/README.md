@@ -13,6 +13,7 @@ The following deliverables have a specification but are still being planned. As 
 * [Delivery dashboard](delivery-dashboard.md)
 * [Content translation](content-translation.md)
 * [Opportunity listing - synopsis](opportunity-listing-synopsis.md)
+* [Co-design group kickoff](co-design-group-kickoff.md)
 
 ## In progress
 
@@ -23,6 +24,8 @@ The following deliverables are actively being worked on and we have estimated a 
 * [Search API](search-api.md)
 * [Search user interface](search-user-interface.md)
 
+
+
 ## Done
 
 The following deliverables have been completed.
@@ -31,9 +34,10 @@ The following deliverables have been completed.
 * [Static site public launch](static-site-public-launch.md)
 * [GET opportunities endpoint](get-opportunities.md)
 * [Open source onboarding](open-source-onboarding.md)
+* [Co-design group planning](co-design-group.md)
 
 ## Change log
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>4/10/2024</td><td>Moved GET Opportunities from "In Progress" to "Done"</td><td>Updated during 30k review meeting on 4/10</td></tr><tr><td>4/26/2024</td><td>Moved Open source onboarding from "In Progress" to "Done"</td><td>30k identified as completed on 4/24 at 30k review meeting</td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>2/12/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>4/10/2024</td><td>Moved GET Opportunities from "In Progress" to "Done"</td><td>Updated during 30k review meeting on 4/10</td></tr><tr><td>4/26/2024</td><td>Moved Open source onboarding from "In Progress" to "Done"</td><td>30k identified as completed on 4/24 at 30k review meeting</td></tr><tr><td>5/9/2024</td><td>Moved Co-design group planning to "Done", added Co-design group kickoff to "Planning"</td><td></td></tr></tbody></table>
