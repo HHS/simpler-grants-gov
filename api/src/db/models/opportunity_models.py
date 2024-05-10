@@ -212,6 +212,14 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
 
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_funding_instrument_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
@@ -237,6 +245,14 @@ class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
 class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_category"
 
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_funding_category_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
@@ -261,6 +277,14 @@ class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
 
 class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
+
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_applicant_type_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,

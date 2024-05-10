@@ -1,26 +1,48 @@
 import logging
 from datetime import datetime
 from enum import StrEnum
-from typing import Sequence, Tuple, Type, TypeVar, cast
+from typing import Any, Sequence, Tuple, Type, TypeVar, cast
 
 from sqlalchemy import and_, select
+from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.data_migration.transformation import transform_util
 from src.db.models.base import ApiSchemaTable
 from src.db.models.opportunity_models import (
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import Tforecast, TforecastHist
+from src.db.models.staging.forecast import (
+    TapplicanttypesForecast,
+    TapplicanttypesForecastHist,
+    Tforecast,
+    TforecastHist,
+    TfundactcatForecast,
+    TfundactcatForecastHist,
+    TfundinstrForecast,
+    TfundinstrForecastHist,
+)
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingParamMixin
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
+from src.db.models.staging.synopsis import (
+    TapplicanttypesSynopsis,
+    TapplicanttypesSynopsisHist,
+    TfundactcatSynopsis,
+    TfundactcatSynopsisHist,
+    TfundinstrSynopsis,
+    TfundinstrSynopsisHist,
+    Tsynopsis,
+    TsynopsisHist,
+)
 from src.task.task import Task
 from src.util import datetime_util
 
-from . import SourceSummary
+from . import SourceApplicantType, SourceFundingCategory, SourceFundingInstrument, SourceSummary
 
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
@@ -35,6 +57,7 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_INSERTED = "total_records_inserted"
         TOTAL_RECORDS_UPDATED = "total_records_updated"
         TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
+        TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
 
         TOTAL_ERROR_COUNT = "total_error_count"
 
@@ -57,7 +80,9 @@ class TransformOracleDataTask(Task):
             self.process_opportunity_summaries()
 
             # One-to-many lookups
-            self.process_one_to_many_lookup_tables()
+            self.process_link_applicant_types()
+            self.process_link_funding_categories()
+            self.process_link_funding_instruments()
 
     def fetch(
         self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
@@ -94,6 +119,41 @@ class TransformOracleDataTask(Task):
                 )
                 .where(source_model.transformed_at.is_(None))
                 .execution_options(yield_per=5000)
+            ),
+        )
+
+    def fetch_with_opportunity_summary(
+        self,
+        source_model: Type[S],
+        destination_model: Type[D],
+        join_clause: Sequence,
+        is_forecast: bool,
+        is_historical_table: bool,
+        relationship_load_value: Any,
+    ) -> list[Tuple[S, D | None, OpportunitySummary | None]]:
+        # setup the join clause for getting the opportunity summary
+
+        opportunity_summary_join_clause = [
+            source_model.opportunity_id == OpportunitySummary.opportunity_id,  # type: ignore[attr-defined]
+            OpportunitySummary.is_forecast.is_(is_forecast),
+        ]
+
+        if is_historical_table:
+            opportunity_summary_join_clause.append(
+                source_model.revision_number == OpportunitySummary.revision_number  # type: ignore[attr-defined]
+            )
+        else:
+            opportunity_summary_join_clause.append(OpportunitySummary.revision_number.is_(None))
+
+        return cast(
+            list[Tuple[S, D | None, OpportunitySummary | None]],
+            self.db_session.execute(
+                select(source_model, destination_model, OpportunitySummary)
+                .join(OpportunitySummary, and_(*opportunity_summary_join_clause), isouter=True)
+                .join(destination_model, and_(*join_clause), isouter=True)
+                .where(source_model.transformed_at.is_(None))
+                .options(selectinload(relationship_load_value))
+                .execution_options(yield_per=5000, populate_existing=True)
             ),
         )
 
@@ -141,12 +201,13 @@ class TransformOracleDataTask(Task):
             transformed_opportunity = transform_util.transform_opportunity(
                 source_opportunity, target_opportunity
             )
-            self.db_session.merge(transformed_opportunity)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_opportunity)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_opportunity)
 
         logger.info("Processed opportunity", extra=extra)
         source_opportunity.transformed_at = self.transform_time
@@ -224,12 +285,13 @@ class TransformOracleDataTask(Task):
             transformed_assistance_listing = transform_util.transform_assistance_listing(
                 source_assistance_listing, target_assistance_listing
             )
-            self.db_session.merge(transformed_assistance_listing)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_assistance_listing)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_assistance_listing)
 
         logger.info("Processed assistance listing", extra=extra)
         source_assistance_listing.transformed_at = self.transform_time
@@ -332,16 +394,461 @@ class TransformOracleDataTask(Task):
             transformed_opportunity_summary = transform_util.transform_opportunity_summary(
                 source_summary, target_summary
             )
-            self.db_session.merge(transformed_opportunity_summary)
 
             if is_insert:
                 self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.db_session.add(transformed_opportunity_summary)
             else:
                 self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_opportunity_summary)
 
         logger.info("Processed opportunity summary", extra=extra)
         source_summary.transformed_at = self.transform_time
 
-    def process_one_to_many_lookup_tables(self) -> None:
-        # TODO - https://github.com/HHS/simpler-grants-gov/issues/1749
-        pass
+    def process_link_applicant_types(self) -> None:
+        link_table = LinkOpportunitySummaryApplicantType
+        relationship_load_value = OpportunitySummary.link_applicant_types
+
+        forecast_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesForecast,
+            link_table,
+            [
+                TapplicanttypesForecast.at_frcst_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(forecast_applicant_type_records)
+
+        forecast_applicant_type_hist_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesForecastHist,
+            link_table,
+            [
+                TapplicanttypesForecastHist.at_frcst_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(forecast_applicant_type_hist_records)
+
+        synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesSynopsis,
+            link_table,
+            [
+                TapplicanttypesSynopsis.at_syn_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(synopsis_applicant_type_records)
+
+        synopsis_applicant_type_hist_records = self.fetch_with_opportunity_summary(
+            TapplicanttypesSynopsisHist,
+            link_table,
+            [
+                TapplicanttypesSynopsisHist.at_syn_id
+                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_applicant_types_group(synopsis_applicant_type_hist_records)
+
+    def process_link_applicant_types_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceApplicantType,
+                LinkOpportunitySummaryApplicantType | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
+        for source_applicant_type, target_applicant_type, opportunity_summary in records:
+            try:
+                self.process_link_applicant_type(
+                    source_applicant_type, target_applicant_type, opportunity_summary
+                )
+            except ValueError:
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                logger.exception(
+                    "Failed to process opportunity summary applicant type",
+                    extra=transform_util.get_log_extra_applicant_type(source_applicant_type),
+                )
+
+    def process_link_applicant_type(
+        self,
+        source_applicant_type: SourceApplicantType,
+        target_applicant_type: LinkOpportunitySummaryApplicantType | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        extra = transform_util.get_log_extra_applicant_type(source_applicant_type)
+        logger.info("Processing applicant type", extra=extra)
+
+        if opportunity_summary is None:
+            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
+            # we'll make sure the opportunity actually exists
+            raise ValueError(
+                "Applicant type record cannot be processed as the opportunity summary for it does not exist"
+            )
+
+        if source_applicant_type.is_deleted:
+            logger.info("Deleting applicant type", extra=extra)
+
+            if target_applicant_type is None:
+                raise ValueError("Cannot delete applicant type as it does not exist")
+
+            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
+            self.db_session.delete(target_applicant_type)
+        else:
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_applicant_type is None
+
+            logger.info("Transforming and upserting applicant type", extra=extra)
+            transformed_applicant_type = transform_util.convert_opportunity_summary_applicant_type(
+                source_applicant_type, target_applicant_type, opportunity_summary
+            )
+
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_applicant_type.applicant_type in opportunity_summary.applicant_types
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping applicant type record",
+                    extra=extra | {"applicant_type": transformed_applicant_type.applicant_type},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_applicant_types.append(transformed_applicant_type)
+            else:
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_applicant_type)
+
+        logger.info("Processed applicant type", extra=extra)
+        source_applicant_type.transformed_at = self.transform_time
+
+    def process_link_funding_categories(self) -> None:
+        link_table = LinkOpportunitySummaryFundingCategory
+        relationship_load_value = OpportunitySummary.link_funding_categories
+
+        forecast_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatForecast,
+            link_table,
+            [
+                TfundactcatForecast.fac_frcst_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_categories_group(forecast_funding_category_records)
+
+        forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(
+            TfundactcatForecastHist,
+            link_table,
+            [
+                TfundactcatForecastHist.fac_frcst_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_categories_group(forecast_funding_category_hist_records)
+
+        synopsis_funding_category_records = self.fetch_with_opportunity_summary(
+            TfundactcatSynopsis,
+            link_table,
+            [
+                TfundactcatSynopsis.fac_syn_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_categories_group(synopsis_funding_category_records)
+
+        synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(
+            TfundactcatSynopsisHist,
+            link_table,
+            [
+                TfundactcatSynopsisHist.fac_syn_id
+                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_categories_group(synopsis_funding_category_hist_records)
+
+    def process_link_funding_categories_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceFundingCategory,
+                LinkOpportunitySummaryFundingCategory | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
+        for source_funding_category, target_funding_category, opportunity_summary in records:
+            try:
+                self.process_link_funding_category(
+                    source_funding_category, target_funding_category, opportunity_summary
+                )
+            except ValueError:
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                logger.exception(
+                    "Failed to process opportunity summary funding category",
+                    extra=transform_util.get_log_extra_funding_category(source_funding_category),
+                )
+
+    def process_link_funding_category(
+        self,
+        source_funding_category: SourceFundingCategory,
+        target_funding_category: LinkOpportunitySummaryFundingCategory | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        extra = transform_util.get_log_extra_funding_category(source_funding_category)
+        logger.info("Processing funding category", extra=extra)
+
+        if opportunity_summary is None:
+            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
+            # we'll make sure the opportunity actually exists
+            raise ValueError(
+                "Funding category record cannot be processed as the opportunity summary for it does not exist"
+            )
+
+        if source_funding_category.is_deleted:
+            logger.info("Deleting funding category", extra=extra)
+
+            if target_funding_category is None:
+                raise ValueError("Cannot delete funding category as it does not exist")
+
+            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
+            self.db_session.delete(target_funding_category)
+        else:
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_funding_category is None
+
+            logger.info("Transforming and upserting funding category", extra=extra)
+            transformed_funding_category = (
+                transform_util.convert_opportunity_summary_funding_category(
+                    source_funding_category, target_funding_category, opportunity_summary
+                )
+            )
+
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_funding_category.funding_category
+                in opportunity_summary.funding_categories
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping funding category record",
+                    extra=extra
+                    | {"funding_category": transformed_funding_category.funding_category},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_funding_categories.append(transformed_funding_category)
+            else:
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_funding_category)
+
+        logger.info("Processed funding category", extra=extra)
+        source_funding_category.transformed_at = self.transform_time
+
+    def process_link_funding_instruments(self) -> None:
+        link_table = LinkOpportunitySummaryFundingInstrument
+        relationship_load_value = OpportunitySummary.link_funding_instruments
+
+        forecast_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrForecast,
+            link_table,
+            [
+                TfundinstrForecast.fi_frcst_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(forecast_funding_instrument_records)
+
+        forecast_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
+            TfundinstrForecastHist,
+            link_table,
+            [
+                TfundinstrForecastHist.fi_frcst_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=True,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(forecast_funding_instrument_hist_records)
+
+        synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
+            TfundinstrSynopsis,
+            link_table,
+            [
+                TfundinstrSynopsis.fi_syn_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=False,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(synopsis_funding_instrument_records)
+
+        synopsis_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
+            TfundinstrSynopsisHist,
+            link_table,
+            [
+                TfundinstrSynopsisHist.fi_syn_id
+                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
+                OpportunitySummary.opportunity_summary_id
+                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
+            ],
+            is_forecast=False,
+            is_historical_table=True,
+            relationship_load_value=relationship_load_value,
+        )
+        self.process_link_funding_instruments_group(synopsis_funding_instrument_hist_records)
+
+    def process_link_funding_instruments_group(
+        self,
+        records: Sequence[
+            Tuple[
+                SourceFundingInstrument,
+                LinkOpportunitySummaryFundingInstrument | None,
+                OpportunitySummary | None,
+            ]
+        ],
+    ) -> None:
+        for source_funding_instrument, target_funding_instrument, opportunity_summary in records:
+            try:
+                self.process_link_funding_instrument(
+                    source_funding_instrument, target_funding_instrument, opportunity_summary
+                )
+            except ValueError:
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                logger.exception(
+                    "Failed to process opportunity summary funding instrument",
+                    extra=transform_util.get_log_extra_funding_instrument(
+                        source_funding_instrument
+                    ),
+                )
+
+    def process_link_funding_instrument(
+        self,
+        source_funding_instrument: SourceFundingInstrument,
+        target_funding_instrument: LinkOpportunitySummaryFundingInstrument | None,
+        opportunity_summary: OpportunitySummary | None,
+    ) -> None:
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        extra = transform_util.get_log_extra_funding_instrument(source_funding_instrument)
+        logger.info("Processing funding instrument", extra=extra)
+
+        if opportunity_summary is None:
+            # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
+            # we'll make sure the opportunity actually exists
+            raise ValueError(
+                "Funding instrument record cannot be processed as the opportunity summary for it does not exist"
+            )
+
+        if source_funding_instrument.is_deleted:
+            logger.info("Deleting funding instrument", extra=extra)
+
+            if target_funding_instrument is None:
+                raise ValueError("Cannot delete funding instrument as it does not exist")
+
+            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
+            self.db_session.delete(target_funding_instrument)
+        else:
+            # To avoid incrementing metrics for records we fail to transform, record
+            # here whether it's an insert/update and we'll increment after transforming
+            is_insert = target_funding_instrument is None
+
+            logger.info("Transforming and upserting funding instrument", extra=extra)
+            transformed_funding_instrument = (
+                transform_util.convert_opportunity_summary_funding_instrument(
+                    source_funding_instrument, target_funding_instrument, opportunity_summary
+                )
+            )
+
+            # Before we insert, we have to still be certain we're not adding a duplicate record
+            # because the primary key of the legacy tables is the legacy ID + lookup value + opportunity ID
+            # its possible for the same lookup value to appear multiple times because the legacy ID is different
+            # This would hit a conflict in our DBs primary key, so we need to verify that won't happen
+            if (
+                is_insert
+                and transformed_funding_instrument.funding_instrument
+                in opportunity_summary.funding_instruments
+            ):
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                logger.warning(
+                    "Skipping funding instrument record",
+                    extra=extra
+                    | {"funding_instrument": transformed_funding_instrument.funding_instrument},
+                )
+            elif is_insert:
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                # We append to the relationship so SQLAlchemy immediately attaches it to its cached
+                # opportunity summary object so that the above check works when we receive dupes in the same batch
+                opportunity_summary.link_funding_instruments.append(transformed_funding_instrument)
+            else:
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.db_session.merge(transformed_funding_instrument)
+
+        logger.info("Processed funding instrument", extra=extra)
+        source_funding_instrument.transformed_at = self.transform_time

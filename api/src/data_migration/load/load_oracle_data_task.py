@@ -1,7 +1,7 @@
 #
 # Load data from legacy (Oracle) tables to staging tables.
 #
-
+import itertools
 import logging
 import time
 
@@ -27,6 +27,7 @@ class LoadOracleDataTask(src.task.task.Task):
         db_session: db.Session,
         foreign_tables: dict[str, sqlalchemy.Table],
         staging_tables: dict[str, sqlalchemy.Table],
+        insert_chunk_size: int = 4000,
     ) -> None:
         if foreign_tables.keys() != staging_tables.keys():
             raise ValueError("keys of foreign_tables and staging_tables must be equal")
@@ -34,6 +35,7 @@ class LoadOracleDataTask(src.task.task.Task):
         super().__init__(db_session)
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
+        self.insert_chunk_size = insert_chunk_size
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
@@ -92,40 +94,71 @@ class LoadOracleDataTask(src.task.task.Task):
     def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Determine new rows by primary key, and copy them into the staging table."""
 
-        insert_from_select_sql, select_sql = sql.build_insert_select_sql(
-            foreign_table, staging_table
+        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
+        new_ids = self.db_session.execute(select_sql).all()
+
+        t0 = time.monotonic()
+        insert_chunk_count = []
+        for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size):
+            insert_from_select_sql = sql.build_insert_select_sql(
+                foreign_table, staging_table, batch_of_new_ids
+            )
+
+            # Execute the INSERT.
+            self.db_session.execute(insert_from_select_sql)
+
+            insert_chunk_count.append(len(batch_of_new_ids))
+            logger.info(
+                "insert chunk done",
+                extra={"count": sum(insert_chunk_count), "total": len(new_ids)},
+            )
+
+        t1 = time.monotonic()
+        total_insert_count = sum(insert_chunk_count)
+        self.increment("count.insert.total", total_insert_count)
+        self.increment(f"count.insert.{staging_table.name}", total_insert_count)
+        self.set_metrics(
+            {
+                f"count.insert.chunk.{staging_table.name}": ",".join(map(str, insert_chunk_count)),
+                f"time.insert.{staging_table.name}": round(t1 - t0, 3),
+            }
         )
 
-        # COUNT has to be a separate query as INSERTs don't return a rowcount.
-        insert_count = self.db_session.query(select_sql.subquery()).count()
-
-        self.increment("count.insert.total", insert_count)
-        self.set_metrics({f"count.insert.{staging_table.name}": insert_count})
-
-        # Execute the INSERT.
-        t0 = time.monotonic()
-        self.db_session.execute(insert_from_select_sql)
-        t1 = time.monotonic()
-
-        self.set_metrics({f"time.insert.{staging_table.name}": round(t1 - t0, 3)})
-
-        return insert_count
+        return total_insert_count
 
     def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
 
-        update_sql = sql.build_update_sql(foreign_table, staging_table).values(transformed_at=None)
+        select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
+        update_ids = self.db_session.execute(select_sql).all()
 
         t0 = time.monotonic()
-        result = self.db_session.execute(update_sql)
+        update_chunk_count = []
+        for batch_of_update_ids in itertools.batched(update_ids, self.insert_chunk_size):
+            update_sql = sql.build_update_sql(
+                foreign_table, staging_table, batch_of_update_ids
+            ).values(transformed_at=None)
+
+            self.db_session.execute(update_sql)
+
+            update_chunk_count.append(len(batch_of_update_ids))
+            logger.info(
+                "update chunk done",
+                extra={"count": sum(update_chunk_count), "total": len(update_ids)},
+            )
+
         t1 = time.monotonic()
-        update_count = result.rowcount
+        total_update_count = sum(update_chunk_count)
+        self.increment("count.update.total", total_update_count)
+        self.increment(f"count.update.{staging_table.name}", total_update_count)
+        self.set_metrics(
+            {
+                f"count.update.chunk.{staging_table.name}": ",".join(map(str, update_chunk_count)),
+                f"time.update.{staging_table.name}": round(t1 - t0, 3),
+            }
+        )
 
-        self.increment("count.update.total", update_count)
-        self.set_metrics({f"count.update.{staging_table.name}": update_count})
-        self.set_metrics({f"time.update.{staging_table.name}": round(t1 - t0, 3)})
-
-        return update_count
+        return total_update_count
 
     def do_mark_deleted(
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
