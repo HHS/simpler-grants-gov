@@ -2,6 +2,8 @@
 # SQL building for data load process.
 #
 
+from typing import Iterable
+
 import sqlalchemy
 
 
@@ -25,7 +27,9 @@ def build_select_new_rows_sql(
 
 
 def build_insert_select_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table, ids: list[tuple[int, ...]]
+    source_table: sqlalchemy.Table,
+    destination_table: sqlalchemy.Table,
+    ids: Iterable[tuple | sqlalchemy.Row],
 ) -> sqlalchemy.Insert:
     """Build an `INSERT INTO ... SELECT ... FROM ...` query for new rows."""
 
@@ -69,7 +73,9 @@ def build_select_updated_rows_sql(
 
 
 def build_update_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table, ids: list[tuple[int, ...]]
+    source_table: sqlalchemy.Table,
+    destination_table: sqlalchemy.Table,
+    ids: Iterable[tuple | sqlalchemy.Row],
 ) -> sqlalchemy.Update:
     """Build an `UPDATE ... SET ... WHERE ...` statement for updated rows."""
 

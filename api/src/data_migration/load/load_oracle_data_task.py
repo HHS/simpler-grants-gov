@@ -139,7 +139,7 @@ class LoadOracleDataTask(src.task.task.Task):
                 foreign_table, staging_table, batch_of_update_ids
             ).values(transformed_at=None)
 
-            result = self.db_session.execute(update_sql)
+            self.db_session.execute(update_sql)
 
             update_chunk_count.append(len(batch_of_update_ids))
             logger.info(
