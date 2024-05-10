@@ -5,6 +5,7 @@ from enum import StrEnum
 from typing import Any
 
 import src.adapters.db as db
+from src.db.models.mutation_log import MutationLog
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
         pass
 
     def __init__(self, db_session: db.Session) -> None:
+        self.mutation_log = None
         self.db_session = db_session
         self.metrics: dict[str, Any] = {}
 
@@ -36,6 +38,15 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
             # Initialize the metrics
             self.initialize_metrics()
+
+            # Add a row to the mutation log
+            self.mutation_log = MutationLog(batch_name=self.cls_name(), batch_step=self.cls_name())
+            self.db_session.add(self.mutation_log)
+            self.db_session.flush()
+            self.db_session.commit()
+            self.db_session.refresh(self.mutation_log)
+            self.db_session.commit()
+            logger.info("added to mutation log", extra={"mutation_log_id": self.mutation_log.mutation_log_id})
 
             # Run the actual task
             self.run_task()
