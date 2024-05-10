@@ -78,4 +78,6 @@ The "analytics" component of the application is the parts composed of the analyt
 - [Front-end Framework](../wiki/decisions/adr/2023-07-14-front-end-framework.md)
 - [Back-end Language](../wiki/decisions/adr/2023-06-30-api-language.md)
 - [Back-End Framework](../wiki/decisions/adr/2023-07-07-api-framework.md)
-- [Application Infrastructure Service](../wiki/decisions//adr/2023-07-20-deployment-strategy.md)
+- [Application Infrastructure Service](../wiki/decisions/adr/2023-07-20-deployment-strategy.md)
+- [Analytics Data Storage](../wiki/decisions/adr/2024-03-19-dashboard-storage.md)
+- [Analytics Dashboard Tool](../wiki/decisions/adr/2024-04-10-dashboard-tool.md)
