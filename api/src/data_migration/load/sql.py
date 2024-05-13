@@ -88,7 +88,7 @@ def build_update_sql(
         .where(
             sqlalchemy.tuple_(*destination_table.primary_key.columns)
             == sqlalchemy.tuple_(*source_table.primary_key.columns),
-            sqlalchemy.tuple_(*destination_table.primary_key.columns).in_(ids),
+            sqlalchemy.tuple_(*source_table.primary_key.columns).in_(ids),
         )
     )
 
