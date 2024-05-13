@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
-    "@playwright/test": "^1.42.0",
+    "@playwright/test": "^1.44.0",
     "@storybook/addon-designs": "^7.0.1",
     "@storybook/addon-essentials": "^7.1.0",
     "@storybook/nextjs": "^7.1.0",
