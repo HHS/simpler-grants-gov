@@ -969,6 +969,10 @@ class StagingTapplicanttypesForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
 
 class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFactory):
     class Meta:
@@ -1010,6 +1014,10 @@ class StagingTapplicanttypesSynopsisFactory(BaseFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
 
 
@@ -1055,6 +1063,10 @@ class StagingTfundactcatForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
 
 class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
     class Meta:
@@ -1096,6 +1108,10 @@ class StagingTfundactcatSynopsisFactory(BaseFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
 
 
@@ -1141,6 +1157,10 @@ class StagingTfundinstrForecastFactory(BaseFactory):
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
         )
 
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
 
 class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
     class Meta:
@@ -1182,6 +1202,10 @@ class StagingTfundinstrSynopsisFactory(BaseFactory):
     class Params:
         already_transformed = factory.Trait(
             transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
 
 

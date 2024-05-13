@@ -49,6 +49,10 @@ D = TypeVar("D", bound=ApiSchemaTable)
 
 logger = logging.getLogger(__name__)
 
+# Constants
+ORPHANED_CFDA = "orphaned_cfda"
+ORPHANED_HISTORICAL_RECORD = "orphaned_historical_record"
+
 
 class TransformOracleDataTask(Task):
     class Metrics(StrEnum):
@@ -58,6 +62,7 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_UPDATED = "total_records_updated"
         TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
         TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
+        TOTAL_HISTORICAL_ORPHANS_SKIPPED = "total_historical_orphans_skipped"
 
         TOTAL_ERROR_COUNT = "total_error_count"
 
@@ -266,6 +271,7 @@ class TransformOracleDataTask(Task):
                 "Assistance listing is orphaned and does not connect to any opportunity",
                 extra=extra,
             )
+            source_assistance_listing.transformation_notes = ORPHANED_CFDA
 
         elif source_assistance_listing.is_deleted:
             logger.info("Deleting assistance listing", extra=extra)
@@ -369,14 +375,27 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_summary(source_summary)
         logger.info("Processing opportunity summary", extra=extra)
 
-        if opportunity is None:
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we don't have anything to link these to. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
+        if opportunity is None and source_summary.is_historical_table:
+            logger.warning(
+                "Historical opportunity summary does not have a corresponding opportunity - cannot import, but will mark as processed",
+                extra=extra,
+            )
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            source_summary.transformation_notes = ORPHANED_HISTORICAL_RECORD
+
+        elif opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError(
                 "Opportunity summary cannot be processed as the opportunity for it does not exist"
             )
 
-        if source_summary.is_deleted:
+        elif source_summary.is_deleted:
             logger.info("Deleting opportunity summary", extra=extra)
 
             if target_summary is None:
@@ -501,14 +520,27 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_applicant_type(source_applicant_type)
         logger.info("Processing applicant type", extra=extra)
 
-        if opportunity_summary is None:
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
+        if opportunity_summary is None and source_applicant_type.is_historical_table:
+            logger.warning(
+                "Historical applicant type does not have a corresponding opportunity summary - cannot import, but will mark as processed",
+                extra=extra,
+            )
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            source_applicant_type.transformation_notes = ORPHANED_HISTORICAL_RECORD
+
+        elif opportunity_summary is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError(
                 "Applicant type record cannot be processed as the opportunity summary for it does not exist"
             )
 
-        if source_applicant_type.is_deleted:
+        elif source_applicant_type.is_deleted:
             logger.info("Deleting applicant type", extra=extra)
 
             if target_applicant_type is None:
@@ -647,14 +679,27 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_funding_category(source_funding_category)
         logger.info("Processing funding category", extra=extra)
 
-        if opportunity_summary is None:
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
+        if opportunity_summary is None and source_funding_category.is_historical_table:
+            logger.warning(
+                "Historical funding category does not have a corresponding opportunity summary - cannot import, but will mark as processed",
+                extra=extra,
+            )
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            source_funding_category.transformation_notes = ORPHANED_HISTORICAL_RECORD
+
+        elif opportunity_summary is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError(
                 "Funding category record cannot be processed as the opportunity summary for it does not exist"
             )
 
-        if source_funding_category.is_deleted:
+        elif source_funding_category.is_deleted:
             logger.info("Deleting funding category", extra=extra)
 
             if target_funding_category is None:
@@ -799,14 +844,27 @@ class TransformOracleDataTask(Task):
         extra = transform_util.get_log_extra_funding_instrument(source_funding_instrument)
         logger.info("Processing funding instrument", extra=extra)
 
-        if opportunity_summary is None:
+        # Historical records are linked to other historical records, however
+        # we don't import historical opportunity records, so if the opportunity
+        # was deleted, we won't have created the opportunity summary. Whenever we do
+        # support historical opportunities, we'll have these all marked with a
+        # flag that we can use to reprocess these.
+        if opportunity_summary is None and source_funding_instrument.is_historical_table:
+            logger.warning(
+                "Historical funding instrument does not have a corresponding opportunity summary - cannot import, but will mark as processed",
+                extra=extra,
+            )
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            source_funding_instrument.transformation_notes = ORPHANED_HISTORICAL_RECORD
+
+        elif opportunity_summary is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
             raise ValueError(
                 "Funding instrument record cannot be processed as the opportunity summary for it does not exist"
             )
 
-        if source_funding_instrument.is_deleted:
+        elif source_funding_instrument.is_deleted:
             logger.info("Deleting funding instrument", extra=extra)
 
             if target_funding_instrument is None:

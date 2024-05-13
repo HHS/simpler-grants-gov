@@ -85,7 +85,7 @@ def setup_synopsis_forecast(
     is_forecast: bool,
     revision_number: int | None,
     create_existing: bool,
-    opportunity: Opportunity,
+    opportunity: Opportunity | None,
     is_delete: bool = False,
     is_already_processed: bool = False,
     source_values: dict | None = None,
@@ -107,10 +107,12 @@ def setup_synopsis_forecast(
     if revision_number is not None:
         source_values["revision_number"] = revision_number
 
+    if opportunity is not None:
+        source_values["opportunity_id"] = opportunity.opportunity_id
+
     source_summary = factory_cls.create(
         **source_values,
         opportunity=None,  # To override the factory trying to create something
-        opportunity_id=opportunity.opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
     )
@@ -845,6 +847,7 @@ class TestTransformAssistanceListing(BaseTestClass):
             cfda_insert_without_opportunity, None, None
         )
         assert cfda_insert_without_opportunity.transformed_at is not None
+        assert cfda_insert_without_opportunity.transformation_notes == "orphaned_cfda"
         assert (
             transform_oracle_data_task.metrics[
                 transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED
@@ -1108,6 +1111,49 @@ class TestTransformOpportunitySummary(BaseTestClass):
             transform_oracle_data_task.process_opportunity_summary(
                 source_summary, None, opportunity
             )
+
+    @pytest.mark.parametrize("is_forecast", [True, False])
+    def test_process_opportunity_summary_but_no_opportunity_non_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        is_forecast,
+    ):
+        source_record = setup_synopsis_forecast(
+            is_forecast=is_forecast,
+            revision_number=None,
+            create_existing=False,
+            opportunity=None,
+            source_values={"opportunity_id": 12121212},
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="Opportunity summary cannot be processed as the opportunity for it does not exist",
+        ):
+            transform_oracle_data_task.process_opportunity_summary(source_record, None, None)
+
+    @pytest.mark.parametrize("is_forecast,revision_number", [(True, 10), (False, 9)])
+    def test_process_opportunity_summary_but_no_opportunity_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        is_forecast,
+        revision_number,
+    ):
+        source_record = setup_synopsis_forecast(
+            is_forecast=is_forecast,
+            revision_number=revision_number,
+            create_existing=False,
+            opportunity=None,
+            source_values={"opportunity_id": 12121212},
+        )
+
+        transform_oracle_data_task.process_opportunity_summary(source_record, None, None)
+
+        validate_opportunity_summary(db_session, source_record, expect_in_db=False)
+        assert source_record.transformed_at is not None
+        assert source_record.transformation_notes == "orphaned_historical_record"
 
 
 class TestTransformApplicantType(BaseTestClass):
@@ -1454,6 +1500,39 @@ class TestTransformApplicantType(BaseTestClass):
                 insert_but_invalid_value, None, opportunity_summary
             )
 
+    @pytest.mark.parametrize(
+        "factory_cls",
+        [f.StagingTapplicanttypesForecastFactory, f.StagingTapplicanttypesSynopsisFactory],
+    )
+    def test_process_applicant_type_but_no_opportunity_summary_non_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True)
+
+        with pytest.raises(
+            ValueError,
+            match="Applicant type record cannot be processed as the opportunity summary for it does not exist",
+        ):
+            transform_oracle_data_task.process_link_applicant_type(source_record, None, None)
+
+    @pytest.mark.parametrize(
+        "factory_cls",
+        [f.StagingTapplicanttypesForecastHistFactory, f.StagingTapplicanttypesSynopsisHistFactory],
+    )
+    def test_process_applicant_type_but_no_opportunity_summary_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
+        transform_oracle_data_task.process_link_applicant_type(source_record, None, None)
+        assert source_record.transformed_at is not None
+        assert source_record.transformation_notes == "orphaned_historical_record"
+
 
 class TestTransformFundingInstrument(BaseTestClass):
     @pytest.fixture()
@@ -1683,7 +1762,7 @@ class TestTransformFundingInstrument(BaseTestClass):
         "is_forecast,revision_number,legacy_lookup_value",
         [(True, None, "X"), (False, None, "4"), (True, 5, "Y"), (False, 10, "A")],
     )
-    def test_process_applicant_types_but_invalid_lookup_value(
+    def test_process_funding_instrument_but_invalid_lookup_value(
         self,
         db_session,
         transform_oracle_data_task,
@@ -1704,6 +1783,38 @@ class TestTransformFundingInstrument(BaseTestClass):
             transform_oracle_data_task.process_link_funding_instrument(
                 insert_but_invalid_value, None, opportunity_summary
             )
+
+    @pytest.mark.parametrize(
+        "factory_cls", [f.StagingTfundinstrForecastFactory, f.StagingTfundinstrSynopsisFactory]
+    )
+    def test_process_funding_instrument_but_no_opportunity_summary_non_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True)
+
+        with pytest.raises(
+            ValueError,
+            match="Funding instrument record cannot be processed as the opportunity summary for it does not exist",
+        ):
+            transform_oracle_data_task.process_link_funding_instrument(source_record, None, None)
+
+    @pytest.mark.parametrize(
+        "factory_cls",
+        [f.StagingTfundinstrForecastHistFactory, f.StagingTfundinstrSynopsisHistFactory],
+    )
+    def test_process_funding_instrument_but_no_opportunity_summary_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
+        transform_oracle_data_task.process_link_funding_instrument(source_record, None, None)
+        assert source_record.transformed_at is not None
+        assert source_record.transformation_notes == "orphaned_historical_record"
 
 
 class TestTransformFundingCategory(BaseTestClass):
@@ -1986,7 +2097,7 @@ class TestTransformFundingCategory(BaseTestClass):
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 1), (False, 70)]
     )
-    def test_process_applicant_types_but_current_missing(
+    def test_process_funding_category_but_current_missing(
         self, db_session, transform_oracle_data_task, is_forecast, revision_number
     ):
         opportunity_summary = f.OpportunitySummaryFactory.create(
@@ -2008,7 +2119,7 @@ class TestTransformFundingCategory(BaseTestClass):
         "is_forecast,revision_number,legacy_lookup_value",
         [(True, None, "ab"), (False, None, "cd"), (True, 5, "ef"), (False, 10, "Ag")],
     )
-    def test_process_applicant_types_but_invalid_lookup_value(
+    def test_process_funding_category_but_invalid_lookup_value(
         self,
         db_session,
         transform_oracle_data_task,
@@ -2029,6 +2140,38 @@ class TestTransformFundingCategory(BaseTestClass):
             transform_oracle_data_task.process_link_funding_category(
                 insert_but_invalid_value, None, opportunity_summary
             )
+
+    @pytest.mark.parametrize(
+        "factory_cls", [f.StagingTfundactcatForecastFactory, f.StagingTfundactcatSynopsisFactory]
+    )
+    def test_process_funding_category_but_no_opportunity_summary_non_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True)
+
+        with pytest.raises(
+            ValueError,
+            match="Funding category record cannot be processed as the opportunity summary for it does not exist",
+        ):
+            transform_oracle_data_task.process_link_funding_category(source_record, None, None)
+
+    @pytest.mark.parametrize(
+        "factory_cls",
+        [f.StagingTfundactcatForecastHistFactory, f.StagingTfundactcatSynopsisHistFactory],
+    )
+    def test_process_funding_category_but_no_opportunity_summary_hist(
+        self,
+        db_session,
+        transform_oracle_data_task,
+        factory_cls,
+    ):
+        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
+        transform_oracle_data_task.process_link_funding_category(source_record, None, None)
+        assert source_record.transformed_at is not None
+        assert source_record.transformation_notes == "orphaned_historical_record"
 
 
 class TestTransformFullRunTask(BaseTestClass):

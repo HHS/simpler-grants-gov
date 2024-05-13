@@ -20,6 +20,10 @@ class Tforecast(StagingBase, forecast_mixin.TforecastMixin, StagingParamMixin):
     def is_forecast(self) -> bool:
         return True
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TforecastHist(StagingBase, forecast_mixin.TforecastHistMixin, StagingParamMixin):
     __tablename__ = "tforecast_hist"
@@ -33,6 +37,10 @@ class TforecastHist(StagingBase, forecast_mixin.TforecastHistMixin, StagingParam
 
     @property
     def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def is_historical_table(self) -> bool:
         return True
 
 
@@ -60,6 +68,10 @@ class TapplicanttypesForecast(
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TapplicanttypesForecastHist(
     StagingBase, forecast_mixin.TapplicanttypesForecastHistMixin, StagingParamMixin
@@ -79,6 +91,10 @@ class TapplicanttypesForecastHist(
 
     @property
     def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def is_historical_table(self) -> bool:
         return True
 
 
@@ -104,6 +120,10 @@ class TfundactcatForecast(StagingBase, forecast_mixin.TfundactcatForecastMixin, 
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TfundactcatForecastHist(
     StagingBase, forecast_mixin.TfundactcatForecastHistMixin, StagingParamMixin
@@ -123,6 +143,10 @@ class TfundactcatForecastHist(
 
     @property
     def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def is_historical_table(self) -> bool:
         return True
 
 
@@ -148,6 +172,10 @@ class TfundinstrForecast(StagingBase, forecast_mixin.TfundinstrForecastMixin, St
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TfundinstrForecastHist(
     StagingBase, forecast_mixin.TfundinstrForecastHistMixin, StagingParamMixin
@@ -167,4 +195,8 @@ class TfundinstrForecastHist(
 
     @property
     def is_forecast(self) -> bool:
+        return True
+
+    @property
+    def is_historical_table(self) -> bool:
         return True

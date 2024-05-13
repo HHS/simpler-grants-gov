@@ -20,6 +20,10 @@ class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
     def is_forecast(self) -> bool:
         return False
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParamMixin):
     __tablename__ = "tsynopsis_hist"
@@ -34,6 +38,10 @@ class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParam
     @property
     def is_forecast(self) -> bool:
         return False
+
+    @property
+    def is_historical_table(self) -> bool:
+        return True
 
 
 class TapplicanttypesSynopsis(
@@ -60,6 +68,10 @@ class TapplicanttypesSynopsis(
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TapplicanttypesSynopsisHist(
     StagingBase, synopsis_mixin.TapplicanttypesSynopsisHistMixin, StagingParamMixin
@@ -80,6 +92,10 @@ class TapplicanttypesSynopsisHist(
     @property
     def is_forecast(self) -> bool:
         return False
+
+    @property
+    def is_historical_table(self) -> bool:
+        return True
 
 
 class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, StagingParamMixin):
@@ -104,6 +120,10 @@ class TfundactcatSynopsis(StagingBase, synopsis_mixin.TfundactcatSynopsisMixin, 
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TfundactcatSynopsisHist(
     StagingBase, synopsis_mixin.TfundactcatSynopsisHistMixin, StagingParamMixin
@@ -124,6 +144,10 @@ class TfundactcatSynopsisHist(
     @property
     def is_forecast(self) -> bool:
         return False
+
+    @property
+    def is_historical_table(self) -> bool:
+        return True
 
 
 class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, StagingParamMixin):
@@ -148,6 +172,10 @@ class TfundinstrSynopsis(StagingBase, synopsis_mixin.TfundinstrSynopsisMixin, St
     def revision_number(self) -> None:
         return None
 
+    @property
+    def is_historical_table(self) -> bool:
+        return False
+
 
 class TfundinstrSynopsisHist(
     StagingBase, synopsis_mixin.TfundinstrSynopsisHistMixin, StagingParamMixin
@@ -168,3 +196,7 @@ class TfundinstrSynopsisHist(
     @property
     def is_forecast(self) -> bool:
         return False
+
+    @property
+    def is_historical_table(self) -> bool:
+        return True
