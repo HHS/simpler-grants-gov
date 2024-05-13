@@ -12,7 +12,5 @@ module "prod_config" {
   database_min_capacity           = 2
 
   service_override_extra_environment_variables = {
-    # determines whether the v0.1 endpoints are available in the API
-    ENABLE_V_0_1_ENDPOINTS = "false"
   }
 }
