@@ -319,7 +319,7 @@ class TestGetStats:
         # validation
         assert output.stats.get(self.TOTAL_CLOSED).value == 3
         assert output.stats.get(self.TOTAL_OPENED).value == 9
-        assert output.stats.get(self.PCT_CLOSED).value == 34  # rounded to 2 places
+        assert output.stats.get(self.PCT_CLOSED).value == 33  # rounded to 2 places
         # validation - check that message contains string value of Unit.points
         assert Unit.points.value in output.stats.get(self.TOTAL_CLOSED).suffix
         assert Unit.points.value in output.stats.get(self.TOTAL_OPENED).suffix
