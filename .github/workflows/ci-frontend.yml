@@ -72,7 +72,7 @@ jobs:
         shell: bash
 
       - name: Run e2e tests
-        run: npx playwright test
+        run: npm run test:e2e
 
       - uses: actions/upload-artifact@v3
         if: always()
