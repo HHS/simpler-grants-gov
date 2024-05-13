@@ -83,7 +83,7 @@ def test_build_update_sql(source_table, destination_table):
         "last_upd_date=test_source_table.last_upd_date FROM test_source_table "
         "WHERE (test_destination_table.id1, test_destination_table.id2) = "
         "(test_source_table.id1, test_source_table.id2) AND "
-        "(test_destination_table.id1, test_destination_table.id2) "
+        "(test_source_table.id1, test_source_table.id2) "
         "IN (__[POSTCOMPILE_param_1])"
     )
 
