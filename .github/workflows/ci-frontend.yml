@@ -67,6 +67,7 @@ jobs:
           make init db-seed-local start &
           cd ../frontend
           # Run the script to wait for API readiness
+          chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
 
