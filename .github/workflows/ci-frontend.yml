@@ -64,14 +64,10 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local start > /dev/null 2>&1 &
+          make init db-seed-local start &
           cd ../frontend
-          echo "Waiting for API to initialize..."
-          # Basic loop to wait for API to be ready (adjust the endpoint as needed)
-          until curl --output /dev/null --silent --head --fail http://localhost:8080/health; do
-            printf '.'
-            sleep 5
-          done
+          # Run the script to wait for API readiness
+          ../api/bin/wait-for-api.sh
         shell: bash
 
       - name: Run e2e tests
