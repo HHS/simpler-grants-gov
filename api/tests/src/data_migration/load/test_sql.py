@@ -38,60 +38,53 @@ def destination_table(sqlalchemy_metadata):
     )
 
 
-def test_build_insert_select_sql(source_table, destination_table):
-    insert, select = sql.build_insert_select_sql(source_table, destination_table)
-    assert str(insert) == (
-        "WITH insert_pks AS MATERIALIZED \n"
-        "(SELECT test_source_table.id1 AS id1, test_source_table.id2 AS id2 \n"
+def test_build_select_new_rows_sql(source_table, destination_table):
+    select = sql.build_select_new_rows_sql(source_table, destination_table)
+    assert str(select) == (
+        "SELECT test_source_table.id1, test_source_table.id2 \n"
         "FROM test_source_table \n"
         "WHERE ((test_source_table.id1, test_source_table.id2) "
-        "NOT IN (SELECT test_destination_table.id1, test_destination_table.id2 \n"
-        "FROM test_destination_table))\n "
-        "LIMIT :param_1)\n "
+        "NOT IN ("
+        "SELECT test_destination_table.id1, test_destination_table.id2 \n"
+        "FROM test_destination_table)) "
+        "ORDER BY test_source_table.id1, test_source_table.id2"
+    )
+
+
+def test_build_select_updated_rows_sql(source_table, destination_table):
+    select = sql.build_select_updated_rows_sql(source_table, destination_table)
+    assert str(select) == (
+        "SELECT test_destination_table.id1, test_destination_table.id2 \n"
+        "FROM test_destination_table "
+        "JOIN test_source_table ON "
+        "(test_destination_table.id1, test_destination_table.id2) = "
+        "(test_source_table.id1, test_source_table.id2) \n"
+        "WHERE test_destination_table.last_upd_date < test_source_table.last_upd_date "
+        "ORDER BY test_source_table.id1, test_source_table.id2"
+    )
+
+
+def test_build_insert_select_sql(source_table, destination_table):
+    insert = sql.build_insert_select_sql(source_table, destination_table, [(1, 2), (3, 4), (5, 6)])
+    assert str(insert) == (
         "INSERT INTO test_destination_table (id1, id2, x, last_upd_date, is_deleted) "
         "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
         "test_source_table.last_upd_date, FALSE AS is_deleted \n"
         "FROM test_source_table \n"
-        "WHERE (test_source_table.id1, test_source_table.id2) IN "
-        "(SELECT insert_pks.id1, insert_pks.id2 \n"
-        "FROM insert_pks)"
-    )
-    assert str(select) == (
-        "WITH insert_pks AS MATERIALIZED \n"
-        "(SELECT test_source_table.id1 AS id1, test_source_table.id2 AS id2 \n"
-        "FROM test_source_table \n"
-        "WHERE ((test_source_table.id1, test_source_table.id2) "
-        "NOT IN (SELECT test_destination_table.id1, test_destination_table.id2 \n"
-        "FROM test_destination_table))\n "
-        "LIMIT :param_1)\n "
-        "SELECT test_source_table.id1, test_source_table.id2, test_source_table.x, "
-        "test_source_table.last_upd_date, FALSE AS is_deleted \n"
-        "FROM test_source_table \n"
-        "WHERE (test_source_table.id1, test_source_table.id2) IN "
-        "(SELECT insert_pks.id1, insert_pks.id2 \n"
-        "FROM insert_pks)"
+        "WHERE (test_source_table.id1, test_source_table.id2) IN (__[POSTCOMPILE_param_1])"
     )
 
 
 def test_build_update_sql(source_table, destination_table):
-    update = sql.build_update_sql(source_table, destination_table)
+    update = sql.build_update_sql(source_table, destination_table, [(1, 2), (3, 4), (5, 6)])
     assert str(update) == (
-        "WITH update_pks AS MATERIALIZED \n"
-        "(SELECT test_destination_table.id1 AS id1, test_destination_table.id2 AS id2 \n"
-        "FROM test_destination_table "
-        "JOIN test_source_table "
-        "ON (test_destination_table.id1, test_destination_table.id2) = "
-        "(test_source_table.id1, test_source_table.id2) \n"
-        "WHERE test_destination_table.last_upd_date < "
-        "test_source_table.last_upd_date)\n "
         "UPDATE test_destination_table "
         "SET id1=test_source_table.id1, id2=test_source_table.id2, x=test_source_table.x, "
         "last_upd_date=test_source_table.last_upd_date FROM test_source_table "
         "WHERE (test_destination_table.id1, test_destination_table.id2) = "
         "(test_source_table.id1, test_source_table.id2) AND "
         "(test_destination_table.id1, test_destination_table.id2) "
-        "IN (SELECT update_pks.id1, update_pks.id2 \n"
-        "FROM update_pks)"
+        "IN (__[POSTCOMPILE_param_1])"
     )
 
 

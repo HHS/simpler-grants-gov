@@ -137,7 +137,7 @@ class CustomProvider(BaseProvider):
         "{{word}}-###-##",
     ]
 
-    YN_BOOLEAN_VALUES = ["Y", "N"]
+    YN_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
