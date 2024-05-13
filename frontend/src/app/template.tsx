@@ -10,7 +10,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     isProd &&
       PUBLIC_ENV.GOOGLE_ANALYTICS_ID &&
-      sendGAEvent({ event: "page_view" });
+      sendGAEvent("event", "page_view");
   }, [isProd]);
 
   return <div>{children}</div>;
