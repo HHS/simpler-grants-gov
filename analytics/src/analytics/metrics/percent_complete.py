@@ -88,7 +88,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
         # calculate the percentage of all issues that have points per deliverable
         df_tgt = issues_total.join(issues_pointed, lsuffix="_total", rsuffix="_pointed")
         df_tgt["pct_pointed"] = df_tgt["count_pointed"] / df_tgt["count_total"] * 100
-        df_tgt["pct_pointed"] = round(df_tgt["pct_pointed"]).fillna(0)
+        df_tgt["pct_pointed"] = round(df_tgt["pct_pointed"], 0).fillna(0)
         df_tgt["pct_pointed"] = df_tgt["pct_pointed"].astype("int64")
         # export to a dictionary of stats)
         stats = {}

@@ -110,7 +110,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         is_pointed = self.sprint_data[Unit.points.value] >= 1
         issues_pointed = len(self.sprint_data[is_pointed])
         issues_total = len(self.sprint_data)
-        pct_pointed = int(issues_pointed / issues_total * 100)
+        pct_pointed = int(round(issues_pointed / issues_total * 100,0))
         # format and return stats
         return {
             "Sprint start date": Statistic(value=sprint_start),

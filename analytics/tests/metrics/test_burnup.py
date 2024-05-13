@@ -495,7 +495,7 @@ class TestGetStats:
         # validation
         assert output.stats.get(self.TOTAL_CLOSED).value == 3
         assert output.stats.get(self.TOTAL_OPENED).value == 9
-        assert output.stats.get(self.PCT_CLOSED).value == 33  # rounded to 2 places
+        assert output.stats.get(self.PCT_CLOSED).value == 34  # rounded to 2 places
         # validation - check that message contains string value of Unit.points
         assert Unit.points.value in output.stats.get(self.TOTAL_CLOSED).suffix
         assert Unit.points.value in output.stats.get(self.TOTAL_OPENED).suffix
@@ -532,7 +532,7 @@ class TestGetStats:
         # validation
         assert output.stats.get(self.TOTAL_CLOSED).value == 2
         assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 66  # rounded to 2 places
+        assert output.stats.get(self.PCT_CLOSED).value == 67  # rounded to 2 places
 
     def test_get_percent_pointed(self):
         """Test that percent pointed is calculated correctly."""
@@ -569,7 +569,7 @@ class TestGetStats:
         # validation
         assert output.stats.get(self.TOTAL_CLOSED).value == 2
         assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_POINTED).value == 66  # exclude final row
+        assert output.stats.get(self.PCT_POINTED).value == 67  # exclude final row
 
 
 class TestFormatSlackMessage:
