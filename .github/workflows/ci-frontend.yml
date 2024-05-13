@@ -58,6 +58,16 @@ jobs:
             skip-step: none
             output: comment
 
+      - name: Install Playwright Browsers for e2e tests
+        run: npx playwright install --with-deps
+
+      - name: Start API Server for e2e tests
+        run: |
+          cd ../api
+          make init db-seed-local start &
+          cd ../frontend
+        shell: bash
+
       - name: Run e2e tests
         run: npm run test:e2e
 
