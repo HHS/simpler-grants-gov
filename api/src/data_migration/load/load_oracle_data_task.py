@@ -72,8 +72,7 @@ class LoadOracleDataTask(src.task.task.Task):
         """Load the data for all tables defined in the mapping."""
         for table_name in self.foreign_tables:
             try:
-                with self.db_session.begin():
-                    self.load_data_for_table(table_name)
+                self.load_data_for_table(table_name)
             except Exception:
                 logger.exception("table load error", extra={"table": table_name})
 
@@ -95,7 +94,8 @@ class LoadOracleDataTask(src.task.task.Task):
         """Determine new rows by primary key, and copy them into the staging table."""
 
         select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
-        new_ids = self.db_session.execute(select_sql).all()
+        with self.db_session.begin():
+            new_ids = self.db_session.execute(select_sql).all()
 
         t0 = time.monotonic()
         insert_chunk_count = []
@@ -105,12 +105,17 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
             # Execute the INSERT.
-            self.db_session.execute(insert_from_select_sql)
+            with self.db_session.begin():
+                self.db_session.execute(insert_from_select_sql)
 
             insert_chunk_count.append(len(batch_of_new_ids))
             logger.info(
                 "insert chunk done",
-                extra={"count": sum(insert_chunk_count), "total": len(new_ids)},
+                extra={
+                    "table": foreign_table.name,
+                    "count": sum(insert_chunk_count),
+                    "total": len(new_ids),
+                },
             )
 
         t1 = time.monotonic()
@@ -130,7 +135,8 @@ class LoadOracleDataTask(src.task.task.Task):
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
 
         select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
-        update_ids = self.db_session.execute(select_sql).all()
+        with self.db_session.begin():
+            update_ids = self.db_session.execute(select_sql).all()
 
         t0 = time.monotonic()
         update_chunk_count = []
@@ -139,7 +145,8 @@ class LoadOracleDataTask(src.task.task.Task):
                 foreign_table, staging_table, batch_of_update_ids
             ).values(transformed_at=None)
 
-            self.db_session.execute(update_sql)
+            with self.db_session.begin():
+                self.db_session.execute(update_sql)
 
             update_chunk_count.append(len(batch_of_update_ids))
             logger.info(
@@ -171,7 +178,8 @@ class LoadOracleDataTask(src.task.task.Task):
         )
 
         t0 = time.monotonic()
-        result = self.db_session.execute(update_sql)
+        with self.db_session.begin():
+            result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
         delete_count = result.rowcount
 
@@ -184,10 +192,11 @@ class LoadOracleDataTask(src.task.task.Task):
     def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
         """Log the number of rows in each of the tables using SQL COUNT()."""
         extra = {}
-        for table in tables:
-            count = self.db_session.query(table).count()
-            extra[f"count.{table.schema}.{table.name}"] = count
-            self.set_metrics({f"count.{message}.{table.schema}.{table.name}": count})
+        with self.db_session.begin():
+            for table in tables:
+                count = self.db_session.query(table).count()
+                extra[f"count.{table.schema}.{table.name}"] = count
+                self.set_metrics({f"count.{message}.{table.schema}.{table.name}": count})
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
 
 
