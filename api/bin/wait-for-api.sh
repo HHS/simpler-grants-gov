@@ -8,7 +8,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NO_COLOR='\033[0m'
 
-MAX_WAIT_TIME=60 # seconds, adjust as necessary
+MAX_WAIT_TIME=800 # seconds, adjust as necessary
 WAIT_TIME=0
 
 echo "Waiting for API server to become ready..."
