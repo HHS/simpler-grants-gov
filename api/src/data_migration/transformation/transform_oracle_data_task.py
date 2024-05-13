@@ -409,7 +409,6 @@ class TransformOracleDataTask(Task):
 
         if source_summary.is_deleted:
             self._handle_delete(source_summary, target_summary, OPPORTUNITY_SUMMARY, extra)
-
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we don't have anything to link these to. Whenever we do
@@ -550,7 +549,6 @@ class TransformOracleDataTask(Task):
 
         if source_applicant_type.is_deleted:
             self._handle_delete(source_applicant_type, target_applicant_type, APPLICANT_TYPE, extra)
-
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we won't have created the opportunity summary. Whenever we do
@@ -724,7 +722,6 @@ class TransformOracleDataTask(Task):
             raise ValueError(
                 "Funding category record cannot be processed as the opportunity summary for it does not exist"
             )
-
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming

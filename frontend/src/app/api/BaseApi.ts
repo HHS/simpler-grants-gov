@@ -69,8 +69,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
-
-    searchInputs: QueryParamData,
+    queryParamData: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -98,7 +97,7 @@ export default abstract class BaseApi {
         headers,
         method,
       },
-      searchInputs,
+      queryParamData,
     );
 
     return response;
@@ -110,7 +109,7 @@ export default abstract class BaseApi {
   private async sendRequest(
     url: string,
     fetchOptions: RequestInit,
-    searchInputs: QueryParamData,
+    queryParamData: QueryParamData,
   ) {
     let response: Response;
     let responseBody: SearchAPIResponse;
@@ -120,13 +119,13 @@ export default abstract class BaseApi {
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
-      throw fetchErrorToNetworkError(error, searchInputs);
+      throw fetchErrorToNetworkError(error, queryParamData);
     }
 
     const { data, message, pagination_info, status_code, warnings } =
       responseBody;
     if (!response.ok) {
-      handleNotOkResponse(responseBody, message, status_code, searchInputs);
+      handleNotOkResponse(responseBody, message, status_code, queryParamData);
     }
 
     return {
@@ -154,14 +153,14 @@ export function createRequestUrl(
   let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
-    const searchBody: { [key: string]: string } = {};
+    const body: { [key: string]: string } = {};
     Object.entries(body).forEach(([key, value]) => {
       const stringValue =
         typeof value === "string" ? value : JSON.stringify(value);
-      searchBody[key] = stringValue;
+      body[key] = stringValue;
     });
 
-    const params = new URLSearchParams(searchBody).toString();
+    const params = new URLSearchParams(body).toString();
     url = `${url}?${params}`;
   }
   return url;
