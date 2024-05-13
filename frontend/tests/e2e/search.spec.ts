@@ -64,6 +64,8 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeHidden();
   });
   test("should retain filters in a new tab", async ({ page }) => {
+    // Set all inputs, then refresh the page. Those same inputs should be
+    // set from query params.
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-forecasted": "forecasted",
@@ -113,10 +115,10 @@ test.describe("Search page tests", () => {
     /* Page refreshed should have all the same inputs selected
     /***********************************************************/
 
-    await goToNewPageUsingCurrentURL(page);
+    await refreshPageWithCurrentURL(page);
 
+    // Expect search inputs are retained in the new tab
     await expectSortBy(page, "agencyDesc");
-    // Ensure search term and checkboxes are retained in the new tab
     const searchInput = getSearchInput(page);
     await expect(searchInput).toHaveValue(searchTerm);
 
@@ -235,7 +237,7 @@ async function toggleCheckbox(page: Page, idWithoutHash: string) {
   await checkBox.click();
 }
 
-async function goToNewPageUsingCurrentURL(page: Page) {
+async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
   await page.goto(currentURL); // go to new url in same tab
   return page;
