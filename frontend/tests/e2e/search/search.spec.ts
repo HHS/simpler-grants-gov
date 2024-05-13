@@ -1,4 +1,19 @@
-import { clickAccordionWithTitle, clickMobileNavMenu, clickSearchNavLink, expectCheckboxIDIsChecked, expectSortBy, expectURLContainsQueryParam, fillSearchInputAndSubmit, getMobileMenuButton, getSearchInput, hasMobileMenu, refreshPageWithCurrentURL, selectSortBy, toggleCheckboxes, waitForSearchResultsLoaded } from "./searchUtil";
+import {
+  clickAccordionWithTitle,
+  clickMobileNavMenu,
+  clickSearchNavLink,
+  expectCheckboxIDIsChecked,
+  expectSortBy,
+  expectURLContainsQueryParam,
+  fillSearchInputAndSubmit,
+  getMobileMenuButton,
+  getSearchInput,
+  hasMobileMenu,
+  refreshPageWithCurrentURL,
+  selectSortBy,
+  toggleCheckboxes,
+  waitForSearchResultsLoaded,
+} from "./searchUtil";
 import { expect, test } from "@playwright/test";
 
 test("should navigate from index to search page", async ({ page }) => {
