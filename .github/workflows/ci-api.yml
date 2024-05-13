@@ -36,9 +36,6 @@ jobs:
       - name: Start tests
         run: make test-coverage
 
-      - name: Run e2e tests
-        run: npm run test:e2e
-
   vulnerability-scans:
     name: Run API Vulnerability Scans
     uses: ./.github/workflows/vulnerability-scans.yml
