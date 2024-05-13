@@ -95,6 +95,7 @@ export function SearchForm({
                 handlePageChange={handlePageChange}
                 showHiddenInput={true}
                 paginationRef={topPaginationRef}
+                totalPages={searchResults?.pagination_info?.total_pages}
                 position={PaginationPosition.Top}
                 searchResultsLength={searchResults.data.length}
               />
@@ -107,6 +108,7 @@ export function SearchForm({
               <SearchPagination
                 page={page}
                 handlePageChange={handlePageChange}
+                totalPages={searchResults?.pagination_info?.total_pages}
                 position={PaginationPosition.Bottom}
                 searchResultsLength={searchResults.data.length}
               />
