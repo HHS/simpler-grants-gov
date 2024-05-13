@@ -356,7 +356,7 @@ class TestGetStats:
         # validation
         assert output.stats.get(self.TOTAL_CLOSED).value == 2
         assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 66  # rounded to 2 places
+        assert output.stats.get(self.PCT_CLOSED).value == 67  # rounded to nearest whole number
 
     def test_get_percent_pointed(self):
         """Test that percent pointed is calculated correctly."""
