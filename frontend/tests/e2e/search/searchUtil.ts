@@ -2,7 +2,7 @@
 // Test Helper Functions
 // =========================
 
-import { Locator, Page } from "@playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");
@@ -66,7 +66,10 @@ export async function clickMobileNavMenu(menuButton: Locator) {
   await menuButton.click();
 }
 
-export async function expectCheckboxIDIsChecked(page: Page, idWithHash: string) {
+export async function expectCheckboxIDIsChecked(
+  page: Page,
+  idWithHash: string,
+) {
   const checkbox: Locator = page.locator(idWithHash);
   await expect(checkbox).toBeChecked();
 }
@@ -119,7 +122,10 @@ export async function waitForSearchResultsLoaded(page: Page) {
   await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
 }
 
-export async function clickAccordionWithTitle(page: Page, accordionTitle: string) {
+export async function clickAccordionWithTitle(
+  page: Page,
+  accordionTitle: string,
+) {
   await page
     .locator(`button.usa-accordion__button:has-text("${accordionTitle}")`)
     .click();
