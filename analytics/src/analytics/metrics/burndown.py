@@ -105,7 +105,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         # get open and closed counts and percentages
         total_opened = int(df["opened"].sum())
         total_closed = int(df["closed"].sum())
-        pct_closed = int(total_closed / total_opened * 100)
+        pct_closed = int(round(total_closed / total_opened * 100, 0))
         # get the percentage of tickets that were ticketed
         is_pointed = self.sprint_data[Unit.points.value] >= 1
         issues_pointed = len(self.sprint_data[is_pointed])
