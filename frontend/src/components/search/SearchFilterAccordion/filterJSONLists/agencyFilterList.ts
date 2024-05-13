@@ -3,12 +3,12 @@ import { FilterOption } from "../SearchFilterAccordion";
 export const agencyFilterList: FilterOption[] = [
   {
     id: "ARPAH",
-    label: " Advanced Research Projects Agency for Health (ARPAH)",
+    label: "Advanced Research Projects Agency for Health (ARPAH)",
     value: "ARPAH",
   },
   {
     id: "USAID",
-    label: " Agency for International Development (USAID)",
+    label: "Agency for International Development (USAID)",
     value: "USAID",
     children: [
       {
@@ -45,17 +45,17 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "AC",
-    label: " AmeriCorps (AC)",
+    label: "AmeriCorps (AC)",
     value: "AC",
   },
   {
     id: "DC",
-    label: " Denali Commission (DC)",
+    label: "Denali Commission (DC)",
     value: "DC",
   },
   {
     id: "USDA",
-    label: " Department of Agriculture (USDA)",
+    label: "Department of Agriculture (USDA)",
     value: "USDA",
     children: [
       {
@@ -72,7 +72,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOC",
-    label: " Department of Commerce (DOC)",
+    label: "Department of Commerce (DOC)",
     value: "DOC",
     children: [
       {
@@ -94,7 +94,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOD",
-    label: " Department of Defense (DOD)",
+    label: "Department of Defense (DOD)",
     value: "DOD",
     children: [
       {
@@ -136,12 +136,12 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "ED",
-    label: " Department of Education (ED)",
+    label: "Department of Education (ED)",
     value: "ED",
   },
   {
     id: "DOE",
-    label: " Department of Energy (DOE)",
+    label: "Department of Energy (DOE)",
     value: "DOE",
     children: [
       {
@@ -163,7 +163,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "PAMS",
-    label: " Department of Energy - Office of Science (PAMS)",
+    label: "Department of Energy - Office of Science (PAMS)",
     value: "PAMS",
     children: [
       {
@@ -175,7 +175,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "HHS",
-    label: " Department of Health and Human Services (HHS)",
+    label: "Department of Health and Human Services (HHS)",
     value: "HHS",
     children: [
       {
@@ -199,7 +199,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DHS",
-    label: " Department of Homeland Security (DHS)",
+    label: "Department of Homeland Security (DHS)",
     value: "DHS",
     children: [
       {
@@ -221,12 +221,12 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "HUD",
-    label: " Department of Housing and Urban Development (HUD)",
+    label: "Department of Housing and Urban Development (HUD)",
     value: "HUD",
   },
   {
     id: "USDOJ",
-    label: " Department of Justice (USDOJ)",
+    label: "Department of Justice (USDOJ)",
     value: "USDOJ",
     children: [
       {
@@ -243,7 +243,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOL",
-    label: " Department of Labor (DOL)",
+    label: "Department of Labor (DOL)",
     value: "DOL",
     children: [
       {
@@ -260,7 +260,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOS",
-    label: " Department of State (DOS)",
+    label: "Department of State (DOS)",
     value: "DOS",
     children: [
       {
@@ -282,7 +282,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOI",
-    label: " Department of the Interior (DOI)",
+    label: "Department of the Interior (DOI)",
     value: "DOI",
     children: [
       {
@@ -304,7 +304,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "USDOT",
-    label: " Department of the Treasury (USDOT)",
+    label: "Department of the Treasury (USDOT)",
     value: "USDOT",
     children: [
       {
@@ -326,7 +326,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "DOT",
-    label: " Department of Transportation (DOT)",
+    label: "Department of Transportation (DOT)",
     value: "DOT",
     children: [
       {
@@ -388,7 +388,7 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "VA",
-    label: " Department of Veterans Affairs (VA)",
+    label: "Department of Veterans Affairs (VA)",
     value: "VA",
     children: [
       {
@@ -440,22 +440,22 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "EPA",
-    label: " Environmental Protection Agency (EPA)",
+    label: "Environmental Protection Agency (EPA)",
     value: "EPA",
   },
   {
     id: "IMLS",
-    label: " Institute of Museum and Library Services (IMLS)",
+    label: "Institute of Museum and Library Services (IMLS)",
     value: "IMLS",
   },
   {
     id: "MCC",
-    label: " Millennium Challenge Corporation (MCC)",
+    label: "Millennium Challenge Corporation (MCC)",
     value: "MCC",
   },
   {
     id: "NASA",
-    label: " National Aeronautics and Space Administration (NASA)",
+    label: "National Aeronautics and Space Administration (NASA)",
     value: "NASA",
     children: [
       {
@@ -482,27 +482,27 @@ export const agencyFilterList: FilterOption[] = [
   },
   {
     id: "NARA",
-    label: " National Archives and Records Administration (NARA)",
+    label: "National Archives and Records Administration (NARA)",
     value: "NARA",
   },
   {
     id: "NEA",
-    label: " National Endowment for the Arts (NEA)",
+    label: "National Endowment for the Arts (NEA)",
     value: "NEA",
   },
   {
     id: "NEH",
-    label: " National Endowment for the Humanities (NEH)",
+    label: "National Endowment for the Humanities (NEH)",
     value: "NEH",
   },
   {
     id: "NSF",
-    label: " National Science Foundation (NSF)",
+    label: "National Science Foundation (NSF)",
     value: "NSF",
   },
   {
     id: "SSA",
-    label: " Social Security Administration (SSA)",
+    label: "Social Security Administration (SSA)",
     value: "SSA",
   },
 ];
