@@ -7,7 +7,7 @@ export default function Loading() {
     <div className="display-flex flex-align-center flex-justify-center margin-bottom-15 margin-top-15">
       <Spinner />
       <span className="font-body-2xl text-bold margin-left-2">
-        Loading results...
+        Loading results....
       </span>
     </div>
   );
