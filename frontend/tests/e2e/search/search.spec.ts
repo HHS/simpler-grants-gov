@@ -51,7 +51,6 @@ test.describe("Search page tests", () => {
     page,
     browserName,
   }) => {
-
     // TODO (Issue #2005): fix test for webkit
     test.skip(
       browserName === "webkit",
@@ -75,12 +74,11 @@ test.describe("Search page tests", () => {
   });
 
   test("should show and hide loading state", async ({ page, browserName }) => {
-
     // TODO (Issue #2005): fix test for webkit
     test.skip(
-        browserName === "webkit",
-        "Skipping test for WebKit due to a query param issue.",
-      );
+      browserName === "webkit",
+      "Skipping test for WebKit due to a query param issue.",
+    );
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
 
