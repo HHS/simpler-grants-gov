@@ -1,7 +1,7 @@
+import { QueryParamData } from "../../src/services/search/searchfetcher/SearchFetcher";
 import ReactDOM from "react-dom";
 // import ReactDOM from "react-dom";
 import { SearchAPIResponse } from "../../src/types/search/searchResponseTypes";
-import { SearchFetcherProps } from "../../src/services/search/searchfetcher/SearchFetcher";
 import { renderHook } from "@testing-library/react";
 import { useSearchFormState } from "../../src/hooks/useSearchFormState";
 
@@ -30,7 +30,7 @@ jest.mock("react-dom", () => {
   };
 });
 describe("useSearchFormState", () => {
-  const mockRequestURLQueryParams: SearchFetcherProps = {
+  const mockRequestURLQueryParams: QueryParamData = {
     status: new Set(["open"]),
     query: "",
     sortby: "date",

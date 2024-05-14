@@ -18,10 +18,10 @@ import {
 } from "src/errors";
 import { compact, isEmpty } from "lodash";
 
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -69,8 +69,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
-
-    searchInputs: SearchFetcherProps,
+    queryParamData: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -98,7 +97,7 @@ export default abstract class BaseApi {
         headers,
         method,
       },
-      searchInputs,
+      queryParamData,
     );
 
     return response;
@@ -110,7 +109,7 @@ export default abstract class BaseApi {
   private async sendRequest(
     url: string,
     fetchOptions: RequestInit,
-    searchInputs: SearchFetcherProps,
+    queryParamData: QueryParamData,
   ) {
     let response: Response;
     let responseBody: SearchAPIResponse;
@@ -120,13 +119,13 @@ export default abstract class BaseApi {
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
-      throw fetchErrorToNetworkError(error, searchInputs);
+      throw fetchErrorToNetworkError(error, queryParamData);
     }
 
     const { data, message, pagination_info, status_code, warnings } =
       responseBody;
     if (!response.ok) {
-      handleNotOkResponse(responseBody, message, status_code, searchInputs);
+      handleNotOkResponse(responseBody, message, status_code, queryParamData);
     }
 
     return {
@@ -154,14 +153,14 @@ export function createRequestUrl(
   let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
-    const searchBody: { [key: string]: string } = {};
+    const body: { [key: string]: string } = {};
     Object.entries(body).forEach(([key, value]) => {
       const stringValue =
         typeof value === "string" ? value : JSON.stringify(value);
-      searchBody[key] = stringValue;
+      body[key] = stringValue;
     });
 
-    const params = new URLSearchParams(searchBody).toString();
+    const params = new URLSearchParams(body).toString();
     url = `${url}?${params}`;
   }
   return url;
@@ -190,7 +189,7 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
  */
 export function fetchErrorToNetworkError(
   error: unknown,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
@@ -202,7 +201,7 @@ function handleNotOkResponse(
   response: SearchAPIResponse,
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
 ) {
   const { errors } = response;
   if (isEmpty(errors)) {
@@ -219,7 +218,7 @@ function handleNotOkResponse(
 const throwError = (
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs: QueryParamData,
   firstError?: APIResponseError,
 ) => {
   console.log("Throwing error: ", message, status_code, searchInputs);

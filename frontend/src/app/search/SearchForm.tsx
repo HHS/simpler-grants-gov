@@ -5,9 +5,9 @@ import SearchPagination, {
 } from "../../components/search/SearchPagination";
 
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
+import { QueryParamData } from "../../services/search/searchfetcher/SearchFetcher";
 import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
 import SearchBar from "../../components/search/SearchBar";
-import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 import SearchFilterAgency from "src/components/search/SearchFilterAgency";
 import SearchFilterCategory from "../../components/search/SearchFilterCategory";
 import SearchFilterEligibility from "../../components/search/SearchFilterEligibility";
@@ -19,7 +19,7 @@ import { useSearchFormState } from "../../hooks/useSearchFormState";
 
 interface SearchFormProps {
   initialSearchResults: SearchAPIResponse;
-  requestURLQueryParams: SearchFetcherProps;
+  requestURLQueryParams: QueryParamData;
   agencyNameLookup?: AgencyNamyLookup;
 }
 
@@ -95,6 +95,7 @@ export function SearchForm({
                 handlePageChange={handlePageChange}
                 showHiddenInput={true}
                 paginationRef={topPaginationRef}
+                totalPages={searchResults?.pagination_info?.total_pages}
                 position={PaginationPosition.Top}
                 searchResultsLength={searchResults.data.length}
               />
@@ -107,6 +108,7 @@ export function SearchForm({
               <SearchPagination
                 page={page}
                 handlePageChange={handlePageChange}
+                totalPages={searchResults?.pagination_info?.total_pages}
                 position={PaginationPosition.Bottom}
                 searchResultsLength={searchResults.data.length}
               />
