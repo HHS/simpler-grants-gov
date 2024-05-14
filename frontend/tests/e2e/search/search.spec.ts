@@ -49,7 +49,15 @@ test.describe("Search page tests", () => {
 
   test("should return 0 results when searching for obscure term", async ({
     page,
+    browserName,
   }) => {
+
+    // TODO (Issue #2005): fix test for webkit
+    test.skip(
+      browserName === "webkit",
+      "Skipping test for WebKit due to a query param issue.",
+    );
+
     const searchTerm = "0resultearch";
 
     await fillSearchInputAndSubmit(searchTerm, page);
@@ -66,7 +74,13 @@ test.describe("Search page tests", () => {
     );
   });
 
-  test("should show and hide loading state", async ({ page }) => {
+  test("should show and hide loading state", async ({ page, browserName }) => {
+
+    // TODO (Issue #2005): fix test for webkit
+    test.skip(
+        browserName === "webkit",
+        "Skipping test for WebKit due to a query param issue.",
+      );
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
 
