@@ -12,6 +12,7 @@ import src.db.foreign
 import src.db.models.staging
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 
+from ...task.ecs_background_task import ecs_background_task
 from ..data_migration_blueprint import data_migration_blueprint
 from ..load.load_oracle_data_task import LoadOracleDataTask
 from ..transformation.transform_oracle_data_task import TransformOracleDataTask
@@ -30,6 +31,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--insert-chunk-size", default=4000, help="chunk size for load inserts", show_default=True
 )
+@ecs_background_task(task_name="load-transform")
 @flask_db.with_db_session()
 def load_transform(
     db_session: db.Session, load: bool, transform: bool, set_current: bool, insert_chunk_size: int

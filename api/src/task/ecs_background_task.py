@@ -43,6 +43,9 @@ def ecs_background_task(task_name: str) -> Generator[None, None, None]:
     try:
         yield
     except Exception:
+        # We want to make certain that any exception will always
+        # be logged as an error
+        # logger.exception is just an alias for logger.error(<msg>, exc_info=True)
         logger.exception("ECS task failed")
         raise
 
