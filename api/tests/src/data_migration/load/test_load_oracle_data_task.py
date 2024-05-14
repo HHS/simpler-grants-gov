@@ -59,6 +59,8 @@ def test_load_data(db_session, source_table, destination_table, create_tables):
     time3 = datetime.datetime(2024, 4, 10, 22, 0, 1)
     now = datetime.datetime.now()
 
+    db_session.execute(sqlalchemy.delete(source_table))
+    db_session.execute(sqlalchemy.delete(destination_table))
     db_session.execute(
         sqlalchemy.insert(source_table).values(
             [
@@ -121,3 +123,39 @@ def test_raises_if_table_dicts_different(db_session, source_table, destination_t
         load_oracle_data_task.LoadOracleDataTask(
             db_session, {"table1": source_table}, {"table2": destination_table}
         )
+
+
+@freezegun.freeze_time()
+def test_load_data_chunked(db_session, source_table, destination_table, create_tables):
+    time1 = datetime.datetime(2024, 1, 20, 7, 15, 0)
+
+    db_session.execute(sqlalchemy.delete(source_table))
+    db_session.execute(sqlalchemy.delete(destination_table))
+    db_session.execute(
+        sqlalchemy.insert(source_table).values(tuple((i, i, "a", time1) for i in range(100)))
+    )
+    db_session.commit()
+
+    task = load_oracle_data_task.LoadOracleDataTask(
+        db_session, {"table1": source_table}, {"table1": destination_table}, insert_chunk_size=30
+    )
+    task.run()
+
+    assert db_session.query(source_table).count() == 100
+    assert db_session.query(destination_table).count() == 100
+
+    assert tuple(
+        db_session.execute(
+            sqlalchemy.select(destination_table).order_by(
+                destination_table.c.id1, destination_table.c.id2
+            )
+        )
+    ) == tuple((i, i, "a", time1, False, None, None) for i in range(100))
+
+    assert task.metrics["count.delete.test_destination_table"] == 0
+    assert task.metrics["count.insert.test_destination_table"] == 100
+    assert task.metrics["count.insert.chunk.test_destination_table"] == "30,30,30,10"
+    assert task.metrics["count.update.test_destination_table"] == 0
+    assert task.metrics["count.delete.total"] == 0
+    assert task.metrics["count.insert.total"] == 100
+    assert task.metrics["count.update.total"] == 0

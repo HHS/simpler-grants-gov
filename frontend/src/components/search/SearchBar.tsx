@@ -3,6 +3,7 @@
 import { Icon } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 import { useState } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
 
 interface SearchBarProps {
   initialQueryParams: string;
@@ -14,6 +15,7 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
 
   const handleSubmit = () => {
     updateQueryParams(inputValue, "query");
+    sendGAEvent("event", "search", { search_term: inputValue });
   };
 
   return (
