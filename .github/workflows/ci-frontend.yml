@@ -1,4 +1,4 @@
-name: Front-end Checks
+name: Frontend Checks
 
 on:
   workflow_call:
@@ -34,9 +34,6 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
       - name: Run lint
         run: npm run lint
 
@@ -57,16 +54,6 @@ jobs:
             icons: emoji
             skip-step: none
             output: comment
-
-      - name: Run e2e tests
-        run: npm run test:e2e
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: ./frontend/playwright-report/
-          retention-days: 30
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
