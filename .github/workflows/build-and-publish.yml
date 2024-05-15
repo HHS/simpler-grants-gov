@@ -33,7 +33,26 @@ on:
         type: string
 
 jobs:
+  # check ECR image job here
+  # see: https://github.com/navapbc/archive-massgov-pfml/blob/5381834193ac9da8066180a8ab1d0589b014d26b/.github/workflows/api-deploy.yml#L319-L324
+  # Skip if its there
+  # make release-image-tag
+  check-ecr-image:
+    name: Check if ECR image has been created
+    runs-on: ubuntu-latest
+
+    steps: 
+      - uses: actions/checkout@v3
+
+      - name: Check ECR Image
+        id: image-tag
+        run: |
+          IMAGE_TAG=$(make release-image-tag)
+          aws ecr describe-images --repository-name=CHANGE_THIS--image-ids=imageTag=$IMAGE_TAG --region us-east-1
+
   build-and-publish:
+    depends-on: [check-ecr-image]
+    # TODO find a way to reference the above
     name: Build and publish
     runs-on: ubuntu-latest
 
@@ -47,7 +66,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Build release
-        run: make APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} release-build
+        run: make APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} release-build # does the environment actually matter here?
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials

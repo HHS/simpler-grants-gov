@@ -27,7 +27,15 @@ jobs:
   api-checks:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
-
+  
+  build-and-publish:
+  # run build-and publish here so that both envs won't try to build the image 
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: "api"
+      ref: ${{ github.ref }}
+      
   deploy:
     name: Deploy
     needs: api-checks

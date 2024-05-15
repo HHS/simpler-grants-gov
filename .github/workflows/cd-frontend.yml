@@ -28,6 +28,7 @@ jobs:
     uses: ./.github/workflows/ci-frontend.yml
 
   deploy:
+    # run build-and publish here so that both envs won't try to build the image 
     name: Deploy
     needs: frontend-checks
     uses: ./.github/workflows/deploy.yml
