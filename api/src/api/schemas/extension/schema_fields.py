@@ -39,7 +39,11 @@ class MixinField(original_fields.Field):
     }
 
     def __init__(self, **kwargs: typing.Any) -> None:
-        super().__init__(**kwargs)
+        # TODO - this was needed to process the response from OpenSearch
+        # without configuring a bunch of fields - we might want to consider
+        # this in some way? I feel like allowing none by default should be the
+        # behavior, or at least if the field is not required.
+        super().__init__(allow_none=True, **kwargs)
 
         # The actual error mapping used for a specific instance
         self._error_mapping: dict[str, MarshmallowErrorContainer] = {}

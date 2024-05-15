@@ -1,11 +1,14 @@
 import logging
+import math
 from typing import Any, Sequence, Tuple
+from opensearchpy import OpenSearch
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, asc, desc, nulls_last, or_, select
 from sqlalchemy.orm import InstrumentedAttribute, noload, selectinload
 
 import src.adapters.db as db
+from src.api.opportunities_v0_1.opportunity_schemas import OpportunitySchema
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     LinkOpportunitySummaryApplicantType,
@@ -187,10 +190,115 @@ def _add_order_by(
     return stmt.order_by(nulls_last(sort_fn(field)))
 
 
+def opensearch_approach(search_params: SearchOpportunityParams) -> Tuple[Sequence[Opportunity], PaginationInfo]:
+    client = OpenSearch(
+        hosts=[{"host": "host.docker.internal", "port": 9200}],
+        http_compress=True,
+        use_ssl=False,
+        verify_certs=False,
+        ssl_assert_hostname=False,
+        ssl_show_warn=False
+    )
+
+
+    body = {
+        "track_total_hits": True, # TODO - is this needed?
+        "size": search_params.pagination.page_size,
+        "from": (search_params.pagination.page_offset - 1) * search_params.pagination.page_size,
+        "query": {}
+    }
+
+    must_filters = []
+    non_scoring_filters = []
+
+
+    if search_params.query:
+        must_filters.append({
+                "multi_match": {
+                    "query": search_params.query,
+                    "fields": ["agency^16", "opportunity_title^2", "opportunity_number^12", "summary.summary_description", "opportunity_assistance_listings.assistance_listing_number^10", "opportunity_assistance_listings.program_title^4"],
+                    "type": "best_fields",
+                    "tie_breaker": 0.3
+                }
+            }
+        )
+
+
+    if search_params.filters:
+        if search_params.filters.agency:
+            non_scoring_filters.append({
+                "terms": {"agency.keyword": search_params.filters.agency["one_of"]}
+            })
+
+        if search_params.filters.opportunity_status:
+            non_scoring_filters.append({
+                "terms": {"opportunity_status": search_params.filters.opportunity_status["one_of"]}
+            })
+
+        if search_params.filters.applicant_type:
+            non_scoring_filters.append({
+                "terms": {"summary.applicant_types": search_params.filters.applicant_type["one_of"]}
+            })
+        if search_params.filters.funding_category:
+            non_scoring_filters.append({
+                "terms": {"summary.funding_categories": search_params.filters.funding_category["one_of"]}
+            })
+        if search_params.filters.funding_instrument:
+            non_scoring_filters.append({
+                "terms": {"summary.funding_instruments": search_params.filters.funding_instrument["one_of"]}
+            })
+
+    body["query"]["bool"] = {}
+    if must_filters:
+        body["query"]["bool"]["must"] = must_filters
+    if non_scoring_filters:
+        body["query"]["bool"]["filter"] = non_scoring_filters
+
+    result = client.search(body=body, index="test-opportunity-index")
+    print(result)
+
+    raw_opps = [opp for opp in result["hits"]["hits"]]
+
+    opportunities = []
+
+    for opp_raw in raw_opps:
+
+        opp = opp_raw["_source"]
+        score = opp_raw["_score"]
+        # TODO - we have to attach the opportunity ID like this because the field
+        # isn't set by Marshmallow when loading - maybe work around that with inheritance?
+        opportunity = OpportunitySchema().load(opp)
+        opportunity["opportunity_id"] = opp["opportunity_id"]
+
+        # TODO Hack to let me easily see scores in search
+        # Might be useful to just return that in the response
+        # and have some way to enable it to display in search results?
+        opportunity["opportunity_title"] = f"[{round(score, 2)}] " + opportunity["opportunity_title"]
+
+        opportunities.append(opportunity)
+
+
+    total_records = result["hits"]["total"]["value"]
+
+    pagination_info = PaginationInfo(
+        page_offset=search_params.pagination.page_offset,
+        page_size=search_params.pagination.page_size,
+        order_by=search_params.pagination.order_by,
+        sort_direction=search_params.pagination.sort_direction,
+        total_records=total_records,
+        # TODO - seems to be off by one
+        total_pages=int(math.ceil(total_records / search_params.pagination.page_size))
+    )
+
+    return opportunities, pagination_info
+
 def search_opportunities(
     db_session: db.Session, raw_search_params: dict
 ) -> Tuple[Sequence[Opportunity], PaginationInfo]:
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
+
+    if True:
+        return opensearch_approach(search_params)
 
     """
     We create an inner query which handles all of the filtering and returns

@@ -100,7 +100,7 @@ start-debug:
 run-logs: start
 	docker-compose logs --follow --no-color $(APP_NAME)
 
-init: build init-db
+init: build init-db init-opensearch
 
 clean-volumes: ## Remove project docker volumes (which includes the DB state)
 	docker-compose down --volumes
@@ -109,6 +109,15 @@ stop:
 	docker-compose down
 
 check: format-check lint db-check-migrations test
+
+##################################################
+# Opensearch
+##################################################
+
+init-opensearch:
+	docker-compose up --detach opensearch-node1
+	docker-compose up --detach opensearch-dashboards
+
 
 ##################################################
 # DB & migrations
