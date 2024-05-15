@@ -63,6 +63,10 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
         self.metrics[name] += value
 
+        if prefix is not None:
+            # Rather than re-implement the above, just re-use the function without a prefix
+            self.increment(f"{prefix}.{name}", value, prefix=None)
+
     def cls_name(self) -> str:
         return self.__class__.__name__
 

@@ -727,7 +727,9 @@ class TestTransformOpportunity(BaseTestClass):
         # Verify an error is raised when we try to delete something that doesn't exist
         delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
 
-        with pytest.raises(ValueError, match="Cannot delete opportunity as it does not exist"):
+        with pytest.raises(
+            ValueError, match="Cannot delete opportunity record as it does not exist"
+        ):
             transform_oracle_data_task.process_opportunity(delete_but_current_missing, None)
 
         validate_opportunity(db_session, delete_but_current_missing, expect_in_db=False)
@@ -823,16 +825,16 @@ class TestTransformAssistanceListing(BaseTestClass):
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning just attempts to re-process the error record, nothing else gets picked up
+        # Rerunning finds nothing - no metrics update
         transform_oracle_data_task.process_assistance_listings()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 11
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 10
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     def test_process_assistance_listing_orphaned_record(
         self, db_session, transform_oracle_data_task
@@ -880,14 +882,13 @@ class TestTransformAssistanceListing(BaseTestClass):
             create_existing=False, is_delete=True, opportunity=opportunity
         )
 
-        with pytest.raises(
-            ValueError, match="Cannot delete assistance listing as it does not exist"
-        ):
-            transform_oracle_data_task.process_assistance_listing(
-                delete_but_current_missing, None, opportunity
-            )
+        transform_oracle_data_task.process_assistance_listing(
+            delete_but_current_missing, None, opportunity
+        )
 
         validate_assistance_listing(db_session, delete_but_current_missing, expect_in_db=False)
+        assert delete_but_current_missing.transformed_at is not None
+        assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
 
 class TestTransformOpportunitySummary(BaseTestClass):
@@ -1044,15 +1045,17 @@ class TestTransformOpportunitySummary(BaseTestClass):
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 3
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 4
+        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 3
         transform_oracle_data_task.process_opportunity_summaries()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 22
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 21
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 8
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 6
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 5), (False, 10)]
@@ -1071,12 +1074,13 @@ class TestTransformOpportunitySummary(BaseTestClass):
             opportunity=opportunity,
         )
 
-        with pytest.raises(
-            ValueError, match="Cannot delete opportunity summary as it does not exist"
-        ):
-            transform_oracle_data_task.process_opportunity_summary(
-                delete_but_current_missing, None, opportunity
-            )
+        transform_oracle_data_task.process_opportunity_summary(
+            delete_but_current_missing, None, opportunity
+        )
+
+        validate_opportunity_summary(db_session, delete_but_current_missing, expect_in_db=False)
+        assert delete_but_current_missing.transformed_at is not None
+        assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number,source_values,expected_error",
@@ -1426,7 +1430,7 @@ class TestTransformApplicantType(BaseTestClass):
         )
 
         validate_applicant_type(
-            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=False
+            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=True
         )
         validate_applicant_type(
             db_session, syn_hist_insert_invalid_type, expect_in_db=False, was_processed=False
@@ -1441,17 +1445,19 @@ class TestTransformApplicantType(BaseTestClass):
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 8
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED] == 1
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 2
+        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 1
         transform_oracle_data_task.process_link_applicant_types()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 25
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 24
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 8
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED] == 1
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 5), (False, 10)]
@@ -1469,10 +1475,13 @@ class TestTransformApplicantType(BaseTestClass):
             is_delete=True,
         )
 
-        with pytest.raises(ValueError, match="Cannot delete applicant type as it does not exist"):
-            transform_oracle_data_task.process_link_applicant_type(
-                delete_but_current_missing, None, opportunity_summary
-            )
+        transform_oracle_data_task.process_link_applicant_type(
+            delete_but_current_missing, None, opportunity_summary
+        )
+
+        validate_applicant_type(db_session, delete_but_current_missing, expect_in_db=False)
+        assert delete_but_current_missing.transformed_at is not None
+        assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number,legacy_lookup_value",
@@ -1714,7 +1723,7 @@ class TestTransformFundingInstrument(BaseTestClass):
         )
 
         validate_funding_instrument(
-            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=False
+            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=True
         )
         validate_funding_instrument(
             db_session, syn_hist_insert_invalid_type, expect_in_db=False, was_processed=False
@@ -1725,15 +1734,17 @@ class TestTransformFundingInstrument(BaseTestClass):
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
         # Rerunning will only attempt to re-process the errors, so total+errors goes up by 2
         transform_oracle_data_task.process_link_funding_instruments()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 16
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 15
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 5
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 1), (False, 4)]
@@ -1751,12 +1762,13 @@ class TestTransformFundingInstrument(BaseTestClass):
             is_delete=True,
         )
 
-        with pytest.raises(
-            ValueError, match="Cannot delete funding instrument as it does not exist"
-        ):
-            transform_oracle_data_task.process_link_funding_instrument(
-                delete_but_current_missing, None, opportunity_summary
-            )
+        transform_oracle_data_task.process_link_funding_instrument(
+            delete_but_current_missing, None, opportunity_summary
+        )
+
+        validate_funding_instrument(db_session, delete_but_current_missing, expect_in_db=False)
+        assert delete_but_current_missing.transformed_at is not None
+        assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number,legacy_lookup_value",
@@ -2073,7 +2085,7 @@ class TestTransformFundingCategory(BaseTestClass):
         )
 
         validate_funding_category(
-            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=False
+            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=True
         )
         validate_funding_category(
             db_session, syn_hist_insert_invalid_type, expect_in_db=False, was_processed=False
@@ -2084,15 +2096,17 @@ class TestTransformFundingCategory(BaseTestClass):
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 9
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 2
+        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 1
         transform_oracle_data_task.process_link_funding_categories()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 24
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 23
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 7
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 9
         assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number", [(True, None), (False, None), (True, 1), (False, 70)]
@@ -2110,10 +2124,13 @@ class TestTransformFundingCategory(BaseTestClass):
             is_delete=True,
         )
 
-        with pytest.raises(ValueError, match="Cannot delete funding category as it does not exist"):
-            transform_oracle_data_task.process_link_funding_category(
-                delete_but_current_missing, None, opportunity_summary
-            )
+        transform_oracle_data_task.process_link_funding_category(
+            delete_but_current_missing, None, opportunity_summary
+        )
+
+        validate_funding_category(db_session, delete_but_current_missing, expect_in_db=False)
+        assert delete_but_current_missing.transformed_at is not None
+        assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     @pytest.mark.parametrize(
         "is_forecast,revision_number,legacy_lookup_value",
@@ -2581,6 +2598,7 @@ class TestTransformFullRunTask(BaseTestClass):
         )
         validate_summary_and_nested(db_session, synopsis_hist_insert, [], [], [])
 
+        print(transform_oracle_data_task.metrics)
         assert {
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 41,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 8,
@@ -2588,5 +2606,170 @@ class TestTransformFullRunTask(BaseTestClass):
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 8,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 15,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
-            transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT: 1,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 1,
+        }.items() <= transform_oracle_data_task.metrics.items()
+
+    def test_delete_opportunity_with_deleted_children(self, db_session, transform_oracle_data_task):
+        # We create an opportunity with a synopsis/forecast record, and various other child values
+        # We then delete all of them at once. Deleting the opportunity will recursively delete the others
+        # but we'll still have delete events for the others - this verfies how we handle that.
+        existing_opportunity = f.OpportunityFactory(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        opportunity = f.StagingTopportunityFactory(
+            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True
+        )
+
+        cfda = setup_cfda(create_existing=True, is_delete=True, opportunity=existing_opportunity)
+
+        ### Forecast - has several children that will be deleted
+        summary_forecast = f.OpportunitySummaryFactory(
+            is_forecast=True, opportunity=existing_opportunity, no_link_values=True
+        )
+        forecast = f.StagingTforecastFactory(opportunity=opportunity, is_deleted=True)
+        forecast_applicant_type = f.StagingTapplicanttypesForecastFactory(
+            forecast=forecast, at_id="04", at_frcst_id=91001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_forecast,
+            applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+            legacy_applicant_type_id=91001,
+        )
+        forecast_funding_category = f.StagingTfundactcatForecastFactory(
+            forecast=forecast, fac_id="ST", fac_frcst_id=92001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_forecast,
+            funding_category=FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
+            legacy_funding_category_id=92001,
+        )
+        forecast_funding_instrument = f.StagingTfundinstrForecastFactory(
+            forecast=forecast, fi_id="O", fi_frcst_id=93001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_forecast,
+            funding_instrument=FundingInstrument.OTHER,
+            legacy_funding_instrument_id=93001,
+        )
+
+        ### Synopsis
+        summary_synopsis = f.OpportunitySummaryFactory(
+            is_forecast=False, opportunity=existing_opportunity, no_link_values=True
+        )
+        synopsis = f.StagingTsynopsisFactory(opportunity=opportunity, is_deleted=True)
+        synopsis_applicant_type = f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis, at_id="21", at_syn_id=81001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.INDIVIDUALS,
+            legacy_applicant_type_id=81001,
+        )
+        synopsis_funding_category = f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis, fac_id="HL", fac_syn_id=82001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.HEALTH,
+            legacy_funding_category_id=82001,
+        )
+        synopsis_funding_instrument = f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis, fi_id="G", fi_syn_id=83001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.GRANT,
+            legacy_funding_instrument_id=83001,
+        )
+        # Need to put an expire all so SQLAlchemy doesn't read from its cache
+        # otherwise when it does the recursive deletes, it doesn't see the later-added link table objects
+        db_session.expire_all()
+
+        transform_oracle_data_task.run_task()
+        print(transform_oracle_data_task.metrics)
+
+        # verify everything is not in the DB
+        validate_opportunity(db_session, opportunity, expect_in_db=False)
+        validate_assistance_listing(db_session, cfda, expect_in_db=False)
+        validate_opportunity_summary(db_session, forecast, expect_in_db=False)
+        validate_opportunity_summary(db_session, synopsis, expect_in_db=False)
+
+        validate_applicant_type(db_session, forecast_applicant_type, expect_in_db=False)
+        validate_applicant_type(db_session, synopsis_applicant_type, expect_in_db=False)
+
+        validate_funding_category(db_session, forecast_funding_category, expect_in_db=False)
+        validate_funding_category(db_session, synopsis_funding_category, expect_in_db=False)
+
+        validate_funding_instrument(db_session, forecast_funding_instrument, expect_in_db=False)
+        validate_funding_instrument(db_session, synopsis_funding_instrument, expect_in_db=False)
+
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 10,
+            # Despite processing 10 records, only the opportunity is actually deleted directly
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
+            f"opportunity.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 9,
+        }.items() <= transform_oracle_data_task.metrics.items()
+
+    def test_delete_opportunity_summary_with_deleted_children(
+        self, db_session, transform_oracle_data_task
+    ):
+        # Similar to the above test, but we're leaving the opportunity alone and just deleting
+        # an opportunity summary. Should be the same thing, just on a smaller scale.
+        existing_opportunity = f.OpportunityFactory(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        opportunity = f.StagingTopportunityFactory(
+            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], already_transformed=True
+        )
+
+        summary_synopsis = f.OpportunitySummaryFactory(
+            is_forecast=False, opportunity=existing_opportunity, no_link_values=True
+        )
+        synopsis = f.StagingTsynopsisFactory(opportunity=opportunity, is_deleted=True)
+        synopsis_applicant_type = f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis, at_id="21", at_syn_id=71001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.INDIVIDUALS,
+            legacy_applicant_type_id=71001,
+        )
+        synopsis_funding_category = f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis, fac_id="HL", fac_syn_id=72001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.HEALTH,
+            legacy_funding_category_id=72001,
+        )
+        synopsis_funding_instrument = f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis, fi_id="G", fi_syn_id=73001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.GRANT,
+            legacy_funding_instrument_id=73001,
+        )
+        # Need to put an expire all so SQLAlchemy doesn't read from its cache
+        # otherwise when it does the recursive deletes, it doesn't see the later-added link table objects
+        db_session.expire_all()
+
+        transform_oracle_data_task.run_task()
+
+        # verify everything is not in the DB
+        validate_opportunity(
+            db_session, opportunity, expect_in_db=True, expect_values_to_match=False
+        )
+        validate_opportunity_summary(db_session, synopsis, expect_in_db=False)
+        validate_applicant_type(db_session, synopsis_applicant_type, expect_in_db=False)
+        validate_funding_category(db_session, synopsis_funding_category, expect_in_db=False)
+        validate_funding_instrument(db_session, synopsis_funding_instrument, expect_in_db=False)
+
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 4,
+            # Despite processing 4 records, only the opportunity_summary is actually deleted directly
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
+            f"opportunity_summary.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 3,
         }.items() <= transform_oracle_data_task.metrics.items()
