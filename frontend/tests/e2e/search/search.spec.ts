@@ -11,6 +11,7 @@ import {
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
   getMobileMenuButton,
+  getNumberOfOpportunitySearchResults,
   getSearchInput,
   hasMobileMenu,
   refreshPageWithCurrentURL,
@@ -20,6 +21,8 @@ import {
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
 import { expect, test } from "@playwright/test";
+
+import page from "../../../src/app/search/page";
 
 test("should navigate from index to search page", async ({ page }) => {
   // Start from the index page with feature flag set
@@ -202,10 +205,8 @@ test.describe("Search page tests", () => {
   }) => {
     await clickLastPaginationPage(page);
 
-    // Wait for the search results to load again
     await waitForSearchResultsInitialLoad(page);
 
-    // Note the last result on the last page
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
     await selectOppositeSortOption(page);
@@ -213,5 +214,29 @@ test.describe("Search page tests", () => {
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
     expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
+  });
+
+  test("number of results is the same with none or all opportunity status checked", async ({
+    page,
+  }) => {
+    const initialNumberOfOpportunityResults =
+      await getNumberOfOpportunitySearchResults(page);
+
+    // check all 4 boxes
+    const statusCheckboxes = {
+      "status-forecasted": "forecasted",
+      "status-posted": "posted",
+      "status-closed": "closed",
+      "status-archived": "archived",
+    };
+
+    await toggleCheckboxes(page, statusCheckboxes, "status");
+
+    const updatedNumberOfOpportunityResults =
+      await getNumberOfOpportunitySearchResults(page);
+
+    expect(initialNumberOfOpportunityResults).toBe(
+      updatedNumberOfOpportunityResults,
+    );
   });
 });

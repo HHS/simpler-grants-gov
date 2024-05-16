@@ -188,3 +188,20 @@ export async function selectOppositeSortOption(page: Page) {
 
   await sortByDropdown.selectOption(oppositeValue);
 }
+
+export async function waitForLoaderToBeHidden(page: Page) {
+  await page.waitForSelector(
+    ".display-flex.flex-align-center.flex-justify-center.margin-bottom-15.margin-top-15",
+    { state: "hidden" },
+  );
+}
+
+export async function getNumberOfOpportunitySearchResults(page: Page) {
+  await waitForLoaderToBeHidden(page);
+  const opportunitiesText = await page
+    .locator("h2.tablet-lg\\:grid-col-fill")
+    .textContent();
+  return opportunitiesText
+    ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
+    : 0;
+}
