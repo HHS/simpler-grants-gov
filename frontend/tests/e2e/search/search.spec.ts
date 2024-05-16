@@ -1,18 +1,23 @@
 import {
   clickAccordionWithTitle,
+  clickLastPaginationPage,
   clickMobileNavMenu,
+  clickPaginationPageNumber,
   clickSearchNavLink,
   expectCheckboxIDIsChecked,
   expectSortBy,
   expectURLContainsQueryParam,
   fillSearchInputAndSubmit,
+  getFirstSearchResultTitle,
+  getLastSearchResultTitle,
   getMobileMenuButton,
   getSearchInput,
   hasMobileMenu,
   refreshPageWithCurrentURL,
+  selectOppositeSortOption,
   selectSortBy,
   toggleCheckboxes,
-  waitForSearchResultsLoaded,
+  waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
 import { expect, test } from "@playwright/test";
 
@@ -119,7 +124,7 @@ test.describe("Search page tests", () => {
 
     await selectSortBy(page, "agencyDesc");
 
-    await waitForSearchResultsLoaded(page);
+    await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page);
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
@@ -168,7 +173,45 @@ test.describe("Search page tests", () => {
     }
   });
 
-  test('resets page back to 1 when choosing a filter', () => {
+  test("resets page back to 1 when choosing a filter", async ({ page }) => {
+    await clickPaginationPageNumber(page, 2);
 
+    // Verify that page 1 is highlighted
+    let currentPageButton = page.locator(".usa-pagination__button.usa-current");
+    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
+
+    // Select the 'Closed' checkbox under 'Opportunity status'
+    const statusCheckboxes = {
+      "status-closed": "closed",
+    };
+    await toggleCheckboxes(page, statusCheckboxes, "status");
+
+    // Wait for the page to reload
+    await waitForSearchResultsInitialLoad(page);
+
+    // Verify that page 1 is highlighted
+    currentPageButton = page.locator(".usa-pagination__button.usa-current");
+    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
+
+    // It should not have a page query param set
+    expectURLContainsQueryParam(page, "page", "1", false);
+  });
+
+  test("last result becomes first result when flipping sort order", async ({
+    page,
+  }) => {
+    await clickLastPaginationPage(page);
+
+    // Wait for the search results to load again
+    await waitForSearchResultsInitialLoad(page);
+
+    // Note the last result on the last page
+    const lastSearchResultTitle = await getLastSearchResultTitle(page);
+
+    await selectOppositeSortOption(page);
+
+    const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+
+    expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
   });
 });
