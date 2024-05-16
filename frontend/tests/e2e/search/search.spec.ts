@@ -13,7 +13,7 @@ import {
   selectSortBy,
   toggleCheckboxes,
   waitForSearchResultsLoaded,
-} from "./searchUtil";
+} from "./searchSpecUtil";
 import { expect, test } from "@playwright/test";
 
 test("should navigate from index to search page", async ({ page }) => {
@@ -91,7 +91,7 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
   });
-  test("should retain filters in a new tab", async ({ page }) => {
+  test("should refresh and retain filters in a new tab", async ({ page }) => {
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
@@ -166,5 +166,9 @@ test.describe("Search page tests", () => {
     for (const [checkboxID] of Object.entries(categoryCheckboxes)) {
       await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
+  });
+
+  test('resets page back to 1 when choosing a filter', () => {
+
   });
 });
