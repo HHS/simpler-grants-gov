@@ -22,8 +22,6 @@ import {
 } from "./searchSpecUtil";
 import { expect, test } from "@playwright/test";
 
-import page from "../../../src/app/search/page";
-
 test("should navigate from index to search page", async ({ page }) => {
   // Start from the index page with feature flag set
   await page.goto("/?_ff=showSearchV0:true");
@@ -71,6 +69,7 @@ test.describe("Search page tests", () => {
 
     expectURLContainsQueryParam(page, "query", searchTerm);
 
+    // eslint-disable-next-line testing-library/prefer-screen-queries
     const resultsHeading = page.getByRole("heading", {
       name: /0 Opportunities/i,
     });
