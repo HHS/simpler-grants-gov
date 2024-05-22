@@ -12,7 +12,7 @@ jest.mock("../../../src/hooks/useSearchParamUpdater", () => ({
 }));
 
 describe("SearchSortBy", () => {
-  const initialQueryParams = "opportunityNumberAsc";
+  const initialQueryParams = "postedDateDesc";
   const mockFormRef = React.createRef<HTMLFormElement>();
 
   it("should not have basic accessibility issues", async () => {
@@ -36,7 +36,7 @@ describe("SearchSortBy", () => {
     );
 
     expect(
-      screen.getByDisplayValue("Opportunity Number (Ascending)"),
+      screen.getByDisplayValue("Posted Date (newest)"),
     ).toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe("SearchSortBy", () => {
     });
 
     expect(
-      screen.getByDisplayValue("Opportunity Title (Descending)"),
+      screen.getByDisplayValue("Opportunity Title (Z to A)"),
     ).toBeInTheDocument();
 
     expect(requestSubmitMock).toHaveBeenCalled();
