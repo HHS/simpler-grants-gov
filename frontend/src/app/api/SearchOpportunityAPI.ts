@@ -109,7 +109,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       closeDate: "close_date",
     };
 
-    let order_by: PaginationOrderBy = "opportunity_id";
+    let order_by: PaginationOrderBy = "post_date";
     if (sortby) {
       for (const [key, value] of Object.entries(orderByFieldLookup)) {
         if (sortby.startsWith(key)) {
@@ -119,9 +119,11 @@ export default class SearchOpportunityAPI extends BaseApi {
       }
     }
 
-    const sort_direction: PaginationSortDirection = sortby?.endsWith("Desc")
-      ? "descending"
-      : "ascending";
+    // default to descending
+    let sort_direction: PaginationSortDirection = "descending";
+    if (sortby) {
+      sort_direction = sortby?.endsWith("Desc") ? "descending" : "ascending";
+    }
 
     return {
       order_by,
