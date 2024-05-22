@@ -11,6 +11,7 @@ from apiflask import APIFlask
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
+from src.adapters import search
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
@@ -141,6 +142,34 @@ def test_api_schema(db_schema_prefix):
 @pytest.fixture
 def test_foreign_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.LEGACY}"
+
+
+####################
+# Opensearch Fixtures
+####################
+
+
+@pytest.fixture(scope="session")
+def search_client() -> search.SearchClient:
+    return search.get_opensearch_client()
+
+
+@pytest.fixture(scope="session")
+def opportunity_index(search_client):
+    # TODO - will adjust this in the future to use utils we'll build
+    # for setting up / aliasing indexes. For now, keep it simple
+
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test_{uuid.uuid4().int}_opportunity"
+
+    search_client.indices.create(index_name, body={})
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        search_client.indices.delete(index_name)
 
 
 ####################
