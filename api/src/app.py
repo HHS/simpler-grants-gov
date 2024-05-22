@@ -13,6 +13,7 @@ import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
 from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
+from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.auth.api_key_auth import get_app_security_scheme
@@ -101,6 +102,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
+    app.register_blueprint(opportunities_v1_blueprint)
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
 

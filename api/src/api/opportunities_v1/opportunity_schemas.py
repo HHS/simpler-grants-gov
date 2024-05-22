@@ -10,7 +10,7 @@ from src.constants.lookup_constants import (
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
-class OpportunitySummaryV01Schema(Schema):
+class OpportunitySummaryV1Schema(Schema):
     summary_description = fields.String(
         metadata={
             "description": "The summary of the opportunity",
@@ -178,7 +178,7 @@ class OpportunitySummaryV01Schema(Schema):
     applicant_types = fields.List(fields.Enum(ApplicantType))
 
 
-class OpportunityAssistanceListingV01Schema(Schema):
+class OpportunityAssistanceListingV1Schema(Schema):
     program_title = fields.String(
         metadata={
             "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
@@ -193,7 +193,7 @@ class OpportunityAssistanceListingV01Schema(Schema):
     )
 
 
-class OpportunityV01Schema(Schema):
+class OpportunityV1Schema(Schema):
     opportunity_id = fields.Integer(
         dump_only=True,
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
@@ -227,9 +227,9 @@ class OpportunityV01Schema(Schema):
     )
 
     opportunity_assistance_listings = fields.List(
-        fields.Nested(OpportunityAssistanceListingV01Schema())
+        fields.Nested(OpportunityAssistanceListingV1Schema())
     )
-    summary = fields.Nested(OpportunitySummaryV01Schema())
+    summary = fields.Nested(OpportunitySummaryV1Schema())
 
     opportunity_status = fields.Enum(
         OpportunityStatus,
@@ -243,35 +243,35 @@ class OpportunityV01Schema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
-class OpportunitySearchFilterV01Schema(Schema):
+class OpportunitySearchFilterV1Schema(Schema):
     funding_instrument = fields.Nested(
-        StrSearchSchemaBuilder("FundingInstrumentFilterV01Schema")
+        StrSearchSchemaBuilder("FundingInstrumentFilterV1Schema")
         .with_one_of(allowed_values=FundingInstrument)
         .build()
     )
     funding_category = fields.Nested(
-        StrSearchSchemaBuilder("FundingCategoryFilterV01Schema")
+        StrSearchSchemaBuilder("FundingCategoryFilterV1Schema")
         .with_one_of(allowed_values=FundingCategory)
         .build()
     )
     applicant_type = fields.Nested(
-        StrSearchSchemaBuilder("ApplicantTypeFilterV01Schema")
+        StrSearchSchemaBuilder("ApplicantTypeFilterV1Schema")
         .with_one_of(allowed_values=ApplicantType)
         .build()
     )
     opportunity_status = fields.Nested(
-        StrSearchSchemaBuilder("OpportunityStatusFilterV01Schema")
+        StrSearchSchemaBuilder("OpportunityStatusFilterV1Schema")
         .with_one_of(allowed_values=OpportunityStatus)
         .build()
     )
     agency = fields.Nested(
-        StrSearchSchemaBuilder("AgencyFilterV01Schema")
+        StrSearchSchemaBuilder("AgencyFilterV1Schema")
         .with_one_of(example="US-ABC", minimum_length=2)
         .build()
     )
 
 
-class OpportunitySearchRequestV01Schema(Schema):
+class OpportunitySearchRequestV1Schema(Schema):
     query = fields.String(
         metadata={
             "description": "Query string which searches against several text fields",
@@ -280,7 +280,7 @@ class OpportunitySearchRequestV01Schema(Schema):
         validate=[validators.Length(min=1, max=100)],
     )
 
-    filters = fields.Nested(OpportunitySearchFilterV01Schema())
+    filters = fields.Nested(OpportunitySearchFilterV1Schema())
 
     pagination = fields.Nested(
         generate_pagination_schema(
