@@ -22,6 +22,7 @@ gunicorn = "^22.0.0"
 psycopg = { extras = ["binary"], version = "^3.1.10" }
 pydantic-settings = "^2.0.3"
 flask-cors = "^4.0.0"
+opensearch-py = "^2.5.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
@@ -43,6 +44,12 @@ sadisplay = "0.4.9"
 ruff = "^0.4.0"
 debugpy = "^1.8.1"
 freezegun = "^1.5.0"
+# This isn't the latest version of types-requests
+# because otherwise it depends on urllib3 v2 but opensearch-py
+# needs urlib3 v1. This should be temporary as opensearch-py
+# has an unreleased change to switch to v2, so I'm guessing
+# in the next few weeks we can just make this the latest?
+types-requests = "2.31.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -100,7 +100,7 @@ start-debug:
 run-logs: start
 	docker-compose logs --follow --no-color $(APP_NAME)
 
-init: build init-db
+init: build init-db init-opensearch
 
 clean-volumes: ## Remove project docker volumes (which includes the DB state)
 	docker-compose down --volumes
@@ -178,6 +178,19 @@ create-erds: # Create ERD diagrams for our DB schema
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
 	$(PY_RUN_CMD) setup-postgres-db
+
+##################################################
+# Opensearch
+##################################################
+
+init-opensearch: start-opensearch
+# TODO - in subsequent PRs, we'll add more to this command to setup the search index locally
+
+start-opensearch:
+	docker-compose up --detach opensearch-node
+	docker-compose up --detach opensearch-dashboards
+	./bin/wait-for-local-opensearch.sh
+
 
 
 ##################################################
