@@ -151,25 +151,35 @@ def test_foreign_schema(db_schema_prefix):
 
 @pytest.fixture(scope="session")
 def search_client() -> search.SearchClient:
-    return search.get_opensearch_client()
+    client = search.SearchClient()
+    try:
+        yield client
+    finally:
+        # Just in case a test setup an index
+        # in a way that didn't clean it up, delete
+        # all indexes at the end of a run that start with test
+        client.delete_index("test-*")
 
 
 @pytest.fixture(scope="session")
 def opportunity_index(search_client):
-    # TODO - will adjust this in the future to use utils we'll build
-    # for setting up / aliasing indexes. For now, keep it simple
-
     # create a random index name just to make sure it won't ever conflict
     # with an actual one, similar to how we create schemas for database tests
-    index_name = f"test_{uuid.uuid4().int}_opportunity"
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
 
-    search_client.indices.create(index_name, body={})
+    search_client.create_index(index_name)
 
     try:
         yield index_name
     finally:
         # Try to clean up the index at the end
-        search_client.indices.delete(index_name)
+        search_client.delete_index(index_name)
+
+
+@pytest.fixture(scope="session")
+def opportunity_index_alias(search_client):
+    # Note we don't actually create anything, this is just a random name
+    return f"test-opportunity-index-alias-{uuid.uuid4().int}"
 
 
 ####################
