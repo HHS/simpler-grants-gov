@@ -144,7 +144,9 @@ To run E2E tests using VS Code:
 1. Download the VS Code extension described in these [Playwright docs](https://playwright.dev/docs/running-tests#run-tests-in-vs-code)
 2. Follow the [instructions](https://playwright.dev/docs/getting-started-vscode#running-tests) Playwright provides
 
-In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
+Playwright E2E tests run "local-to-local", requiring both the frontend and the API to be running for the tests to pass - and for the database to be seeded with data.
+
+In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
 
 ## 🤖 Type checking, linting, and formatting
 

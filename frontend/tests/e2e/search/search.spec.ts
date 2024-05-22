@@ -1,19 +1,25 @@
 import {
   clickAccordionWithTitle,
+  clickLastPaginationPage,
   clickMobileNavMenu,
+  clickPaginationPageNumber,
   clickSearchNavLink,
   expectCheckboxIDIsChecked,
   expectSortBy,
   expectURLContainsQueryParam,
   fillSearchInputAndSubmit,
+  getFirstSearchResultTitle,
+  getLastSearchResultTitle,
   getMobileMenuButton,
+  getNumberOfOpportunitySearchResults,
   getSearchInput,
   hasMobileMenu,
   refreshPageWithCurrentURL,
+  selectOppositeSortOption,
   selectSortBy,
   toggleCheckboxes,
-  waitForSearchResultsLoaded,
-} from "./searchUtil";
+  waitForSearchResultsInitialLoad,
+} from "./searchSpecUtil";
 import { expect, test } from "@playwright/test";
 
 test("should navigate from index to search page", async ({ page }) => {
@@ -63,6 +69,7 @@ test.describe("Search page tests", () => {
 
     expectURLContainsQueryParam(page, "query", searchTerm);
 
+    // eslint-disable-next-line testing-library/prefer-screen-queries
     const resultsHeading = page.getByRole("heading", {
       name: /0 Opportunities/i,
     });
@@ -91,7 +98,7 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
   });
-  test("should retain filters in a new tab", async ({ page }) => {
+  test("should refresh and retain filters in a new tab", async ({ page }) => {
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
@@ -119,7 +126,7 @@ test.describe("Search page tests", () => {
 
     await selectSortBy(page, "agencyDesc");
 
-    await waitForSearchResultsLoaded(page);
+    await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page);
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
@@ -166,5 +173,69 @@ test.describe("Search page tests", () => {
     for (const [checkboxID] of Object.entries(categoryCheckboxes)) {
       await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
+  });
+
+  test("resets page back to 1 when choosing a filter", async ({ page }) => {
+    await clickPaginationPageNumber(page, 2);
+
+    // Verify that page 1 is highlighted
+    let currentPageButton = page.locator(".usa-pagination__button.usa-current");
+    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
+
+    // Select the 'Closed' checkbox under 'Opportunity status'
+    const statusCheckboxes = {
+      "status-closed": "closed",
+    };
+    await toggleCheckboxes(page, statusCheckboxes, "status");
+
+    // Wait for the page to reload
+    await waitForSearchResultsInitialLoad(page);
+
+    // Verify that page 1 is highlighted
+    currentPageButton = page.locator(".usa-pagination__button.usa-current");
+    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
+
+    // It should not have a page query param set
+    expectURLContainsQueryParam(page, "page", "1", false);
+  });
+
+  test("last result becomes first result when flipping sort order", async ({
+    page,
+  }) => {
+    await clickLastPaginationPage(page);
+
+    await waitForSearchResultsInitialLoad(page);
+
+    const lastSearchResultTitle = await getLastSearchResultTitle(page);
+
+    await selectOppositeSortOption(page);
+
+    const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+
+    expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
+  });
+
+  test("number of results is the same with none or all opportunity status checked", async ({
+    page,
+  }) => {
+    const initialNumberOfOpportunityResults =
+      await getNumberOfOpportunitySearchResults(page);
+
+    // check all 4 boxes
+    const statusCheckboxes = {
+      "status-forecasted": "forecasted",
+      "status-posted": "posted",
+      "status-closed": "closed",
+      "status-archived": "archived",
+    };
+
+    await toggleCheckboxes(page, statusCheckboxes, "status");
+
+    const updatedNumberOfOpportunityResults =
+      await getNumberOfOpportunitySearchResults(page);
+
+    expect(initialNumberOfOpportunityResults).toBe(
+      updatedNumberOfOpportunityResults,
+    );
   });
 });
