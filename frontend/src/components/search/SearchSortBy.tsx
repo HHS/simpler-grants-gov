@@ -7,16 +7,16 @@ type SortOption = {
 };
 
 const SORT_OPTIONS: SortOption[] = [
-  { label: "Opportunity Number (Ascending)", value: "opportunityNumberAsc" },
-  { label: "Opportunity Number (Descending)", value: "opportunityNumberDesc" },
-  { label: "Opportunity Title (Ascending)", value: "opportunityTitleAsc" },
-  { label: "Opportunity Title (Descending)", value: "opportunityTitleDesc" },
-  { label: "Agency (Ascending)", value: "agencyAsc" },
-  { label: "Agency (Descending)", value: "agencyDesc" },
-  { label: "Posted Date (Ascending)", value: "postedDateAsc" },
-  { label: "Posted Date (Descending)", value: "postedDateDesc" },
-  { label: "Close Date (Ascending)", value: "closeDateAsc" },
-  { label: "Close Date (Descending)", value: "closeDateDesc" },
+  { label: "Posted Date (newest)", value: "postedDateDesc" },
+  { label: "Posted Date (oldest)", value: "postedDateAsc" },
+  { label: "Close Date (newest)", value: "closeDateDesc" },
+  { label: "Close Date (oldest)", value: "closeDateAsc" },
+  { label: "Opportunity Title (A to Z)", value: "opportunityTitleAsc" },
+  { label: "Opportunity Title (Z to A)", value: "opportunityTitleDesc" },
+  { label: "Agency (A to Z)", value: "agencyAsc" },
+  { label: "Agency (Z to A)", value: "agencyDesc" },
+  { label: "Opportunity Number (descending)", value: "opportunityNumberDesc" },
+  { label: "Opportunity Number (ascending)", value: "opportunityNumberAsc" },
 ];
 
 interface SearchSortByProps {
