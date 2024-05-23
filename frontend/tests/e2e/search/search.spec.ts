@@ -202,6 +202,8 @@ test.describe("Search page tests", () => {
   test("last result becomes first result when flipping sort order", async ({
     page,
   }) => {
+    await selectSortBy(page, "opportunityTitleDesc");
+
     await clickLastPaginationPage(page);
 
     await waitForSearchResultsInitialLoad(page);

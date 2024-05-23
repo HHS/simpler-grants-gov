@@ -1,7 +1,7 @@
 "use client";
 
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
-import Loading from "../../app/search/loading";
+import Loading from "../../app/[locale]/search/loading";
 import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import { SearchResponseData } from "../../types/search/searchResponseTypes";
 import SearchResultsListItem from "./SearchResultsListItem";

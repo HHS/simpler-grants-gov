@@ -1,8 +1,7 @@
-"use client";
-
 import { ExternalRoutes } from "src/constants/routes";
 
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
+
 import Image from "next/image";
 import {
   Identifier,
@@ -16,28 +15,21 @@ import {
   IdentifierMasthead,
 } from "@trussworks/react-uswds";
 
-import logo from "../../public/img/logo-white-lg.webp";
+import logo from "public/img/logo-white-lg.webp";
 
-// TODO: Remove during move to app router and next-intl upgrade
-type IdentifierStrings = {
-  link_about: string;
-  link_accessibility: string;
-  link_foia: string;
-  link_fear: string;
-  link_ig: string;
-  link_performance: string;
-  link_privacy: string;
-  logo_alt: string;
-};
+const GrantsIdentifier = () => {
+  const t = useTranslations("Identifier");
 
-type Props = {
-  identifier_strings: IdentifierStrings;
-};
-
-const GrantsIdentifier = ({ identifier_strings }: Props) => {
-  const { t } = useTranslation("common", {
-    keyPrefix: "Identifier",
-  });
+  const identifier_strings = {
+    link_about: t("link_about"),
+    link_accessibility: t("link_accessibility"),
+    link_foia: t("link_foia"),
+    link_fear: t("link_fear"),
+    link_ig: t("link_ig"),
+    link_performance: t("link_performance"),
+    link_privacy: t("link_privacy"),
+    logo_alt: t("logo_alt"),
+  };
 
   const logoImage = (
     <Image
@@ -91,26 +83,18 @@ const GrantsIdentifier = ({ identifier_strings }: Props) => {
           <IdentifierLogo href="#">{logoImage}</IdentifierLogo>
         </IdentifierLogos>
         <IdentifierIdentity domain="HHS.gov">
-          <Trans
-            t={t}
-            i18nKey="identity"
-            components={{
-              hhsLink: <a href={ExternalRoutes.HHS} />,
-            }}
-          />
+          {t.rich("identity", {
+            hhsLink: (chunks) => <a href={ExternalRoutes.HHS}>{chunks}</a>,
+          })}
         </IdentifierIdentity>
       </IdentifierMasthead>
       <IdentifierLinks navProps={{ "aria-label": "Important links" }}>
         {IdentifierLinkList}
       </IdentifierLinks>
       <IdentifierGov aria-label="U.S. government information and services">
-        <Trans
-          t={t}
-          i18nKey="gov_content"
-          components={{
-            usaLink: <a href={ExternalRoutes.USA} />,
-          }}
-        />
+        {t.rich("gov_content", {
+          usaLink: (chunks) => <a href={ExternalRoutes.USA}>{chunks}</a>,
+        })}
       </IdentifierGov>
     </Identifier>
   );

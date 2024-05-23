@@ -1,13 +1,12 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "tests/react-utils";
+
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import Newsletter from "src/pages/newsletter";
+import Newsletter from "src/app/[locale]/newsletter/page";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
-jest.mock("next/router", () => ({
-  useRouter: jest.fn(),
-}));
+jest.mock("next/navigation");
 
 describe("Newsletter", () => {
   it("renders signup form with a submit button", () => {
@@ -44,10 +43,9 @@ describe("Newsletter", () => {
 
     // Wait for the form submission
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        pathname: "/newsletter/confirmation/",
-        query: { sendy: "Success" },
-      });
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/newsletter/confirmation/?sendy=Success",
+      );
     });
   });
 

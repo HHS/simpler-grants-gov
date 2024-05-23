@@ -1,16 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
 
 import Header from "src/components/Header";
-
-const header_strings = {
-  nav_link_home: "Home",
-  nav_link_process: "Process",
-  nav_link_research: "Research",
-  nav_link_newsletter: "Newsletter",
-  nav_menu_toggle: "Menu",
-  title: "Simpler.Grants.gov",
-};
 
 const props = {
   logoPath: "/img/logo.svg",
@@ -24,7 +15,6 @@ const props = {
       href: "/health",
     },
   ],
-  header_strings,
 };
 
 describe("Header", () => {
@@ -50,7 +40,7 @@ describe("Header", () => {
   });
 
   it("displays expandable government banner", async () => {
-    render(<Header header_strings={header_strings} />);
+    render(<Header />);
 
     const govBanner = screen.getByRole("button", { expanded: false });
 

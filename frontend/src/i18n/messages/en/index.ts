@@ -229,12 +229,12 @@ export const messages = {
         {
           title: "Find",
           content:
-            "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p><chevron/>",
+            "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>",
         },
         {
           title: "Advanced reporting",
           content:
-            "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p><chevron/>",
+            "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>",
         },
         {
           title: "Apply",
@@ -291,9 +291,9 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       already_subscribed:
-        "{{email_address}} is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
+        "<email_address/> is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
       sendy:
-        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: {{sendy_error}}",
+        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
     },
   },
   Newsletter_confirmation: {
@@ -323,6 +323,7 @@ export const messages = {
       "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. ",
   },
   ErrorPages: {
+    page_title: "Page Not Found | Simpler.Grants.gov",
     page_not_found: {
       title: "Oops! Page Not Found",
       message_content_1:

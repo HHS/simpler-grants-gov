@@ -1,5 +1,5 @@
 import { BadRequestError } from "src/errors";
-import { ParsedError } from "src/app/search/error";
+import { ParsedError } from "src/app/[locale]/search/error";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
 describe("BadRequestError", () => {

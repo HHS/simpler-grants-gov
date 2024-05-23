@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import GoalContent from "src/pages/content/IndexGoalContent";
+import GoalContent from "src/components/content/IndexGoalContent";
 
 const meta: Meta<typeof GoalContent> = {
   title: "Components/Content/Goal Content",

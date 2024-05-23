@@ -1,6 +1,6 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "tests/react-utils";
 import { axe } from "jest-axe";
-import NewsletterUnsubscribe from "src/pages/newsletter/unsubscribe";
+import NewsletterUnsubscribe from "src/app/[locale]/newsletter/unsubscribe/page";
 
 describe("Newsletter", () => {
   it("passes accessibility scan", async () => {
