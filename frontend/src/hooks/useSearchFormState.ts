@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 import { QueryParamData } from "../services/search/searchfetcher/SearchFetcher";
 import { SearchAPIResponse } from "../types/search/searchResponseTypes";
-import { updateResults } from "../app/search/actions";
+import { updateResults } from "../app/[locale]/search/actions";
 import { useFormState } from "react-dom";
 import { useSearchParamUpdater } from "./useSearchParamUpdater";
 

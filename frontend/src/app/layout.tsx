@@ -1,8 +1,8 @@
 import "src/styles/styles.scss";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { PUBLIC_ENV } from "../constants/environments";
+import { PUBLIC_ENV } from "src/constants/environments";
 
-import Layout from "src/components/AppLayout";
+import Layout from "src/components/Layout";
 import { unstable_setRequestLocale } from "next-intl/server";
 /**
  * Root layout component, wraps all pages.

@@ -1,12 +1,12 @@
-import { render, screen } from "@testing-library/react";
-
-import Layout from "src/components/Layout";
+import { render, screen } from "tests/react-utils";
 import { axe } from "jest-axe";
 
-describe("Layout", () => {
+import Layout from "src/components/Layout";
+
+describe("AppLayout", () => {
   it("renders children in main section", () => {
     render(
-      <Layout>
+      <Layout locale="en">
         <h1>child</h1>
       </Layout>,
     );
@@ -18,7 +18,7 @@ describe("Layout", () => {
 
   it("passes accessibility scan", async () => {
     const { container } = render(
-      <Layout>
+      <Layout locale="en">
         <h1>child</h1>
       </Layout>,
     );

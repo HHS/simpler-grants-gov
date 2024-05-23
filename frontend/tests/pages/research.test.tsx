@@ -1,6 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "tests/react-utils";
+
 import { axe } from "jest-axe";
-import Research from "src/pages/research";
+import Research from "src/app/[locale]/research/page";
 
 describe("Research", () => {
   it("renders alert with grants.gov link", () => {

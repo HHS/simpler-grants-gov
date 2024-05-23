@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import ProcessMilestones from "src/pages/content/ProcessMilestones";
+import { render, screen } from "tests/react-utils";
+import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {
