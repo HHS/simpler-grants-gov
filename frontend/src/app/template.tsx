@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
-import { PUBLIC_ENV } from "../constants/environments";
+import { PUBLIC_ENV } from "src/constants/environments";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === "production";

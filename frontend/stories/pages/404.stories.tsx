@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import PageNotFound from "src/pages/404";
+import PageNotFound from "src/app/not-found";
 
 const meta: Meta<typeof PageNotFound> = {
   title: "Pages/404",
