@@ -1,3 +1,4 @@
+import { Select } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
 import { useState } from "react";
 
@@ -43,20 +44,22 @@ const SearchSortBy: React.FC<SearchSortByProps> = ({
 
   return (
     <div id="search-sort-by">
-      <select
-        className="usa-select"
-        name="search-sort-by"
+      <label htmlFor="search-sort-by-select" className="usa-sr-only">
+        Sort By
+      </label>
+
+      <Select
         id="search-sort-by-select"
+        name="search-sort-by"
         onChange={handleChange}
         value={sortBy}
-        aria-label="Sort By"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 };
