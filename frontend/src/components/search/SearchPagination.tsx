@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "@trussworks/react-uswds";
+import { useDebouncedCallback } from "use-debounce";
 import { useFormStatus } from "react-dom";
 
 export enum PaginationPosition {
@@ -19,6 +20,7 @@ interface SearchPaginationProps {
 }
 
 const MAX_SLOTS = 7;
+const DEBOUNCE_TIME = 300;
 
 export default function SearchPagination({
   showHiddenInput,
@@ -30,6 +32,10 @@ export default function SearchPagination({
   searchResultsLength,
 }: SearchPaginationProps) {
   const { pending } = useFormStatus();
+
+  const debouncedHandlePageChange = useDebouncedCallback((newPage: number) => {
+    handlePageChange(newPage);
+  }, DEBOUNCE_TIME);
 
   // If there's no results, don't show pagination
   if (searchResultsLength < 1) {
@@ -59,9 +65,11 @@ export default function SearchPagination({
         totalPages={totalPages}
         currentPage={page}
         maxSlots={MAX_SLOTS}
-        onClickNext={() => handlePageChange(page + 1)}
-        onClickPrevious={() => handlePageChange(page - 1)}
-        onClickPageNumber={(event, page) => handlePageChange(page)}
+        onClickNext={() => debouncedHandlePageChange(page + 1)}
+        onClickPrevious={() => debouncedHandlePageChange(page - 1)}
+        onClickPageNumber={(event: React.MouseEvent, page: number) =>
+          debouncedHandlePageChange(page)
+        }
       />
     </>
   );

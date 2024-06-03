@@ -146,6 +146,9 @@ export async function clickPaginationPageNumber(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
   await paginationButton.first().click();
+
+  // Delay for pagination debounce
+  await page.waitForTimeout(400);
 }
 
 export async function clickLastPaginationPage(page: Page) {
@@ -156,6 +159,8 @@ export async function clickLastPaginationPage(page: Page) {
   if (count > 2) {
     await paginationButtons.nth(count - 2).click();
   }
+  // Delay for pagination debounce
+  await page.waitForTimeout(400);
 }
 
 export async function getFirstSearchResultTitle(page: Page) {
