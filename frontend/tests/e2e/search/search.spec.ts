@@ -1,3 +1,4 @@
+import { Page, expect, test } from "@playwright/test";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -20,9 +21,18 @@ import {
   toggleCheckboxes,
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
-import { expect, test } from "@playwright/test";
 
-test("should navigate from index to search page", async ({ page }) => {
+import { BrowserContextOptions } from "playwright-core";
+
+interface PageProps {
+  page: Page;
+  browserName?: string;
+  contextOptions?: BrowserContextOptions;
+}
+
+test("should navigate from index to search page", async ({
+  page,
+}: PageProps) => {
   // Start from the index page with feature flag set
   await page.goto("/?_ff=showSearchV0:true");
 
@@ -48,7 +58,7 @@ test("should navigate from index to search page", async ({ page }) => {
 });
 
 test.describe("Search page tests", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }: PageProps) => {
     // Navigate to the search page with the feature flag set
     await page.goto("/search?_ff=showSearchV0:true");
   });
@@ -56,7 +66,7 @@ test.describe("Search page tests", () => {
   test("should return 0 results when searching for obscure term", async ({
     page,
     browserName,
-  }) => {
+  }: PageProps) => {
     // TODO (Issue #2005): fix test for webkit
     test.skip(
       browserName === "webkit",
@@ -80,7 +90,10 @@ test.describe("Search page tests", () => {
     );
   });
 
-  test("should show and hide loading state", async ({ page, browserName }) => {
+  test("should show and hide loading state", async ({
+    page,
+    browserName,
+  }: PageProps) => {
     // TODO (Issue #2005): fix test for webkit
     test.skip(
       browserName === "webkit",
@@ -98,7 +111,10 @@ test.describe("Search page tests", () => {
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
   });
-  test("should refresh and retain filters in a new tab", async ({ page }) => {
+
+  test("should refresh and retain filters in a new tab", async ({
+    page,
+  }: PageProps) => {
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
@@ -175,11 +191,15 @@ test.describe("Search page tests", () => {
     }
   });
 
-  test("resets page back to 1 when choosing a filter", async ({ page }) => {
+  test("resets page back to 1 when choosing a filter", async ({
+    page,
+  }: PageProps) => {
     await clickPaginationPageNumber(page, 2);
 
     // Verify that page 1 is highlighted
-    let currentPageButton = page.locator(".usa-pagination__button.usa-current");
+    let currentPageButton = page
+      .locator(".usa-pagination__button.usa-current")
+      .first();
     await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
 
     // Select the 'Closed' checkbox under 'Opportunity status'
@@ -201,7 +221,7 @@ test.describe("Search page tests", () => {
 
   test("last result becomes first result when flipping sort order", async ({
     page,
-  }) => {
+  }: PageProps) => {
     await selectSortBy(page, "opportunityTitleDesc");
 
     await clickLastPaginationPage(page);
@@ -219,7 +239,7 @@ test.describe("Search page tests", () => {
 
   test("number of results is the same with none or all opportunity status checked", async ({
     page,
-  }) => {
+  }: PageProps) => {
     const initialNumberOfOpportunityResults =
       await getNumberOfOpportunitySearchResults(page);
 
