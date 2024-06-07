@@ -67,7 +67,7 @@ def configure_app(app: APIFlask) -> None:
     # Modify the response schema to instead use the format of our ApiResponse class
     # which adds additional details to the object.
     # https://apiflask.com/schema/#base-response-schema-customization
-    app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
+    # app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
     app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["SWAGGER_UI_CSS"] = "/static/swagger-ui.min.css"

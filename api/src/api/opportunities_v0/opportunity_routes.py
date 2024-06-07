@@ -34,7 +34,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
     arg_name="feature_flag_config",
 )
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema(many=True))
+@opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV0Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
@@ -65,7 +65,7 @@ def opportunity_search(
 
 
 @opportunity_blueprint.get("/opportunities/<int:opportunity_id>")
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema)
+@opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV0Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
