@@ -30,7 +30,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
     opportunity_schemas.OpportunitySearchRequestV1Schema, arg_name="search_params"
 )
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV1Schema(many=True))
+@opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 def opportunity_search(search_params: dict) -> response.ApiResponse:
@@ -53,7 +53,7 @@ def opportunity_search(search_params: dict) -> response.ApiResponse:
 
 
 @opportunity_blueprint.get("/opportunities/<int:opportunity_id>")
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV1Schema)
+@opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()

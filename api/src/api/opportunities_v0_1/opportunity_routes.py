@@ -67,7 +67,7 @@ examples = {
     examples=examples,
 )
 # many=True allows us to return a list of opportunity objects
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV01Schema(many=True))
+@opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV01Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
@@ -92,7 +92,7 @@ def opportunity_search(db_session: db.Session, search_params: dict) -> response.
 
 
 @opportunity_blueprint.get("/opportunities/<int:opportunity_id>")
-@opportunity_blueprint.output(opportunity_schemas.OpportunityV01Schema)
+@opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV01Schema)
 @opportunity_blueprint.auth_required(api_key_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
