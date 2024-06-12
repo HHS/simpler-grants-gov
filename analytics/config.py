@@ -8,6 +8,7 @@ Dynaconf provides a few valuable features for configuration management:
 
 For more information visit: https://www.dynaconf.com/
 """
+
 from dynaconf import Dynaconf, Validator, ValidationError
 
 settings = Dynaconf(
@@ -16,6 +17,8 @@ settings = Dynaconf(
     # looks for config vars in the following files
     # with vars in .secrets.toml overriding vars in settings.toml
     settings_files=["settings.toml", ".secrets.toml"],
+    # merge the settings found in all files
+    merge_enabled= True,
     # add validators for our required config vars
     validators=[
         Validator("SLACK_BOT_TOKEN", must_exist=True),
