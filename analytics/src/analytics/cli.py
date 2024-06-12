@@ -1,18 +1,22 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
+import logging
 from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
 from slack_sdk import WebClient
+from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.integrations import github, slack
+from analytics.integrations import db, github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
+
+logger = logging.getLogger(__name__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -120,6 +124,29 @@ def calculate_sprint_burnup(
         post_results=post_results,
         output_dir=output_dir,
     )
+
+
+@export_app.command(name="test_connection")
+def test_connection() -> None:
+    """Test function that ensures the DB connection works."""
+    engine = db.get_db()
+    # connection method from sqlalchemy
+    connection = engine.connect()
+
+    # Test INSERT INTO action
+    result = connection.execute(
+        text(
+            "INSERT INTO audit_log (topic,timestamp, end_timestamp, user_id, details)"
+            "VALUES('test','2024-06-11 10:41:15','2024-06-11 10:54:15',87654,'test from command');",
+        ),
+    )
+    # Test SELECT action
+    result = connection.execute(text("SELECT * FROM audit_log WHERE user_id=87654;"))
+    for row in result:
+        print(row)
+    # commits the transaction to the db
+    connection.commit()
+    result.close()
 
 
 @metrics_app.command(name="deliverable_percent_complete")
