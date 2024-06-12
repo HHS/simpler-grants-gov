@@ -1,0 +1,62 @@
+name: pa11y tests
+
+on:
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/ci-frontend-a11y.yml
+
+jobs:
+  build:
+    name: Pa11y-ci tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    env:
+      NODE_VERSION: 20
+      LOCKFILE_PATH: ./frontend/package-lock.json
+      PACKAGE_MANAGER: npm
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create screenshots directory
+        run: mkdir -p screenshots-output
+
+      - name: Build project
+        run: npm run build
+
+      - name: Start server and log output
+        run: npm run start &
+
+      - name: Wait for frontend to be ready
+        run: |
+          # Ensure the server wait script is executable
+          chmod +x ./bin/wait-for-frontend.sh
+          ./bin/wait-for-frontend.sh
+
+      - name: Run pa11y-ci
+        run: |
+          set -e # Ensure the script fails if any command fails
+          npm run test:pa11y
+          echo "pa11y-ci tests finished."
+          
+      - name: Upload screenshots to artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshots
+          path: ./frontend/screenshots-output
