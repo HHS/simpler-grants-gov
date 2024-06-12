@@ -1,13 +1,9 @@
-import {
-  ServerSideRouteParams,
-  ServerSideSearchParams,
-} from "../../../types/searchRequestURLTypes";
-
 import BetaAlert from "src/components/BetaAlert";
 import { Metadata } from "next";
 import React from "react";
 import SearchCallToAction from "../../../components/search/SearchCallToAction";
 import { SearchForm } from "./SearchForm";
+import { ServerSideSearchParams } from "../../../types/searchRequestURLTypes";
 import { convertSearchParamsToProperTypes } from "../../../utils/search/convertSearchParamsToProperTypes";
 import { generateAgencyNameLookup } from "src/utils/search/generateAgencyNameLookup";
 import { getSearchFetcher } from "../../../services/search/searchfetcher/SearchFetcherUtil";
@@ -17,7 +13,6 @@ import withFeatureFlag from "../../../hoc/search/withFeatureFlag";
 const searchFetcher = getSearchFetcher();
 
 interface ServerPageProps {
-  params: ServerSideRouteParams;
   searchParams: ServerSideSearchParams;
 }
 
