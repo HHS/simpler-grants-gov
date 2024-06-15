@@ -7,7 +7,7 @@ import PageSEO from "src/components/PageSEO";
 import BetaAlert from "src/components/BetaAlert";
 import NewsletterForm from "src/app/[locale]/newsletter/NewsletterForm";
 import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import {
   useTranslations,
   useMessages,
@@ -25,6 +25,7 @@ export async function generateMetadata() {
 }
 
 export default function Newsletter() {
+  unstable_setRequestLocale("en");
   const t = useTranslations("Newsletter");
   const messages = useMessages();
 

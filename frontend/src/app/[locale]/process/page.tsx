@@ -9,7 +9,7 @@ import ProcessIntro from "src/app/[locale]/process/ProcessIntro";
 import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
 import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -21,6 +21,7 @@ export async function generateMetadata() {
 }
 
 export default function Process() {
+  unstable_setRequestLocale("en");
   const t = useTranslations("Process");
 
   return (
