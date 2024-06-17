@@ -1,7 +1,4 @@
-version: '3'
-
 services:
-
   grants-db:
     image: postgres:15-alpine
     container_name: grants-db
