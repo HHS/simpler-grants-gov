@@ -38,7 +38,7 @@ endif
 ifeq "$(PY_RUN_APPROACH)" "local"
 PY_RUN_CMD := poetry run
 else
-PY_RUN_CMD := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
 endif
 
 FLASK_CMD := $(PY_RUN_CMD) flask
@@ -89,24 +89,24 @@ setup-local:
 ##################################################
 
 build:
-	docker-compose build
+	docker compose build
 
 start:
-	docker-compose up --detach
+	docker compose up --detach
 
 start-debug:
 	docker compose -f docker-compose.yml -f docker-compose.debug.yml up --detach
 
 run-logs: start
-	docker-compose logs --follow --no-color $(APP_NAME)
+	docker compose logs --follow --no-color $(APP_NAME)
 
 init: build init-db init-opensearch
 
 clean-volumes: ## Remove project docker volumes (which includes the DB state)
-	docker-compose down --volumes
+	docker compose down --volumes
 
 stop:
-	docker-compose down
+	docker compose down
 
 check: format-check lint db-check-migrations test
 
@@ -123,7 +123,7 @@ check: format-check lint db-check-migrations test
 init-db: start-db setup-postgres-db db-migrate
 
 start-db:
-	docker-compose up --detach grants-db
+	docker compose up --detach grants-db
 	./bin/wait-for-local-db.sh
 
 ## Destroy current DB, setup new one
@@ -187,8 +187,8 @@ init-opensearch: start-opensearch
 # TODO - in subsequent PRs, we'll add more to this command to setup the search index locally
 
 start-opensearch:
-	docker-compose up --detach opensearch-node
-	docker-compose up --detach opensearch-dashboards
+	docker compose up --detach opensearch-node
+	docker compose up --detach opensearch-dashboards
 	./bin/wait-for-local-opensearch.sh
 
 
