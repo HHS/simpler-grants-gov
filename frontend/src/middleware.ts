@@ -1,3 +1,7 @@
+import { NextRequest, NextResponse } from "next/server";
+import { defaultLocale, locales } from "./i18n/config";
+
+import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 /**
  * @file Middleware allows you to run code before a request is completed. Then, based on
  * the incoming request, you can modify the response by rewriting, redirecting,
@@ -5,10 +9,6 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import createIntlMiddleware from "next-intl/middleware";
-import { NextRequest, NextResponse } from "next/server";
-import { defaultLocale, locales } from "./i18n/config";
-
-import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 
 export const config = {
   matcher: [
@@ -19,7 +19,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - images (static files in public/images/ directory)
      */
-    "/((?!api|_next/static|_next/image|public|img|uswds|images|robots.txt|site.webmanifest).*)",
+    "/((?!api|_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest).*)",
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:

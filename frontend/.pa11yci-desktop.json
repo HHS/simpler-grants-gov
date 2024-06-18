@@ -1,0 +1,16 @@
+{
+  "defaults": {
+    "timeout": 240000,
+    "runners": ["axe"],
+    "ignore": ["color-contrast"],
+    "concurrency": 1,
+    "chromeLaunchConfig": {
+      "ignoreHTTPSErrors": true,
+      "args": ["--disable-dev-shm-usage", "--no-sandbox"]
+    },
+    "actions": [
+      "wait for element #main-content to be visible",
+      "screen capture screenshots-output/desktop-main-view.png"
+    ]
+  }
+}
