@@ -51,9 +51,10 @@ jobs:
       - name: Run pa11y-ci
         run: |
           set -e # Ensure the script fails if any command fails
-          npm run test:pa11y
+          npm run test:pa11y-desktop
+          npm run test:pa11y-mobile
           echo "pa11y-ci tests finished."
-          
+
       - name: Upload screenshots to artifacts
         if: always()
         uses: actions/upload-artifact@v3

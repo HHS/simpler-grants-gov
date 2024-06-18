@@ -1,3 +1,10 @@
 export default function Health() {
-  return <>healthy</>;
+  return (
+    <>
+      <head>
+        <title>Health Check</title>
+      </head>
+      <div>healthy</div>
+    </>
+  );
 }
