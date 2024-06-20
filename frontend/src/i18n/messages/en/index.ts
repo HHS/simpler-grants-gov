@@ -5,6 +5,10 @@ export const messages = {
     alert:
       "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website.",
   },
+  OpportunityListing: {
+    page_title: "Opportunity Listing",
+    meta_description: "Summary details for the specific opportunity listing.",
+  },
   Index: {
     page_title: "Simpler.Grants.gov",
     meta_description:
