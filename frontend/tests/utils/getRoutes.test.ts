@@ -12,6 +12,7 @@ jest.mock("../../src/utils/getRoutes", () => {
 
 const mockedListPaths = listPaths as jest.MockedFunction<typeof listPaths>;
 
+// TODO: https://github.com/navapbc/simpler-grants-gov/issues/98
 describe("getNextRoutes", () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -30,6 +31,7 @@ describe("getNextRoutes", () => {
       "/newsletter/confirmation",
       "/newsletter",
       "/newsletter/unsubscribe",
+      "/opportunity/1",
       "/",
       "/process",
       "/research",
