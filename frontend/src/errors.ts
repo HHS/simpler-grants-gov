@@ -12,8 +12,10 @@ import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher"
  */
 
 export class NetworkError extends Error {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    const serializedSearchInputs = convertSearchInputSetsToArrays(searchInputs);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    const serializedSearchInputs = searchInputs
+      ? convertSearchInputSetsToArrays(searchInputs)
+      : {};
 
     const serializedData = JSON.stringify({
       type: "NetworkError",
@@ -29,15 +31,17 @@ export class NetworkError extends Error {
 export class BaseFrontendError extends Error {
   constructor(
     error: unknown,
-    searchInputs: QueryParamData,
-    type: string,
+    type = "BaseFrontendError",
     status?: number,
+    searchInputs?: QueryParamData,
   ) {
     // Sets cannot be properly serialized so convert to arrays first
-    const serializedSearchInputs = convertSearchInputSetsToArrays(searchInputs);
+    const serializedSearchInputs = searchInputs
+      ? convertSearchInputSetsToArrays(searchInputs)
+      : {};
 
     const serializedData = JSON.stringify({
-      type: type || "BaseFrontendError",
+      type,
       searchInputs: serializedSearchInputs,
       message: error instanceof Error ? error.message : "Unknown Error",
       status,
@@ -61,11 +65,11 @@ export class BaseFrontendError extends Error {
 export class ApiRequestError extends BaseFrontendError {
   constructor(
     error: unknown,
-    searchInputs: QueryParamData,
-    type: string,
-    status: number,
+    type = "APIRequestError",
+    status = 400,
+    searchInputs?: QueryParamData,
   ) {
-    super(error, searchInputs, type || "APIRequestError", status || 400);
+    super(error, type, status, searchInputs);
   }
 }
 
@@ -73,8 +77,8 @@ export class ApiRequestError extends BaseFrontendError {
  * An API response returned a 400 status code and its JSON body didn't include any `errors`
  */
 export class BadRequestError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "BadRequestError", 400);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "BadRequestError", 400, searchInputs);
   }
 }
 
@@ -82,8 +86,8 @@ export class BadRequestError extends ApiRequestError {
  * An API response returned a 401 status code
  */
 export class UnauthorizedError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "UnauthorizedError", 401);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "UnauthorizedError", 401, searchInputs);
   }
 }
 
@@ -93,8 +97,8 @@ export class UnauthorizedError extends ApiRequestError {
  * being created, or the user hasn't consented to the data sharing agreement.
  */
 export class ForbiddenError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "ForbiddenError", 403);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "ForbiddenError", 403, searchInputs);
   }
 }
 
@@ -102,8 +106,8 @@ export class ForbiddenError extends ApiRequestError {
  * A fetch request failed due to a 404 error
  */
 export class NotFoundError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "NotFoundError", 404);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "NotFoundError", 404, searchInputs);
   }
 }
 
@@ -111,8 +115,8 @@ export class NotFoundError extends ApiRequestError {
  * An API response returned a 408 status code
  */
 export class RequestTimeoutError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "RequestTimeoutError", 408);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "RequestTimeoutError", 408, searchInputs);
   }
 }
 
@@ -120,8 +124,8 @@ export class RequestTimeoutError extends ApiRequestError {
  * An API response returned a 422 status code
  */
 export class ValidationError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "ValidationError", 422);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "ValidationError", 422, searchInputs);
   }
 }
 
@@ -133,8 +137,8 @@ export class ValidationError extends ApiRequestError {
  * An API response returned a 500 status code
  */
 export class InternalServerError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "InternalServerError", 500);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "InternalServerError", 500, searchInputs);
   }
 }
 
@@ -142,8 +146,8 @@ export class InternalServerError extends ApiRequestError {
  *  An API response returned a 503 status code
  */
 export class ServiceUnavailableError extends ApiRequestError {
-  constructor(error: unknown, searchInputs: QueryParamData) {
-    super(error, searchInputs, "ServiceUnavailableError", 503);
+  constructor(error: unknown, searchInputs?: QueryParamData) {
+    super(error, "ServiceUnavailableError", 503, searchInputs);
   }
 }
 
