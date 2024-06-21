@@ -8,6 +8,9 @@
       "ignoreHTTPSErrors": true,
       "args": ["--disable-dev-shm-usage", "--no-sandbox"]
     },
+    "headers": {
+      "Cookie": "_ff={%22showSearchV0%22:true}"
+    },
     "viewport": {
       "width": 390,
       "height": 844,
