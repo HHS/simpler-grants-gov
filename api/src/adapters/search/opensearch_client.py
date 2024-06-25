@@ -4,8 +4,33 @@ from typing import Any, Sequence
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
+from src.adapters.search.opensearch_response import SearchResponse
 
 logger = logging.getLogger(__name__)
+
+# By default, we'll override the default analyzer+tokenization
+# for a search index. You can provide your own when calling create_index
+DEFAULT_INDEX_ANALYSIS = {
+    "analyzer": {
+        "default": {
+            "type": "custom",
+            "filter": ["lowercase", "custom_stemmer"],
+            # Change tokenization to whitespace as the default is very clunky
+            # with a lot of our IDs that have dashes in them.
+            # see: https://opensearch.org/docs/latest/analyzers/tokenizers/index/
+            "tokenizer": "whitespace",
+        }
+    },
+    # Change the default stemming to use snowball which handles plural
+    # queries better than the default
+    # TODO - there are a lot of stemmers, we should take some time to figure out
+    #        which one works best with our particular dataset. Snowball is really
+    #        basic and naive (literally just adjusting suffixes on words in common patterns)
+    #        which might be fine generally, but we work with a lot of acronyms
+    #        and should verify that doesn't cause any issues.
+    # see: https://opensearch.org/docs/latest/analyzers/token-filters/index/
+    "filter": {"custom_stemmer": {"type": "snowball", "name": "english"}},
+}
 
 
 class SearchClient:
@@ -17,15 +42,27 @@ class SearchClient:
         self._client = opensearchpy.OpenSearch(**_get_connection_parameters(opensearch_config))
 
     def create_index(
-        self, index_name: str, *, shard_count: int = 1, replica_count: int = 1
+        self,
+        index_name: str,
+        *,
+        shard_count: int = 1,
+        replica_count: int = 1,
+        analysis: dict | None = None
     ) -> None:
         """
         Create an empty search index
         """
+
+        # Allow the user to adjust how the index analyzer + tokenization works
+        # but also have a general default.
+        if analysis is None:
+            analysis = DEFAULT_INDEX_ANALYSIS
+
         body = {
             "settings": {
-                "index": {"number_of_shards": shard_count, "number_of_replicas": replica_count}
-            }
+                "index": {"number_of_shards": shard_count, "number_of_replicas": replica_count},
+                "analysis": analysis,
+            },
         }
 
         logger.info("Creating search index %s", index_name, extra={"index_name": index_name})
@@ -104,11 +141,16 @@ class SearchClient:
             for index in existing_indexes:
                 self.delete_index(index)
 
-    def search(self, index_name: str, search_query: dict) -> dict:
-        # TODO - add more when we build out the request/response parsing logic
-        # we use something like Pydantic to help reorganize the response
-        # object into something easier to parse.
+    def search_raw(self, index_name: str, search_query: dict) -> dict:
+        # Simple wrapper around search if you don't want the request or response
+        # object handled in any special way.
         return self._client.search(index=index_name, body=search_query)
+
+    def search(
+        self, index_name: str, search_query: dict, include_scores: bool = True
+    ) -> SearchResponse:
+        response = self._client.search(index=index_name, body=search_query)
+        return SearchResponse.from_opensearch_response(response, include_scores)
 
 
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
