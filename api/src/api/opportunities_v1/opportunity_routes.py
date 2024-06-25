@@ -7,7 +7,7 @@ import src.api.response as response
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities_v1.get_opportunity import get_opportunity
+from src.services.opportunities_v1.get_opportunity import get_opportunity, get_opportunity_versions
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
 
@@ -64,3 +64,17 @@ def opportunity_get(db_session: db.Session, opportunity_id: int) -> response.Api
         opportunity = get_opportunity(db_session, opportunity_id)
 
     return response.ApiResponse(message="Success", data=opportunity)
+
+
+@opportunity_blueprint.get("/opportunities/<int:opportunity_id>/versions")
+@opportunity_blueprint.output(opportunity_schemas.OpportunityVersionsGetResponseV1Schema)
+@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
+@flask_db.with_db_session()
+def opportunity_versions_get(db_session: db.Session, opportunity_id: int) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"opportunity.opportunity_id": opportunity_id})
+    logger.info("GET /v1/opportunities/:opportunity_id/versions")
+    with db_session.begin():
+        data = get_opportunity_versions(db_session, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=data)

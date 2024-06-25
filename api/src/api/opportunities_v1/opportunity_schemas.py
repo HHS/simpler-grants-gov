@@ -174,6 +174,10 @@ class OpportunitySummaryV1Schema(Schema):
         }
     )
 
+    version_number = fields.Integer(
+        metadata={"description": "The version number of the opportunity summary", "example": 1}
+    )
+
     funding_instruments = fields.List(fields.Enum(FundingInstrument))
     funding_categories = fields.List(fields.Enum(FundingCategory))
     applicant_types = fields.List(fields.Enum(ApplicantType))
@@ -301,6 +305,16 @@ class OpportunitySearchRequestV1Schema(Schema):
 
 class OpportunityGetResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunityV1Schema())
+
+
+class OpportunityVersionV1Schema(Schema):
+    opportunity = fields.Nested(OpportunityV1Schema())
+    forecasts = fields.Nested(OpportunitySummaryV1Schema(many=True))
+    non_forecasts = fields.Nested(OpportunitySummaryV1Schema(many=True))
+
+
+class OpportunityVersionsGetResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunityVersionV1Schema())
 
 
 class OpportunitySearchResponseV1Schema(AbstractResponseSchema, PaginationMixinSchema):
