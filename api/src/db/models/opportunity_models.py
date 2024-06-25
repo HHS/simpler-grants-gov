@@ -82,6 +82,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
         return self.current_opportunity_summary.opportunity_status
 
+    @property
+    def all_forecasts(self) -> list["OpportunitySummary"]:
+        # Utility method for getting all forecasted summary records attached to the opportunity
+        # Note this will include historical and deleted records.
+        return [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+
+    @property
+    def all_non_forecasts(self) -> list["OpportunitySummary"]:
+        # Utility method for getting all forecasted summary records attached to the opportunity
+        # Note this will include historical and deleted records.
+        return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
+
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
@@ -190,6 +202,29 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         "applicant_type",
         creator=lambda obj: LinkOpportunitySummaryApplicantType(applicant_type=obj),
     )
+
+    def for_json(self) -> dict:
+        json_valid_dict = super().for_json()
+
+        # The proxy values don't end up in the JSON as they aren't columns
+        # so manually add them.
+        json_valid_dict["funding_instruments"] = self.funding_instruments
+        json_valid_dict["funding_categories"] = self.funding_categories
+        json_valid_dict["applicant_types"] = self.applicant_types
+
+        return json_valid_dict
+
+    def can_summary_be_public(self, current_date: date) -> bool:
+        """
+        Utility method to check whether a summary object
+        """
+        if self.is_deleted:
+            return False
+
+        if self.post_date is None or self.post_date > current_date:
+            return False
+
+        return True
 
 
 class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):

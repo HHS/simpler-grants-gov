@@ -160,10 +160,16 @@ class SetCurrentOpportunitiesTask(Task):
         # Note that if it cannot, we do not want to use an earlier revision
         # even if that revision doesn't have the same issue. Only the latest
         # revisions of forecast/non-forecast records are ever an option
-        if not self.can_summary_be_public(latest_forecasted_summary):
+        if (
+            latest_forecasted_summary is not None
+            and not latest_forecasted_summary.can_summary_be_public(self.current_date)
+        ):
             latest_forecasted_summary = None
 
-        if not self.can_summary_be_public(latest_non_forecasted_summary):
+        if (
+            latest_non_forecasted_summary is not None
+            and not latest_non_forecasted_summary.can_summary_be_public(self.current_date)
+        ):
             latest_non_forecasted_summary = None
 
         if latest_forecasted_summary is None and latest_non_forecasted_summary is None:
@@ -179,18 +185,6 @@ class SetCurrentOpportunitiesTask(Task):
         return latest_forecasted_summary, self.determine_opportunity_status(
             cast(OpportunitySummary, latest_forecasted_summary)
         )
-
-    def can_summary_be_public(self, summary: OpportunitySummary | None) -> bool:
-        if summary is None:
-            return False
-
-        if summary.is_deleted:
-            return False
-
-        if summary.post_date is None or summary.post_date > self.current_date:
-            return False
-
-        return True
 
     def determine_opportunity_status(
         self, opportunity_summary: OpportunitySummary
