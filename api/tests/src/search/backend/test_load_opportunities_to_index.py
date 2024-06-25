@@ -52,12 +52,10 @@ class TestLoadOpportunitiesToIndex(BaseTestClass):
         # Just do some rough validation that the data is present
         resp = search_client.search(opportunity_index_alias, {"size": 100})
 
-        total_records = resp["hits"]["total"]["value"]
-        assert total_records == len(opportunities)
+        assert resp.total_records == len(opportunities)
 
-        records = [record["_source"] for record in resp["hits"]["hits"]]
         assert set([opp.opportunity_id for opp in opportunities]) == set(
-            [record["opportunity_id"] for record in records]
+            [record["opportunity_id"] for record in resp.records]
         )
 
         # Rerunning without changing anything about the data in the DB doesn't meaningfully change anything
@@ -65,12 +63,10 @@ class TestLoadOpportunitiesToIndex(BaseTestClass):
         load_opportunities_to_index.run()
         resp = search_client.search(opportunity_index_alias, {"size": 100})
 
-        total_records = resp["hits"]["total"]["value"]
-        assert total_records == len(opportunities)
+        assert resp.total_records == len(opportunities)
 
-        records = [record["_source"] for record in resp["hits"]["hits"]]
         assert set([opp.opportunity_id for opp in opportunities]) == set(
-            [record["opportunity_id"] for record in records]
+            [record["opportunity_id"] for record in resp.records]
         )
 
         # Rerunning but first add a few more opportunities to show up
@@ -82,10 +78,8 @@ class TestLoadOpportunitiesToIndex(BaseTestClass):
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
 
-        total_records = resp["hits"]["total"]["value"]
-        assert total_records == len(opportunities)
+        assert resp.total_records == len(opportunities)
 
-        records = [record["_source"] for record in resp["hits"]["hits"]]
         assert set([opp.opportunity_id for opp in opportunities]) == set(
-            [record["opportunity_id"] for record in records]
+            [record["opportunity_id"] for record in resp.records]
         )

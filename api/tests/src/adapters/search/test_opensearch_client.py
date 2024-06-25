@@ -90,16 +90,14 @@ def test_swap_alias_index(search_client, generic_index):
     search_client.swap_alias_index(tmp_index, alias_name, delete_prior_indexes=True)
 
     # Can search by this alias and get records from the tmp index
-    resp = search_client.search(alias_name, {})
-    resp_records = [record["_source"] for record in resp["hits"]["hits"]]
-    assert resp_records == tmp_index_records
+    resp = search_client.search(alias_name, {}, include_scores=False)
+    assert resp.records == tmp_index_records
 
     # Swap the index to the generic one + delete the tmp one
     search_client.swap_alias_index(generic_index, alias_name, delete_prior_indexes=True)
 
-    resp = search_client.search(alias_name, {})
-    resp_records = [record["_source"] for record in resp["hits"]["hits"]]
-    assert resp_records == records
+    resp = search_client.search(alias_name, {}, include_scores=False)
+    assert resp.records == records
 
     # Verify the tmp one was deleted
     assert search_client._client.indices.exists(tmp_index) is False
