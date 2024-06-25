@@ -1,26 +1,11 @@
 import pytest
 
-from src.db.models.opportunity_models import Opportunity
 from tests.src.api.opportunities_v1.conftest import validate_opportunity
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
-
-
-@pytest.fixture
-def truncate_opportunities(db_session):
-    # Note that we can't just do db_session.query(Opportunity).delete() as the cascade deletes won't work automatically:
-    # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html#orm-queryguide-update-delete-caveats
-    # but if we do it individually they will
-    opportunities = db_session.query(Opportunity).all()
-    for opp in opportunities:
-        db_session.delete(opp)
-
-    # Force the deletes to the DB
-    db_session.commit()
-
 
 #####################################
 # GET opportunity tests

@@ -337,7 +337,7 @@ class OpportunitySummaryFactory(BaseFactory):
     )
 
     # Just a random recent post date
-    post_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+    post_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
 
     # By default set to a date in the future
     archive_date = factory.Faker("date_between", start_date="+3w", end_date="+4w")
@@ -419,6 +419,8 @@ class OpportunitySummaryFactory(BaseFactory):
     # Generally, current summaries won't have the revision number set
     revision_number = None
 
+    version_number = factory.Faker("random_int", min=8, max=13)
+
     funding_instruments = factory.Faker(
         "random_elements",
         length=random.randint(1, 3),
@@ -436,6 +438,11 @@ class OpportunitySummaryFactory(BaseFactory):
         length=random.randint(1, 3),
         elements=[a for a in ApplicantType],
         unique=True,
+    )
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
     class Params:
@@ -1292,3 +1299,236 @@ class ForeignTopportunityFactory(factory.DictFactory):
 
     created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
     last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
+
+
+##
+# Pseudo-factories
+##
+
+
+class OpportunitySummaryHistoryBuilder:
+    """dasdasd
+    Utility class for adding historical opportunity summary records
+    to an opportunity.
+
+    Can either take in an existing opportunity or you can pass parameters
+    into the init method to create an opportunity using the OpportunityFactory
+
+    For example:
+
+        opportunity = (
+            OpportunitySummaryHistoryBuilder(opportunity_title="My opportunity title")
+                .add_forecast()
+                .add_forecast_history()
+                .add_non_forecast(is_current=True)
+                .add_non_forecast_history(summary_description="an older description")
+                .add_non_forecast_history()
+                .build()
+        )
+
+    This would produce an opportunity with:
+        * A non-forecast summary record set to be the CurrentOpportunitySummary
+        * Two prior non-forecast summary records
+        * A forecast summary record
+        * A forecast summary history record
+
+    """
+
+    def __init__(self, opportunity: opportunity_models.Opportunity | None = None, **kwargs):
+        self.opportunity_already_exists: bool = False
+        self.forecast_already_exists: bool = False
+        self.non_forecast_already_exists: bool = False
+
+        self.most_recent_non_forecast: dict | None = None
+        self.most_recent_forecast: dict | None = None
+
+        self.non_forecast_history: list[dict] = []
+        self.forecast_history: list[dict] = []
+
+        self.is_current_non_forecast = False
+        self.is_current_forecast = False
+
+        if opportunity is None:
+            self.opportunity = OpportunityFactory.create(no_current_summary=True, **kwargs)
+        else:
+            self.opportunity_already_exists = True
+            self.opportunity = opportunity
+            if opportunity.current_opportunity_summary is not None:
+                current_summary = opportunity.current_opportunity_summary.opportunity_summary
+
+                if current_summary.is_forecast:
+                    self.most_recent_forecast = current_summary.for_json()
+                    self.forecast_already_exists = True
+                    self.is_current_forecast = True
+                else:
+                    self.most_recent_non_forecast = current_summary.for_json()
+                    self.non_forecast_already_exists = True
+                    self.is_current_non_forecast = True
+
+    def add_non_forecast(
+        self, is_current: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        if self.most_recent_non_forecast:
+            raise Exception("Cannot call add_non_forecast if a non-forecast already exists")
+
+        kwargs["is_forecast"] = False
+        self.is_current_non_forecast = is_current
+        self.most_recent_non_forecast = kwargs
+
+        return self
+
+    def add_forecast(
+        self, is_current: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        if self.most_recent_forecast:
+            raise Exception("Cannot call add_forecast if a forecast already exists")
+
+        kwargs["is_forecast"] = True
+        self.is_current_forecast = is_current
+        self.most_recent_forecast = kwargs
+
+        return self
+
+    def add_non_forecast_history(
+        self, is_deleted: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        # If there is no most_recent_non_forecast set, we want to error
+        # unless the record is deleted or the last (first added) history record was deleted.
+        #
+        # Effectively, you can only have a history without a non-history record
+        # if the last history record is deleted. If the last is deleted, you're
+        # free to add more history.
+        #
+        # eg. You can setup a history that is several updates and then someone ultimately deleting the non-forecast
+        if self.most_recent_non_forecast is None:
+            if not is_deleted and (
+                len(self.non_forecast_history) > 0
+                and self.non_forecast_history[0].get("is_deleted") is not True
+            ):
+                raise Exception(
+                    "Cannot add a historical non-forecast without already having a regular non-forecast UNLESS the last historical record is deleted"
+                )
+
+        kwargs["is_forecast"] = False
+        kwargs["is_deleted"] = is_deleted
+        self.non_forecast_history.append(kwargs)
+
+        return self
+
+    def add_forecast_history(
+        self, is_deleted: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        # If there is no most_recent_forecast set, we want to error
+        # unless the record is deleted or the last (first added) history record was deleted.
+        #
+        # Effectively, you can only have a history without a non-history record
+        # if the last history record is deleted. If the last is deleted, you're
+        # free to add more history.
+        #
+        # eg. You can setup a history that is several updates and then someone ultimately deleting the forecast
+        if self.most_recent_forecast is None:
+            if not is_deleted and (
+                len(self.forecast_history) > 0
+                and self.forecast_history[0].get("is_deleted") is not True
+            ):
+                raise Exception(
+                    "Cannot add a historical forecast without already having a regular forecast UNLESS the last historical record is deleted"
+                )
+
+        kwargs["is_forecast"] = True
+        kwargs["is_deleted"] = is_deleted
+        self.forecast_history.append(kwargs)
+
+        return self
+
+    def build(self) -> opportunity_models.Opportunity:
+        if self.is_current_non_forecast and self.is_current_forecast:
+            raise Exception(
+                "Cannot set both the forecast and non-forecast record to be the CurrentOpportunitySummary"
+            )
+
+        non_forecast_hist_count = len(self.non_forecast_history)
+        forecast_hist_count = len(self.forecast_history)
+
+        # revision number behaves sorta like
+        # a "global" count shared by all historical records
+        revision_number = non_forecast_hist_count + forecast_hist_count - 1
+
+        non_forecast_params: dict = {}
+        forecast_params: dict = {}
+
+        if self.non_forecast_already_exists is False and self.most_recent_non_forecast is not None:
+            non_forecast = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity,
+                version_number=non_forecast_hist_count + 1,
+                revision_number=None,
+                **self.most_recent_non_forecast,
+            )
+
+            non_forecast_params = non_forecast.for_json()
+
+            if self.is_current_non_forecast:
+                CurrentOpportunitySummaryFactory.create(
+                    opportunity=self.opportunity, opportunity_summary=non_forecast
+                )
+
+        if self.non_forecast_already_exists:
+            # Adjust the version number to make sense
+            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
+                non_forecast_hist_count + 1
+            )
+
+        if self.forecast_already_exists is False and self.most_recent_forecast is not None:
+            forecast = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity,
+                version_number=forecast_hist_count + 1,
+                revision_number=None,
+                **self.most_recent_forecast,
+            )
+
+            forecast_params = forecast.for_json()
+
+            if self.is_current_forecast:
+                CurrentOpportunitySummaryFactory.create(
+                    opportunity=self.opportunity, opportunity_summary=forecast
+                )
+
+        if self.forecast_already_exists:
+            # Adjust the version number to make sense
+            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
+                forecast_hist_count + 1
+            )
+
+        for non_forecast_hist in self.non_forecast_history:
+            params = non_forecast_params | non_forecast_hist
+
+            params.pop("opportunity_summary_id", None)
+            params["revision_number"] = revision_number
+            params["version_number"] = non_forecast_hist_count
+            params["is_deleted"] = non_forecast_hist.get("is_deleted")
+
+            non_forecast_hist = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity, **params
+            )
+
+            non_forecast_params = non_forecast_hist.for_json()
+
+            non_forecast_hist_count -= 1
+            revision_number -= 1
+
+        for forecast_hist in self.forecast_history:
+            params = forecast_params | forecast_hist
+
+            params.pop("opportunity_summary_id", None)
+            params["revision_number"] = revision_number
+            params["version_number"] = forecast_hist_count
+            params["is_deleted"] = forecast_hist.get("is_deleted")
+
+            forecast_hist = OpportunitySummaryFactory.create(opportunity=self.opportunity, **params)
+
+            forecast_params = forecast_hist.for_json()
+
+            forecast_hist_count -= 1
+            revision_number -= 1
+
+        return self.opportunity
