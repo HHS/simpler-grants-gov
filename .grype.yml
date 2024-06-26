@@ -16,11 +16,11 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
-  # Golang vulnerability inside of a python docker image. It's basically impossible to find
-  # out where the impacted golang vulnerability is coming from. The python image in question
-  # does not even have golang installed, yet somehow still there's a golang vulnerability.
-  # We are ignoring the finding because it would take undue effort to track down the source.
+  # Golang vulnerabilities inside of a python docker image. Both originate from lower level packages within the GitHub CLI:
+  # https://github.com/cli/cli/blob/trunk/go.mod#L101 
+  # https://github.com/cli/cli/blob/trunk/go.mod#L161
   - vulnerability: GHSA-4v7x-pqxf-cx7m
+  - vulnerability: GHSA-v6v8-xj6m-xwqh
   # https://github.com/anchore/grype/issues/1172
   - vulnerability: GHSA-xqr8-7jwr-rhp7
   - vulnerability: GHSA-7fh5-64p2-3v2j

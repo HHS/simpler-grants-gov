@@ -42,9 +42,11 @@ app = typer.Typer()
 # instantiate sub-commands for exporting data and calculating metrics
 export_app = typer.Typer()
 metrics_app = typer.Typer()
+import_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
+app.add_typer(import_app, name="import", help="Import data into the database")
 
 
 @app.callback()
@@ -126,7 +128,7 @@ def calculate_sprint_burnup(
     )
 
 
-@export_app.command(name="test_connection")
+@import_app.command(name="test_connection")
 def test_connection() -> None:
     """Test function that ensures the DB connection works."""
     engine = db.get_db()
@@ -147,6 +149,40 @@ def test_connection() -> None:
     # commits the transaction to the db
     connection.commit()
     result.close()
+
+
+@import_app.command(name="db_import")
+def export_json_to_database(
+    sprint_file: Annotated[str, SPRINT_FILE_ARG],
+    issue_file: Annotated[str, ISSUE_FILE_ARG],
+) -> None:
+    """Import JSON data to the database."""
+    # Get the database engine and establish a connection
+    engine = db.get_db()
+
+    # get data and load from JSON
+    deliverable_data = DeliverableTasks.load_from_json_files(
+        sprint_file=sprint_file,
+        issue_file=issue_file,
+    )
+
+    # Load data from the sprint board
+    sprint_data = SprintBoard.load_from_json_files(
+        sprint_file=sprint_file,
+        issue_file=issue_file,
+    )
+
+    deliverable_data.to_sql(
+        output_table="github_project_data",
+        engine=engine,
+        replace_table=True,
+    )  # replace_table=True is the default
+
+    sprint_data.to_sql(
+        output_table="github_project_data",
+        engine=engine,
+        replace_table=True,
+    )
 
 
 @metrics_app.command(name="deliverable_percent_complete")
