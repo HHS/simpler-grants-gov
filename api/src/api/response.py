@@ -45,6 +45,7 @@ class ApiResponse:
     status_code: int = 200
 
     pagination_info: PaginationInfo | None = None
+    facet_counts: dict | None = None
 
 
 def process_marshmallow_issues(marshmallow_issues: dict) -> list[ValidationErrorDetail]:

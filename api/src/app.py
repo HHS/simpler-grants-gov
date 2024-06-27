@@ -7,6 +7,8 @@ from flask_cors import CORS
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.adapters.search as search
+import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
@@ -47,6 +49,7 @@ def create_app() -> APIFlask:
     configure_app(app)
     register_blueprints(app)
     register_index(app)
+    register_search_client(app)
 
     return app
 
@@ -59,6 +62,11 @@ def setup_logging(app: APIFlask) -> None:
 def register_db_client(app: APIFlask) -> None:
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
+
+
+def register_search_client(app: APIFlask) -> None:
+    search_client = search.SearchClient()
+    flask_opensearch.register_search_client(search_client, app)
 
 
 def configure_app(app: APIFlask) -> None:

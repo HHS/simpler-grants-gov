@@ -173,13 +173,18 @@ def opportunity_index(search_client):
         yield index_name
     finally:
         # Try to clean up the index at the end
-        search_client.delete_index(index_name)
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-opportunity-index-*")
 
 
 @pytest.fixture(scope="session")
-def opportunity_index_alias(search_client):
+def opportunity_index_alias(search_client, monkeypatch_session):
     # Note we don't actually create anything, this is just a random name
-    return f"test-opportunity-index-alias-{uuid.uuid4().int}"
+    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
+    monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    return alias
 
 
 ####################
@@ -190,7 +195,7 @@ def opportunity_index_alias(search_client):
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client) -> APIFlask:
+def app(db_client, opportunity_index_alias) -> APIFlask:
     return app_entry.create_app()
 
 
