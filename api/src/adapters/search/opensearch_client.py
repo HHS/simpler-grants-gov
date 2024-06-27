@@ -15,10 +15,7 @@ DEFAULT_INDEX_ANALYSIS = {
         "default": {
             "type": "custom",
             "filter": ["lowercase", "custom_stemmer"],
-            # Change tokenization to whitespace as the default is very clunky
-            # with a lot of our IDs that have dashes in them.
-            # see: https://opensearch.org/docs/latest/analyzers/tokenizers/index/
-            "tokenizer": "whitespace",
+            "tokenizer": "standard",
         }
     },
     # Change the default stemming to use snowball which handles plural

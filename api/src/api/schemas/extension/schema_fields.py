@@ -183,6 +183,12 @@ class Raw(original_fields.Raw, MixinField):
     pass
 
 
+class Dict(original_fields.Dict, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid dict."),
+    }
+
+
 class Enum(MixinField):
     """
     Custom field class for handling unioning together multiple Python enums into
@@ -230,7 +236,7 @@ class Enum(MixinField):
         if value is None:
             return None
 
-        val = value.value
+        val = value
         return self.field._serialize(val, attr, obj, **kwargs)
 
     def _deserialize(

@@ -9,7 +9,7 @@ from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.adapters.search as search
-from src.api.opportunities_v0_1.opportunity_schemas import OpportunityV01Schema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
@@ -95,7 +95,7 @@ class LoadOpportunitiesToIndex(Task):
 
     def load_records(self, records: Sequence[Opportunity]) -> None:
         logger.info("Loading batch of opportunities...")
-        schema = OpportunityV01Schema()
+        schema = OpportunityV1Schema()
         json_records = []
 
         for record in records:
