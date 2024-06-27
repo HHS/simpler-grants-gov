@@ -145,6 +145,61 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OpportunitySearchRequestV1'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: ascending
+              example2:
+                summary: All filters
+                value:
+                  query: research
+                  filters:
+                    agency:
+                      one_of:
+                      - USAID
+                      - ARPAH
+                    applicant_type:
+                      one_of:
+                      - state_governments
+                      - county_governments
+                      - individuals
+                    funding_category:
+                      one_of:
+                      - recovery_act
+                      - arts
+                      - natural_resources
+                    funding_instrument:
+                      one_of:
+                      - cooperative_agreement
+                      - grant
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+              example3:
+                summary: Query & opportunity_status filters
+                value:
+                  query: research
+                  filters:
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v0.1/opportunities/search:
@@ -755,7 +810,7 @@ components:
           items:
             type: string
             minLength: 2
-            example: US-ABC
+            example: USAID
     OpportunitySearchFilterV1:
       type: object
       properties:
@@ -784,12 +839,13 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyFilterV1'
-    OpportunityPagination:
+    OpportunityPaginationV1:
       type: object
       properties:
         order_by:
           type: string
           enum:
+          - relevancy
           - opportunity_id
           - opportunity_number
           - opportunity_title
@@ -837,19 +893,23 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunityPagination'
+          - $ref: '#/components/schemas/OpportunityPaginationV1'
       required:
       - pagination
     OpportunityAssistanceListingV1:
       type: object
       properties:
         program_title:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The name of the program, see https://sam.gov/content/assistance-listings
             for more detail
           example: Space Technology
         assistance_listing_number:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The assistance listing number, see https://sam.gov/content/assistance-listings
             for more detail
           example: '43.012'
@@ -857,11 +917,15 @@ components:
       type: object
       properties:
         summary_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The summary of the opportunity
           example: This opportunity aims to unravel the mysteries of the universe.
         is_cost_sharing:
-          type: boolean
+          type:
+          - boolean
+          - 'null'
           description: Whether or not the opportunity has a cost sharing/matching
             requirement
         is_forecast:
@@ -870,106 +934,154 @@ components:
             is only an estimate and not yet official
           example: false
         close_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: The date that the opportunity will close - only set if is_forecast=False
         close_date_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Optional details regarding the close date
           example: Proposals are due earlier than usual.
         post_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: The date the opportunity was posted
         archive_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: When the opportunity will be archived
         expected_number_of_awards:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: The number of awards the opportunity is expected to award
           example: 10
         estimated_total_program_funding:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: The total program funding of the opportunity in US Dollars
           example: 10000000
         award_floor:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: The minimum amount an opportunity would award
           example: 10000
         award_ceiling:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: The maximum amount an opportunity would award
           example: 100000
         additional_info_url:
-          type: string
+          type:
+          - string
+          - 'null'
           description: A URL to a website that can provide additional information
             about the opportunity
           example: grants.gov
         additional_info_url_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The text to display for the additional_info_url link
           example: Click me for more info
         forecasted_post_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: Forecasted opportunity only. The date the opportunity is expected
             to be posted, and transition out of being a forecast
         forecasted_close_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: Forecasted opportunity only. The date the opportunity is expected
             to be close once posted.
         forecasted_close_date_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Forecasted opportunity only. Optional details regarding the
             forecasted closed date.
           example: Proposals will probably be due on this date
         forecasted_award_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: Forecasted opportunity only. The date the grantor plans to
             award the opportunity.
         forecasted_project_start_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: Forecasted opportunity only. The date the grantor expects the
             award recipient should start their project
         fiscal_year:
-          type: integer
+          type:
+          - integer
+          - 'null'
           description: Forecasted opportunity only. The fiscal year the project is
             expected to be funded and launched
         funding_category_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Additional information about the funding category
           example: Economic Support
         applicant_eligibility_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Additional information about the types of applicants that are
             eligible
           example: All types of domestic applicants are eligible to apply
         agency_code:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The agency who owns the opportunity
           example: US-ABC
         agency_name:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The name of the agency who owns the opportunity
           example: US Alphabetical Basic Corp
         agency_phone_number:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The phone number of the agency who owns the opportunity
           example: 123-456-7890
         agency_contact_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Information regarding contacting the agency who owns the opportunity
           example: For more information, reach out to Jane Smith at agency US-ABC
         agency_email_address:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The contact email of the agency who owns the opportunity
           example: fake_email@grants.gov
         agency_email_address_description:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The text for the link to the agency email address
           example: Click me to email the agency
         version_number:
@@ -1046,19 +1158,24 @@ components:
       properties:
         opportunity_id:
           type: integer
-          readOnly: true
           description: The internal ID of the opportunity
           example: 12345
         opportunity_number:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The funding opportunity number
           example: ABC-123-XYZ-001
         opportunity_title:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
         agency:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The agency who created the opportunity
           example: US-ABC
         category:
@@ -1073,8 +1190,12 @@ components:
           - other
           type:
           - string
+          - 'null'
+          - 'null'
         category_explanation:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Explanation of the category when the category is 'O' (other)
           example: null
         opportunity_assistance_listings:
@@ -1108,6 +1229,51 @@ components:
           type: string
           format: date-time
           readOnly: true
+    OpportunityFacetV1:
+      type: object
+      properties:
+        opportunity_status:
+          type: object
+          description: The counts of opportunity_status values in the full response
+          example:
+            posted: 1
+            forecasted: 2
+          additionalProperties:
+            type: integer
+        applicant_type:
+          type: object
+          description: The counts of applicant_type values in the full response
+          example:
+            state_governments: 3
+            county_governments: 2
+            city_or_township_governments: 1
+          additionalProperties:
+            type: integer
+        funding_instrument:
+          type: object
+          description: The counts of funding_instrument values in the full response
+          example:
+            cooperative_agreement: 4
+            grant: 3
+          additionalProperties:
+            type: integer
+        funding_category:
+          type: object
+          description: The counts of funding_category values in the full response
+          example:
+            recovery_act: 2
+            arts: 3
+            agriculture: 5
+          additionalProperties:
+            type: integer
+        agency:
+          type: object
+          description: The counts of agency values in the full response
+          example:
+            USAID: 4
+            ARPAH: 3
+          additionalProperties:
+            type: integer
     OpportunitySearchResponseV1:
       type: object
       properties:
@@ -1128,6 +1294,12 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+        facet_counts:
+          description: Counts of filter/facet values in the full response
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityFacetV1'
     FundingInstrumentFilterV01:
       type: object
       properties:
@@ -1257,7 +1429,7 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyFilterV01'
-    OpportunityPagination1:
+    OpportunityPagination:
       type: object
       properties:
         order_by:
@@ -1310,7 +1482,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunityPagination1'
+          - $ref: '#/components/schemas/OpportunityPagination'
       required:
       - pagination
     OpportunityAssistanceListingV01:
