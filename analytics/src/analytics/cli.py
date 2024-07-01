@@ -157,6 +157,8 @@ def export_json_to_database(
     issue_file: Annotated[str, ISSUE_FILE_ARG],
 ) -> None:
     """Import JSON data to the database."""
+    logger.info("Beginning import")
+
     # Get the database engine and establish a connection
     engine = db.get_db()
 
@@ -183,6 +185,8 @@ def export_json_to_database(
         engine=engine,
         replace_table=True,
     )
+    rows = len(sprint_data.to_dict())
+    logger.info("Number of rows in table: %s", rows)
 
 
 @metrics_app.command(name="deliverable_percent_complete")
