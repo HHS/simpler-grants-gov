@@ -8,7 +8,7 @@ import PageSEO from "src/components/PageSEO";
 import BetaAlert from "src/components/BetaAlert";
 import { useTranslations } from "next-intl";
 import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -21,6 +21,7 @@ export async function generateMetadata() {
 }
 
 export default function NewsletterConfirmation() {
+  unstable_setRequestLocale("en");
   const t = useTranslations("Newsletter_confirmation");
 
   return (

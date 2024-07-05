@@ -10,7 +10,7 @@ import ResearchMethodology from "src/app/[locale]/research/ResearchMethodology";
 import ResearchThemes from "src/app/[locale]/research/ResearchThemes";
 import { Metadata } from "next";
 import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -22,6 +22,8 @@ export async function generateMetadata() {
 }
 
 export default function Research() {
+  unstable_setRequestLocale("en");
+
   const t = useTranslations("Research");
 
   return (

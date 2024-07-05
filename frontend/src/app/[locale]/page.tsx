@@ -5,7 +5,7 @@ import IndexGoalContent from "src/components/content/IndexGoalContent";
 import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
 import { Metadata } from "next";
 import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -17,6 +17,8 @@ export async function generateMetadata() {
 }
 
 export default function Home() {
+  unstable_setRequestLocale("en");
+
   const t = useTranslations("Index");
 
   return (
