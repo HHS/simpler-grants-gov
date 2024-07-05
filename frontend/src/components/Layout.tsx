@@ -6,6 +6,7 @@ import {
   useMessages,
   NextIntlClientProvider,
 } from "next-intl";
+import { unstable_setRequestLocale } from "next-intl/server";
 import pick from "lodash/pick";
 
 type Props = {
@@ -14,6 +15,8 @@ type Props = {
 };
 
 export default function Layout({ children, locale }: Props) {
+  unstable_setRequestLocale(locale);
+
   const t = useTranslations();
   const messages = useMessages();
 
