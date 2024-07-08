@@ -49,9 +49,17 @@ D = TypeVar("D", bound=ApiSchemaTable)
 
 logger = logging.getLogger(__name__)
 
-# Constants
+### Constants
 ORPHANED_CFDA = "orphaned_cfda"
 ORPHANED_HISTORICAL_RECORD = "orphaned_historical_record"
+ORPHANED_DELETE_RECORD = "orphaned_delete_record"
+
+OPPORTUNITY = "opportunity"
+ASSISTANCE_LISTING = "assistance_listing"
+OPPORTUNITY_SUMMARY = "opportunity_summary"
+APPLICANT_TYPE = "applicant_type"
+FUNDING_CATEGORY = "funding_category"
+FUNDING_INSTRUMENT = "funding_instrument"
 
 
 class TransformOracleDataTask(Task):
@@ -63,6 +71,7 @@ class TransformOracleDataTask(Task):
         TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
         TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
         TOTAL_HISTORICAL_ORPHANS_SKIPPED = "total_historical_orphans_skipped"
+        TOTAL_DELETE_ORPHANS_SKIPPED = "total_delete_orphans_skipped"
 
         TOTAL_ERROR_COUNT = "total_error_count"
 
@@ -88,6 +97,33 @@ class TransformOracleDataTask(Task):
             self.process_link_applicant_types()
             self.process_link_funding_categories()
             self.process_link_funding_instruments()
+
+    def _handle_delete(
+        self,
+        source: S,
+        target: D | None,
+        record_type: str,
+        extra: dict,
+        error_on_missing_target: bool = False,
+    ) -> None:
+        # If the target we want to delete is None, we have nothing to delete
+        if target is None:
+            # In some scenarios we want to error when this happens
+            if error_on_missing_target:
+                raise ValueError("Cannot delete %s record as it does not exist" % record_type)
+
+            # In a lot of scenarios, we actually just want to log a message as it is expected to happen
+            # For example, if we are deleting an opportunity_summary record, and already deleted the opportunity,
+            # then SQLAlchemy would have deleted the opportunity_summary for us already. When we later go to delete
+            # it, we'd hit this case, which isn't a problem.
+            logger.info("Cannot delete %s record as it does not exist", record_type, extra=extra)
+            source.transformation_notes = ORPHANED_DELETE_RECORD
+            self.increment(self.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED, prefix=record_type)
+            return
+
+        logger.info("Deleting %s record", record_type, extra=extra)
+        self.increment(self.Metrics.TOTAL_RECORDS_DELETED, prefix=record_type)
+        self.db_session.delete(target)
 
     def fetch(
         self, source_model: Type[S], destination_model: Type[D], join_clause: Sequence
@@ -175,7 +211,7 @@ class TransformOracleDataTask(Task):
             try:
                 self.process_opportunity(source_opportunity, target_opportunity)
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=OPPORTUNITY)
                 logger.exception(
                     "Failed to process opportunity",
                     extra={"opportunity_id": source_opportunity.opportunity_id},
@@ -184,18 +220,18 @@ class TransformOracleDataTask(Task):
     def process_opportunity(
         self, source_opportunity: Topportunity, target_opportunity: Opportunity | None
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=OPPORTUNITY)
         extra = {"opportunity_id": source_opportunity.opportunity_id}
         logger.info("Processing opportunity", extra=extra)
 
         if source_opportunity.is_deleted:
-            logger.info("Deleting opportunity", extra=extra)
-
-            if target_opportunity is None:
-                raise ValueError("Cannot delete opportunity as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_opportunity)
+            self._handle_delete(
+                source_opportunity,
+                target_opportunity,
+                OPPORTUNITY,
+                extra,
+                error_on_missing_target=True,
+            )
 
         else:
             # To avoid incrementing metrics for records we fail to transform, record
@@ -208,10 +244,10 @@ class TransformOracleDataTask(Task):
             )
 
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=OPPORTUNITY)
                 self.db_session.add(transformed_opportunity)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=OPPORTUNITY)
                 self.db_session.merge(transformed_opportunity)
 
         logger.info("Processed opportunity", extra=extra)
@@ -239,7 +275,7 @@ class TransformOracleDataTask(Task):
                     source_assistance_listing, target_assistance_listing, opportunity
                 )
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=ASSISTANCE_LISTING)
                 logger.exception(
                     "Failed to process assistance listing",
                     extra={
@@ -253,34 +289,30 @@ class TransformOracleDataTask(Task):
         target_assistance_listing: OpportunityAssistanceListing | None,
         opportunity: Opportunity | None,
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=ASSISTANCE_LISTING)
         extra = {
             "opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id,
             "opportunity_id": source_assistance_listing.opportunity_id,
         }
         logger.info("Processing assistance listing", extra=extra)
 
-        if opportunity is None:
+        if source_assistance_listing.is_deleted:
+            self._handle_delete(
+                source_assistance_listing, target_assistance_listing, ASSISTANCE_LISTING, extra
+            )
+
+        elif opportunity is None:
             # The Oracle system we're importing these from does not have a foreign key between
             # the opportunity ID in the TOPPORTUNITY_CFDA table and the TOPPORTUNITY table.
             # There are many (2306 as of writing) orphaned CFDA records, created between 2007 and 2011
             # We don't want to continuously process these, so won't error for these, and will just
             # mark them as transformed below.
-            self.increment(self.Metrics.TOTAL_RECORDS_ORPHANED)
+            self.increment(self.Metrics.TOTAL_RECORDS_ORPHANED, prefix=ASSISTANCE_LISTING)
             logger.info(
                 "Assistance listing is orphaned and does not connect to any opportunity",
                 extra=extra,
             )
             source_assistance_listing.transformation_notes = ORPHANED_CFDA
-
-        elif source_assistance_listing.is_deleted:
-            logger.info("Deleting assistance listing", extra=extra)
-
-            if target_assistance_listing is None:
-                raise ValueError("Cannot delete assistance listing as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_assistance_listing)
 
         else:
             # To avoid incrementing metrics for records we fail to transform, record
@@ -293,10 +325,10 @@ class TransformOracleDataTask(Task):
             )
 
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=ASSISTANCE_LISTING)
                 self.db_session.add(transformed_assistance_listing)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=ASSISTANCE_LISTING)
                 self.db_session.merge(transformed_assistance_listing)
 
         logger.info("Processed assistance listing", extra=extra)
@@ -359,7 +391,7 @@ class TransformOracleDataTask(Task):
             try:
                 self.process_opportunity_summary(source_summary, target_summary, opportunity)
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=OPPORTUNITY_SUMMARY)
                 logger.exception(
                     "Failed to process opportunity summary",
                     extra=transform_util.get_log_extra_summary(source_summary),
@@ -371,21 +403,26 @@ class TransformOracleDataTask(Task):
         target_summary: OpportunitySummary | None,
         opportunity: Opportunity | None,
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=OPPORTUNITY_SUMMARY)
         extra = transform_util.get_log_extra_summary(source_summary)
         logger.info("Processing opportunity summary", extra=extra)
+
+        if source_summary.is_deleted:
+            self._handle_delete(source_summary, target_summary, OPPORTUNITY_SUMMARY, extra)
 
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we don't have anything to link these to. Whenever we do
         # support historical opportunities, we'll have these all marked with a
         # flag that we can use to reprocess these.
-        if opportunity is None and source_summary.is_historical_table:
+        elif opportunity is None and source_summary.is_historical_table:
             logger.warning(
                 "Historical opportunity summary does not have a corresponding opportunity - cannot import, but will mark as processed",
                 extra=extra,
             )
-            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            self.increment(
+                self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED, prefix=OPPORTUNITY_SUMMARY
+            )
             source_summary.transformation_notes = ORPHANED_HISTORICAL_RECORD
 
         elif opportunity is None:
@@ -394,15 +431,6 @@ class TransformOracleDataTask(Task):
             raise ValueError(
                 "Opportunity summary cannot be processed as the opportunity for it does not exist"
             )
-
-        elif source_summary.is_deleted:
-            logger.info("Deleting opportunity summary", extra=extra)
-
-            if target_summary is None:
-                raise ValueError("Cannot delete opportunity summary as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_summary)
 
         else:
             # To avoid incrementing metrics for records we fail to transform, record
@@ -415,10 +443,10 @@ class TransformOracleDataTask(Task):
             )
 
             if is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=OPPORTUNITY_SUMMARY)
                 self.db_session.add(transformed_opportunity_summary)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=OPPORTUNITY_SUMMARY)
                 self.db_session.merge(transformed_opportunity_summary)
 
         logger.info("Processed opportunity summary", extra=extra)
@@ -504,7 +532,7 @@ class TransformOracleDataTask(Task):
                     source_applicant_type, target_applicant_type, opportunity_summary
                 )
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=APPLICANT_TYPE)
                 logger.exception(
                     "Failed to process opportunity summary applicant type",
                     extra=transform_util.get_log_extra_applicant_type(source_applicant_type),
@@ -516,21 +544,24 @@ class TransformOracleDataTask(Task):
         target_applicant_type: LinkOpportunitySummaryApplicantType | None,
         opportunity_summary: OpportunitySummary | None,
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=APPLICANT_TYPE)
         extra = transform_util.get_log_extra_applicant_type(source_applicant_type)
         logger.info("Processing applicant type", extra=extra)
+
+        if source_applicant_type.is_deleted:
+            self._handle_delete(source_applicant_type, target_applicant_type, APPLICANT_TYPE, extra)
 
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we won't have created the opportunity summary. Whenever we do
         # support historical opportunities, we'll have these all marked with a
         # flag that we can use to reprocess these.
-        if opportunity_summary is None and source_applicant_type.is_historical_table:
+        elif opportunity_summary is None and source_applicant_type.is_historical_table:
             logger.warning(
                 "Historical applicant type does not have a corresponding opportunity summary - cannot import, but will mark as processed",
                 extra=extra,
             )
-            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED, prefix=APPLICANT_TYPE)
             source_applicant_type.transformation_notes = ORPHANED_HISTORICAL_RECORD
 
         elif opportunity_summary is None:
@@ -539,15 +570,6 @@ class TransformOracleDataTask(Task):
             raise ValueError(
                 "Applicant type record cannot be processed as the opportunity summary for it does not exist"
             )
-
-        elif source_applicant_type.is_deleted:
-            logger.info("Deleting applicant type", extra=extra)
-
-            if target_applicant_type is None:
-                raise ValueError("Cannot delete applicant type as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_applicant_type)
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
@@ -566,18 +588,18 @@ class TransformOracleDataTask(Task):
                 is_insert
                 and transformed_applicant_type.applicant_type in opportunity_summary.applicant_types
             ):
-                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED, prefix=APPLICANT_TYPE)
                 logger.warning(
                     "Skipping applicant type record",
                     extra=extra | {"applicant_type": transformed_applicant_type.applicant_type},
                 )
             elif is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=APPLICANT_TYPE)
                 # We append to the relationship so SQLAlchemy immediately attaches it to its cached
                 # opportunity summary object so that the above check works when we receive dupes in the same batch
                 opportunity_summary.link_applicant_types.append(transformed_applicant_type)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=APPLICANT_TYPE)
                 self.db_session.merge(transformed_applicant_type)
 
         logger.info("Processed applicant type", extra=extra)
@@ -663,7 +685,7 @@ class TransformOracleDataTask(Task):
                     source_funding_category, target_funding_category, opportunity_summary
                 )
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=FUNDING_CATEGORY)
                 logger.exception(
                     "Failed to process opportunity summary funding category",
                     extra=transform_util.get_log_extra_funding_category(source_funding_category),
@@ -675,21 +697,26 @@ class TransformOracleDataTask(Task):
         target_funding_category: LinkOpportunitySummaryFundingCategory | None,
         opportunity_summary: OpportunitySummary | None,
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=FUNDING_CATEGORY)
         extra = transform_util.get_log_extra_funding_category(source_funding_category)
         logger.info("Processing funding category", extra=extra)
+
+        if source_funding_category.is_deleted:
+            self._handle_delete(
+                source_funding_category, target_funding_category, FUNDING_CATEGORY, extra
+            )
 
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we won't have created the opportunity summary. Whenever we do
         # support historical opportunities, we'll have these all marked with a
         # flag that we can use to reprocess these.
-        if opportunity_summary is None and source_funding_category.is_historical_table:
+        elif opportunity_summary is None and source_funding_category.is_historical_table:
             logger.warning(
                 "Historical funding category does not have a corresponding opportunity summary - cannot import, but will mark as processed",
                 extra=extra,
             )
-            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED, prefix=FUNDING_CATEGORY)
             source_funding_category.transformation_notes = ORPHANED_HISTORICAL_RECORD
 
         elif opportunity_summary is None:
@@ -698,15 +725,6 @@ class TransformOracleDataTask(Task):
             raise ValueError(
                 "Funding category record cannot be processed as the opportunity summary for it does not exist"
             )
-
-        elif source_funding_category.is_deleted:
-            logger.info("Deleting funding category", extra=extra)
-
-            if target_funding_category is None:
-                raise ValueError("Cannot delete funding category as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_funding_category)
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
@@ -728,19 +746,21 @@ class TransformOracleDataTask(Task):
                 and transformed_funding_category.funding_category
                 in opportunity_summary.funding_categories
             ):
-                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                self.increment(
+                    self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED, prefix=FUNDING_CATEGORY
+                )
                 logger.warning(
                     "Skipping funding category record",
                     extra=extra
                     | {"funding_category": transformed_funding_category.funding_category},
                 )
             elif is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=FUNDING_CATEGORY)
                 # We append to the relationship so SQLAlchemy immediately attaches it to its cached
                 # opportunity summary object so that the above check works when we receive dupes in the same batch
                 opportunity_summary.link_funding_categories.append(transformed_funding_category)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=FUNDING_CATEGORY)
                 self.db_session.merge(transformed_funding_category)
 
         logger.info("Processed funding category", extra=extra)
@@ -826,7 +846,7 @@ class TransformOracleDataTask(Task):
                     source_funding_instrument, target_funding_instrument, opportunity_summary
                 )
             except ValueError:
-                self.increment(self.Metrics.TOTAL_ERROR_COUNT)
+                self.increment(self.Metrics.TOTAL_ERROR_COUNT, prefix=FUNDING_INSTRUMENT)
                 logger.exception(
                     "Failed to process opportunity summary funding instrument",
                     extra=transform_util.get_log_extra_funding_instrument(
@@ -840,21 +860,26 @@ class TransformOracleDataTask(Task):
         target_funding_instrument: LinkOpportunitySummaryFundingInstrument | None,
         opportunity_summary: OpportunitySummary | None,
     ) -> None:
-        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED)
+        self.increment(self.Metrics.TOTAL_RECORDS_PROCESSED, prefix=FUNDING_INSTRUMENT)
         extra = transform_util.get_log_extra_funding_instrument(source_funding_instrument)
         logger.info("Processing funding instrument", extra=extra)
+
+        if source_funding_instrument.is_deleted:
+            self._handle_delete(
+                source_funding_instrument, target_funding_instrument, FUNDING_INSTRUMENT, extra
+            )
 
         # Historical records are linked to other historical records, however
         # we don't import historical opportunity records, so if the opportunity
         # was deleted, we won't have created the opportunity summary. Whenever we do
         # support historical opportunities, we'll have these all marked with a
         # flag that we can use to reprocess these.
-        if opportunity_summary is None and source_funding_instrument.is_historical_table:
+        elif opportunity_summary is None and source_funding_instrument.is_historical_table:
             logger.warning(
                 "Historical funding instrument does not have a corresponding opportunity summary - cannot import, but will mark as processed",
                 extra=extra,
             )
-            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED)
+            self.increment(self.Metrics.TOTAL_HISTORICAL_ORPHANS_SKIPPED, prefix=FUNDING_INSTRUMENT)
             source_funding_instrument.transformation_notes = ORPHANED_HISTORICAL_RECORD
 
         elif opportunity_summary is None:
@@ -864,14 +889,6 @@ class TransformOracleDataTask(Task):
                 "Funding instrument record cannot be processed as the opportunity summary for it does not exist"
             )
 
-        elif source_funding_instrument.is_deleted:
-            logger.info("Deleting funding instrument", extra=extra)
-
-            if target_funding_instrument is None:
-                raise ValueError("Cannot delete funding instrument as it does not exist")
-
-            self.increment(self.Metrics.TOTAL_RECORDS_DELETED)
-            self.db_session.delete(target_funding_instrument)
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
@@ -893,19 +910,21 @@ class TransformOracleDataTask(Task):
                 and transformed_funding_instrument.funding_instrument
                 in opportunity_summary.funding_instruments
             ):
-                self.increment(self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED)
+                self.increment(
+                    self.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED, prefix=FUNDING_INSTRUMENT
+                )
                 logger.warning(
                     "Skipping funding instrument record",
                     extra=extra
                     | {"funding_instrument": transformed_funding_instrument.funding_instrument},
                 )
             elif is_insert:
-                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED)
+                self.increment(self.Metrics.TOTAL_RECORDS_INSERTED, prefix=FUNDING_INSTRUMENT)
                 # We append to the relationship so SQLAlchemy immediately attaches it to its cached
                 # opportunity summary object so that the above check works when we receive dupes in the same batch
                 opportunity_summary.link_funding_instruments.append(transformed_funding_instrument)
             else:
-                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED)
+                self.increment(self.Metrics.TOTAL_RECORDS_UPDATED, prefix=FUNDING_INSTRUMENT)
                 self.db_session.merge(transformed_funding_instrument)
 
         logger.info("Processed funding instrument", extra=extra)
