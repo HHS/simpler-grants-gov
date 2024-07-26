@@ -5,8 +5,9 @@ import pytest
 from slack_sdk import WebClient
 
 from analytics.integrations.slack import FileMapping, SlackBot
-from config import settings
+from config import get_db_settings
 
+settings = get_db_settings()
 client = WebClient(token=settings.slack_bot_token)
 
 
@@ -19,7 +20,9 @@ def mock_slackbot() -> SlackBot:
 @pytest.mark.skip(reason="requires Slack token")
 def test_fetch_slack_channels(slackbot: SlackBot):
     """The fetch_slack_channels() function should execute correctly."""
-    result = slackbot.fetch_slack_channel_info(channel_id=settings.reporting_channel_id)
+    result = slackbot.fetch_slack_channel_info(
+        channel_id=settings.reporting_channel_id,
+    )
     assert result["ok"] is True
     assert result["channel"]["name"] == "z_bot-analytics-ci-test"
 

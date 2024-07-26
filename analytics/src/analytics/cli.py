@@ -241,7 +241,9 @@ def show_and_or_post_results(
     """Optionally show the results of a metric and/or post them to slack."""
     # defer load of settings until this command is called
     # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
-    from config import settings
+    from config import get_db_settings
+
+    settings = get_db_settings()
 
     # optionally display the burndown chart in the browser
     if show_results:
