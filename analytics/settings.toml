@@ -1,4 +1,0 @@
-POSTGRES_NAME = "app"
-POSTGRES_HOST = "grants-analytics-db"
-POSTGRES_USER = "app"
-POSTGRES_PORT = 5432
