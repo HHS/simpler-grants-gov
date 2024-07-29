@@ -1,15 +1,19 @@
 import logging
 
+from flask import Response
+
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
+import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import get_opportunity, get_opportunity_versions
+from src.services.opportunities_v1.opportunity_to_csv import opportunity_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
 
@@ -74,6 +78,21 @@ examples = {
             },
         },
     },
+    "example4": {
+        "summary": "CSV file response",
+        "value": {
+            "format": "csv",
+            "filters": {
+                "opportunity_status": {"one_of": ["forecasted", "posted"]},
+            },
+            "pagination": {
+                "order_by": "opportunity_id",
+                "page_offset": 1,
+                "page_size": 100,
+                "sort_direction": "ascending",
+            },
+        },
+    },
 }
 
 
@@ -85,11 +104,16 @@ examples = {
 )
 @opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema())
 @opportunity_blueprint.auth_required(api_key_auth)
-@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
+@opportunity_blueprint.doc(
+    description=SHARED_ALPHA_DESCRIPTION,
+    # This adds a file response schema
+    # in addition to the one added by the output decorator
+    responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
+)
 @flask_opensearch.with_search_client()
 def opportunity_search(
     search_client: search.SearchClient, search_params: dict
-) -> response.ApiResponse:
+) -> response.ApiResponse | Response:
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search")
 
@@ -104,6 +128,18 @@ def opportunity_search(
         }
     )
     logger.info("Successfully fetched opportunities")
+
+    if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
+        # Convert the response into a CSV and return the contents
+        output = opportunity_to_csv(opportunities)
+        timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
+        return Response(
+            output.getvalue().encode("utf-8"),
+            content_type="text/csv",
+            headers={
+                "Content-Disposition": f"attachment; filename=opportunity_search_results_{timestamp}.csv"
+            },
+        )
 
     return response.ApiResponse(
         message="Success",

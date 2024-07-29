@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
@@ -9,6 +11,11 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.pagination.pagination_schema import generate_pagination_schema
+
+
+class SearchResponseFormat(StrEnum):
+    JSON = "json"
+    CSV = "csv"
 
 
 class OpportunitySummaryV1Schema(Schema):
@@ -208,6 +215,13 @@ class OpportunitySummaryV1Schema(Schema):
     funding_categories = fields.List(fields.Enum(FundingCategory))
     applicant_types = fields.List(fields.Enum(ApplicantType))
 
+    created_at = fields.DateTime(
+        metadata={"description": "When the opportunity summary was created"}
+    )
+    updated_at = fields.DateTime(
+        metadata={"description": "When the opportunity summary was last updated"}
+    )
+
 
 class OpportunityAssistanceListingV1Schema(Schema):
     program_title = fields.String(
@@ -380,6 +394,15 @@ class OpportunitySearchRequestV1Schema(Schema):
             ],
         ),
         required=True,
+    )
+
+    format = fields.Enum(
+        SearchResponseFormat,
+        load_default=SearchResponseFormat.JSON,
+        metadata={
+            "description": "The format of the response",
+            "default": SearchResponseFormat.JSON,
+        },
     )
 
 
