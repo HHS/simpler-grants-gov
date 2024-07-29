@@ -62,7 +62,7 @@ db-migrate-down-all = "src.db.migrations.run:downall"
 db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
-
+setup-localstack = "bin.setup_localstack:main"
 
 [tool.black]
 line-length = 100
