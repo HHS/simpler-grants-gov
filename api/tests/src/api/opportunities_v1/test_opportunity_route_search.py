@@ -1,3 +1,4 @@
+import csv
 from datetime import date
 
 import pytest
@@ -23,20 +24,40 @@ from tests.src.db.models.factories import (
 
 
 def validate_search_response(
-    search_response, expected_results: list[Opportunity], expected_status_code: int = 200
+    search_response,
+    expected_results: list[Opportunity],
+    expected_status_code: int = 200,
+    is_csv_response: bool = False,
 ):
     assert search_response.status_code == expected_status_code
 
-    response_json = search_response.get_json()
-
-    opportunities = response_json["data"]
-
-    response_ids = [opp["opportunity_id"] for opp in opportunities]
     expected_ids = [exp.opportunity_id for exp in expected_results]
+
+    if is_csv_response:
+        reader = csv.DictReader(search_response.text.split("\n"))
+        opportunities = [record for record in reader]
+    else:
+        response_json = search_response.get_json()
+        opportunities = response_json["data"]
+
+    response_ids = [int(opp["opportunity_id"]) for opp in opportunities]
 
     assert (
         response_ids == expected_ids
     ), f"Actual opportunities:\n {'\n'.join([opp['opportunity_title'] for opp in opportunities])}"
+
+
+def call_search_and_validate(client, api_auth_token, search_request, expected_results):
+    resp = client.post(
+        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+    )
+    validate_search_response(resp, expected_results)
+
+    search_request["format"] = "csv"
+    resp = client.post(
+        "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+    )
+    validate_search_response(resp, expected_results, is_csv_response=True)
 
 
 def build_opp(
@@ -470,10 +491,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
     def test_sorting_and_pagination_200(
         self, client, api_auth_token, setup_search_data, search_request, expected_results
     ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        validate_search_response(resp, expected_results)
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
@@ -690,10 +708,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
     def test_search_filters_200(
         self, client, api_auth_token, setup_search_data, search_request, expected_results
     ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        validate_search_response(resp, expected_results)
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
@@ -758,7 +773,4 @@ class TestOpportunityRouteSearch(BaseTestClass):
     ):
         # This test isn't looking to validate opensearch behavior, just that we've connected fields properly and
         # results being returned are as expected.
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        validate_search_response(resp, expected_results)
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)

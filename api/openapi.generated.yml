@@ -108,6 +108,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OpportunitySearchResponseV1'
+            application/octet-stream: {}
           description: Successful response
         '422':
           content:
@@ -200,6 +201,20 @@ paths:
                     page_offset: 1
                     page_size: 25
                     sort_direction: descending
+              example4:
+                summary: CSV file response
+                value:
+                  format: csv
+                  filters:
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 100
+                    sort_direction: ascending
       security:
       - ApiKeyAuth: []
   /v0.1/opportunities/search:
@@ -894,6 +909,15 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityPaginationV1'
+        format:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
+          - json
+          description: The format of the response
+          enum:
+          - json
+          - csv
+          type:
+          - string
       required:
       - pagination
     OpportunityAssistanceListingV1:
@@ -1153,6 +1177,14 @@ components:
             - unrestricted
             type:
             - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was last updated
     OpportunityV1:
       type: object
       properties:
