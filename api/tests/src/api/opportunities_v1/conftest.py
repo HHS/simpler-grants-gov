@@ -37,6 +37,7 @@ def get_search_request(
     applicant_type_one_of: list[ApplicantType] | None = None,
     opportunity_status_one_of: list[OpportunityStatus] | None = None,
     agency_one_of: list[str] | None = None,
+    format: str | None = None,
 ):
     req = {
         "pagination": {
@@ -69,6 +70,9 @@ def get_search_request(
 
     if query is not None:
         req["query"] = query
+
+    if format is not None:
+        req["format"] = format
 
     return req
 
