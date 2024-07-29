@@ -100,7 +100,7 @@ start-debug:
 run-logs: start
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: build init-db init-opensearch
+init: build init-db init-opensearch init-localstack
 
 clean-volumes: ## Remove project docker volumes (which includes the DB state)
 	docker compose down --volumes
@@ -191,7 +191,17 @@ start-opensearch:
 	docker compose up --detach opensearch-dashboards
 	./bin/wait-for-local-opensearch.sh
 
+##################################################
+# Opensearch
+##################################################
 
+init-localstack: start-localstack setup-localstack
+
+start-localstack:
+	docker compose up --detach localstack
+
+setup-localstack:
+	$(PY_RUN_CMD) setup-localstack
 
 ##################################################
 # Testing
