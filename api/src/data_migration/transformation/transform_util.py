@@ -7,6 +7,12 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityCategory,
 )
+from src.data_migration.transformation.transform_constants import (
+    SourceApplicantType,
+    SourceFundingCategory,
+    SourceFundingInstrument,
+    SourceSummary,
+)
 from src.db.models.base import TimestampMixin
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
@@ -16,13 +22,9 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
 from src.util import datetime_util
-
-from . import SourceApplicantType, SourceFundingCategory, SourceFundingInstrument, SourceSummary
 
 logger = logging.getLogger(__name__)
 
@@ -194,15 +196,15 @@ def transform_opportunity_summary(
 
     if incoming_summary is None:
         logger.info("Creating new opportunity summary record", extra=log_extra)
+        # These values are a part of a unique key for identifying across tables, we don't
+        # ever want to modify them once created
         target_summary = OpportunitySummary(
             opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
-            revision_number=None,
+            # Revision number is only found in the historical table, use getattr
+            # to avoid type checking
+            revision_number=getattr(source_summary, "revision_number", None),
         )
-
-        # Revision number is only found in the historical table
-        if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-            target_summary.revision_number = source_summary.revision_number
     else:
         # We create a new summary object and merge it outside this function
         # that way if any modifications occur on the object and then it errors
@@ -238,39 +240,32 @@ def transform_opportunity_summary(
     target_summary.updated_by = source_summary.last_upd_id
     target_summary.created_by = source_summary.creator_id
 
-    # Some fields either are named different in synopsis/forecast
-    # or only come from one of those tables, so handle those here
-    if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
-        target_summary.summary_description = source_summary.syn_desc
-        target_summary.agency_code = source_summary.a_sa_code
-        target_summary.agency_phone_number = source_summary.ac_phone_number
+    target_summary.summary_description = source_summary.description
+    target_summary.agency_code = source_summary.agency_code
+    target_summary.agency_phone_number = source_summary.agency_phone_number
 
-        # Synopsis only fields
-        target_summary.agency_contact_description = source_summary.agency_contact_desc
-        target_summary.close_date = source_summary.response_date
-        target_summary.close_date_description = source_summary.response_date_desc
-        target_summary.unarchive_date = source_summary.unarchive_date
+    # These fields are only on synopsis records, use getattr to avoid isinstance
+    target_summary.agency_contact_description = getattr(source_summary, "agency_contact_desc", None)
+    target_summary.close_date = getattr(source_summary, "response_date", None)
+    target_summary.close_date_description = getattr(source_summary, "response_date_desc", None)
+    target_summary.unarchive_date = getattr(source_summary, "unarchive_date", None)
 
-    else:  # TForecast & TForecastHist
-        target_summary.summary_description = source_summary.forecast_desc
-        target_summary.agency_code = source_summary.agency_code
-        target_summary.agency_phone_number = source_summary.ac_phone
+    # These fields are only on forecast records, use getattr to avoid isinstance
+    target_summary.forecasted_post_date = getattr(source_summary, "est_synopsis_posting_date", None)
+    target_summary.forecasted_close_date = getattr(source_summary, "est_appl_response_date", None)
+    target_summary.forecasted_close_date_description = getattr(
+        source_summary, "est_appl_response_date_desc", None
+    )
+    target_summary.forecasted_award_date = getattr(source_summary, "est_award_date", None)
+    target_summary.forecasted_project_start_date = getattr(
+        source_summary, "est_project_start_date", None
+    )
+    target_summary.fiscal_year = getattr(source_summary, "fiscal_year", None)
 
-        # Forecast only fields
-        target_summary.forecasted_post_date = source_summary.est_synopsis_posting_date
-        target_summary.forecasted_close_date = source_summary.est_appl_response_date
-        target_summary.forecasted_close_date_description = (
-            source_summary.est_appl_response_date_desc
-        )
-        target_summary.forecasted_award_date = source_summary.est_award_date
-        target_summary.forecasted_project_start_date = source_summary.est_project_start_date
-        target_summary.fiscal_year = source_summary.fiscal_year
-
-    # Historical only
-    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-        target_summary.is_deleted = convert_action_type_to_is_deleted(source_summary.action_type)
-    else:
-        target_summary.is_deleted = False
+    # Set whether it is deleted based on action_type, which only appears on the historical records
+    target_summary.is_deleted = convert_action_type_to_is_deleted(
+        getattr(source_summary, "action_type", None)
+    )
 
     transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
@@ -436,9 +431,13 @@ def convert_yn_bool(value: str | None) -> bool | None:
     raise ValueError("Unexpected Y/N bool value: %s" % value)
 
 
-def convert_action_type_to_is_deleted(value: str | None) -> bool | None:
+def convert_action_type_to_is_deleted(value: str | None) -> bool:
+    # Action type can be U (update) or D (delete)
+    # however many older records seem to not have this set at all
+    # The legacy system looks like it treats anything that isn't D
+    # the same, so we'll go with that assumption as well.
     if value is None or value == "":
-        return None
+        return False
 
     if value == "D":  # D = Delete
         return True

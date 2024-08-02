@@ -24,6 +24,14 @@ class Tforecast(StagingBase, forecast_mixin.TforecastMixin, StagingParamMixin):
     def is_historical_table(self) -> bool:
         return False
 
+    @property
+    def description(self) -> str | None:
+        return self.forecast_desc
+
+    @property
+    def agency_phone_number(self) -> str | None:
+        return self.ac_phone
+
 
 class TforecastHist(StagingBase, forecast_mixin.TforecastHistMixin, StagingParamMixin):
     __tablename__ = "tforecast_hist"
@@ -42,6 +50,14 @@ class TforecastHist(StagingBase, forecast_mixin.TforecastHistMixin, StagingParam
     @property
     def is_historical_table(self) -> bool:
         return True
+
+    @property
+    def description(self) -> str | None:
+        return self.forecast_desc
+
+    @property
+    def agency_phone_number(self) -> str | None:
+        return self.ac_phone
 
 
 class TapplicanttypesForecast(
