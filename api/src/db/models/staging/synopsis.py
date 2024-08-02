@@ -24,6 +24,18 @@ class Tsynopsis(StagingBase, synopsis_mixin.TsynopsisMixin, StagingParamMixin):
     def is_historical_table(self) -> bool:
         return False
 
+    @property
+    def description(self) -> str | None:
+        return self.syn_desc
+
+    @property
+    def agency_code(self) -> str | None:
+        return self.a_sa_code
+
+    @property
+    def agency_phone_number(self) -> str | None:
+        return self.ac_phone_number
+
 
 class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParamMixin):
     __tablename__ = "tsynopsis_hist"
@@ -42,6 +54,18 @@ class TsynopsisHist(StagingBase, synopsis_mixin.TsynopsisHistMixin, StagingParam
     @property
     def is_historical_table(self) -> bool:
         return True
+
+    @property
+    def description(self) -> str | None:
+        return self.syn_desc
+
+    @property
+    def agency_code(self) -> str | None:
+        return self.a_sa_code
+
+    @property
+    def agency_phone_number(self) -> str | None:
+        return self.ac_phone_number
 
 
 class TapplicanttypesSynopsis(
