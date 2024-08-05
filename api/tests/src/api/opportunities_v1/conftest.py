@@ -37,6 +37,8 @@ def get_search_request(
     applicant_type_one_of: list[ApplicantType] | None = None,
     opportunity_status_one_of: list[OpportunityStatus] | None = None,
     agency_one_of: list[str] | None = None,
+    post_date: dict | None = None,
+    close_date: dict | None = None,
     format: str | None = None,
 ):
     req = {
@@ -64,6 +66,12 @@ def get_search_request(
 
     if agency_one_of is not None:
         filters["agency"] = {"one_of": agency_one_of}
+
+    if post_date is not None:
+        filters["post_date"] = post_date
+
+    if close_date is not None:
+        filters["close_date"] = close_date
 
     if len(filters) > 0:
         req["filters"] = filters

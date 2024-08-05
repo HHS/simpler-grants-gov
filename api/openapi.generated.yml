@@ -182,6 +182,11 @@ paths:
                       one_of:
                       - forecasted
                       - posted
+                    post_date:
+                      start_date: '2024-01-01'
+                      end_date: '2024-02-01'
+                    close_date:
+                      start_date: '2024-01-01'
                   pagination:
                     order_by: opportunity_id
                     page_offset: 1
@@ -826,6 +831,32 @@ components:
             type: string
             minLength: 2
             example: USAID
+    PostDateFilterV1:
+      type: object
+      properties:
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+    CloseDateFilterV1:
+      type: object
+      properties:
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
     OpportunitySearchFilterV1:
       type: object
       properties:
@@ -854,6 +885,16 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyFilterV1'
+        post_date:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/PostDateFilterV1'
+        close_date:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/CloseDateFilterV1'
     OpportunityPaginationV1:
       type: object
       properties:
