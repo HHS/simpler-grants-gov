@@ -54,6 +54,10 @@ examples = {
                 "funding_category": {"one_of": ["recovery_act", "arts", "natural_resources"]},
                 "funding_instrument": {"one_of": ["cooperative_agreement", "grant"]},
                 "opportunity_status": {"one_of": ["forecasted", "posted"]},
+                "post_date": {"start_date": "2024-01-01", "end_date": "2024-02-01"},
+                "close_date": {
+                    "start_date": "2024-01-01",
+                },
             },
             "pagination": {
                 "order_by": "opportunity_id",
