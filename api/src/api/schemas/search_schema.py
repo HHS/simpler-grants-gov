@@ -35,7 +35,17 @@ class BaseSearchSchema(Schema):
             )
 
 
-class StrSearchSchemaBuilder:
+class BaseSearchSchemaBuilder:
+    def __init__(self, schema_class_name: str):
+        # The schema class name is used on the endpoint
+        self.schema_fields: dict[str, fields.MixinField] = {}
+        self.schema_class_name = schema_class_name
+
+    def build(self) -> Schema:
+        return BaseSearchSchema.from_dict(self.schema_fields, name=self.schema_class_name)  # type: ignore
+
+
+class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
     """
     Builder for setting up a filter in a search endpoint schema.
 
@@ -70,11 +80,6 @@ class StrSearchSchemaBuilder:
             )
     """
 
-    def __init__(self, schema_class_name: str):
-        # The schema class name is used on the endpoint
-        self.schema_fields: dict[str, fields.MixinField] = {}
-        self.schema_class_name = schema_class_name
-
     def with_one_of(
         self,
         *,
@@ -103,5 +108,51 @@ class StrSearchSchemaBuilder:
 
         return self
 
-    def build(self) -> Schema:
-        return BaseSearchSchema.from_dict(self.schema_fields, name=self.schema_class_name)  # type: ignore
+
+class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
+    """
+    Builder for setting up a filter for a range of dates in the search endpoint schema.
+
+    Example of what this might look like:
+        {
+            "filters": {
+                "post_date": {
+                    "start_date": "YYYY-MM-DD",
+                    "end_date": "YYYY-MM-DD"
+                }
+            }
+        }
+
+    Support for start_date and
+    end_date filters have been partially implemented.
+
+    Usage::
+    # In a search request schema, you would use it like so:
+
+        example_start_date_field = fields.Nested(
+            DateSearchSchemaBuilder("ExampleStartDateFieldSchema")
+                .with_start_date()
+                .build()
+        )
+
+        example_end_date_field = fields.Nested(
+            DateSearchSchemaBuilder("ExampleEndDateFieldSchema")
+                .with_end_date()
+                .build()
+        )
+
+        example_startend_date_field = fields.Nested(
+            DateSearchSchemaBuilder("ExampleStartEndDateFieldSchema")
+                .with_start_date()
+                .with_end_date()
+                .build()
+        )
+    """
+
+    def with_start_date(self) -> "DateSearchSchemaBuilder":
+        self.schema_fields["start_date"] = fields.Date(allow_none=True)
+        return self
+
+    def with_end_date(self) -> "DateSearchSchemaBuilder":
+        self.schema_fields["end_date"] = fields.Date(allow_none=True)
+        return self
