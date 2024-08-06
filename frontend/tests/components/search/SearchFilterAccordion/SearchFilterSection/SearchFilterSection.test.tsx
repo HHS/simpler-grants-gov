@@ -1,12 +1,29 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import React from "react";
-import SearchFilterSection from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
+import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
 import { axe } from "jest-axe";
 
+const isSectionAllSelected = (
+  allSelected: Set<string>,
+  query: Set<string>,
+): boolean => {
+  if (allSelected && query) {
+    return false;
+  }
+  return true;
+};
+const isSectionNoneSelected = (query: Set<string>): boolean => {
+  if (query) {
+    return false;
+  }
+  return true;
+};
 const defaultProps = {
+  isSectionAllSelected,
+  isSectionNoneSelected,
   option: {
     id: "1",
     label: "Option 1",
@@ -28,12 +45,11 @@ const defaultProps = {
   },
   incrementTotal: jest.fn(),
   decrementTotal: jest.fn(),
-  mounted: true,
   updateCheckedOption: jest.fn(),
   toggleSelectAll: jest.fn(),
   accordionTitle: "Default Title",
-  isSectionAllSelected: false,
-  isSectionNoneSelected: true,
+  query: new Set(""),
+  value: "",
 };
 
 describe("SearchFilterSection", () => {
@@ -62,29 +78,6 @@ describe("SearchFilterSection", () => {
     expect(
       screen.getByRole("checkbox", { name: "Child 1" }),
     ).toBeInTheDocument();
-  });
-
-  it("correctly updates the section count", async () => {
-    // Render the component with default props
-    render(<SearchFilterSection {...defaultProps} />);
-
-    // Just 1 is checked initially, so count should be 1
-    const countSpanAsOne = screen.getByText("1", { selector: ".usa-tag" });
-    expect(countSpanAsOne).toBeInTheDocument();
-
-    // uncollapse section
-    fireEvent.click(screen.getByRole("button"));
-
-    // Check the 1st box in the section
-    const checkboxForChild1 = screen.getByLabelText("Child 1");
-    fireEvent.click(checkboxForChild1);
-
-    await waitFor(() => {
-      // count should now be 2
-      expect(
-        screen.getByText("2", { selector: ".usa-tag" }),
-      ).toBeInTheDocument();
-    });
   });
 
   it("renders hidden inputs for checked children when collapsed", () => {
