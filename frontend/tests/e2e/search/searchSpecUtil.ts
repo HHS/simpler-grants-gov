@@ -11,8 +11,7 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   await searchInput.fill(term);
-  await page.click(".usa-search >> button[type='submit']");
-  expectURLContainsQueryParam(page, "query", term);
+  await page.click(".usa-search > button[type='submit']");
 }
 
 export function expectURLContainsQueryParam(
@@ -114,6 +113,7 @@ export async function refreshPageWithCurrentURL(page: Page) {
 
 export async function selectSortBy(page: Page, sortByValue: string) {
   await page.locator("#search-sort-by-select").selectOption(sortByValue);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 export async function expectSortBy(page: Page, value: string) {

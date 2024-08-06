@@ -1,5 +1,17 @@
 /* eslint-disable jest/no-commented-out-tests */
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/extend-expect";
+import { axe } from "jest-axe";
+import { render } from "@testing-library/react";
+import React from "react";
+import SearchPagination from "src/components/search/SearchPagination";
+
+const mockUpdateQueryParams = jest.fn();
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    updateQueryParams: mockUpdateQueryParams,
+  }),
+}));
 
 // import SearchPagination, {
 //   PaginationPosition,
@@ -9,34 +21,21 @@ import "@testing-library/jest-dom";
 
 // TODO (Issue #1936): Uncomment tests after React 19 upgrade
 describe("SearchPagination", () => {
-  //   const mockHandlePageChange = jest.fn();
-  //   const page = 1;
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("pass test", () => {
     expect(1).toBe(1);
   });
-  //   it("should not have basic accessibility issues", async () => {
-  //     const { container } = render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         totalPages={totalPages}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     const results = await axe(container, {
-  //       rules: {
-  //         // Disable specific rules that are known to fail due to third-party components
-  //         list: { enabled: false },
-  //         "svg-img-alt": { enabled: false },
-  //       },
-  //     });
-  //     expect(results).toHaveNoViolations();
-  //   });
+  it("should not have basic accessibility issues", async () => {
+    const { container } = render(<SearchPagination page={1} query={"test"} />);
+
+    const results = await axe(container, {
+      rules: {
+        // Disable specific rules that are known to fail due to third-party components
+        list: { enabled: false },
+        "svg-img-alt": { enabled: false },
+      },
+    });
+    expect(results).toHaveNoViolations();
+  });
 
   //   it("renders hidden input when showHiddenInput is true", () => {
   //     render(

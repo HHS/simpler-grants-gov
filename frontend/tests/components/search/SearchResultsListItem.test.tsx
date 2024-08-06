@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 
-import { Opportunity } from "../../../src/types/search/searchResponseTypes";
+import { Opportunity } from "src/types/search/searchResponseTypes";
 import React from "react";
-import SearchResultsListItem from "../../../src/components/search/SearchResultsListItem";
+import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { axe } from "jest-axe";
 
 const mockOpportunity: Opportunity = {

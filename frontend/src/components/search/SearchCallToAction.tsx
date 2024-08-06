@@ -1,13 +1,10 @@
-import Breadcrumbs from "../../components/Breadcrumbs";
 import { GridContainer } from "@trussworks/react-uswds";
 import React from "react";
-import { SEARCH_CRUMBS } from "../../constants/breadcrumbs";
 
 const SearchCallToAction: React.FC = () => {
   return (
     <>
       {/* <BetaAlert /> */}
-      <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
       <GridContainer>
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
           Search funding opportunities
