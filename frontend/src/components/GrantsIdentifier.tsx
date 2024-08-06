@@ -36,6 +36,8 @@ const GrantsIdentifier = () => {
       alt={identifier_strings.logo_alt}
       src={logo}
       className="usa-identifier__logo-img"
+      width={500}
+      height={168}
     />
   );
 

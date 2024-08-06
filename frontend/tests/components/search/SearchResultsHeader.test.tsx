@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 
 import React from "react";
-import SearchResultsHeader from "../../../src/components/search/SearchResultsHeader";
+import SearchResultsHeader from "src/components/search/SearchResultsHeader";
 import { axe } from "jest-axe";
 
-jest.mock("../../../src/components/search/SearchSortBy", () => {
+jest.mock("src/components/search/SearchSortBy", () => {
   return {
     __esModule: true,
     default: () => <div>Mock SearchSortBy</div>,
@@ -12,17 +12,9 @@ jest.mock("../../../src/components/search/SearchSortBy", () => {
 });
 
 describe("SearchResultsHeader", () => {
-  const initialQueryParams = "";
-  const formRef = React.createRef<HTMLFormElement>();
-
   it("should not have basic accessibility issues", async () => {
-    const searchResultsLength = 100;
     const { container } = render(
-      <SearchResultsHeader
-        searchResultsLength={searchResultsLength}
-        formRef={formRef}
-        initialQueryParams={initialQueryParams}
-      />,
+      <SearchResultsHeader totalFetchedResults={"100"} sortby="" />,
     );
 
     const results = await axe(container);
@@ -30,14 +22,7 @@ describe("SearchResultsHeader", () => {
   });
 
   it("renders correctly and displays the number of opportunities", () => {
-    const searchResultsLength = 100;
-    render(
-      <SearchResultsHeader
-        searchResultsLength={searchResultsLength}
-        formRef={formRef}
-        initialQueryParams={initialQueryParams}
-      />,
-    );
+    render(<SearchResultsHeader sortby="" totalFetchedResults={"100"} />);
 
     expect(screen.getByText("100 Opportunities")).toBeInTheDocument();
     expect(screen.getByText("Mock SearchSortBy")).toBeInTheDocument();

@@ -1,21 +1,19 @@
 "use client";
-
 import { Icon } from "@trussworks/react-uswds";
-import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
-import { useState } from "react";
-import { sendGAEvent } from "@next/third-parties/google";
+import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { useContext } from "react";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 interface SearchBarProps {
-  initialQueryParams: string;
+  query: string | null | undefined;
 }
 
-export default function SearchBar({ initialQueryParams }: SearchBarProps) {
-  const [inputValue, setInputValue] = useState<string>(initialQueryParams);
+export default function SearchBar({ query }: SearchBarProps) {
+  const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
 
   const handleSubmit = () => {
-    updateQueryParams(inputValue, "query");
-    sendGAEvent("event", "search", { search_term: inputValue });
+    updateQueryParams("", "query", queryTerm, false);
   };
 
   return (
@@ -35,10 +33,12 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
           id="query"
           type="search"
           name="query"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          defaultValue={query || ""}
+          onChange={(e) => updateQueryTerm(e.target?.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+          }}
         />
-
         <button className="usa-button" type="submit" onClick={handleSubmit}>
           <span className="usa-search__submit-text">Search </span>
           <Icon.Search

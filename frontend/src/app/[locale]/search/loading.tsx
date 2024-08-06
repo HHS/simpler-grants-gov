@@ -1,5 +1,5 @@
 import React from "react";
-import Spinner from "../../../components/Spinner";
+import Spinner from "src/components/Spinner";
 
 export default function Loading() {
   // TODO (Issue #1937): Use translation utility for strings in this file

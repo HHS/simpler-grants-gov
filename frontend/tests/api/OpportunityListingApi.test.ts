@@ -1,7 +1,7 @@
 import { ApiResponse } from "../../src/types/opportunity/opportunityResponseTypes";
 import OpportunityListingAPI from "../../src/app/api/OpportunityListingAPI";
 
-jest.mock("../../src/app/api/BaseApi");
+jest.mock("src/app/api/BaseApi");
 
 describe("OpportunityListingAPI", () => {
   const mockedRequest = jest.fn();
@@ -21,7 +21,7 @@ describe("OpportunityListingAPI", () => {
     mockedRequest.mockResolvedValue(mockResponse);
 
     const result = await opportunityListingAPI.getOpportunityById(12345);
-    console.log("results => ", result);
+
     expect(mockedRequest).toHaveBeenCalledWith(
       "GET",
       opportunityListingAPI.basePath,

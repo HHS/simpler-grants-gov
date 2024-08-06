@@ -19,8 +19,6 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
         <button
           className="usa-button usa-button--unstyled font-sans-xs"
           onClick={(event) => {
-            // form submission is done in useSearchFilter, so
-            // prevent the onClick from submitting here.
             event.preventDefault();
             onSelectAll?.();
           }}
