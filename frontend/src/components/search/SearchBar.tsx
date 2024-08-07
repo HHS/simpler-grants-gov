@@ -3,7 +3,7 @@ import { Icon } from "@trussworks/react-uswds";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { useTranslations } from "next-intl"; 
+import { useTranslations } from "next-intl";
 
 interface SearchBarProps {
   query: string | null | undefined;
@@ -27,7 +27,9 @@ export default function SearchBar({ query }: SearchBarProps) {
       >
         {t.rich("bar.label", {
           strong: (chunks) => <span className="text-bold">{chunks}</span>,
-          small: (chunks) => <small className="display-inline-block">{chunks}</small>,
+          small: (chunks) => (
+            <small className="display-inline-block">{chunks}</small>
+          ),
         })}
       </label>
       <div className="usa-search usa-search--big" role="search">

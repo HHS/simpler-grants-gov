@@ -20,7 +20,7 @@ export default function SearchResultsListItem({
       ? "https://grants.gov"
       : "https://test.grants.gov";
 
-  const t = useTranslations("Search")
+  const t = useTranslations("Search");
 
   const metadataBorderClasses = `
     display-block
@@ -123,7 +123,7 @@ export default function SearchResultsListItem({
             {/* TODO: Better way to format as a dollar amounts */}
             <span
               className={`${metadataBorderClasses} desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
-            > 
+            >
               <strong>{t("resultsListItem.award_ceiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
                 ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}

@@ -3,14 +3,12 @@ import { Select } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";
-import { useTranslations } from "next-intl"
+import { useTranslations } from "next-intl";
 
 type SortOption = {
   label: string;
   value: string;
 };
-
-
 
 interface SearchSortByProps {
   queryTerm: string | null | undefined;
@@ -25,19 +23,31 @@ export default function SearchSortBy({
 }: SearchSortByProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const { updateTotalResults } = useContext(QueryContext);
-  const t = useTranslations("Search")
+  const t = useTranslations("Search");
 
   const SORT_OPTIONS: SortOption[] = [
     { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
     { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
     { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
     { label: t("sortBy.options.close_date_asc"), value: "closeDateAsc" },
-    { label: t("sortBy.options.opportunity_title_asc"), value: "opportunityTitleAsc" },
-    { label: t("sortBy.options.opportunity_title_desc"), value: "opportunityTitleDesc" },
+    {
+      label: t("sortBy.options.opportunity_title_asc"),
+      value: "opportunityTitleAsc",
+    },
+    {
+      label: t("sortBy.options.opportunity_title_desc"),
+      value: "opportunityTitleDesc",
+    },
     { label: t("sortBy.options.agency_asc"), value: "agencyAsc" },
     { label: t("sortBy.options.agency_desc"), value: "agencyDesc" },
-    { label: t("sortBy.options.opportunity_number_desc"), value: "opportunityNumberDesc" },
-    { label: t("sortBy.options.opportunity_number_asc"), value: "opportunityNumberAsc" },
+    {
+      label: t("sortBy.options.opportunity_number_desc"),
+      value: "opportunityNumberDesc",
+    },
+    {
+      label: t("sortBy.options.opportunity_number_asc"),
+      value: "opportunityNumberAsc",
+    },
   ];
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

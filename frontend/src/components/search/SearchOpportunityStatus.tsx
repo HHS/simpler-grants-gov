@@ -3,7 +3,7 @@ import { Checkbox } from "@trussworks/react-uswds";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { useTranslations } from "next-intl"
+import { useTranslations } from "next-intl";
 
 interface StatusOption {
   id: string;
@@ -14,7 +14,6 @@ interface StatusOption {
 interface SearchOpportunityStatusProps {
   query: Set<string>;
 }
-
 
 export default function SearchOpportunityStatus({
   query,
@@ -28,18 +27,36 @@ export default function SearchOpportunityStatus({
     updateQueryParams(updated, "status", queryTerm);
   };
 
-  const t = useTranslations("Search")
+  const t = useTranslations("Search");
 
   const statusOptions: StatusOption[] = [
-    { id: "status-forecasted", label: t("opportunityStatus.label.forecasted"), value: "forecasted" },
-    { id: "status-posted", label: t("opportunityStatus.label.posted"), value: "posted" },
-    { id: "status-closed", label: t("opportunityStatus.label.closed"), value: "closed" },
-    { id: "status-archived", label: t("opportunityStatus.label.archived"), value: "archived" },
+    {
+      id: "status-forecasted",
+      label: t("opportunityStatus.label.forecasted"),
+      value: "forecasted",
+    },
+    {
+      id: "status-posted",
+      label: t("opportunityStatus.label.posted"),
+      value: "posted",
+    },
+    {
+      id: "status-closed",
+      label: t("opportunityStatus.label.closed"),
+      value: "closed",
+    },
+    {
+      id: "status-archived",
+      label: t("opportunityStatus.label.archived"),
+      value: "archived",
+    },
   ];
 
   return (
     <>
-      <h2 className="margin-bottom-1 font-sans-xs">{t("opportunityStatus.title")}</h2>
+      <h2 className="margin-bottom-1 font-sans-xs">
+        {t("opportunityStatus.title")}
+      </h2>
       <div className="grid-row flex-wrap">
         {statusOptions.map((option) => {
           return (

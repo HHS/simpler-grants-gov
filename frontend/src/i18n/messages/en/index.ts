@@ -394,12 +394,14 @@ export const messages = {
       },
     },
     bar: {
-      label: "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
+      label:
+        "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
       button: "Search",
     },
     callToAction: {
       title: "Search funding opportunities",
-      description: "We’re incrementally improving this experimental search page. How can we make it easier to discover grants that are right for you? Let us know at <mail>simpler@grants.gov</mail>.",
+      description:
+        "We’re incrementally improving this experimental search page. How can we make it easier to discover grants that are right for you? Let us know at <mail>simpler@grants.gov</mail>.",
     },
     opportunityStatus: {
       title: "Opportunity status",
@@ -411,12 +413,13 @@ export const messages = {
       },
     },
     resultsHeader: {
-      message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}" 
+      message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListFetch: {
       title: "Your search did not return any results.",
       body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
-      paginationError: "You're trying to access opportunity results that are beyond the last page of data."
+      paginationError:
+        "You're trying to access opportunity results that are beyond the last page of data.",
     },
     resultsListItem: {
       status: {
@@ -450,7 +453,7 @@ export const messages = {
     },
     filterToggleAll: {
       select: "Select All",
-      clear: "Clear All"
+      clear: "Clear All",
     },
   },
 };
