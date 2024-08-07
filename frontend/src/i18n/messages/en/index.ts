@@ -382,6 +382,75 @@ export const messages = {
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
+    meta_description:
+      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     description: "Try out our experimental search page.",
+    accordion: {
+      titles: {
+        funding: "Funding instrument",
+        eligibility: "Eligibility",
+        agency: "Agency",
+        category: "Category",
+      },
+    },
+    bar: {
+      label: "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
+      button: "Search",
+    },
+    callToAction: {
+      title: "Search funding opportunities",
+      description: "We’re incrementally improving this experimental search page. How can we make it easier to discover grants that are right for you? Let us know at <mail>simpler@grants.gov</mail>.",
+    },
+    opportunityStatus: {
+      title: "Opportunity status",
+      label: {
+        forecasted: "Forecasted",
+        posted: "Posted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+    },
+    resultsHeader: {
+      message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}" 
+    },
+    resultsListFetch: {
+      title: "Your search did not return any results.",
+      body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
+      paginationError: "You're trying to access opportunity results that are beyond the last page of data."
+    },
+    resultsListItem: {
+      status: {
+        archived: "Archived: ",
+        closed: "Closed: ",
+        posted: "Closing: ",
+        forecasted: "Forecasted",
+      },
+      summary: {
+        posted: "Posted: ",
+        agency: "Agency: ",
+      },
+      opportunity_number: "Opportunity Number: ",
+      award_ceiling: "Award Ceiling: ",
+      floor: "Floor: ",
+    },
+    sortBy: {
+      options: {
+        posted_date_desc: "Posted Date (newest)",
+        posted_date_asc: "Posted Date (oldest)",
+        close_date_desc: "Close Date (newest)",
+        close_date_asc: "Close Date (oldest)",
+        opportunity_title_asc: "Opportunity Title (A to Z)",
+        opportunity_title_desc: "Opportunity Title (Z to A)",
+        agency_asc: "Agency (A to Z)",
+        agency_desc: "Agency (Z to A)",
+        opportunity_number_asc: "Opportunity Number (descending)",
+        opportunity_number_desc: "Opportunity Number (ascending)",
+      },
+      label: "Sort By",
+    },
+    filterToggleAll: {
+      select: "Select All",
+      clear: "Clear All"
+    },
   },
 };

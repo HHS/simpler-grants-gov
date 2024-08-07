@@ -49,7 +49,7 @@ interface searchParamsTypes {
 
 function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   unstable_setRequestLocale("en");
-  const t = useTranslations("Process");
+  const t = useTranslations("Search");
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const {
     agency,
@@ -71,7 +71,7 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
+      <PageSEO title={t("title")} description={t("meta_description")} />
       <BetaAlert />
       <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
       <SearchCallToAction />
@@ -85,25 +85,25 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
               <SearchOpportunityStatus query={status} />
               <SearchFilterAccordion
                 filterOptions={fundingOptions}
-                title="Funding instrument"
+                title={t("accordion.titles.funding")}
                 queryParamKey="fundingInstrument"
                 query={fundingInstrument}
               />
               <SearchFilterAccordion
                 filterOptions={eligibilityOptions}
-                title="Eligibility"
+                title={t("accordion.titles.eligibility")}
                 queryParamKey="eligibility"
                 query={eligibility}
               />
               <SearchFilterAccordion
                 filterOptions={agencyOptions}
-                title="Agency"
+                title={t("accordion.titles.agency")}
                 queryParamKey="agency"
                 query={agency}
               />
               <SearchFilterAccordion
                 filterOptions={categoryOptions}
-                title="Category"
+                title={t("accordion.titles.category")}
                 queryParamKey="category"
                 query={category}
               />
