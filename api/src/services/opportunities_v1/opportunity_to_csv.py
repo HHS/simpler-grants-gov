@@ -58,7 +58,7 @@ def _process_assistance_listing(assistance_listings: list[dict]) -> str:
     )
 
 
-def opportunity_to_csv(opportunities: Sequence[dict]) -> io.StringIO:
+def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> None:
     opportunities_to_write: list[dict] = []
 
     for opportunity in opportunities:
@@ -84,10 +84,6 @@ def opportunity_to_csv(opportunities: Sequence[dict]) -> io.StringIO:
 
         opportunities_to_write.append(out_opportunity)
 
-    output = io.StringIO()
-
     writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL)
     writer.writeheader()
     writer.writerows(opportunities_to_write)
-
-    return output
