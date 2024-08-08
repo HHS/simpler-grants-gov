@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";

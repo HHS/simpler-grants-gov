@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-
+import { render, screen } from "tests/react-utils";
 import { Opportunity } from "src/types/search/searchResponseTypes";
 import React from "react";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";

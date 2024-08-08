@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 
 import { FilterOption } from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import React from "react";

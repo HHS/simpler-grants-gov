@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 interface SearchFilterToggleAllProps {
   isAllSelected: boolean;
@@ -13,6 +14,8 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
   isAllSelected,
   isNoneSelected,
 }) => {
+  const t = useTranslations("Search");
+
   return (
     <div className="grid-row">
       <div className="grid-col-fill">
@@ -24,7 +27,7 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
           }}
           disabled={isAllSelected}
         >
-          Select All
+          {t("filterToggleAll.select")}
         </button>
       </div>
       <div className="grid-col-fill text-right">
@@ -36,7 +39,7 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
           }}
           disabled={isNoneSelected}
         >
-          Clear All
+          {t("filterToggleAll.clear")}
         </button>
       </div>
     </div>

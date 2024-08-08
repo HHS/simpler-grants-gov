@@ -3,6 +3,7 @@ import { Icon } from "@trussworks/react-uswds";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { useTranslations } from "next-intl";
 
 interface SearchBarProps {
   query: string | null | undefined;
@@ -16,16 +17,20 @@ export default function SearchBar({ query }: SearchBarProps) {
     updateQueryParams("", "query", queryTerm, false);
   };
 
+  const t = useTranslations("Search");
+
   return (
     <div className="margin-top-5 margin-bottom-2">
       <label
         htmlFor="query"
         className="font-sans-lg display-block margin-bottom-2"
       >
-        <span className="text-bold">Search terms </span>
-        <small className="display-inline-block">
-          Enter keywords, opportunity numbers, or assistance listing numbers
-        </small>
+        {t.rich("bar.label", {
+          strong: (chunks) => <span className="text-bold">{chunks}</span>,
+          small: (chunks) => (
+            <small className="display-inline-block">{chunks}</small>
+          ),
+        })}
       </label>
       <div className="usa-search usa-search--big" role="search">
         <input
@@ -40,7 +45,7 @@ export default function SearchBar({ query }: SearchBarProps) {
           }}
         />
         <button className="usa-button" type="submit" onClick={handleSubmit}>
-          <span className="usa-search__submit-text">Search </span>
+          <span className="usa-search__submit-text">{t("bar.button")} </span>
           <Icon.Search
             className="usa-search__submit-icon"
             size={4}
