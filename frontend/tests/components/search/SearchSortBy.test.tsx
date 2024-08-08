@@ -1,5 +1,7 @@
 import { axe } from "jest-axe";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
+
 import React from "react";
 import SearchSortBy from "src/components/search/SearchSortBy";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
