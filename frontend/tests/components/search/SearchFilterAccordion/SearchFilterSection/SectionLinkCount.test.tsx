@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
 import SectionLinkCount from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";

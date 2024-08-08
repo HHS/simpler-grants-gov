@@ -3,24 +3,12 @@ import { Select } from "@trussworks/react-uswds";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";
+import { useTranslations } from "next-intl";
 
 type SortOption = {
   label: string;
   value: string;
 };
-
-const SORT_OPTIONS: SortOption[] = [
-  { label: "Posted Date (newest)", value: "postedDateDesc" },
-  { label: "Posted Date (oldest)", value: "postedDateAsc" },
-  { label: "Close Date (newest)", value: "closeDateDesc" },
-  { label: "Close Date (oldest)", value: "closeDateAsc" },
-  { label: "Opportunity Title (A to Z)", value: "opportunityTitleAsc" },
-  { label: "Opportunity Title (Z to A)", value: "opportunityTitleDesc" },
-  { label: "Agency (A to Z)", value: "agencyAsc" },
-  { label: "Agency (Z to A)", value: "agencyDesc" },
-  { label: "Opportunity Number (descending)", value: "opportunityNumberDesc" },
-  { label: "Opportunity Number (ascending)", value: "opportunityNumberAsc" },
-];
 
 interface SearchSortByProps {
   queryTerm: string | null | undefined;
@@ -35,6 +23,32 @@ export default function SearchSortBy({
 }: SearchSortByProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const { updateTotalResults } = useContext(QueryContext);
+  const t = useTranslations("Search");
+
+  const SORT_OPTIONS: SortOption[] = [
+    { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
+    { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
+    { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
+    { label: t("sortBy.options.close_date_asc"), value: "closeDateAsc" },
+    {
+      label: t("sortBy.options.opportunity_title_asc"),
+      value: "opportunityTitleAsc",
+    },
+    {
+      label: t("sortBy.options.opportunity_title_desc"),
+      value: "opportunityTitleDesc",
+    },
+    { label: t("sortBy.options.agency_asc"), value: "agencyAsc" },
+    { label: t("sortBy.options.agency_desc"), value: "agencyDesc" },
+    {
+      label: t("sortBy.options.opportunity_number_desc"),
+      value: "opportunityNumberDesc",
+    },
+    {
+      label: t("sortBy.options.opportunity_number_asc"),
+      value: "opportunityNumberAsc",
+    },
+  ];
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value;
@@ -45,7 +59,7 @@ export default function SearchSortBy({
   return (
     <div id="search-sort-by">
       <label htmlFor="search-sort-by-select" className="usa-sr-only">
-        Sort By
+        {t("sortBy.label")}
       </label>
 
       <Select
