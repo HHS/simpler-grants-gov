@@ -1,3 +1,4 @@
+import io
 import logging
 
 from flask import Response
@@ -13,7 +14,7 @@ from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import get_opportunity, get_opportunity_versions
-from src.services.opportunities_v1.opportunity_to_csv import opportunity_to_csv
+from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
 
@@ -135,7 +136,8 @@ def opportunity_search(
 
     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
         # Convert the response into a CSV and return the contents
-        output = opportunity_to_csv(opportunities)
+        output = io.StringIO()
+        opportunities_to_csv(opportunities, output)
         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
         return Response(
             output.getvalue().encode("utf-8"),
