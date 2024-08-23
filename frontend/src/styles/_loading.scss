@@ -49,3 +49,13 @@ $spinner-size: units(4);
     transform: rotate(360deg);
   }
 }
+
+.grants-pagination.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  & > *,
+  & * {
+    user-select: none;
+    pointer-events: none;
+  }
+}

@@ -41,12 +41,7 @@ export default function SearchPagination({
   };
 
   return (
-    <div
-      style={{
-        pointerEvents: loading ? "none" : "fill",
-        opacity: loading ? 0.5 : 1,
-      }}
-    >
+    <div className={`grants-pagination ${loading ? "disabled" : ""}`}>
       <Pagination
         pathname="/search"
         totalPages={pages}
