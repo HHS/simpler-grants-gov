@@ -219,7 +219,7 @@ const throwError = (
   searchInputs?: QueryParamData,
   firstError?: APIResponseError,
 ) => {
-  console.log("Throwing error: ", message, status_code, searchInputs);
+  console.error("Throwing error: ", message, status_code, searchInputs);
 
   // Include just firstError for now, we can expand this
   // If we need ValidationErrors to be more expanded
