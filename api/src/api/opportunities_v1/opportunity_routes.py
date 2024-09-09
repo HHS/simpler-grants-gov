@@ -98,6 +98,37 @@ examples = {
             },
         },
     },
+    "example5": {
+        "summary": "Filter by award fields",
+        "value": {
+            "filters": {
+                "expected_number_of_awards": {"min": 5},
+                "award_floor": {"min": 10000},
+                "award_ceiling": {"max": 1000000},
+                "estimated_total_program_funding": {"min": 100000, "max": 250000},
+            },
+            "pagination": {
+                "order_by": "opportunity_id",
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_direction": "descending",
+            },
+        },
+    },
+    "example6": {
+        "summary": "FIlter by assistance listing numbers",
+        "value": {
+            "filters": {
+                "assistance_listing_number": {"one_of": ["43.001", "47.049"]},
+            },
+            "pagination": {
+                "order_by": "opportunity_id",
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_direction": "descending",
+            },
+        },
+    },
 }
 
 

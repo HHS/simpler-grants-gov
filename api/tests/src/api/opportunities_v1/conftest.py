@@ -37,6 +37,12 @@ def get_search_request(
     applicant_type_one_of: list[ApplicantType] | None = None,
     opportunity_status_one_of: list[OpportunityStatus] | None = None,
     agency_one_of: list[str] | None = None,
+    assistance_listing_one_of: list[str] = None,
+    is_cost_sharing_one_of: list[bool | str] | None = None,
+    expected_number_of_awards: dict | None = None,
+    award_floor: dict | None = None,
+    award_ceiling: dict | None = None,
+    estimated_total_program_funding: dict | None = None,
     post_date: dict | None = None,
     close_date: dict | None = None,
     format: str | None = None,
@@ -66,6 +72,24 @@ def get_search_request(
 
     if agency_one_of is not None:
         filters["agency"] = {"one_of": agency_one_of}
+
+    if assistance_listing_one_of is not None:
+        filters["assistance_listing_number"] = {"one_of": assistance_listing_one_of}
+
+    if is_cost_sharing_one_of is not None:
+        filters["is_cost_sharing"] = {"one_of": is_cost_sharing_one_of}
+
+    if expected_number_of_awards is not None:
+        filters["expected_number_of_awards"] = expected_number_of_awards
+
+    if award_floor is not None:
+        filters["award_floor"] = award_floor
+
+    if award_ceiling is not None:
+        filters["award_ceiling"] = award_ceiling
+
+    if estimated_total_program_funding is not None:
+        filters["estimated_total_program_funding"] = estimated_total_program_funding
 
     if post_date is not None:
         filters["post_date"] = post_date
