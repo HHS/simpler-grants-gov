@@ -2,7 +2,12 @@ from enum import StrEnum
 
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import DateSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.search_schema import (
+    BoolSearchSchemaBuilder,
+    DateSearchSchemaBuilder,
+    IntegerSearchSchemaBuilder,
+    StrSearchSchemaBuilder,
+)
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -318,6 +323,43 @@ class OpportunitySearchFilterV1Schema(Schema):
     agency = fields.Nested(
         StrSearchSchemaBuilder("AgencyFilterV1Schema")
         .with_one_of(example="USAID", minimum_length=2)
+        .build()
+    )
+    assistance_listing_number = fields.Nested(
+        StrSearchSchemaBuilder("AssistanceListingNumberFilterV1Schema")
+        .with_one_of(
+            example="45.149", pattern=r"^\d{2}\.\d{2,3}$"
+        )  # Always of the format ##.## or ##.###
+        .build()
+    )
+    is_cost_sharing = fields.Nested(
+        BoolSearchSchemaBuilder("IsCostSharingFilterV1Schema").with_one_of(example=True).build()
+    )
+    expected_number_of_awards = fields.Nested(
+        IntegerSearchSchemaBuilder("ExpectedNumberAwardsFilterV1Schema")
+        .with_minimum_value(example=0)
+        .with_maximum_value(example=25)
+        .build()
+    )
+
+    award_floor = fields.Nested(
+        IntegerSearchSchemaBuilder("AwardFloorFilterV1Schema")
+        .with_minimum_value(example=0)
+        .with_maximum_value(example=10_000)
+        .build()
+    )
+
+    award_ceiling = fields.Nested(
+        IntegerSearchSchemaBuilder("AwardCeilingFilterV1Schema")
+        .with_minimum_value(example=0)
+        .with_maximum_value(example=10_000_000)
+        .build()
+    )
+
+    estimated_total_program_funding = fields.Nested(
+        IntegerSearchSchemaBuilder("EstimatedTotalProgramFundingFilterV1Schema")
+        .with_minimum_value(example=0)
+        .with_maximum_value(example=10_000_000)
         .build()
     )
 
