@@ -7,6 +7,8 @@ from marshmallow import ValidationError
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
 
+Validator = validators.Validator  # re-export
+
 
 class Regexp(validators.Regexp):
     REGEX_ERROR = MarshmallowErrorContainer(

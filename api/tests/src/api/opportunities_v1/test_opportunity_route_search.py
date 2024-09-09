@@ -290,7 +290,7 @@ def search_scenario_id_fnc(val):
 
 
 class TestOpportunityRouteSearch(BaseTestClass):
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(self, opportunity_index, opportunity_index_alias, search_client):
         # Load into the search index
         schema = OpportunityV1Schema()
@@ -489,7 +489,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ids=search_scenario_id_fnc,
     )
     def test_sorting_and_pagination_200(
-        self, client, api_auth_token, setup_search_data, search_request, expected_results
+        self, client, api_auth_token, search_request, expected_results
     ):
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
@@ -705,9 +705,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
         ids=search_scenario_id_fnc,
     )
-    def test_search_filters_200(
-        self, client, api_auth_token, setup_search_data, search_request, expected_results
-    ):
+    def test_search_filters_200(self, client, api_auth_token, search_request, expected_results):
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
@@ -774,6 +772,160 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert error["message"] == "Not a valid date."
 
     @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(assistance_listing_one_of=["12.345", "67.89"]),
+            get_search_request(assistance_listing_one_of=["98.765"]),
+            get_search_request(assistance_listing_one_of=["67.89", "54.24", "12.345", "86.753"]),
+        ],
+    )
+    def test_search_validate_assistance_listing_filters_200(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(assistance_listing_one_of=["12.345", "675.89"]),
+            get_search_request(assistance_listing_one_of=["hello"]),
+            get_search_request(assistance_listing_one_of=["67.89", "54.2412"]),
+            get_search_request(assistance_listing_one_of=["1.1"]),
+            get_search_request(assistance_listing_one_of=["12.hello"]),
+            get_search_request(assistance_listing_one_of=["fourfive.sixseveneight"]),
+            get_search_request(assistance_listing_one_of=["11..11"]),
+        ],
+    )
+    def test_search_validate_assistance_listing_filters_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert error["message"] == "String does not match expected pattern."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(is_cost_sharing_one_of=[True, False]),
+            get_search_request(is_cost_sharing_one_of=["1", "0"]),
+            get_search_request(is_cost_sharing_one_of=["t", "f"]),
+            get_search_request(is_cost_sharing_one_of=["true", "false"]),
+            get_search_request(is_cost_sharing_one_of=["on", "off"]),
+            get_search_request(is_cost_sharing_one_of=["yes", "no"]),
+        ],
+    )
+    def test_search_validate_is_cost_sharing_200(self, client, api_auth_token, search_request):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(is_cost_sharing_one_of=["hello"]),
+            get_search_request(is_cost_sharing_one_of=[True, "definitely"]),
+            get_search_request(is_cost_sharing_one_of=[5, 6]),
+            get_search_request(is_cost_sharing_one_of=["2024-01-01"]),
+            get_search_request(is_cost_sharing_one_of=[{}]),
+        ],
+    )
+    def test_search_validate_is_cost_sharing_filters_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert error["message"] == "Not a valid boolean."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(
+                expected_number_of_awards={"min": 0},
+                award_floor={"max": 35},
+                award_ceiling={"max": "10000000"},
+                estimated_total_program_funding={"min": "123456"},
+            ),
+            get_search_request(
+                expected_number_of_awards={"min": 1, "max": 2},
+                award_floor={"min": 0, "max": 1000},
+                award_ceiling={"min": 10000, "max": 10000000},
+                estimated_total_program_funding={"min": 123456, "max": 345678},
+            ),
+            get_search_request(expected_number_of_awards={"min": 1, "max": 2}),
+            get_search_request(award_floor={"min": 0, "max": 1000}),
+            get_search_request(award_ceiling={"min": "10000", "max": 10000000}),
+            get_search_request(estimated_total_program_funding={"min": 123456, "max": "345678"}),
+        ],
+    )
+    def test_search_validate_award_values_200(self, client, api_auth_token, search_request):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(estimated_total_program_funding={"min": "hello", "max": "345678"}),
+            get_search_request(award_floor={"min": "one"}),
+            get_search_request(award_ceiling={"min": {}, "max": "123e4f5"}),
+        ],
+    )
+    def test_search_validate_award_values_422(self, client, api_auth_token, search_request):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        assert json["message"] == "Validation error"
+        for error in json["errors"]:
+            assert error["message"] == "Not a valid integer."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(
+                expected_number_of_awards={"min": -1},
+                award_floor={"max": -2},
+                award_ceiling={"max": "-10000000"},
+                estimated_total_program_funding={"min": "-123456"},
+            ),
+            get_search_request(expected_number_of_awards={"min": -1, "max": 10000000}),
+            get_search_request(
+                estimated_total_program_funding={"max": "-5"}, award_floor={"max": "-9"}
+            ),
+        ],
+    )
+    def test_search_validate_award_values_negative_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        json = resp.get_json()
+        assert json["message"] == "Validation error"
+        for error in json["errors"]:
+            assert error["message"] == "Must be greater than or equal to 0."
+
+    @pytest.mark.parametrize(
         "search_request, expected_results",
         [
             # Note that the sorting is not relevancy for this as we intend to update the relevancy scores a bit
@@ -831,9 +983,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
         ids=search_scenario_id_fnc,
     )
-    def test_search_query_200(
-        self, client, api_auth_token, setup_search_data, search_request, expected_results
-    ):
+    def test_search_query_200(self, client, api_auth_token, search_request, expected_results):
         # This test isn't looking to validate opensearch behavior, just that we've connected fields properly and
         # results being returned are as expected.
         call_search_and_validate(client, api_auth_token, search_request, expected_results)

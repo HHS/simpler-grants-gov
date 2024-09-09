@@ -220,6 +220,37 @@ paths:
                     page_offset: 1
                     page_size: 100
                     sort_direction: ascending
+              example5:
+                summary: Filter by award fields
+                value:
+                  filters:
+                    expected_number_of_awards:
+                      min: 5
+                    award_floor:
+                      min: 10000
+                    award_ceiling:
+                      max: 1000000
+                    estimated_total_program_funding:
+                      min: 100000
+                      max: 250000
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+              example6:
+                summary: FIlter by assistance listing numbers
+                value:
+                  filters:
+                    assistance_listing_number:
+                      one_of:
+                      - '43.001'
+                      - '47.049'
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v0.1/opportunities/search:
@@ -831,6 +862,86 @@ components:
             type: string
             minLength: 2
             example: USAID
+    AssistanceListingNumberFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: ^\d{2}\.\d{2,3}$
+            example: '45.149'
+    IsCostSharingFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    ExpectedNumberAwardsFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 25
+    AwardFloorFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000
+    AwardCeilingFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000000
+    EstimatedTotalProgramFundingFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000000
     PostDateFilterV1:
       type: object
       properties:
@@ -885,6 +996,36 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyFilterV1'
+        assistance_listing_number:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
+        is_cost_sharing:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/IsCostSharingFilterV1'
+        expected_number_of_awards:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
+        award_floor:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AwardFloorFilterV1'
+        award_ceiling:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AwardCeilingFilterV1'
+        estimated_total_program_funding:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
         post_date:
           type:
           - object
