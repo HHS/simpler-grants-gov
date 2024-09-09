@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 import pytest
 
@@ -12,6 +13,7 @@ WAY_OF_KINGS = {
     "author": "Brandon Sanderson",
     "in_stock": True,
     "page_count": 1007,
+    "publication_date": "2010-08-31",
 }
 WORDS_OF_RADIANCE = {
     "id": 2,
@@ -19,6 +21,7 @@ WORDS_OF_RADIANCE = {
     "author": "Brandon Sanderson",
     "in_stock": False,
     "page_count": 1087,
+    "publication_date": "2014-03-04",
 }
 OATHBRINGER = {
     "id": 3,
@@ -26,6 +29,7 @@ OATHBRINGER = {
     "author": "Brandon Sanderson",
     "in_stock": True,
     "page_count": 1248,
+    "publication_date": "2017-11-14",
 }
 RHYTHM_OF_WAR = {
     "id": 4,
@@ -33,6 +37,7 @@ RHYTHM_OF_WAR = {
     "author": "Brandon Sanderson",
     "in_stock": False,
     "page_count": 1232,
+    "publication_date": "2020-11-17",
 }
 GAME_OF_THRONES = {
     "id": 5,
@@ -40,6 +45,7 @@ GAME_OF_THRONES = {
     "author": "George R.R. Martin",
     "in_stock": True,
     "page_count": 694,
+    "publication_date": "1996-08-01",
 }
 CLASH_OF_KINGS = {
     "id": 6,
@@ -47,6 +53,7 @@ CLASH_OF_KINGS = {
     "author": "George R.R. Martin",
     "in_stock": True,
     "page_count": 768,
+    "publication_date": "1998-11-16",
 }
 STORM_OF_SWORDS = {
     "id": 7,
@@ -54,6 +61,7 @@ STORM_OF_SWORDS = {
     "author": "George R.R. Martin",
     "in_stock": True,
     "page_count": 973,
+    "publication_date": "2000-08-08",
 }
 FEAST_FOR_CROWS = {
     "id": 8,
@@ -61,6 +69,7 @@ FEAST_FOR_CROWS = {
     "author": "George R.R. Martin",
     "in_stock": True,
     "page_count": 753,
+    "publication_date": "2005-10-17",
 }
 DANCE_WITH_DRAGONS = {
     "id": 9,
@@ -68,6 +77,7 @@ DANCE_WITH_DRAGONS = {
     "author": "George R.R. Martin",
     "in_stock": False,
     "page_count": 1056,
+    "publication_date": "2011-07-12",
 }
 FELLOWSHIP_OF_THE_RING = {
     "id": 10,
@@ -75,6 +85,7 @@ FELLOWSHIP_OF_THE_RING = {
     "author": "J R.R. Tolkien",
     "in_stock": True,
     "page_count": 423,
+    "publication_date": "1954-07-29",
 }
 TWO_TOWERS = {
     "id": 11,
@@ -82,6 +93,7 @@ TWO_TOWERS = {
     "author": "J R.R. Tolkien",
     "in_stock": True,
     "page_count": 352,
+    "publication_date": "1954-11-11",
 }
 RETURN_OF_THE_KING = {
     "id": 12,
@@ -89,6 +101,7 @@ RETURN_OF_THE_KING = {
     "author": "J R.R. Tolkien",
     "in_stock": True,
     "page_count": 416,
+    "publication_date": "1955-10-20",
 }
 
 FULL_DATA = [
@@ -120,7 +133,9 @@ def validate_valid_request(
             f"Request generated was invalid and caused an error in search client: {json_value}"
         )
 
-    assert resp.records == expected_results
+    assert (
+        resp.records == expected_results
+    ), f"{[record['title'] for record in resp.records]} != {[expected['title'] for expected in expected_results]}"
 
     if expected_aggregations is not None:
         assert resp.aggregations == expected_aggregations
@@ -363,6 +378,131 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         assert builder.build() == expected_query
 
         validate_valid_request(search_client, search_index, builder, expected_results)
+
+    @pytest.mark.parametrize(
+        "start_date,end_date,expected_results",
+        [
+            # Date range that will include all results
+            (date(1900, 1, 1), date(2050, 1, 1), FULL_DATA),
+            # Start only date range that will get all results
+            (date(1950, 1, 1), None, FULL_DATA),
+            # End only date range that will get all results
+            (None, date(2025, 1, 1), FULL_DATA),
+            # Range that filters to just oldest
+            (
+                date(1950, 1, 1),
+                date(1960, 1, 1),
+                [FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING],
+            ),
+            # Unbounded range for oldest few
+            (None, date(1990, 1, 1), [FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING]),
+            # Unbounded range for newest few
+            (date(2011, 8, 1), None, [WORDS_OF_RADIANCE, OATHBRINGER, RHYTHM_OF_WAR]),
+            # Selecting a few in the middle
+            (
+                date(2005, 1, 1),
+                date(2014, 1, 1),
+                [WAY_OF_KINGS, FEAST_FOR_CROWS, DANCE_WITH_DRAGONS],
+            ),
+            # Exact date
+            (date(1954, 7, 29), date(1954, 7, 29), [FELLOWSHIP_OF_THE_RING]),
+            # None fetched in range
+            (date(1981, 1, 1), date(1989, 1, 1), []),
+        ],
+    )
+    def test_query_builder_filter_date_range(
+        self, search_client, search_index, start_date, end_date, expected_results
+    ):
+        builder = (
+            SearchQueryBuilder()
+            .sort_by([])
+            .filter_date_range("publication_date", start_date, end_date)
+        )
+
+        expected_ranges = {}
+        if start_date is not None:
+            expected_ranges["gte"] = start_date.isoformat()
+        if end_date is not None:
+            expected_ranges["lte"] = end_date.isoformat()
+
+        expected_query = {
+            "size": 25,
+            "from": 0,
+            "track_scores": True,
+            "query": {"bool": {"filter": [{"range": {"publication_date": expected_ranges}}]}},
+        }
+
+        assert builder.build() == expected_query
+
+        validate_valid_request(search_client, search_index, builder, expected_results)
+
+    @pytest.mark.parametrize(
+        "min_value,max_value,expected_results",
+        [
+            # All fetched
+            (1, 2000, FULL_DATA),
+            # None fetched
+            (2000, 3000, []),
+            # "Short" books
+            (300, 700, [GAME_OF_THRONES, FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING]),
+            # Unbounded short
+            (None, 416, [TWO_TOWERS, RETURN_OF_THE_KING]),
+            # Unbounded long
+            (1050, None, [WORDS_OF_RADIANCE, OATHBRINGER, RHYTHM_OF_WAR, DANCE_WITH_DRAGONS]),
+            # Middle length
+            (
+                500,
+                1010,
+                [WAY_OF_KINGS, GAME_OF_THRONES, CLASH_OF_KINGS, STORM_OF_SWORDS, FEAST_FOR_CROWS],
+            ),
+        ],
+    )
+    def test_query_builder_filter_int_range(
+        self, search_client, search_index, min_value, max_value, expected_results
+    ):
+        builder = (
+            SearchQueryBuilder().sort_by([]).filter_int_range("page_count", min_value, max_value)
+        )
+
+        expected_ranges = {}
+        if min_value is not None:
+            expected_ranges["gte"] = min_value
+        if max_value is not None:
+            expected_ranges["lte"] = max_value
+
+        expected_query = {
+            "size": 25,
+            "from": 0,
+            "track_scores": True,
+            "query": {"bool": {"filter": [{"range": {"page_count": expected_ranges}}]}},
+        }
+
+        assert builder.build() == expected_query
+
+        validate_valid_request(search_client, search_index, builder, expected_results)
+
+    def test_multiple_ranges(self, search_client, search_index):
+        # Sanity test that we can specify multiple ranges (in this case, a date + int range)
+        # in the same query
+        builder = (
+            SearchQueryBuilder()
+            .sort_by([])
+            .filter_int_range("page_count", 600, 1100)
+            .filter_date_range("publication_date", date(2000, 1, 1), date(2013, 1, 1))
+        )
+
+        expected_results = [WAY_OF_KINGS, STORM_OF_SWORDS, FEAST_FOR_CROWS, DANCE_WITH_DRAGONS]
+        validate_valid_request(
+            search_client, search_index, builder, expected_results=expected_results
+        )
+
+    def test_filter_int_range_both_none(self):
+        with pytest.raises(ValueError, match="Cannot use int range filter"):
+            SearchQueryBuilder().filter_int_range("test_field", None, None)
+
+    def test_filter_date_range_both_none(self):
+        with pytest.raises(ValueError, match="Cannot use date range filter"):
+            SearchQueryBuilder().filter_date_range("test_field", None, None)
 
     @pytest.mark.parametrize(
         "query,fields,expected_results,expected_aggregations",
