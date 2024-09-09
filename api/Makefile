@@ -91,19 +91,21 @@ setup-local:
 build:
 	docker compose build
 
-start:
+start: ## Start the API
 	docker compose up --detach
 
 start-debug:
 	docker compose -f docker-compose.yml -f docker-compose.debug.yml up --detach
 
-run-logs: start
+run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
 init: build init-db init-opensearch init-localstack
 
-clean-volumes: ## Remove project docker volumes (which includes the DB state)
+clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
+
+volume-recreate:  clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
 
 stop:
 	docker compose down
@@ -125,9 +127,6 @@ init-db: start-db setup-postgres-db db-migrate
 start-db:
 	docker compose up --detach grants-db
 	./bin/wait-for-local-db.sh
-
-## Destroy current DB, setup new one
-db-recreate: clean-volumes init-db
 
 #########################
 # DB Migrations
@@ -166,7 +165,7 @@ db-migrate-history: ## Show migration history
 db-migrate-heads: ## Show migrations marked as a head
 	$(alembic_cmd) heads $(args)
 
-db-seed-local:
+db-seed-local: ## Generate records into your local database
 	$(PY_RUN_CMD) db-seed-local $(args)
 
 db-check-migrations: ## Verify the DB schema matches the DB migrations generated
@@ -183,8 +182,7 @@ setup-postgres-db: ## Does any initial setup necessary for our local database to
 # Opensearch
 ##################################################
 
-init-opensearch: start-opensearch
-# TODO - in subsequent PRs, we'll add more to this command to setup the search index locally
+init-opensearch: start-opensearch ## Start the opensearch service locally
 
 start-opensearch:
 	docker compose up --detach opensearch-node
@@ -274,6 +272,9 @@ setup-foreign-tables:
 
 seed-local-legacy-tables:
 	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
+
+populate-search-opportunities: ## Load opportunities from the DB into the search index, run "make db-seed-local" first to populate your database
+	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
 
 ##################################################
 # Miscellaneous Utilities
