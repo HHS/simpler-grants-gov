@@ -1,6 +1,7 @@
 services:
   nextjs:
     container_name: next-dev
+    platform: linux/amd64
     build:
       context: .
       target: dev
@@ -15,6 +16,7 @@ services:
 
   storybook:
     container_name: storybook
+    platform: linux/amd64
     build:
       context: .
       target: dev
