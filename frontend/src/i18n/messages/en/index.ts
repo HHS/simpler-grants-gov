@@ -8,6 +8,17 @@ export const messages = {
   OpportunityListing: {
     page_title: "Opportunity Listing",
     meta_description: "Summary details for the specific opportunity listing.",
+    intro: {
+      agency: "Agency: ",
+      assistanceListings: "Assistance Listings: ",
+      lastUpdated: "Last Updated: ",
+    },
+    description: {
+      description: "Description",
+      eligible_applicants: "Eligible Applicants",
+      additional_info: "Additional Information on eligibility",
+      contact_info: "Grantor contact information",
+    },
   },
   Index: {
     page_title: "Simpler.Grants.gov",

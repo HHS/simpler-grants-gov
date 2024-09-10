@@ -1,4 +1,5 @@
 "use client";
+
 import { Checkbox } from "@trussworks/react-uswds";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useContext } from "react";

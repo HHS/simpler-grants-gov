@@ -1,13 +1,22 @@
 import {
   ApiResponse,
-  Summary,
+  Opportunity,
 } from "../../../../types/opportunity/opportunityResponseTypes";
 
+import BetaAlert from "src/components/BetaAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
+import { GridContainer } from "@trussworks/react-uswds";
 import { Metadata } from "next";
 import NotFound from "../../../not-found";
+import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
+import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
+import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
+import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
+import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityListingAPI from "../../../api/OpportunityListingAPI";
+import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 import { getTranslations } from "next-intl/server";
-import { isSummary } from "../../../../utils/opportunity/isSummary";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -24,7 +33,6 @@ export default async function OpportunityListing({
   params: { id: string };
 }) {
   const id = Number(params.id);
-
   // Opportunity id needs to be a number greater than 1
   if (isNaN(id) || id < 0) {
     return <NotFound />;
@@ -43,47 +51,32 @@ export default async function OpportunityListing({
     return <NotFound />;
   }
 
-  const renderSummary = (summary: Summary) => {
-    return (
-      <>
-        {Object.entries(summary).map(([summaryKey, summaryValue]) => (
-          <tr key={summaryKey}>
-            <td className="word-wrap">{`summary.${summaryKey}`}</td>
-            <td className="word-wrap">{JSON.stringify(summaryValue)}</td>
-          </tr>
-        ))}
-      </>
-    );
-  };
+  const opportunityData: Opportunity = opportunity.data;
+
+  OPPORTUNITY_CRUMBS.push({
+    title: opportunityData.opportunity_title,
+    path: `/opportunity/${opportunityData.opportunity_id}/`,
+  });
 
   return (
-    <div className="grid-container">
-      <div className="grid-row margin-y-4">
-        <div className="usa-table-container">
-          <table className="usa-table usa-table--borderless margin-x-auto width-full maxw-desktop-lg">
-            <thead>
-              <tr>
-                <th>Field Name</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(opportunity.data).map(([key, value]) => {
-                if (key === "summary" && isSummary(value)) {
-                  return renderSummary(value);
-                } else {
-                  return (
-                    <tr key={key}>
-                      <td className="word-wrap">{key}</td>
-                      <td className="word-wrap">{JSON.stringify(value)}</td>
-                    </tr>
-                  );
-                }
-              })}
-            </tbody>
-          </table>
+    <div>
+      <BetaAlert />
+      <Breadcrumbs breadcrumbList={OPPORTUNITY_CRUMBS} />
+      <OpportunityIntro opportunityData={opportunityData} />
+      <GridContainer>
+        <div className="grid-row">
+          <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+            <OpportunityDescription opportunityData={opportunityData} />
+            <OpportunityLink opportunityData={opportunityData} />
+          </div>
+
+          <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
+            <OpportunityStatusWidget opportunityData={opportunityData} />
+            <OpportunityAwardInfo opportunityData={opportunityData} />
+            <OpportunityHistory opportunityData={opportunityData} />
+          </div>
         </div>
-      </div>
+      </GridContainer>
     </div>
   );
 }

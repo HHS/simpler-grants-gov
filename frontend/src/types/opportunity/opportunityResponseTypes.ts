@@ -51,7 +51,7 @@ export interface Opportunity {
 }
 
 export interface ApiResponse {
-  data: Opportunity[];
+  data: Opportunity;
   message: string;
   status_code: number;
 }
