@@ -143,3 +143,6 @@ dmypy.json
 
 # vscode
 .vscode/settings.json
+
+# vim
+*.swp
