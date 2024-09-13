@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.constants.lookup_constants import (
+    AgencyDownloadFileType,
+    AgencySubmissionNotificationSetting,
     ApplicantType,
     FundingCategory,
     FundingInstrument,
@@ -93,6 +95,18 @@ FUNDING_INSTRUMENT_CONFIG = LookupConfig(
     ]
 )
 
+AGENCY_DOWNLOAD_FILE_TYPE_CONFIG = LookupConfig(
+    [LookupStr(AgencyDownloadFileType.XML, 1), LookupStr(AgencyDownloadFileType.PDF, 2)]
+)
+
+AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
+    [
+        LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
+        LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
+        LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
+    ]
+)
+
 
 @LookupRegistry.register_lookup(OPPORTUNITY_CATEGORY_CONFIG)
 class LkOpportunityCategory(LookupTable, TimestampMixin):
@@ -161,4 +175,33 @@ class LkOpportunityStatus(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkOpportunityStatus":
         return LkOpportunityStatus(
             opportunity_status_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(AGENCY_DOWNLOAD_FILE_TYPE_CONFIG)
+class LkAgencyDownloadFileType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_agency_download_file_type"
+
+    agency_download_file_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkAgencyDownloadFileType":
+        return LkAgencyDownloadFileType(
+            agency_download_file_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG)
+class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
+    __tablename__ = "lk_agency_submission_notification_setting"
+
+    agency_submission_notification_setting_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkAgencySubmissionNotificationSetting":
+        return LkAgencySubmissionNotificationSetting(
+            agency_submission_notification_setting_id=lookup.lookup_val,
+            description=lookup.get_description(),
         )
