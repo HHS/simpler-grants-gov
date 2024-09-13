@@ -337,38 +337,34 @@ class OpportunitySearchFilterV1Schema(Schema):
     )
     expected_number_of_awards = fields.Nested(
         IntegerSearchSchemaBuilder("ExpectedNumberAwardsFilterV1Schema")
-        .with_minimum_value(example=0)
-        .with_maximum_value(example=25)
+        .with_integer_range(min_example=0, max_example=25)
         .build()
     )
 
     award_floor = fields.Nested(
         IntegerSearchSchemaBuilder("AwardFloorFilterV1Schema")
-        .with_minimum_value(example=0)
-        .with_maximum_value(example=10_000)
+        .with_integer_range(min_example=0, max_example=10_000)
         .build()
     )
 
     award_ceiling = fields.Nested(
         IntegerSearchSchemaBuilder("AwardCeilingFilterV1Schema")
-        .with_minimum_value(example=0)
-        .with_maximum_value(example=10_000_000)
+        .with_integer_range(min_example=0, max_example=10_000_000)
         .build()
     )
 
     estimated_total_program_funding = fields.Nested(
         IntegerSearchSchemaBuilder("EstimatedTotalProgramFundingFilterV1Schema")
-        .with_minimum_value(example=0)
-        .with_maximum_value(example=10_000_000)
+        .with_integer_range(min_example=0, max_example=10_000_000)
         .build()
     )
 
     post_date = fields.Nested(
-        DateSearchSchemaBuilder("PostDateFilterV1Schema").with_start_date().with_end_date().build()
+        DateSearchSchemaBuilder("PostDateFilterV1Schema").with_date_range().build()
     )
 
     close_date = fields.Nested(
-        DateSearchSchemaBuilder("CloseDateFilterV1Schema").with_start_date().with_end_date().build()
+        DateSearchSchemaBuilder("CloseDateFilterV1Schema").with_date_range().build()
     )
 
 
