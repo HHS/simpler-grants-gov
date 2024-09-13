@@ -72,6 +72,11 @@ def build_opp(
     funding_categories: list,
     post_date: date,
     close_date: date | None,
+    is_cost_sharing: bool,
+    expected_number_of_awards: int | None,
+    award_floor: int | None,
+    award_ceiling: int | None,
+    estimated_total_program_funding: int | None,
 ) -> Opportunity:
     opportunity = OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -98,6 +103,11 @@ def build_opp(
         funding_categories=funding_categories,
         post_date=post_date,
         close_date=close_date,
+        is_cost_sharing=is_cost_sharing,
+        expected_number_of_awards=expected_number_of_awards,
+        award_floor=award_floor,
+        award_ceiling=award_ceiling,
+        estimated_total_program_funding=estimated_total_program_funding,
     )
 
     opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
@@ -135,6 +145,11 @@ NASA_SPACE_FELLOWSHIP = build_opp(
     funding_categories=[FundingCategory.EDUCATION],
     post_date=date(2020, 3, 1),
     close_date=date(2027, 6, 1),
+    is_cost_sharing=True,
+    expected_number_of_awards=3,
+    award_floor=50_000,
+    award_ceiling=5_000_000,
+    estimated_total_program_funding=15_000_000,
 )
 
 NASA_INNOVATIONS = build_opp(
@@ -149,6 +164,11 @@ NASA_INNOVATIONS = build_opp(
     funding_categories=[FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT],
     post_date=date(2019, 3, 1),
     close_date=None,
+    is_cost_sharing=False,
+    expected_number_of_awards=1,
+    award_floor=5000,
+    award_ceiling=5000,
+    estimated_total_program_funding=5000,
 )
 
 NASA_SUPERSONIC = build_opp(
@@ -163,6 +183,11 @@ NASA_SUPERSONIC = build_opp(
     funding_categories=[FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT],
     post_date=date(2021, 3, 1),
     close_date=date(2030, 6, 1),
+    is_cost_sharing=True,
+    expected_number_of_awards=9,
+    award_floor=10_000,
+    award_ceiling=50_000,
+    estimated_total_program_funding=None,
 )
 
 NASA_K12_DIVERSITY = build_opp(
@@ -177,6 +202,11 @@ NASA_K12_DIVERSITY = build_opp(
     funding_categories=[FundingCategory.EDUCATION],
     post_date=date(2025, 3, 1),
     close_date=date(2018, 6, 1),
+    is_cost_sharing=False,
+    expected_number_of_awards=None,
+    award_floor=None,
+    award_ceiling=None,
+    estimated_total_program_funding=None,
 )
 
 LOC_TEACHING = build_opp(
@@ -197,6 +227,11 @@ LOC_TEACHING = build_opp(
     funding_categories=[FundingCategory.EDUCATION],
     post_date=date(2031, 3, 1),
     close_date=date(2010, 6, 1),
+    is_cost_sharing=True,
+    expected_number_of_awards=100,
+    award_floor=500,
+    award_ceiling=1_000,
+    estimated_total_program_funding=10_000,
 )
 
 LOC_HIGHER_EDUCATION = build_opp(
@@ -214,6 +249,11 @@ LOC_HIGHER_EDUCATION = build_opp(
     funding_categories=[FundingCategory.OTHER],
     post_date=date(2026, 3, 1),
     close_date=None,
+    is_cost_sharing=False,
+    expected_number_of_awards=1,
+    award_floor=None,
+    award_ceiling=None,
+    estimated_total_program_funding=15_000_000,
 )
 
 DOS_DIGITAL_LITERACY = build_opp(
@@ -233,6 +273,11 @@ DOS_DIGITAL_LITERACY = build_opp(
     funding_categories=[FundingCategory.OTHER],
     post_date=date(2028, 3, 1),
     close_date=date(2023, 6, 1),
+    is_cost_sharing=True,
+    expected_number_of_awards=2,
+    award_floor=5,
+    award_ceiling=10,
+    estimated_total_program_funding=15,
 )
 
 DOC_SPACE_COAST = build_opp(
@@ -251,6 +296,11 @@ DOC_SPACE_COAST = build_opp(
     funding_categories=[FundingCategory.OTHER, FundingCategory.REGIONAL_DEVELOPMENT],
     post_date=date(2017, 3, 1),
     close_date=date(2019, 6, 1),
+    is_cost_sharing=False,
+    expected_number_of_awards=1000,
+    award_floor=1,
+    award_ceiling=2,
+    estimated_total_program_funding=2000,
 )
 
 DOC_MANUFACTURING = build_opp(
@@ -269,6 +319,11 @@ DOC_MANUFACTURING = build_opp(
     ],
     post_date=date(2013, 3, 1),
     close_date=date(2035, 6, 1),
+    is_cost_sharing=True,
+    expected_number_of_awards=25,
+    award_floor=50_000_000,
+    award_ceiling=5_000_000_000,
+    estimated_total_program_funding=15_000_000_000,
 )
 
 OPPORTUNITIES = [
@@ -709,33 +764,257 @@ class TestOpportunityRouteSearch(BaseTestClass):
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
-        "search_request",
+        "search_request, expected_results",
         [
-            # Post Date
-            (get_search_request(post_date={"start_date": None})),
-            (get_search_request(post_date={"end_date": None})),
-            (get_search_request(post_date={"start_date": "2020-01-01"})),
-            (get_search_request(post_date={"end_date": "2020-02-01"})),
-            (get_search_request(post_date={"start_date": None, "end_date": None})),
-            (get_search_request(post_date={"start_date": "2020-01-01", "end_date": None})),
-            (get_search_request(post_date={"start_date": None, "end_date": "2020-02-01"})),
-            (get_search_request(post_date={"start_date": "2020-01-01", "end_date": "2020-02-01"})),
-            # Close Date
-            (get_search_request(close_date={"start_date": None})),
-            (get_search_request(close_date={"end_date": None})),
-            (get_search_request(close_date={"start_date": "2020-01-01"})),
-            (get_search_request(close_date={"end_date": "2020-02-01"})),
-            (get_search_request(close_date={"start_date": None, "end_date": None})),
-            (get_search_request(close_date={"start_date": "2020-01-01", "end_date": None})),
-            (get_search_request(close_date={"start_date": None, "end_date": "2020-02-01"})),
-            (get_search_request(close_date={"start_date": "2020-01-01", "end_date": "2020-02-01"})),
+            # Post date
+            (
+                get_search_request(
+                    post_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
+                ),
+                OPPORTUNITIES,
+            ),
+            (
+                get_search_request(
+                    post_date={"start_date": "1999-01-01", "end_date": "2000-01-01"}
+                ),
+                [],
+            ),
+            (
+                get_search_request(
+                    post_date={"start_date": "2015-01-01", "end_date": "2018-01-01"}
+                ),
+                [DOC_SPACE_COAST],
+            ),
+            (
+                get_search_request(
+                    post_date={"start_date": "2019-06-01", "end_date": "2024-01-01"}
+                ),
+                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+            ),
+            (get_search_request(post_date={"end_date": "2016-01-01"}), [DOC_MANUFACTURING]),
+            # Close date
+            (
+                get_search_request(
+                    close_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
+                ),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    NASA_K12_DIVERSITY,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(close_date={"start_date": "2019-01-01"}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(close_date={"end_date": "2019-01-01"}),
+                [NASA_K12_DIVERSITY, LOC_TEACHING],
+            ),
+            (
+                get_search_request(
+                    close_date={"start_date": "2015-01-01", "end_date": "2019-12-01"}
+                ),
+                [NASA_K12_DIVERSITY, DOC_SPACE_COAST],
+            ),
         ],
     )
-    def test_search_validate_date_filters_200(self, client, api_auth_token, search_request):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 200
+    def test_search_filters_date_200(
+        self, client, api_auth_token, search_request, expected_results
+    ):
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            # Is cost sharing
+            (get_search_request(is_cost_sharing_one_of=[True, False]), OPPORTUNITIES),
+            (get_search_request(is_cost_sharing_one_of=["1", "0"]), OPPORTUNITIES),
+            (
+                get_search_request(is_cost_sharing_one_of=["t"]),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(is_cost_sharing_one_of=["on"]),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(is_cost_sharing_one_of=["false"]),
+                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+            ),
+            (
+                get_search_request(is_cost_sharing_one_of=["no"]),
+                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+            ),
+        ],
+    )
+    def test_search_bool_filters_200(
+        self, client, api_auth_token, search_request, expected_results
+    ):
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            # Expected Number of Awards
+            (
+                get_search_request(expected_number_of_awards={"min": 0, "max": 1000}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                    LOC_TEACHING,
+                    LOC_HIGHER_EDUCATION,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(expected_number_of_awards={"min": 5, "max": 10}),
+                [NASA_SUPERSONIC],
+            ),
+            (
+                get_search_request(expected_number_of_awards={"min": 12}),
+                [LOC_TEACHING, DOC_SPACE_COAST, DOC_MANUFACTURING],
+            ),
+            (
+                get_search_request(expected_number_of_awards={"min": 7}),
+                [NASA_SUPERSONIC, LOC_TEACHING, DOC_SPACE_COAST, DOC_MANUFACTURING],
+            ),
+            # Award Floor
+            (
+                get_search_request(award_floor={"min": 0, "max": 10_000_000_000}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(award_floor={"min": 1, "max": 5_000}),
+                [
+                    NASA_INNOVATIONS,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                ],
+            ),
+            (
+                get_search_request(award_floor={"min": 5_000, "max": 10_000}),
+                [
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                ],
+            ),
+            # Award Ceiling
+            (
+                get_search_request(award_ceiling={"min": 0, "max": 10_000_000_000}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(award_ceiling={"min": 5_000, "max": 50_000}),
+                [
+                    NASA_INNOVATIONS,
+                    NASA_SUPERSONIC,
+                ],
+            ),
+            (
+                get_search_request(award_ceiling={"min": 50_000}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            # Estimated Total Program Funding
+            (
+                get_search_request(
+                    estimated_total_program_funding={"min": 0, "max": 100_000_000_000}
+                ),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
+                    LOC_TEACHING,
+                    LOC_HIGHER_EDUCATION,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(estimated_total_program_funding={"min": 0, "max": 5_000}),
+                [
+                    NASA_INNOVATIONS,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                ],
+            ),
+            # Mix
+            (
+                get_search_request(
+                    expected_number_of_awards={"min": 0},
+                    award_floor={"max": 10_000},
+                    award_ceiling={"max": 10_000_000},
+                    estimated_total_program_funding={"min": 10_000},
+                ),
+                [LOC_TEACHING],
+            ),
+            (
+                get_search_request(
+                    expected_number_of_awards={"max": 10},
+                    award_floor={"min": 1_000, "max": 10_000},
+                    award_ceiling={"max": 10_000_000},
+                ),
+                [NASA_INNOVATIONS, NASA_SUPERSONIC],
+            ),
+            (
+                get_search_request(
+                    expected_number_of_awards={"min": 1, "max": 2},
+                    award_floor={"min": 0, "max": 1000},
+                    award_ceiling={"min": 10000, "max": 10000000},
+                    estimated_total_program_funding={"min": 123456, "max": 345678},
+                ),
+                [],
+            ),
+        ],
+    )
+    def test_search_int_filters_200(self, client, api_auth_token, search_request, expected_results):
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
         "search_request",
@@ -760,7 +1039,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (get_search_request(close_date={"end_date": 5})),
         ],
     )
-    def test_search_validate_date_filters_422(self, client, api_auth_token, search_request):
+    def test_search_validate_date_filters_format_422(self, client, api_auth_token, search_request):
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
@@ -770,6 +1049,34 @@ class TestOpportunityRouteSearch(BaseTestClass):
         error = json["errors"][0]
         assert json["message"] == "Validation error"
         assert error["message"] == "Not a valid date."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # Post Date
+            (get_search_request(post_date={"start_date": None, "end_date": None})),
+            (get_search_request(post_date={"start_date": None})),
+            (get_search_request(post_date={"end_date": None})),
+            (get_search_request(post_date={})),
+            # Close Date
+            (get_search_request(close_date={"start_date": None, "end_date": None})),
+            (get_search_request(close_date={"start_date": None})),
+            (get_search_request(close_date={"end_date": None})),
+            (get_search_request(close_date={})),
+        ],
+    )
+    def test_search_validate_date_filters_nullability_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert error["message"] == "At least one of start_date or end_date must be provided."
 
     @pytest.mark.parametrize(
         "search_request",
@@ -815,23 +1122,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.mark.parametrize(
         "search_request",
         [
-            get_search_request(is_cost_sharing_one_of=[True, False]),
-            get_search_request(is_cost_sharing_one_of=["1", "0"]),
-            get_search_request(is_cost_sharing_one_of=["t", "f"]),
-            get_search_request(is_cost_sharing_one_of=["true", "false"]),
-            get_search_request(is_cost_sharing_one_of=["on", "off"]),
-            get_search_request(is_cost_sharing_one_of=["yes", "no"]),
-        ],
-    )
-    def test_search_validate_is_cost_sharing_200(self, client, api_auth_token, search_request):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 200
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
             get_search_request(is_cost_sharing_one_of=["hello"]),
             get_search_request(is_cost_sharing_one_of=[True, "definitely"]),
             get_search_request(is_cost_sharing_one_of=[5, 6]),
@@ -851,33 +1141,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         error = json["errors"][0]
         assert json["message"] == "Validation error"
         assert error["message"] == "Not a valid boolean."
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            get_search_request(
-                expected_number_of_awards={"min": 0},
-                award_floor={"max": 35},
-                award_ceiling={"max": "10000000"},
-                estimated_total_program_funding={"min": "123456"},
-            ),
-            get_search_request(
-                expected_number_of_awards={"min": 1, "max": 2},
-                award_floor={"min": 0, "max": 1000},
-                award_ceiling={"min": 10000, "max": 10000000},
-                estimated_total_program_funding={"min": 123456, "max": 345678},
-            ),
-            get_search_request(expected_number_of_awards={"min": 1, "max": 2}),
-            get_search_request(award_floor={"min": 0, "max": 1000}),
-            get_search_request(award_ceiling={"min": "10000", "max": 10000000}),
-            get_search_request(estimated_total_program_funding={"min": 123456, "max": "345678"}),
-        ],
-    )
-    def test_search_validate_award_values_200(self, client, api_auth_token, search_request):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 200
 
     @pytest.mark.parametrize(
         "search_request",
@@ -924,6 +1187,44 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert json["message"] == "Validation error"
         for error in json["errors"]:
             assert error["message"] == "Must be greater than or equal to 0."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # Both set to None
+            get_search_request(
+                expected_number_of_awards={"min": None, "max": None},
+                award_floor={"min": None, "max": None},
+                award_ceiling={"min": None, "max": None},
+                estimated_total_program_funding={"min": None, "max": None},
+            ),
+            # Min only set
+            get_search_request(
+                expected_number_of_awards={"min": None},
+                award_floor={"min": None},
+                award_ceiling={"min": None},
+                estimated_total_program_funding={"min": None},
+            ),
+            # Max only set
+            get_search_request(
+                expected_number_of_awards={"max": None},
+                award_floor={"max": None},
+                award_ceiling={"max": None},
+                estimated_total_program_funding={"max": None},
+            ),
+        ],
+    )
+    def test_search_validate_award_values_nullability_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        json = resp.get_json()
+        assert json["message"] == "Validation error"
+        for error in json["errors"]:
+            assert error["message"] == "At least one of min or max must be provided."
 
     @pytest.mark.parametrize(
         "search_request, expected_results",
