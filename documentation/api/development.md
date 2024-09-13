@@ -11,17 +11,28 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 1. Install the version of Python specified in [pyproject.toml](../../api/pyproject.toml)
    [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
    or [asdf](https://asdf-vm.com/).
-
-2. After installing and activating the right version of Python, install
+   - If using pyenv run `pyenv local <version>` to ensure that version will be used in subsequent steps
+2. Ensure that `python -V` and `python3 -V` are picking up that version.
+   - If not, run `pyenv init -` and/or restart your shell to ensure it was run automatically
+3. After installing and activating the right version of Python, install
    [poetry](https://python-poetry.org/docs/#installation) and follow the instructions to add poetry to your path if necessary.
 
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
-3. If you are using an M1 mac, you will need to install postgres as well: `brew install postgresql` (The psycopg2-binary is built from source on M1 macs which requires the postgres executable to be present)
-
 4. You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+## Database setup: Run Migrations/Seeds
+
+1. If you haven't done local development before you'll need to execute the migrations and seed the DB with data using the steps in [database-local-usage.md](database/database-local-usage.md)
+
+## OpenSearch setup
+
+1. Run `make init-opensearch` setup the OpenSearch Container
+2. Run `make populate-search-opportunities` to push data previously seeded in the DB into the search index
+
+If your DB or OpenSearch end up in an odd place, you can reset all the persistent storage using `make volume-recreate`
 
 ## Run the application
 
@@ -36,11 +47,14 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 
 `make test` will run all of the tests. Additional arguments can be passed to this command which will be passed to pytest like so: `make test args="tests/api/route -v"` which would run all tests in the route folder with verbosity increased. See the [Pytest Docs](https://docs.pytest.org/en/7.1.x/reference/reference.html#command-line-flags) for more details on CLI flags you can set.
 
-`make clean-volumes` will spin down the docker containers + delete the volumes. This can be useful to reset your DB, or fix any bad states your local environment may have gotten into.
+`make clean-volumes` will spin down the docker containers + delete the volumes.
+
+`make volume-recreate` Deletes the volumes and then re-initializes the persistant portions of the stack. This can be useful to reset your DB, or fix any bad states your local environment may have gotten into.
 
 See the [Makefile](../../api/Makefile) for a full list of commands you can run.
 
 The `make console` command initializes a Python REPL environment pre-configured with database connectivity. This allows developers to perform database queries, utilize factories for data generation, and interact with the application's models directly.
+
 - Writing a query: `dbs.query(Opportunity).all()`
 - Saving some factory generated data to the db: `f.OpportunityFactory.create()`
 
@@ -51,8 +65,8 @@ Running in Docker is the default, but on some machines like the M1 Mac, running 
 
 You can switch which way many of these components are run by setting the `PY_RUN_APPROACH` env variable in your terminal.
 
-* `export PY_RUN_APPROACH=local` will run these components natively
-* `export PY_RUN_APPROACH=docker` will run these within Docker
+- `export PY_RUN_APPROACH=local` will run these components natively
+- `export PY_RUN_APPROACH=docker` will run these within Docker
 
 Note that even with the native mode, many components like the DB and API will only ever run in Docker, and you should always make sure that any implementations work within docker.
 
@@ -82,15 +96,14 @@ The API can be run in debug mode that allows for remote attach debugging (curren
 - See `./vscode/launch.json` which has the debug config. (Named `API Remote Attach`)
 
 - Start the server in debug mode via `make start-debug` or `make start-debug run-logs`.
-    - This will start the `main-app` service with port 5678 exposed.
+
+  - This will start the `main-app` service with port 5678 exposed.
 
 - The server will start in waiting mode, waiting for you to attach the debugger (see `/src/app.py`) before continuing to run.
 
 - Go to your VSCode debugger window and run the `API Remote Attach` option
 
 - You should now be able to hit set breakpoints throughout the API
-
-
 
 ## Next steps
 
