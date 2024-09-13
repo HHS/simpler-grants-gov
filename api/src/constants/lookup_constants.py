@@ -105,3 +105,14 @@ class FundingInstrument(StrEnum):
     GRANT = "grant"  # G
     PROCUREMENT_CONTRACT = "procurement_contract"  # PC
     OTHER = "other"  # O
+
+
+class AgencyDownloadFileType(StrEnum):
+    XML = "xml"
+    PDF = "pdf"
+
+
+class AgencySubmissionNotificationSetting(StrEnum):
+    NEVER = "never"
+    FIRST_APPLICATION_ONLY = "first_application_only"
+    ALWAYS = "always"
