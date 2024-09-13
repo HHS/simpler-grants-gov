@@ -8,6 +8,12 @@ import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
+from src.search.search_models import (
+    BoolSearchFilter,
+    DateSearchFilter,
+    IntSearchFilter,
+    StrSearchFilter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +34,11 @@ REQUEST_FIELD_NAME_MAPPING = {
     "funding_instrument": "summary.funding_instruments.keyword",
     "funding_category": "summary.funding_categories.keyword",
     "applicant_type": "summary.applicant_types.keyword",
+    "is_cost_sharing": "summary.is_cost_sharing",
+    "expected_number_of_awards": "summary.expected_number_of_awards",
+    "award_floor": "summary.award_floor",
+    "award_ceiling": "summary.award_ceiling",
+    "estimated_total_program_funding": "summary.estimated_total_program_funding",
 }
 
 SEARCH_FIELDS = [
@@ -45,11 +56,31 @@ SEARCH_FIELDS = [
 SCHEMA = OpportunityV1Schema()
 
 
+class OpportunityFilters(BaseModel):
+    applicant_type: StrSearchFilter | None = None
+    funding_instrument: StrSearchFilter | None = None
+    funding_category: StrSearchFilter | None = None
+    funding_applicant_type: StrSearchFilter | None = None
+    opportunity_status: StrSearchFilter | None = None
+    agency: StrSearchFilter | None = None
+    assistance_listing_number: StrSearchFilter | None = None
+
+    is_cost_sharing: BoolSearchFilter | None = None
+
+    expected_number_of_awards: IntSearchFilter | None = None
+    award_floor: IntSearchFilter | None = None
+    award_ceiling: IntSearchFilter | None = None
+    estimated_total_program_funding: IntSearchFilter | None = None
+
+    post_date: DateSearchFilter | None = None
+    close_date: DateSearchFilter | None = None
+
+
 class SearchOpportunityParams(BaseModel):
     pagination: PaginationParams
 
     query: str | None = Field(default=None)
-    filters: dict | None = Field(default=None)
+    filters: OpportunityFilters | None = Field(default=None)
 
 
 def _adjust_field_name(field: str) -> str:
@@ -68,16 +99,30 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     return sort_by
 
 
-def _add_search_filters(builder: search.SearchQueryBuilder, filters: dict | None) -> None:
+def _add_search_filters(
+    builder: search.SearchQueryBuilder, filters: OpportunityFilters | None
+) -> None:
     if filters is None:
         return
 
-    for field, field_filters in filters.items():
-        # one_of filters translate to an opensearch term filter
-        # see: https://opensearch.org/docs/latest/query-dsl/term/terms/
-        one_of_filters = field_filters.get("one_of", None)
-        if one_of_filters:
-            builder.filter_terms(_adjust_field_name(field), one_of_filters)
+    for field in filters.model_fields_set:
+        field_filters = getattr(filters, field)
+        field_name = _adjust_field_name(field)
+
+        # We use the type of the search filter to determine what methods
+        # we call on the builder. This way we can make sure we have the proper
+        # type mappings.
+        if isinstance(field_filters, StrSearchFilter) and field_filters.one_of:
+            builder.filter_terms(field_name, field_filters.one_of)
+
+        elif isinstance(field_filters, BoolSearchFilter) and field_filters.one_of:
+            builder.filter_terms(field_name, field_filters.one_of)
+
+        elif isinstance(field_filters, IntSearchFilter):
+            builder.filter_int_range(field_name, field_filters.min, field_filters.max)
+
+        elif isinstance(field_filters, DateSearchFilter):
+            builder.filter_date_range(field_name, field_filters.start_date, field_filters.end_date)
 
 
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:

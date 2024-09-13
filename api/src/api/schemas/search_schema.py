@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any, Pattern, Type
+from typing import Any, Callable, Pattern, Type
 
 from marshmallow import ValidationError, validates_schema
 
@@ -37,8 +37,9 @@ class BaseSearchSchema(Schema):
 
 class BaseSearchSchemaBuilder:
     def __init__(self, schema_class_name: str):
+        # schema fields are the fields and functions of the class
+        self.schema_fields: dict[str, fields.MixinField | Callable[..., Any]] = {}
         # The schema class name is used on the endpoint
-        self.schema_fields: dict[str, fields.MixinField] = {}
         self.schema_class_name = schema_class_name
 
     def build(self) -> Schema:
@@ -147,13 +148,23 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         class OpportunitySearchFilterSchema(Schema):
             example_int_field = fields.Nested(
                 IntegerSearchSchemaBuilder("ExampleIntFieldSchema")
-                    .with_minimum_value(example=1)
-                    .with_maximum_value(example=25)
+                    .with_integer_range(min_example=1, max_example=25)
                     .build()
             )
     """
 
-    def with_minimum_value(
+    def with_integer_range(
+        self,
+        min_example: int | None = None,
+        max_example: int | None = None,
+        positive_only: bool = True,
+    ) -> "IntegerSearchSchemaBuilder":
+        self._with_minimum_value(min_example, positive_only)
+        self._with_maximum_value(max_example, positive_only)
+        self._with_int_range_validator()
+        return self
+
+    def _with_minimum_value(
         self, example: int | None = None, positive_only: bool = True
     ) -> "IntegerSearchSchemaBuilder":
         metadata = {}
@@ -169,7 +180,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         )
         return self
 
-    def with_maximum_value(
+    def _with_maximum_value(
         self, example: int | None = None, positive_only: bool = True
     ) -> "IntegerSearchSchemaBuilder":
         metadata = {}
@@ -183,6 +194,28 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         self.schema_fields["max"] = fields.Integer(
             allow_none=True, metadata=metadata, validate=field_validators
         )
+        return self
+
+    def _with_int_range_validator(self) -> "IntegerSearchSchemaBuilder":
+        # Define a schema validator function that we'll use to define any
+        # rules that go across fields in the validation
+        @validates_schema
+        def validate_int_range(_: Any, data: dict, **kwargs: Any) -> None:
+            min_value = data.get("min", None)
+            max_value = data.get("max", None)
+
+            # Error if min and max value are None (either explicitly set, or because they are missing)
+            if min_value is None and max_value is None:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.REQUIRED,
+                            "At least one of min or max must be provided.",
+                        )
+                    ]
+                )
+
+        self.schema_fields["validate_int_range"] = validate_int_range
         return self
 
 
@@ -250,30 +283,38 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
     Usage::
     # In a search request schema, you would use it like so:
 
-        example_start_date_field = fields.Nested(
-            DateSearchSchemaBuilder("ExampleStartDateFieldSchema")
-                .with_start_date()
-                .build()
-        )
-
-        example_end_date_field = fields.Nested(
-            DateSearchSchemaBuilder("ExampleEndDateFieldSchema")
-                .with_end_date()
-                .build()
-        )
-
         example_startend_date_field = fields.Nested(
             DateSearchSchemaBuilder("ExampleStartEndDateFieldSchema")
-                .with_start_date()
-                .with_end_date()
+                .with_date_range()
                 .build()
         )
     """
 
-    def with_start_date(self) -> "DateSearchSchemaBuilder":
+    def with_date_range(self) -> "DateSearchSchemaBuilder":
         self.schema_fields["start_date"] = fields.Date(allow_none=True)
+        self.schema_fields["end_date"] = fields.Date(allow_none=True)
+        self._with_date_range_validator()
+
         return self
 
-    def with_end_date(self) -> "DateSearchSchemaBuilder":
-        self.schema_fields["end_date"] = fields.Date(allow_none=True)
+    def _with_date_range_validator(self) -> "DateSearchSchemaBuilder":
+        # Define a schema validator function that we'll use to define any
+        # rules that go across fields in the validation
+        @validates_schema
+        def validate_date_range(_: Any, data: dict, **kwargs: Any) -> None:
+            start_date = data.get("start_date", None)
+            end_date = data.get("end_date", None)
+
+            # Error if start and end date are None (either explicitly set, or because they are missing)
+            if start_date is None and end_date is None:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.REQUIRED,
+                            "At least one of start_date or end_date must be provided.",
+                        )
+                    ]
+                )
+
+        self.schema_fields["validate_date_range"] = validate_date_range
         return self
