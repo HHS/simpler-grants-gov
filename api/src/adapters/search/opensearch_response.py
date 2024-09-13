@@ -10,6 +10,8 @@ class SearchResponse:
 
     aggregations: dict[str, dict[str, int]]
 
+    scroll_id: str | None
+
     @classmethod
     def from_opensearch_response(
         cls, raw_json: dict[str, typing.Any], include_scores: bool = True
@@ -40,6 +42,8 @@ class SearchResponse:
             ]
         }
         """
+        scroll_id = raw_json.get("_scroll_id", None)
+
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
         total_records = hits_total.get("value", 0)
@@ -59,7 +63,7 @@ class SearchResponse:
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
 
-        return cls(total_records, records, aggregations)
+        return cls(total_records, records, aggregations, scroll_id)
 
 
 def _parse_aggregations(
