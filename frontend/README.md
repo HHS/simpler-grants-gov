@@ -166,7 +166,7 @@ It's recommended that developers configure their code editor to auto run these t
   <summary>VSCode instructions</summary>
 
 1. Install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extensions.
-2. Add the following to a `.vscode/settings.json` Worspace Settings file:
+2. Add the following to a `.vscode/settings.json` Workspace Settings file:
 
    ```json
    {
