@@ -38,21 +38,52 @@ class LoadOpportunitiesToIndex(Task):
         self,
         db_session: db.Session,
         search_client: search.SearchClient,
+        is_full_refresh: bool = True,
         config: LoadOpportunitiesToIndexConfig | None = None,
     ) -> None:
         super().__init__(db_session)
 
         self.search_client = search_client
+        self.is_full_refresh = is_full_refresh
 
         if config is None:
             config = LoadOpportunitiesToIndexConfig()
         self.config = config
 
-        current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
-        self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
+        if is_full_refresh:
+            current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
+            self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
+        else:
+            self.index_name = self.config.alias_name
         self.set_metrics({"index_name": self.index_name})
 
     def run_task(self) -> None:
+        if self.is_full_refresh:
+            logger.info("Running full refresh")
+            self.full_refresh()
+        else:
+            logger.info("Running incremental load")
+            self.incremental_updates_and_deletes()
+
+    def incremental_updates_and_deletes(self) -> None:
+        existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
+
+        # load the records incrementally
+        # TODO - The point of this incremental load is to support upcoming work
+        #        to load only opportunities that have changes as we'll eventually be indexing
+        #        files which will take longer. However - the structure of the data isn't yet
+        #        known so I want to hold on actually setting up any change-detection logic
+        loaded_opportunity_ids = set()
+        for opp_batch in self.fetch_opportunities():
+            loaded_opportunity_ids.update(self.load_records(opp_batch))
+
+        # Delete
+        opportunity_ids_to_delete = existing_opportunity_ids - loaded_opportunity_ids
+
+        if len(opportunity_ids_to_delete) > 0:
+            self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete)
+
+    def full_refresh(self) -> None:
         # create the index
         self.search_client.create_index(
             self.index_name,
@@ -93,10 +124,31 @@ class LoadOpportunitiesToIndex(Task):
             .partitions()
         )
 
-    def load_records(self, records: Sequence[Opportunity]) -> None:
+    def fetch_existing_opportunity_ids_in_index(self) -> set[int]:
+        if not self.search_client.alias_exists(self.index_name):
+            raise RuntimeError(
+                "Alias %s does not exist, please run the full refresh job before the incremental job"
+                % self.index_name
+            )
+
+        opportunity_ids: set[int] = set()
+
+        for response in self.search_client.scroll(
+            self.config.alias_name,
+            {"size": 10000, "_source": ["opportunity_id"]},
+            include_scores=False,
+        ):
+            for record in response.records:
+                opportunity_ids.add(record["opportunity_id"])
+
+        return opportunity_ids
+
+    def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
         schema = OpportunityV1Schema()
         json_records = []
+
+        loaded_opportunity_ids = set()
 
         for record in records:
             logger.info(
@@ -109,4 +161,8 @@ class LoadOpportunitiesToIndex(Task):
             json_records.append(schema.dump(record))
             self.increment(self.Metrics.RECORDS_LOADED)
 
+            loaded_opportunity_ids.add(record.opportunity_id)
+
         self.search_client.bulk_upsert(self.index_name, json_records, "opportunity_id")
+
+        return loaded_opportunity_ids

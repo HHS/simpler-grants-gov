@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Sequence
+from typing import Any, Generator, Iterable
 
 import opensearchpy
 
@@ -75,7 +75,7 @@ class SearchClient:
     def bulk_upsert(
         self,
         index_name: str,
-        records: Sequence[dict[str, Any]],
+        records: Iterable[dict[str, Any]],
         primary_key_field: str,
         *,
         refresh: bool = True
@@ -103,9 +103,50 @@ class SearchClient:
         logger.info(
             "Upserting records to %s",
             index_name,
-            extra={"index_name": index_name, "record_count": int(len(bulk_operations) / 2)},
+            extra={
+                "index_name": index_name,
+                "record_count": int(len(bulk_operations) / 2),
+                "operation": "update",
+            },
         )
         self._client.bulk(index=index_name, body=bulk_operations, refresh=refresh)
+
+    def bulk_delete(self, index_name: str, ids: Iterable[Any], *, refresh: bool = True) -> None:
+        """
+        Bulk delete records from an index
+
+        See: https://opensearch.org/docs/latest/api-reference/document-apis/bulk/ for details.
+        In this method, we delete records based on the IDs passed in.
+        """
+        bulk_operations = []
+
+        for _id in ids:
+            # { "delete": { "_id": "tt2229499" } }
+            bulk_operations.append({"delete": {"_id": _id}})
+
+        logger.info(
+            "Deleting records from %s",
+            index_name,
+            extra={
+                "index_name": index_name,
+                "record_count": len(bulk_operations),
+                "operation": "delete",
+            },
+        )
+        self._client.bulk(index=index_name, body=bulk_operations, refresh=refresh)
+
+    def index_exists(self, index_name: str) -> bool:
+        """
+        Check if an index OR alias exists by a given name
+        """
+        return self._client.indices.exists(index_name)
+
+    def alias_exists(self, alias_name: str) -> bool:
+        """
+        Check if an alias exists
+        """
+        existing_index_mapping = self._client.cat.aliases(alias_name, format="json")
+        return len(existing_index_mapping) > 0
 
     def swap_alias_index(
         self, index_name: str, alias_name: str, *, delete_prior_indexes: bool = False
@@ -144,10 +185,70 @@ class SearchClient:
         return self._client.search(index=index_name, body=search_query)
 
     def search(
-        self, index_name: str, search_query: dict, include_scores: bool = True
+        self,
+        index_name: str,
+        search_query: dict,
+        include_scores: bool = True,
+        params: dict | None = None,
     ) -> SearchResponse:
-        response = self._client.search(index=index_name, body=search_query)
+        if params is None:
+            params = {}
+
+        response = self._client.search(index=index_name, body=search_query, params=params)
         return SearchResponse.from_opensearch_response(response, include_scores)
+
+    def scroll(
+        self,
+        index_name: str,
+        search_query: dict,
+        include_scores: bool = True,
+        duration: str = "10m",
+    ) -> Generator[SearchResponse, None, None]:
+        """
+        Scroll (iterate) over a large result set a given search query.
+
+        This query uses additional resources to keep the response open, but
+        keeps a consistent set of results and is useful for backend processes
+        that need to fetch a large amount of search data. After processing the results,
+        the scroll lock is closed for you.
+
+        This method is setup as a generator method and the results can be iterated over::
+
+            for response in search_client.scroll("my_index", {"size": 10000}):
+                for record in response.records:
+                    process_record(record)
+
+
+        See: https://opensearch.org/docs/latest/api-reference/scroll/
+        """
+
+        # start scroll
+        response = self.search(
+            index_name=index_name,
+            search_query=search_query,
+            include_scores=include_scores,
+            params={"scroll": duration},
+        )
+        scroll_id = response.scroll_id
+
+        yield response
+
+        # iterate
+        while True:
+            raw_response = self._client.scroll({"scroll_id": scroll_id, "scroll": duration})
+            response = SearchResponse.from_opensearch_response(raw_response, include_scores)
+
+            # The scroll ID can change between queries according to the docs, so we
+            # keep updating the value while iterating in case they change.
+            scroll_id = response.scroll_id
+
+            if len(response.records) == 0:
+                break
+
+            yield response
+
+        # close scroll
+        self._client.clear_scroll(scroll_id=scroll_id)
 
 
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
