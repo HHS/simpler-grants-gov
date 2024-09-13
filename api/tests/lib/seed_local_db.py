@@ -9,6 +9,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
@@ -115,6 +116,41 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
     logger.info("Finished creating records in the transfer_topportunity table")
 
 
+# Agencies we want to create locally - if we want to create significantly more
+# we can consider shoving this into a CSV that we load instead.
+AGENCIES_TO_CREATE = [
+    {
+        "agency_code": "USAID",
+        "agency_name": "Agency for International Development",
+    },
+    {
+        "agency_code": "ARPAH",
+        "agency_name": "Advanced Research Projects Agency for Health",
+    },
+    {
+        "agency_code": "DOC",
+        "agency_name": "Agency for International Development",
+    },
+    {
+        "agency_code": "DOC-EDA",
+        "agency_name": "Agency for International Development",
+    },
+]
+
+
+def _build_agencies(db_session: db.Session) -> None:
+    # Create a static set of agencies, only if they don't already exist
+    agencies = db_session.query(Agency).all()
+    agency_codes = set([a.agency_code for a in agencies])
+
+    for agency_to_create in AGENCIES_TO_CREATE:
+        if agency_to_create["agency_code"] in agency_codes:
+            continue
+
+        logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
+        factories.AgencyFactory.create(**agency_to_create)
+
+
 @click.command()
 @click.option(
     "--iterations",
@@ -141,3 +177,5 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
             # Need to commit to force any updates made
             # after factories created objects
             db_session.commit()
+
+            _build_agencies(db_session)

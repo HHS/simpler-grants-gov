@@ -24,6 +24,8 @@ import src.db.models.staging as staging
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
+    AgencyDownloadFileType,
+    AgencySubmissionNotificationSetting,
     ApplicantType,
     FundingCategory,
     FundingInstrument,
@@ -31,6 +33,7 @@ from src.constants.lookup_constants import (
     OpportunityCategoryLegacy,
     OpportunityStatus,
 )
+from src.db.models import agency_models
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -137,7 +140,9 @@ class CustomProvider(BaseProvider):
         "{{word}}-###-##",
     ]
 
-    YN_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
+    YN_BOOLEAN_VALUES = ["Y", "N"]
+
+    YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
@@ -176,6 +181,9 @@ class CustomProvider(BaseProvider):
 
     def yn_boolean(self) -> str:
         return self.random_element(self.YN_BOOLEAN_VALUES)
+
+    def yn_yesno_boolean(self) -> str:
+        return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
 
 
 fake = faker.Faker()
@@ -638,6 +646,61 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
     applicant_type = factory.Iterator(ApplicantType)
 
 
+class AgencyContactInfoFactory(BaseFactory):
+    class Meta:
+        model = agency_models.AgencyContactInfo
+
+    contact_name = factory.Faker("name")
+    address_line_1 = factory.Faker("street_address")
+    address_line_2 = sometimes_none(factory.Sequence(lambda n: f"Room {n}"))
+    city = factory.Faker("city")
+    state = factory.Faker("state_abbr")
+    zip_code = factory.Faker("street_address")
+    phone_number = factory.Faker("basic_phone_number")
+    primary_email = factory.Faker("email")
+    secondary_email = sometimes_none(factory.Faker("email"))
+
+
+class AgencyFactory(BaseFactory):
+    class Meta:
+        model = agency_models.Agency
+
+    agency_name = factory.Faker("agency_name")
+
+    agency_code = factory.Faker("agency")
+    sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
+
+    assistance_listing_number = factory.Faker("random_int", min=1, max=999)
+
+    agency_submission_notification_setting = factory.fuzzy.FuzzyChoice(
+        AgencySubmissionNotificationSetting
+    )
+
+    agency_contact_info = factory.SubFactory(AgencyContactInfoFactory)
+    agency_contact_info_id = factory.LazyAttribute(
+        lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
+    )
+
+    is_test_agency = False
+
+    ldap_group = factory.LazyAttribute(lambda a: a.agency_code)
+    description = factory.LazyAttribute(lambda a: a.agency_name)
+    label = factory.LazyAttribute(lambda a: a.agency_name)
+    is_multilevel_agency = factory.Faker("boolean")
+    is_multiproject = factory.Faker("boolean")
+    has_system_to_system_certificate = factory.Faker("boolean")
+    can_view_packages_in_grace_period = factory.Faker("boolean")
+    is_image_workspace_enabled = factory.Faker("boolean")
+    is_validation_workspace_enabled = factory.Faker("boolean")
+
+    agency_download_file_types = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 2),
+        elements=[a for a in AgencyDownloadFileType],
+        unique=True,
+    )
+
+
 ####################################
 # Staging Table Factories
 ####################################
@@ -797,7 +860,7 @@ class StagingTsynopsisFactory(BaseFactory):
     syn_desc = factory.Faker("summary_description")
     oth_cat_fa_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
 
-    cost_sharing = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.1)
+    cost_sharing = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.1)
     # These int values are stored as strings
     number_of_awards = sometimes_none(
         factory.LazyFunction(lambda: str(fake.random_int(1, 25))), none_chance=0.1
@@ -828,7 +891,7 @@ class StagingTsynopsisFactory(BaseFactory):
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
     create_ts = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
-    sendmail = sometimes_none(factory.Faker("yn_boolean"))
+    sendmail = sometimes_none(factory.Faker("yn_yesno_boolean"))
     response_date_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=2))
     applicant_elig_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=5))
     version_nbr = factory.Faker("random_int", min=0, max=10)
@@ -871,7 +934,7 @@ class StagingTforecastFactory(BaseFactory):
     forecast_desc = factory.Faker("summary_description")
     oth_cat_fa_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
 
-    cost_sharing = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.1)
+    cost_sharing = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.1)
     # These int values are stored as strings
     number_of_awards = sometimes_none(
         factory.LazyFunction(lambda: str(fake.random_int(1, 25))), none_chance=0.1
@@ -901,7 +964,7 @@ class StagingTforecastFactory(BaseFactory):
         factory.Faker("date_time_between", start_date="-5y", end_date="now")
     )
     create_ts = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
-    sendmail = sometimes_none(factory.Faker("yn_boolean"))
+    sendmail = sometimes_none(factory.Faker("yn_yesno_boolean"))
     applicant_elig_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=5))
     version_nbr = factory.Faker("random_int", min=0, max=10)
     modification_comments = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
@@ -1230,6 +1293,24 @@ class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
         )
 
 
+class StagingTgroupsFactory(BaseFactory):
+    class Meta:
+        model = staging.tgroups.Tgroups
+
+    keyfield = ""
+    value = ""
+
+    is_deleted = False
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    last_upd_id = factory.Faker("first_name")
+    creator_id = factory.Faker("first_name")
+
+
 ####################################
 # Transfer Table Factories
 ####################################
@@ -1532,3 +1613,73 @@ class OpportunitySummaryHistoryBuilder:
             revision_number -= 1
 
         return self.opportunity
+
+
+class StagingTgroupsAgencyFactory(factory.DictFactory):
+    """
+        This does not need to be called directly, and instead you should use
+    create_tgroups_agency (defined below) in order to call this.
+
+    We use this to help organize factories / the ability to override and set
+    values for the tgroups agency data which is spread across many rows.
+
+    Note: Any value that is "None" will not be included in the created
+          tgroups records (empty strings, or strings of values like "null" will be)
+    """
+
+    AgencyName = factory.Faker("agency_name")
+    AgencyCode = ""  # see: create_tgroups_agency for how this gets set
+    AgencyCFDA = factory.Faker("random_int", min=1, max=99)
+    AgencyDownload = factory.Faker("random_int", min=1, max=3)
+    AgencyNotify = factory.Faker("random_int", min=1, max=3)
+    AgencyEnroll = ""  # see: create_tgroups_agency for how this gets set
+
+    AgencyContactName = factory.Faker("name")
+    AgencyContactAddress1 = factory.Faker("street_address")
+    AgencyContactAddress2 = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: random.random() > 0.5),
+        yes_declaration=factory.Sequence(lambda n: f"Room {n}"),
+        no_declaration="NULL",
+    )
+    AgencyContactCity = factory.Faker("city")
+    AgencyContactState = factory.Faker("state_abbr")
+    AgencyContactZipCode = factory.Faker("postcode")
+    AgencyContactTelephone = Generators.PhoneNumber
+    AgencyContactEMail = factory.Faker("email")
+    AgencyContactEMail2 = sometimes_none(factory.Faker("email"))
+
+    ldapGp = ""  # see: create_tgroups_agency for how this gets set
+    description = factory.LazyAttribute(lambda g: g.AgencyName)
+    label = factory.LazyAttribute(lambda g: g.AgencyName)
+    multilevel = sometimes_none("TRUE", none_chance=0.8)
+    HasS2SCert = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+    ViewPkgsInGracePeriod = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+    multiproject = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+    ImageWS = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+    ValidationWS = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+
+
+def create_tgroups_agency(
+    agency_code: str, is_deleted: bool = False, **kwargs
+) -> list[staging.tgroups.Tgroups]:
+    # The agency_code value is actually just the first bit (the top-level agency)
+    kwargs["AgencyCode"] = agency_code.split("-")[0]
+    kwargs["AgencyEnroll"] = agency_code
+    kwargs["ldapGp"] = agency_code
+
+    field_values = StagingTgroupsAgencyFactory.build(**kwargs)
+
+    groups = []
+
+    field_prefix = f"Agency-{agency_code}-"
+
+    for field_name, value in field_values.items():
+        if value is None:
+            continue
+        tgroup = StagingTgroupsFactory.create(
+            keyfield=field_prefix + field_name, value=value, is_deleted=is_deleted
+        )
+
+        groups.append(tgroup)
+
+    return groups
