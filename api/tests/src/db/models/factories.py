@@ -1310,6 +1310,11 @@ class StagingTgroupsFactory(BaseFactory):
     last_upd_id = factory.Faker("first_name")
     creator_id = factory.Faker("first_name")
 
+    class Params:
+        already_transformed = factory.Trait(
+            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
 
 ####################################
 # Transfer Table Factories
@@ -1652,15 +1657,21 @@ class StagingTgroupsAgencyFactory(factory.DictFactory):
     description = factory.LazyAttribute(lambda g: g.AgencyName)
     label = factory.LazyAttribute(lambda g: g.AgencyName)
     multilevel = sometimes_none("TRUE", none_chance=0.8)
-    HasS2SCert = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
-    ViewPkgsInGracePeriod = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
-    multiproject = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
-    ImageWS = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
-    ValidationWS = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.8)
+
+    HasS2SCert = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ViewPkgsInGracePeriod = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    multiproject = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ImageWS = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ValidationWS = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
 
 
 def create_tgroups_agency(
-    agency_code: str, is_deleted: bool = False, **kwargs
+    agency_code: str,
+    is_deleted: bool = False,
+    is_already_processed: bool = False,
+    deleted_fields: set | None = None,
+    already_processed_fields: set | None = None,
+    **kwargs,
 ) -> list[staging.tgroups.Tgroups]:
     # The agency_code value is actually just the first bit (the top-level agency)
     kwargs["AgencyCode"] = agency_code.split("-")[0]
@@ -1673,11 +1684,24 @@ def create_tgroups_agency(
 
     field_prefix = f"Agency-{agency_code}-"
 
+    if already_processed_fields is None:
+        already_processed_fields = set()
+
+    if deleted_fields is None:
+        deleted_fields = set()
+
     for field_name, value in field_values.items():
         if value is None:
             continue
+
+        is_field_already_processed = is_already_processed or field_name in already_processed_fields
+        is_field_deleted = is_deleted or field_name in deleted_fields
+
         tgroup = StagingTgroupsFactory.create(
-            keyfield=field_prefix + field_name, value=value, is_deleted=is_deleted
+            keyfield=field_prefix + field_name,
+            value=str(value),
+            is_deleted=is_field_deleted,
+            already_transformed=is_field_already_processed,
         )
 
         groups.append(tgroup)

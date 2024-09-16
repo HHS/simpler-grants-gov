@@ -5,6 +5,7 @@ from pydantic_settings import SettingsConfigDict
 
 import src.data_migration.transformation.transform_constants as transform_constants
 from src.adapters import db
+from src.data_migration.transformation.subtask.transform_agency import TransformAgency
 from src.data_migration.transformation.subtask.transform_applicant_type import (
     TransformApplicantType,
 )
@@ -37,6 +38,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_applicant_type: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_APPLICANT_TYPE
     enable_funding_category: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_CATEGORY
     enable_funding_instrument: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_INSTRUMENT
+    enable_agency: bool = False  # TRANSFORM_ORACLE_DATA_ENABLE_AGENCY
 
 
 class TransformOracleDataTask(Task):
@@ -76,3 +78,6 @@ class TransformOracleDataTask(Task):
 
         if self.transform_config.enable_funding_instrument:
             TransformFundingInstrument(self).run()
+
+        if self.transform_config.enable_agency:
+            TransformAgency(self).run()
