@@ -34,6 +34,7 @@ OPPORTUNITY_SUMMARY = "opportunity_summary"
 APPLICANT_TYPE = "applicant_type"
 FUNDING_CATEGORY = "funding_category"
 FUNDING_INSTRUMENT = "funding_instrument"
+AGENCY = "agency"
 
 
 class Metrics(StrEnum):

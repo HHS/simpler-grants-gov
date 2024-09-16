@@ -7,6 +7,7 @@ import tests.src.db.models.factories as f
 from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
+from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
@@ -299,13 +300,42 @@ def setup_funding_category(
     return source_funding_category
 
 
+def setup_agency(
+    agency_code: str,
+    create_existing: bool,
+    is_already_processed: bool = False,
+    deleted_fields: set | None = None,
+    already_processed_fields: set | None = None,
+    source_values: dict | None = None,
+):
+    if source_values is None:
+        source_values = {}
+
+    tgroups = f.create_tgroups_agency(
+        agency_code,
+        is_already_processed=is_already_processed,
+        deleted_fields=deleted_fields,
+        already_processed_fields=already_processed_fields,
+        **source_values,
+    )
+
+    if create_existing:
+        f.AgencyFactory.create(agency_code=agency_code)
+
+    return tgroups
+
+
 def validate_matching_fields(
     source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
 ):
     mismatched_fields = []
 
     for source_field, destination_field in fields:
-        source_value = getattr(source, source_field)
+        if isinstance(source, dict):
+            source_value = source.get(source_field)
+        else:
+            source_value = getattr(source, source_field)
+
         destination_value = getattr(destination, destination_field)
 
         # Some fields that we copy in are datetime typed (although behave as dates and we convert as such)
@@ -656,4 +686,64 @@ def validate_funding_category(
         link_funding_category,
         [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
         expect_values_to_match,
+    )
+
+
+AGENCY_FIELD_MAPPING = [
+    ("AgencyName", "agency_name"),
+    ("AgencyCode", "sub_agency_code"),
+    ("AgencyCFDA", "assistance_listing_number"),
+    ("ldapGp", "ldap_group"),
+    ("description", "description"),
+    ("label", "label"),
+]
+
+AGENCY_CONTACT_FIELD_MAPPING = [
+    ("AgencyContactName", "contact_name"),
+    ("AgencyContactAddress1", "address_line_1"),
+    ("AgencyContactCity", "city"),
+    ("AgencyContactState", "state"),
+    ("AgencyContactZipCode", "zip_code"),
+    ("AgencyContactTelephone", "phone_number"),
+    ("AgencyContactEMail", "primary_email"),
+]
+
+
+def validate_agency(
+    db_session,
+    source_tgroups: list[staging.tgroups.Tgroups],
+    expect_in_db: bool = True,
+    expect_values_to_match: bool = True,
+    is_test_agency: bool = False,
+    non_matching_fields: set | None = None,
+):
+    agency_code = source_tgroups[0].get_agency_code()
+    agency = db_session.query(Agency).filter(Agency.agency_code == agency_code).one_or_none()
+
+    if not expect_in_db:
+        assert agency is None
+        return
+
+    assert agency is not None
+
+    # need to restructure the tgroups into a dict
+    tgroup_map = {tgroup.get_field_name(): tgroup.value for tgroup in source_tgroups}
+
+    if non_matching_fields is not None:
+        agency_field_mapping = [m for m in AGENCY_FIELD_MAPPING if m[0] not in non_matching_fields]
+    else:
+        agency_field_mapping = AGENCY_FIELD_MAPPING
+
+    validate_matching_fields(tgroup_map, agency, agency_field_mapping, expect_values_to_match)
+    assert agency.is_test_agency == is_test_agency
+
+    if non_matching_fields is not None:
+        agency_contact_field_mapping = [
+            m for m in AGENCY_CONTACT_FIELD_MAPPING if m[0] not in non_matching_fields
+        ]
+    else:
+        agency_contact_field_mapping = AGENCY_CONTACT_FIELD_MAPPING
+
+    validate_matching_fields(
+        tgroup_map, agency.agency_contact_info, agency_contact_field_mapping, expect_values_to_match
     )

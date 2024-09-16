@@ -74,3 +74,7 @@ class StagingParamMixin:
     )
 
     transformation_notes: Mapped[str | None]
+
+    @property
+    def is_modified(self) -> bool:
+        return self.transformed_at is None
