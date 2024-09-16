@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from typing import Tuple
 
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -377,6 +378,35 @@ def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     return datetime_util.adjust_timezone(aware_timestamp, "UTC")
 
 
+def get_create_update_timestamps(
+    source_created_date: datetime | None,
+    source_last_upd_date: datetime | None,
+    log_extra: dict | None = None,
+) -> Tuple[datetime, datetime]:
+    created_timestamp = convert_est_timestamp_to_utc(source_created_date)
+    updated_timestamp = convert_est_timestamp_to_utc(source_last_upd_date)
+
+    # This is incredibly rare, but possible - because our system requires
+    # we set something, we'll default to the current time and log a warning.
+    if created_timestamp is None:
+        if log_extra is None:
+            log_extra = {}
+
+        logger.warning(
+            "Record does not have a created_date timestamp set, assuming value to be now.",
+            extra=log_extra,
+        )
+        created_timestamp = datetime_util.utcnow()
+
+    if updated_timestamp is None:
+        # In the legacy system, they don't set whether something was updated
+        # until it receives an update. We always set the value, and on initial insert
+        # want it to be the same as the created_at.
+        updated_timestamp = created_timestamp
+
+    return created_timestamp, updated_timestamp
+
+
 def transform_update_create_timestamp(
     source: StagingBase, target: TimestampMixin, log_extra: dict | None = None
 ) -> None:
@@ -385,30 +415,10 @@ def transform_update_create_timestamp(
     #       on the individual class definitions, not the base class - due to how
     #       we need to maintain the column order of the legacy system.
     #       Every legacy table does have these columns.
-    created_timestamp = convert_est_timestamp_to_utc(source.created_date)  # type: ignore[attr-defined]
-    updated_timestamp = convert_est_timestamp_to_utc(source.last_upd_date)  # type: ignore[attr-defined]
+    created_timestamp, updated_timestamp = get_create_update_timestamps(source.created_date, source.last_upd_date, log_extra)  # type: ignore[attr-defined]
 
-    if created_timestamp is not None:
-        target.created_at = created_timestamp
-    else:
-        # This is incredibly rare, but possible - because our system requires
-        # we set something, we'll default to the current time and log a warning.
-        if log_extra is None:
-            log_extra = {}
-
-        logger.warning(
-            f"{source.__class__} does not have a created_date timestamp set, setting value to now.",
-            extra=log_extra,
-        )
-        target.created_at = datetime_util.utcnow()
-
-    if updated_timestamp is not None:
-        target.updated_at = updated_timestamp
-    else:
-        # In the legacy system, they don't set whether something was updated
-        # until it receives an update. We always set the value, and on initial insert
-        # want it to be the same as the created_at.
-        target.updated_at = target.created_at
+    target.created_at = created_timestamp
+    target.updated_at = updated_timestamp
 
 
 TRUTHY = {"Y", "Yes"}
@@ -429,6 +439,23 @@ def convert_yn_bool(value: str | None) -> bool | None:
 
     # Just in case the column isn't actually a boolean
     raise ValueError("Unexpected Y/N bool value: %s" % value)
+
+
+def convert_true_false_bool(value: str | None) -> bool | None:
+    if value is None or value == "":
+        return None
+
+    return value == "TRUE"
+
+
+def convert_null_like_to_none(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    if value.lower() == "null":
+        return None
+
+    return value
 
 
 def convert_action_type_to_is_deleted(value: str | None) -> bool:

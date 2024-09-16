@@ -73,12 +73,13 @@ class Agency(ApiSchemaTable, TimestampMixin):
     ldap_group: Mapped[str]
     description: Mapped[str]
     label: Mapped[str]
-    is_multilevel_agency: Mapped[bool]
-    is_multiproject: Mapped[bool]
-    has_system_to_system_certificate: Mapped[bool]
-    can_view_packages_in_grace_period: Mapped[bool]
-    is_image_workspace_enabled: Mapped[bool]
-    is_validation_workspace_enabled: Mapped[bool]
+
+    is_multilevel_agency: Mapped[bool] = mapped_column(default=False)
+    is_multiproject: Mapped[bool] = mapped_column(default=False)
+    has_system_to_system_certificate: Mapped[bool] = mapped_column(default=False)
+    can_view_packages_in_grace_period: Mapped[bool] = mapped_column(default=False)
+    is_image_workspace_enabled: Mapped[bool] = mapped_column(default=False)
+    is_validation_workspace_enabled: Mapped[bool] = mapped_column(default=False)
 
     link_agency_download_file_types: Mapped[list["LinkAgencyDownloadFileType"]] = relationship(
         back_populates="agency", uselist=True, cascade="all, delete-orphan"
