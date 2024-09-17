@@ -21,7 +21,9 @@ export class APISearchFetcher extends SearchFetcher {
       // await new Promise((resolve) => setTimeout(resolve, 13250));
 
       const response: SearchAPIResponse =
-        await this.searchApi.searchOpportunities(searchInputs);
+        (await this.searchApi.searchOpportunities(
+          searchInputs,
+        )) as SearchAPIResponse;
       response.actionType = searchInputs.actionType;
       response.fieldChanged = searchInputs.fieldChanged;
 
