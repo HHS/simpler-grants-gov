@@ -1,4 +1,5 @@
 import { SearchFetcherActionType } from "./searchRequestTypes";
+import { PaginationInfo } from "src/types/apiResponseTypes";
 
 export interface AssistanceListing {
   assistance_listing_number: string;
@@ -50,15 +51,6 @@ export interface Opportunity {
   opportunity_title: string;
   summary: Summary;
   updated_at: string;
-}
-
-export interface PaginationInfo {
-  order_by: string;
-  page_offset: number;
-  page_size: number;
-  sort_direction: string;
-  total_pages: number;
-  total_records: number;
 }
 
 export interface SearchAPIResponse {

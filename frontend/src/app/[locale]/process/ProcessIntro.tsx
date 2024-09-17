@@ -1,6 +1,7 @@
-import { Grid } from "@trussworks/react-uswds";
-import { useTranslations, useMessages } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
+
 import ContentLayout from "src/components/ContentLayout";
+import { Grid } from "@trussworks/react-uswds";
 
 const ProcessIntro = () => {
   const t = useTranslations("Process");

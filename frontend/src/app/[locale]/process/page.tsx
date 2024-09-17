@@ -1,15 +1,14 @@
-import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import BetaAlert from "src/components/BetaAlert";
-
 import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
 import { Metadata } from "next";
+import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
+import PageSEO from "src/components/PageSEO";
 import ProcessIntro from "src/app/[locale]/process/ProcessIntro";
 import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
 import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

@@ -13,13 +13,6 @@ export default function SearchResultsListItem({
   opportunity,
   agencyNameLookup,
 }: SearchResultsListItemProps) {
-  // TODO: Confirm once deploying to lowers
-  // relates to https://github.com/HHS/simpler-grants-gov/issues/1521
-  const opportunityURL =
-    process.env.NEXT_PUBLIC_ENVIRONMENT === "prod"
-      ? "https://grants.gov"
-      : "https://test.grants.gov";
-
   const t = useTranslations("Search");
 
   const metadataBorderClasses = `
@@ -49,7 +42,7 @@ export default function SearchResultsListItem({
             <div className="grid-col tablet:order-2">
               <h2 className="margin-y-105 line-height-serif-2">
                 <a
-                  href={`${opportunityURL}/search-results-detail/${opportunity?.opportunity_id}`}
+                  href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link--external"
                 >
                   {opportunity?.opportunity_title}
