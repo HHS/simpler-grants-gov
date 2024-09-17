@@ -17,7 +17,7 @@ import { compact, isEmpty } from "lodash";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)
-import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
+import { APIResponse } from "src/types/apiResponseTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -108,10 +108,10 @@ export default abstract class BaseApi {
     queryParamData?: QueryParamData,
   ) {
     let response: Response;
-    let responseBody: SearchAPIResponse;
+    let responseBody: APIResponse;
     try {
       response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as SearchAPIResponse;
+      responseBody = (await response.json()) as APIResponse;
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
@@ -196,7 +196,7 @@ export function fetchErrorToNetworkError(
 }
 
 function handleNotOkResponse(
-  response: SearchAPIResponse,
+  response: APIResponse,
   message: string,
   status_code: number,
   searchInputs?: QueryParamData,

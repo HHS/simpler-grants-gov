@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ApiResponse } from "../../types/opportunity/opportunityResponseTypes";
+import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 import BaseApi from "./BaseApi";
 
 export default class OpportunityListingAPI extends BaseApi {
@@ -16,14 +16,16 @@ export default class OpportunityListingAPI extends BaseApi {
     return "opportunities";
   }
 
-  async getOpportunityById(opportunityId: number): Promise<ApiResponse> {
+  async getOpportunityById(
+    opportunityId: number,
+  ): Promise<OpportunityApiResponse> {
     const subPath = `${opportunityId}`;
-    const response = await this.request(
+    const response = (await this.request(
       "GET",
       this.basePath,
       this.namespace,
       subPath,
-    );
-    return response as ApiResponse;
+    )) as OpportunityApiResponse;
+    return response;
   }
 }
