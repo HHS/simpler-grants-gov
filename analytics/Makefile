@@ -33,8 +33,8 @@ ifeq "$(PY_RUN_APPROACH)" "local"
 POETRY := poetry run
 GITHUB := gh
 else
-POETRY := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
-GITHUB := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
+POETRY := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+GITHUB := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
 endif
 
 # Docker user configuration
