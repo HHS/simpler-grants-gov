@@ -29,6 +29,3 @@ coverage.*
 
 #e2e
 /test-results/
-
-# localstack
-/volume
