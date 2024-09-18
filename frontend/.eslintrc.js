@@ -51,8 +51,6 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "error",
         // Just warn since playwright tests may not use screen the way jest would
         "testing-library/prefer-screen-queries": "warn",
-        // Prevent unnecessary console statements
-        "no-console": ["error", { allow: ["warn", "error"] }],
       },
     },
   ],
