@@ -33,3 +33,5 @@ ignore:
   - vulnerability: CVE-2023-39418
   - vulnerability: CVE-2023-5868
   - vulnerability: CVE-2023-5870
+  # Affects SSR in pages router which we don't use https://github.com/advisories/GHSA-gp8f-8m3g-qvj9
+  - vulnerability: GHSA-gp8f-8m3g-qvj9 
