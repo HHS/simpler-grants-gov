@@ -1,4 +1,5 @@
 """Test the cli entrypoints."""
+
 from dataclasses import dataclass  # noqa: I001
 from pathlib import Path
 

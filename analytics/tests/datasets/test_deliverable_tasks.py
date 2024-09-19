@@ -1,4 +1,5 @@
 """Tests for analytics/datasets/deliverable_tasks.py."""
+
 import numpy as np  # noqa: I001
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
