@@ -1,5 +1,6 @@
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
+
 import { useTranslations } from "next-intl";
 
 type Props = {

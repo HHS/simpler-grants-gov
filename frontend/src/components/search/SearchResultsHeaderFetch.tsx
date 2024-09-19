@@ -1,6 +1,8 @@
 "use server";
-import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetcherUtil";
+
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetcherUtil";
+
 import SearchResultsHeader from "./SearchResultsHeader";
 
 export default async function SearchResultsHeaderFetch({

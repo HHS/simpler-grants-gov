@@ -1,3 +1,5 @@
+import { expect, test } from "@playwright/test";
+
 import {
   clickAccordionWithTitle,
   clickMobileNavMenu,
@@ -14,7 +16,6 @@ import {
   toggleCheckboxes,
   waitForSearchResultsLoaded,
 } from "./searchUtil";
-import { expect, test } from "@playwright/test";
 
 test("should navigate from index to search page", async ({ page }) => {
   // Start from the index page with feature flag set

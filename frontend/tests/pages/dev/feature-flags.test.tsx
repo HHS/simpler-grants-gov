@@ -4,7 +4,6 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
-
 import { mockDefaultFeatureFlags } from "tests/utils/FeatureFlagTestUtils";
 
 describe("Feature flags page", () => {

@@ -1,10 +1,11 @@
-import { axe } from "jest-axe";
 import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
+
 import SearchSortBy from "src/components/search/SearchSortBy";
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
 
 // Mock the useSearchParamUpdater hook
 jest.mock("src/hooks/useSearchParamUpdater", () => ({

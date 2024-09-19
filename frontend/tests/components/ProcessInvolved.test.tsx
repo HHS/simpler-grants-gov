@@ -1,5 +1,5 @@
-import { render, screen } from "tests/react-utils";
 import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
+import { render, screen } from "tests/react-utils";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {

@@ -1,5 +1,5 @@
-import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
+import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 
 jest.mock("src/app/api/BaseApi");
 

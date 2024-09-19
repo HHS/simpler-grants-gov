@@ -1,13 +1,15 @@
+import pick from "lodash/pick";
+
+import {
+  NextIntlClientProvider,
+  useMessages,
+  useTranslations,
+} from "next-intl";
+import { unstable_setRequestLocale } from "next-intl/server";
+
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
 import Header from "./Header";
-import {
-  useTranslations,
-  useMessages,
-  NextIntlClientProvider,
-} from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
-import pick from "lodash/pick";
 
 type Props = {
   children: React.ReactNode;

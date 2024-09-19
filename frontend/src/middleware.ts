@@ -1,7 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
-import { defaultLocale, locales } from "./i18n/config";
-
-import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 /**
  * @file Middleware allows you to run code before a request is completed. Then, based on
  * the incoming request, you can modify the response by rewriting, redirecting,
@@ -9,6 +5,10 @@ import { FeatureFlagsManager } from "./services/FeatureFlagManager";
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import createIntlMiddleware from "next-intl/middleware";
+import { NextRequest, NextResponse } from "next/server";
+
+import { defaultLocale, locales } from "./i18n/config";
+import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 
 export const config = {
   matcher: [

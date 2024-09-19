@@ -1,5 +1,6 @@
 import "server-only";
 
+import { compact, isEmpty } from "lodash";
 import {
   ApiRequestError,
   BadRequestError,
@@ -12,8 +13,6 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "src/errors";
-import { compact, isEmpty } from "lodash";
-
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)

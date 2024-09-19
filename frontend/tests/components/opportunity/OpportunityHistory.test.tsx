@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
-
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
-import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import { formatDate } from "src/utils/dateUtil";
+
+import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 
 // Mock the formatDate function
 jest.mock("src/utils/dateUtil", () => ({

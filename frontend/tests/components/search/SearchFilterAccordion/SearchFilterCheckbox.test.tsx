@@ -1,11 +1,12 @@
 import "@testing-library/jest-dom";
 
 import { fireEvent, waitFor } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
+
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
-import { axe } from "jest-axe";
 
 const mockUpdateCheckedOption = jest.fn();
 const option = {

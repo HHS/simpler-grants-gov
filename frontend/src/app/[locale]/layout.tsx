@@ -1,16 +1,15 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, unstable_setRequestLocale } from "next-intl/server";
-
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { PUBLIC_ENV } from "src/constants/environments";
-
-import Layout from "src/components/Layout";
-
 /**
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
  */
 import { Metadata } from "next";
+import { PUBLIC_ENV } from "src/constants/environments";
+
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, unstable_setRequestLocale } from "next-intl/server";
+
+import Layout from "src/components/Layout";
 
 export const metadata: Metadata = {
   icons: [`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/favicon.ico`],

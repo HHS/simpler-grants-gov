@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import { render, screen } from "@testing-library/react";
+import DOMPurify from "isomorphic-dompurify";
 import {
   Opportunity,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
-import { render, screen } from "@testing-library/react";
 
-import DOMPurify from "isomorphic-dompurify";
-import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 import { useTranslations } from "next-intl";
+
+import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 
 jest.mock("isomorphic-dompurify", () => ({
   sanitize: jest.fn((input: string) => input),

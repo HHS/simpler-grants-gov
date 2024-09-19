@@ -3,8 +3,9 @@ import {
   OpportunityAssistanceListing,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import ContentLayout from "src/components/ContentLayout";
 import { useTranslations } from "next-intl";
+
+import ContentLayout from "src/components/ContentLayout";
 
 type Props = {
   opportunityData: Opportunity;

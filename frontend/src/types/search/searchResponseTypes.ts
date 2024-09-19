@@ -1,5 +1,6 @@
-import { SearchFetcherActionType } from "./searchRequestTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+
+import { SearchFetcherActionType } from "./searchRequestTypes";
 
 export interface AssistanceListing {
   assistance_listing_number: string;

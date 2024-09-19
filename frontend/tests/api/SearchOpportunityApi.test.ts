@@ -1,5 +1,5 @@
-import { QueryParamData } from "../../src/services/search/searchfetcher/SearchFetcher";
 import SearchOpportunityAPI from "../../src/app/api/SearchOpportunityAPI";
+import { QueryParamData } from "../../src/services/search/searchfetcher/SearchFetcher";
 import { SearchRequestBody } from "../../src/types/search/searchRequestTypes";
 
 // mockFetch should match the SearchAPIResponse type structure

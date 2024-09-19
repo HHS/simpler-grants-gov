@@ -1,8 +1,10 @@
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetcherUtil";
+
+import { getTranslations } from "next-intl/server";
+
 import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
-import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetcherUtil";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-import { getTranslations } from "next-intl/server";
 
 interface ServerPageProps {
   searchParams: QueryParamData;

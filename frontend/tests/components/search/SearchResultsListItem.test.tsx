@@ -1,8 +1,10 @@
-import { render, screen } from "tests/react-utils";
-import { Opportunity } from "src/types/search/searchResponseTypes";
-import React from "react";
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { axe } from "jest-axe";
+import { Opportunity } from "src/types/search/searchResponseTypes";
+import { render, screen } from "tests/react-utils";
+
+import React from "react";
+
+import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 
 const mockOpportunity: Opportunity = {
   opportunity_id: 12345,

@@ -1,6 +1,7 @@
 "use client";
-import { createContext, useCallback, useMemo, useState } from "react";
+
 import { useSearchParams } from "next/navigation";
+import { createContext, useCallback, useMemo, useState } from "react";
 
 interface QueryContextParams {
   queryTerm: string | null | undefined;

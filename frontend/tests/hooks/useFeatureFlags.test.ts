@@ -1,5 +1,4 @@
 import { act, renderHook } from "@testing-library/react";
-
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { mockDefaultFeatureFlags } from "tests/utils/FeatureFlagTestUtils";
 

@@ -1,8 +1,11 @@
 /* eslint-disable testing-library/no-node-access */
 import "@testing-library/jest-dom/extend-expect";
+
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+
 import React from "react";
+
 import SearchPagination from "src/components/search/SearchPagination";
 
 // Mock the useSearchParamUpdater hook

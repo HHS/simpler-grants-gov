@@ -1,11 +1,13 @@
 import "@testing-library/jest-dom";
 
 import { fireEvent } from "@testing-library/react";
-import { render, screen } from "tests/react-utils";
-import React from "react";
-import SearchBar from "src/components/search/SearchBar";
 import { axe } from "jest-axe";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { render, screen } from "tests/react-utils";
+
+import React from "react";
+
+import SearchBar from "src/components/search/SearchBar";
 
 // Mock the hook since it's used in the component
 const mockUpdateQueryParams = jest.fn();

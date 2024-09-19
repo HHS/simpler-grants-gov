@@ -2,6 +2,7 @@ import { Metadata } from "next";
 
 import Head from "next/head";
 import React from "react";
+
 import FeatureFlagsTable from "./FeatureFlagsTable";
 
 export function generateMetadata() {

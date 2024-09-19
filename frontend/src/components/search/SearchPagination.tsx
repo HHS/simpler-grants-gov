@@ -1,8 +1,10 @@
 "use client";
-import { Pagination } from "@trussworks/react-uswds";
+
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useContext } from "react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
+import { useContext } from "react";
+import { Pagination } from "@trussworks/react-uswds";
 
 export enum PaginationPosition {
   Top = "topPagination",

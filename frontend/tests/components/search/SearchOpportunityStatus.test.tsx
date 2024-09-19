@@ -1,8 +1,11 @@
 import "@testing-library/jest-dom/extend-expect";
-import { axe } from "jest-axe";
+
 import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
+
 import React from "react";
+
 import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 
 const mockUpdateQueryParams = jest.fn();

@@ -1,10 +1,12 @@
 "use client";
+
 import { useState } from "react";
+
 import { FilterOptionWithChildren } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
-import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
 import SectionLinkCount from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
 import SectionLinkLabel from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
+import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
 
 interface SearchFilterSectionProps {
   option: FilterOptionWithChildren;

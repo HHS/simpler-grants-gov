@@ -1,8 +1,8 @@
+import { render, screen } from "@testing-library/react";
 import {
   Opportunity,
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
-import { render, screen } from "@testing-library/react";
 
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 

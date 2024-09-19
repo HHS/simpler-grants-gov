@@ -1,9 +1,11 @@
 "use client";
-import { Select } from "@trussworks/react-uswds";
-import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useContext } from "react";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
 import { useTranslations } from "next-intl";
+import { useContext } from "react";
+import { Select } from "@trussworks/react-uswds";
 
 type SortOption = {
   label: string;

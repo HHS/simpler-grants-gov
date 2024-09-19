@@ -1,9 +1,11 @@
-import BetaAlert from "src/components/BetaAlert";
-import { GridContainer } from "@trussworks/react-uswds";
-import Link from "next/link";
+import { Metadata } from "next";
+
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Metadata } from "next";
+import Link from "next/link";
+import { GridContainer } from "@trussworks/react-uswds";
+
+import BetaAlert from "src/components/BetaAlert";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
