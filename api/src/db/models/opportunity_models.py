@@ -12,6 +12,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
+from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
@@ -61,6 +62,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     all_opportunity_summaries: Mapped[list["OpportunitySummary"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
+
+    agency_record: Mapped[Agency | None] = relationship(
+        Agency, primaryjoin="Opportunity.agency == foreign(Agency.agency_code)", uselist=False
+    )
+
+    @property
+    def agency_name(self) -> str | None:
+        # Fetch the agency name from the agency table record (if one was found)
+        if self.agency_record is not None:
+            return self.agency_record.agency_name
+
+        return None
 
     @property
     def summary(self) -> "OpportunitySummary | None":
