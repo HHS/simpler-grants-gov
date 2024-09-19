@@ -206,7 +206,7 @@ def test_get_connection_parameters():
 
     # Mostly validating defaults get used
     assert params == {
-        "hosts": [{"host": "localhost", "port": 9200}],
+        "hosts": [{"host": config.host, "port": 9200}],
         "http_compress": True,
         "use_ssl": False,
         "verify_certs": False,
