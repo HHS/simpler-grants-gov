@@ -1,8 +1,8 @@
 import logging
 from typing import Any, Generator, Iterable
 
-import opensearchpy
 import boto3
+import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
@@ -262,7 +262,7 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
         use_ssl=opensearch_config.use_ssl,
         verify_certs=opensearch_config.verify_certs,
         connection_class=opensearchpy.RequestsHttpConnection,
-        pool_maxsize=opensearch_config.connection_pool_size
+        pool_maxsize=opensearch_config.connection_pool_size,
     )
 
     # If an AWS region is set, we assume we're running non-locally

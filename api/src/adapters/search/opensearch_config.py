@@ -21,7 +21,6 @@ class OpensearchConfig(PydanticBaseEnvConfig):
     aws_region: str | None = Field(default=None)  # OPENSEARCH_AWS_REGION
 
 
-
 def get_opensearch_config() -> OpensearchConfig:
     opensearch_config = OpensearchConfig()
 
