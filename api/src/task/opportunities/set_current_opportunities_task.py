@@ -84,9 +84,11 @@ class SetCurrentOpportunitiesTask(Task):
             "existing_opportunity_status": opportunity.opportunity_status,
         }
         log_extra |= get_log_extra_for_summary(
-            opportunity.current_opportunity_summary.opportunity_summary
-            if opportunity.current_opportunity_summary
-            else None,
+            (
+                opportunity.current_opportunity_summary.opportunity_summary
+                if opportunity.current_opportunity_summary
+                else None
+            ),
             "existing",
         )
         logger.info("Processing opportunity %s", opportunity.opportunity_id, extra=log_extra)
@@ -245,9 +247,9 @@ def is_opportunity_changed(
 def get_log_extra_for_summary(summary: OpportunitySummary | None, prefix: str) -> dict[str, Any]:
     return {
         f"{prefix}_opportunity_summary_id": summary.opportunity_summary_id if summary else None,
-        f"{prefix}_opportunity_summary_revision_number": summary.revision_number
-        if summary
-        else None,
+        f"{prefix}_opportunity_summary_revision_number": (
+            summary.revision_number if summary else None
+        ),
         f"{prefix}_opportunity_summary_is_forecast": summary.is_forecast if summary else None,
         f"{prefix}_opportunity_summary_post_date": summary.post_date if summary else None,
         f"{prefix}_opportunity_summary_close_date": summary.close_date if summary else None,

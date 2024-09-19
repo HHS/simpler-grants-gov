@@ -24,7 +24,6 @@ Example:
     logger.info("message")
 """
 
-
 import src.logging.config as config
 
 

@@ -165,10 +165,10 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
-    link_funding_instruments: Mapped[
-        list["LinkOpportunitySummaryFundingInstrument"]
-    ] = relationship(
-        back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
+    link_funding_instruments: Mapped[list["LinkOpportunitySummaryFundingInstrument"]] = (
+        relationship(
+            back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
+        )
     )
     link_funding_categories: Mapped[list["LinkOpportunitySummaryFundingCategory"]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"

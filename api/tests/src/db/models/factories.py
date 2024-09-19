@@ -7,6 +7,7 @@ that are persisted to the database.
 The factories are based on the `factory_boy` library. See
 https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
+
 import random
 from datetime import datetime
 from typing import Optional

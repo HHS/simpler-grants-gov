@@ -240,7 +240,8 @@ def reset_aws_env_vars(monkeypatch):
 
 @pytest.fixture
 def mock_s3(reset_aws_env_vars):
-    with moto.mock_s3():
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
         yield boto3.resource("s3")
 
 

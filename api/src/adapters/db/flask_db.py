@@ -38,6 +38,7 @@ Example:
         db_client = flask_db.get_db(current_app)
         # db_client.get_connection() or db_client.get_session()
 """
+
 from functools import wraps
 from typing import Callable, Concatenate, ParamSpec, TypeVar
 
