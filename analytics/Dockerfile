@@ -4,7 +4,7 @@
 # The build stage that will be used to deploy to the various environments
 # needs to be called `release` in order to integrate with the repo's
 # top-level Makefile
-FROM python:3-slim AS base
+FROM python:3.12-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org

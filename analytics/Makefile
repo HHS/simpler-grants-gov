@@ -76,7 +76,7 @@ login:
 	$(GITHUB) auth login
 
 build:
-	docker-compose build
+	docker compose build
 
 release-build:
 	docker buildx build \
