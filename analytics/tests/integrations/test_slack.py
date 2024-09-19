@@ -1,4 +1,5 @@
 """Test the code in analytics.integrations.slack."""
+
 from pathlib import Path  # noqa: I001
 
 import pytest

@@ -1,4 +1,5 @@
 """Integrate with Slack to post messages and get channel information."""
+
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass

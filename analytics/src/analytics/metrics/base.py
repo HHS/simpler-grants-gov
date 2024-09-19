@@ -1,4 +1,5 @@
 """Base class for all metrics."""
+
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path

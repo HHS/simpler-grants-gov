@@ -4,6 +4,7 @@ Calculates burnup for sprints.
 This is a subclass of the BaseMetric class that calculates the running total of
 open issues for each day in a sprint
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
