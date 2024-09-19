@@ -9,6 +9,8 @@ import pytest
 import sqlalchemy
 
 from src.data_migration.load import load_oracle_data_task
+from tests.conftest import BaseTestClass
+from tests.src.db.models.factories import ForeignTopportunityFactory
 
 
 @pytest.fixture(scope="module")
@@ -159,3 +161,8 @@ def test_load_data_chunked(db_session, source_table, destination_table, create_t
     assert task.metrics["count.delete.total"] == 0
     assert task.metrics["count.insert.total"] == 100
     assert task.metrics["count.update.total"] == 0
+
+
+class TestLoadOracleDataTask(BaseTestClass):
+    def test_real_tables(self, db_session, enable_factory_create):
+        ForeignTopportunityFactory.create()

@@ -63,19 +63,19 @@ def test_copy_oracle_data_foreign_empty(
 
 
 def test_copy_oracle_data(db_session, enable_factory_create, test_api_schema, test_foreign_schema):
-    print(db_session.__class__.__name__)
-
     # Create some records initially in the table that we'll wipe
     TransferTopportunityFactory.create_batch(size=3)
 
     foreign_records = [
-        build_foreign_opportunity(db_session, {}, test_foreign_schema),
-        build_foreign_opportunity(db_session, {}, test_foreign_schema),
-        build_foreign_opportunity(db_session, {}, test_foreign_schema),
+        build_foreign_opportunity(db_session, {"is_draft": "N"}, test_foreign_schema),
+        build_foreign_opportunity(db_session, {"is_draft": "N"}, test_foreign_schema),
+        build_foreign_opportunity(db_session, {"is_draft": "N"}, test_foreign_schema),
         build_foreign_opportunity(
-            db_session, {"oppnumber": "ABC-123-454-321-CBA"}, test_foreign_schema
+            db_session, {"oppnumber": "ABC-123-454-321-CBA", "is_draft": "N"}, test_foreign_schema
         ),
-        build_foreign_opportunity(db_session, {"opportunity_id": 100}, test_foreign_schema),
+        build_foreign_opportunity(
+            db_session, {"opportunity_id": 100, "is_draft": "N"}, test_foreign_schema
+        ),
     ]
 
     # The copy script won't fetch anything with is_draft not equaling "N" so add one
@@ -101,5 +101,9 @@ def test_copy_oracle_data(db_session, enable_factory_create, test_api_schema, te
         assert copied_opportunity.category_explanation == foreign_record["category_explanation"]
         assert copied_opportunity.is_draft == foreign_record["is_draft"]
         assert copied_opportunity.revision_number == foreign_record["revision_number"]
-        assert copied_opportunity.last_upd_date == foreign_record["last_upd_date"]
-        assert copied_opportunity.created_date == foreign_record["created_date"]
+        assert copied_opportunity.last_upd_date == (
+            foreign_record["last_upd_date"].date()
+            if foreign_record["last_upd_date"] is not None
+            else None
+        )
+        assert copied_opportunity.created_date == foreign_record["created_date"].date()
