@@ -1550,20 +1550,6 @@ pluggy = ">=1.5,<2"
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
-name = "pytest-lazy-fixture"
-version = "0.6.3"
-description = "It helps to use fixtures in pytest.mark.parametrize"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytest-lazy-fixture-0.6.3.tar.gz", hash = "sha256:0e7d0c7f74ba33e6e80905e9bfd81f9d15ef9a790de97993e34213deb5ad10ac"},
-    {file = "pytest_lazy_fixture-0.6.3-py3-none-any.whl", hash = "sha256:e0b379f38299ff27a653f03eaa69b08a6fd4484e46fd1c9907d984b9f9daeda6"},
-]
-
-[package.dependencies]
-pytest = ">=3.2.5"
-
-[[package]]
 name = "pytest-watch"
 version = "4.2.0"
 description = "Local continuous test runner with pytest and watchdog."
@@ -2232,4 +2218,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12"
-content-hash = "73ae1d4b7d8aab4281b6db33ba22a7816e522c07928ed7fbe13370b598d9b660"
+content-hash = "4dff9e0a62ea17408ca330759f3ed1b3fa0ef23940fe6f718dd2831b877f2972"
