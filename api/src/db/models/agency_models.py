@@ -47,12 +47,14 @@ class Agency(ApiSchemaTable, TimestampMixin):
 
     assistance_listing_number: Mapped[str]
 
-    agency_submission_notification_setting: Mapped[
-        AgencySubmissionNotificationSetting
-    ] = mapped_column(
-        "agency_submission_notification_setting_id",
-        LookupColumn(LkAgencySubmissionNotificationSetting),
-        ForeignKey(LkAgencySubmissionNotificationSetting.agency_submission_notification_setting_id),
+    agency_submission_notification_setting: Mapped[AgencySubmissionNotificationSetting] = (
+        mapped_column(
+            "agency_submission_notification_setting_id",
+            LookupColumn(LkAgencySubmissionNotificationSetting),
+            ForeignKey(
+                LkAgencySubmissionNotificationSetting.agency_submission_notification_setting_id
+            ),
+        )
     )
 
     agency_contact_info_id: Mapped[BigInteger | None] = mapped_column(

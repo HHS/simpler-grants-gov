@@ -16,12 +16,10 @@ class Regexp(validators.Regexp):
     )
 
     @typing.overload
-    def __call__(self, value: str) -> str:
-        ...
+    def __call__(self, value: str) -> str: ...
 
     @typing.overload
-    def __call__(self, value: bytes) -> bytes:
-        ...
+    def __call__(self, value: bytes) -> bytes: ...
 
     def __call__(self, value: str | bytes) -> str | bytes:
         if self.regex.match(value) is None:  # type: ignore
