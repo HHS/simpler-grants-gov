@@ -1,16 +1,17 @@
-import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import ResearchIntro from "src/app/[locale]/research/ResearchIntro";
-
-import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
-import BetaAlert from "src/components/BetaAlert";
+import { Metadata } from "next";
 import ResearchArchetypes from "src/app/[locale]/research/ResearchArchetypes";
 import ResearchImpact from "src/app/[locale]/research/ResearchImpact";
+import ResearchIntro from "src/app/[locale]/research/ResearchIntro";
 import ResearchMethodology from "src/app/[locale]/research/ResearchMethodology";
 import ResearchThemes from "src/app/[locale]/research/ResearchThemes";
-import { Metadata } from "next";
+import { RESEARCH_CRUMBS } from "src/constants/breadcrumbs";
+
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+
+import BetaAlert from "src/components/BetaAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
+import PageSEO from "src/components/PageSEO";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

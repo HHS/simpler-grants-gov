@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
-
 import Link from "next/link";
 import { Button, Grid } from "@trussworks/react-uswds";
-import { USWDSIcon } from "../USWDSIcon";
+
 import ContentLayout from "src/components/ContentLayout";
+import { USWDSIcon } from "../USWDSIcon";
 
 const IndexGoalContent = () => {
   const t = useTranslations("Index");

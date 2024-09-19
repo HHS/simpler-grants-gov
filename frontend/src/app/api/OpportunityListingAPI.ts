@@ -1,6 +1,7 @@
 import "server-only";
 
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
+
 import BaseApi from "./BaseApi";
 
 export default class OpportunityListingAPI extends BaseApi {

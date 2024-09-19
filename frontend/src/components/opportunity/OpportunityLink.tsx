@@ -1,4 +1,5 @@
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+
 import { useTranslations } from "next-intl";
 
 type Props = {

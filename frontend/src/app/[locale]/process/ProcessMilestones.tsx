@@ -1,8 +1,8 @@
 import { ExternalRoutes } from "src/constants/routes";
-import React from "react";
 
-import { useTranslations, useMessages } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
+import React from "react";
 import {
   Button,
   Grid,
@@ -12,9 +12,9 @@ import {
   IconListItem,
   IconListTitle,
 } from "@trussworks/react-uswds";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 import ContentLayout from "src/components/ContentLayout";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const ProcessMilestones = () => {
   const t = useTranslations("Process");

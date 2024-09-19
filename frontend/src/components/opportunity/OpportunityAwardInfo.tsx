@@ -1,7 +1,9 @@
-import { Grid } from "@trussworks/react-uswds";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
-import OpportunityAwardGridRow from "./OpportunityAwardGridRow";
+
 import { useTranslations } from "next-intl";
+import { Grid } from "@trussworks/react-uswds";
+
+import OpportunityAwardGridRow from "./OpportunityAwardGridRow";
 
 type Props = {
   opportunityData: Opportunity;

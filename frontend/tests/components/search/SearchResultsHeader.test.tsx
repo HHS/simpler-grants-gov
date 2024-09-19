@@ -1,8 +1,9 @@
+import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
+
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
-import { axe } from "jest-axe";
 
 jest.mock("src/components/search/SearchSortBy", () => {
   return {

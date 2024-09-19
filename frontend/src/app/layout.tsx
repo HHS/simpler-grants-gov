@@ -1,4 +1,5 @@
 import "src/styles/styles.scss";
+
 import { ReactNode } from "react";
 
 type Props = {

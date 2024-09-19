@@ -1,5 +1,10 @@
 "use client";
 
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { assetPath } from "src/utils/assetPath";
+
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -7,11 +12,6 @@ import {
   Title,
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
-import { useEffect, useRef, useState } from "react";
-
-import { assetPath } from "src/utils/assetPath";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useTranslations } from "next-intl";
 
 type PrimaryLinks = {
   i18nKey: string;

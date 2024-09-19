@@ -1,8 +1,11 @@
 import "@testing-library/jest-dom/extend-expect";
-import { axe } from "jest-axe";
+
 import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { render, screen } from "tests/react-utils";
+
 import React from "react";
+
 import SearchFilterAccordion, {
   FilterOption,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";

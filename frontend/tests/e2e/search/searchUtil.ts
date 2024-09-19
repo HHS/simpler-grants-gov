@@ -2,7 +2,7 @@
 // Test Helper Functions
 // =========================
 
-import { Locator, Page, expect } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");

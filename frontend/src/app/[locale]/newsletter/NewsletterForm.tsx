@@ -1,7 +1,10 @@
 "use client";
+
 import { NEWSLETTER_CONFIRMATION } from "src/constants/breadcrumbs";
 import { ExternalRoutes } from "src/constants/routes";
+import { Data } from "src/pages/api/subscribe";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -12,9 +15,6 @@ import {
   Label,
   TextInput,
 } from "@trussworks/react-uswds";
-
-import { Data } from "src/pages/api/subscribe";
-import { useTranslations } from "next-intl";
 
 export default function NewsletterForm() {
   const t = useTranslations("Newsletter");

@@ -1,9 +1,8 @@
 import "server-only";
 
-import { QueryParamData, SearchFetcher } from "./SearchFetcher";
-
-import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
 import SearchOpportunityAPI from "../../../app/api/SearchOpportunityAPI";
+import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
+import { QueryParamData, SearchFetcher } from "./SearchFetcher";
 
 export class APISearchFetcher extends SearchFetcher {
   private searchApi: SearchOpportunityAPI;

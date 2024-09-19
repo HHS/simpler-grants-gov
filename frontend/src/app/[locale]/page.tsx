@@ -1,11 +1,13 @@
-import BetaAlert from "src/components/BetaAlert";
-import PageSEO from "src/components/PageSEO";
-import Hero from "src/components/Hero";
-import IndexGoalContent from "src/components/content/IndexGoalContent";
-import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
 import { Metadata } from "next";
+
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+
+import BetaAlert from "src/components/BetaAlert";
+import IndexGoalContent from "src/components/content/IndexGoalContent";
+import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
+import Hero from "src/components/Hero";
+import PageSEO from "src/components/PageSEO";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

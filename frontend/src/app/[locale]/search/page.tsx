@@ -1,30 +1,32 @@
+import { Metadata } from "next";
+import Loading from "src/app/[locale]/search/loading";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
+import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
+
+import { useTranslations } from "next-intl";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { Suspense } from "react";
+
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import Loading from "src/app/[locale]/search/loading";
 import PageSEO from "src/components/PageSEO";
-import SearchResultsListFetch from "src/components/search/SearchResultsListFetch";
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import SearchBar from "src/components/search/SearchBar";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
-import SearchPagination from "src/components/search/SearchPagination";
-import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
-import SearchResultsHeaderFetch from "src/components/search/SearchResultsHeaderFetch";
-import SearchResultsHeader from "src/components/search/SearchResultsHeader";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import {
   agencyOptions,
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Metadata } from "next";
-import { useTranslations } from "next-intl";
-import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import { Suspense } from "react";
+import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
+import SearchPagination from "src/components/search/SearchPagination";
+import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
+import SearchResultsHeader from "src/components/search/SearchResultsHeader";
+import SearchResultsHeaderFetch from "src/components/search/SearchResultsHeaderFetch";
+import SearchResultsListFetch from "src/components/search/SearchResultsListFetch";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

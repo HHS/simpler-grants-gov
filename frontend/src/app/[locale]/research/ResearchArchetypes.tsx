@@ -1,11 +1,13 @@
-import Image from "next/image";
-import { Grid } from "@trussworks/react-uswds";
-import { useTranslations } from "next-intl";
-import ContentLayout from "src/components/ContentLayout";
 import embarrassed from "public/img/noun-embarrassed.svg";
 import goal from "public/img/noun-goal.svg";
 import hiring from "public/img/noun-hiring.svg";
 import leadership from "public/img/noun-leadership.svg";
+
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { Grid } from "@trussworks/react-uswds";
+
+import ContentLayout from "src/components/ContentLayout";
 
 const ResearchArchetypes = () => {
   const t = useTranslations("Research");

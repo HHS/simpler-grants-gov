@@ -1,9 +1,11 @@
 "use client";
-import { Icon } from "@trussworks/react-uswds";
+
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useContext } from "react";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
 import { useTranslations } from "next-intl";
+import { useContext } from "react";
+import { Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   query: string | null | undefined;

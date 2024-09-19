@@ -1,7 +1,8 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function useSearchParamUpdater() {
   const searchParams = useSearchParams() || undefined;

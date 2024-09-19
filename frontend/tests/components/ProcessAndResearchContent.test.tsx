@@ -1,4 +1,5 @@
 import { render, screen } from "tests/react-utils";
+
 import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
 
 describe("Process Content", () => {
