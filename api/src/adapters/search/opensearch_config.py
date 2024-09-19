@@ -15,6 +15,11 @@ class OpensearchConfig(PydanticBaseEnvConfig):
     port: int  # OPENSEARCH_PORT
     use_ssl: bool = Field(default=True)  # OPENSEARCH_USE_SSL
     verify_certs: bool = Field(default=True)  # OPENSEARCH_VERIFY_CERTS
+    connection_pool_size: int = Field(default=10)  # OPENSEARCH_CONNECTION_POOL_SIZE
+
+    # AWS configuration
+    aws_region: str | None = Field(default=None)  # OPENSEARCH_AWS_REGION
+
 
 
 def get_opensearch_config() -> OpensearchConfig:
@@ -27,6 +32,7 @@ def get_opensearch_config() -> OpensearchConfig:
             "port": opensearch_config.port,
             "use_ssl": opensearch_config.use_ssl,
             "verify_certs": opensearch_config.verify_certs,
+            "connection_pool_size": opensearch_config.connection_pool_size,
         },
     )
 

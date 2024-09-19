@@ -1,6 +1,10 @@
 import uuid
 
+import opensearchpy
 import pytest
+
+from src.adapters.search.opensearch_client import _get_connection_parameters
+from src.adapters.search import get_opensearch_config
 
 ########################################################################
 # These tests are primarily looking to validate
@@ -193,3 +197,18 @@ def test_scroll(search_client, generic_index):
     assert len(results[0].records) == 3
     assert len(results[1].records) == 3
     assert len(results[2].records) == 2
+
+def test_get_connection_parameters():
+    # Just validating this builds as expected for local mode
+    config = get_opensearch_config()
+    params = _get_connection_parameters(config)
+
+    # Mostly validating defaults get used
+    assert params == {
+        "hosts": [{"host": "localhost", "port": 9200}],
+        "http_compress": True,
+        "use_ssl": False,
+        "verify_certs": False,
+        "connection_class": opensearchpy.RequestsHttpConnection,
+        "pool_maxsize": 10,
+    }
