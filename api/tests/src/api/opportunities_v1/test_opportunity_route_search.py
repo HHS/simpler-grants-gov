@@ -1288,3 +1288,20 @@ class TestOpportunityRouteSearch(BaseTestClass):
         # This test isn't looking to validate opensearch behavior, just that we've connected fields properly and
         # results being returned are as expected.
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    def test_search_query_facets_200(self, client, api_auth_token):
+        search_response = client.post(
+            "/v1/opportunities/search",
+            json=get_search_request(),
+            headers={"X-Auth": api_auth_token},
+        )
+
+        assert search_response.status_code == 200
+        facet_counts = search_response.get_json()["facet_counts"]
+        assert facet_counts.keys() == {
+            "agency",
+            "applicant_type",
+            "funding_instrument",
+            "funding_category",
+            "opportunity_status",
+        }

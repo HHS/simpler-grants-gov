@@ -128,7 +128,7 @@ def _add_search_filters(
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     # TODO - we'll likely want to adjust the total number of values returned, especially
     # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
-    builder.aggregation_terms("opportunity_status", _adjust_field_name("applicant_type"))
+    builder.aggregation_terms("opportunity_status", _adjust_field_name("opportunity_status"))
     builder.aggregation_terms("applicant_type", _adjust_field_name("applicant_type"))
     builder.aggregation_terms("funding_instrument", _adjust_field_name("funding_instrument"))
     builder.aggregation_terms("funding_category", _adjust_field_name("funding_category"))
