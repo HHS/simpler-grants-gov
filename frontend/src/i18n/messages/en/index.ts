@@ -498,4 +498,8 @@ export const messages = {
       clear: "Clear All",
     },
   },
+  Loading: {
+    default: "Loading",
+    search: "Loading Results",
+  },
 };
