@@ -266,6 +266,14 @@ class OpportunityV1Schema(Schema):
         metadata={"description": "The agency who created the opportunity", "example": "US-ABC"},
     )
 
+    agency_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the agency who created the oppportunity",
+            "example": "Department of Examples",
+        },
+    )
+
     category = fields.Enum(
         OpportunityCategory,
         allow_none=True,
