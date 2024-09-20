@@ -1,32 +1,40 @@
-import { Metadata } from "next";
-import Loading from "src/app/[locale]/search/loading";
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
-import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
+import { Suspense } from 'react';
 
-import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
-
-import BetaAlert from "src/components/BetaAlert";
-import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
-import SearchBar from "src/components/search/SearchBar";
-import SearchCallToAction from "src/components/search/SearchCallToAction";
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { Metadata } from 'next';
+import { useTranslations } from 'next-intl';
+import {
+  getTranslations,
+  unstable_setRequestLocale,
+} from 'next-intl/server';
+import Loading from 'src/app/[locale]/search/loading';
+import QueryProvider from 'src/app/[locale]/search/QueryProvider';
+import BetaAlert from 'src/components/BetaAlert';
+import Breadcrumbs from 'src/components/Breadcrumbs';
+import PageSEO from 'src/components/PageSEO';
+import SearchBar from 'src/components/search/SearchBar';
+import SearchCallToAction from 'src/components/search/SearchCallToAction';
+import SearchFilterAccordion
+  from 'src/components/search/SearchFilterAccordion/SearchFilterAccordion';
 import {
   agencyOptions,
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
-import SearchPagination from "src/components/search/SearchPagination";
-import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
-import SearchResultsHeader from "src/components/search/SearchResultsHeader";
-import SearchResultsHeaderFetch from "src/components/search/SearchResultsHeaderFetch";
-import SearchResultsListFetch from "src/components/search/SearchResultsListFetch";
+} from 'src/components/search/SearchFilterAccordion/SearchFilterOptions';
+import SearchOpportunityStatus
+  from 'src/components/search/SearchOpportunityStatus';
+import SearchPagination from 'src/components/search/SearchPagination';
+import SearchPaginationFetch from 'src/components/search/SearchPaginationFetch';
+import SearchResultsHeader from 'src/components/search/SearchResultsHeader';
+import SearchResultsHeaderFetch
+  from 'src/components/search/SearchResultsHeaderFetch';
+import SearchResultsListFetch
+  from 'src/components/search/SearchResultsListFetch';
+import { SEARCH_CRUMBS } from 'src/constants/breadcrumbs';
+import withFeatureFlag from 'src/hoc/search/withFeatureFlag';
+import {
+  convertSearchParamsToProperTypes,
+} from 'src/utils/search/convertSearchParamsToProperTypes';
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -71,6 +79,7 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
 
+  console.log("!!! render");
   return (
     <>
       <PageSEO title={t("title")} description={t("meta_description")} />
