@@ -1,23 +1,24 @@
+import { Metadata } from "next";
+import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import {
-  OpportunityApiResponse,
   Opportunity,
+  OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
+
+import { getTranslations } from "next-intl/server";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { GridContainer } from "@trussworks/react-uswds";
-import { Metadata } from "next";
-import NotFound from "../../../not-found";
-import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
-import OpportunityListingAPI from "../../../api/OpportunityListingAPI";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
-import { getTranslations } from "next-intl/server";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import OpportunityListingAPI from "../../../api/OpportunityListingAPI";
+import NotFound from "../../../not-found";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

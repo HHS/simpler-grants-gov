@@ -1,7 +1,7 @@
+import logo from "public/img/logo-white-lg.webp";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
-
 import Image from "next/image";
 import {
   Identifier,
@@ -14,8 +14,6 @@ import {
   IdentifierLogos,
   IdentifierMasthead,
 } from "@trussworks/react-uswds";
-
-import logo from "public/img/logo-white-lg.webp";
 
 const GrantsIdentifier = () => {
   const t = useTranslations("Identifier");

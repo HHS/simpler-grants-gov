@@ -1,4 +1,5 @@
 import { render, screen } from "tests/react-utils";
+
 import FundingContent from "src/components/content/FundingContent";
 
 describe("Funding Content", () => {

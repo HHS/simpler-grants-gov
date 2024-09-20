@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 
 import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
-import { axe } from "jest-axe";
 
 describe("SearchErrorAlert", () => {
   it("should display the error message", () => {

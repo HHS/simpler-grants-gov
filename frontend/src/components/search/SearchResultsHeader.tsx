@@ -1,8 +1,11 @@
 "use client";
-import SearchSortyBy from "./SearchSortBy";
+
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useContext } from "react";
+
 import { useTranslations } from "next-intl";
+import { useContext } from "react";
+
+import SearchSortyBy from "./SearchSortBy";
 
 export default function SearchResultsHeader({
   sortby,

@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button, Grid } from "@trussworks/react-uswds";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 import ContentLayout from "src/components/ContentLayout";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const ResearchMethodology = () => {
   const t = useTranslations("Research");

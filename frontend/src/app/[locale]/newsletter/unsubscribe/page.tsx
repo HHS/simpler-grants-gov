@@ -1,14 +1,14 @@
+import { Metadata } from "next";
 import { NEWSLETTER_UNSUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 
+import { useTranslations } from "next-intl";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
+import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import BetaAlert from "src/components/BetaAlert";
-import { useTranslations } from "next-intl";
-import { Metadata } from "next";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

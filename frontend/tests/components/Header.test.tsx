@@ -1,5 +1,5 @@
-import { render, screen } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
+import { render, screen } from "tests/react-utils";
 
 import Header from "src/components/Header";
 

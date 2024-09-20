@@ -1,6 +1,6 @@
-import { GridContainer } from "@trussworks/react-uswds";
-import React from "react";
 import { useTranslations } from "next-intl";
+import React from "react";
+import { GridContainer } from "@trussworks/react-uswds";
 
 const SearchCallToAction: React.FC = () => {
   const t = useTranslations("Search");

@@ -1,6 +1,6 @@
 import { ExternalRoutes } from "src/constants/routes";
-import { useMessages, useTranslations } from "next-intl";
 
+import { useMessages, useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";

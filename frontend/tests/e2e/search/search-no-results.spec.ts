@@ -1,10 +1,10 @@
-import { Page, expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
+import { BrowserContextOptions } from "playwright-core";
+
 import {
   expectURLContainsQueryParam,
   fillSearchInputAndSubmit,
 } from "./searchSpecUtil";
-
-import { BrowserContextOptions } from "playwright-core";
 
 interface PageProps {
   page: Page;

@@ -1,7 +1,9 @@
 "use client";
-import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
-import { formatDate } from "src/utils/dateUtil";
+
 import { Opportunity } from "src/types/search/searchResponseTypes";
+import { formatDate } from "src/utils/dateUtil";
+import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
+
 import { useTranslations } from "next-intl";
 
 interface SearchResultsListItemProps {

@@ -2,12 +2,13 @@
  * @file Service for checking and managing feature flags
  */
 
+import { CookiesStatic } from "js-cookie";
+import { featureFlags } from "src/constants/featureFlags";
+
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
 
-import { CookiesStatic } from "js-cookie";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { ServerSideSearchParams } from "../types/searchRequestURLTypes";
-import { featureFlags } from "src/constants/featureFlags";
 
 export type FeatureFlags = { [name: string]: boolean };
 // Parity with unexported getServerSideProps context cookie type

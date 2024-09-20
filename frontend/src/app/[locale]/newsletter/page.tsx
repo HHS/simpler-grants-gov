@@ -1,18 +1,19 @@
+import pick from "lodash/pick";
+import { Metadata } from "next";
+import NewsletterForm from "src/app/[locale]/newsletter/NewsletterForm";
 import { NEWSLETTER_CRUMBS } from "src/constants/breadcrumbs";
 
+import {
+  NextIntlClientProvider,
+  useMessages,
+  useTranslations,
+} from "next-intl";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
-import pick from "lodash/pick";
+
+import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import BetaAlert from "src/components/BetaAlert";
-import NewsletterForm from "src/app/[locale]/newsletter/NewsletterForm";
-import { Metadata } from "next";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import {
-  useTranslations,
-  useMessages,
-  NextIntlClientProvider,
-} from "next-intl";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

@@ -1,23 +1,27 @@
-"use client"; // Error components must be Client Components
+"use client";
+
+// Error components must be Client Components
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+
+import { useEffect } from "react";
+
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
-import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import SearchBar from "src/components/search/SearchBar";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
-import SearchResultsHeader from "src/components/search/SearchResultsHeader";
 import {
   agencyOptions,
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-import { useEffect } from "react";
-import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
+import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
+import SearchResultsHeader from "src/components/search/SearchResultsHeader";
 
 interface ErrorProps {
   // Next's error boundary also includes a reset function as a prop for retries,

@@ -1,4 +1,5 @@
 import React from "react";
+
 import Spinner from "src/components/Spinner";
 
 export default function Loading() {
