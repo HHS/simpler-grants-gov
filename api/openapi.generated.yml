@@ -1392,6 +1392,12 @@ components:
           - 'null'
           description: The agency who created the opportunity
           example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the oppportunity
+          example: Department of Examples
         category:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
