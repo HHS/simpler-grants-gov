@@ -1,12 +1,6 @@
-import Search from 'src/app/[locale]/search/page';
-import {
-  MockSearchFetcher,
-} from 'src/services/search/searchfetcher/MockSearchFetcher';
-
-import {
-  render,
-  screen,
-} from '@testing-library/react';
+import { render, screen } from "@testing-library/react";
+import Search from "src/app/[locale]/search/page";
+import { MockSearchFetcher } from "src/services/search/searchfetcher/MockSearchFetcher";
 
 function mockUseTranslations(translationKey: string) {
   return translationKey;
