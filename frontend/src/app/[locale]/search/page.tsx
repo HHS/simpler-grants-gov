@@ -139,7 +139,10 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
                     scroll={false}
                   />
                 </Suspense>
-                <Suspense key={key} fallback={<Loading />}>
+                <Suspense
+                  key={key}
+                  fallback={<Loading message={t("loading")} />}
+                >
                   <SearchResultsListFetch
                     searchParams={convertedSearchParams}
                   />

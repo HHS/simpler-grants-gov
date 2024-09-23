@@ -7,4 +7,8 @@ const meta: Meta<typeof Loading> = {
 };
 export default meta;
 
-export const Default = {};
+export const Default = {
+  args: {
+    message: "Loading Storybook",
+  },
+};
