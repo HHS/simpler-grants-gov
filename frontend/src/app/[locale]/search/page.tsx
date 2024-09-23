@@ -79,7 +79,6 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
 
-  console.log("!!! render");
   return (
     <>
       <PageSEO title={t("title")} description={t("meta_description")} />

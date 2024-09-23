@@ -1,11 +1,12 @@
 "use client";
 
-import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { useContext } from 'react';
 
-import { useTranslations } from "next-intl";
-import { useContext } from "react";
-import { Checkbox } from "@trussworks/react-uswds";
+import { useTranslations } from 'next-intl';
+import { QueryContext } from 'src/app/[locale]/search/QueryProvider';
+import { useSearchParamUpdater } from 'src/hooks/useSearchParamUpdater';
+
+import { Checkbox } from '@trussworks/react-uswds';
 
 interface StatusOption {
   id: string;
@@ -53,7 +54,6 @@ export default function SearchOpportunityStatus({
       value: "archived",
     },
   ];
-
   return (
     <>
       <h2 className="margin-bottom-1 font-sans-xs">

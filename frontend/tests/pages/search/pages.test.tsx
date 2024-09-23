@@ -19,7 +19,7 @@ jest.mock("src/hoc/search/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),
 );
 
-// test without i18n functionality
+// test without i18n functionality, pass through translation key as text
 jest.mock("next-intl/server", () => ({
   getTranslations: jest.fn(() => (translationKey: string) => translationKey),
   unstable_setRequestLocale: jest.fn(),
@@ -29,75 +29,62 @@ jest.mock("next-intl", () => ({
   useTranslations: () => mockUseTranslations,
 }));
 
-// jest.mock("src/services/search/searchfetcher/SearchFetcherUtil", () => ({
-//   getSearchFetcher: () => ({
-//     fetchOpportunities: () =>
-//       Promise.resolve({
-//         pagination_info: {
-//           total_records: 10,
-//           total_pages: 1,
-//         },
-//         status_code: 200,
-//         data: [basicOpportunityFixture],
-//       }),
-//   }),
-// }));
-
+// mock API interactions
 jest.mock("src/services/search/searchfetcher/SearchFetcherUtil", () => ({
   getSearchFetcher: () => new MockSearchFetcher(),
 }));
 
 jest.mock("next/navigation", () => ({
-  ...jest.requireActual("next/navigation"),
+  ...jest.requireActual<typeof import("next/navigation")>("next/navigation"),
   useRouter: () => ({
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     push: () => {},
   }),
 }));
 
-// const globalFetchReference = global.fetch;
+/*
+  nested async server components (< ...Fetcher />) are currently breaking the render.
+  stated workarounds are not working. to get testing minimally working, overriding
+  Suspense to force display of fallback UI.
 
-// const mockedOpportunityResponse = {
-//   // from Body interface
-//   body: null,
-//   bodyUsed: true,
-//   arrayBuffer: () => Promise.resolve(new ArrayBuffer(1)),
-//   blob: () => Promise.resolve(new Blob()),
-//   formData: () => Promise.resolve(new FormData()),
-//   json: () => Promise.resolve(basicOpportunityFixture),
-//   text: () => Promise.resolve(JSON.stringify(basicOpportunityFixture)),
-
-//   // from Response interface
-//   headers: new Headers(),
-//   ok: true,
-//   redirected: false,
-//   status: 200,
-//   statusText: "200",
-//   type: "default" as ResponseType,
-//   url: "http://realultimatepower.net",
-//   clone: () => mockedOpportunityResponse,
-// };
+  for more see https://github.com/testing-library/react-testing-library/issues/1209
+*/
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
 
 describe("Search Route", () => {
-  // beforeEach(() => {
-  //   global.fetch = jest.fn(() => Promise.resolve(mockedOpportunityResponse));
-  // });
-  // afterEach(() => {
-  //   global.fetch = globalFetchReference;
-  // });
-  it("renders the search page when feature flag is enabled", async () => {
-    // global.fetch = jest.fn().mockResolvedValue({
-    //   json: jest.fn().mockResolvedValue({ login: "Gio" }),
-    // });
-
+  it("renders the search page with expected checkboxes checked", async () => {
     const mockSearchParams = {
-      query: "?status=forecasted,posted",
+      status: "forecasted,posted",
     };
 
-    const ResolvedSearchPage = await Search({
-      searchParams: mockSearchParams,
-    });
-    render(ResolvedSearchPage);
+    render(<Search searchParams={mockSearchParams} />);
 
-    expect(screen.getByText("Mocked Search Form")).toBeInTheDocument();
+    // translation service is mocked, so the expected label here is the translation key rather than the label text
+    const forecastedCheckbox = await screen.findByLabelText(
+      "opportunityStatus.label.forecasted",
+    );
+    expect(forecastedCheckbox).toBeInTheDocument();
+    expect(forecastedCheckbox).toBeChecked();
+
+    const postedCheckbox = await screen.findByLabelText(
+      "opportunityStatus.label.posted",
+    );
+    expect(postedCheckbox).toBeInTheDocument();
+    expect(postedCheckbox).toBeChecked();
+
+    const closedCheckbox = await screen.findByLabelText(
+      "opportunityStatus.label.closed",
+    );
+    expect(closedCheckbox).toBeInTheDocument();
+    expect(closedCheckbox).not.toBeChecked();
+
+    const archivedCheckbox = await screen.findByLabelText(
+      "opportunityStatus.label.archived",
+    );
+    expect(archivedCheckbox).toBeInTheDocument();
+    expect(archivedCheckbox).not.toBeChecked();
   });
 });
