@@ -1,8 +1,7 @@
 import Cookies from "js-cookie";
+import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
 
 import { useEffect, useState } from "react";
-
-import { FeatureFlagsManager } from "../services/FeatureFlagManager";
 
 /**
  * React hook for reading and managing feature flags in client-side code.

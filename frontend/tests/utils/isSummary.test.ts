@@ -1,5 +1,5 @@
-import { Summary } from "../../src/types/opportunity/opportunityResponseTypes";
-import { isSummary } from "../../src/utils/opportunity/isSummary";
+import { Summary } from "src/types/opportunity/opportunityResponseTypes";
+import { isSummary } from "src/utils/opportunity/isSummary";
 
 describe("isSummary", () => {
   it("should return true for a valid Summary object", () => {

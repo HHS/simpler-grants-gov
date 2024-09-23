@@ -1,9 +1,9 @@
+import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import React, { ComponentType } from "react";
-
-import { FeatureFlagsManager } from "../../services/FeatureFlagManager";
-import { ServerSideSearchParams } from "../../types/searchRequestURLTypes";
 
 type WithFeatureFlagProps = {
   searchParams: ServerSideSearchParams;

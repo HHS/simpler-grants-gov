@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button, Grid } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";
-import { USWDSIcon } from "../USWDSIcon";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const IndexGoalContent = () => {
   const t = useTranslations("Index");

@@ -4,11 +4,10 @@
 
 import { CookiesStatic } from "js-cookie";
 import { featureFlags } from "src/constants/featureFlags";
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
-
-import { ServerSideSearchParams } from "../types/searchRequestURLTypes";
 
 export type FeatureFlags = { [name: string]: boolean };
 // Parity with unexported getServerSideProps context cookie type

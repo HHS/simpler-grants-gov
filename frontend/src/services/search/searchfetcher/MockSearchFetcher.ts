@@ -1,7 +1,8 @@
 import "server-only";
 
-import mockData from "../../../app/api/mock/APIMockResponse.json";
-import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
+import mockData from "src/app/api/mock/APIMockResponse.json";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
+
 import { SearchFetcher } from "./SearchFetcher";
 
 export class MockSearchFetcher extends SearchFetcher {
