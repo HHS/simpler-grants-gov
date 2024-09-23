@@ -20,11 +20,9 @@ from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
-TASK_NAME = "set-current-opportunities"
-
 
 @task_blueprint.cli.command(
-    TASK_NAME,
+    "set-current-opportunities",
     help="For each opportunity in the database set/update the current opportunity record",
 )
 @flask_db.with_db_session()
