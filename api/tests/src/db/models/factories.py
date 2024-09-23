@@ -983,13 +983,23 @@ class TfundinstrFactory(BaseFactory):
 ####################################
 
 
-class StagingTopportunityFactory(TopportunityFactory):
+class AbstractStagingFactory(BaseFactory):
     class Meta:
-        model = staging.opportunity.Topportunity
+        abstract = True
 
     # Default to being a new insert/update
     is_deleted = False
     transformed_at = None
+
+    class Params:
+        already_transformed = factory.Trait(
+            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+
+class StagingTopportunityFactory(TopportunityFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.opportunity.Topportunity
 
     cfdas = factory.RelatedFactoryList(
         "tests.src.db.models.factories.StagingTopportunityCfdaFactory",
@@ -998,10 +1008,6 @@ class StagingTopportunityFactory(TopportunityFactory):
     )
 
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         # Trait to set all nullable fields to None
         all_fields_null = factory.Trait(
             oppnumber=None,
@@ -1013,22 +1019,14 @@ class StagingTopportunityFactory(TopportunityFactory):
         )
 
 
-class StagingTopportunityCfdaFactory(TopportunityCfdaFactory):
+class StagingTopportunityCfdaFactory(TopportunityCfdaFactory, AbstractStagingFactory):
     class Meta:
         model = staging.opportunity.TopportunityCfda
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         # Trait to set all nullable fields to None
         all_fields_null = factory.Trait(
             programtitle=None,
@@ -1036,21 +1034,12 @@ class StagingTopportunityCfdaFactory(TopportunityCfdaFactory):
         )
 
 
-class StagingTsynopsisFactory(TsynopsisFactory):
+class StagingTsynopsisFactory(TsynopsisFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.Tsynopsis
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
 
 class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
@@ -1060,27 +1049,13 @@ class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
     revision_number = factory.Faker("random_int", min=1, max=25)
     action_type = "U"  # Update, put D for deleted
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTforecastFactory(TforecastFactory):
+class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.Tforecast
 
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
 
 class StagingTforecastHistFactory(StagingTforecastFactory):
@@ -1090,13 +1065,8 @@ class StagingTforecastHistFactory(StagingTforecastFactory):
     revision_number = factory.Faker("random_int", min=1, max=25)
     action_type = "U"  # Update, put D for deleted
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory):
+class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.TapplicanttypesForecast
 
@@ -1105,15 +1075,7 @@ class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory):
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1127,13 +1089,8 @@ class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFa
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
+class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TapplicanttypesSynopsis
 
@@ -1142,15 +1099,7 @@ class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1164,13 +1113,8 @@ class StagingTapplicanttypesSynopsisHistFactory(StagingTapplicanttypesSynopsisFa
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTfundactcatForecastFactory(TfundactcatFactory):
+class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.TfundactcatForecast
 
@@ -1179,15 +1123,7 @@ class StagingTfundactcatForecastFactory(TfundactcatFactory):
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1201,13 +1137,8 @@ class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTfundactcatSynopsisFactory(TfundactcatFactory):
+class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundactcatSynopsis
 
@@ -1216,15 +1147,7 @@ class StagingTfundactcatSynopsisFactory(TfundactcatFactory):
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1238,13 +1161,8 @@ class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTfundinstrForecastFactory(TfundinstrFactory):
+class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory):
     class Meta:
         model = staging.forecast.TfundinstrForecast
 
@@ -1253,15 +1171,7 @@ class StagingTfundinstrForecastFactory(TfundinstrFactory):
     forecast = factory.SubFactory(StagingTforecastFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1275,13 +1185,8 @@ class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTfundinstrSynopsisFactory(TfundinstrFactory):
+class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory):
     class Meta:
         model = staging.synopsis.TfundinstrSynopsis
 
@@ -1290,15 +1195,7 @@ class StagingTfundinstrSynopsisFactory(TfundinstrFactory):
     synopsis = factory.SubFactory(StagingTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
 
-    # Default to being a new insert/update
-    is_deleted = False
-    transformed_at = None
-
     class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
-
         orphaned_record = factory.Trait(
             synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
         )
@@ -1312,20 +1209,13 @@ class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
-
-class StagingTgroupsFactory(BaseFactory):
+class StagingTgroupsFactory(AbstractStagingFactory):
     class Meta:
         model = staging.tgroups.Tgroups
 
     keyfield = ""
     value = ""
-
-    is_deleted = False
 
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
     last_upd_date = sometimes_none(
@@ -1334,11 +1224,6 @@ class StagingTgroupsFactory(BaseFactory):
 
     last_upd_id = factory.Faker("first_name")
     creator_id = factory.Faker("first_name")
-
-    class Params:
-        already_transformed = factory.Trait(
-            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
-        )
 
 
 ####################################
@@ -1382,9 +1267,6 @@ class TransferTopportunityFactory(BaseFactory):
 ####################################
 # Foreign Table Factories
 ####################################
-#
-# NOTE: These generate a dictionary - and do not connect to the database directly
-#
 
 
 class ForeignTopportunityFactory(TopportunityFactory):
