@@ -18,6 +18,28 @@ from . import sql
 
 logger = logging.getLogger(__name__)
 
+TABLES_TO_LOAD = [
+    "topportunity",
+    "topportunity_cfda",
+    "tsynopsis",
+    "tsynopsis_hist",
+    "tforecast",
+    "tforecast_hist",
+    "tapplicanttypes_forecast",
+    "tapplicanttypes_forecast_hist",
+    "tapplicanttypes_synopsis",
+    "tapplicanttypes_synopsis_hist",
+    "tfundactcat_forecast",
+    "tfundactcat_forecast_hist",
+    "tfundactcat_synopsis",
+    "tfundactcat_synopsis_hist",
+    "tfundinstr_forecast",
+    "tfundinstr_forecast_hist",
+    "tfundinstr_synopsis",
+    "tfundinstr_synopsis_hist",
+    # tgroups,  # Want to hold on this until we have permissions
+]
+
 
 class LoadOracleDataTask(src.task.task.Task):
     """Task to load data from legacy tables to staging tables."""
@@ -27,8 +49,16 @@ class LoadOracleDataTask(src.task.task.Task):
         db_session: db.Session,
         foreign_tables: dict[str, sqlalchemy.Table],
         staging_tables: dict[str, sqlalchemy.Table],
+        tables_to_load: list[str] | None = None,
         insert_chunk_size: int = 4000,
     ) -> None:
+
+        if tables_to_load is None or len(tables_to_load) == 0:
+            tables_to_load = TABLES_TO_LOAD
+
+        foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
+        staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}
+
         if foreign_tables.keys() != staging_tables.keys():
             raise ValueError("keys of foreign_tables and staging_tables must be equal")
 

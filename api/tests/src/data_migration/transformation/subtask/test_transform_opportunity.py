@@ -11,7 +11,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 class TestTransformOpportunity(BaseTransformTestClass):
     @pytest.fixture()
-    def transform_opportunity(self, transform_oracle_data_task):
+    def transform_opportunity(self, transform_oracle_data_task, truncate_staging_tables):
         return TransformOpportunity(transform_oracle_data_task)
 
     def test_process_opportunities(self, db_session, transform_opportunity):

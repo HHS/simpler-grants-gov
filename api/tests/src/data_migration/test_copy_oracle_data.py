@@ -38,7 +38,7 @@ def convert_value_for_insert(value) -> str:
 
 
 def build_foreign_opportunity(db_session, opp_params: dict, table_schema: str):
-    opp = ForeignTopportunityFactory.build(**opp_params)
+    opp = ForeignTopportunityFactory.build(**opp_params)._dict()
 
     columns = opp.keys()
     values = [convert_value_for_insert(opp[column]) for column in columns]
