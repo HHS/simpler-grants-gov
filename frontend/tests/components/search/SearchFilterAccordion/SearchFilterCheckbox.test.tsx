@@ -1,13 +1,13 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, waitFor } from "@testing-library/react";
+import { axe } from "jest-axe";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
-import SearchFilterCheckbox from "../../../../src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
-import { axe } from "jest-axe";
 
-const mockIncrement = jest.fn();
-const mockDecrement = jest.fn();
+import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
+
 const mockUpdateCheckedOption = jest.fn();
 const option = {
   id: "test-option",
@@ -20,11 +20,9 @@ describe("SearchFilterCheckbox", () => {
     const { container } = render(
       <SearchFilterCheckbox
         option={option}
-        increment={mockIncrement}
-        decrement={mockDecrement}
-        mounted={true}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}
+        query={new Set()}
       />,
     );
     const results = await axe(container);
@@ -35,11 +33,9 @@ describe("SearchFilterCheckbox", () => {
     render(
       <SearchFilterCheckbox
         option={option}
-        increment={mockIncrement}
-        decrement={mockDecrement}
-        mounted={true}
         updateCheckedOption={mockUpdateCheckedOption}
         accordionTitle={"Test Accordion"}
+        query={new Set()}
       />,
     );
 
@@ -47,28 +43,9 @@ describe("SearchFilterCheckbox", () => {
     const checkbox = screen.getByLabelText(option.label);
     fireEvent.click(checkbox);
 
-    // Wait for the increment function to be called
-    await waitFor(() => {
-      expect(mockIncrement).toHaveBeenCalledTimes(1);
-    });
-
     // Wait for the updateCheckedOption function to be called with the checkbox being checked
     await waitFor(() => {
-      expect(mockUpdateCheckedOption).toHaveBeenCalledWith(option.id, true);
+      expect(mockUpdateCheckedOption).toHaveBeenCalledWith(option.value, true);
     });
-
-    // Simulate user clicking the checkbox again to uncheck it
-    fireEvent.click(checkbox);
-
-    // TODO (Issue #1618): Resolve issues with unchecking
-
-    // await waitFor(() => {
-    //   expect(mockDecrement).toHaveBeenCalledTimes(1);
-    // });
-
-    // // Wait for the updateCheckedOption function to be called with the checkbox being unchecked
-    // await waitFor(() => {
-    //   expect(mockUpdateCheckedOption).toHaveBeenCalledWith(option.id, false);
-    // });
   });
 });

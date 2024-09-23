@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import ResearchThemes from "src/pages/content/ResearchThemes";
+import ResearchThemes from "src/app/[locale]/research/ResearchThemes";
 
 const meta: Meta<typeof ResearchThemes> = {
   title: "Components/Content/Research Themes Content",

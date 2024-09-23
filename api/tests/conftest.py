@@ -11,6 +11,7 @@ from apiflask import APIFlask
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
+from src.adapters import search
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
@@ -144,6 +145,49 @@ def test_foreign_schema(db_schema_prefix):
 
 
 ####################
+# Opensearch Fixtures
+####################
+
+
+@pytest.fixture(scope="session")
+def search_client() -> search.SearchClient:
+    client = search.SearchClient()
+    try:
+        yield client
+    finally:
+        # Just in case a test setup an index
+        # in a way that didn't clean it up, delete
+        # all indexes at the end of a run that start with test
+        client.delete_index("test-*")
+
+
+@pytest.fixture(scope="session")
+def opportunity_index(search_client):
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+
+    search_client.create_index(index_name)
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-opportunity-index-*")
+
+
+@pytest.fixture(scope="session")
+def opportunity_index_alias(search_client, monkeypatch_session):
+    # Note we don't actually create anything, this is just a random name
+    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
+    monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    return alias
+
+
+####################
 # Test App & Client
 ####################
 
@@ -151,7 +195,7 @@ def test_foreign_schema(db_schema_prefix):
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client) -> APIFlask:
+def app(db_client, opportunity_index_alias) -> APIFlask:
     return app_entry.create_app()
 
 
@@ -196,7 +240,8 @@ def reset_aws_env_vars(monkeypatch):
 
 @pytest.fixture
 def mock_s3(reset_aws_env_vars):
-    with moto.mock_s3():
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
         yield boto3.resource("s3")
 
 

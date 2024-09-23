@@ -42,6 +42,7 @@ We would define the Marshmallow schema in-python like so:
 ```py
 from enum import StrEnum
 from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema
 
 class Suffix(StrEnum):
     SENIOR = "SR"
@@ -65,6 +66,10 @@ class NameSchema(Schema):
 class ExampleSchema(Schema):
     name = fields.Nested(NameSchema())
     birth_date = fields.Date(metadata={"description": "Their birth date"})
+
+class ExampleResponseSchema(AbstractResponseSchema):
+    # Note that AbstractResponseSchema defines a message and status_code field as well
+    data = fields.Nested(ExampleSchema())
 ```
 
 Anything specified in the metadata field is passed to the OpenAPI file that backs the swagger endpoint. The values
@@ -77,9 +82,8 @@ but it's recommended you try to populate the following:
 You can specify validators that will be run when the request is being serialized by APIFlask
 
 Defining a response works the exact same way however field validation does not occur on response, only formatting.
-The response schema only dictates the data portion of the response, the rest of the response is defined in
-[ResponseSchema](../../api/src/api/schemas/response_schema.py) which is connected to APIFlask via the `BASE_RESPONSE_SCHEMA` config.
-
+To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../api/src/api/schemas/response_schema.py)
+that you can derive from for shared values like the message.
 
 ### Schema tips
 

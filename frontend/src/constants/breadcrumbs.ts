@@ -28,3 +28,4 @@ export const NEWSLETTER_UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
   NEWSLETTER_UNSUBSCRIBE,
 ];
 export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
+export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];

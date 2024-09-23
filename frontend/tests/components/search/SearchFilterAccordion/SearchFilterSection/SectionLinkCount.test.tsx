@@ -1,10 +1,11 @@
 import "@testing-library/jest-dom";
 
-import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
+
 import SectionLinkCount from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
-import { axe } from "jest-axe";
 
 describe("SectionLinkCount", () => {
   it("should not have basic accessibility issues", async () => {

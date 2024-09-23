@@ -5,6 +5,52 @@ export const messages = {
     alert:
       "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website.",
   },
+  OpportunityListing: {
+    page_title: "Opportunity Listing",
+    meta_description: "Summary details for the specific opportunity listing.",
+    intro: {
+      agency: "Agency: ",
+      assistanceListings: "Assistance Listings: ",
+      lastUpdated: "Last Updated: ",
+    },
+    description: {
+      description: "Description",
+      eligible_applicants: "Eligible Applicants",
+      additional_info: "Additional Information on eligibility",
+      contact_info: "Grantor contact information",
+    },
+    award_info: {
+      yes: "Yes",
+      no: "No",
+      program_funding: "Program Funding",
+      expected_awards: "Expected awards",
+      award_ceiling: "Award Ceiling",
+      award_floor: "Award Floor",
+      cost_sharing: "Cost sharing or matching requirement",
+      funding_instrument: "Funding instrument type",
+      opportunity_category: "Opportunity Category",
+      opportunity_category_explanation: "Opportunity Category Explanation",
+      funding_activity: "Category of Funding Activity",
+      category_explanation: "Category Explanation",
+    },
+    history: {
+      posted_date: "Posted date",
+      closing_date: "Original closing date for applications",
+      archive_date: "Archive date",
+      version: "Version",
+    },
+    link: {
+      title: "Link to additonal information",
+    },
+    status_widget: {
+      archived: "Archived: ",
+      closed: "Closed: ",
+      closing: "Closing: ",
+      forecasted: "Forecasted",
+      closing_warn:
+        "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
+    },
+  },
   Index: {
     page_title: "Simpler.Grants.gov",
     meta_description:
@@ -229,12 +275,12 @@ export const messages = {
         {
           title: "Find",
           content:
-            "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p><chevron/>",
+            "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>",
         },
         {
           title: "Advanced reporting",
           content:
-            "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p><chevron/>",
+            "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>",
         },
         {
           title: "Apply",
@@ -291,9 +337,9 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       already_subscribed:
-        "{{email_address}} is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
+        "<email_address/> is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
       sendy:
-        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: {{sendy_error}}",
+        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
     },
   },
   Newsletter_confirmation: {
@@ -323,6 +369,7 @@ export const messages = {
       "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. ",
   },
   ErrorPages: {
+    page_title: "Page Not Found | Simpler.Grants.gov",
     page_not_found: {
       title: "Oops! Page Not Found",
       message_content_1:
@@ -377,6 +424,78 @@ export const messages = {
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
+    meta_description:
+      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     description: "Try out our experimental search page.",
+    accordion: {
+      titles: {
+        funding: "Funding instrument",
+        eligibility: "Eligibility",
+        agency: "Agency",
+        category: "Category",
+      },
+    },
+    bar: {
+      label:
+        "<strong>Search terms </strong><small>Enter keywords, opportunity numbers, or assistance listing numbers</small>",
+      button: "Search",
+    },
+    callToAction: {
+      title: "Search funding opportunities",
+      description:
+        "We’re incrementally improving this experimental search page. How can we make it easier to discover grants that are right for you? Let us know at <mail>simpler@grants.gov</mail>.",
+    },
+    opportunityStatus: {
+      title: "Opportunity status",
+      label: {
+        forecasted: "Forecasted",
+        posted: "Posted",
+        closed: "Closed",
+        archived: "Archived",
+      },
+    },
+    resultsHeader: {
+      message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
+    },
+    resultsListFetch: {
+      title: "Your search did not return any results.",
+      body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
+      paginationError:
+        "You're trying to access opportunity results that are beyond the last page of data.",
+    },
+    resultsListItem: {
+      status: {
+        archived: "Archived: ",
+        closed: "Closed: ",
+        posted: "Closing: ",
+        forecasted: "Forecasted",
+      },
+      summary: {
+        posted: "Posted: ",
+        agency: "Agency: ",
+      },
+      opportunity_number: "Opportunity Number: ",
+      award_ceiling: "Award Ceiling: ",
+      floor: "Floor: ",
+    },
+    sortBy: {
+      options: {
+        posted_date_desc: "Posted Date (newest)",
+        posted_date_asc: "Posted Date (oldest)",
+        close_date_desc: "Close Date (newest)",
+        close_date_asc: "Close Date (oldest)",
+        opportunity_title_asc: "Opportunity Title (A to Z)",
+        opportunity_title_desc: "Opportunity Title (Z to A)",
+        agency_asc: "Agency (A to Z)",
+        agency_desc: "Agency (Z to A)",
+        opportunity_number_asc: "Opportunity Number (descending)",
+        opportunity_number_desc: "Opportunity Number (ascending)",
+      },
+      label: "Sort By",
+    },
+    filterToggleAll: {
+      select: "Select All",
+      clear: "Clear All",
+    },
   },
 };

@@ -1,12 +1,14 @@
 import "@testing-library/jest-dom/extend-expect";
 
-import SearchFilterAccordion, {
-  FilterOption,
-} from "../../../../src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
-import { axe } from "jest-axe";
+
+import SearchFilterAccordion, {
+  FilterOption,
+} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 const initialFilterOptions: FilterOption[] = [
   {
@@ -31,19 +33,25 @@ const initialFilterOptions: FilterOption[] = [
   },
 ];
 
+const mockUpdateQueryParams = jest.fn();
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    updateQueryParams: mockUpdateQueryParams,
+  }),
+}));
+
 describe("SearchFilterAccordion", () => {
   const title = "Test Accordion";
-  const queryParamKey = "status";
-  const initialQueryParams = new Set("");
+  const queryParamKey = "fundingInstrument";
 
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchFilterAccordion
-        initialFilterOptions={initialFilterOptions}
+        filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
-        initialQueryParams={initialQueryParams}
-        formRef={React.createRef()}
+        query={new Set()}
       />,
     );
     const results = await axe(container);
@@ -53,11 +61,10 @@ describe("SearchFilterAccordion", () => {
   it("displays the correct checkbox labels", () => {
     render(
       <SearchFilterAccordion
-        initialFilterOptions={initialFilterOptions}
+        filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
-        initialQueryParams={initialQueryParams}
-        formRef={React.createRef()}
+        query={new Set()}
       />,
     );
 
@@ -68,13 +75,12 @@ describe("SearchFilterAccordion", () => {
   });
 
   it("displays select all and clear all correctly", () => {
-    render(
+    const { rerender } = render(
       <SearchFilterAccordion
-        initialFilterOptions={initialFilterOptions}
+        filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
-        initialQueryParams={initialQueryParams}
-        formRef={React.createRef()}
+        query={new Set()}
       />,
     );
 
@@ -86,12 +92,18 @@ describe("SearchFilterAccordion", () => {
     expect(clearAllButton).toBeInTheDocument();
     expect(clearAllButton).toBeDisabled();
 
-    const cooperativeAgreementCheckbox = screen.getByLabelText(
-      "Cooperative Agreement",
+    const updatedQuery = new Set("");
+    updatedQuery.add("Cooperative Agreement");
+    // after clicking one of the boxes, the page should rerender
+    // both select all and clear all should be enabled
+    rerender(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={updatedQuery}
+      />,
     );
-
-    // after clicking one of the boxes, both select all and clear all should be enabled
-    fireEvent.click(cooperativeAgreementCheckbox);
     expect(selectAllButton).toBeEnabled();
     expect(clearAllButton).toBeEnabled();
   });
@@ -99,11 +111,10 @@ describe("SearchFilterAccordion", () => {
   it("has hidden attribute when collapsed", () => {
     render(
       <SearchFilterAccordion
-        initialFilterOptions={initialFilterOptions}
+        filterOptions={initialFilterOptions}
         title={title}
-        queryParamKey={queryParamKey}
-        initialQueryParams={initialQueryParams}
-        formRef={React.createRef()}
+        queryParamKey={"status"}
+        query={new Set()}
       />,
     );
 
@@ -121,32 +132,33 @@ describe("SearchFilterAccordion", () => {
   });
 
   it("checks boxes correctly and updates count", () => {
-    render(
+    const { rerender } = render(
       <SearchFilterAccordion
-        initialFilterOptions={initialFilterOptions}
+        filterOptions={initialFilterOptions}
         title={title}
         queryParamKey={queryParamKey}
-        initialQueryParams={initialQueryParams}
-        formRef={React.createRef()}
+        query={new Set("")}
       />,
     );
 
-    const cooperativeAgreementCheckbox = screen.getByLabelText(
-      "Cooperative Agreement",
+    const updatedQuery = new Set("");
+    updatedQuery.add("Cooperative Agreement");
+    updatedQuery.add("Grant");
+    // after clicking one of the boxes, the page should rerender
+    // both select all and clear all should be enabled
+    rerender(
+      <SearchFilterAccordion
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={updatedQuery}
+      />,
     );
-    fireEvent.click(cooperativeAgreementCheckbox);
-
-    const grantCheckbox = screen.getByLabelText("Grant");
-    fireEvent.click(grantCheckbox);
 
     // Verify the count updates to 2
     const countSpan = screen.getByText("2", {
       selector: ".usa-tag.usa-tag--big.radius-pill.margin-left-1",
     });
     expect(countSpan).toBeInTheDocument();
-
-    // Verify the checkboxes are checked
-    expect(cooperativeAgreementCheckbox).toBeChecked();
-    expect(grantCheckbox).toBeChecked();
   });
 });

@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import FundingContent from "src/pages/content/FundingContent";
+import { render, screen } from "tests/react-utils";
+
+import FundingContent from "src/components/content/FundingContent";
 
 describe("Funding Content", () => {
   it("Renders without errors", () => {

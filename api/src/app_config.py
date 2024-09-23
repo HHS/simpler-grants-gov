@@ -9,3 +9,7 @@ class AppConfig(PydanticBaseEnvConfig):
     # See https://flask.palletsprojects.com/en/2.2.x/api/#flask.Flask.run
     host: str = "127.0.0.1"
     port: int = 8080
+
+    # For the OpenAPI docs, set whether the auth tokens are stored
+    # across refreshes of the page. Currently we only set this to true locally
+    persist_authorization_openapi: bool = False

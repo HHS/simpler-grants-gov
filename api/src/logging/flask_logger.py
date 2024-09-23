@@ -16,6 +16,7 @@ Usage:
 
     flask_logger.init_app(logger, app)
 """
+
 import logging
 import os
 import time

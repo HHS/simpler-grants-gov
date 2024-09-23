@@ -6,6 +6,7 @@ be used used during development.
 
 See https://docs.python.org/3/library/logging.html#formatter-objects
 """
+
 import json
 import logging
 from datetime import date, datetime

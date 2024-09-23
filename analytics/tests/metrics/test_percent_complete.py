@@ -1,4 +1,5 @@
 """Tests for analytics/datasets/percent_complete.py."""
+
 from pathlib import Path  # noqa: I001
 
 import pytest

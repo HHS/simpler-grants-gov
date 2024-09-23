@@ -45,3 +45,13 @@ npm-debug.log*
 
 # uswds assets
 /public/uswds
+
+# playwright e2e
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# pa11y
+screenshots-output/*
+pa11y_output.txt

@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import ResearchImpact from "src/pages/content/ResearchImpact";
+import ResearchImpact from "src/app/[locale]/research/ResearchImpact";
+import { render, screen } from "tests/react-utils";
 
 describe("Research Content", () => {
   it("Renders without errors", () => {

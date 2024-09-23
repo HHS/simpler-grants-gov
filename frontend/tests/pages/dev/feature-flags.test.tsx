@@ -3,9 +3,8 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import FeatureFlags, { getStaticProps } from "src/pages/dev/feature-flags";
-
-import { mockDefaultFeatureFlags } from "../../utils/FeatureFlagTestUtils";
+import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
+import { mockDefaultFeatureFlags } from "tests/utils/FeatureFlagTestUtils";
 
 describe("Feature flags page", () => {
   const MOCK_DEFAULT_FEATURE_FLAGS = {
@@ -42,13 +41,5 @@ describe("Feature flags page", () => {
       fireEvent.click(enableButton);
       expect(statusElement).toHaveTextContent("Enabled");
     });
-  });
-
-  it("is disabled in production", () => {
-    expect(getStaticProps().notFound).toBeUndefined();
-    const oldEnv = { ...process.env };
-    process.env.NEXT_PUBLIC_ENVIRONMENT = "prod";
-    expect(getStaticProps().notFound).toBe(true);
-    process.env = oldEnv; // Restore old environment
   });
 });

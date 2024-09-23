@@ -1,9 +1,6 @@
-// This server-only package is recommended by Next.js to ensure code is only run on the server.
-// It provides a build-time error if client-side code attempts to invoke the code here.
-// Since we're pulling in an API Auth Token here, this should be server only
-// https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
+import { compact, isEmpty } from "lodash";
 import {
   ApiRequestError,
   BadRequestError,
@@ -16,12 +13,10 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "src/errors";
-import { compact, isEmpty } from "lodash";
-
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)
-import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
+import { APIResponse } from "src/types/apiResponseTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -69,7 +64,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
-    queryParamData: QueryParamData,
+    queryParamData?: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -109,13 +104,13 @@ export default abstract class BaseApi {
   private async sendRequest(
     url: string,
     fetchOptions: RequestInit,
-    queryParamData: QueryParamData,
+    queryParamData?: QueryParamData,
   ) {
     let response: Response;
-    let responseBody: SearchAPIResponse;
+    let responseBody: APIResponse;
     try {
       response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as SearchAPIResponse;
+      responseBody = (await response.json()) as APIResponse;
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
@@ -189,19 +184,21 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
  */
 export function fetchErrorToNetworkError(
   error: unknown,
-  searchInputs: QueryParamData,
+  searchInputs?: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
   console.error(error);
-  return new NetworkError(error, searchInputs);
+  return searchInputs
+    ? new NetworkError(error, searchInputs)
+    : new NetworkError(error);
 }
 
 function handleNotOkResponse(
-  response: SearchAPIResponse,
+  response: APIResponse,
   message: string,
   status_code: number,
-  searchInputs: QueryParamData,
+  searchInputs?: QueryParamData,
 ) {
   const { errors } = response;
   if (isEmpty(errors)) {
@@ -218,10 +215,10 @@ function handleNotOkResponse(
 const throwError = (
   message: string,
   status_code: number,
-  searchInputs: QueryParamData,
+  searchInputs?: QueryParamData,
   firstError?: APIResponseError,
 ) => {
-  console.log("Throwing error: ", message, status_code, searchInputs);
+  console.error("Throwing error: ", message, status_code, searchInputs);
 
   // Include just firstError for now, we can expand this
   // If we need ValidationErrors to be more expanded
@@ -246,9 +243,9 @@ const throwError = (
     default:
       throw new ApiRequestError(
         error,
-        searchInputs,
         "APIRequestError",
         status_code,
+        searchInputs,
       );
   }
 };

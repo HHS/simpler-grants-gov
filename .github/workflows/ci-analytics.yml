@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       # install poetry
       - uses: Gr1N/setup-poetry@v8
@@ -42,11 +42,12 @@ jobs:
       - name: Run tests
         run: make test-audit
 
-      - name: Export GitHub data
-        run: make gh-data-export
+      # Both of these tasks are looking for github and slack auth
+      # - name: Export GitHub data
+      #   run: make gh-data-export
 
-      - name: Run reports
-        run: make sprint-reports
+      # - name: Run reports
+      #   run: make sprint-reports
 
   vulnerability-scans:
     name: Run Analytics Vulnerability Scans

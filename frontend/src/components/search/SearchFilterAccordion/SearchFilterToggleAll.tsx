@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface SearchFilterToggleAllProps {
   isAllSelected: boolean;
   isNoneSelected: boolean;
@@ -13,20 +15,20 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
   isAllSelected,
   isNoneSelected,
 }) => {
+  const t = useTranslations("Search");
+
   return (
     <div className="grid-row">
       <div className="grid-col-fill">
         <button
           className="usa-button usa-button--unstyled font-sans-xs"
           onClick={(event) => {
-            // form submission is done in useSearchFilter, so
-            // prevent the onClick from submitting here.
             event.preventDefault();
             onSelectAll?.();
           }}
           disabled={isAllSelected}
         >
-          Select All
+          {t("filterToggleAll.select")}
         </button>
       </div>
       <div className="grid-col-fill text-right">
@@ -38,7 +40,7 @@ const SearchFilterToggleAll: React.FC<SearchFilterToggleAllProps> = ({
           }}
           disabled={isNoneSelected}
         >
-          Clear All
+          {t("filterToggleAll.clear")}
         </button>
       </div>
     </div>

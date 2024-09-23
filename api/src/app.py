@@ -7,16 +7,21 @@ from flask_cors import CORS
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.adapters.search as search
+import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
 from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
+from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
+from src.app_config import AppConfig
 from src.auth.api_key_auth import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 
 logger = logging.getLogger(__name__)
@@ -44,6 +49,7 @@ def create_app() -> APIFlask:
     configure_app(app)
     register_blueprints(app)
     register_index(app)
+    register_search_client(app)
 
     return app
 
@@ -58,16 +64,26 @@ def register_db_client(app: APIFlask) -> None:
     flask_db.register_db_client(db_client, app)
 
 
+def register_search_client(app: APIFlask) -> None:
+    search_client = search.SearchClient()
+    flask_opensearch.register_search_client(search_client, app)
+
+
 def configure_app(app: APIFlask) -> None:
+    app_config = AppConfig()
+
     # Modify the response schema to instead use the format of our ApiResponse class
     # which adds additional details to the object.
     # https://apiflask.com/schema/#base-response-schema-customization
-    app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
+    # app.config["BASE_RESPONSE_SCHEMA"] = response_schema.ResponseSchema
     app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.config["SWAGGER_UI_CSS"] = "/static/swagger-ui.min.css"
     app.config["SWAGGER_UI_BUNDLE_JS"] = "/static/swagger-ui-bundle.js"
     app.config["SWAGGER_UI_STANDALONE_PRESET_JS"] = "/static/swagger-ui-standalone-preset.js"
+    app.config["SWAGGER_UI_CONFIG"] = {
+        "persistAuthorization": app_config.persist_authorization_openapi
+    }
     # Removing because the server dropdown has accessibility issues.
     app.config["SERVERS"] = "."
     app.config["DOCS_FAVICON"] = "https://simpler.grants.gov/img/favicon.ico"
@@ -101,8 +117,12 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
+    app.register_blueprint(opportunities_v1_blueprint)
+
+    # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
+    app.register_blueprint(load_search_data_blueprint)
 
 
 def get_project_root_dir() -> str:

@@ -93,7 +93,7 @@ def test_convert_yn_boolean_unexpected_value(value):
 
 
 @pytest.mark.parametrize(
-    "value,expected_value", [("D", True), ("U", False), ("", None), (None, None)]
+    "value,expected_value", [("D", True), ("U", False), ("", False), (None, False)]
 )
 def test_convert_action_type_to_is_deleted(value, expected_value):
     assert transform_util.convert_action_type_to_is_deleted(value) == expected_value
