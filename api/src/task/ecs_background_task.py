@@ -106,7 +106,7 @@ def _get_ecs_metadata() -> dict:
         )
         return {}
 
-    task_metadata = requests.get(ecs_metadata_uri)
+    task_metadata = requests.get(ecs_metadata_uri, timeout=1)  # 1sec timeout
     logger.info("Retrieved task metadata from ECS")
     metadata_json = task_metadata.json()
 
