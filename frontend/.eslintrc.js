@@ -14,6 +14,17 @@ module.exports = {
     // dependencies to work in standalone mode. It may be overkill for most projects at
     // Nava which aren't image heavy.
     "@next/next/no-img-element": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["../"],
+            "message": "Relative imports are not allowed."
+          }
+        ]
+      }
+    ]
   },
   // Additional lint rules. These get layered onto the top-level rules.
   overrides: [
