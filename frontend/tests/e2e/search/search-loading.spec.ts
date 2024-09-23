@@ -27,7 +27,7 @@ test.describe("Search page tests", () => {
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
 
-    const loadingIndicator = page.locator("text='Loading results...'");
+    const loadingIndicator = page.getByTestId("loading-message");
     await expect(loadingIndicator).toBeVisible();
     await expect(loadingIndicator).toBeHidden();
 
