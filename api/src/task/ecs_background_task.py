@@ -2,7 +2,9 @@ import contextlib
 import logging
 import os
 import time
-from typing import Generator
+import uuid
+from functools import wraps
+from typing import Callable, Generator, ParamSpec, TypeVar
 
 import requests
 
@@ -10,11 +12,13 @@ from src.logging.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
 
+P = ParamSpec("P")
+T = TypeVar("T")
 
-@contextlib.contextmanager
-def ecs_background_task(task_name: str) -> Generator[None, None, None]:
+
+def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
-    Context manager for any ECS Task entrypoint function.
+    Decorator for any ECS Task entrypoint function.
 
     This encapsulates the setup required by all ECS tasks, making it easy to:
     - add new shared initialization steps for logging
@@ -32,7 +36,30 @@ def ecs_background_task(task_name: str) -> Generator[None, None, None]:
 
     Parameters:
       task_name (str): Name of the ECS task
+
+    IMPORTANT: Do not specify this decorator before the task command.
+               Click effectively rewrites your function to be a main function
+               and any decorators from before the "task_blueprint.cli.command(...)"
+               line are discarded.
+               See: https://click.palletsprojects.com/en/8.1.x/quickstart/#basic-concepts-creating-a-command
     """
+
+    def decorator(f: Callable[P, T]) -> Callable[P, T]:
+        @wraps(f)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            with _ecs_background_task_impl(task_name):
+                return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+@contextlib.contextmanager
+def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
+    # The actual implementation, see the docs on the
+    # decorator method above for details on usage
+
     start = time.perf_counter()
     _add_log_metadata(task_name)
 
@@ -46,19 +73,23 @@ def ecs_background_task(task_name: str) -> Generator[None, None, None]:
         # We want to make certain that any exception will always
         # be logged as an error
         # logger.exception is just an alias for logger.error(<msg>, exc_info=True)
-        logger.exception("ECS task failed")
+        logger.exception("ECS task failed", extra={"status": "error"})
         raise
 
     end = time.perf_counter()
     duration = round((end - start), 3)
-    logger.info("Completed ECS task %s", task_name, extra={"ecs_task_duration_sec": duration})
+    logger.info(
+        "Completed ECS task %s",
+        task_name,
+        extra={"ecs_task_duration_sec": duration, "status": "success"},
+    )
 
 
 def _add_log_metadata(task_name: str) -> None:
     # Note we set an "aws.ecs.task_name" as well pulled from ECS
     # which may be different as that value is set based on our infra setup
     # while this one is just based on whatever we passed the @ecs_background_task decorator
-    add_extra_data_to_global_logs({"task_name": task_name})
+    add_extra_data_to_global_logs({"task_name": task_name, "task_uuid": str(uuid.uuid4())})
     add_extra_data_to_global_logs(_get_ecs_metadata())
 
 
@@ -70,7 +101,7 @@ def _get_ecs_metadata() -> dict:
     ecs_metadata_uri = os.environ.get("ECS_CONTAINER_METADATA_URI_V4")
 
     if os.environ.get("ENVIRONMENT", "local") == "local" or ecs_metadata_uri is None:
-        logger.warning(
+        logger.info(
             "ECS metadata not available for local environments. Run this task on ECS to see metadata."
         )
         return {}

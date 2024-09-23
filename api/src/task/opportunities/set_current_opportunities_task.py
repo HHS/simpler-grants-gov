@@ -14,7 +14,6 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util.datetime_util import get_now_us_eastern_date
@@ -28,7 +27,6 @@ TASK_NAME = "set-current-opportunities"
     TASK_NAME,
     help="For each opportunity in the database set/update the current opportunity record",
 )
-@ecs_background_task(TASK_NAME)
 @flask_db.with_db_session()
 def set_current_opportunities(db_session: db.Session) -> None:
     SetCurrentOpportunitiesTask(db_session).run()

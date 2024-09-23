@@ -53,8 +53,8 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     # set on the ancestors.
     # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
     for handler in app_logger.handlers:
-        handler.addFilter(_add_request_context_info_to_log_record)
         handler.addFilter(_add_global_context_info_to_log_record)
+        handler.addFilter(_add_request_context_info_to_log_record)
 
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule

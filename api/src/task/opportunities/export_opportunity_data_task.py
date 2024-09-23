@@ -14,6 +14,7 @@ import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
+from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util.datetime_util import get_now_us_eastern_datetime
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
     help="Generate JSON and CSV files containing an export of all opportunity data",
 )
 @flask_db.with_db_session()
+@ecs_background_task(task_name="export-opportunity-data")
 def export_opportunity_data(db_session: db.Session) -> None:
     ExportOpportunityDataTask(db_session).run()
 
