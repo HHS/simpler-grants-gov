@@ -330,6 +330,7 @@ class BaseTestClass:
 
         db_session.commit()
 
+    @pytest.fixture(scope="class")
     def truncate_foreign_tables(self, db_session):
         for table in foreign_metadata.tables.values():
             db_session.execute(delete(table))
