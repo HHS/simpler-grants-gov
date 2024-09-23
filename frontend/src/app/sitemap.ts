@@ -1,6 +1,5 @@
 import { MetadataRoute } from "next";
-
-import { getNextRoutes } from "../utils/getRoutes";
+import { getNextRoutes } from "src/utils/getRoutes";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = getNextRoutes("./src/app");

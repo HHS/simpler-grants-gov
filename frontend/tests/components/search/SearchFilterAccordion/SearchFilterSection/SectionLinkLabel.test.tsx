@@ -5,8 +5,8 @@ import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import { FilterOption } from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import SectionLinkLabel from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
+import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SectionLinkLabel from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
 
 // Mock the Icon component from "@trussworks/react-uswds"
 jest.mock("@trussworks/react-uswds", () => ({

@@ -17,14 +17,14 @@ module.exports = {
     "no-restricted-imports": [
       "error",
       {
-        "patterns": [
+        patterns: [
           {
-            "group": ["../"],
-            "message": "Relative imports are not allowed."
-          }
-        ]
-      }
-    ]
+            group: ["../"],
+            message: "Relative imports are not allowed.",
+          },
+        ],
+      },
+    ],
   },
   // Additional lint rules. These get layered onto the top-level rules.
   overrides: [

@@ -3,7 +3,7 @@ import { nofoPdfs } from "src/constants/nofoPdfs";
 import { useTranslations } from "next-intl";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import NofoImageLink from "../../components/NofoImageLink";
+import NofoImageLink from "src/components/NofoImageLink";
 
 const FundingContent = () => {
   const t = useTranslations("Index");

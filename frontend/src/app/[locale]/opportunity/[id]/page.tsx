@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
+import NotFound from "src/app/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import {
@@ -17,8 +19,6 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
-import OpportunityListingAPI from "../../../api/OpportunityListingAPI";
-import NotFound from "../../../not-found";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });

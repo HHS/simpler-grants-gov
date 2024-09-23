@@ -1,6 +1,6 @@
 import "server-only";
 
-import { QueryParamData } from "../../services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -8,7 +8,8 @@ import {
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
-} from "../../types/search/searchRequestTypes";
+} from "src/types/search/searchRequestTypes";
+
 import BaseApi from "./BaseApi";
 
 export default class SearchOpportunityAPI extends BaseApi {

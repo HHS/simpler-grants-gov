@@ -1,9 +1,9 @@
-import { getNextRoutes, listPaths } from "../../src/utils/getRoutes";
+import { getNextRoutes, listPaths } from "src/utils/getRoutes";
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-jest.mock("../../src/utils/getRoutes", () => {
-  const originalModule = jest.requireActual("../../src/utils/getRoutes");
+jest.mock("src/utils/getRoutes", () => {
+  const originalModule = jest.requireActual("src/utils/getRoutes");
   return {
     ...originalModule,
     listPaths: jest.fn(),

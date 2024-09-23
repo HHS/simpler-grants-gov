@@ -5,7 +5,7 @@ import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SectionLinkCount from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
+import SectionLinkCount from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
 
 describe("SectionLinkCount", () => {
   it("should not have basic accessibility issues", async () => {

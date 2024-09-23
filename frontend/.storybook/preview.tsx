@@ -4,10 +4,11 @@
  */
 import { Loader, Preview } from "@storybook/react";
 
-import "../src/styles/styles.scss";
+import "src/styles/styles.scss";
 
-import { defaultLocale, locales } from "../src/i18n/config";
-import { getMessagesWithFallbacks } from "../src/i18n/getMessagesWithFallbacks";
+import { defaultLocale, locales } from "src/i18n/config";
+import { getMessagesWithFallbacks } from "src/i18n/getMessagesWithFallbacks";
+
 import I18nStoryWrapper from "./I18nStoryWrapper";
 
 const parameters = {

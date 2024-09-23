@@ -3,11 +3,10 @@
  * @see https://storybook.js.org/docs/writing-stories/decorators
  */
 import { StoryContext } from "@storybook/react";
+import { defaultLocale, formats, timeZone } from "src/i18n/config";
 
 import { NextIntlClientProvider } from "next-intl";
 import React from "react";
-
-import { defaultLocale, formats, timeZone } from "../src/i18n/config";
 
 const I18nStoryWrapper = (
   Story: React.ComponentType,
