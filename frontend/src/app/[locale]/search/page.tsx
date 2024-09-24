@@ -7,21 +7,21 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearch
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import PageSEO from "src/components/PageSEO";
 import SearchBar from "src/components/search/SearchBar";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import { SearchFilterConfiguration } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import {
   agencyOptions,
   categoryOptions,
   eligibilityOptions,
   fundingOptions,
 } from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
+import SearchFilters from "src/components/search/SearchFilters";
 import SearchPagination from "src/components/search/SearchPagination";
 import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
@@ -52,6 +52,7 @@ interface searchParamsTypes {
 function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
+
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const {
     agency,
@@ -71,6 +72,35 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
 
+  const filterConfigurations = useMemo((): SearchFilterConfiguration[] => {
+    return [
+      {
+        filterOptions: fundingOptions,
+        title: t("accordion.titles.funding"),
+        query: fundingInstrument,
+        queryParamKey: "fundingInstrument",
+      },
+      {
+        filterOptions: eligibilityOptions,
+        title: t("accordion.titles.eligibility"),
+        query: eligibility,
+        queryParamKey: "eligibility",
+      },
+      {
+        filterOptions: agencyOptions,
+        title: t("accordion.titles.agency"),
+        query: agency,
+        queryParamKey: "agency",
+      },
+      {
+        filterOptions: categoryOptions,
+        title: t("accordion.titles.category"),
+        query: category,
+        queryParamKey: "category",
+      },
+    ];
+  }, [fundingInstrument, eligibility, agency, category, t]);
+
   return (
     <>
       <PageSEO title={t("title")} description={t("meta_description")} />
@@ -84,30 +114,9 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">
-              <SearchOpportunityStatus query={status} />
-              <SearchFilterAccordion
-                filterOptions={fundingOptions}
-                title={t("accordion.titles.funding")}
-                queryParamKey="fundingInstrument"
-                query={fundingInstrument}
-              />
-              <SearchFilterAccordion
-                filterOptions={eligibilityOptions}
-                title={t("accordion.titles.eligibility")}
-                queryParamKey="eligibility"
-                query={eligibility}
-              />
-              <SearchFilterAccordion
-                filterOptions={agencyOptions}
-                title={t("accordion.titles.agency")}
-                queryParamKey="agency"
-                query={agency}
-              />
-              <SearchFilterAccordion
-                filterOptions={categoryOptions}
-                title={t("accordion.titles.category")}
-                queryParamKey="category"
-                query={category}
+              <SearchFilters
+                opportunityStatus={status}
+                filterConfigurations={filterConfigurations}
               />
             </div>
             <div className="tablet:grid-col-8">
