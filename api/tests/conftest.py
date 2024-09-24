@@ -7,7 +7,7 @@ import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
-from sqlalchemy import delete
+from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
@@ -137,12 +137,17 @@ def db_schema_prefix():
     return f"test_{uuid.uuid4().int}_"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_api_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.API}"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+def test_staging_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.STAGING}"
+
+
+@pytest.fixture(scope="session")
 def test_foreign_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.LEGACY}"
 
@@ -324,15 +329,15 @@ class BaseTestClass:
         db_session.commit()
 
     @pytest.fixture(scope="class")
-    def truncate_staging_tables(self, db_session):
+    def truncate_staging_tables(self, db_session, test_staging_schema):
         for table in staging_metadata.tables.values():
-            db_session.execute(delete(table))
+            db_session.execute(text(f"TRUNCATE TABLE {test_staging_schema}.{table.name}"))
 
         db_session.commit()
 
     @pytest.fixture(scope="class")
-    def truncate_foreign_tables(self, db_session):
+    def truncate_foreign_tables(self, db_session, test_foreign_schema):
         for table in foreign_metadata.tables.values():
-            db_session.execute(delete(table))
+            db_session.execute(text(f"TRUNCATE TABLE {test_foreign_schema}.{table.name}"))
 
         db_session.commit()
