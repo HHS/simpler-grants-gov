@@ -1,6 +1,7 @@
 import "server-only";
 
 import { compact, isEmpty } from "lodash";
+import { environment } from "src/constants/environments";
 import {
   ApiRequestError,
   BadRequestError,
@@ -50,8 +51,8 @@ export default abstract class BaseApi {
   get headers(): HeadersDict {
     const headers: HeadersDict = {};
 
-    if (process.env.API_AUTH_TOKEN) {
-      headers["X-AUTH"] = process.env.API_AUTH_TOKEN;
+    if (environment.API_AUTH_TOKEN) {
+      headers["X-AUTH"] = environment.API_AUTH_TOKEN;
     }
     return headers;
   }
