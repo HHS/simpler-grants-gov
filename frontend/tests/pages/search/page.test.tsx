@@ -1,26 +1,21 @@
 import { render, screen } from "@testing-library/react";
+import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
 import { MockSearchFetcher } from "src/services/search/searchfetcher/MockSearchFetcher";
-
-function mockUseTranslations(translationKey: string) {
-  return translationKey;
-}
-
-mockUseTranslations.rich = (translationKey: string) => translationKey;
+import { useTranslationsMock } from "tests/utils/intlMocks";
 
 // test without feature flag functionality
 jest.mock("src/hoc/search/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),
 );
 
-// test without i18n functionality, pass through translation key as text
 jest.mock("next-intl/server", () => ({
-  getTranslations: jest.fn(() => (translationKey: string) => translationKey),
-  unstable_setRequestLocale: jest.fn(),
+  getTranslations: () => identity,
+  unstable_setRequestLocale: identity,
 }));
 
 jest.mock("next-intl", () => ({
-  useTranslations: () => mockUseTranslations,
+  useTranslations: () => useTranslationsMock(),
 }));
 
 // mock API interactions
