@@ -8,7 +8,7 @@ import freezegun
 import pytest
 import sqlalchemy
 
-import src.db.foreign
+import src.db.models.foreign
 import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
@@ -52,7 +52,7 @@ class TestLoadOracleData(BaseTestClass):
 
     @pytest.fixture(scope="class")
     def foreign_tables(self):
-        return {t.name: t for t in src.db.foreign.metadata.tables.values()}
+        return {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
 
     @pytest.fixture(scope="class")
     def staging_tables(self):

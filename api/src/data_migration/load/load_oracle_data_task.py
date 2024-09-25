@@ -7,7 +7,7 @@ import time
 
 import sqlalchemy
 
-import src.db.foreign
+import src.db.models.foreign
 import src.db.models.staging
 import src.logging
 import src.task.task
@@ -234,7 +234,7 @@ def main() -> None:
     with src.logging.init(__package__):
         db_client = db.PostgresDBClient()
 
-        foreign_tables = {t.name: t for t in src.db.foreign.metadata.tables.values()}
+        foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
         staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
         with db_client.get_session() as db_session:

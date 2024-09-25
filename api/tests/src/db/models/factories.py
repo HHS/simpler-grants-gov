@@ -20,7 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
-import src.db.foreign as foreign
+import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models

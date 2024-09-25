@@ -5,7 +5,7 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-from src.db.legacy_mixin import tgroups_mixin
+from src.db.models.legacy_mixin import tgroups_mixin
 
 from . import foreignbase
 
