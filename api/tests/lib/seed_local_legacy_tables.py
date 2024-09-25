@@ -56,8 +56,8 @@ def update_existing_data(db_session, max_opportunity_id):
         updated_opportunity["last_upd_date"] = datetime.datetime.now()
 
         db_session.execute(
-            sqlalchemy.update(src.db.models.foreign.opportunity.Topportunity)
-            .where(src.db.models.foreign.opportunity.Topportunity.opportunity_id == opportunity_id)
+            sqlalchemy.update(foreign.opportunity.Topportunity)
+            .where(foreign.opportunity.Topportunity.opportunity_id == opportunity_id)
             .values(**updated_opportunity)
         )
 
@@ -79,7 +79,7 @@ def generate_batch(db_session, start_id, count):
 
 def get_max_opportunity_id(db_session):
     max_opportunity_id = db_session.query(
-        sqlalchemy.func.max(src.db.models.foreign.opportunity.Topportunity.opportunity_id)
+        sqlalchemy.func.max(foreign.opportunity.Topportunity.opportunity_id)
     ).scalar()
     logger.info("max(opportunity_id) = %r" % max_opportunity_id)
     if max_opportunity_id is None:
