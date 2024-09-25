@@ -11,8 +11,10 @@ logger = logging.getLogger(__name__)
 class OpensearchConfig(PydanticBaseEnvConfig):
     model_config = SettingsConfigDict(env_prefix="OPENSEARCH_")
 
-    host: str  # OPENSEARCH_HOST
-    port: int  # OPENSEARCH_PORT
+    # TODO - hacky fix to get the API working again, host/port should
+    #        be defined in terraform env vars
+    host: str = Field(default="NOT_DEFINED")  # OPENSEARCH_HOST
+    port: int = Field(default=1)  # OPENSEARCH_PORT
     use_ssl: bool = Field(default=True)  # OPENSEARCH_USE_SSL
     verify_certs: bool = Field(default=True)  # OPENSEARCH_VERIFY_CERTS
     connection_pool_size: int = Field(default=10)  # OPENSEARCH_CONNECTION_POOL_SIZE
