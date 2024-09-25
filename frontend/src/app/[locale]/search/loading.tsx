@@ -2,13 +2,19 @@ import React from "react";
 
 import Spinner from "src/components/Spinner";
 
-export default function Loading() {
-  // TODO (Issue #1937): Use translation utility for strings in this file
+export interface LoadingProps {
+  message?: string;
+}
+
+export default function Loading({ message }: LoadingProps) {
   return (
     <div className="display-flex flex-align-center flex-justify-center margin-bottom-15 margin-top-15">
       <Spinner />
-      <span className="font-body-2xl text-bold margin-left-2">
-        Loading results...
+      <span
+        className="font-body-2xl text-bold margin-left-2"
+        data-testid="loading-message"
+      >
+        {message || "Loading"}...
       </span>
     </div>
   );

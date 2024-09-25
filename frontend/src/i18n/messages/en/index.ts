@@ -497,5 +497,6 @@ export const messages = {
       select: "Select All",
       clear: "Clear All",
     },
+    loading: "Loading Results",
   },
 };
