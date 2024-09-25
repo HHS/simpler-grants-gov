@@ -8,7 +8,7 @@ locals {
 
 module "aws_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.5.1"
+  version = "5.13.0"
 
   name = var.name
   azs  = local.availability_zones
