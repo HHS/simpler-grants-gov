@@ -10,8 +10,8 @@ import sqlalchemy
 
 import src.adapters.db
 import src.logging
+import tests.src.db.models.factories as factories
 from src.db import foreign
-from tests.src.db.models.factories import ForeignTopportunityFactory
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,7 @@ def seed_local_source_tables() -> None:
         db_client = src.adapters.db.PostgresDBClient()
 
         with db_client.get_session() as db_session:
+            factories._db_session = db_session
             update_and_append_data(db_session)
 
         logger.info("populating source tables done")
@@ -40,7 +41,7 @@ def update_existing_data(db_session, max_opportunity_id):
     """Update a subset of existing opportunities in the source tables."""
 
     # Every record with id ending in 001:
-    update_ids = set(range(1, max_opportunity_id, 1000))
+    update_ids = set(range(1, max_opportunity_id, 100))
     # Plus the 20 most recently created records:
     update_ids |= set(range(max_opportunity_id - 19, max_opportunity_id + 1))
 
@@ -48,9 +49,9 @@ def update_existing_data(db_session, max_opportunity_id):
 
     for opportunity_id in update_ids:
         factory.random.reseed_random(opportunity_id + max_opportunity_id)
-        ForeignTopportunityFactory.reset_sequence(opportunity_id, force=True)
+        factories.ForeignTopportunityFactory.reset_sequence(opportunity_id, force=True)
 
-        updated_opportunity = ForeignTopportunityFactory.build()
+        updated_opportunity = factories.ForeignTopportunityFactory.build()._dict()
         updated_opportunity.pop("created_date")
         updated_opportunity["last_upd_date"] = datetime.datetime.now()
 
@@ -62,7 +63,7 @@ def update_existing_data(db_session, max_opportunity_id):
 
 
 def append_new_data(db_session, max_opportunity_id):
-    count = 100000 if max_opportunity_id == 0 else 2000
+    count = 5000 if max_opportunity_id == 0 else 500
     generate_batch(db_session, max_opportunity_id + 1, count)
 
 
@@ -71,11 +72,9 @@ def generate_batch(db_session, start_id, count):
     logger.info("appending batch of %i rows starting with id %i" % (count, start_id))
 
     factory.random.reseed_random(start_id)
-    ForeignTopportunityFactory.reset_sequence(start_id, force=True)
+    factories.ForeignTopportunityFactory.reset_sequence(start_id, force=True)
 
-    opportunity_rows = ForeignTopportunityFactory.build_batch(size=count)
-
-    db_session.execute(sqlalchemy.insert(foreign.opportunity.Topportunity), opportunity_rows)
+    factories.ForeignTopportunityFactory.create_batch(size=count)
 
 
 def get_max_opportunity_id(db_session):

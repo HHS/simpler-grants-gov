@@ -30,9 +30,15 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--insert-chunk-size", default=4000, help="chunk size for load inserts", show_default=True
 )
+@click.option("--tables-to-load", "-t", help="table to load", multiple=True)
 @flask_db.with_db_session()
 def load_transform(
-    db_session: db.Session, load: bool, transform: bool, set_current: bool, insert_chunk_size: int
+    db_session: db.Session,
+    load: bool,
+    transform: bool,
+    set_current: bool,
+    insert_chunk_size: int,
+    tables_to_load: list[str],
 ) -> None:
     logger.info("load and transform start")
 
@@ -40,7 +46,9 @@ def load_transform(
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
     if load:
-        LoadOracleDataTask(db_session, foreign_tables, staging_tables, insert_chunk_size).run()
+        LoadOracleDataTask(
+            db_session, foreign_tables, staging_tables, tables_to_load, insert_chunk_size
+        ).run()
     if transform:
         TransformOracleDataTask(db_session).run()
     if set_current:
