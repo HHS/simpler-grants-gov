@@ -1,5 +1,6 @@
 import "server-only";
 
+import { environment } from "src/constants/environments";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
@@ -14,7 +15,7 @@ import BaseApi from "./BaseApi";
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {
-    return process.env.API_URL || "";
+    return environment.API_URL;
   }
 
   get namespace(): string {

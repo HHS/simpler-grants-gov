@@ -1,5 +1,6 @@
 import "server-only";
 
+import { environment } from "src/constants/environments";
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 
 import BaseApi from "./BaseApi";
@@ -10,7 +11,7 @@ export default class OpportunityListingAPI extends BaseApi {
   }
 
   get basePath(): string {
-    return process.env.API_URL || "";
+    return environment.API_URL;
   }
 
   get namespace(): string {
