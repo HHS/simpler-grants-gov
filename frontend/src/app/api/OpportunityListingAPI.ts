@@ -7,7 +7,7 @@ import BaseApi from "./BaseApi";
 
 export default class OpportunityListingAPI extends BaseApi {
   get version(): string {
-    return "v1";
+    return "v0.1";
   }
 
   get basePath(): string {

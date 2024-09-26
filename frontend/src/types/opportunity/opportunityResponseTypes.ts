@@ -6,34 +6,34 @@ export interface OpportunityAssistanceListing {
 export interface Summary {
   additional_info_url: string | null;
   additional_info_url_description: string | null;
-  agency_code: string;
-  agency_contact_description: string;
-  agency_email_address: string;
-  agency_email_address_description: string;
-  agency_name: string;
-  agency_phone_number: string;
-  applicant_eligibility_description: string;
+  agency_code: string | null;
+  agency_contact_description: string | null;
+  agency_email_address: string | null;
+  agency_email_address_description: string | null;
+  agency_name: string | null;
+  agency_phone_number: string | null;
+  applicant_eligibility_description: string | null;
   applicant_types: string[];
-  archive_date: string;
-  award_ceiling: number;
-  award_floor: number;
-  close_date: string;
-  close_date_description: string;
-  estimated_total_program_funding: number;
-  expected_number_of_awards: number;
-  fiscal_year: number;
-  forecasted_award_date: string;
-  forecasted_close_date: string;
-  forecasted_close_date_description: string;
-  forecasted_post_date: string;
-  forecasted_project_start_date: string;
+  archive_date: string | null;
+  award_ceiling: number | null;
+  award_floor: number | null;
+  close_date: string | null;
+  close_date_description: string | null;
+  estimated_total_program_funding: number | null;
+  expected_number_of_awards: number | null;
+  fiscal_year: number | null;
+  forecasted_award_date: string | null;
+  forecasted_close_date: string | null;
+  forecasted_close_date_description: string | null;
+  forecasted_post_date: string | null;
+  forecasted_project_start_date: string | null;
   funding_categories: string[];
-  funding_category_description: string;
+  funding_category_description: string | null;
   funding_instruments: string[];
   is_cost_sharing: boolean;
   is_forecast: boolean;
-  post_date: string;
-  summary_description: string;
+  post_date: string | null;
+  summary_description: string | null;
 }
 
 export interface Opportunity {

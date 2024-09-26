@@ -59,7 +59,9 @@ describe("OpportunityDescription", () => {
     expect(descriptionHeading).toBeInTheDocument();
 
     const sanitizedSummaryDescription = DOMPurify.sanitize(
-      mockOpportunityData.summary.summary_description,
+      mockOpportunityData.summary.summary_description
+        ? mockOpportunityData.summary.summary_description
+        : "",
     );
     expect(screen.getByText("Summary Description")).toBeInTheDocument();
     expect(DOMPurify.sanitize).toHaveBeenCalledWith(
@@ -87,7 +89,9 @@ describe("OpportunityDescription", () => {
     expect(additionalInfoHeading).toBeInTheDocument();
 
     const sanitizedEligibilityDescription = DOMPurify.sanitize(
-      mockOpportunityData.summary.applicant_eligibility_description,
+      mockOpportunityData.summary.applicant_eligibility_description
+        ? mockOpportunityData.summary.applicant_eligibility_description
+        : "",
     );
     expect(screen.getByText("Eligibility Description")).toBeInTheDocument();
     expect(DOMPurify.sanitize).toHaveBeenCalledWith(
@@ -108,17 +112,19 @@ describe("OpportunityDescription", () => {
     const mailtoLink = screen.getByRole("link", {
       name: "Contact Email Description",
     });
-    expect(mailtoLink).toHaveAttribute(
-      "href",
-      `mailto:${mockOpportunityData.summary.agency_email_address}`,
-    );
+    const agency_email = mockOpportunityData.summary.agency_email_address
+      ? mockOpportunityData.summary.agency_email_address
+      : "";
+    expect(mailtoLink).toHaveAttribute("href", `mailto:${agency_email}`);
 
     const telLink = screen.getByRole("link", {
-      name: mockOpportunityData.summary.agency_phone_number,
+      name: mockOpportunityData.summary.agency_phone_number
+        ? mockOpportunityData.summary.agency_phone_number
+        : "",
     });
-    expect(telLink).toHaveAttribute(
-      "href",
-      `tel:${mockOpportunityData.summary.agency_phone_number.replace(/-/g, "")}`,
-    );
+    const number = mockOpportunityData.summary.agency_phone_number
+      ? mockOpportunityData.summary.agency_phone_number.replace(/-/g, "")
+      : "";
+    expect(telLink).toHaveAttribute("href", `tel:${number}`);
   });
 });
