@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - "main"
+      - "kai/concurrent-releases"
     paths:
       - "api/**"
   release:
