@@ -10,6 +10,7 @@ on:
       - "kai/concurrent-releases"
     paths:
       - "api/**"
+      - "bin/**"
   release:
     types: [published]
   workflow_dispatch:
