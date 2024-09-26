@@ -1,0 +1,13 @@
+@use "uswds-core" as *;
+
+@media screen and (max-width: units(tablet)) {
+  .grants-search-filter-options {
+    display: none;
+  }
+}
+
+@media screen and (min-width: units(tablet)) {
+  .grants-search-filter-toggle {
+    display: none;
+  }
+}

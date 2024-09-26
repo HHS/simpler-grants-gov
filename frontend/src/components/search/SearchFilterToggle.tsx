@@ -12,7 +12,7 @@ export default function SearchFilterToggle({
   buttonText: string;
 }) {
   return (
-    <div className="search-filter-toggle">
+    <div className="grants-search-filter-toggle">
       <button onClick={(_event) => setShowFilterOptions(!showFilterOptions)}>
         <USWDSIcon name={"Arrow Drop Down"} className="" />
         <span>{buttonText}</span>

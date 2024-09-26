@@ -36,13 +36,9 @@ export default function SearchFilters({
         showFilterOptions={showFilterOptions}
         buttonText={showFilterOptions ? "Hide Filters" : "Show Filters"}
       />
-      <div className="filter-options">
-        {showFilterOptions && (
-          <>
-            <SearchOpportunityStatus query={opportunityStatus} />
-            {FilterAccordions}
-          </>
-        )}
+      <div className="grants-search-filter-options">
+        <SearchOpportunityStatus query={opportunityStatus} />
+        {FilterAccordions}
       </div>
     </>
   );
