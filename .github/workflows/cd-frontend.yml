@@ -41,7 +41,7 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     strategy:
       matrix:
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev"]') || fromJSON('["dev"]') }} # temporarily removing staging from matrix. See: https://github.com/HHS/simpler-grants-gov/issues/1919
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}

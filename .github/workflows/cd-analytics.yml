@@ -46,3 +46,4 @@ jobs:
     with:
       app_name: "analytics"
       environment: ${{ matrix.envs }}
+g
