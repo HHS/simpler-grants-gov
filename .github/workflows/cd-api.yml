@@ -11,6 +11,7 @@ on:
     paths:
       - "api/**"
       - "bin/**"
+      - ".github/**"
   release:
     types: [published]
   workflow_dispatch:
