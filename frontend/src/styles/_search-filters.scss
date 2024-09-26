@@ -11,3 +11,9 @@
     display: none;
   }
 }
+
+.grants-search-filter-options {
+  &.grants-search-filter-options-display-mobile {
+    display: block;
+  }
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import clsx from "clsx";
+
 import { useState } from "react";
 
 import SearchFilterAccordion, {
@@ -36,7 +38,12 @@ export default function SearchFilters({
         showFilterOptions={showFilterOptions}
         buttonText={showFilterOptions ? "Hide Filters" : "Show Filters"}
       />
-      <div className="grants-search-filter-options">
+      <div
+        className={clsx({
+          "grants-search-filter-options": true,
+          "grants-search-filter-options-display-mobile": !!showFilterOptions,
+        })}
+      >
         <SearchOpportunityStatus query={opportunityStatus} />
         {FilterAccordions}
       </div>
