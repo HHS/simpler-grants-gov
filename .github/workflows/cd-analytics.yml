@@ -45,5 +45,4 @@ jobs:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
       app_name: "analytics"
-      environment: ${{ matrix.envs }}
-g
+      environment: ${{ matrix.envs g}}
