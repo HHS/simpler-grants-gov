@@ -100,12 +100,12 @@ export default function SearchResultsListItem({
               <span className={metadataBorderClasses}>
                 <strong>{t("resultsListItem.summary.agency")}</strong>
                 {opportunity?.agency ||
-                (opportunity?.summary?.agency_name &&
-                opportunity?.summary?.agency_code &&
-                agencyNameLookup
-                  ? // Use same exact label we're using for the agency filter list
-                    agencyNameLookup[opportunity?.summary?.agency_code]
-                  : "--")}
+                  (opportunity?.summary?.agency_name &&
+                  opportunity?.summary?.agency_code &&
+                  agencyNameLookup
+                    ? // Use same exact label we're using for the agency filter list
+                      agencyNameLookup[opportunity?.summary?.agency_code]
+                    : "--")}
               </span>
               <span className={metadataBorderClasses}>
                 <strong>{t("resultsListItem.opportunity_number")}</strong>
