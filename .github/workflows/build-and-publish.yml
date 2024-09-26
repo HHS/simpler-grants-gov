@@ -42,13 +42,6 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.ref }}
-
-      - name: Build release
-        run: make APP_NAME=${{ inputs.app_name }} release-build
-
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
