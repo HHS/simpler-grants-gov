@@ -28,13 +28,6 @@ jobs:
     name: Run Frontend Checks
     uses: ./.github/workflows/ci-frontend.yml
 
-  build-and-publish:
-    name: Build
-    uses: ./.github/workflows/build-and-publish.yml
-    with:
-      app_name: "frontend"
-      ref: ${{ github.ref }}
-
   deploy:
     name: Deploy
     needs: frontend-checks

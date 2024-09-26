@@ -15,6 +15,13 @@ on:
 concurrency: cd-${{ inputs.environment }}
 
 jobs:
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: ${{ inputs.app_name }}
+      ref: ${{ github.ref }}
+
   database-migrations:
     name: Database migrations
     uses: ./.github/workflows/database-migrations.yml

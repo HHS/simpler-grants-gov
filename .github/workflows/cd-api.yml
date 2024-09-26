@@ -7,11 +7,8 @@ on:
   push:
     branches:
       - "main"
-      - "kai/concurrent-releases"
     paths:
       - "api/**"
-      - "bin/**"
-      - ".github/**"
   release:
     types: [published]
   workflow_dispatch:
@@ -30,13 +27,6 @@ jobs:
   api-checks:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
-
-  build-and-publish:
-    name: Build
-    uses: ./.github/workflows/build-and-publish.yml
-    with:
-      app_name: "api"
-      ref: ${{ github.ref }}
 
   deploy:
     name: Deploy
