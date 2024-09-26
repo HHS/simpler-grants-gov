@@ -21,8 +21,11 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
   const id = Number(params.id);
   const opportunityData = (await getOpportunityData(id)) as Opportunity;
+  const title = opportunityData?.opportunity_title
+    ? opportunityData?.opportunity_title
+    : "";
   const meta: Metadata = {
-    title: `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`,
+    title: `${t("OpportunityListing.page_title")} - ${title}`,
     description: t("OpportunityListing.meta_description"),
   };
   return meta;
@@ -83,13 +86,12 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
   }
 
   const opportunityData = (await getOpportunityData(id)) as Opportunity;
-  opportunityData.summary = opportunityData.summary
-    ? opportunityData.summary
-    : emptySummary();
-
   if (!opportunityData) {
     return <NotFound />;
   }
+  opportunityData.summary = opportunityData?.summary
+    ? opportunityData.summary
+    : emptySummary();
 
   breadcrumbs.push({
     title: opportunityData.opportunity_title,
