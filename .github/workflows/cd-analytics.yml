@@ -29,6 +29,13 @@ jobs:
     uses: ./.github/workflows/ci-analytics.yml
     secrets: inherit
 
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: "analytics"
+      ref: ${{ github.ref }}
+
   deploy:
     name: Deploy
     needs: analytics-checks

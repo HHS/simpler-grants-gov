@@ -2,10 +2,11 @@ name: Deploy Frontend
 # Need to set a default value for when the workflow is triggered from a git push
 # which bypasses the default configuration for inputs
 run-name: Deploy ${{ github.ref_name }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+
 on:
   push:
     branches:
-      - main
+      - "main"
     paths:
       - "frontend/**"
   release:
@@ -26,6 +27,13 @@ jobs:
   frontend-checks:
     name: Run Frontend Checks
     uses: ./.github/workflows/ci-frontend.yml
+
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: "frontend"
+      ref: ${{ github.ref }}
 
   deploy:
     name: Deploy

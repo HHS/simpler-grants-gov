@@ -28,6 +28,13 @@ jobs:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
 
+  build-and-publish:
+    name: Build
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: "api"
+      ref: ${{ github.ref }}
+
   deploy:
     name: Deploy
     needs: api-checks
