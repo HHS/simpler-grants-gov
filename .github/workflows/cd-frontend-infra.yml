@@ -20,8 +20,8 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.2
           terraform_wrapper: false
@@ -48,8 +48,8 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.2
           terraform_wrapper: false
