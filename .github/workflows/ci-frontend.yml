@@ -49,7 +49,7 @@ jobs:
             coverage-file: coverage/report.json
             test-script: npm test
             working-directory: ./frontend
-            annotations: failed-tests
+            annotations: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'failed-tests' || 'none' }}
             package-manager: npm
             icons: emoji
             skip-step: none
