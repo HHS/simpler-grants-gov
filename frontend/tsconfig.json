@@ -36,6 +36,7 @@
     "**/*.ts",
     "**/*.tsx",
     "__mocks__/styleMock.js",
+    ".storybook/**/*",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

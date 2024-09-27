@@ -129,3 +129,29 @@ Our primary dependencies that we should take note of when they are upgraded (wit
 * [Pydantic](https://docs.pydantic.dev/latest/changelog/)
 * [Marshmallow](https://marshmallow.readthedocs.io/en/stable/changelog.html)
 * [psycopg](https://www.psycopg.org/psycopg3/docs/news.html)
+
+# Upgrading Python
+Python does [yearly releases](https://devguide.python.org/versions/) for their minor versions (eg. 3.12 -> 3.13). They do not
+use semvar versioning, and their [minor releases](https://devguide.python.org/developer-workflow/development-cycle/#devcycle) contain
+breaking changes.
+
+Pin to a specific minor version of python just in case anything would break when the yearly release does occur.
+Only pin the minor versions of Python (eg. 3.12), and not the patch versions (eg. 3.12.1) as those contain bug and security fixes.
+
+Along with any version upgrades, remember to:
+- Test the system functionality before deploying to production
+- Review the [changelog](https://docs.python.org/3/whatsnew/changelog.html)
+for any breaking changes of features you may use
+
+## Upgrade Steps
+To upgrade the Python version, make changes in the following places:
+1. Local Python version (see more about managing local Python versions in [development](./development.md))
+2. [Dockerfile](/api/Dockerfile)
+    search for the line `FROM python:3.12-slim as base` - supported versions can be found on [Dockerhub](https://hub.docker.com/_/python)
+3. [pyproject.toml](/api/pyproject.toml)
+    search for the line
+    ```toml
+    [tool.poetry.dependencies]
+    python = "~3.12"
+    ```
+   Then run `poetry lock --no-update` to update the [poetry.lock](/api/poetry.lock) file.

@@ -1,65 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { FilterOption } from "../SearchFilterAccordion";
-import SearchFilterCheckbox from "../SearchFilterCheckbox";
-import SearchFilterToggleAll from "../SearchFilterToggleAll";
-import SectionLinkCount from "./SectionLinkCount";
-import SectionLinkLabel from "./SectionLinkLabel";
+import { FilterOptionWithChildren } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
+import SectionLinkCount from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkCount";
+import SectionLinkLabel from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
+import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
 
 interface SearchFilterSectionProps {
-  option: FilterOption;
-  incrementTotal: () => void;
-  decrementTotal: () => void;
-  mounted: boolean;
+  option: FilterOptionWithChildren;
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
-  toggleSelectAll: (isSelected: boolean, sectionId: string) => void;
+  toggleSelectAll: (all: boolean, allSelected: Set<string>) => void;
   accordionTitle: string;
-  isSectionAllSelected: boolean;
-  isSectionNoneSelected: boolean;
+  isSectionAllSelected: (
+    allSelected: Set<string>,
+    query: Set<string>,
+  ) => boolean;
+  isSectionNoneSelected: (query: Set<string>) => boolean;
+  query: Set<string>;
+  value: string;
 }
 
 const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   option,
-  incrementTotal,
-  decrementTotal,
-  mounted,
   updateCheckedOption,
   toggleSelectAll,
   accordionTitle,
+  query,
   isSectionAllSelected,
   isSectionNoneSelected,
+  value,
 }) => {
   const [childrenVisible, setChildrenVisible] = useState<boolean>(false);
 
-  // TODO: Set this number per state/query params
-  const [sectionCount, setSectionCount] = useState<number>(0);
-  const increment = () => {
-    setSectionCount(sectionCount + 1);
-    incrementTotal();
-  };
-  const decrement = () => {
-    setSectionCount(sectionCount - 1);
-    decrementTotal();
-  };
-
-  const handleSelectAll = () => {
-    toggleSelectAll(true, option.id);
-  };
-
-  const handleClearAll = () => {
-    toggleSelectAll(false, option.id);
-  };
-
-  useEffect(() => {
-    if (option.children) {
-      const newCount = option.children.filter(
-        (child) => child.isChecked,
-      ).length;
-      setSectionCount(newCount);
+  const sectionQuery = new Set<string>();
+  query.forEach((queryValue) => {
+    // The value is treated as a child for some agencies if has children in the UI and so
+    // is added to the count.
+    if (queryValue.startsWith(`${value}-`) || query.has(value)) {
+      sectionQuery.add(queryValue);
     }
-  }, [option.children]);
+  });
+  const allSectionOptionValues = option.children.map(
+    (options) => options.value,
+  );
+  const sectionAllSelected = new Set(allSectionOptionValues);
+
+  const sectionCount = sectionQuery.size;
 
   const getHiddenName = (name: string) =>
     accordionTitle === "Agency" ? `agency-${name}` : name;
@@ -81,22 +69,22 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
       {childrenVisible ? (
         <div className="padding-y-1">
           <SearchFilterToggleAll
-            onSelectAll={handleSelectAll}
-            onClearAll={handleClearAll}
-            isAllSelected={isSectionAllSelected}
-            isNoneSelected={isSectionNoneSelected}
+            onSelectAll={() => toggleSelectAll(true, sectionAllSelected)}
+            onClearAll={() => toggleSelectAll(false, sectionAllSelected)}
+            isAllSelected={isSectionAllSelected(
+              sectionAllSelected,
+              sectionQuery,
+            )}
+            isNoneSelected={isSectionNoneSelected(sectionQuery)}
           />
           <ul className="usa-list usa-list--unstyled margin-left-4">
             {option.children?.map((child) => (
               <li key={child.id}>
                 <SearchFilterCheckbox
                   option={child}
-                  increment={increment}
-                  decrement={decrement}
-                  mounted={mounted}
+                  query={query}
                   updateCheckedOption={updateCheckedOption}
                   accordionTitle={accordionTitle}
-                  //   value={child.id} // TODO: consider passing the actual value to the server action
                 />
               </li>
             ))}

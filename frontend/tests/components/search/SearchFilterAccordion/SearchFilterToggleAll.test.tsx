@@ -1,10 +1,12 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
-import SearchFilterToggleAll from "../../../../src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
-import { axe } from "jest-axe";
+
+import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/SearchFilterToggleAll";
 
 describe("SearchFilterToggleAll", () => {
   const mockOnSelectAll = jest.fn();

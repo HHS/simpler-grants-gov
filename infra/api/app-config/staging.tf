@@ -10,8 +10,18 @@ module "staging_config" {
   database_max_capacity           = 16
   database_min_capacity           = 2
 
+  # See api/src/data_migration/command/load_transform.py for argument specifications.
+  load_transform_args = [
+    "poetry",
+    "run",
+    "flask",
+    "data-migration",
+    "load-transform",
+    "--load",
+    "--transform",
+    "--set-current",
+  ]
+
   service_override_extra_environment_variables = {
-    # determines whether the v0.1 endpoints are available in the API
-    ENABLE_V_0_1_ENDPOINTS = "true"
   }
 }

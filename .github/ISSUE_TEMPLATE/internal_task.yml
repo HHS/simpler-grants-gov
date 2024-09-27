@@ -1,7 +1,6 @@
 name: Internal - Task
 description: Describes an individual task that needs to be completed
 title: "[Task]: "
-labels: ["project: grants.gov"]
 assignees:
   - octocat
 body:

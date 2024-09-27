@@ -1,20 +1,31 @@
 import logging
 from datetime import datetime
+from typing import Tuple
 
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+)
+from src.data_migration.transformation.transform_constants import (
+    SourceApplicantType,
+    SourceFundingCategory,
+    SourceFundingInstrument,
+    SourceSummary,
+)
 from src.db.models.base import TimestampMixin
 from src.db.models.opportunity_models import (
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import TforecastHist
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
 from src.util import datetime_util
-
-from . import SourceSummary
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +35,62 @@ OPPORTUNITY_CATEGORY_MAP = {
     "C": OpportunityCategory.CONTINUATION,
     "E": OpportunityCategory.EARMARK,
     "O": OpportunityCategory.OTHER,
+}
+
+APPLICANT_TYPE_MAP = {
+    "00": ApplicantType.STATE_GOVERNMENTS,
+    "01": ApplicantType.COUNTY_GOVERNMENTS,
+    "02": ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS,
+    "04": ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+    "05": ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS,
+    "06": ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+    "07": ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+    "08": ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES,
+    "11": ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS,
+    "12": ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3,
+    "13": ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3,
+    "20": ApplicantType.PRIVATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+    "21": ApplicantType.INDIVIDUALS,
+    "22": ApplicantType.FOR_PROFIT_ORGANIZATIONS_OTHER_THAN_SMALL_BUSINESSES,
+    "23": ApplicantType.SMALL_BUSINESSES,
+    "25": ApplicantType.OTHER,
+    "99": ApplicantType.UNRESTRICTED,
+}
+
+FUNDING_CATEGORY_MAP = {
+    "RA": FundingCategory.RECOVERY_ACT,
+    "AG": FundingCategory.AGRICULTURE,
+    "AR": FundingCategory.ARTS,
+    "BC": FundingCategory.BUSINESS_AND_COMMERCE,
+    "CD": FundingCategory.COMMUNITY_DEVELOPMENT,
+    "CP": FundingCategory.CONSUMER_PROTECTION,
+    "DPR": FundingCategory.DISASTER_PREVENTION_AND_RELIEF,
+    "ED": FundingCategory.EDUCATION,
+    "ELT": FundingCategory.EMPLOYMENT_LABOR_AND_TRAINING,
+    "EN": FundingCategory.ENERGY,
+    "ENV": FundingCategory.ENVIRONMENT,
+    "FN": FundingCategory.FOOD_AND_NUTRITION,
+    "HL": FundingCategory.HEALTH,
+    "HO": FundingCategory.HOUSING,
+    "HU": FundingCategory.HUMANITIES,
+    "IIJ": FundingCategory.INFRASTRUCTURE_INVESTMENT_AND_JOBS_ACT,
+    "IS": FundingCategory.INFORMATION_AND_STATISTICS,
+    "ISS": FundingCategory.INCOME_SECURITY_AND_SOCIAL_SERVICES,
+    "LJL": FundingCategory.LAW_JUSTICE_AND_LEGAL_SERVICES,
+    "NR": FundingCategory.NATURAL_RESOURCES,
+    "OZ": FundingCategory.OPPORTUNITY_ZONE_BENEFITS,
+    "RD": FundingCategory.REGIONAL_DEVELOPMENT,
+    "ST": FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
+    "T": FundingCategory.TRANSPORTATION,
+    "ACA": FundingCategory.AFFORDABLE_CARE_ACT,
+    "O": FundingCategory.OTHER,
+}
+
+FUNDING_INSTRUMENT_MAP = {
+    "CA": FundingInstrument.COOPERATIVE_AGREEMENT,
+    "G": FundingInstrument.GRANT,
+    "PC": FundingInstrument.PROCUREMENT_CONTRACT,
+    "O": FundingInstrument.OTHER,
 }
 
 
@@ -67,6 +134,36 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
     return OPPORTUNITY_CATEGORY_MAP[value]
 
 
+def transform_applicant_type(value: str | None) -> ApplicantType | None:
+    if value is None or value == "":
+        return None
+
+    if value not in APPLICANT_TYPE_MAP:
+        raise ValueError("Unrecognized applicant type: %s" % value)
+
+    return APPLICANT_TYPE_MAP[value]
+
+
+def transform_funding_category(value: str | None) -> FundingCategory | None:
+    if value is None or value == "":
+        return None
+
+    if value not in FUNDING_CATEGORY_MAP:
+        raise ValueError("Unrecognized funding category: %s" % value)
+
+    return FUNDING_CATEGORY_MAP[value]
+
+
+def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
+    if value is None or value == "":
+        return None
+
+    if value not in FUNDING_INSTRUMENT_MAP:
+        raise ValueError("Unrecognized funding instrument: %s" % value)
+
+    return FUNDING_INSTRUMENT_MAP[value]
+
+
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
     existing_assistance_listing: OpportunityAssistanceListing | None,
@@ -100,15 +197,15 @@ def transform_opportunity_summary(
 
     if incoming_summary is None:
         logger.info("Creating new opportunity summary record", extra=log_extra)
+        # These values are a part of a unique key for identifying across tables, we don't
+        # ever want to modify them once created
         target_summary = OpportunitySummary(
             opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
-            revision_number=None,
+            # Revision number is only found in the historical table, use getattr
+            # to avoid type checking
+            revision_number=getattr(source_summary, "revision_number", None),
         )
-
-        # Revision number is only found in the historical table
-        if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-            target_summary.revision_number = source_summary.revision_number
     else:
         # We create a new summary object and merge it outside this function
         # that way if any modifications occur on the object and then it errors
@@ -144,43 +241,128 @@ def transform_opportunity_summary(
     target_summary.updated_by = source_summary.last_upd_id
     target_summary.created_by = source_summary.creator_id
 
-    # Some fields either are named different in synopsis/forecast
-    # or only come from one of those tables, so handle those here
-    if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
-        target_summary.summary_description = source_summary.syn_desc
-        target_summary.agency_code = source_summary.a_sa_code
-        target_summary.agency_phone_number = source_summary.ac_phone_number
+    target_summary.summary_description = source_summary.description
+    target_summary.agency_code = source_summary.agency_code
+    target_summary.agency_phone_number = source_summary.agency_phone_number
 
-        # Synopsis only fields
-        target_summary.agency_contact_description = source_summary.agency_contact_desc
-        target_summary.close_date = source_summary.response_date
-        target_summary.close_date_description = source_summary.response_date_desc
-        target_summary.unarchive_date = source_summary.unarchive_date
+    # These fields are only on synopsis records, use getattr to avoid isinstance
+    target_summary.agency_contact_description = getattr(source_summary, "agency_contact_desc", None)
+    target_summary.close_date = getattr(source_summary, "response_date", None)
+    target_summary.close_date_description = getattr(source_summary, "response_date_desc", None)
+    target_summary.unarchive_date = getattr(source_summary, "unarchive_date", None)
 
-    else:  # TForecast & TForecastHist
-        target_summary.summary_description = source_summary.forecast_desc
-        target_summary.agency_code = source_summary.agency_code
-        target_summary.agency_phone_number = source_summary.ac_phone
+    # These fields are only on forecast records, use getattr to avoid isinstance
+    target_summary.forecasted_post_date = getattr(source_summary, "est_synopsis_posting_date", None)
+    target_summary.forecasted_close_date = getattr(source_summary, "est_appl_response_date", None)
+    target_summary.forecasted_close_date_description = getattr(
+        source_summary, "est_appl_response_date_desc", None
+    )
+    target_summary.forecasted_award_date = getattr(source_summary, "est_award_date", None)
+    target_summary.forecasted_project_start_date = getattr(
+        source_summary, "est_project_start_date", None
+    )
+    target_summary.fiscal_year = getattr(source_summary, "fiscal_year", None)
 
-        # Forecast only fields
-        target_summary.forecasted_post_date = source_summary.est_synopsis_posting_date
-        target_summary.forecasted_close_date = source_summary.est_appl_response_date
-        target_summary.forecasted_close_date_description = (
-            source_summary.est_appl_response_date_desc
-        )
-        target_summary.forecasted_award_date = source_summary.est_award_date
-        target_summary.forecasted_project_start_date = source_summary.est_project_start_date
-        target_summary.fiscal_year = source_summary.fiscal_year
-
-    # Historical only
-    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-        target_summary.is_deleted = convert_action_type_to_is_deleted(source_summary.action_type)
-    else:
-        target_summary.is_deleted = False
+    # Set whether it is deleted based on action_type, which only appears on the historical records
+    target_summary.is_deleted = convert_action_type_to_is_deleted(
+        getattr(source_summary, "action_type", None)
+    )
 
     transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
     return target_summary
+
+
+def convert_opportunity_summary_applicant_type(
+    source_applicant_type: SourceApplicantType,
+    existing_applicant_type: LinkOpportunitySummaryApplicantType | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryApplicantType:
+    log_extra = get_log_extra_applicant_type(source_applicant_type)
+
+    # NOTE: The columns we're working with here are mostly the primary keys
+    #       While we do support updates, that's really only going to affect
+    #       the last update user + timestamps. From checking the prod data
+    #       there are basically zero updates to this data (~5 occurred 10+ years ago)
+    if existing_applicant_type is None:
+        logger.info("Creating new applicant type record", extra=log_extra)
+
+    applicant_type = transform_applicant_type(source_applicant_type.at_id)
+
+    target_applicant_type = LinkOpportunitySummaryApplicantType(
+        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
+        legacy_applicant_type_id=source_applicant_type.legacy_applicant_type_id,
+        applicant_type=applicant_type,
+        updated_by=source_applicant_type.last_upd_id,
+        created_by=source_applicant_type.creator_id,
+    )
+    transform_update_create_timestamp(
+        source_applicant_type, target_applicant_type, log_extra=log_extra
+    )
+
+    return target_applicant_type
+
+
+def convert_opportunity_summary_funding_instrument(
+    source_funding_instrument: SourceFundingInstrument,
+    existing_funding_instrument: LinkOpportunitySummaryFundingInstrument | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryFundingInstrument:
+    log_extra = get_log_extra_funding_instrument(source_funding_instrument)
+
+    # NOTE: The columns we're working with here are mostly the primary keys
+    #       While we do support updates, that's really only going to affect
+    #       the last update user + timestamps. From checking the prod data
+    #       there are basically zero updates to this data (~5 occurred 10+ years ago)
+    if existing_funding_instrument is None:
+        logger.info("Creating new funding instrument record", extra=log_extra)
+
+    funding_instrument = transform_funding_instrument(source_funding_instrument.fi_id)
+
+    target_funding_instrument = LinkOpportunitySummaryFundingInstrument(
+        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
+        legacy_funding_instrument_id=source_funding_instrument.legacy_funding_instrument_id,
+        funding_instrument=funding_instrument,
+        updated_by=source_funding_instrument.last_upd_id,
+        created_by=source_funding_instrument.creator_id,
+    )
+
+    transform_update_create_timestamp(
+        source_funding_instrument, target_funding_instrument, log_extra=log_extra
+    )
+
+    return target_funding_instrument
+
+
+def convert_opportunity_summary_funding_category(
+    source_funding_category: SourceFundingCategory,
+    existing_funding_category: LinkOpportunitySummaryFundingCategory | None,
+    opportunity_summary: OpportunitySummary,
+) -> LinkOpportunitySummaryFundingCategory:
+    log_extra = get_log_extra_funding_category(source_funding_category)
+
+    # NOTE: The columns we're working with here are mostly the primary keys
+    #       While we do support updates, that's really only going to affect
+    #       the last update user + timestamps. From checking the prod data
+    #       there are basically zero updates to this data (~5 occurred 10+ years ago)
+    if existing_funding_category is None:
+        logger.info("Creating new funding category record", extra=log_extra)
+
+    funding_category = transform_funding_category(source_funding_category.fac_id)
+
+    target_funding_category = LinkOpportunitySummaryFundingCategory(
+        opportunity_summary_id=opportunity_summary.opportunity_summary_id,
+        legacy_funding_category_id=source_funding_category.legacy_funding_category_id,
+        funding_category=funding_category,
+        updated_by=source_funding_category.last_upd_id,
+        created_by=source_funding_category.creator_id,
+    )
+
+    transform_update_create_timestamp(
+        source_funding_category, target_funding_category, log_extra=log_extra
+    )
+
+    return target_funding_category
 
 
 def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
@@ -196,6 +378,35 @@ def convert_est_timestamp_to_utc(timestamp: datetime | None) -> datetime | None:
     return datetime_util.adjust_timezone(aware_timestamp, "UTC")
 
 
+def get_create_update_timestamps(
+    source_created_date: datetime | None,
+    source_last_upd_date: datetime | None,
+    log_extra: dict | None = None,
+) -> Tuple[datetime, datetime]:
+    created_timestamp = convert_est_timestamp_to_utc(source_created_date)
+    updated_timestamp = convert_est_timestamp_to_utc(source_last_upd_date)
+
+    # This is incredibly rare, but possible - because our system requires
+    # we set something, we'll default to the current time and log a warning.
+    if created_timestamp is None:
+        if log_extra is None:
+            log_extra = {}
+
+        logger.warning(
+            "Record does not have a created_date timestamp set, assuming value to be now.",
+            extra=log_extra,
+        )
+        created_timestamp = datetime_util.utcnow()
+
+    if updated_timestamp is None:
+        # In the legacy system, they don't set whether something was updated
+        # until it receives an update. We always set the value, and on initial insert
+        # want it to be the same as the created_at.
+        updated_timestamp = created_timestamp
+
+    return created_timestamp, updated_timestamp
+
+
 def transform_update_create_timestamp(
     source: StagingBase, target: TimestampMixin, log_extra: dict | None = None
 ) -> None:
@@ -204,51 +415,56 @@ def transform_update_create_timestamp(
     #       on the individual class definitions, not the base class - due to how
     #       we need to maintain the column order of the legacy system.
     #       Every legacy table does have these columns.
-    created_timestamp = convert_est_timestamp_to_utc(source.created_date)  # type: ignore[attr-defined]
-    updated_timestamp = convert_est_timestamp_to_utc(source.last_upd_date)  # type: ignore[attr-defined]
+    created_timestamp, updated_timestamp = get_create_update_timestamps(source.created_date, source.last_upd_date, log_extra)  # type: ignore[attr-defined]
 
-    if created_timestamp is not None:
-        target.created_at = created_timestamp
-    else:
-        # This is incredibly rare, but possible - because our system requires
-        # we set something, we'll default to the current time and log a warning.
-        if log_extra is None:
-            log_extra = {}
+    target.created_at = created_timestamp
+    target.updated_at = updated_timestamp
 
-        logger.warning(
-            f"{source.__class__} does not have a created_date timestamp set, setting value to now.",
-            extra=log_extra,
-        )
-        target.created_at = datetime_util.utcnow()
 
-    if updated_timestamp is not None:
-        target.updated_at = updated_timestamp
-    else:
-        # In the legacy system, they don't set whether something was updated
-        # until it receives an update. We always set the value, and on initial insert
-        # want it to be the same as the created_at.
-        target.updated_at = target.created_at
+TRUTHY = {"Y", "Yes"}
+FALSEY = {"N", "No"}
 
 
 def convert_yn_bool(value: str | None) -> bool | None:
     # Booleans in the Oracle database are stored as varchar/char
-    # columns with the values as Y/N
+    # columns with the values as Y/N (very rarely Yes/No)
     if value is None or value == "":
         return None
 
-    if value == "Y":
+    if value in TRUTHY:
         return True
 
-    if value == "N":
+    if value in FALSEY:
         return False
 
     # Just in case the column isn't actually a boolean
     raise ValueError("Unexpected Y/N bool value: %s" % value)
 
 
-def convert_action_type_to_is_deleted(value: str | None) -> bool | None:
+def convert_true_false_bool(value: str | None) -> bool | None:
     if value is None or value == "":
         return None
+
+    return value == "TRUE"
+
+
+def convert_null_like_to_none(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    if value.lower() == "null":
+        return None
+
+    return value
+
+
+def convert_action_type_to_is_deleted(value: str | None) -> bool:
+    # Action type can be U (update) or D (delete)
+    # however many older records seem to not have this set at all
+    # The legacy system looks like it treats anything that isn't D
+    # the same, so we'll go with that assumption as well.
+    if value is None or value == "":
+        return False
 
     if value == "D":  # D = Delete
         return True
@@ -280,4 +496,34 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
         # use getattr instead of an isinstance if/else for simplicity
         "revision_number": getattr(source_summary, "revision_number", None),
         "table_name": source_summary.__tablename__,
+    }
+
+
+def get_log_extra_applicant_type(source_applicant_type: SourceApplicantType) -> dict:
+    return {
+        "opportunity_id": source_applicant_type.opportunity_id,
+        "at_frcst_id": getattr(source_applicant_type, "at_frcst_id", None),
+        "at_syn_id": getattr(source_applicant_type, "at_syn_id", None),
+        "revision_number": getattr(source_applicant_type, "revision_number", None),
+        "table_name": source_applicant_type.__tablename__,
+    }
+
+
+def get_log_extra_funding_category(source_funding_category: SourceFundingCategory) -> dict:
+    return {
+        "opportunity_id": source_funding_category.opportunity_id,
+        "fac_frcst_id": getattr(source_funding_category, "fac_frcst_id", None),
+        "fac_syn_id": getattr(source_funding_category, "fac_syn_id", None),
+        "revision_number": getattr(source_funding_category, "revision_number", None),
+        "table_name": source_funding_category.__tablename__,
+    }
+
+
+def get_log_extra_funding_instrument(source_funding_instrument: SourceFundingInstrument) -> dict:
+    return {
+        "opportunity_id": source_funding_instrument.opportunity_id,
+        "fi_frcst_id": getattr(source_funding_instrument, "fi_frcst_id", None),
+        "fi_syn_id": getattr(source_funding_instrument, "fi_syn_id", None),
+        "revision_number": getattr(source_funding_instrument, "revision_number", None),
+        "table_name": source_funding_instrument.__tablename__,
     }

@@ -5,6 +5,7 @@ from marshmallow import post_load
 from src.api.feature_flags.feature_flag import FeatureFlag
 from src.api.feature_flags.feature_flag_config import FeatureFlagConfig, get_feature_flag_config
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.constants.lookup_constants import OpportunityCategoryLegacy
 from src.pagination.pagination_schema import PaginationSchema, generate_sorting_schema
 
@@ -113,3 +114,11 @@ class OpportunitySearchHeaderSchema(Schema):
             feature_flag_config.enable_opportunity_log_msg = enable_opportunity_log_msg
 
         return feature_flag_config
+
+
+class OpportunityGetResponseV0Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunityV0Schema())
+
+
+class OpportunitySearchResponseV0Schema(AbstractResponseSchema, PaginationMixinSchema):
+    data = fields.Nested(OpportunityV0Schema(many=True))

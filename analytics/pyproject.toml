@@ -17,25 +17,28 @@ pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
 pydantic = "^2.0.3"
-python = "^3.11"
+python = "~3.12"
 slack-sdk = "^3.23.0"
 typer = { extras = ["all"], version = "^0.9.0" }
+sqlalchemy = "^2.0.30"
+psycopg = ">=3.0.7"
+pydantic-settings = "^2.3.4"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+black = "^24.0.0"
 mypy = "^1.4.1"
 pylint = "^3.0.2"
-pytest = "^7.4.0"
-pytest-cov = "^4.1.0"
+pytest = "^8.0.0"
+pytest-cov = "^5.0.0"
 ruff = "^0.0.278"
-safety = "^2.3.5"
+safety = "^3.0.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true

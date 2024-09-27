@@ -16,7 +16,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Close open issues marked as "Done" in Sprint Board
         run: |

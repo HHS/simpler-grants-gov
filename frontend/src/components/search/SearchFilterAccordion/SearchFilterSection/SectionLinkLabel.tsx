@@ -1,5 +1,6 @@
-import { FilterOption } from "../SearchFilterAccordion";
 import { Icon } from "@trussworks/react-uswds";
+
+import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export default function SectionLinkLabel({
   childrenVisible,

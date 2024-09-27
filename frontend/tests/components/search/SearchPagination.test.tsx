@@ -1,109 +1,49 @@
-/* eslint-disable jest/no-commented-out-tests */
-import "@testing-library/jest-dom";
+/* eslint-disable testing-library/no-node-access */
+import "@testing-library/jest-dom/extend-expect";
 
-// import SearchPagination, {
-//   PaginationPosition,
-// } from "../../../src/components/search/SearchPagination";
+import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 
-// import { render } from "@testing-library/react";
+import React from "react";
 
-// TODO (Issue #1936): Uncomment tests after React 19 upgrade
+import SearchPagination from "src/components/search/SearchPagination";
+
+// Mock the useSearchParamUpdater hook
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    updateQueryParams: jest.fn(),
+  }),
+}));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe("SearchPagination", () => {
-  //   const mockHandlePageChange = jest.fn();
-  //   const page = 1;
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("pass test", () => {
-    expect(1).toBe(1);
+  it("should not have basic accessibility issues", async () => {
+    const { container } = render(<SearchPagination page={1} query={"test"} />);
+
+    const results = await axe(container, {
+      rules: {
+        // Disable specific rules that are known to fail due to third-party components
+        list: { enabled: false },
+        "svg-img-alt": { enabled: false },
+      },
+    });
+    expect(results).toHaveNoViolations();
   });
-  //   it("should not have basic accessibility issues", async () => {
-  //     const { container } = render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         totalPages={totalPages}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     const results = await axe(container, {
-  //       rules: {
-  //         // Disable specific rules that are known to fail due to third-party components
-  //         list: { enabled: false },
-  //         "svg-img-alt": { enabled: false },
-  //       },
-  //     });
-  //     expect(results).toHaveNoViolations();
-  //   });
+  it("Renders Pagination component when pages > 0", () => {
+    render(<SearchPagination page={1} query={"test"} total={10} />);
 
-  //   it("renders hidden input when showHiddenInput is true", () => {
-  //     render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         totalPages={totalPages}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+  });
+  it("Does not render Pagination component when pages <= 0", () => {
+    render(<SearchPagination page={1} query={"test"} total={0} />);
 
-  //     const hiddenInput = screen.getByTestId("hiddenCurrentPage");
-  //     expect(hiddenInput).toHaveValue("1");
-  //   });
-
-  //   it("does not render hidden input when showHiddenInput is false", () => {
-  //     render(
-  //       <SearchPagination
-  //         showHiddenInput={false}
-  //         totalPages={totalPages}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     expect(screen.queryByTestId("hiddenCurrentPage")).not.toBeInTheDocument();
-  //   });
-
-  //   it("calls handlePageChange with next page on next button click", () => {
-  //     render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         totalPages={totalPages}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     fireEvent.click(screen.getByLabelText("Next page"));
-  //     expect(mockHandlePageChange).toHaveBeenCalledWith(page + 1);
-  //   });
-
-  //   it("calls handlePageChange with previous page on previous button click", () => {
-  //     render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         totalPages={totalPages}
-  //         page={2} // Set to second page to test going back to first page
-  //         handlePageChange={mockHandlePageChange}
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     fireEvent.click(screen.getByLabelText("Previous page"));
-  //     expect(mockHandlePageChange).toHaveBeenCalledWith(1);
-  //   });
-
-  //   it("returns null when searchResultsLength is less than 1", () => {
-  //     const { container } = render(
-  //       <SearchPagination
-  //         showHiddenInput={true}
-  //         page={page}
-  //         handlePageChange={mockHandlePageChange}
-  //         searchResultsLength={0} // No results, pagination should be hidden
-  //         position={PaginationPosition.Top}
-  //       />,
-  //     );
-  //     expect(container).toBeEmptyDOMElement();
-  //   });
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
 });

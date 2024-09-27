@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import ProcessAndResearchContent from "src/pages/content/ProcessAndResearchContent";
+import { render, screen } from "tests/react-utils";
+
+import ProcessAndResearchContent from "src/components/content/ProcessAndResearchContent";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {

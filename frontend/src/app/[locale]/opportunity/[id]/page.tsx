@@ -1,0 +1,83 @@
+import { Metadata } from "next";
+import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
+import NotFound from "src/app/not-found";
+import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import {
+  Opportunity,
+  OpportunityApiResponse,
+} from "src/types/opportunity/opportunityResponseTypes";
+
+import { getTranslations } from "next-intl/server";
+import { GridContainer } from "@trussworks/react-uswds";
+
+import BetaAlert from "src/components/BetaAlert";
+import Breadcrumbs from "src/components/Breadcrumbs";
+import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
+import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
+import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
+import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
+import OpportunityLink from "src/components/opportunity/OpportunityLink";
+import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+
+export async function generateMetadata() {
+  const t = await getTranslations({ locale: "en" });
+  const meta: Metadata = {
+    title: t("OpportunityListing.page_title"),
+    description: t("OpportunityListing.meta_description"),
+  };
+  return meta;
+}
+
+async function OpportunityListing({ params }: { params: { id: string } }) {
+  const id = Number(params.id);
+  const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
+  // Opportunity id needs to be a number greater than 1
+  if (isNaN(id) || id < 0) {
+    return <NotFound />;
+  }
+
+  const api = new OpportunityListingAPI();
+  let opportunity: OpportunityApiResponse;
+  try {
+    opportunity = await api.getOpportunityById(id);
+  } catch (error) {
+    console.error("Failed to fetch opportunity:", error);
+    return <NotFound />;
+  }
+
+  if (!opportunity.data) {
+    return <NotFound />;
+  }
+
+  const opportunityData: Opportunity = opportunity.data;
+
+  breadcrumbs.push({
+    title: opportunityData.opportunity_title,
+    path: `/opportunity/${opportunityData.opportunity_id}/`,
+  });
+
+  return (
+    <div>
+      <BetaAlert />
+      <Breadcrumbs breadcrumbList={breadcrumbs} />
+      <OpportunityIntro opportunityData={opportunityData} />
+      <GridContainer>
+        <div className="grid-row">
+          <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+            <OpportunityDescription opportunityData={opportunityData} />
+            <OpportunityLink opportunityData={opportunityData} />
+          </div>
+
+          <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
+            <OpportunityStatusWidget opportunityData={opportunityData} />
+            <OpportunityAwardInfo opportunityData={opportunityData} />
+            <OpportunityHistory opportunityData={opportunityData} />
+          </div>
+        </div>
+      </GridContainer>
+    </div>
+  );
+}
+
+export default withFeatureFlag(OpportunityListing, "showSearchV0");

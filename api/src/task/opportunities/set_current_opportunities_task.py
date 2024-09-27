@@ -84,9 +84,11 @@ class SetCurrentOpportunitiesTask(Task):
             "existing_opportunity_status": opportunity.opportunity_status,
         }
         log_extra |= get_log_extra_for_summary(
-            opportunity.current_opportunity_summary.opportunity_summary
-            if opportunity.current_opportunity_summary
-            else None,
+            (
+                opportunity.current_opportunity_summary.opportunity_summary
+                if opportunity.current_opportunity_summary
+                else None
+            ),
             "existing",
         )
         logger.info("Processing opportunity %s", opportunity.opportunity_id, extra=log_extra)
@@ -160,10 +162,16 @@ class SetCurrentOpportunitiesTask(Task):
         # Note that if it cannot, we do not want to use an earlier revision
         # even if that revision doesn't have the same issue. Only the latest
         # revisions of forecast/non-forecast records are ever an option
-        if not self.can_summary_be_public(latest_forecasted_summary):
+        if (
+            latest_forecasted_summary is not None
+            and not latest_forecasted_summary.can_summary_be_public(self.current_date)
+        ):
             latest_forecasted_summary = None
 
-        if not self.can_summary_be_public(latest_non_forecasted_summary):
+        if (
+            latest_non_forecasted_summary is not None
+            and not latest_non_forecasted_summary.can_summary_be_public(self.current_date)
+        ):
             latest_non_forecasted_summary = None
 
         if latest_forecasted_summary is None and latest_non_forecasted_summary is None:
@@ -179,18 +187,6 @@ class SetCurrentOpportunitiesTask(Task):
         return latest_forecasted_summary, self.determine_opportunity_status(
             cast(OpportunitySummary, latest_forecasted_summary)
         )
-
-    def can_summary_be_public(self, summary: OpportunitySummary | None) -> bool:
-        if summary is None:
-            return False
-
-        if summary.is_deleted:
-            return False
-
-        if summary.post_date is None or summary.post_date > self.current_date:
-            return False
-
-        return True
 
     def determine_opportunity_status(
         self, opportunity_summary: OpportunitySummary
@@ -251,9 +247,9 @@ def is_opportunity_changed(
 def get_log_extra_for_summary(summary: OpportunitySummary | None, prefix: str) -> dict[str, Any]:
     return {
         f"{prefix}_opportunity_summary_id": summary.opportunity_summary_id if summary else None,
-        f"{prefix}_opportunity_summary_revision_number": summary.revision_number
-        if summary
-        else None,
+        f"{prefix}_opportunity_summary_revision_number": (
+            summary.revision_number if summary else None
+        ),
         f"{prefix}_opportunity_summary_is_forecast": summary.is_forecast if summary else None,
         f"{prefix}_opportunity_summary_post_date": summary.post_date if summary else None,
         f"{prefix}_opportunity_summary_close_date": summary.close_date if summary else None,

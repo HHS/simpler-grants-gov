@@ -1,4 +1,5 @@
 """Calculate and visualizes percent completion by deliverable."""
+
 import datetime as dt
 
 import pandas as pd

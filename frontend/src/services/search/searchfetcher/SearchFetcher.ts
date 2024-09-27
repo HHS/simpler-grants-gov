@@ -1,9 +1,9 @@
 import "server-only";
 
-import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
-import { SearchFetcherActionType } from "../../../types/search/searchRequestTypes";
+import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
-export interface SearchFetcherProps {
+export interface QueryParamData {
   page: number;
   query: string | null | undefined;
   status: Set<string>;
@@ -18,6 +18,6 @@ export interface SearchFetcherProps {
 
 export abstract class SearchFetcher {
   abstract fetchOpportunities(
-    props: SearchFetcherProps,
+    props: QueryParamData,
   ): Promise<SearchAPIResponse>;
 }

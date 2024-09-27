@@ -1,18 +1,22 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
+import logging
 from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
 from slack_sdk import WebClient
+from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.integrations import github, slack
+from analytics.integrations import db, github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
+
+logger = logging.getLogger(__name__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -38,9 +42,11 @@ app = typer.Typer()
 # instantiate sub-commands for exporting data and calculating metrics
 export_app = typer.Typer()
 metrics_app = typer.Typer()
+import_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
+app.add_typer(import_app, name="import", help="Import data into the database")
 
 
 @app.callback()
@@ -122,6 +128,67 @@ def calculate_sprint_burnup(
     )
 
 
+@import_app.command(name="test_connection")
+def test_connection() -> None:
+    """Test function that ensures the DB connection works."""
+    engine = db.get_db()
+    # connection method from sqlalchemy
+    connection = engine.connect()
+
+    # Test INSERT INTO action
+    result = connection.execute(
+        text(
+            "INSERT INTO audit_log (topic,timestamp, end_timestamp, user_id, details)"
+            "VALUES('test','2024-06-11 10:41:15','2024-06-11 10:54:15',87654,'test from command');",
+        ),
+    )
+    # Test SELECT action
+    result = connection.execute(text("SELECT * FROM audit_log WHERE user_id=87654;"))
+    for row in result:
+        print(row)
+    # commits the transaction to the db
+    connection.commit()
+    result.close()
+
+
+@import_app.command(name="db_import")
+def export_json_to_database(
+    sprint_file: Annotated[str, SPRINT_FILE_ARG],
+    issue_file: Annotated[str, ISSUE_FILE_ARG],
+) -> None:
+    """Import JSON data to the database."""
+    logger.info("Beginning import")
+
+    # Get the database engine and establish a connection
+    engine = db.get_db()
+
+    # get data and load from JSON
+    deliverable_data = DeliverableTasks.load_from_json_files(
+        sprint_file=sprint_file,
+        issue_file=issue_file,
+    )
+
+    # Load data from the sprint board
+    sprint_data = SprintBoard.load_from_json_files(
+        sprint_file=sprint_file,
+        issue_file=issue_file,
+    )
+
+    deliverable_data.to_sql(
+        output_table="github_project_data",
+        engine=engine,
+        replace_table=True,
+    )  # replace_table=True is the default
+
+    sprint_data.to_sql(
+        output_table="github_project_data",
+        engine=engine,
+        replace_table=True,
+    )
+    rows = len(sprint_data.to_dict())
+    logger.info("Number of rows in table: %s", rows)
+
+
 @metrics_app.command(name="deliverable_percent_complete")
 def calculate_deliverable_percent_complete(
     sprint_file: Annotated[str, SPRINT_FILE_ARG],
@@ -174,7 +241,9 @@ def show_and_or_post_results(
     """Optionally show the results of a metric and/or post them to slack."""
     # defer load of settings until this command is called
     # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
-    from config import settings
+    from config import get_db_settings
+
+    settings = get_db_settings()
 
     # optionally display the burndown chart in the browser
     if show_results:

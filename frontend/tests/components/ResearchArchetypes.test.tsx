@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import ResearchArchetypes from "src/pages/content/ResearchArchetypes";
+import ResearchArchetypes from "src/app/[locale]/research/ResearchArchetypes";
+import { render, screen } from "tests/react-utils";
 
 describe("Research Content", () => {
   it("Renders without errors", () => {

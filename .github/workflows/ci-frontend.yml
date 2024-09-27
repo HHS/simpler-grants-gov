@@ -1,4 +1,4 @@
-name: Front-end Checks
+name: Frontend Checks
 
 on:
   workflow_call:
@@ -26,16 +26,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
 
       - name: Run lint
         run: npm run lint
@@ -58,31 +55,21 @@ jobs:
             skip-step: none
             output: comment
 
-      - name: Run e2e tests
-        run: npm run test:e2e
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: ./frontend/playwright-report/
-          retention-days: 30
-
   # Confirms the front end still builds successfully
   check-frontend-builds:
     name: FE Build Check
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
 
       # https://nextjs.org/docs/advanced-features/ci-build-caching
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.npm
@@ -102,8 +89,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}

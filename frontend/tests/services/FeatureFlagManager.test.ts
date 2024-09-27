@@ -2,15 +2,15 @@
  * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import Cookies from "js-cookie";
+import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+import { mockProcessEnv } from "tests/utils/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
-} from "../utils/FeatureFlagTestUtils";
+} from "tests/utils/FeatureFlagTestUtils";
 
-import Cookies from "js-cookie";
-import { FeatureFlagsManager } from "../../src/services/FeatureFlagManager";
-import { mockProcessEnv } from "../utils/commonTestUtils";
+import { NextRequest, NextResponse } from "next/server";
 
 describe("FeatureFlagsManager", () => {
   const COOKIE_VALUE = { feature1: true };

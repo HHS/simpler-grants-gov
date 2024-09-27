@@ -1,11 +1,12 @@
 import "@testing-library/jest-dom";
 
-import { render, screen } from "@testing-library/react";
-
-import { FilterOption } from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import React from "react";
-import SectionLinkLabel from "../../../../../src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
 import { axe } from "jest-axe";
+import { render, screen } from "tests/react-utils";
+
+import React from "react";
+
+import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
+import SectionLinkLabel from "src/components/search/SearchFilterAccordion/SearchFilterSection/SectionLinkLabel";
 
 // Mock the Icon component from "@trussworks/react-uswds"
 jest.mock("@trussworks/react-uswds", () => ({

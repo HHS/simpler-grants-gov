@@ -1,86 +1,73 @@
-"use client";
-
+import GrantsLogo from "public/img/grants-gov-logo.png";
 import { ExternalRoutes } from "src/constants/routes";
-import { assetPath } from "src/utils/assetPath";
 
-import { ComponentType } from "react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   Address,
   Grid,
   GridContainer,
-  Icon,
   SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
-import { IconProps } from "@trussworks/react-uswds/lib/components/Icon/Icon";
+
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 // Recreate @trussworks/react-uswds SocialLink component to accept any Icon
 // https://github.com/trussworks/react-uswds/blob/cf5b4555e25f0e52fc8af66afe29253922bed2a5/src/components/Footer/SocialLinks/SocialLinks.tsx#L33
 type SocialLinkProps = {
   href: string;
   name: string;
-  Tag: ComponentType<IconProps>;
+  icon: string;
 };
 
-const SocialLink = ({ href, name, Tag }: SocialLinkProps) => (
+const SocialLink = ({ href, name, icon }: SocialLinkProps) => (
   <a className="usa-social-link" href={href} title={name} target="_blank">
-    <Tag className="usa-social-link__icon" name={name} aria-label={name} />
+    <USWDSIcon
+      className="usa-icon usa-social-link__icon"
+      height="40px"
+      name={icon}
+      aria-label={name}
+    />
   </a>
 );
 
-// TODO: Remove during move to app router and next-intl upgrade
-type FooterStrings = {
-  agency_name: string;
-  agency_contact_center: string;
-  telephone: string;
-  return_to_top: string;
-  link_twitter: string;
-  link_youtube: string;
-  link_blog: string;
-  link_newsletter: string;
-  link_rss: string;
-  link_github: string;
-  logo_alt: string;
-};
+const Footer = () => {
+  const t = useTranslations("Footer");
 
-type Props = {
-  footer_strings: FooterStrings;
-};
-
-const Footer = ({ footer_strings }: Props) => {
   const links = [
     {
       href: ExternalRoutes.GRANTS_TWITTER,
-      name: footer_strings.link_twitter,
-      Tag: Icon.Twitter,
+      name: t("link_twitter"),
+      icon: "twitter",
     },
     {
       href: ExternalRoutes.GRANTS_YOUTUBE,
-      name: footer_strings.link_youtube,
-      Tag: Icon.Youtube,
+      name: t("link_youtube"),
+      icon: "youtube",
     },
     {
       href: ExternalRoutes.GRANTS_BLOG,
-      name: footer_strings.link_blog,
-      Tag: Icon.LocalLibrary,
+      name: t("link_blog"),
+      icon: "local_library",
     },
     {
       href: ExternalRoutes.GRANTS_NEWSLETTER,
-      name: footer_strings.link_newsletter,
-      Tag: Icon.Mail,
+      name: t("link_newsletter"),
+      icon: "mail",
     },
     {
       href: ExternalRoutes.GRANTS_RSS,
-      name: footer_strings.link_rss,
-      Tag: Icon.RssFeed,
+      name: t("link_rss"),
+      icon: "rss_feed",
     },
     {
       href: ExternalRoutes.GITHUB_REPO,
-      name: footer_strings.link_github,
-      Tag: Icon.Github,
+      name: t("link_github"),
+      icon: "github",
     },
-  ].map(({ href, name, Tag }) => (
-    <SocialLink href={href} key={name} name={name} Tag={Tag} />
+  ].map(({ href, name, icon }) => (
+    <SocialLink href={href} key={name} name={name} icon={icon} />
   ));
 
   return (
@@ -89,17 +76,20 @@ const Footer = ({ footer_strings }: Props) => {
       size="medium"
       returnToTop={
         <GridContainer className="usa-footer__return-to-top margin-top-5">
-          <a href="#">{footer_strings.return_to_top}</a>
+          <a href="#">{t("return_to_top")}</a>
         </GridContainer>
       }
       primary={null}
       secondary={
         <Grid row gap>
           <Grid tablet={{ col: 4 }} desktop={{ col: 6 }}>
-            <img
+            <Image
               className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
-              alt={footer_strings.logo_alt}
-              src={assetPath("/img/grants-gov-logo.png")}
+              alt={t("logo_alt")}
+              src={GrantsLogo}
+              height={168}
+              width={500}
+              priority={false}
             />
           </Grid>
           <Grid
@@ -109,13 +99,13 @@ const Footer = ({ footer_strings }: Props) => {
           >
             <SocialLinks links={links} />
             <h2 className="usa-footer__contact-heading">
-              {footer_strings.agency_contact_center}
+              {t("agency_contact_center")}
             </h2>
             <Address
               size="medium"
               items={[
-                <a key="telephone" href={`tel:${footer_strings.telephone}`}>
-                  {footer_strings.telephone}
+                <a key="telephone" href={`tel:${t("telephone")}`}>
+                  {t("telephone")}
                 </a>,
                 <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
                   {ExternalRoutes.EMAIL_SUPPORT}

@@ -23,5 +23,6 @@ module.exports = {
     "^(src/)?components/(.*)$",
     "^[./]",
   ],
+  plugins: ["@ianvs/prettier-plugin-sort-imports"],
   importOrderTypeScriptVersion: "5.0.0",
 };

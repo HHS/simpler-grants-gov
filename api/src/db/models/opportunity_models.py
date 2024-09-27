@@ -12,6 +12,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityStatus,
 )
+from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
@@ -62,6 +63,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    agency_record: Mapped[Agency | None] = relationship(
+        Agency, primaryjoin="Opportunity.agency == foreign(Agency.agency_code)", uselist=False
+    )
+
+    @property
+    def agency_name(self) -> str | None:
+        # Fetch the agency name from the agency table record (if one was found)
+        if self.agency_record is not None:
+            return self.agency_record.agency_name
+
+        return None
+
     @property
     def summary(self) -> "OpportunitySummary | None":
         """
@@ -81,6 +94,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
             return None
 
         return self.current_opportunity_summary.opportunity_status
+
+    @property
+    def all_forecasts(self) -> list["OpportunitySummary"]:
+        # Utility method for getting all forecasted summary records attached to the opportunity
+        # Note this will include historical and deleted records.
+        return [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+
+    @property
+    def all_non_forecasts(self) -> list["OpportunitySummary"]:
+        # Utility method for getting all forecasted summary records attached to the opportunity
+        # Note this will include historical and deleted records.
+        return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
 
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
@@ -153,10 +178,10 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
 
-    link_funding_instruments: Mapped[
-        list["LinkOpportunitySummaryFundingInstrument"]
-    ] = relationship(
-        back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
+    link_funding_instruments: Mapped[list["LinkOpportunitySummaryFundingInstrument"]] = (
+        relationship(
+            back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
+        )
     )
     link_funding_categories: Mapped[list["LinkOpportunitySummaryFundingCategory"]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
@@ -191,6 +216,29 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkOpportunitySummaryApplicantType(applicant_type=obj),
     )
 
+    def for_json(self) -> dict:
+        json_valid_dict = super().for_json()
+
+        # The proxy values don't end up in the JSON as they aren't columns
+        # so manually add them.
+        json_valid_dict["funding_instruments"] = self.funding_instruments
+        json_valid_dict["funding_categories"] = self.funding_categories
+        json_valid_dict["applicant_types"] = self.applicant_types
+
+        return json_valid_dict
+
+    def can_summary_be_public(self, current_date: date) -> bool:
+        """
+        Utility method to check whether a summary object
+        """
+        if self.is_deleted:
+            return False
+
+        if self.post_date is None or self.post_date > current_date:
+            return False
+
+        return True
+
 
 class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
@@ -211,6 +259,14 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
 
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
+
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_funding_instrument_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -237,6 +293,14 @@ class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
 class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_category"
 
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_funding_category_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,
         ForeignKey(OpportunitySummary.opportunity_summary_id),
@@ -261,6 +325,14 @@ class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
 
 class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
+
+    __table_args__ = (
+        # We want a unique constraint so that legacy IDs are unique for a given opportunity summary
+        UniqueConstraint("opportunity_summary_id", "legacy_applicant_type_id"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,

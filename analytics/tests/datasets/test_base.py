@@ -1,4 +1,5 @@
 """Test the BaseDataset class."""
+
 from pathlib import Path  # noqa: I001
 
 import pandas as pd
