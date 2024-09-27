@@ -84,7 +84,7 @@ const Footer = () => {
         <Grid row gap>
           <Grid tablet={{ col: 4 }} desktop={{ col: 6 }}>
             <Image
-              className="maxh-15 margin-bottom-2 tablet:margin-bottom-0"
+              className="maxh-15 width-auto margin-bottom-2 tablet:margin-bottom-0"
               alt={t("logo_alt")}
               src={GrantsLogo}
               height={168}
