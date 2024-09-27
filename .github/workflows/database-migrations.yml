@@ -15,17 +15,9 @@ on:
 concurrency: database-migrations-${{ inputs.environment }}
 
 jobs:
-  build-and-publish:
-    name: Build
-    uses: ./.github/workflows/build-and-publish.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      ref: ${{ github.ref }}
-      environment: ${{ inputs.environment }}
   run-migrations:
     name: Run migrations
     runs-on: ubuntu-latest
-    needs: [build-and-publish]
 
     permissions:
       contents: read
