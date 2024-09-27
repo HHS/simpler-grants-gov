@@ -17,3 +17,15 @@
     display: block;
   }
 }
+
+.grants-toggle {
+  .usa-link {
+    text-decoration: none;
+  }
+}
+
+.grants-toggle-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
