@@ -4,10 +4,10 @@ import clsx from "clsx";
 
 import { useState } from "react";
 
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchFilterAccordion, {
   SearchFilterConfiguration,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import SearchFilterToggle from "src/components/search/SearchFilterToggle";
 import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
 
 export default function SearchFilters({
@@ -17,6 +17,8 @@ export default function SearchFilters({
   opportunityStatus: Set<string>;
   filterConfigurations: SearchFilterConfiguration[];
 }) {
+  // all filter options will be displayed on > mobile viewports
+  // filter options will be hidden by default and can be toggled
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const FilterAccordions = filterConfigurations.map(
     ({ filterOptions, query, queryParamKey, title }) => {
@@ -33,11 +35,14 @@ export default function SearchFilters({
   );
   return (
     <>
-      <SearchFilterToggle
-        setShowFilterOptions={setShowFilterOptions}
-        showFilterOptions={showFilterOptions}
-        buttonText={showFilterOptions ? "Hide Filters" : "Show Filters"}
-      />
+      <div className="grid-row flex-wrap grants-search-filter-toggle">
+        <div className="grid-col-4" />
+        <ContentDisplayToggle
+          setToggledContentVisible={setShowFilterOptions}
+          toggledContentVisible={showFilterOptions}
+          toggleText={showFilterOptions ? "Hide Filters" : "Show Filters"}
+        />
+      </div>
       <div
         className={clsx({
           "grants-search-filter-options": true,
