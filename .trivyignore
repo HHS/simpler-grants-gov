@@ -7,4 +7,3 @@
 #  Issue:         Why there is a finding and why this is here or not been removed
 #  Last checked:  Date last checked in scans
 #The-CVE-or-vuln-id # Remove comment at start of line
-# 2/12/2024 - libgnutls30 in node:20-bullseye-slim not updated with latest fix. Check again after 2/20/2024 to remove
