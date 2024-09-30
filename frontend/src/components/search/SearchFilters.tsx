@@ -18,10 +18,15 @@ export default function SearchFilters({
   filterConfigurations: SearchFilterConfiguration[];
 }) {
   // all filter options will be displayed on > mobile viewports
-  // filter options will be hidden by default and can be toggled
+  // on mobile, filter options will be hidden by default and can be toggled
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const FilterAccordions = filterConfigurations.map(
-    ({ filterOptions, query, queryParamKey, title }) => {
+    ({
+      filterOptions,
+      query,
+      queryParamKey,
+      title,
+    }: SearchFilterConfiguration) => {
       return (
         <SearchFilterAccordion
           filterOptions={filterOptions}
@@ -44,6 +49,7 @@ export default function SearchFilters({
         />
       </div>
       <div
+        data-testid="search-filters"
         className={clsx({
           "grants-search-filter-options": true,
           "grants-search-filter-options-display-mobile": !!showFilterOptions,

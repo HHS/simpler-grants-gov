@@ -15,7 +15,10 @@ export default function ContentDisplayToggle({
 }) {
   const iconName = toggledContentVisible ? "arrow_drop_up" : "arrow_drop_down";
   return (
-    <div className="grants-toggle grid-col-4">
+    <div
+      data-testid="content-display-toggle"
+      className="grants-toggle grid-col-4"
+    >
       <a
         onClick={(_event) => setToggledContentVisible(!toggledContentVisible)}
         aria-pressed={toggledContentVisible}

@@ -24,8 +24,11 @@ export default function SearchOpportunityStatus({
   const { updateQueryParams } = useSearchParamUpdater();
 
   const handleCheck = (value: string, isChecked: boolean) => {
+    console.log("!!! handleCheck", value, query, updated);
     const updated = new Set(query);
+    console.log("!!! handleCheck", value, query, updated);
     isChecked ? updated.add(value) : updated.delete(value);
+    console.log("!!! updating", updated, queryTerm);
     updateQueryParams(updated, "status", queryTerm);
   };
 
