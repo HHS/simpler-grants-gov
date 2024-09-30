@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 async function getOpportunityData(id: number) {
   const api = new OpportunityListingAPI();
   try {
-    const oppportunity = await api.getOpportunityById(id);
+    const opportunity = await api.getOpportunityById(id);
     return oppportunity.data;
   } catch (error) {
     console.error("Failed to fetch opportunity:", error);
