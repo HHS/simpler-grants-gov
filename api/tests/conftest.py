@@ -15,7 +15,7 @@ import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.constants.schema import Schemas
 from src.db import models
-from src.db.foreign import metadata as foreign_metadata
+from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata

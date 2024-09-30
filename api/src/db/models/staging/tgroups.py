@@ -1,4 +1,4 @@
-from src.db.legacy_mixin import tgroups_mixin
+from src.db.models.legacy_mixin import tgroups_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
 

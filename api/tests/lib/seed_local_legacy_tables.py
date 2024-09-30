@@ -11,7 +11,7 @@ import sqlalchemy
 import src.adapters.db
 import src.logging
 import tests.src.db.models.factories as factories
-from src.db import foreign
+from src.db.models import foreign
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import click
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-import src.db.foreign
+import src.db.models.foreign
 import src.db.models.staging
 from src.task.ecs_background_task import ecs_background_task
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
@@ -44,7 +44,7 @@ def load_transform(
 ) -> None:
     logger.info("load and transform start")
 
-    foreign_tables = {t.name: t for t in src.db.foreign.metadata.tables.values()}
+    foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
     staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
 
     if load:
