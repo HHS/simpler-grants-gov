@@ -7,8 +7,7 @@
 from sqlalchemy import and_
 from sqlalchemy.orm import Mapped, foreign, relationship
 
-from src.db.legacy_mixin import forecast_mixin
-
+from ..legacy_mixin import forecast_mixin
 from . import foreignbase
 from .opportunity import Topportunity
 

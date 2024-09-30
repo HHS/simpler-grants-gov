@@ -6,7 +6,7 @@
 #
 from sqlalchemy.orm import Mapped, foreign, relationship
 
-from src.db.legacy_mixin import opportunity_mixin
+from src.db.models.legacy_mixin import opportunity_mixin
 
 from . import foreignbase
 

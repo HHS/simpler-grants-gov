@@ -5,8 +5,8 @@ from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-import src.db.foreign
-import src.db.foreign.dialect
+import src.db.models.foreign
+import src.db.models.foreign.dialect
 from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
@@ -59,14 +59,14 @@ def build_sql(table: sqlalchemy.schema.Table, is_local: bool, schema_name: str) 
         )
     else:
         compiler = create_table.compile(
-            dialect=src.db.foreign.dialect.ForeignTableDialect(),
+            dialect=src.db.models.foreign.dialect.ForeignTableDialect(),
             schema_translate_map={Schemas.LEGACY.name: schema_name},
         )
     return str(compiler).strip()
 
 
 def _run_create_table_commands(db_session: db.Session, config: ForeignTableConfig) -> None:
-    for table in src.db.foreign.metadata.tables.values():
+    for table in src.db.models.foreign.metadata.tables.values():
         sql = build_sql(table, config.is_local_foreign_table, config.schema_name)
         logger.info("create table", extra={"table": table.name, "sql": sql})
         db_session.execute(sqlalchemy.text(sql))
