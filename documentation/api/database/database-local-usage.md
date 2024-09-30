@@ -14,7 +14,7 @@ Steps:
 
 ![Local DB Connection Parameters](../images/local-db-connection.png)
 
-Connection parameters for the database can be found in [local.env](../../api/local.env) including the password.
+Connection parameters for the database can be found in [local.env](../../../api/local.env) including the password.
 
 ### CLI
 
