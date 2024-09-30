@@ -4,7 +4,10 @@ const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
 const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
 const NEWSLETTER: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
-const SEARCH: Breadcrumb = { title: "Search", path: "/search/" };
+const SEARCH: Breadcrumb = {
+  title: "Search",
+  path: "/search?status=forecasted,posted",
+};
 export const NEWSLETTER_CONFIRMATION: Breadcrumb = {
   title: "Confirmation",
   path: "/newsletter/confirmation/",

@@ -87,7 +87,7 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
             ),
           }}
         />
-        <p>{opportunityData.summary.agency_email_address}</p>
+        <p>{agency_email}</p>
         <p>
           <a href={`mailto:${agency_email}`}>
             {opportunityData.summary.agency_email_address_description}

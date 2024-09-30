@@ -14,8 +14,8 @@ type Props = {
 const OpportunityIntro = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.intro");
 
-  const agencyName = opportunityData.summary.agency_name
-    ? opportunityData.summary.agency_name
+  const agencyName = opportunityData.agency_name
+    ? opportunityData.agency_name
     : "--";
 
   const assistanceListings = ({
