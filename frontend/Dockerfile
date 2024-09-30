@@ -8,7 +8,9 @@ WORKDIR /frontend
 COPY package.json package-lock.json ./
 COPY public ./public
 COPY scripts ./scripts
-RUN npm ci --no-audit
+RUN npm ci --no-audit \
+    # Remove dev packages not removed by `npm prune`
+    && rm -rf /frontend/node_modules/@esbuild
 
 # =============================================================================
 # Development stage
@@ -87,8 +89,6 @@ RUN npm prune --production
 # Release stage doesn't have a need for `npm`, so remove it to avoid
 # any vulnerabilities specific to NPM
 RUN npm uninstall -g npm
-# Remove dev packages not removed by `npm prune`
-RUN rm -rf node_modules/@esbuild
 # Remove yarn as well (https://github.com/nodejs/docker-node/issues/777)
 RUN rm -rf /opt/yarn-v*
 
