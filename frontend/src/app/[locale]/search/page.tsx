@@ -52,7 +52,6 @@ interface searchParamsTypes {
 function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
-
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const {
     agency,

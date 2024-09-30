@@ -36,6 +36,7 @@ test.describe("Search page tests", () => {
   }: PageProps) => {
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
+    // console.log("!!!!", contextOptions);
     const searchTerm = "education";
     const statusCheckboxes = {
       "status-forecasted": "forecasted",
@@ -63,6 +64,7 @@ test.describe("Search page tests", () => {
 
     await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page);
+
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     await clickAccordionWithTitle(page, "Funding instrument");

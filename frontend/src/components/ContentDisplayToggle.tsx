@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-// this could either be simpler and more generic
+// this could implemented slightly differently to either be simpler and more generic
 // or we could opt to build the entire show / hide functionality into this component and pass the content controlled by the toggle as children
 export default function ContentDisplayToggle({
   setToggledContentVisible,
