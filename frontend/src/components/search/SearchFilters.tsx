@@ -18,7 +18,7 @@ export default function SearchFilters({
   filterConfigurations: SearchFilterConfiguration[];
 }) {
   // all filter options will be displayed on > mobile viewports
-  // on mobile, filter options will be hidden by default and can be toggled
+  // on mobile, filter options will be hidden by default and can be toggled here
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const FilterAccordions = filterConfigurations.map(
     ({
