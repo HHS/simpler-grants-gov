@@ -7,10 +7,8 @@ on:
   push:
     branches:
       - "main"
-      - "kai/concurrent-releases-3"
     paths:
       - "api/**"
-      - ".github/"
   release:
     types: [published]
   workflow_dispatch:
@@ -37,7 +35,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        envs: ${{ fromJSON('["dev", "staging"]') }}
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
