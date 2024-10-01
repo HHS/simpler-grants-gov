@@ -50,7 +50,7 @@ class LoadOracleDataTask(src.task.task.Task):
         foreign_tables: dict[str, sqlalchemy.Table],
         staging_tables: dict[str, sqlalchemy.Table],
         tables_to_load: list[str] | None = None,
-        insert_chunk_size: int = 4000,
+        insert_chunk_size: int = 800,
     ) -> None:
 
         if tables_to_load is None or len(tables_to_load) == 0:
@@ -122,13 +122,16 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def do_insert(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Determine new rows by primary key, and copy them into the staging table."""
+        log_extra = {"table": foreign_table.name}
 
+        logger.info("Fetching records to be inserted", extra=log_extra)
         select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
         with self.db_session.begin():
             new_ids = self.db_session.execute(select_sql).all()
 
         t0 = time.monotonic()
         insert_chunk_count = []
+        logger.info("Fetched records to be inserted, beginning batches", extra=log_extra)
         for batch_of_new_ids in itertools.batched(new_ids, self.insert_chunk_size):
             insert_from_select_sql = sql.build_insert_select_sql(
                 foreign_table, staging_table, batch_of_new_ids
@@ -141,8 +144,8 @@ class LoadOracleDataTask(src.task.task.Task):
             insert_chunk_count.append(len(batch_of_new_ids))
             logger.info(
                 "insert chunk done",
-                extra={
-                    "table": foreign_table.name,
+                extra=log_extra
+                | {
                     "count": sum(insert_chunk_count),
                     "total": len(new_ids),
                 },
@@ -163,13 +166,16 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def do_update(self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table) -> int:
         """Find updated rows using last_upd_date, copy them, and reset transformed_at to NULL."""
+        log_extra = {"table": foreign_table.name}
 
+        logger.info("Fetching records to be updated", extra=log_extra)
         select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
         with self.db_session.begin():
             update_ids = self.db_session.execute(select_sql).all()
 
         t0 = time.monotonic()
         update_chunk_count = []
+        logger.info("Fetched records to be updated, beginning batches", extra=log_extra)
         for batch_of_update_ids in itertools.batched(update_ids, self.insert_chunk_size):
             update_sql = sql.build_update_sql(
                 foreign_table, staging_table, batch_of_update_ids
@@ -181,7 +187,7 @@ class LoadOracleDataTask(src.task.task.Task):
             update_chunk_count.append(len(batch_of_update_ids))
             logger.info(
                 "update chunk done",
-                extra={"count": sum(update_chunk_count), "total": len(update_ids)},
+                extra=log_extra | {"count": sum(update_chunk_count), "total": len(update_ids)},
             )
 
         t1 = time.monotonic()
@@ -201,13 +207,16 @@ class LoadOracleDataTask(src.task.task.Task):
         self, foreign_table: sqlalchemy.Table, staging_table: sqlalchemy.Table
     ) -> int:
         """Find deleted rows, set is_deleted=TRUE, and reset transformed_at to NULL."""
+        log_extra = {"table": foreign_table.name}
 
+        logger.info("Fetching records to be deleted", extra=log_extra)
         update_sql = sql.build_mark_deleted_sql(foreign_table, staging_table).values(
             transformed_at=None,
             deleted_at=datetime_util.utcnow(),
         )
 
         t0 = time.monotonic()
+        logger.info("Fetched records to be deleted", extra=log_extra)
         with self.db_session.begin():
             result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
@@ -216,15 +225,17 @@ class LoadOracleDataTask(src.task.task.Task):
         self.increment("count.delete.total", delete_count)
         self.set_metrics({f"count.delete.{staging_table.name}": delete_count})
         self.set_metrics({f"time.delete.{staging_table.name}": round(t1 - t0, 3)})
+        logger.info("Delete done", extra=log_extra | {"count": delete_count})
 
         return delete_count
 
     def log_row_count(self, message: str, *tables: sqlalchemy.Table) -> None:
         """Log the number of rows in each of the tables using SQL COUNT()."""
-        extra = {}
+        extra: dict = {}
         with self.db_session.begin():
             for table in tables:
                 count = self.db_session.query(table).count()
+                extra["table"] = table.name
                 extra[f"count.{table.schema}.{table.name}"] = count
                 self.set_metrics({f"count.{message}.{table.schema}.{table.name}": count})
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
