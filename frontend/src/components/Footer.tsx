@@ -37,9 +37,9 @@ const Footer = () => {
 
   const links = [
     {
-      href: ExternalRoutes.GRANTS_TWITTER,
-      name: t("link_twitter"),
-      icon: "twitter",
+      href: ExternalRoutes.GRANTS_X_TWITTER,
+      name: t("link_x_twitter"),
+      icon: "x",
     },
     {
       href: ExternalRoutes.GRANTS_YOUTUBE,
