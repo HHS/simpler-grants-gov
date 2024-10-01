@@ -40,7 +40,7 @@ export default function SearchFilters({
   );
   return (
     <>
-      <div className="grid-row flex-wrap grants-search-filter-toggle">
+      <div className="grid-row flex-wrap tablet:display-none">
         <div className="grid-col-4" />
         <ContentDisplayToggle
           setToggledContentVisible={setShowFilterOptions}
@@ -51,8 +51,8 @@ export default function SearchFilters({
       <div
         data-testid="search-filters"
         className={clsx({
-          "grants-search-filter-options": true,
-          "grants-search-filter-options-display-mobile": !!showFilterOptions,
+          "display-none": !showFilterOptions,
+          "tablet:display-block": true,
         })}
       >
         <SearchOpportunityStatus query={opportunityStatus} />

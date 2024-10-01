@@ -213,7 +213,7 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
 
 export async function toggleMobileSearchFilters(page: Page) {
   const toggleButton = page.locator(
-    ".grants-search-filter-toggle .grants-toggle-button",
+    "div[data-testid='content-display-toggle'] .usa-button--unstyled",
   );
   await toggleButton.click();
 }

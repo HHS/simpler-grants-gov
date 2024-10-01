@@ -62,9 +62,7 @@ describe("SearchFilters", () => {
 
     const filters = screen.getByTestId("search-filters");
     expect(filters).toBeInTheDocument();
-    expect(filters).not.toHaveClass(
-      "grants-search-filter-options-display-mobile",
-    );
+    expect(filters).toHaveClass("display-none");
 
     const toggle = screen.getByText("Show Filters");
     expect(toggle).toBeInTheDocument();
@@ -73,9 +71,7 @@ describe("SearchFilters", () => {
     await waitFor(
       () => {
         const updatedFilters = screen.getByTestId("search-filters");
-        expect(updatedFilters).toHaveClass(
-          "grants-search-filter-options-display-mobile",
-        );
+        expect(updatedFilters).not.toHaveClass("display-none");
       },
       { timeout: 50 },
     );
