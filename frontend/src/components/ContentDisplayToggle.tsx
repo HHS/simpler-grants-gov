@@ -19,14 +19,14 @@ export default function ContentDisplayToggle({
       data-testid="content-display-toggle"
       className="grants-toggle grid-col-4"
     >
-      <a
+      <button
         onClick={(_event) => setToggledContentVisible(!toggledContentVisible)}
         aria-pressed={toggledContentVisible}
-        className="usa-link text-bold grants-toggle-button"
+        className="usa-button usa-button--unstyled grants-toggle-button"
       >
         <USWDSIcon name={iconName} className="usa-icon usa-icon--size-4" />
-        <span>{toggleText}</span>
-      </a>
+        <span className="text-bold">{toggleText}</span>
+      </button>
     </div>
   );
 }
