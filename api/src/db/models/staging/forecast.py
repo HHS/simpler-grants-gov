@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Mapped, relationship
 
-from src.db.legacy_mixin import forecast_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
+from ..legacy_mixin import forecast_mixin
 from .opportunity import Topportunity
 
 

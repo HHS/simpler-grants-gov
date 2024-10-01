@@ -3,7 +3,7 @@ import re
 import pytest
 import sqlalchemy
 
-import src.db.foreign
+import src.db.models.foreign
 from src.data_migration.setup_foreign_tables import build_sql
 
 EXPECTED_LOCAL_OPPORTUNITY_SQL = [
@@ -83,12 +83,12 @@ EXPECTED_NONLOCAL_TEST_SQL = [
         (TEST_TABLE, True, EXPECTED_LOCAL_TEST_SQL),
         (TEST_TABLE, False, EXPECTED_NONLOCAL_TEST_SQL),
         (
-            src.db.foreign.metadata.tables["legacy.topportunity"],
+            src.db.models.foreign.metadata.tables["legacy.topportunity"],
             True,
             EXPECTED_LOCAL_OPPORTUNITY_SQL,
         ),
         (
-            src.db.foreign.metadata.tables["legacy.topportunity"],
+            src.db.models.foreign.metadata.tables["legacy.topportunity"],
             False,
             EXPECTED_NONLOCAL_OPPORTUNITY_SQL,
         ),
