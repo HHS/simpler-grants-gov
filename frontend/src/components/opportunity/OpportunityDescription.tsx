@@ -59,9 +59,7 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              opportunityData.summary.summary_description
-                ? opportunityData.summary.summary_description
-                : "",
+              opportunityData.summary.summary_description ?? "",
             ),
           }}
         />
