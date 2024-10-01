@@ -34,6 +34,7 @@ jobs:
     needs: analytics-checks
     uses: ./.github/workflows/deploy.yml
     strategy:
+      max-parallel: 1
       matrix:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:

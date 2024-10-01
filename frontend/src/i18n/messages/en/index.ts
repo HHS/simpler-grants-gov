@@ -397,7 +397,7 @@ export const messages = {
     agency_contact_center: "Grants.gov Program Management Office",
     telephone: "1-877-696-6775",
     return_to_top: "Return to top",
-    link_twitter: "Twitter",
+    link_x_twitter: "X (Twitter)",
     link_youtube: "YouTube",
     link_github: "Github",
     link_rss: "RSS",

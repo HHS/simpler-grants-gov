@@ -2,8 +2,24 @@
 
 This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOWNERS) for list of reviewers for different parts of the codebase. Team members include:
 
-<!-- Note: team members listed in alphabetical order by last name -->
 
+## Engineering
+
+* Aaron Couch
+* Brandon Tabaska
+* Doug Schrashun
+* Kai Siren
+* Matt Dragon
+* Michael Chouinard
+
+## Content and Design
+
+* Andy Cochran
+* Crystabel Rangel
+* Emily Ianacone
+* Jenn Snyder
+* Risha Lee
+* Senongo Akpem
 
 ## Product and Delivery
 
@@ -12,31 +28,11 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Sarah Knopp
 * Billy Daly
 * Eric Valenzuela
+* David Dudas
 
-## Engineering
+## Product and Program Management
 
-* Aaron Couch
-* Alsia Plybeah
-* Kai Siren
-* Michael Chouinard
-* Sammy Steiner
-* Brett Rosenblatt
-* Brandon Tabaska
-* Ebuwa Evbuoma-Fike
-* James Bursa
-* Ryan Lewis
-
-## Product and Project Management
-
-* Sumi Thaiveettil
 * Margaret Spring
+* Max Kramer
 
 
-## Content and Design
-
-* Andy Cochran
-* Emily Ianacone
-* Risha Lee
-* Crystabel Rangel
-* Senongo Akpem
-* Meghan Casey

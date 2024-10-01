@@ -6,8 +6,6 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 
 ## Prerequisites
 
-**Note:** Run everything from within the `/api` folder:
-
 1. Install the version of Python specified in [pyproject.toml](../../api/pyproject.toml)
    [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
    or [asdf](https://asdf-vm.com/).
@@ -23,6 +21,8 @@ A very simple [docker-compose.yml](../../docker-compose.yml) has been included t
 
 4. You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
+## **Note:** All the following commands should be run from the `/api` directory.
+
 ## Database setup: Run Migrations/Seeds
 
 1. If you haven't done local development before you'll need to execute the migrations and seed the DB with data using the steps in [database-local-usage.md](database/database-local-usage.md)
@@ -37,11 +37,11 @@ If your DB or OpenSearch end up in an odd place, you can reset all the persisten
 ## Run the application
 
 1. Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed & running.
-2. Run `make -C api setup-local` to install dependencies
-3. Run `make -C api init start` to build the image and start the container.
+2. Run `make setup-local` to install dependencies
+3. Run `make init start` to build the image and start the container.
 4. Navigate to `localhost:8080/docs` to access the Swagger UI.
-5. Run `make -C api run-logs` to see the logs of the running API container
-6. Run `make -C api stop` when you are done to delete the container.
+5. Run `make run-logs` to see the logs of the running API container
+6. Run `make stop` when you are done to delete the container.
 
 ## Some Useful Commands
 
