@@ -40,8 +40,7 @@ export default function SearchFilters({
   );
   return (
     <>
-      <div className="grid-row flex-wrap tablet:display-none">
-        <div className="grid-col-4" />
+      <div className="display-flex flex-column flex-align-center tablet:display-none">
         <ContentDisplayToggle
           setToggledContentVisible={setShowFilterOptions}
           toggledContentVisible={showFilterOptions}
