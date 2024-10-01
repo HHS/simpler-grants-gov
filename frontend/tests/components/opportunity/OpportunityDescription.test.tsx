@@ -114,13 +114,9 @@ describe("OpportunityDescription", () => {
     expect(mailtoLink).toHaveAttribute("href", `mailto:${agency_email}`);
 
     const telLink = screen.getByRole("link", {
-      name: mockOpportunityData.summary.agency_phone_number
-        ? mockOpportunityData.summary.agency_phone_number
-        : "",
+      name: "123-456-7890",
     });
-    const number = mockOpportunityData.summary.agency_phone_number
-      ? mockOpportunityData.summary.agency_phone_number.replace(/-/g, "")
-      : "";
+    const number = "1234567890";
     expect(telLink).toHaveAttribute("href", `tel:${number}`);
   });
 });

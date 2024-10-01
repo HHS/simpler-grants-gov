@@ -27,9 +27,8 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
         currency: "USD",
         minimumFractionDigits: 0,
       }).format(number);
-    } else {
-      return "";
     }
+    return "";
   };
 
   const formatSubContent = (content: boolean | string | null | string[]) => {
