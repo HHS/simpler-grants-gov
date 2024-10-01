@@ -1,7 +1,7 @@
 # We are limiting this to 4 engineers and choosing not to select "Require review from Code Owners."
 * @acouch @chouinar @mdragon 
 
-/documentation/ @sumiat @widal001 @andycochran @acouch
+/documentation/ @mxk0  @widal001 @andycochran @acouch
 /frontend/ @andycochran @acouch @doug-s-nava 
 /api/ @chouinar
 /analytics/ @coilysiren @widal001 @acouch 
