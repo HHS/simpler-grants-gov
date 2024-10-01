@@ -71,35 +71,6 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
 
-  const filterConfigurations = useMemo((): SearchFilterConfiguration[] => {
-    return [
-      {
-        filterOptions: fundingOptions,
-        title: t("accordion.titles.funding"),
-        query: fundingInstrument,
-        queryParamKey: "fundingInstrument",
-      },
-      {
-        filterOptions: eligibilityOptions,
-        title: t("accordion.titles.eligibility"),
-        query: eligibility,
-        queryParamKey: "eligibility",
-      },
-      {
-        filterOptions: agencyOptions,
-        title: t("accordion.titles.agency"),
-        query: agency,
-        queryParamKey: "agency",
-      },
-      {
-        filterOptions: categoryOptions,
-        title: t("accordion.titles.category"),
-        query: category,
-        queryParamKey: "category",
-      },
-    ];
-  }, [fundingInstrument, eligibility, agency, category, t]);
-
   return (
     <>
       <PageSEO title={t("title")} description={t("meta_description")} />
@@ -115,7 +86,14 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
             <div className="tablet:grid-col-4">
               <SearchFilters
                 opportunityStatus={status}
-                filterConfigurations={filterConfigurations}
+                eligibility={eligibility}
+                category={category}
+                fundingInstrument={fundingInstrument}
+                agency={agency}
+                categoryTitle={t("accordion.titles.category")}
+                eligibilityTitle={t("accordion.titles.eligibility")}
+                fundingTitle={t("accordion.titles.funding")}
+                agencyTitle={t("accordion.titles.agency")}
               />
             </div>
             <div className="tablet:grid-col-8">
