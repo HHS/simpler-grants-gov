@@ -49,13 +49,9 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
     ? opportunityData.summary.agency_phone_number.replace(/-/g, "")
     : "";
 
-  const additionalInformationOnEligibility = opportunityData.summary
-    .applicant_eligibility_description
-    ? opportunityData.summary.applicant_eligibility_description
-    : "--";
-  const agency_email = opportunityData.summary.agency_email_address
-    ? opportunityData.summary.agency_email_address
-    : "";
+  const additionalInformationOnEligibility =
+    opportunityData.summary.applicant_eligibility_description ?? "--";
+  const agency_email = opportunityData.summary.agency_email_address ?? "";
   return (
     <>
       <div className="usa-prose">

@@ -59,9 +59,7 @@ describe("OpportunityDescription", () => {
     expect(descriptionHeading).toBeInTheDocument();
 
     const sanitizedSummaryDescription = DOMPurify.sanitize(
-      mockOpportunityData.summary.summary_description
-        ? mockOpportunityData.summary.summary_description
-        : "",
+      "<p>Summary Description</p>",
     );
     expect(screen.getByText("Summary Description")).toBeInTheDocument();
     expect(DOMPurify.sanitize).toHaveBeenCalledWith(
@@ -112,9 +110,7 @@ describe("OpportunityDescription", () => {
     const mailtoLink = screen.getByRole("link", {
       name: "Contact Email Description",
     });
-    const agency_email = mockOpportunityData.summary.agency_email_address
-      ? mockOpportunityData.summary.agency_email_address
-      : "";
+    const agency_email = "contact@example.com";
     expect(mailtoLink).toHaveAttribute("href", `mailto:${agency_email}`);
 
     const telLink = screen.getByRole("link", {

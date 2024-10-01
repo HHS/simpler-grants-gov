@@ -20,25 +20,28 @@ import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatu
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
   const id = Number(params.id);
-  const opportunityData = (await getOpportunityData(id)) as Opportunity;
-  const title = opportunityData?.opportunity_title
-    ? opportunityData?.opportunity_title
-    : "";
+  let title = `${t("OpportunityListing.page_title")}`;
+  try {
+    const opportunityData = await getOpportunityData(id);
+    title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
+  } catch (error) {
+    console.error("Failed to render title");
+  }
   const meta: Metadata = {
-    title: `${t("OpportunityListing.page_title")} - ${title}`,
+    title,
     description: t("OpportunityListing.meta_description"),
   };
   return meta;
 }
 
-async function getOpportunityData(id: number) {
+async function getOpportunityData(id: number): Promise<Opportunity> {
   const api = new OpportunityListingAPI();
   try {
     const opportunity = await api.getOpportunityById(id);
-    return oppportunity.data;
+    return opportunity.data;
   } catch (error) {
     console.error("Failed to fetch opportunity:", error);
-    return null;
+    throw new Error("Failed to fetch opportunity");
   }
 }
 
@@ -85,8 +88,10 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
     return <NotFound />;
   }
 
-  const opportunityData = (await getOpportunityData(id)) as Opportunity;
-  if (!opportunityData) {
+  let opportunityData = {} as Opportunity;
+  try {
+    opportunityData = await getOpportunityData(id);
+  } catch (error) {
     return <NotFound />;
   }
   opportunityData.summary = opportunityData?.summary
