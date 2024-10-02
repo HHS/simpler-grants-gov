@@ -28,7 +28,7 @@ export interface FilterOption {
   value: string;
 }
 
-export interface SearchFilterConfiguration {
+export interface SearchFilterAccordionProps {
   filterOptions: FilterOption[];
   query: Set<string>;
   queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
@@ -48,7 +48,7 @@ export function SearchFilterAccordion({
   title,
   queryParamKey,
   query,
-}: SearchFilterConfiguration) {
+}: SearchFilterAccordionProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
   const totalCheckedCount = query.size;

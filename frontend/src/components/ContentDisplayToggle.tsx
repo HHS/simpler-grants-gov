@@ -1,31 +1,43 @@
 "use client";
 
 import clsx from "clsx";
+import { Breakpoints } from "src/types/uiTypes";
 
 import { useState } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-// this could implemented slightly differently to either be simpler and more generic
-// or we could opt to build the entire show / hide functionality into this component and pass the content controlled by the toggle as children
+/*
+ * @param {string} breakpoint - used to:
+ *  - add a class to toggled content to always display it at viewport sizes above the specified breakpoint
+ *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
+ */
 export default function ContentDisplayToggle({
   toggleOnText,
   toggleOffText,
-  visibleClassname,
+  breakpoint,
   children,
 }: {
   toggleOnText: string;
   toggleOffText: string;
-  visibleClassname: string;
+  breakpoint?: Breakpoints;
   children: React.ReactNode;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
     useState<boolean>(false);
 
   const iconName = toggledContentVisible ? "arrow_drop_up" : "arrow_drop_down";
+
   return (
     <>
-      <div className="display-flex flex-column flex-align-center tablet:display-none">
+      <div
+        className={clsx(
+          "display-flex",
+          "flex-column",
+          "flex-align-center",
+          breakpoint && `${breakpoint}:display-none`,
+        )}
+      >
         <div data-testid="content-display-toggle" className="grid-col-4">
           <button
             onClick={(_event) =>
@@ -42,10 +54,10 @@ export default function ContentDisplayToggle({
         </div>
       </div>
       <div
-        className={clsx({
-          "display-none": !toggledContentVisible,
-          [visibleClassname]: true,
-        })}
+        className={clsx(
+          breakpoint && `${breakpoint}:display-block`,
+          !toggledContentVisible && "display-none",
+        )}
       >
         {children}
       </div>

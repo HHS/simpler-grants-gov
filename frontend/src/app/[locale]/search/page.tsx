@@ -3,6 +3,7 @@ import Loading from "src/app/[locale]/search/loading";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
@@ -81,7 +82,7 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
               <ContentDisplayToggle
                 toggleOffText={t("filterDisplayToggle.showFilters")}
                 toggleOnText={t("filterDisplayToggle.hideFilters")}
-                visibleClassname="tablet:display-block"
+                breakpoint={Breakpoints.TABLET}
               >
                 <SearchFilters
                   opportunityStatus={status}
