@@ -1,6 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
-import { QueryParamKey } from "src/types/search/searchResponseTypes";
 import { useTranslationsMock } from "tests/utils/intlMocks";
 
 import SearchFilters from "src/components/search/SearchFilters";

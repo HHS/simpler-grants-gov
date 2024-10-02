@@ -53,6 +53,7 @@ export default function ContentDisplayToggle({
         </button>
       </div>
       <div
+        data-testid="toggled-content-container"
         className={clsx(
           breakpoint && `${breakpoint}:display-block`,
           !toggledContentVisible && "display-none",
