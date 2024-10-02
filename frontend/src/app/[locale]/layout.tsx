@@ -8,13 +8,19 @@ import { environment, PUBLIC_ENV } from "src/constants/environments";
 import "src/styles/styles.scss";
 
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, unstable_setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import Layout from "src/components/Layout";
 
-export const metadata: Metadata = {
-  icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
-};
+export async function generateMetadata() {
+  const t = await getTranslations({ locale: "en" });
+  const meta: Metadata = {
+    title: t("ErrorPages.page_not_found.title"),
+    description: t("Index.meta_description"),
+    icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
+  };
+  return meta;
+}
 
 interface Props {
   children: React.ReactNode;
@@ -40,7 +46,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale}>
       <head>
         <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       </head>
