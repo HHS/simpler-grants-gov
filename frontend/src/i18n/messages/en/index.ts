@@ -178,7 +178,7 @@ export const messages = {
       title_2:
         "Are there challenges you’ve experienced that aren’t captured here?",
       paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><newsletter>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></newsletter></strong> to be notified of upcoming user research efforts.",
+        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></subscribe></strong> to be notified of upcoming user research efforts.",
       boxes: [
         {
           title: "Digital connectivity",
@@ -322,15 +322,15 @@ export const messages = {
         "If you’re interested in contributing to the open-source project or exploring the details of exactly what we’re building, check out the project at <strong><github>https://github.com/HHS/simpler-grants-gov</github></strong> or join our community at <strong><wiki>wiki.simpler.hhs.gov</wiki></strong>.",
     },
   },
-  Newsletter: {
-    page_title: "Newsletter | Simpler.Grants.gov",
-    title: "Newsletter signup",
+  Subscribe: {
+    page_title: "Subscribe | Simpler.Grants.gov",
+    title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     paragraph_1:
-      "If you sign up for the Simpler.Grants.gov newsletter, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
+      "If you sign up for the Simpler.Grants.gov product updates, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
-      "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
     errors: {
       missing_name: "Enter your first name.",
       missing_email: "Enter your email address.",
@@ -342,8 +342,8 @@ export const messages = {
         "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
     },
   },
-  Newsletter_confirmation: {
-    page_title: "Newsletter Confirmation | Simpler.Grants.gov",
+  Subscription_confirmation: {
+    page_title: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You’re subscribed",
     intro:
       "You are signed up to receive project updates from Simpler.Grants.gov.",
@@ -353,10 +353,10 @@ export const messages = {
     paragraph_2:
       "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
-      "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. ",
+      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
-  Newsletter_unsubscribe: {
-    page_title: "Newsletter Unsubscribe | Simpler.Grants.gov",
+  Unsubscription_confirmation: {
+    page_title: "Unsubscribe | Simpler.Grants.gov",
     title: "You have unsubscribed",
     intro:
       "You will no longer receive project updates from Simpler.Grants.gov. ",
@@ -366,7 +366,7 @@ export const messages = {
     paragraph_2:
       "You can read all about our <strong><process-link>transparent process</process-link></strong> and what we’re doing now, or explore <strong><research-link>our existing user research</research-link></strong> and the findings that are guiding our work.",
     disclaimer:
-      "The Simpler.Grants.gov newsletter is powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov. ",
+      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
     page_title: "Page Not Found | Simpler.Grants.gov",
@@ -381,7 +381,7 @@ export const messages = {
     nav_link_home: "Home",
     nav_link_process: "Process",
     nav_link_research: "Research",
-    nav_link_newsletter: "Newsletter",
+    nav_link_subscribe: "Subscribe",
     nav_menu_toggle: "Menu",
     nav_link_search: "Search",
     title: "Simpler.Grants.gov",
