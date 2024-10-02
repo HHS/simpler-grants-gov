@@ -26,7 +26,7 @@ describe("getNextRoutes", () => {
     const result = getNextRoutes("src/app");
 
     expect(result).toEqual([
-      '[...notFound]',
+      "[...notFound]",
       "/dev/feature-flags",
       "/health",
       "/newsletter/confirmation",
