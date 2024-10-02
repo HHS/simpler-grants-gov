@@ -38,7 +38,7 @@ const Header = ({ logoPath, locale }: Props) => {
       { i18nKey: t("nav_link_home"), href: "/" },
       { i18nKey: t("nav_link_process"), href: "/process" },
       { i18nKey: t("nav_link_research"), href: "/research" },
-      { i18nKey: t("nav_link_newsletter"), href: "/newsletter" },
+      { i18nKey: t("nav_link_subscribe"), href: "/newsletter" },
     ];
     const searchNavLink = {
       i18nKey: t("nav_link_search"),

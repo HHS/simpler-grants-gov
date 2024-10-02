@@ -178,7 +178,7 @@ export const messages = {
       title_2:
         "Are there challenges you’ve experienced that aren’t captured here?",
       paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><newsletter>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></newsletter></strong> to be notified of upcoming user research efforts.",
+        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></subscribe></strong> to be notified of upcoming user research efforts.",
       boxes: [
         {
           title: "Digital connectivity",
@@ -322,7 +322,7 @@ export const messages = {
         "If you’re interested in contributing to the open-source project or exploring the details of exactly what we’re building, check out the project at <strong><github>https://github.com/HHS/simpler-grants-gov</github></strong> or join our community at <strong><wiki>wiki.simpler.hhs.gov</wiki></strong>.",
     },
   },
-  Newsletter: {
+  Subscribe: {
     page_title: "Subscribe | Simpler.Grants.gov",
     title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
@@ -342,7 +342,7 @@ export const messages = {
         "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
     },
   },
-  Newsletter_confirmation: {
+  Subscription_confirmation: {
     page_title: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You’re subscribed",
     intro:
@@ -355,7 +355,7 @@ export const messages = {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
-  Newsletter_unsubscribe: {
+  Unsubscription_confirmation: {
     page_title: "Unsubscribe | Simpler.Grants.gov",
     title: "You have unsubscribed",
     intro:

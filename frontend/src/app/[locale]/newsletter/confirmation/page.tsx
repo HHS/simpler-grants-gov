@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { NEWSLETTER_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
+import { SUBSCRIBE_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
@@ -13,22 +13,22 @@ import PageSEO from "src/components/PageSEO";
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
   const meta: Metadata = {
-    title: t("Newsletter.page_title"),
+    title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
   };
 
   return meta;
 }
 
-export default function NewsletterConfirmation() {
+export default function SubscriptionConfirmation() {
   unstable_setRequestLocale("en");
-  const t = useTranslations("Newsletter_confirmation");
+  const t = useTranslations("Subscription_confirmation");
 
   return (
     <>
       <PageSEO title={t("page_title")} description={t("intro")} />
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={NEWSLETTER_CONFIRMATION_CRUMBS} />
+      <Breadcrumbs breadcrumbList={SUBSCRIBE_CONFIRMATION_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">

@@ -1,7 +1,7 @@
 import pick from "lodash/pick";
 import { Metadata } from "next";
-import NewsletterForm from "src/app/[locale]/newsletter/NewsletterForm";
-import { NEWSLETTER_CRUMBS } from "src/constants/breadcrumbs";
+import SubscriptionForm from "src/app/[locale]/newsletter/NewsletterForm";
+import { SUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 
 import {
   NextIntlClientProvider,
@@ -18,23 +18,23 @@ import PageSEO from "src/components/PageSEO";
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
   const meta: Metadata = {
-    title: t("Newsletter.page_title"),
+    title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
   };
 
   return meta;
 }
 
-export default function Newsletter() {
+export default function Subscribe() {
   unstable_setRequestLocale("en");
-  const t = useTranslations("Newsletter");
+  const t = useTranslations("Subscribe");
   const messages = useMessages();
 
   return (
     <>
       <PageSEO title={t("page_title")} description={t("intro")} />
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={NEWSLETTER_CRUMBS} />
+      <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
@@ -58,9 +58,9 @@ export default function Newsletter() {
           <Grid tabletLg={{ col: 6 }}>
             <NextIntlClientProvider
               locale="en"
-              messages={pick(messages, "Newsletter")}
+              messages={pick(messages, "Subscribe")}
             >
-              <NewsletterForm />
+              <SubscriptionForm />
             </NextIntlClientProvider>
           </Grid>
         </Grid>
