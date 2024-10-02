@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
  */
 import { Metadata } from "next";
 import { environment, PUBLIC_ENV } from "src/constants/environments";
+
 import "src/styles/styles.scss";
 
 import { NextIntlClientProvider } from "next-intl";
