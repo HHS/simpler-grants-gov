@@ -2,6 +2,10 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+data "aws_ssm_parameter" "aws_canonical_user_id" {
+  name = "/canonical-user-id"
+}
+
 resource "aws_cloudwatch_log_group" "opensearch" {
   name_prefix = "opensearch-${var.environment_name}"
 
@@ -33,6 +37,10 @@ resource "aws_security_group" "opensearch" {
 
 data "aws_iam_policy_document" "opensearch_access" {
   statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::315341936575:root"]
+    }
     effect    = "Allow"
     actions   = ["es:*"]
     resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.environment_name}/*"]
@@ -55,26 +63,36 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
   }
 }
 
-data "aws_secretsmanager_random_password" "opensearch_username" {
-  password_length = 16
+resource "random_password" "opensearch_username" {
+  length           = 16
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+  special          = true
+  override_special = "-"
+}
+
+resource "random_password" "opensearch_password" {
+  length           = 16
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+  special          = true
+  override_special = "-"
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
   name        = "/opensearch/${var.environment_name}/username"
   description = "The username for the OpenSearch domain"
   type        = "SecureString"
-  value       = data.aws_secretsmanager_random_password.opensearch_username.random_password
-}
-
-data "aws_secretsmanager_random_password" "opensearch_password" {
-  password_length = 16
+  value       = random_password.opensearch_username.result
 }
 
 resource "aws_ssm_parameter" "opensearch_password" {
   name        = "/opensearch/${var.environment_name}/password"
   description = "The password for the OpenSearch domain"
   type        = "SecureString"
-  value       = data.aws_secretsmanager_random_password.opensearch_password.random_password
+  value       = random_password.opensearch_password.result
 }
 
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
@@ -106,11 +124,11 @@ resource "aws_opensearch_domain" "opensearch" {
 
   advanced_security_options {
     enabled                        = true
-    anonymous_auth_enabled         = true
+    anonymous_auth_enabled         = false
     internal_user_database_enabled = true
     master_user_options {
-      master_user_name     = data.aws_secretsmanager_random_password.opensearch_username.random_password
-      master_user_password = data.aws_secretsmanager_random_password.opensearch_password.random_password
+      master_user_name     = random_password.opensearch_username.result
+      master_user_password = random_password.opensearch_password.result
     }
   }
 
