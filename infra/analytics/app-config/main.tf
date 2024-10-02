@@ -1,7 +1,6 @@
 locals {
-  app_name              = "analytics"
-  project_name          = module.project_config.project_name
-  image_repository_name = "${local.project_name}-${local.app_name}"
+  app_name     = "analytics"
+  project_name = module.project_config.project_name
 
   environment_configs = {
     dev     = module.dev_config
@@ -9,9 +8,6 @@ locals {
     prod    = module.prod_config
   }
 
-  build_repository_config = {
-    region = module.project_config.default_region
-  }
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".
@@ -47,6 +43,13 @@ locals {
     staging = "simpler-grants-gov"
     prod    = "simpler-grants-gov"
   }
+
+  # The name of the network that contains the resources shared across all
+  # application environments, such as the build repository.
+  # The list of networks can be found in /infra/networks
+  # by looking for the backend config files of the form:
+  #   <NETWORK_NAME>.s3.tfbackend
+  shared_network_name = "prod"
 }
 
 module "project_config" {

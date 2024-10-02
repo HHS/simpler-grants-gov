@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { environment } from "src/constants/environments";
 import { SendySubscribeForm } from "src/types/sendy";
 
 export type Data = {
@@ -28,9 +29,9 @@ export default async function handler(
   }
 
   try {
-    const sendyApiUrl = process.env.SENDY_API_URL || "";
-    const sendyApiKey = process.env.SENDY_API_KEY || "";
-    const list = process.env.SENDY_LIST_ID || "";
+    const sendyApiUrl = environment.SENDY_API_URL;
+    const sendyApiKey = environment.SENDY_API_KEY;
+    const list = environment.SENDY_LIST_ID;
     const requestData = {
       list,
       subform: "yes",

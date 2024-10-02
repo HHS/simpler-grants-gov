@@ -1,25 +1,26 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { render, screen } from "tests/react-utils";
 
 import React from "react";
-import SearchSortBy from "../../../src/components/search/SearchSortBy";
-import { axe } from "jest-axe";
+
+import SearchSortBy from "src/components/search/SearchSortBy";
 
 // Mock the useSearchParamUpdater hook
-jest.mock("../../../src/hooks/useSearchParamUpdater", () => ({
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: jest.fn(),
   }),
 }));
 
 describe("SearchSortBy", () => {
-  const initialQueryParams = "opportunityNumberAsc";
-  const mockFormRef = React.createRef<HTMLFormElement>();
-
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <SearchSortBy
-        formRef={mockFormRef}
-        initialQueryParams={initialQueryParams}
+        totalResults={"10"}
+        queryTerm="test"
+        sortby="closeDateDesc"
       />,
     );
 
@@ -28,38 +29,24 @@ describe("SearchSortBy", () => {
   });
 
   it("renders correctly with initial query params", () => {
-    render(
-      <SearchSortBy
-        formRef={mockFormRef}
-        initialQueryParams={initialQueryParams}
-      />,
-    );
+    render(<SearchSortBy totalResults={"10"} queryTerm="test" sortby="" />);
 
     expect(
-      screen.getByDisplayValue("Opportunity Number (Ascending)"),
+      screen.getByDisplayValue("Posted Date (newest)"),
     ).toBeInTheDocument();
   });
 
   it("updates sort option and submits the form on change", () => {
-    const formElement = document.createElement("form");
-    const requestSubmitMock = jest.fn();
-    formElement.requestSubmit = requestSubmitMock;
-
     render(
-      <SearchSortBy
-        formRef={{ current: formElement }}
-        initialQueryParams={initialQueryParams}
-      />,
+      <QueryProvider>
+        <SearchSortBy totalResults={"10"} queryTerm="test" sortby="" />
+      </QueryProvider>,
     );
 
     fireEvent.change(screen.getByRole("combobox"), {
       target: { value: "opportunityTitleDesc" },
     });
 
-    expect(
-      screen.getByDisplayValue("Opportunity Title (Descending)"),
-    ).toBeInTheDocument();
-
-    expect(requestSubmitMock).toHaveBeenCalled();
+    expect(screen.getByText("Opportunity Title (Z to A)")).toBeInTheDocument();
   });
 });

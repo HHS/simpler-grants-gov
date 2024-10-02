@@ -1,5 +1,7 @@
 import "server-only";
 
+import { environment } from "src/constants/environments";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -7,14 +9,13 @@ import {
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
-} from "../../types/search/searchRequestTypes";
+} from "src/types/search/searchRequestTypes";
 
 import BaseApi from "./BaseApi";
-import { SearchFetcherProps } from "../../services/search/searchfetcher/SearchFetcher";
 
 export default class SearchOpportunityAPI extends BaseApi {
   get basePath(): string {
-    return process.env.API_URL || "";
+    return environment.API_URL;
   }
 
   get namespace(): string {
@@ -27,7 +28,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return { ...baseHeaders, ...searchHeaders };
   }
 
-  async searchOpportunities(searchInputs: SearchFetcherProps) {
+  async searchOpportunities(searchInputs: QueryParamData) {
     const { query } = searchInputs;
     const filters = this.buildFilters(searchInputs);
     const pagination = this.buildPagination(searchInputs);
@@ -57,9 +58,7 @@ export default class SearchOpportunityAPI extends BaseApi {
   }
 
   // Build with one_of syntax
-  private buildFilters(
-    searchInputs: SearchFetcherProps,
-  ): SearchFilterRequestBody {
+  private buildFilters(searchInputs: QueryParamData): SearchFilterRequestBody {
     const { status, fundingInstrument, eligibility, agency, category } =
       searchInputs;
     const filters: SearchFilterRequestBody = {};
@@ -88,9 +87,7 @@ export default class SearchOpportunityAPI extends BaseApi {
     return filters;
   }
 
-  private buildPagination(
-    searchInputs: SearchFetcherProps,
-  ): PaginationRequestBody {
+  private buildPagination(searchInputs: QueryParamData): PaginationRequestBody {
     const { sortby, page, fieldChanged } = searchInputs;
 
     // When performing an update (query, filter, sortby change) - we want to
@@ -113,7 +110,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       closeDate: "close_date",
     };
 
-    let order_by: PaginationOrderBy = "opportunity_id";
+    let order_by: PaginationOrderBy = "post_date";
     if (sortby) {
       for (const [key, value] of Object.entries(orderByFieldLookup)) {
         if (sortby.startsWith(key)) {
@@ -123,9 +120,11 @@ export default class SearchOpportunityAPI extends BaseApi {
       }
     }
 
-    const sort_direction: PaginationSortDirection = sortby?.endsWith("Desc")
-      ? "descending"
-      : "ascending";
+    // default to descending
+    let sort_direction: PaginationSortDirection = "descending";
+    if (sortby) {
+      sort_direction = sortby?.endsWith("Desc") ? "descending" : "ascending";
+    }
 
     return {
       order_by,

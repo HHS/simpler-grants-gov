@@ -1,4 +1,5 @@
 """Dummy test to make sure the package is installed correctly."""
+
 import analytics
 
 

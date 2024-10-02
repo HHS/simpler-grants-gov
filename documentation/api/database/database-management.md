@@ -30,7 +30,7 @@ This command is not needed when starting the application with `make start`
 To clean the database, use the following command:
 
 ```sh
-make db-recreate
+make volume-recreate
 ```
 
 This will remove _all_ docker project volumes, rebuild the database volume, and

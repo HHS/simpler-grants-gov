@@ -15,24 +15,16 @@ on:
 concurrency: database-migrations-${{ inputs.environment }}
 
 jobs:
-  build-and-publish:
-    name: Build
-    uses: ./.github/workflows/build-and-publish.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      ref: ${{ github.ref }}
-      environment: ${{ inputs.environment }}
   run-migrations:
     name: Run migrations
     runs-on: ubuntu-latest
-    needs: [build-and-publish]
 
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials

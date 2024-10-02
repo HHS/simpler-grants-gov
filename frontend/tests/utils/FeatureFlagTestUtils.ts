@@ -12,7 +12,7 @@
 import {
   FeatureFlags,
   FeatureFlagsManager,
-} from "../../src/services/FeatureFlagManager";
+} from "src/services/FeatureFlagManager";
 
 /**
  * Mock feature flags cookie in `window.document` so that we don't need to mock

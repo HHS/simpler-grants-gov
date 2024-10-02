@@ -2,7 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    "group:monorepos"
+    "group:monorepos",
+    "config:recommended",
+    ":dependencyDashboard"
   ],
   "schedule": [
     "on the 2nd and 4th day instance on sunday after 9pm"
@@ -116,6 +118,15 @@
         "peerDependencies"
       ],
       "enabled": false
+    },
+    {
+      "description": "Leave Postgres Docker version alone - we want it to match our AWS version",
+      "enabled": false,
+      "matchFileNames": [
+        "analytics/docker-compose.yml",
+        "api/docker-compose.yml"
+      ],
+      "matchPackagePatterns": ["postgres"]
     }
   ]
 }

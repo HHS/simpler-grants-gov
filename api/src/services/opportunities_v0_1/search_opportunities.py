@@ -197,7 +197,7 @@ def search_opportunities(
     a set of opportunity IDs for the outer query to filter against. This query
     ends up looking like (varying based on exact filters):
 
-        SELECT DISTINCT
+        SELECT
             opportunity.opportunity_id
         FROM opportunity
             JOIN current_opportunity_summary ON opportunity.opportunity_id = current_opportunity_summary.opportunity_id
@@ -220,9 +220,6 @@ def search_opportunities(
         )  # Only ever return non-drafts
         # Filter anything without a current opportunity summary
         .where(Opportunity.current_opportunity_summary != None)  # noqa: E711
-        # Distinct the opportunity IDs returned so that the outer query
-        # has fewer results to query against
-        .distinct()
     )
 
     # Current + Opportunity Summary are always needed so just add them here

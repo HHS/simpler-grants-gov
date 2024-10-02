@@ -2,15 +2,15 @@
  * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import Cookies from "js-cookie";
+import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+import { mockProcessEnv } from "tests/utils/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
-} from "../utils/FeatureFlagTestUtils";
+} from "tests/utils/FeatureFlagTestUtils";
 
-import Cookies from "js-cookie";
-import { FeatureFlagsManager } from "../../src/services/FeatureFlagManager";
-import { mockProcessEnv } from "../utils/commonTestUtils";
+import { NextRequest, NextResponse } from "next/server";
 
 describe("FeatureFlagsManager", () => {
   const COOKIE_VALUE = { feature1: true };
@@ -437,6 +437,28 @@ describe("FeatureFlagsManager", () => {
       expect(() =>
         featureFlagsManager.isFeatureEnabled("invalidFeature"),
       ).toThrow();
+    });
+
+    test("`searchParams` override takes precedence over default and cookie-based feature flags", () => {
+      // Set a different state in cookies to test precedence
+      const modifiedCookieValue = { feature1: true };
+      mockFeatureFlagsCookie(modifiedCookieValue);
+      const serverFeatureFlagsManager = new FeatureFlagsManager(
+        MockServerCookiesModule,
+      );
+
+      // Now provide searchParams with a conflicting setup
+      const searchParams = {
+        _ff: "feature1:false",
+      };
+
+      expect(
+        serverFeatureFlagsManager.isFeatureEnabled("feature1", searchParams),
+      ).toBe(false);
+
+      expect(
+        serverFeatureFlagsManager.isFeatureDisabled("feature1", searchParams),
+      ).toBe(true);
     });
   });
 });

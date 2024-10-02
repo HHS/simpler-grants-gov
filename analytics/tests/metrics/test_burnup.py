@@ -1,4 +1,5 @@
 """Test the analytics.metrics.burnup module."""
+
 from pathlib import Path
 
 import pandas as pd

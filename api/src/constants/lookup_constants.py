@@ -1,23 +1,11 @@
 from enum import StrEnum
 
-from src.db.models.lookup import LookupConfig, LookupStr
-
 
 class OpportunityStatus(StrEnum):
     FORECASTED = "forecasted"
     POSTED = "posted"
     CLOSED = "closed"
     ARCHIVED = "archived"
-
-
-OPPORTUNITY_STATUS_CONFIG = LookupConfig(
-    [
-        LookupStr(OpportunityStatus.FORECASTED, 1),
-        LookupStr(OpportunityStatus.POSTED, 2),
-        LookupStr(OpportunityStatus.CLOSED, 3),
-        LookupStr(OpportunityStatus.ARCHIVED, 4),
-    ]
-)
 
 
 class OpportunityCategoryLegacy(StrEnum):
@@ -37,17 +25,6 @@ class OpportunityCategory(StrEnum):
     CONTINUATION = "continuation"
     EARMARK = "earmark"
     OTHER = "other"
-
-
-OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
-    [
-        LookupStr(OpportunityCategory.DISCRETIONARY, 1),
-        LookupStr(OpportunityCategory.MANDATORY, 2),
-        LookupStr(OpportunityCategory.CONTINUATION, 3),
-        LookupStr(OpportunityCategory.EARMARK, 4),
-        LookupStr(OpportunityCategory.OTHER, 5),
-    ]
-)
 
 
 class ApplicantType(StrEnum):
@@ -86,29 +63,6 @@ class ApplicantType(StrEnum):
     UNRESTRICTED = "unrestricted"  # 99
 
 
-APPLICANT_TYPE_CONFIG = LookupConfig(
-    [
-        LookupStr(ApplicantType.STATE_GOVERNMENTS, 1),
-        LookupStr(ApplicantType.COUNTY_GOVERNMENTS, 2),
-        LookupStr(ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS, 3),
-        LookupStr(ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS, 4),
-        LookupStr(ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS, 5),
-        LookupStr(ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION, 6),
-        LookupStr(ApplicantType.PRIVATE_INSTITUTIONS_OF_HIGHER_EDUCATION, 7),
-        LookupStr(ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS, 8),
-        LookupStr(ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS, 9),
-        LookupStr(ApplicantType.PUBLIC_AND_INDIAN_HOUSING_AUTHORITIES, 10),
-        LookupStr(ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3, 11),
-        LookupStr(ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3, 12),
-        LookupStr(ApplicantType.INDIVIDUALS, 13),
-        LookupStr(ApplicantType.FOR_PROFIT_ORGANIZATIONS_OTHER_THAN_SMALL_BUSINESSES, 14),
-        LookupStr(ApplicantType.SMALL_BUSINESSES, 15),
-        LookupStr(ApplicantType.OTHER, 16),
-        LookupStr(ApplicantType.UNRESTRICTED, 17),
-    ]
-)
-
-
 class FundingCategory(StrEnum):
     # https://grants.gov/system-to-system/grantor-system-to-system/schemas/grants-funding-synopsis#FundingActivityCategory
     # Comment is the legacy systems code
@@ -143,38 +97,6 @@ class FundingCategory(StrEnum):
     OTHER = "other"  # O
 
 
-FUNDING_CATEGORY_CONFIG = LookupConfig(
-    [
-        LookupStr(FundingCategory.RECOVERY_ACT, 1),
-        LookupStr(FundingCategory.AGRICULTURE, 2),
-        LookupStr(FundingCategory.ARTS, 3),
-        LookupStr(FundingCategory.BUSINESS_AND_COMMERCE, 4),
-        LookupStr(FundingCategory.COMMUNITY_DEVELOPMENT, 5),
-        LookupStr(FundingCategory.CONSUMER_PROTECTION, 6),
-        LookupStr(FundingCategory.DISASTER_PREVENTION_AND_RELIEF, 7),
-        LookupStr(FundingCategory.EDUCATION, 8),
-        LookupStr(FundingCategory.EMPLOYMENT_LABOR_AND_TRAINING, 9),
-        LookupStr(FundingCategory.ENERGY, 10),
-        LookupStr(FundingCategory.ENVIRONMENT, 11),
-        LookupStr(FundingCategory.FOOD_AND_NUTRITION, 12),
-        LookupStr(FundingCategory.HEALTH, 13),
-        LookupStr(FundingCategory.HOUSING, 14),
-        LookupStr(FundingCategory.HUMANITIES, 15),
-        LookupStr(FundingCategory.INFRASTRUCTURE_INVESTMENT_AND_JOBS_ACT, 16),
-        LookupStr(FundingCategory.INFORMATION_AND_STATISTICS, 17),
-        LookupStr(FundingCategory.INCOME_SECURITY_AND_SOCIAL_SERVICES, 18),
-        LookupStr(FundingCategory.LAW_JUSTICE_AND_LEGAL_SERVICES, 19),
-        LookupStr(FundingCategory.NATURAL_RESOURCES, 20),
-        LookupStr(FundingCategory.OPPORTUNITY_ZONE_BENEFITS, 21),
-        LookupStr(FundingCategory.REGIONAL_DEVELOPMENT, 22),
-        LookupStr(FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT, 23),
-        LookupStr(FundingCategory.TRANSPORTATION, 24),
-        LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
-        LookupStr(FundingCategory.OTHER, 26),
-    ]
-)
-
-
 class FundingInstrument(StrEnum):
     # https://grants.gov/system-to-system/grantor-system-to-system/schemas/grants-funding-synopsis#FundingInstrument
     # Comment is the legacy systems code
@@ -185,11 +107,12 @@ class FundingInstrument(StrEnum):
     OTHER = "other"  # O
 
 
-FUNDING_INSTRUMENT_CONFIG = LookupConfig(
-    [
-        LookupStr(FundingInstrument.COOPERATIVE_AGREEMENT, 1),
-        LookupStr(FundingInstrument.GRANT, 2),
-        LookupStr(FundingInstrument.PROCUREMENT_CONTRACT, 3),
-        LookupStr(FundingInstrument.OTHER, 4),
-    ]
-)
+class AgencyDownloadFileType(StrEnum):
+    XML = "xml"
+    PDF = "pdf"
+
+
+class AgencySubmissionNotificationSetting(StrEnum):
+    NEVER = "never"
+    FIRST_APPLICATION_ONLY = "first_application_only"
+    ALWAYS = "always"

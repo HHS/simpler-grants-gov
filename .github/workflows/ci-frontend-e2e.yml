@@ -1,0 +1,61 @@
+name: Frontend E2E Tests
+
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/ci-frontend-e2e.yml
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+env:
+  NODE_VERSION: 18
+  LOCKFILE_PATH: ./frontend/package-lock.json
+  PACKAGE_MANAGER: npm
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start API Server for e2e tests
+        run: |
+          cd ../api
+          make init db-seed-local start &
+          cd ../frontend
+          # Ensure the API wait script is executable
+          chmod +x ../api/bin/wait-for-api.sh
+          ../api/bin/wait-for-api.sh
+        shell: bash
+
+      - name: Run E2E Tests
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: ./frontend/playwright-report/
+          retention-days: 30

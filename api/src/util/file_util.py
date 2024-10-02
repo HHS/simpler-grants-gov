@@ -3,8 +3,6 @@ from pathlib import PosixPath
 from typing import Any, Optional, Tuple
 from urllib.parse import urlparse
 
-import boto3
-import botocore
 import smart_open
 from botocore.config import Config
 
@@ -38,19 +36,6 @@ def get_file_name(path: str) -> str:
 
 def join(*parts: str) -> str:
     return os.path.join(*parts)
-
-
-##################################
-# S3 Utilities
-##################################
-
-
-def get_s3_client(boto_session: Optional[boto3.Session] = None) -> botocore.client.BaseClient:
-    """Returns an S3 client, wrapping around boiler plate if you already have a session"""
-    if boto_session:
-        return boto_session.client("s3")
-
-    return boto3.client("s3")
 
 
 ##################################

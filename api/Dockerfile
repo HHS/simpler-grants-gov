@@ -4,7 +4,9 @@
 # The build stage that will be used to deploy to the various environments
 # needs to be called `release` in order to integrate with the repo's
 # top-level Makefile
-FROM python:3-slim AS base
+FROM python:3.12-slim AS base
+# See /documentation/api/package-depedency-management.md#Upgrading Python
+# for details on upgrading your Python version
 
 # Install poetry, the package manager.
 # https://python-poetry.org
@@ -15,10 +17,11 @@ RUN apt-get update \
     # https://pythonspeed.com/articles/security-updates-in-docker/
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
-    build-essential \
-    libpq-dev \
-    postgresql \
-    wget \
+        libc-bin libc6 \
+        build-essential \
+        libpq-dev \
+        postgresql \
+        wget \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -fr /var/lib/apt/lists/* \

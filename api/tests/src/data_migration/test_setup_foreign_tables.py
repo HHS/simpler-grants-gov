@@ -1,80 +1,100 @@
+import re
+
 import pytest
+import sqlalchemy
 
-from src.data_migration.setup_foreign_tables import OPPORTUNITY_COLUMNS, Column, build_sql
+import src.db.models.foreign
+from src.data_migration.setup_foreign_tables import build_sql
 
-EXPECTED_LOCAL_OPPORTUNITY_SQL = (
-    "CREATE TABLE IF NOT EXISTS {}.foreign_topportunity "
-    "(OPPORTUNITY_ID numeric(20) CONSTRAINT TOPPORTUNITY_pkey PRIMARY KEY NOT NULL,"
-    "OPPNUMBER character varying (40),"
-    "REVISION_NUMBER numeric(20),"
-    "OPPTITLE character varying (255),"
-    "OWNINGAGENCY character varying (255),"
-    "PUBLISHERUID character varying (255),"
-    "LISTED CHAR(1),"
-    "OPPCATEGORY CHAR(1),"
-    "INITIAL_OPPORTUNITY_ID numeric(20),"
-    "MODIFIED_COMMENTS character varying (2000),"
-    "CREATED_DATE DATE,"
-    "LAST_UPD_DATE DATE,"
-    "CREATOR_ID character varying (50),"
-    "LAST_UPD_ID character varying (50),"
-    "FLAG_2006 CHAR(1),"
-    "CATEGORY_EXPLANATION character varying (255),"
-    "PUBLISHER_PROFILE_ID numeric(20),"
-    "IS_DRAFT character varying (1))"
-)
-
-EXPECTED_NONLOCAL_OPPORTUNITY_SQL = (
-    "CREATE FOREIGN TABLE IF NOT EXISTS {}.foreign_topportunity "
-    "(OPPORTUNITY_ID numeric(20) OPTIONS (key 'true') NOT NULL,"
-    "OPPNUMBER character varying (40),"
-    "REVISION_NUMBER numeric(20),"
-    "OPPTITLE character varying (255),"
-    "OWNINGAGENCY character varying (255),"
-    "PUBLISHERUID character varying (255),"
-    "LISTED CHAR(1),"
-    "OPPCATEGORY CHAR(1),"
-    "INITIAL_OPPORTUNITY_ID numeric(20),"
-    "MODIFIED_COMMENTS character varying (2000),"
-    "CREATED_DATE DATE,"
-    "LAST_UPD_DATE DATE,"
-    "CREATOR_ID character varying (50),"
-    "LAST_UPD_ID character varying (50),"
-    "FLAG_2006 CHAR(1),"
-    "CATEGORY_EXPLANATION character varying (255),"
-    "PUBLISHER_PROFILE_ID numeric(20),"
-    "IS_DRAFT character varying (1))"
-    " SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TOPPORTUNITY')"
-)
-
-
-TEST_COLUMNS = [
-    Column("ID", "integer", is_nullable=False, is_primary_key=True),
-    Column("DESCRIPTION", "text"),
+EXPECTED_LOCAL_OPPORTUNITY_SQL = [
+    "CREATE TABLE IF NOT EXISTS __[SCHEMA_legacy].topportunity (",
+    "opportunity_id BIGSERIAL NOT NULL,",
+    "oppnumber TEXT,",
+    "revision_number BIGINT,",
+    "opptitle TEXT,",
+    "owningagency TEXT,",
+    "publisheruid TEXT,",
+    "listed TEXT,",
+    "oppcategory TEXT,",
+    "initial_opportunity_id BIGINT,",
+    "modified_comments TEXT,",
+    "created_date TIMESTAMP WITH TIME ZONE,",
+    "last_upd_date TIMESTAMP WITH TIME ZONE,",
+    "creator_id TEXT,",
+    "last_upd_id TEXT,",
+    "flag_2006 TEXT,",
+    "category_explanation TEXT,",
+    "publisher_profile_id BIGINT,",
+    "is_draft TEXT,",
+    "PRIMARY KEY (opportunity_id)",
+    ")",
 ]
-EXPECTED_LOCAL_TEST_SQL = (
-    "CREATE TABLE IF NOT EXISTS {}.foreign_test_table "
-    "(ID integer CONSTRAINT TEST_TABLE_pkey PRIMARY KEY NOT NULL,"
-    "DESCRIPTION text)"
+
+EXPECTED_NONLOCAL_OPPORTUNITY_SQL = [
+    "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_legacy].topportunity (",
+    "opportunity_id BIGINT OPTIONS (key 'true') NOT NULL,",
+    "oppnumber TEXT,",
+    "revision_number BIGINT,",
+    "opptitle TEXT,",
+    "owningagency TEXT,",
+    "publisheruid TEXT,",
+    "listed TEXT,",
+    "oppcategory TEXT,",
+    "initial_opportunity_id BIGINT,",
+    "modified_comments TEXT,",
+    "created_date TIMESTAMP WITH TIME ZONE,",
+    "last_upd_date TIMESTAMP WITH TIME ZONE,",
+    "creator_id TEXT,",
+    "last_upd_id TEXT,",
+    "flag_2006 TEXT,",
+    "category_explanation TEXT,",
+    "publisher_profile_id BIGINT,",
+    "is_draft TEXT",
+    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TOPPORTUNITY', readonly 'true', prefetch '1000')",
+]
+
+
+TEST_METADATA = sqlalchemy.MetaData()
+TEST_TABLE = sqlalchemy.Table(
+    "test_table",
+    TEST_METADATA,
+    sqlalchemy.Column("id", sqlalchemy.Integer, nullable=False, primary_key=True),
+    sqlalchemy.Column("description", sqlalchemy.Text),
+    schema="schema1",
 )
-EXPECTED_NONLOCAL_TEST_SQL = (
-    "CREATE FOREIGN TABLE IF NOT EXISTS {}.foreign_test_table "
-    "(ID integer OPTIONS (key 'true') NOT NULL,"
-    "DESCRIPTION text)"
-    " SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE')"
-)
+EXPECTED_LOCAL_TEST_SQL = [
+    "CREATE TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table (",
+    "id SERIAL NOT NULL,",
+    "description TEXT,",
+    "PRIMARY KEY (id)",
+    ")",
+]
+EXPECTED_NONLOCAL_TEST_SQL = [
+    "CREATE FOREIGN TABLE IF NOT EXISTS __[SCHEMA_schema1].test_table (",
+    "id INTEGER OPTIONS (key 'true') NOT NULL,",
+    "description TEXT",
+    ") SERVER grants OPTIONS (schema 'EGRANTSADMIN', table 'TEST_TABLE', readonly 'true', prefetch '1000')",
+]
 
 
 @pytest.mark.parametrize(
-    "table_name,columns,is_local,expected_sql",
+    "table,is_local,expected_sql",
     [
-        ("TEST_TABLE", TEST_COLUMNS, True, EXPECTED_LOCAL_TEST_SQL),
-        ("TEST_TABLE", TEST_COLUMNS, False, EXPECTED_NONLOCAL_TEST_SQL),
-        ("TOPPORTUNITY", OPPORTUNITY_COLUMNS, True, EXPECTED_LOCAL_OPPORTUNITY_SQL),
-        ("TOPPORTUNITY", OPPORTUNITY_COLUMNS, False, EXPECTED_NONLOCAL_OPPORTUNITY_SQL),
+        (TEST_TABLE, True, EXPECTED_LOCAL_TEST_SQL),
+        (TEST_TABLE, False, EXPECTED_NONLOCAL_TEST_SQL),
+        (
+            src.db.models.foreign.metadata.tables["legacy.topportunity"],
+            True,
+            EXPECTED_LOCAL_OPPORTUNITY_SQL,
+        ),
+        (
+            src.db.models.foreign.metadata.tables["legacy.topportunity"],
+            False,
+            EXPECTED_NONLOCAL_OPPORTUNITY_SQL,
+        ),
     ],
 )
-def test_build_sql(table_name, columns, is_local, expected_sql, test_api_schema):
-    sql = build_sql(table_name, columns, is_local, test_api_schema)
+def test_build_sql(table, is_local, expected_sql, test_foreign_schema):
+    sql = build_sql(table, is_local, test_foreign_schema)
 
-    assert sql == expected_sql.format(test_api_schema)
+    assert re.split(r"\s*\n\s*", sql) == expected_sql

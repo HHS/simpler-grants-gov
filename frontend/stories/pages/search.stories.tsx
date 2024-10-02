@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import Search from "../../src/app/search/page";
+import Search from "src/app/[locale]/search/page";
 
 const meta: Meta<typeof Search> = {
   title: "Pages/Search",

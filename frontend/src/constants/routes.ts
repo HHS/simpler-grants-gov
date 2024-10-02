@@ -16,7 +16,7 @@ export const ExternalRoutes = {
   GRANTS_NEWSLETTER:
     "https://www.grants.gov/web/grants/connect/newsletter-archive.html",
   GRANTS_RSS: "https://grants.gov/connect/rss-feeds",
-  GRANTS_TWITTER: "https://twitter.com/grantsdotgov",
+  GRANTS_X_TWITTER: "https://x.com/grantsdotgov",
   GRANTS_YOUTUBE: "https://www.youtube.com/user/GrantsGovUS",
   GRANTS_BLOG: "https://grantsgovprod.wordpress.com/",
   HHS: "https://www.hhs.gov",

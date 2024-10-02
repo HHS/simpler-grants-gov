@@ -1,20 +1,25 @@
 "use client";
 
+import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
+import { useTranslations } from "next-intl";
+import { useContext } from "react";
 import { Icon } from "@trussworks/react-uswds";
-import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
-import { useState } from "react";
 
 interface SearchBarProps {
-  initialQueryParams: string;
+  query: string | null | undefined;
 }
 
-export default function SearchBar({ initialQueryParams }: SearchBarProps) {
-  const [inputValue, setInputValue] = useState<string>(initialQueryParams);
+export default function SearchBar({ query }: SearchBarProps) {
+  const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
 
   const handleSubmit = () => {
-    updateQueryParams(inputValue, "query");
+    updateQueryParams("", "query", queryTerm, false);
   };
+
+  const t = useTranslations("Search");
 
   return (
     <div className="margin-top-5 margin-bottom-2">
@@ -22,10 +27,12 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
         htmlFor="query"
         className="font-sans-lg display-block margin-bottom-2"
       >
-        <span className="text-bold">Search terms </span>
-        <small className="display-inline-block">
-          Enter keywords, opportunity numbers, or assistance listing numbers
-        </small>
+        {t.rich("bar.label", {
+          strong: (chunks) => <span className="text-bold">{chunks}</span>,
+          small: (chunks) => (
+            <small className="display-inline-block">{chunks}</small>
+          ),
+        })}
       </label>
       <div className="usa-search usa-search--big" role="search">
         <input
@@ -33,12 +40,14 @@ export default function SearchBar({ initialQueryParams }: SearchBarProps) {
           id="query"
           type="search"
           name="query"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          defaultValue={query || ""}
+          onChange={(e) => updateQueryTerm(e.target?.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+          }}
         />
-
         <button className="usa-button" type="submit" onClick={handleSubmit}>
-          <span className="usa-search__submit-text">Search </span>
+          <span className="usa-search__submit-text">{t("bar.button")} </span>
           <Icon.Search
             className="usa-search__submit-icon"
             size={4}

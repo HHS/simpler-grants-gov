@@ -4,8 +4,10 @@
  * modifying the request or response headers, or responding directly.
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
+import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
+import { defaultLocale, locales } from "./i18n/config";
 import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 
 export const config = {
@@ -17,7 +19,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - images (static files in public/images/ directory)
      */
-    "/((?!api|_next/static|_next/image|images|site.webmanifest).*)",
+    "/((?!api|_next/static|_next/image|sitemap|public|img|uswds|images|robots.txt|site.webmanifest).*)",
     /**
      * Fix issue where the pattern above was causing middleware
      * to not run on the homepage:
@@ -26,8 +28,19 @@ export const config = {
   ],
 };
 
-export function middleware(request: NextRequest): NextResponse {
-  let response = NextResponse.next();
+/**
+ * Detect the user's preferred language and redirect to a localized route
+ * if the preferred language isn't the current locale.
+ */
+const i18nMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  // Don't prefix the URL with the locale when the locale is the default locale (i.e. "en-US")
+  localePrefix: "as-needed",
+});
+
+export default function middleware(request: NextRequest): NextResponse {
+  let response = i18nMiddleware(request);
 
   const featureFlagsManager = new FeatureFlagsManager(request.cookies);
   response = featureFlagsManager.middleware(request, response);

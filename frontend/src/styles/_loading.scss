@@ -1,0 +1,61 @@
+@use "uswds-core" as *;
+$spinner-size: units(4);
+
+.grants-spinner {
+  box-sizing: border-box;
+  display: inline-block;
+  position: relative;
+  height: $spinner-size;
+  width: $spinner-size;
+
+  // Spinner icon pieces (full and partial circles)
+  &::before,
+  &::after {
+    border-radius: 50%;
+    border-style: solid;
+    border-width: calc(100% / 8);
+    box-sizing: border-box;
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  // Full circle
+  &::before {
+    border-color: currentColor;
+    opacity: 0.2;
+  }
+
+  // Partial circle
+  &::after {
+    animation: spin 0.8s infinite linear;
+    border-bottom-color: transparent;
+    border-left-color: currentColor;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    transform: translateZ(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.grants-pagination.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  & > *,
+  & * {
+    user-select: none;
+    pointer-events: none;
+  }
+}

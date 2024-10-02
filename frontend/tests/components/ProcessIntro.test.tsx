@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import ProcessIntro from "src/pages/content/ProcessIntro";
+import ProcessIntro from "src/app/[locale]/process/ProcessIntro";
+import { render, screen } from "tests/react-utils";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {

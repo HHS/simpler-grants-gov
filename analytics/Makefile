@@ -33,8 +33,8 @@ ifeq "$(PY_RUN_APPROACH)" "local"
 POETRY := poetry run
 GITHUB := gh
 else
-POETRY := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
-GITHUB := docker-compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
+POETRY := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+GITHUB := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
 endif
 
 # Docker user configuration
@@ -76,7 +76,7 @@ login:
 	$(GITHUB) auth login
 
 build:
-	docker-compose build
+	docker compose build
 
 release-build:
 	docker buildx build \
@@ -145,6 +145,13 @@ sprint-data-export:
 	--owner $(ORG) \
 	--project $(SPRINT_PROJECT) \
 	--output-file $(SPRINT_FILE)
+
+gh-db-data-import:
+	@echo "=> Importing sprint data to the database"
+	@echo "====================================================="
+	$(POETRY) analytics import db_import \
+	--sprint-file $(SPRINT_FILE) \
+	--issue-file $(ISSUE_FILE)
 
 roadmap-data-export:
 	@echo "=> Exporting project data from the product roadmap"

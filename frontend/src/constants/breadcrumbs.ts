@@ -3,28 +3,32 @@ import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
 const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
-const NEWSLETTER: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
-const SEARCH: Breadcrumb = { title: "Search", path: "/search/" };
-export const NEWSLETTER_CONFIRMATION: Breadcrumb = {
-  title: "Confirmation",
-  path: "/newsletter/confirmation/",
+const SUBSCRIBE: Breadcrumb = { title: "Subscribe", path: "/subscribe/" };
+const SEARCH: Breadcrumb = {
+  title: "Search",
+  path: "/search?status=forecasted,posted",
 };
-const NEWSLETTER_UNSUBSCRIBE: Breadcrumb = {
+export const SUBSCRIBE_CONFIRMATION: Breadcrumb = {
+  title: "Confirmation",
+  path: "/subscribe/confirmation/",
+};
+const UNSUBSCRIBE: Breadcrumb = {
   title: "Unsubscribe",
-  path: "/newsletter/unsubscribe/",
+  path: "/subscribe/unsubscribe/",
 };
 
 export const RESEARCH_CRUMBS: BreadcrumbList = [HOME, RESEARCH];
 export const PROCESS_CRUMBS: BreadcrumbList = [HOME, PROCESS];
-export const NEWSLETTER_CRUMBS: BreadcrumbList = [HOME, NEWSLETTER];
-export const NEWSLETTER_CONFIRMATION_CRUMBS: BreadcrumbList = [
+export const SUBSCRIBE_CRUMBS: BreadcrumbList = [HOME, SUBSCRIBE];
+export const SUBSCRIBE_CONFIRMATION_CRUMBS: BreadcrumbList = [
   HOME,
-  NEWSLETTER,
-  NEWSLETTER_CONFIRMATION,
+  SUBSCRIBE,
+  SUBSCRIBE_CONFIRMATION,
 ];
-export const NEWSLETTER_UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
+export const UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
   HOME,
-  NEWSLETTER,
-  NEWSLETTER_UNSUBSCRIBE,
+  SUBSCRIBE,
+  UNSUBSCRIBE,
 ];
 export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
+export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];

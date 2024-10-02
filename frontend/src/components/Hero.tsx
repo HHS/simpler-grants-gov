@@ -1,13 +1,13 @@
 import { ExternalRoutes } from "src/constants/routes";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { GridContainer, Icon } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
+
+import { USWDSIcon } from "./USWDSIcon";
 
 const Hero = () => {
-  const { t } = useTranslation("common", {
-    keyPrefix: "Hero",
-  });
+  const t = useTranslations("Hero");
 
   return (
     <div data-testid="hero" className="usa-dark-background bg-primary">
@@ -23,9 +23,9 @@ const Hero = () => {
           href={ExternalRoutes.GITHUB_REPO}
           target="_blank"
         >
-          <Icon.Github
+          <USWDSIcon
+            name="github"
             className="usa-icon usa-icon--size-3 margin-right-1 text-middle tablet:margin-top-neg-2px"
-            size={3}
             aria-label="Github"
           />
           {t("github_link")}

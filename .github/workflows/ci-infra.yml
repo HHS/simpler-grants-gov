@@ -21,7 +21,7 @@ jobs:
     name: Lint GitHub Actions workflows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download actionlint
         id: get_actionlint
         run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
@@ -33,17 +33,17 @@ jobs:
     name: Lint scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Shellcheck
         run: make infra-lint-scripts
   check-terraform-format:
     name: Check Terraform format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.7.1
+          terraform_version: 1.8.2
           terraform_wrapper: false
       - name: Run infra-lint-terraform
         run: |
@@ -53,10 +53,10 @@ jobs:
     name: Validate Terraform modules
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.7.1
+          terraform_version: 1.8.2
           terraform_wrapper: false
       - name: Validate
         run: make infra-validate-modules
@@ -64,8 +64,8 @@ jobs:
     name: Check compliance with checkov
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - name: Run Checkov check
@@ -88,7 +88,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run tfsec check
         uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
         with:

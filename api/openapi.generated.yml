@@ -23,6 +23,7 @@ tags:
 - name: Health
 - name: Opportunity v0
 - name: Opportunity v0.1
+- name: Opportunity v1
 servers: .
 paths:
   /health:
@@ -33,55 +34,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/Healthcheck'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: &id001
-                    - object
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: &id002
-                      - object
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/HealthcheckResponse'
           description: Successful response
         '503':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id001
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id002
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Service Unavailable
       tags:
       - Health
@@ -100,83 +59,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/OpportunityV0'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: &id003
-                    - object
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: &id004
-                      - object
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/OpportunitySearchResponseV0'
           description: Successful response
         '422':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id003
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id004
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
         '401':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id003
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id004
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
       - Opportunity v0
@@ -204,6 +99,160 @@ paths:
               $ref: '#/components/schemas/OpportunitySearch'
       security:
       - ApiKeyAuth: []
+  /v1/opportunities/search:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitySearchResponseV1'
+            application/octet-stream: {}
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Opportunity v1
+      summary: Opportunity Search
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunitySearchRequestV1'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: ascending
+              example2:
+                summary: All filters
+                value:
+                  query: research
+                  filters:
+                    agency:
+                      one_of:
+                      - USAID
+                      - ARPAH
+                    applicant_type:
+                      one_of:
+                      - state_governments
+                      - county_governments
+                      - individuals
+                    funding_category:
+                      one_of:
+                      - recovery_act
+                      - arts
+                      - natural_resources
+                    funding_instrument:
+                      one_of:
+                      - cooperative_agreement
+                      - grant
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                    post_date:
+                      start_date: '2024-01-01'
+                      end_date: '2024-02-01'
+                    close_date:
+                      start_date: '2024-01-01'
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+              example3:
+                summary: Query & opportunity_status filters
+                value:
+                  query: research
+                  filters:
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+              example4:
+                summary: CSV file response
+                value:
+                  format: csv
+                  filters:
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 100
+                    sort_direction: ascending
+              example5:
+                summary: Filter by award fields
+                value:
+                  filters:
+                    expected_number_of_awards:
+                      min: 5
+                    award_floor:
+                      min: 10000
+                    award_ceiling:
+                      max: 1000000
+                    estimated_total_program_funding:
+                      min: 100000
+                      max: 250000
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+              example6:
+                summary: FIlter by assistance listing numbers
+                value:
+                  filters:
+                    assistance_listing_number:
+                      one_of:
+                      - '43.001'
+                      - '47.049'
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+      security:
+      - ApiKeyAuth: []
   /v0.1/opportunities/search:
     post:
       parameters: []
@@ -212,83 +261,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Opportunity'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: &id005
-                    - object
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: &id006
-                      - object
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/OpportunitySearchResponseV01'
           description: Successful response
         '422':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id005
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id006
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
         '401':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id005
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id006
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
       - Opportunity v0.1
@@ -313,7 +298,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OpportunitySearchRequest'
+              $ref: '#/components/schemas/OpportunitySearchRequestV01'
             examples:
               example1:
                 summary: No filters
@@ -370,84 +355,70 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/OpportunityV0'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: &id007
-                    - object
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: &id008
-                      - object
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/OpportunityGetResponseV0'
           description: Successful response
         '401':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id007
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id008
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
         '404':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id007
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id008
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
       - Opportunity v0
+      summary: Opportunity Get
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      security:
+      - ApiKeyAuth: []
+  /v1/opportunities/{opportunity_id}:
+    get:
+      parameters:
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityGetResponseV1'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Opportunity v1
       summary: Opportunity Get
       description: '
 
@@ -480,81 +451,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/Opportunity'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: &id009
-                    - object
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: &id010
-                      - object
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/OpportunityGetResponseV01'
           description: Successful response
         '401':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id009
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id010
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
         '404':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: The message to return
-                  data:
-                    $ref: '#/components/schemas/ErrorResponse'
-                  status_code:
-                    type: integer
-                    description: The HTTP status code
-                  pagination_info:
-                    description: The pagination information for paginated endpoints
-                    type: *id009
-                    allOf:
-                    - $ref: '#/components/schemas/PaginationInfo'
-                  warnings:
-                    type: array
-                    items:
-                      type: *id010
-                      allOf:
-                      - $ref: '#/components/schemas/ValidationIssue'
+                $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
       - Opportunity v0.1
@@ -577,69 +486,102 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/opportunities/{opportunity_id}/versions:
+    get:
+      parameters:
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityVersionsGetResponseV1'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Opportunity v1
+      summary: Opportunity Versions Get
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      security:
+      - ApiKeyAuth: []
 openapi: 3.1.0
 components:
   schemas:
-    PaginationInfo:
+    HealthcheckResponse:
       type: object
       properties:
-        page_offset:
-          type: integer
-          description: The page number that was fetched
-          example: 1
-        page_size:
-          type: integer
-          description: The size of the page fetched
-          example: 25
-        total_records:
-          type: integer
-          description: The total number of records fetchable
-          example: 42
-        total_pages:
-          type: integer
-          description: The total number of pages that can be fetched
-          example: 2
-        order_by:
+        message:
           type: string
-          description: The field that the records were sorted by
-          example: id
-        sort_direction:
-          description: The direction the records are sorted
-          enum:
-          - ascending
-          - descending
-          type:
-          - string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ValidationIssue:
       type: object
       properties:
         type:
           type: string
           description: The type of error
+          example: invalid
         message:
           type: string
           description: The message to return
+          example: Not a valid string.
         field:
           type: string
           description: The field that failed
-    Healthcheck:
-      type: object
-      properties:
-        message:
-          type: string
+          example: summary.summary_description
     ErrorResponse:
       type: object
       properties:
+        data:
+          description: Additional data that might be useful in resolving an error
+            (see specific endpoints for details, this is used infrequently)
+          example: {}
         message:
           type: string
-          description: The message to return
-        data:
-          description: The REST resource object
+          description: General description of the error
+          example: Error
         status_code:
           type: integer
-          description: The HTTP status code
+          description: The HTTP status code of the error
         errors:
           type: array
+          example: []
           items:
             type:
             - object
@@ -715,6 +657,36 @@ components:
       required:
       - paging
       - sorting
+    PaginationInfo:
+      type: object
+      properties:
+        page_offset:
+          type: integer
+          description: The page number that was fetched
+          example: 1
+        page_size:
+          type: integer
+          description: The size of the page fetched
+          example: 25
+        total_records:
+          type: integer
+          description: The total number of records fetchable
+          example: 42
+        total_pages:
+          type: integer
+          description: The total number of pages that can be fetched
+          example: 2
+        order_by:
+          type: string
+          description: The field that the records were sorted by
+          example: id
+        sort_direction:
+          description: The direction the records are sorted
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
     OpportunityV0:
       type: object
       properties:
@@ -768,7 +740,28 @@ components:
           type: string
           format: date-time
           readOnly: true
-    FundingInstrumentFilter:
+    OpportunitySearchResponseV0:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: &id001
+          - object
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityV0'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FundingInstrumentFilterV1:
       type: object
       properties:
         one_of:
@@ -782,7 +775,7 @@ components:
             - other
             type:
             - string
-    FundingCategoryFilter:
+    FundingCategoryFilterV1:
       type: object
       properties:
         one_of:
@@ -818,7 +811,7 @@ components:
             - other
             type:
             - string
-    ApplicantTypeFilter:
+    ApplicantTypeFilterV1:
       type: object
       properties:
         one_of:
@@ -845,7 +838,7 @@ components:
             - unrestricted
             type:
             - string
-    OpportunityStatusFilter:
+    OpportunityStatusFilterV1:
       type: object
       properties:
         one_of:
@@ -859,7 +852,766 @@ components:
             - archived
             type:
             - string
-    AgencyFilter:
+    AgencyFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 2
+            example: USAID
+    AssistanceListingNumberFilterV1:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            pattern: ^\d{2}\.\d{2,3}$
+            example: '45.149'
+    IsCostSharingFilterV1:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    ExpectedNumberAwardsFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 25
+    AwardFloorFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000
+    AwardCeilingFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000000
+    EstimatedTotalProgramFundingFilterV1:
+      type: object
+      properties:
+        min:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 0
+        max:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          example: 10000000
+    PostDateFilterV1:
+      type: object
+      properties:
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+    CloseDateFilterV1:
+      type: object
+      properties:
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+    OpportunitySearchFilterV1:
+      type: object
+      properties:
+        funding_instrument:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FundingInstrumentFilterV1'
+        funding_category:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/FundingCategoryFilterV1'
+        applicant_type:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ApplicantTypeFilterV1'
+        opportunity_status:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityStatusFilterV1'
+        agency:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyFilterV1'
+        assistance_listing_number:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
+        is_cost_sharing:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/IsCostSharingFilterV1'
+        expected_number_of_awards:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
+        award_floor:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AwardFloorFilterV1'
+        award_ceiling:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AwardCeilingFilterV1'
+        estimated_total_program_funding:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
+        post_date:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/PostDateFilterV1'
+        close_date:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/CloseDateFilterV1'
+    OpportunityPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - relevancy
+          - opportunity_id
+          - opportunity_number
+          - opportunity_title
+          - post_date
+          - close_date
+          - agency_code
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+        page_size:
+          type: integer
+          minimum: 1
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
+    OpportunitySearchRequestV1:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Query string which searches against several text fields
+          example: research
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityPaginationV1'
+        format:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
+          - json
+          description: The format of the response
+          enum:
+          - json
+          - csv
+          type:
+          - string
+      required:
+      - pagination
+    OpportunityAssistanceListingV1:
+      type: object
+      properties:
+        program_title:
+          type:
+          - string
+          - 'null'
+          description: The name of the program, see https://sam.gov/content/assistance-listings
+            for more detail
+          example: Space Technology
+        assistance_listing_number:
+          type:
+          - string
+          - 'null'
+          description: The assistance listing number, see https://sam.gov/content/assistance-listings
+            for more detail
+          example: '43.012'
+    OpportunitySummaryV1:
+      type: object
+      properties:
+        summary_description:
+          type:
+          - string
+          - 'null'
+          description: The summary of the opportunity
+          example: This opportunity aims to unravel the mysteries of the universe.
+        is_cost_sharing:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not the opportunity has a cost sharing/matching
+            requirement
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted, that is, the information
+            is only an estimate and not yet official
+          example: false
+        close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date that the opportunity will close - only set if is_forecast=False
+        close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Optional details regarding the close date
+          example: Proposals are due earlier than usual.
+        post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date the opportunity was posted
+        archive_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: When the opportunity will be archived
+        expected_number_of_awards:
+          type:
+          - integer
+          - 'null'
+          description: The number of awards the opportunity is expected to award
+          example: 10
+        estimated_total_program_funding:
+          type:
+          - integer
+          - 'null'
+          description: The total program funding of the opportunity in US Dollars
+          example: 10000000
+        award_floor:
+          type:
+          - integer
+          - 'null'
+          description: The minimum amount an opportunity would award
+          example: 10000
+        award_ceiling:
+          type:
+          - integer
+          - 'null'
+          description: The maximum amount an opportunity would award
+          example: 100000
+        additional_info_url:
+          type:
+          - string
+          - 'null'
+          description: A URL to a website that can provide additional information
+            about the opportunity
+          example: grants.gov
+        additional_info_url_description:
+          type:
+          - string
+          - 'null'
+          description: The text to display for the additional_info_url link
+          example: Click me for more info
+        forecasted_post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be posted, and transition out of being a forecast
+        forecasted_close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be close once posted.
+        forecasted_close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Forecasted opportunity only. Optional details regarding the
+            forecasted closed date.
+          example: Proposals will probably be due on this date
+        forecasted_award_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor plans to
+            award the opportunity.
+        forecasted_project_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor expects the
+            award recipient should start their project
+        fiscal_year:
+          type:
+          - integer
+          - 'null'
+          description: Forecasted opportunity only. The fiscal year the project is
+            expected to be funded and launched
+        funding_category_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the funding category
+          example: Economic Support
+        applicant_eligibility_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the types of applicants that are
+            eligible
+          example: All types of domestic applicants are eligible to apply
+        agency_code:
+          type:
+          - string
+          - 'null'
+          description: The agency who owns the opportunity
+          example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who owns the opportunity
+          example: US Alphabetical Basic Corp
+        agency_phone_number:
+          type:
+          - string
+          - 'null'
+          description: The phone number of the agency who owns the opportunity
+          example: 123-456-7890
+        agency_contact_description:
+          type:
+          - string
+          - 'null'
+          description: Information regarding contacting the agency who owns the opportunity
+          example: For more information, reach out to Jane Smith at agency US-ABC
+        agency_email_address:
+          type:
+          - string
+          - 'null'
+          description: The contact email of the agency who owns the opportunity
+          example: fake_email@grants.gov
+        agency_email_address_description:
+          type:
+          - string
+          - 'null'
+          description: The text for the link to the agency email address
+          example: Click me to email the agency
+        version_number:
+          type: integer
+          description: The version number of the opportunity summary
+          example: 1
+        funding_instruments:
+          type: array
+          items:
+            enum:
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
+            type:
+            - string
+        funding_categories:
+          type: array
+          items:
+            enum:
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
+            type:
+            - string
+        applicant_types:
+          type: array
+          items:
+            enum:
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
+            type:
+            - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was last updated
+    OpportunityV1:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          description: The internal ID of the opportunity
+          example: 12345
+        opportunity_number:
+          type:
+          - string
+          - 'null'
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
+          type:
+          - string
+          - 'null'
+          description: The agency who created the opportunity
+          example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the oppportunity
+          example: Department of Examples
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
+          enum:
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
+          type:
+          - string
+          - 'null'
+          - 'null'
+        category_explanation:
+          type:
+          - string
+          - 'null'
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        opportunity_assistance_listings:
+          type: array
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        summary:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySummaryV1'
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    OpportunityFacetV1:
+      type: object
+      properties:
+        opportunity_status:
+          type: object
+          description: The counts of opportunity_status values in the full response
+          example:
+            posted: 1
+            forecasted: 2
+          additionalProperties:
+            type: integer
+        applicant_type:
+          type: object
+          description: The counts of applicant_type values in the full response
+          example:
+            state_governments: 3
+            county_governments: 2
+            city_or_township_governments: 1
+          additionalProperties:
+            type: integer
+        funding_instrument:
+          type: object
+          description: The counts of funding_instrument values in the full response
+          example:
+            cooperative_agreement: 4
+            grant: 3
+          additionalProperties:
+            type: integer
+        funding_category:
+          type: object
+          description: The counts of funding_category values in the full response
+          example:
+            recovery_act: 2
+            arts: 3
+            agriculture: 5
+          additionalProperties:
+            type: integer
+        agency:
+          type: object
+          description: The counts of agency values in the full response
+          example:
+            USAID: 4
+            ARPAH: 3
+          additionalProperties:
+            type: integer
+    OpportunitySearchResponseV1:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id001
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+        facet_counts:
+          description: Counts of filter/facet values in the full response
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityFacetV1'
+    FundingInstrumentFilterV01:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
+            type:
+            - string
+    FundingCategoryFilterV01:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
+            type:
+            - string
+    ApplicantTypeFilterV01:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
+            type:
+            - string
+    OpportunityStatusFilterV01:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    AgencyFilterV01:
       type: object
       properties:
         one_of:
@@ -869,34 +1621,34 @@ components:
             type: string
             minLength: 2
             example: US-ABC
-    OpportunitySearchFilter:
+    OpportunitySearchFilterV01:
       type: object
       properties:
         funding_instrument:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/FundingInstrumentFilter'
+          - $ref: '#/components/schemas/FundingInstrumentFilterV01'
         funding_category:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/FundingCategoryFilter'
+          - $ref: '#/components/schemas/FundingCategoryFilterV01'
         applicant_type:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/ApplicantTypeFilter'
+          - $ref: '#/components/schemas/ApplicantTypeFilterV01'
         opportunity_status:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunityStatusFilter'
+          - $ref: '#/components/schemas/OpportunityStatusFilterV01'
         agency:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/AgencyFilter'
+          - $ref: '#/components/schemas/AgencyFilterV01'
     OpportunityPagination:
       type: object
       properties:
@@ -932,7 +1684,7 @@ components:
       - page_offset
       - page_size
       - sort_direction
-    OpportunitySearchRequest:
+    OpportunitySearchRequestV01:
       type: object
       properties:
         query:
@@ -945,7 +1697,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunitySearchFilter'
+          - $ref: '#/components/schemas/OpportunitySearchFilterV01'
         pagination:
           type:
           - object
@@ -953,7 +1705,7 @@ components:
           - $ref: '#/components/schemas/OpportunityPagination'
       required:
       - pagination
-    OpportunityAssistanceListing:
+    OpportunityAssistanceListingV01:
       type: object
       properties:
         program_title:
@@ -966,7 +1718,7 @@ components:
           description: The assistance listing number, see https://sam.gov/content/assistance-listings
             for more detail
           example: '43.012'
-    OpportunitySummary:
+    OpportunitySummaryV01:
       type: object
       properties:
         summary_description:
@@ -1150,7 +1902,7 @@ components:
             - unrestricted
             type:
             - string
-    Opportunity:
+    OpportunityV01:
       type: object
       properties:
         opportunity_id:
@@ -1192,12 +1944,12 @@ components:
             type:
             - object
             allOf:
-            - $ref: '#/components/schemas/OpportunityAssistanceListing'
+            - $ref: '#/components/schemas/OpportunityAssistanceListingV01'
         summary:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunitySummary'
+          - $ref: '#/components/schemas/OpportunitySummaryV01'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
@@ -1217,6 +1969,106 @@ components:
           type: string
           format: date-time
           readOnly: true
+    OpportunitySearchResponseV01:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id001
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunityV01'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunityGetResponseV0:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityV0'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunityGetResponseV1:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunityGetResponseV01:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityV01'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunityVersionV1:
+      type: object
+      properties:
+        opportunity:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityV1'
+        forecasts:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunitySummaryV1'
+        non_forecasts:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpportunitySummaryV1'
+    OpportunityVersionsGetResponseV1:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

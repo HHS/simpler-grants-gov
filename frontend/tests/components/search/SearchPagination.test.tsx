@@ -1,29 +1,32 @@
-import "@testing-library/jest-dom";
+/* eslint-disable testing-library/no-node-access */
+import "@testing-library/jest-dom/extend-expect";
 
-import { fireEvent, render, screen } from "@testing-library/react";
-
-import React from "react";
-import SearchPagination from "../../../src/components/search/SearchPagination";
+import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-describe("SearchPagination", () => {
-  const mockHandlePageChange = jest.fn();
-  const totalPages = 10;
-  const page = 1;
+import React from "react";
 
+import SearchPagination from "src/components/search/SearchPagination";
+
+// Mock the useSearchParamUpdater hook
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    updateQueryParams: jest.fn(),
+  }),
+}));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe("SearchPagination", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should not have basic accessibility issues", async () => {
-    const { container } = render(
-      <SearchPagination
-        showHiddenInput={true}
-        totalPages={totalPages}
-        page={page}
-        handlePageChange={mockHandlePageChange}
-      />,
-    );
+    const { container } = render(<SearchPagination page={1} query={"test"} />);
+
     const results = await axe(container, {
       rules: {
         // Disable specific rules that are known to fail due to third-party components
@@ -33,56 +36,14 @@ describe("SearchPagination", () => {
     });
     expect(results).toHaveNoViolations();
   });
+  it("Renders Pagination component when pages > 0", () => {
+    render(<SearchPagination page={1} query={"test"} total={10} />);
 
-  it("renders hidden input when showHiddenInput is true", () => {
-    render(
-      <SearchPagination
-        showHiddenInput={true}
-        totalPages={totalPages}
-        page={page}
-        handlePageChange={mockHandlePageChange}
-      />,
-    );
-
-    const hiddenInput = screen.getByTestId("hiddenCurrentPage");
-    expect(hiddenInput).toHaveValue("1");
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
   });
+  it("Does not render Pagination component when pages <= 0", () => {
+    render(<SearchPagination page={1} query={"test"} total={0} />);
 
-  it("does not render hidden input when showHiddenInput is false", () => {
-    render(
-      <SearchPagination
-        showHiddenInput={false}
-        totalPages={totalPages}
-        page={page}
-        handlePageChange={mockHandlePageChange}
-      />,
-    );
-    expect(screen.queryByTestId("hiddenCurrentPage")).not.toBeInTheDocument();
-  });
-
-  it("calls handlePageChange with next page on next button click", () => {
-    render(
-      <SearchPagination
-        showHiddenInput={true}
-        totalPages={totalPages}
-        page={page}
-        handlePageChange={mockHandlePageChange}
-      />,
-    );
-    fireEvent.click(screen.getByLabelText("Next page"));
-    expect(mockHandlePageChange).toHaveBeenCalledWith(page + 1);
-  });
-
-  it("calls handlePageChange with previous page on previous button click", () => {
-    render(
-      <SearchPagination
-        showHiddenInput={true}
-        totalPages={totalPages}
-        page={2} // Set to second page to test going back to first page
-        handlePageChange={mockHandlePageChange}
-      />,
-    );
-    fireEvent.click(screen.getByLabelText("Previous page"));
-    expect(mockHandlePageChange).toHaveBeenCalledWith(1);
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 });

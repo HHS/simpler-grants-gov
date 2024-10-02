@@ -1,4 +1,4 @@
-name: Front-end Checks
+name: Frontend Checks
 
 on:
   workflow_call:
@@ -26,16 +26,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
 
       - name: Run lint
         run: npm run lint
@@ -46,18 +43,17 @@ jobs:
       - name: Run format
         run: npm run format-check
 
-      - name: Run tests
-        run: npm run test
-
-      - name: Run e2e tests
-        run: npm run test:e2e
-
-      - uses: actions/upload-artifact@v3
-        if: always()
+      - run: npm run test -- --testLocationInResults --json --outputFile=coverage/report.json
+      - uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-          name: playwright-report
-          path: ./frontend/playwright-report/
-          retention-days: 30
+            coverage-file: coverage/report.json
+            test-script: npm test
+            working-directory: ./frontend
+            annotations: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'failed-tests' || 'none' }}
+            package-manager: npm
+            icons: emoji
+            skip-step: none
+            output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
@@ -65,15 +61,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
 
       # https://nextjs.org/docs/advanced-features/ci-build-caching
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.npm
@@ -93,8 +89,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}

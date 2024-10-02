@@ -7,6 +7,7 @@ that are persisted to the database.
 The factories are based on the `factory_boy` library. See
 https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
+
 import random
 from datetime import datetime
 from typing import Optional
@@ -15,13 +16,18 @@ import factory
 import factory.fuzzy
 import faker
 from faker.providers import BaseProvider
+from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
+import src.db.models.staging as staging
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
+    AgencyDownloadFileType,
+    AgencySubmissionNotificationSetting,
     ApplicantType,
     FundingCategory,
     FundingInstrument,
@@ -29,6 +35,15 @@ from src.constants.lookup_constants import (
     OpportunityCategoryLegacy,
     OpportunityStatus,
 )
+from src.db.models import agency_models
+
+
+def sometimes_none(factory_value, none_chance: float = 0.5):
+    return factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: random.random() > none_chance),
+        yes_declaration=factory_value,
+        no_declaration=None,
+    )
 
 
 class CustomProvider(BaseProvider):
@@ -84,7 +99,7 @@ class CustomProvider(BaseProvider):
     AGENCY_CONTACT_DESC_FORMATS = [
         "{{name}}\n{{job}}\n555-###-####\n{{email}}",
         "{{relevant_url}} Contact Center\nHours of operation are 24 hours a day, 7 days a week.\n{{email}}",
-        "{{agency}} Webmaster\n{{email}}",
+        "Webmaster\n{{email}}",
     ]
 
     # Rather than generate any random URL in our data, use those
@@ -127,6 +142,10 @@ class CustomProvider(BaseProvider):
         "{{word}}-###-##",
     ]
 
+    YN_BOOLEAN_VALUES = ["Y", "N"]
+
+    YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
+
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -161,6 +180,12 @@ class CustomProvider(BaseProvider):
     def summary_description(self) -> str:
         pattern = self.random_element(self.SUMMARY_DESCRIPTION_FORMATS)
         return self.generator.parse(pattern)
+
+    def yn_boolean(self) -> str:
+        return self.random_element(self.YN_BOOLEAN_VALUES)
+
+    def yn_yesno_boolean(self) -> str:
+        return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
 
 
 fake = faker.Faker()
@@ -212,6 +237,17 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(opportunity_models.Opportunity.opportunity_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
 
     opportunity_id = factory.Sequence(lambda n: n)
 
@@ -276,12 +312,18 @@ class OpportunityFactory(BaseFactory):
             opportunity_assistance_listings=None,
         )
 
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
+
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
 
-    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity = factory.SubFactory(OpportunityFactory, current_opportunity_summary=None)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
     summary_description = factory.Faker("summary_description")
@@ -305,7 +347,7 @@ class OpportunitySummaryFactory(BaseFactory):
     )
 
     # Just a random recent post date
-    post_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+    post_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
 
     # By default set to a date in the future
     archive_date = factory.Faker("date_between", start_date="+3w", end_date="+4w")
@@ -335,7 +377,7 @@ class OpportunitySummaryFactory(BaseFactory):
         no_declaration=None,
     )
 
-    agency_code = factory.Faker("agency")
+    agency_code = factory.LazyAttribute(lambda s: s.opportunity.agency)
     agency_name = factory.Faker("agency_name")
     agency_phone_number = Generators.PhoneNumber
     agency_contact_description = factory.Faker("agency_contact_description")
@@ -387,6 +429,8 @@ class OpportunitySummaryFactory(BaseFactory):
     # Generally, current summaries won't have the revision number set
     revision_number = None
 
+    version_number = factory.Faker("random_int", min=8, max=13)
+
     funding_instruments = factory.Faker(
         "random_elements",
         length=random.randint(1, 3),
@@ -404,6 +448,11 @@ class OpportunitySummaryFactory(BaseFactory):
         length=random.randint(1, 3),
         elements=[a for a in ApplicantType],
         unique=True,
+    )
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
 
     class Params:
@@ -529,6 +578,21 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
 
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(
+                    opportunity_models.OpportunityAssistanceListing.opportunity_assistance_listing_id
+                )
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    opportunity_assistance_listing_id = factory.Sequence(lambda n: n)
+
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
 
@@ -536,6 +600,13 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     assistance_listing_number = factory.LazyFunction(
         lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
     )
+
+    class Params:
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
 
 
 class LinkOpportunitySummaryFundingInstrumentFactory(BaseFactory):
@@ -577,6 +648,584 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
     applicant_type = factory.Iterator(ApplicantType)
 
 
+class AgencyContactInfoFactory(BaseFactory):
+    class Meta:
+        model = agency_models.AgencyContactInfo
+
+    contact_name = factory.Faker("name")
+    address_line_1 = factory.Faker("street_address")
+    address_line_2 = sometimes_none(factory.Sequence(lambda n: f"Room {n}"))
+    city = factory.Faker("city")
+    state = factory.Faker("state_abbr")
+    zip_code = factory.Faker("street_address")
+    phone_number = factory.Faker("basic_phone_number")
+    primary_email = factory.Faker("email")
+    secondary_email = sometimes_none(factory.Faker("email"))
+
+
+class AgencyFactory(BaseFactory):
+    class Meta:
+        model = agency_models.Agency
+
+    agency_name = factory.Faker("agency_name")
+
+    agency_code = factory.Faker("agency")
+    sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
+
+    assistance_listing_number = factory.Faker("random_int", min=1, max=999)
+
+    agency_submission_notification_setting = factory.fuzzy.FuzzyChoice(
+        AgencySubmissionNotificationSetting
+    )
+
+    agency_contact_info = factory.SubFactory(AgencyContactInfoFactory)
+    agency_contact_info_id = factory.LazyAttribute(
+        lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
+    )
+
+    is_test_agency = False
+
+    ldap_group = factory.LazyAttribute(lambda a: a.agency_code)
+    description = factory.LazyAttribute(lambda a: a.agency_name)
+    label = factory.LazyAttribute(lambda a: a.agency_name)
+    is_multilevel_agency = factory.Faker("boolean")
+    is_multiproject = factory.Faker("boolean")
+    has_system_to_system_certificate = factory.Faker("boolean")
+    can_view_packages_in_grace_period = factory.Faker("boolean")
+    is_image_workspace_enabled = factory.Faker("boolean")
+    is_validation_workspace_enabled = factory.Faker("boolean")
+
+    agency_download_file_types = factory.Faker(
+        "random_elements",
+        length=random.randint(1, 2),
+        elements=[a for a in AgencyDownloadFileType],
+        unique=True,
+    )
+
+
+####################################
+# Staging Table Factories
+####################################
+
+
+LEGACY_APPLICANT_TYPE_IDS = [
+    "00",
+    "01",
+    "02",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "11",
+    "12",
+    "13",
+    "20",
+    "21",
+    "22",
+    "23",
+    "25",
+    "99",
+]
+LEGACY_FUNDING_CATEGORY_IDS = [
+    "RA",
+    "AG",
+    "AR",
+    "BC",
+    "CD",
+    "CP",
+    "DPR",
+    "ED",
+    "ELT",
+    "EN",
+    "ENV",
+    "FN",
+    "HL",
+    "HO",
+    "HU",
+    "IIJ",
+    "IS",
+    "ISS",
+    "LJL",
+    "NR",
+    "OZ",
+    "RD",
+    "ST",
+    "T",
+    "ACA",
+    "O",
+]
+LEGACY_FUNDING_INSTRUMENT_IDS = ["CA", "G", "PC", "O"]
+
+
+class TopportunityFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    oppnumber = factory.Faker("opportunity_number")
+    opptitle = factory.Faker("opportunity_title")
+
+    owningagency = factory.Faker("agency")
+
+    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
+    # only set the category explanation if category is Other
+    category_explanation = factory.Maybe(
+        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
+        yes_declaration=factory.Faker("sentence", nb_words=5),
+        no_declaration=None,
+    )
+
+    is_draft = factory.fuzzy.FuzzyChoice(["N", "S"])
+
+    revision_number = factory.Faker("random_int", min=1, max=10)
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+
+class TopportunityCfdaFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    opp_cfda_id = factory.Sequence(lambda n: n)
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    programtitle = factory.Faker("company")
+    cfdanumber = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
+    )
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+
+class TsynopsisFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    posting_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+    response_date = factory.Faker("date_between", start_date="+2w", end_date="+3w")
+    archive_date = factory.Faker("date_between", start_date="+3w", end_date="+4w")
+    unarchive_date = sometimes_none(
+        factory.Faker("date_between", start_date="+6w", end_date="+7w"), none_chance=0.9
+    )
+    syn_desc = factory.Faker("summary_description")
+    oth_cat_fa_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+
+    cost_sharing = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.1)
+    # These int values are stored as strings
+    number_of_awards = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(1, 25))), none_chance=0.1
+    )
+    est_funding = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(25_000, 25_000_000, step=5_000))),
+        none_chance=0.1,
+    )
+    award_ceiling = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(10_000, 25_000, step=5_000))),
+        none_chance=0.1,
+    )
+    award_floor = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(0, 10_000, step=5_000))), none_chance=0.1
+    )
+
+    fd_link_url = factory.Faker("relevant_url")
+    fd_link_desc = factory.Faker("additional_info_desc")
+    agency_contact_desc = factory.Faker("agency_contact_description")
+    ac_email_addr = factory.Faker("email")
+    ac_email_desc = factory.LazyAttribute(lambda s: f"Contact {s.ac_name} via email")
+    a_sa_code = factory.Faker("agency")
+    ac_phone_number = Generators.PhoneNumber
+    ac_name = factory.Faker("agency_name")
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+    create_ts = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    sendmail = sometimes_none(factory.Faker("yn_yesno_boolean"))
+    response_date_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=2))
+    applicant_elig_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=5))
+    version_nbr = factory.Faker("random_int", min=0, max=10)
+    modification_comments = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+    publisheruid = sometimes_none(factory.Faker("first_name"))
+    publisher_profile_id = sometimes_none(factory.Faker("random_int", min=1, max=99_999))
+
+
+class TforecastFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    posting_date = factory.Faker("date_between", start_date="-3w", end_date="now")
+    archive_date = factory.Faker("date_between", start_date="+3w", end_date="+4w")
+    forecast_desc = factory.Faker("summary_description")
+    oth_cat_fa_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+
+    cost_sharing = sometimes_none(factory.Faker("yn_yesno_boolean"), none_chance=0.1)
+    # These int values are stored as strings
+    number_of_awards = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(1, 25))), none_chance=0.1
+    )
+    est_funding = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(25_000, 25_000_000, step=5_000))),
+        none_chance=0.1,
+    )
+    award_ceiling = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(10_000, 25_000, step=5_000))),
+        none_chance=0.1,
+    )
+    award_floor = sometimes_none(
+        factory.LazyFunction(lambda: str(fake.random_int(0, 10_000, step=5_000))), none_chance=0.1
+    )
+
+    fd_link_url = factory.Faker("relevant_url")
+    fd_link_desc = factory.Faker("additional_info_desc")
+    ac_email_addr = factory.Faker("email")
+    ac_email_desc = factory.LazyAttribute(lambda s: f"Contact {s.ac_name} via email")
+    agency_code = factory.Faker("agency")
+    ac_phone = Generators.PhoneNumber
+    ac_name = factory.Faker("agency_name")
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+    create_ts = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    sendmail = sometimes_none(factory.Faker("yn_yesno_boolean"))
+    applicant_elig_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=5))
+    version_nbr = factory.Faker("random_int", min=0, max=10)
+    modification_comments = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+    publisheruid = sometimes_none(factory.Faker("first_name"))
+    publisher_profile_id = sometimes_none(factory.Faker("random_int", min=1, max=99_999))
+
+    est_synopsis_posting_date = sometimes_none(
+        factory.Faker("date_between", start_date="+2w", end_date="+3w")
+    )
+    est_appl_response_date = sometimes_none(
+        factory.Faker("date_between", start_date="+4w", end_date="+6w")
+    )
+    est_appl_response_date_desc = sometimes_none(factory.Faker("paragraph", nb_sentences=1))
+    est_award_date = sometimes_none(
+        factory.Faker("date_between", start_date="+26w", end_date="+30w")
+    )
+    est_project_start_date = sometimes_none(
+        factory.Faker("date_between", start_date="+30w", end_date="+52w")
+    )
+    fiscal_year = factory.LazyAttribute(
+        lambda f: f.est_project_start_date.year if f.est_project_start_date else None
+    )
+
+
+class TapplicanttypesFactory(BaseFactory):
+    # Base abstract factory for both TapplicanttypesForecast and TapplicanttypesSynopsis
+    class Meta:
+        abstract = True
+
+    at_id = factory.Iterator(LEGACY_APPLICANT_TYPE_IDS)
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    last_upd_id = factory.Faker("first_name")
+    creator_id = factory.Faker("first_name")
+
+
+class TfundactcatFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    fac_id = factory.Iterator(LEGACY_FUNDING_CATEGORY_IDS)
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
+
+class TfundinstrFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    fi_id = factory.Iterator(LEGACY_FUNDING_INSTRUMENT_IDS)
+
+    opportunity_id = factory.Sequence(lambda n: n)
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+
+
+####################################
+# Staging Table Factories
+####################################
+
+
+class AbstractStagingFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    # Default to being a new insert/update
+    is_deleted = False
+    transformed_at = None
+
+    class Params:
+        already_transformed = factory.Trait(
+            transformed_at=factory.Faker("date_time_between", start_date="-7d", end_date="-1d")
+        )
+
+
+class StagingTopportunityFactory(TopportunityFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.opportunity.Topportunity
+
+    cfdas = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.StagingTopportunityCfdaFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
+    )
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            oppnumber=None,
+            revision_number=None,
+            opptitle=None,
+            owningagency=None,
+            oppcategory=None,
+            category_explanation=None,
+        )
+
+
+class StagingTopportunityCfdaFactory(TopportunityCfdaFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.opportunity.TopportunityCfda
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            programtitle=None,
+            cfdanumber=None,
+        )
+
+
+class StagingTsynopsisFactory(TsynopsisFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.synopsis.Tsynopsis
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class StagingTsynopsisHistFactory(StagingTsynopsisFactory):
+    class Meta:
+        model = staging.synopsis.TsynopsisHist
+
+    revision_number = factory.Faker("random_int", min=1, max=25)
+    action_type = "U"  # Update, put D for deleted
+
+
+class StagingTforecastFactory(TforecastFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.forecast.Tforecast
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class StagingTforecastHistFactory(StagingTforecastFactory):
+    class Meta:
+        model = staging.forecast.TforecastHist
+
+    revision_number = factory.Faker("random_int", min=1, max=25)
+    action_type = "U"  # Update, put D for deleted
+
+
+class StagingTapplicanttypesForecastFactory(TapplicanttypesFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.forecast.TapplicanttypesForecast
+
+    at_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(StagingTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTapplicanttypesForecastHistFactory(StagingTapplicanttypesForecastFactory):
+    class Meta:
+        model = staging.forecast.TapplicanttypesForecastHist
+
+    forecast = factory.SubFactory(StagingTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class StagingTapplicanttypesSynopsisFactory(TapplicanttypesFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.synopsis.TapplicanttypesSynopsis
+
+    at_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(StagingTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTapplicanttypesSynopsisHistFactory(StagingTapplicanttypesSynopsisFactory):
+    class Meta:
+        model = staging.synopsis.TapplicanttypesSynopsisHist
+
+    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class StagingTfundactcatForecastFactory(TfundactcatFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.forecast.TfundactcatForecast
+
+    fac_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(StagingTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTfundactcatForecastHistFactory(StagingTfundactcatForecastFactory):
+    class Meta:
+        model = staging.forecast.TfundactcatForecastHist
+
+    forecast = factory.SubFactory(StagingTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class StagingTfundactcatSynopsisFactory(TfundactcatFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.synopsis.TfundactcatSynopsis
+
+    fac_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(StagingTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTfundactcatSynopsisHistFactory(StagingTfundactcatSynopsisFactory):
+    class Meta:
+        model = staging.synopsis.TfundactcatSynopsisHist
+
+    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class StagingTfundinstrForecastFactory(TfundinstrFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.forecast.TfundinstrForecast
+
+    fi_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(StagingTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            forecast=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTfundinstrForecastHistFactory(StagingTfundinstrForecastFactory):
+    class Meta:
+        model = staging.forecast.TfundinstrForecastHist
+
+    forecast = factory.SubFactory(StagingTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class StagingTfundinstrSynopsisFactory(TfundinstrFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.synopsis.TfundinstrSynopsis
+
+    fi_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(StagingTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+    class Params:
+        orphaned_record = factory.Trait(
+            synopsis=None, opportunity_id=factory.Faker("random_int", min=10_000, max=50_000)
+        )
+
+
+class StagingTfundinstrSynopsisHistFactory(StagingTfundinstrSynopsisFactory):
+    class Meta:
+        model = staging.synopsis.TfundinstrSynopsisHist
+
+    synopsis = factory.SubFactory(StagingTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class StagingTgroupsFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.tgroups.Tgroups
+
+    keyfield = ""
+    value = ""
+
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = sometimes_none(
+        factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    )
+
+    last_upd_id = factory.Faker("first_name")
+    creator_id = factory.Faker("first_name")
+
+
 ####################################
 # Transfer Table Factories
 ####################################
@@ -589,7 +1238,7 @@ class TransferTopportunityFactory(BaseFactory):
     opportunity_id = factory.Sequence(lambda n: n)
 
     oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry")
+    opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
 
     owningagency = factory.Faker("agency")
 
@@ -620,29 +1269,510 @@ class TransferTopportunityFactory(BaseFactory):
 ####################################
 
 
-class ForeignTopportunityFactory(factory.DictFactory):
-    """
-    NOTE: This generates a dictionary - and does not connect to the database directly
-    """
+class ForeignTopportunityFactory(TopportunityFactory):
+    class Meta:
+        model = foreign.opportunity.Topportunity
 
-    opportunity_id = factory.Sequence(lambda n: n)
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(foreign.opportunity.Topportunity.opportunity_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
 
-    oppnumber = factory.Sequence(lambda n: f"F-ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Research into {fake.job()} industry".replace("'", ""))
+        return 1
 
-    owningagency = factory.Iterator(["F-US-ABC", "F-US-XYZ", "F-US-123"])
-
-    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
-    # only set the category explanation if category is Other
-    category_explanation = factory.Maybe(
-        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
-        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
-        no_declaration=None,
+    cfdas = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.ForeignTopportunityCfdaFactory",
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 3),
     )
 
-    is_draft = "N"  # Because we filter out drafts, just default these to False
 
-    revision_number = 0
+class ForeignTopportunityCfdaFactory(TopportunityCfdaFactory):
+    class Meta:
+        model = foreign.opportunity.TopportunityCfda
 
-    created_date = factory.Faker("date_between", start_date="-10y", end_date="-5y")
-    last_upd_date = factory.Faker("date_between", start_date="-5y", end_date="today")
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(
+                func.max(foreign.opportunity.TopportunityCfda.opp_cfda_id)
+            ).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    opportunity = factory.SubFactory(ForeignTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class ForeignTsynopsisFactory(TsynopsisFactory):
+    class Meta:
+        model = foreign.synopsis.Tsynopsis
+
+    opportunity = factory.SubFactory(ForeignTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class ForeignTsynopsisHistFactory(ForeignTsynopsisFactory):
+    class Meta:
+        model = foreign.synopsis.TsynopsisHist
+
+    revision_number = factory.Faker("random_int", min=1, max=25)
+    action_type = "U"  # Update, put D for deleted
+
+
+class ForeignTforecastFactory(TforecastFactory):
+    class Meta:
+        model = foreign.forecast.Tforecast
+
+    opportunity = factory.SubFactory(ForeignTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class ForeignTforecastHistFactory(ForeignTforecastFactory):
+    class Meta:
+        model = foreign.forecast.TforecastHist
+
+    revision_number = factory.Faker("random_int", min=1, max=25)
+    action_type = "U"  # Update, put D for deleted
+
+
+class ForeignTapplicanttypesForecastFactory(TapplicanttypesFactory):
+    class Meta:
+        model = foreign.forecast.TapplicanttypesForecast
+
+    at_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(ForeignTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+
+class ForeignTapplicanttypesForecastHistFactory(ForeignTapplicanttypesForecastFactory):
+    class Meta:
+        model = foreign.forecast.TapplicanttypesForecastHist
+
+    forecast = factory.SubFactory(ForeignTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class ForeignTapplicanttypesSynopsisFactory(TapplicanttypesFactory):
+    class Meta:
+        model = foreign.synopsis.TapplicanttypesSynopsis
+
+    at_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(ForeignTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+
+class ForeignTapplicanttypesSynopsisHistFactory(ForeignTapplicanttypesSynopsisFactory):
+    class Meta:
+        model = foreign.synopsis.TapplicanttypesSynopsisHist
+
+    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class ForeignTfundactcatForecastFactory(TfundactcatFactory):
+    class Meta:
+        model = foreign.forecast.TfundactcatForecast
+
+    fac_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(ForeignTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+
+class ForeignTfundactcatForecastHistFactory(ForeignTfundactcatForecastFactory):
+    class Meta:
+        model = foreign.forecast.TfundactcatForecastHist
+
+    forecast = factory.SubFactory(ForeignTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class ForeignTfundactcatSynopsisFactory(TfundactcatFactory):
+    class Meta:
+        model = foreign.synopsis.TfundactcatSynopsis
+
+    fac_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(ForeignTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+
+class ForeignTfundactcatSynopsisHistFactory(ForeignTfundactcatSynopsisFactory):
+    class Meta:
+        model = foreign.synopsis.TfundactcatSynopsisHist
+
+    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class ForeignTfundinstrForecastFactory(TfundinstrFactory):
+    class Meta:
+        model = foreign.forecast.TfundinstrForecast
+
+    fi_frcst_id = factory.Sequence(lambda n: n)
+
+    forecast = factory.SubFactory(ForeignTforecastFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+
+
+class ForeignTfundinstrForecastHistFactory(ForeignTfundinstrForecastFactory):
+    class Meta:
+        model = foreign.forecast.TfundinstrForecastHist
+
+    forecast = factory.SubFactory(ForeignTforecastHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.forecast.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.forecast.revision_number)
+
+
+class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
+    class Meta:
+        model = staging.synopsis.TfundinstrSynopsis
+
+    fi_syn_id = factory.Sequence(lambda n: n)
+
+    synopsis = factory.SubFactory(StagingTsynopsisFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+
+
+class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
+    class Meta:
+        model = foreign.synopsis.TfundinstrSynopsisHist
+
+    synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+##
+# Pseudo-factories
+##
+
+
+class OpportunitySummaryHistoryBuilder:
+    """dasdasd
+    Utility class for adding historical opportunity summary records
+    to an opportunity.
+
+    Can either take in an existing opportunity or you can pass parameters
+    into the init method to create an opportunity using the OpportunityFactory
+
+    For example:
+
+        opportunity = (
+            OpportunitySummaryHistoryBuilder(opportunity_title="My opportunity title")
+                .add_forecast()
+                .add_forecast_history()
+                .add_non_forecast(is_current=True)
+                .add_non_forecast_history(summary_description="an older description")
+                .add_non_forecast_history()
+                .build()
+        )
+
+    This would produce an opportunity with:
+        * A non-forecast summary record set to be the CurrentOpportunitySummary
+        * Two prior non-forecast summary records
+        * A forecast summary record
+        * A forecast summary history record
+
+    """
+
+    def __init__(self, opportunity: opportunity_models.Opportunity | None = None, **kwargs):
+        self.opportunity_already_exists: bool = False
+        self.forecast_already_exists: bool = False
+        self.non_forecast_already_exists: bool = False
+
+        self.most_recent_non_forecast: dict | None = None
+        self.most_recent_forecast: dict | None = None
+
+        self.non_forecast_history: list[dict] = []
+        self.forecast_history: list[dict] = []
+
+        self.is_current_non_forecast = False
+        self.is_current_forecast = False
+
+        if opportunity is None:
+            self.opportunity = OpportunityFactory.create(no_current_summary=True, **kwargs)
+        else:
+            self.opportunity_already_exists = True
+            self.opportunity = opportunity
+            if opportunity.current_opportunity_summary is not None:
+                current_summary = opportunity.current_opportunity_summary.opportunity_summary
+
+                if current_summary.is_forecast:
+                    self.most_recent_forecast = current_summary.for_json()
+                    self.forecast_already_exists = True
+                    self.is_current_forecast = True
+                else:
+                    self.most_recent_non_forecast = current_summary.for_json()
+                    self.non_forecast_already_exists = True
+                    self.is_current_non_forecast = True
+
+    def add_non_forecast(
+        self, is_current: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        if self.most_recent_non_forecast:
+            raise Exception("Cannot call add_non_forecast if a non-forecast already exists")
+
+        kwargs["is_forecast"] = False
+        self.is_current_non_forecast = is_current
+        self.most_recent_non_forecast = kwargs
+
+        return self
+
+    def add_forecast(
+        self, is_current: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        if self.most_recent_forecast:
+            raise Exception("Cannot call add_forecast if a forecast already exists")
+
+        kwargs["is_forecast"] = True
+        self.is_current_forecast = is_current
+        self.most_recent_forecast = kwargs
+
+        return self
+
+    def add_non_forecast_history(
+        self, is_deleted: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        # If there is no most_recent_non_forecast set, we want to error
+        # unless the record is deleted or the last (first added) history record was deleted.
+        #
+        # Effectively, you can only have a history without a non-history record
+        # if the last history record is deleted. If the last is deleted, you're
+        # free to add more history.
+        #
+        # eg. You can setup a history that is several updates and then someone ultimately deleting the non-forecast
+        if self.most_recent_non_forecast is None:
+            if not is_deleted and (
+                len(self.non_forecast_history) > 0
+                and self.non_forecast_history[0].get("is_deleted") is not True
+            ):
+                raise Exception(
+                    "Cannot add a historical non-forecast without already having a regular non-forecast UNLESS the last historical record is deleted"
+                )
+
+        kwargs["is_forecast"] = False
+        kwargs["is_deleted"] = is_deleted
+        self.non_forecast_history.append(kwargs)
+
+        return self
+
+    def add_forecast_history(
+        self, is_deleted: bool = False, **kwargs
+    ) -> "OpportunitySummaryHistoryBuilder":
+        # If there is no most_recent_forecast set, we want to error
+        # unless the record is deleted or the last (first added) history record was deleted.
+        #
+        # Effectively, you can only have a history without a non-history record
+        # if the last history record is deleted. If the last is deleted, you're
+        # free to add more history.
+        #
+        # eg. You can setup a history that is several updates and then someone ultimately deleting the forecast
+        if self.most_recent_forecast is None:
+            if not is_deleted and (
+                len(self.forecast_history) > 0
+                and self.forecast_history[0].get("is_deleted") is not True
+            ):
+                raise Exception(
+                    "Cannot add a historical forecast without already having a regular forecast UNLESS the last historical record is deleted"
+                )
+
+        kwargs["is_forecast"] = True
+        kwargs["is_deleted"] = is_deleted
+        self.forecast_history.append(kwargs)
+
+        return self
+
+    def build(self) -> opportunity_models.Opportunity:
+        if self.is_current_non_forecast and self.is_current_forecast:
+            raise Exception(
+                "Cannot set both the forecast and non-forecast record to be the CurrentOpportunitySummary"
+            )
+
+        non_forecast_hist_count = len(self.non_forecast_history)
+        forecast_hist_count = len(self.forecast_history)
+
+        # revision number behaves sorta like
+        # a "global" count shared by all historical records
+        revision_number = non_forecast_hist_count + forecast_hist_count - 1
+
+        non_forecast_params: dict = {}
+        forecast_params: dict = {}
+
+        if self.non_forecast_already_exists is False and self.most_recent_non_forecast is not None:
+            non_forecast = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity,
+                version_number=non_forecast_hist_count + 1,
+                revision_number=None,
+                **self.most_recent_non_forecast,
+            )
+
+            non_forecast_params = non_forecast.for_json()
+
+            if self.is_current_non_forecast:
+                CurrentOpportunitySummaryFactory.create(
+                    opportunity=self.opportunity, opportunity_summary=non_forecast
+                )
+
+        if self.non_forecast_already_exists:
+            # Adjust the version number to make sense
+            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
+                non_forecast_hist_count + 1
+            )
+
+        if self.forecast_already_exists is False and self.most_recent_forecast is not None:
+            forecast = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity,
+                version_number=forecast_hist_count + 1,
+                revision_number=None,
+                **self.most_recent_forecast,
+            )
+
+            forecast_params = forecast.for_json()
+
+            if self.is_current_forecast:
+                CurrentOpportunitySummaryFactory.create(
+                    opportunity=self.opportunity, opportunity_summary=forecast
+                )
+
+        if self.forecast_already_exists:
+            # Adjust the version number to make sense
+            self.opportunity.current_opportunity_summary.opportunity_summary.version_number = (
+                forecast_hist_count + 1
+            )
+
+        for non_forecast_hist in self.non_forecast_history:
+            params = non_forecast_params | non_forecast_hist
+
+            params.pop("opportunity_summary_id", None)
+            params["revision_number"] = revision_number
+            params["version_number"] = non_forecast_hist_count
+            params["is_deleted"] = non_forecast_hist.get("is_deleted")
+
+            non_forecast_hist = OpportunitySummaryFactory.create(
+                opportunity=self.opportunity, **params
+            )
+
+            non_forecast_params = non_forecast_hist.for_json()
+
+            non_forecast_hist_count -= 1
+            revision_number -= 1
+
+        for forecast_hist in self.forecast_history:
+            params = forecast_params | forecast_hist
+
+            params.pop("opportunity_summary_id", None)
+            params["revision_number"] = revision_number
+            params["version_number"] = forecast_hist_count
+            params["is_deleted"] = forecast_hist.get("is_deleted")
+
+            forecast_hist = OpportunitySummaryFactory.create(opportunity=self.opportunity, **params)
+
+            forecast_params = forecast_hist.for_json()
+
+            forecast_hist_count -= 1
+            revision_number -= 1
+
+        return self.opportunity
+
+
+class StagingTgroupsAgencyFactory(factory.DictFactory):
+    """
+        This does not need to be called directly, and instead you should use
+    create_tgroups_agency (defined below) in order to call this.
+
+    We use this to help organize factories / the ability to override and set
+    values for the tgroups agency data which is spread across many rows.
+
+    Note: Any value that is "None" will not be included in the created
+          tgroups records (empty strings, or strings of values like "null" will be)
+    """
+
+    AgencyName = factory.Faker("agency_name")
+    AgencyCode = ""  # see: create_tgroups_agency for how this gets set
+    AgencyCFDA = factory.Faker("random_int", min=1, max=99)
+    AgencyDownload = factory.Faker("random_int", min=1, max=3)
+    AgencyNotify = factory.Faker("random_int", min=1, max=3)
+    AgencyEnroll = ""  # see: create_tgroups_agency for how this gets set
+
+    AgencyContactName = factory.Faker("name")
+    AgencyContactAddress1 = factory.Faker("street_address")
+    AgencyContactAddress2 = factory.Maybe(
+        decider=factory.LazyAttribute(lambda s: random.random() > 0.5),
+        yes_declaration=factory.Sequence(lambda n: f"Room {n}"),
+        no_declaration="NULL",
+    )
+    AgencyContactCity = factory.Faker("city")
+    AgencyContactState = factory.Faker("state_abbr")
+    AgencyContactZipCode = factory.Faker("postcode")
+    AgencyContactTelephone = Generators.PhoneNumber
+    AgencyContactEMail = factory.Faker("email")
+    AgencyContactEMail2 = sometimes_none(factory.Faker("email"))
+
+    ldapGp = ""  # see: create_tgroups_agency for how this gets set
+    description = factory.LazyAttribute(lambda g: g.AgencyName)
+    label = factory.LazyAttribute(lambda g: g.AgencyName)
+    multilevel = sometimes_none("TRUE", none_chance=0.8)
+
+    HasS2SCert = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ViewPkgsInGracePeriod = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    multiproject = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ImageWS = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+    ValidationWS = sometimes_none(factory.Faker("yn_boolean"), none_chance=0.8)
+
+
+def create_tgroups_agency(
+    agency_code: str,
+    is_deleted: bool = False,
+    is_already_processed: bool = False,
+    deleted_fields: set | None = None,
+    already_processed_fields: set | None = None,
+    **kwargs,
+) -> list[staging.tgroups.Tgroups]:
+    # The agency_code value is actually just the first bit (the top-level agency)
+    kwargs["AgencyCode"] = agency_code.split("-")[0]
+    kwargs["AgencyEnroll"] = agency_code
+    kwargs["ldapGp"] = agency_code
+
+    field_values = StagingTgroupsAgencyFactory.build(**kwargs)
+
+    groups = []
+
+    field_prefix = f"Agency-{agency_code}-"
+
+    if already_processed_fields is None:
+        already_processed_fields = set()
+
+    if deleted_fields is None:
+        deleted_fields = set()
+
+    for field_name, value in field_values.items():
+        if value is None:
+            continue
+
+        is_field_already_processed = is_already_processed or field_name in already_processed_fields
+        is_field_deleted = is_deleted or field_name in deleted_fields
+
+        tgroup = StagingTgroupsFactory.create(
+            keyfield=field_prefix + field_name,
+            value=str(value),
+            is_deleted=is_field_deleted,
+            already_transformed=is_field_already_processed,
+        )
+
+        groups.append(tgroup)
+
+    return groups

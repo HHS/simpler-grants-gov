@@ -35,7 +35,7 @@ The application can be ran natively or in a Docker container.
 
 #### Native
 
-There are several secret environment variables necessary to submit the form related to the newsletter. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
+There are several secret environment variables necessary to submit the form related to email subscription. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
 
 From the `frontend/` directory:
 
@@ -135,6 +135,7 @@ E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` director
 
 To run E2E tests via CLI:
 
+- `cd ../api && make init db-seed-local start` (prerequisite to start the API)
 - `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
 - `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
 - `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
@@ -144,7 +145,9 @@ To run E2E tests using VS Code:
 1. Download the VS Code extension described in these [Playwright docs](https://playwright.dev/docs/running-tests#run-tests-in-vs-code)
 2. Follow the [instructions](https://playwright.dev/docs/getting-started-vscode#running-tests) Playwright provides
 
-In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
+Playwright E2E tests run "local-to-local", requiring both the frontend and the API to be running for the tests to pass - and for the database to be seeded with data.
+
+In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
 
 ## 🤖 Type checking, linting, and formatting
 
@@ -163,7 +166,7 @@ It's recommended that developers configure their code editor to auto run these t
   <summary>VSCode instructions</summary>
 
 1. Install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extensions.
-2. Add the following to a `.vscode/settings.json` Worspace Settings file:
+2. Add the following to a `.vscode/settings.json` Workspace Settings file:
 
    ```json
    {

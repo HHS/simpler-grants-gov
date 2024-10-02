@@ -22,13 +22,13 @@ jobs:
       ACTION: show-results # show results, but don't post them to slack
     steps:
       # set up python
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       # install poetry
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
 
       - name: Install analytics package using poetry
         run: make install
@@ -42,11 +42,12 @@ jobs:
       - name: Run tests
         run: make test-audit
 
-      - name: Export GitHub data
-        run: make gh-data-export
+      # Both of these tasks are looking for github and slack auth
+      # - name: Export GitHub data
+      #   run: make gh-data-export
 
-      - name: Run reports
-        run: make sprint-reports
+      # - name: Run reports
+      #   run: make sprint-reports
 
   vulnerability-scans:
     name: Run Analytics Vulnerability Scans

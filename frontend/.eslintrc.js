@@ -14,6 +14,17 @@ module.exports = {
     // dependencies to work in standalone mode. It may be overkill for most projects at
     // Nava which aren't image heavy.
     "@next/next/no-img-element": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["../"],
+            message: "Relative imports are not allowed.",
+          },
+        ],
+      },
+    ],
   },
   // Additional lint rules. These get layered onto the top-level rules.
   overrides: [
@@ -49,6 +60,10 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": "error",
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
         "@typescript-eslint/no-explicit-any": "error",
+        // Just warn since playwright tests may not use screen the way jest would
+        "testing-library/prefer-screen-queries": "warn",
+        // Prevent unnecessary console statements
+        "no-console": ["error", { allow: ["warn", "error"] }],
       },
     },
   ],

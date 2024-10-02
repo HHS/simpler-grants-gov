@@ -1,21 +1,21 @@
-import Breadcrumbs from "../../components/Breadcrumbs";
-import { GridContainer } from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
 import React from "react";
-import { SEARCH_CRUMBS } from "../../constants/breadcrumbs";
+import { GridContainer } from "@trussworks/react-uswds";
 
 const SearchCallToAction: React.FC = () => {
+  const t = useTranslations("Search");
+
   return (
     <>
       {/* <BetaAlert /> */}
-      <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
       <GridContainer>
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
-          Search funding opportunities
+          {t("callToAction.title")}
         </h1>
         <p className="font-serif-md tablet-lg:font-serif-lg usa-intro margin-top-2">
-          We’re incrementally improving this experimental search page. How can
-          we make it easier to discover grants that are right for you? Let us
-          know at <a href="mailto:simpler@grants.gov">simpler@grants.gov</a>.
+          {t.rich("callToAction.description", {
+            mail: (chunks) => <a href="mailto:simpler@grants.gov">{chunks}</a>,
+          })}
         </p>
       </GridContainer>
     </>

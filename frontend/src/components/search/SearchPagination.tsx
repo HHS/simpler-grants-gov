@@ -1,45 +1,62 @@
 "use client";
 
+import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
+import { useContext } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
-interface SearchPaginationProps {
-  showHiddenInput?: boolean; // Only one of the two SearchPagination should have this set
-  totalPages: number;
-  page: number;
-  handlePageChange: (handlePage: number) => void; // managed in useSearchFormState
-  paginationRef?: React.RefObject<HTMLInputElement>; // managed in useSearchFormState
+export enum PaginationPosition {
+  Top = "topPagination",
+  Bottom = "bottomPagination",
 }
 
-const MAX_SLOTS = 5;
+interface SearchPaginationProps {
+  page: number;
+  query: string | null | undefined;
+  total?: number | null;
+  scroll?: boolean;
+  totalResults?: string;
+  loading?: boolean;
+}
+
+const MAX_SLOTS = 7;
 
 export default function SearchPagination({
-  showHiddenInput,
-  totalPages,
   page,
-  handlePageChange,
-  paginationRef,
+  query,
+  total = null,
+  scroll = false,
+  totalResults = "",
+  loading = false,
 }: SearchPaginationProps) {
+  const { updateQueryParams } = useSearchParamUpdater();
+  const { updateTotalPages, updateTotalResults } = useContext(QueryContext);
+  const { totalPages } = useContext(QueryContext);
+  // Shows total pages from the query context before it is re-fetched from the API.
+  const pages = total || Number(totalPages);
+
+  const updatePage = (page: number) => {
+    updateTotalPages(String(total));
+    updateTotalResults(totalResults);
+    updateQueryParams(String(page), "page", query, scroll);
+  };
+
   return (
-    <>
-      {showHiddenInput === true && (
-        // Allows us to pass a value to server action when updating results
-        <input
-          type="hidden"
-          name="currentPage"
-          ref={paginationRef}
-          value={page}
-          data-testid="hiddenCurrentPage"
+    <div className={`grants-pagination ${loading ? "disabled" : ""}`}>
+      {pages > 0 && (
+        <Pagination
+          pathname="/search"
+          totalPages={pages}
+          currentPage={page}
+          maxSlots={MAX_SLOTS}
+          onClickNext={() => updatePage(page + 1)}
+          onClickPrevious={() => updatePage(page > 1 ? page - 1 : 0)}
+          onClickPageNumber={(event: React.MouseEvent, page: number) =>
+            updatePage(page)
+          }
         />
       )}
-      <Pagination
-        pathname="/search"
-        totalPages={totalPages}
-        currentPage={page}
-        maxSlots={MAX_SLOTS}
-        onClickNext={() => handlePageChange(page + 1)}
-        onClickPrevious={() => handlePageChange(page - 1)}
-        onClickPageNumber={(event, page) => handlePageChange(page)}
-      />
-    </>
+    </div>
   );
 }

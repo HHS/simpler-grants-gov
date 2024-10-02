@@ -26,3 +26,9 @@ coverage.*
 # VSCode Workspace
 *.code-workspace
 .vscode
+
+#e2e
+/test-results/
+
+# localstack
+/volume

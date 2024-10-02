@@ -1,9 +1,7 @@
-// This server-only package is recommended by Next.js to ensure code is only run on the server.
-// It provides a build-time error if client-side code attempts to invoke the code here.
-// Since we're pulling in an API Auth Token here, this should be server only
-// https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#keeping-server-only-code-out-of-the-client-environment
 import "server-only";
 
+import { compact, isEmpty } from "lodash";
+import { environment } from "src/constants/environments";
 import {
   ApiRequestError,
   BadRequestError,
@@ -16,12 +14,10 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "src/errors";
-import { compact, isEmpty } from "lodash";
-
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 // TODO (#1682): replace search specific references (since this is a generic API file that any
 // future page or different namespace could use)
-import { SearchAPIResponse } from "../../types/search/searchResponseTypes";
-import { SearchFetcherProps } from "src/services/search/searchfetcher/SearchFetcher";
+import { APIResponse } from "src/types/apiResponseTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
@@ -55,8 +51,8 @@ export default abstract class BaseApi {
   get headers(): HeadersDict {
     const headers: HeadersDict = {};
 
-    if (process.env.API_AUTH_TOKEN) {
-      headers["X-AUTH"] = process.env.API_AUTH_TOKEN;
+    if (environment.API_AUTH_TOKEN) {
+      headers["X-AUTH"] = environment.API_AUTH_TOKEN;
     }
     return headers;
   }
@@ -69,8 +65,7 @@ export default abstract class BaseApi {
     basePath: string,
     namespace: string,
     subPath: string,
-
-    searchInputs: SearchFetcherProps,
+    queryParamData?: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
@@ -98,7 +93,7 @@ export default abstract class BaseApi {
         headers,
         method,
       },
-      searchInputs,
+      queryParamData,
     );
 
     return response;
@@ -110,23 +105,23 @@ export default abstract class BaseApi {
   private async sendRequest(
     url: string,
     fetchOptions: RequestInit,
-    searchInputs: SearchFetcherProps,
+    queryParamData?: QueryParamData,
   ) {
     let response: Response;
-    let responseBody: SearchAPIResponse;
+    let responseBody: APIResponse;
     try {
       response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as SearchAPIResponse;
+      responseBody = (await response.json()) as APIResponse;
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
-      throw fetchErrorToNetworkError(error, searchInputs);
+      throw fetchErrorToNetworkError(error, queryParamData);
     }
 
     const { data, message, pagination_info, status_code, warnings } =
       responseBody;
     if (!response.ok) {
-      handleNotOkResponse(responseBody, message, status_code, searchInputs);
+      handleNotOkResponse(responseBody, message, status_code, queryParamData);
     }
 
     return {
@@ -154,14 +149,14 @@ export function createRequestUrl(
   let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
-    const searchBody: { [key: string]: string } = {};
+    const body: { [key: string]: string } = {};
     Object.entries(body).forEach(([key, value]) => {
       const stringValue =
         typeof value === "string" ? value : JSON.stringify(value);
-      searchBody[key] = stringValue;
+      body[key] = stringValue;
     });
 
-    const params = new URLSearchParams(searchBody).toString();
+    const params = new URLSearchParams(body).toString();
     url = `${url}?${params}`;
   }
   return url;
@@ -190,19 +185,21 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
  */
 export function fetchErrorToNetworkError(
   error: unknown,
-  searchInputs: SearchFetcherProps,
+  searchInputs?: QueryParamData,
 ) {
   // Request failed to send or something failed while parsing the response
   // Log the JS error to support troubleshooting
   console.error(error);
-  return new NetworkError(error, searchInputs);
+  return searchInputs
+    ? new NetworkError(error, searchInputs)
+    : new NetworkError(error);
 }
 
 function handleNotOkResponse(
-  response: SearchAPIResponse,
+  response: APIResponse,
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs?: QueryParamData,
 ) {
   const { errors } = response;
   if (isEmpty(errors)) {
@@ -219,9 +216,11 @@ function handleNotOkResponse(
 const throwError = (
   message: string,
   status_code: number,
-  searchInputs: SearchFetcherProps,
+  searchInputs?: QueryParamData,
   firstError?: APIResponseError,
 ) => {
+  console.error("Throwing error: ", message, status_code, searchInputs);
+
   // Include just firstError for now, we can expand this
   // If we need ValidationErrors to be more expanded
   const error = firstError ? { message, firstError } : { message };
@@ -245,9 +244,9 @@ const throwError = (
     default:
       throw new ApiRequestError(
         error,
-        searchInputs,
         "APIRequestError",
         status_code,
+        searchInputs,
       );
   }
 };

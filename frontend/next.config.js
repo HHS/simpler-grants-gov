@@ -1,5 +1,6 @@
 // @ts-check
-const { i18n } = require("./next-i18next.config");
+
+const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
 const sassOptions = require("./scripts/sassOptions");
 
 /**
@@ -15,17 +16,11 @@ const appSassOptions = sassOptions(basePath);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   basePath,
-  i18n,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
   sassOptions: appSassOptions,
-  transpilePackages: [
-    // Continue to support older browsers (ES5)
-    // https://github.com/i18next/i18next/issues/1948
-    "i18next",
-  ],
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);
