@@ -1,8 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import {
-  Opportunity,
-  Summary,
-} from "src/types/opportunity/opportunityResponseTypes";
+import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 
@@ -20,9 +17,7 @@ jest.mock("next-intl", () => ({
 
 const mockOpportunityData: Opportunity = {
   opportunity_title: "Test Opportunity",
-  summary: {
-    agency_name: "Test Agency",
-  },
+  agency_name: "Test Agency",
   opportunity_assistance_listings: [
     {
       assistance_listing_number: "12345",
@@ -64,9 +59,7 @@ describe("OpportunityIntro", () => {
   it("handles null agency name and null assistance listings", () => {
     const opportunityDataWithNulls: Opportunity = {
       ...mockOpportunityData,
-      summary: {
-        agency_name: "",
-      } as Summary,
+      agency_name: "",
       opportunity_assistance_listings: [],
     };
 

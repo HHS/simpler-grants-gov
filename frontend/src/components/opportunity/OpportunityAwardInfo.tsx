@@ -20,12 +20,15 @@ type TranslationKeys =
 const OpportunityAwardInfo = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.award_info");
 
-  const formatCurrency = (number: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(number);
+  const formatCurrency = (number: number | null) => {
+    if (number) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+      }).format(number);
+    }
+    return "";
   };
 
   const formatSubContent = (content: boolean | string | null | string[]) => {
