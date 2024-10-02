@@ -40,7 +40,7 @@ export default function Unsubscribe() {
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p className="usa-intro">{t("paragraph_1")}</p>
-            <Link className="usa-button margin-bottom-4" href="/newsletter">
+            <Link className="usa-button margin-bottom-4" href="/subscribe">
               {t("button_resub")}
             </Link>
           </Grid>

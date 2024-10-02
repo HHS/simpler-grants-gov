@@ -16,7 +16,7 @@ const IndexGoalContent = () => {
     >
       <Grid tabletLg={{ col: 6 }}>
         <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
-        <Link href="/newsletter" passHref>
+        <Link href="/subscribe" passHref>
           <Button className="margin-bottom-4" type="button" size="big">
             <span className="margin-right-5">{t("goal.cta")}</span>
             <USWDSIcon

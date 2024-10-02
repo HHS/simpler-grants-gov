@@ -63,7 +63,7 @@ const ResearchImpact = () => {
               </a>
             ),
             strong: (chunks) => <strong>{chunks}</strong>,
-            newsletter: (chunks) => <a href={"/newsletter"}>{chunks}</a>,
+            subscribe: (chunks) => <a href={"/subscribe"}>{chunks}</a>,
             arrowUpRightFromSquare: () => (
               <USWDSIcon
                 className="usa-icon text-middle"
