@@ -80,8 +80,8 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">
               <ContentDisplayToggle
-                toggleOffText={t("filterDisplayToggle.showFilters")}
-                toggleOnText={t("filterDisplayToggle.hideFilters")}
+                showCallToAction={t("filterDisplayToggle.showFilters")}
+                hideCallToAction={t("filterDisplayToggle.hideFilters")}
                 breakpoint={Breakpoints.TABLET}
               >
                 <SearchFilters

@@ -13,24 +13,27 @@ import { USWDSIcon } from "src/components/USWDSIcon";
  *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
  */
 export default function ContentDisplayToggle({
-  toggleOnText,
-  toggleOffText,
+  hideCallToAction,
+  showCallToAction,
   breakpoint,
+  showContentByDefault = false,
   children,
 }: {
-  toggleOnText: string;
-  toggleOffText: string;
+  hideCallToAction: string;
+  showCallToAction: string;
   breakpoint?: Breakpoints;
+  showContentByDefault?: boolean;
   children: React.ReactNode;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
-    useState<boolean>(false);
+    useState<boolean>(showContentByDefault);
 
   const iconName = toggledContentVisible ? "arrow_drop_up" : "arrow_drop_down";
 
   return (
     <>
       <div
+        data-testid="content-display-toggle"
         className={clsx(
           "display-flex",
           "flex-column",
@@ -38,20 +41,16 @@ export default function ContentDisplayToggle({
           breakpoint && `${breakpoint}:display-none`,
         )}
       >
-        <div data-testid="content-display-toggle" className="grid-col-4">
-          <button
-            onClick={(_event) =>
-              setToggledContentVisible(!toggledContentVisible)
-            }
-            aria-pressed={toggledContentVisible}
-            className="usa-button usa-button--unstyled text-no-underline"
-          >
-            <USWDSIcon name={iconName} className="usa-icon usa-icon--size-4" />
-            <span className="text-bold">
-              {toggledContentVisible ? toggleOnText : toggleOffText}
-            </span>
-          </button>
-        </div>
+        <button
+          onClick={(_event) => setToggledContentVisible(!toggledContentVisible)}
+          aria-pressed={toggledContentVisible}
+          className="usa-button usa-button--unstyled text-no-underline"
+        >
+          <USWDSIcon name={iconName} className="usa-icon usa-icon--size-4" />
+          <span className="text-bold">
+            {toggledContentVisible ? hideCallToAction : showCallToAction}
+          </span>
+        </button>
       </div>
       <div
         className={clsx(
