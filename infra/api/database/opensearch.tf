@@ -1,10 +1,7 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region
 data "aws_region" "current" {}
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity
 data "aws_caller_identity" "current" {}
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group
 resource "aws_cloudwatch_log_group" "opensearch" {
   name_prefix = "opensearch-${var.environment_name}"
 
@@ -14,7 +11,6 @@ resource "aws_cloudwatch_log_group" "opensearch" {
   # checkov:skip=CKV_AWS_158:skip requirement to encrypt with customer managed KMS key
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 resource "aws_security_group" "opensearch" {
   name_prefix = "opensearch-${var.environment_name}"
   description = "Security group for OpenSearch domain ${var.environment_name}"
@@ -35,20 +31,14 @@ resource "aws_security_group" "opensearch" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
 data "aws_iam_policy_document" "opensearch_access" {
   statement {
-    effect = "Allow"
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
+    effect    = "Allow"
     actions   = ["es:*"]
     resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.environment_name}/*"]
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document
 data "aws_iam_policy_document" "opensearch_cloudwatch" {
   statement {
     effect = "Allow"
@@ -65,12 +55,10 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_random_password
 data "aws_secretsmanager_random_password" "opensearch_username" {
   password_length = 16
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "opensearch_username" {
   name        = "/opensearch/${var.environment_name}/username"
   description = "The username for the OpenSearch domain"
@@ -78,12 +66,10 @@ resource "aws_ssm_parameter" "opensearch_username" {
   value       = data.aws_secretsmanager_random_password.opensearch_username.random_password
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_random_password
 data "aws_secretsmanager_random_password" "opensearch_password" {
   password_length = 16
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "opensearch_password" {
   name        = "/opensearch/${var.environment_name}/password"
   description = "The password for the OpenSearch domain"
@@ -91,13 +77,11 @@ resource "aws_ssm_parameter" "opensearch_password" {
   value       = data.aws_secretsmanager_random_password.opensearch_password.random_password
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_resource_policy
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
   policy_name     = "opensearch-${var.environment_name}"
   policy_document = data.aws_iam_policy_document.opensearch_cloudwatch.json
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_domain
 resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.environment_name
   engine_version  = "OpenSearch_2.11"
@@ -176,7 +160,6 @@ resource "aws_opensearch_domain" "opensearch" {
   # checkov:skip=CKV_AWS_247:skip requirement to encrypt with customer managed KMS key
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/opensearch_vpc_endpoint
 resource "aws_opensearch_vpc_endpoint" "opensearch" {
   domain_arn = aws_opensearch_domain.opensearch.arn
   vpc_options {
