@@ -10,7 +10,7 @@ test.afterEach(async ({ context }) => {
 });
 
 test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle(/Newsletter | Simpler.Grants.gov/);
+  await expect(page).toHaveTitle(/Subscribe | Simpler.Grants.gov/);
 });
 
 test("client side errors", async ({ page }) => {

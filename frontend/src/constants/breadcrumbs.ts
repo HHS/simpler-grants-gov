@@ -3,7 +3,7 @@ import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const RESEARCH: Breadcrumb = { title: "Research", path: "/research/" };
 const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
-const NEWSLETTER: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
+const NEWSLETTER: Breadcrumb = { title: "Subscribe", path: "/newsletter/" };
 const SEARCH: Breadcrumb = {
   title: "Search",
   path: "/search?status=forecasted,posted",
