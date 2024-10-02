@@ -7,20 +7,14 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearch
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Suspense, useMemo } from "react";
+import { Suspense } from "react";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import PageSEO from "src/components/PageSEO";
 import SearchBar from "src/components/search/SearchBar";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
-import { SearchFilterConfiguration } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import {
-  agencyOptions,
-  categoryOptions,
-  eligibilityOptions,
-  fundingOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchPagination from "src/components/search/SearchPagination";
 import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
@@ -84,17 +78,19 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">
-              <SearchFilters
-                opportunityStatus={status}
-                eligibility={eligibility}
-                category={category}
-                fundingInstrument={fundingInstrument}
-                agency={agency}
-                categoryTitle={t("accordion.titles.category")}
-                eligibilityTitle={t("accordion.titles.eligibility")}
-                fundingTitle={t("accordion.titles.funding")}
-                agencyTitle={t("accordion.titles.agency")}
-              />
+              <ContentDisplayToggle
+                toggleOffText={t("filterDisplayToggle.showFilters")}
+                toggleOnText={t("filterDisplayToggle.hideFilters")}
+                visibleClassname="tablet:display-block"
+              >
+                <SearchFilters
+                  opportunityStatus={status}
+                  eligibility={eligibility}
+                  category={category}
+                  fundingInstrument={fundingInstrument}
+                  agency={agency}
+                />
+              </ContentDisplayToggle>
             </div>
             <div className="tablet:grid-col-8">
               <Suspense
