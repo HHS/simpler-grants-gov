@@ -140,7 +140,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     unarchive_date: Mapped[date | None]
 
     # The award amounts can be for several billion requiring us to use BigInteger
-    expected_number_of_awards: Mapped[int | None]
+    expected_number_of_awards: Mapped[int | None] = mapped_column(BigInteger)
     estimated_total_program_funding: Mapped[int | None] = mapped_column(BigInteger)
     award_floor: Mapped[int | None] = mapped_column(BigInteger)
     award_ceiling: Mapped[int | None] = mapped_column(BigInteger)

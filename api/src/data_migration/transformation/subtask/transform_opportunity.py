@@ -51,7 +51,6 @@ class TransformOpportunity(AbstractTransformSubTask):
                 target_opportunity,
                 transform_constants.OPPORTUNITY,
                 extra,
-                error_on_missing_target=True,
             )
 
         else:
