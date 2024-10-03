@@ -1,3 +1,16 @@
+output "opensearch_config" {
+  value = var.has_opensearch ? {
+    multi_az_with_standby_enabled = var.opensearch_multi_az_with_standby_enabled
+    zone_awareness_enabled        = var.opensearch_zone_awareness_enabled
+    dedicated_master_enabled      = var.opensearch_dedicated_master_enabled
+    instance_count                = var.opensearch_instance_count
+    instance_type                 = var.opensearch_instance_type
+    dedicated_master_count        = var.opensearch_dedicated_master_count
+    dedicated_master_type         = var.opensearch_dedicated_master_type
+    availability_zone_count       = var.opensearch_availability_zone_count
+  } : null
+}
+
 output "database_config" {
   value = var.has_database ? {
     region                      = var.default_region
