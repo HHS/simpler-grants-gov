@@ -8,7 +8,14 @@ resource "random_password" "opensearch_username" {
 }
 
 # The master password must be generated 5 ~ 10 times before you can get a master password that meets the requirements.
-# This is because the master password cannot be fully configured to meet opensearch requirements.
+# This is because the master password cannot be fully configured to meet opensearch requirements. The error message
+# you'll get is:
+#
+#   ValidationException: The master user password must contain at least one uppercase letter, one lowercase letter,
+#   one number, and one special character.
+#
+# The password generated is supposed to meet these requirements, but for some reason it often doesn't.
+# Thusly, we generate the password multiple times until we get one that meets the requirements.
 resource "random_password" "opensearch_password" {
   length           = 16
   min_lower        = 1
