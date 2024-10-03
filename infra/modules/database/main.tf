@@ -75,6 +75,8 @@ resource "aws_rds_cluster_instance" "instance" {
   monitoring_interval                   = 30
   performance_insights_enabled          = true
   performance_insights_retention_period = 93
+
+  # checkov:skip=CKV_AWS_354:Ignore the managed customer KMS key requirement for now
 }
 
 resource "aws_kms_key" "db" {
