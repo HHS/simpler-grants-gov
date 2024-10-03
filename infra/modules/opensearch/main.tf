@@ -96,4 +96,6 @@ resource "aws_opensearch_domain" "opensearch" {
   }
 
   # checkov:skip=CKV_AWS_247:skip requirement to encrypt with customer managed KMS key
+  # checkov:skip=CKV_AWS_317:false positve, we do have audit logs enabled
+  # checkov:skip=CKV_AWS_318:we use a high availability setup in prod
 }

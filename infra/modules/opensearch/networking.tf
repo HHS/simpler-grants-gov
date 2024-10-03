@@ -16,6 +16,9 @@ resource "aws_security_group" "opensearch" {
   lifecycle {
     create_before_destroy = true
   }
+
+  # checkov:skip=CKV_AWS_23:false positve, we do have a description
+  # checkov:skip=CKV2_AWS_5:false positve, this security group is attached to opensearch
 }
 
 resource "aws_opensearch_vpc_endpoint" "opensearch" {
