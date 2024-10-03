@@ -421,8 +421,8 @@ def transform_update_create_timestamp(
     target.updated_at = updated_timestamp
 
 
-TRUTHY = {"Y", "Yes"}
-FALSEY = {"N", "No"}
+TRUTHY = {"Y", "Yes", "y", "yes"}
+FALSEY = {"N", "No", "n", "no"}
 
 
 def convert_yn_bool(value: str | None) -> bool | None:
