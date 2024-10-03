@@ -19,7 +19,7 @@ Simpler needs to surface Grant Opportunities to Grant Seekers to ensure that the
 
 ## Options Considered
 
-- Roll our own search engine in [PostgreSQL]()
+- Roll our own search engine in [PostgreSQL](https://postgresql.org)
 - [Elastic Search](https://www.elastic.co/)
 - [OpenSearch](https://opensearch.org/)
 
@@ -50,12 +50,11 @@ Utilize some PostgreSQL supported SQL syntax to do searches as SQL SELECT querie
 - **Pros**
   - No additional infra/cost
   - Infra already exists
-  - Very quick, but very bad, MVP implementation
   - Works with existing data we're already tracking, no data sync needed
 - **Cons**
   - Not a core/frequently utilized portion of the product functionality
   - Still wasn't really "utilizing" the existing data/skillset as special indexes/syntax are needed
-  - Potential for issues scaling since it would require scaling the entire DB
+  - Creates issues scaling since it would require scaling the entire DB instance to account for search traffic
   - Harder to support new search features, onboard new developers, etc.
   - Slow queries
 
