@@ -232,6 +232,26 @@ class TestProcessOpportunity(BaseTestClass):
         "summary_info,expected_opportunity_status",
         SINGLE_SUMMARY_PARAMS,
     )
+    def test_process_opportunity_is_draft(
+        self, set_current_opportunities_task, db_session, summary_info, expected_opportunity_status
+    ):
+        # Regardless of the state of the opportunity summary, if the opportunity
+        # is a draft, it will not get a status
+        container = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=summary_info.is_forecast,
+            post_date=summary_info.post_date,
+            close_date=summary_info.close_date,
+            archive_date=summary_info.archive_date,
+            is_expected_current=False,
+        )
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        validate_current_opportunity(db_session, container, None)
+
+    @pytest.mark.parametrize(
+        "summary_info,expected_opportunity_status",
+        SINGLE_SUMMARY_PARAMS,
+    )
     def test_single_summary_scenario(
         self,
         set_current_opportunities_task,
@@ -503,6 +523,15 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
             )
         )
 
+        # A scenario where the opportunity summary is valid, but the opportunity is a draft
+        container6 = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=NON_FORECAST_AFTER_POST_DATE_2.is_forecast,
+            post_date=NON_FORECAST_AFTER_POST_DATE_2.post_date,
+            close_date=NON_FORECAST_AFTER_POST_DATE_2.close_date,
+            archive_date=NON_FORECAST_AFTER_POST_DATE_2.archive_date,
+            is_expected_current=False,
+        )
+
         set_current_opportunities_task.run()
 
         validate_current_opportunity(db_session, container1, OpportunityStatus.POSTED)
@@ -510,12 +539,13 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
         validate_current_opportunity(db_session, container3, None)
         validate_current_opportunity(db_session, container4, None)
         validate_current_opportunity(db_session, container5, OpportunityStatus.POSTED)
+        validate_current_opportunity(db_session, container6, None)
 
         # Check a few basic metrics that should be set
         metrics = set_current_opportunities_task.metrics
 
-        assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 5
-        assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 1
+        assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 6
+        assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 2
         assert metrics[set_current_opportunities_task.Metrics.MODIFIED_OPPORTUNITY_COUNT] == 4
 
 
