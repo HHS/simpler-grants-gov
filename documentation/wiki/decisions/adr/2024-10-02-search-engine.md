@@ -27,7 +27,7 @@ Simpler needs to surface Grant Opportunities to Grant Seekers to ensure that the
 
 Chosen option: "OpenSearch" because:
 
-- Rolling our own doesn't make sense so that eliminates PostgreSQL
+- Rolling our own is more complex than we would like, even relative to deploying Opensearch, so that eliminates PostgreSQL
 - Elastic had licensing issues/controversy that they've since walked back but has lost the trust of the Open Source community
 - OpenSearch largely tracks Elastic, but has a dedicated community and is direcly committed to avoiding situations like Elastic experienced.
 
