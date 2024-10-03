@@ -53,7 +53,8 @@ Utilize some PostgreSQL supported SQL syntax to do searches as SQL SELECT querie
   - Very quick, but very bad, MVP implementation
   - Works with existing data we're already tracking, no data sync needed
 - **Cons**
-  - Not a well used/documented portion of the product functionality
+  - Not a core/frequently utilized portion of the product functionality
+  - Still wasn't really "utilizing" the existing data/skillset as special indexes/syntax are needed
   - Potential for issues scaling since it would require scaling the entire DB
   - Harder to support new search features, onboard new developers, etc.
   - Slow queries
