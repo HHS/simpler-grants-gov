@@ -27,14 +27,14 @@ Simpler needs to surface Grant Opportunities to Grant Seekers to ensure that the
 
 Chosen option: "OpenSearch" because:
 
-- Rolling our own doesn't make sense so that elinates PostgreSQL
+- Rolling our own doesn't make sense so that eliminates PostgreSQL
 - Elastic had licensing issues/controversy that they've since walked back but has lost the trust of the Open Source community
 - OpenSearch largely tracks Elastic, but has a dedicated community and is direcly committed to avoiding situations like Elastic experienced.
 
 ### Positive Consequences <!-- OPTIONAL -->
 
-- Using a dedicated search product provides a ton of funtionality and features out of the box
-- An isloated search engine allows us to scale/tune independently of the operational database.
+- Using a dedicated search product provides a ton of functionality and features out of the box
+- An isolated search engine allows us to scale/tune independently of the operational database.
 - The "search queries" have documented syntax, an existing testing/troubleshooting environment, and can share expertise across Nava teams.
 
 ### Negative Consequences <!-- OPTIONAL -->
