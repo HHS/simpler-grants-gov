@@ -110,13 +110,13 @@ resource "aws_opensearch_domain" "opensearch" {
   }
 
   cluster_config {
-    instance_type                 = "m6g.large.search"
-    dedicated_master_type         = "m6g.large.search"
+    instance_type                 = "or1.medium.search"
+    dedicated_master_type         = "or1.medium.search"
     multi_az_with_standby_enabled = true
     zone_awareness_enabled        = true
     dedicated_master_enabled      = true
     instance_count                = 3
-    dedicated_master_count        = 3
+    dedicated_master_count        = 1
     zone_awareness_config {
       availability_zone_count = 3
     }
