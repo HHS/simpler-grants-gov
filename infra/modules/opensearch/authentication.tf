@@ -16,6 +16,9 @@ resource "random_password" "opensearch_username" {
 #
 # The password generated is supposed to meet these requirements, but for some reason it often doesn't.
 # Thusly, we generate the password multiple times until we get one that meets the requirements.
+# You can regenerate the password by running:
+#
+#   terraform state rm "module.opensearch[0].random_password.opensearch_password"
 resource "random_password" "opensearch_password" {
   length           = 16
   min_lower        = 1
