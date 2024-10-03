@@ -37,5 +37,6 @@ export function getNextRoutes(src: string): string[] {
     return route.replace(/\/\//g, "/");
   });
 
-  return appRoutes;
+  const filteredRoutes = appRoutes.filter((item) => item !== "/[...not-found]");
+  return filteredRoutes;
 }
