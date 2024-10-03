@@ -15,11 +15,10 @@ module "staging_config" {
   opensearch_zone_awareness_enabled        = false
   opensearch_dedicated_master_enabled      = false
   opensearch_dedicated_master_count        = 1
-  opensearch_dedicated_master_type         = "m6g.large.search" # 0.128/hour = 92/month
+  opensearch_dedicated_master_type         = "m6g.large.search"
   opensearch_instance_count                = 1
-  opensearch_instance_type                 = "or1.medium.search" # 0.105/hour = 76/month
+  opensearch_instance_type                 = "or1.medium.search"
   opensearch_availability_zone_count       = 3
-  # total = 168/month
 
   # See api/src/data_migration/command/load_transform.py for argument specifications.
   load_transform_args = [

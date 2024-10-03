@@ -16,11 +16,10 @@ module "prod_config" {
   opensearch_zone_awareness_enabled        = true
   opensearch_dedicated_master_enabled      = true
   opensearch_instance_count                = 3
-  opensearch_instance_type                 = "or1.medium.search" # 0.128/hour = 92/month * 3 = 276/month
+  opensearch_instance_type                 = "or1.medium.search"
   opensearch_dedicated_master_count        = 3
-  opensearch_dedicated_master_type         = "m6g.large.search" # 0.105/hour = 76/month * 3 = 228/month
+  opensearch_dedicated_master_type         = "m6g.large.search"
   opensearch_availability_zone_count       = 3
-  # total = 504/month
 
   # See api/src/data_migration/command/load_transform.py for argument specifications.
   load_transform_args = [
