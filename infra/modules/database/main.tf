@@ -82,6 +82,7 @@ resource "aws_rds_cluster_instance" "instance" {
 resource "aws_kms_key" "db" {
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 # Query Logging
