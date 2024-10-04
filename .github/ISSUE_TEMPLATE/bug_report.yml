@@ -1,58 +1,48 @@
-name: Bug Report
-description: File a bug report
-title: "[Bug]: "
-labels: ["bug"]
-assignees:
-  - octocat
+name: Bug
+description: Report a bug
+title: "[Bug] "
+type: Bug
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
-  - type: input
-    id: contact
-    attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: ex. email@example.com
-    validations:
-      required: false
   - type: textarea
-    id: what-happened
+    id: summary
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
-    validations:
-      required: true
-  - type: textarea
-    id: steps-to-repro
-    attributes:
-      label: Steps to reproduce the behavior
-      description: How can we verify the bug ourselves?
+      label: Summary
+      description: Please describe the bug you experienced
+      placeholder: What happened? What did you want to happen?
     validations:
       required: true
   - type: dropdown
-    id: priority
+    id: reproducibility
     attributes:
-      label: Priority
-      description: Suggested bug priority
+      label: Reproducibility
+      description: Please describe the frequency of the bug
       options:
-        - low (inconvenience)
-        - medium (please fix soon)
-        - high (this is breaking and/or blocking)
+        - It happened once then I did not try again
+        - It happened once then I tried again and everything worked
+        - I tried multiple times and saw the bug every time
+        - I tried multiple times and saw the bug intermittently
+        - None of the above
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: How to reproduce the bug
+      description: To see the bug with our own eyes, what steps should we follow?
     validations:
-      required: true
-  - type: textarea
-    id: logs
+      required: false
+  - type: dropdown
+    id: browser
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-  - type: textarea
-    id: screenshots-and-context
-    attributes:
-      label: Screenshots and additional context
-      description: Please upload any relevant screenshots.
+      label: Browser
+      description: Which web browser were you using when you experienced the bug? (if any)
+      options:
+        - Chrome
+        - Firefox
+        - Internet Explorer
+        - Microsoft Edge
+        - Safari
+        - Other
+        - I do not know
+        - Not applicable
   - type: checkboxes
     id: terms
     attributes:
