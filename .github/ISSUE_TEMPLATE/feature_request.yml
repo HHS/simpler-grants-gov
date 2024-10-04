@@ -1,9 +1,7 @@
 name: Feature Request
-description: File a feature request
-title: "[Feature Request]: "
-labels: ["enhancement"]
-assignees:
-  - octocat
+description: Request a new feature
+title: "[Feature] "
+type: Enhancement
 body:
   - type: markdown
     attributes:
@@ -18,29 +16,19 @@ body:
     validations:
       required: false
   - type: textarea
-    id: describe-problem
+    id: problem_statement
     attributes:
       label: Is your feature request related to a problem? Please describe
       description: A clear and concise description of what the problem is.
     validations:
       required: false
   - type: textarea
-    id: describe-solution
+    id: desired_behavior
     attributes:
       label: A clear and concise description of what you want to happen
       description: Help us understand your improvement ideas.
     validations:
       required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Describe alternatives you've considered
-      description: A clear and concise description of any alternative solutions or features you've considered.
-  - type: textarea
-    id: screenshots-and-context
-    attributes:
-      label: Screenshots and additional context
-      description: Please upload any relevant screenshots.
   - type: checkboxes
     id: terms
     attributes:
