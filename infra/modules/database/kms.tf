@@ -8,4 +8,5 @@ resource "aws_kms_key" "dms_endpoints" {
   description         = "NO LONGER IN USE"
   enable_key_rotation = true
   is_enabled          = false
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
