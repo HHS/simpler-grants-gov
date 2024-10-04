@@ -51,7 +51,7 @@ body:
       description: Leave the following acceptance criteria unchecked when the ticket is created then mark them as completed as you meet each criterion with the ADR
       options:
         - label: The approvers for this decision have been identified (ideally before work on the ADR starts)
-        - label: The ADR is created and stored in `documentation/decisions/adr` with status "Accepted"
+        - label: The ADR is created and stored in `documentation/wiki/decisions/adr` with status "Accepted"
         - label: The ADR has been reviewed and approved by the approvers listed above
         - label: The ADR satisfies requirements that are outlined in the ADR template
         - label: Any follow-up tickets have been created (if necessary)
