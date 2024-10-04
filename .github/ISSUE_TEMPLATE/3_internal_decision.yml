@@ -1,6 +1,7 @@
 name: Internal - Decision
 description: Describe a decision that needs to be made and recorded
 type: Task
+labels: ["docs: adr"]
 body:
   - type: markdown
     attributes:
