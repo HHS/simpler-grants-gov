@@ -3,20 +3,23 @@
 import { z } from 'zod'
 import { environment } from '../constants/environments'
 import { redirect } from 'next/navigation'
-
-const schema = z.object({
-    name: z.string().min(1, {
-        message: 'You must enter a name',
-    }),
-    email: z.string().min(1, {
-        message: 'You must enter an email address',
-    }).email({
-        message: 'Invalid email address',
-    }),
-})
+import { getTranslations } from 'next-intl/server';
 
 // this function is a Next.js server action!
 export default async function subscribeEmail(prevState: any, formData: FormData) {
+    const t = await getTranslations("Subscribe");
+
+    const schema = z.object({
+        name: z.string().min(1, {
+            message: t('errors.missing_name'),
+        }),
+        email: z.string().min(1, {
+            message: t('errors.missing_email'),
+        }).email({
+            message: t('errors.invalid_email'),
+        }),
+    })
+    
     const validatedFields = schema.safeParse({
         name: formData.get('name'),
         email: formData.get('email'),

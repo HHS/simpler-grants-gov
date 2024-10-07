@@ -12,14 +12,12 @@ import {
 
 import { useTranslations } from "next-intl";
 
-import { useFormState, useFormStatus } from 'react-dom'
+import { useFormState } from 'react-dom'
 import subscribeEmail from '../../actions';
 import { SubscriptionSubmitButton } from './SubscriptionSubmitButton';
 
 export default function SubscriptionForm() {
     const t = useTranslations("Subscribe");
-
-    
     
     const [state, formAction] = useFormState(subscribeEmail, {
         errorMessage: '',
@@ -34,9 +32,9 @@ export default function SubscriptionForm() {
         <form action={formAction}>
             <FormGroup error={showError("name")}>
                 <Label htmlFor="name">
-                    First Name{" "}
+                    {t('form.name') + " "}
                     <span title="required" className="usa-hint usa-hint--required ">
-                        (required)
+                        ({t('form.req')})
                     </span>
                 </Label>
                 {showError("name") ? (
@@ -53,8 +51,11 @@ export default function SubscriptionForm() {
                     id="name"
                 />
             </FormGroup>
-            <Label htmlFor="LastName" hint=" (optional)">
-                Last Name
+            <Label htmlFor="LastName">
+                {t('form.lastName') + " "}
+                <span title="optional" className="usa-hint usa-hint--optional ">
+                    ({t('form.opt')})
+                </span>
             </Label>
             <TextInput
                 type="text"
@@ -63,9 +64,9 @@ export default function SubscriptionForm() {
             />
             <FormGroup error={showError("email")}>
                 <Label htmlFor="email">
-                    Email{" "}
+                    {t('form.email') + " "}
                     <span title="required" className="usa-hint usa-hint--required ">
-                        (required)
+                        ({t('form.req')})
                     </span>
                 </Label>
                 {showError("email") ? (
