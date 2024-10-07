@@ -5,7 +5,7 @@ from typing import Sequence, Tuple
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, ScoringRuleEnum
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -14,7 +14,12 @@ from src.search.search_models import (
     IntSearchFilter,
     StrSearchFilter,
 )
-from src.services.opportunities_v1.experimental_constant import AGENCY, DEFAULT, EXPANDED
+from src.services.opportunities_v1.experimental_constant import (
+    AGENCY,
+    DEFAULT,
+    EXPANDED,
+    ScoringRule,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +47,12 @@ REQUEST_FIELD_NAME_MAPPING = {
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
 }
 
+SCORING_RULE_MAPPING = {
+    ScoringRule.EXPANDED: EXPANDED,
+    ScoringRule.AGENCY: AGENCY,
+    ScoringRule.DEFAULT: DEFAULT,
+}
+
 SCHEMA = OpportunityV1Schema()
 
 
@@ -65,8 +76,8 @@ class OpportunityFilters(BaseModel):
     close_date: DateSearchFilter | None = None
 
 
-class ScoringRule(BaseModel):
-    scoring_rule: ScoringRuleEnum = Field(default=ScoringRuleEnum.DEFAULT)
+class Experimental(BaseModel):
+    scoring_rule: ScoringRule = Field(default=ScoringRule.DEFAULT)
 
 
 class SearchOpportunityParams(BaseModel):
@@ -142,13 +153,10 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
 
     # Query
     if params.query:
-        match params.experimental.scoring_rule:
-            case ScoringRuleEnum.EXPANDED:
-                builder.simple_query(params.query, EXPANDED)
-            case ScoringRuleEnum.AGENCY:
-                builder.simple_query(params.query, AGENCY)
-            case ScoringRuleEnum.DEFAULT:
-                builder.simple_query(params.query, DEFAULT)
+        scoring_rule = SCORING_RULE_MAPPING.get(
+            params.experimental.scoring_rule, ScoringRule.DEFAULT
+        )
+        builder.simple_query(params.query, scoring_rule)
 
     # Filters
     _add_search_filters(builder, params.filters)
