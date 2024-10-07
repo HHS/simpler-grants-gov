@@ -74,7 +74,7 @@ jobs:
         # There is currently no way to specify the checkov version to pin to (See https://github.com/bridgecrewio/checkov-action/issues/41)
         # so we need to pin the version of the checkov-action, which indirectly pins the checkov version.
         # In this case, checkov-action v12.2874.0 is mapped to checkov v3.2.256.
-        uses: bridgecrewio/checkov-action@v12.2874.0
+        uses: bridgecrewio/checkov-action@v12.2875.0
         with:
           directory: infra
           framework: terraform
