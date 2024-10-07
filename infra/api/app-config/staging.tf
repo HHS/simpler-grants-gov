@@ -11,7 +11,7 @@ module "staging_config" {
   database_min_capacity           = 2
 
   has_opensearch = true
-  # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/supported-instance-types.html
+  # https://aws.amazon.com/opensearch-service/pricing/
   opensearch_dedicated_master_type = "m6g.large.search"
   opensearch_instance_type         = "or1.medium.search"
   # 20 is the minimum volume size for the or1.medium.search instance type.
