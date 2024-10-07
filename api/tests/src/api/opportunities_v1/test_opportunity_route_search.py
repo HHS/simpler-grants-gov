@@ -540,6 +540,42 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
             ),
+            # TESTING REQUEST WITH QUERY
+            # default scoring rule
+            (
+                get_search_request(
+                    page_size=3,
+                    page_offset=1,
+                    order_by="agency_code",
+                    sort_direction=SortDirection.DESCENDING,
+                    query="research"
+                ),
+                [],
+            ),
+            # # agency scoring rule
+            (
+                    get_search_request(
+                        page_size=3,
+                        page_offset=1,
+                        order_by="agency_code",
+                        sort_direction=SortDirection.DESCENDING,
+                        query="research",
+                        experimental={"scoring_rule": "agency"}
+                    ),
+                    [],
+            ),
+            # # expanded scoring rule
+            (
+                    get_search_request(
+                        page_size=3,
+                        page_offset=1,
+                        order_by="agency_code",
+                        sort_direction=SortDirection.DESCENDING,
+                        query="research",
+                        experimental={"scoring_rule": "expanded"}
+                    ),
+                    [],
+            ),
         ],
         ids=search_scenario_id_fnc,
     )
