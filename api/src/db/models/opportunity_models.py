@@ -362,9 +362,7 @@ class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
-    opportunity: Mapped[Opportunity] = relationship(
-        single_parent=True, cascade="all, delete-orphan"
-    )
+    opportunity: Mapped[Opportunity] = relationship(single_parent=True)
 
     opportunity_summary_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -372,9 +370,7 @@ class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
         primary_key=True,
         index=True,
     )
-    opportunity_summary: Mapped[OpportunitySummary] = relationship(
-        single_parent=True, cascade="all, delete-orphan"
-    )
+    opportunity_summary: Mapped[OpportunitySummary] = relationship(single_parent=True)
 
     opportunity_status: Mapped[OpportunityStatus] = mapped_column(
         "opportunity_status_id",

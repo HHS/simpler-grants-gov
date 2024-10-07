@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import pytest
 
 from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import CurrentOpportunitySummary, OpportunitySummary
+from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from src.util.datetime_util import get_now_us_eastern_date
 from tests.conftest import BaseTestClass
@@ -131,11 +131,16 @@ class OpportunityContainer:
 def validate_current_opportunity(
     db_session, container: OpportunityContainer, expected_status: OpportunityStatus | None
 ):
-    current_opportunity_summary = (
-        db_session.query(CurrentOpportunitySummary)
-        .where(CurrentOpportunitySummary.opportunity_id == container.opportunity.opportunity_id)
+    # Force all opportunity changes to be flushed to the DB and removed from any session cache
+    db_session.commit()
+    db_session.expunge_all()
+
+    opportunity = (
+        db_session.query(Opportunity)
+        .where(Opportunity.opportunity_id == container.opportunity.opportunity_id)
         .one_or_none()
     )
+    current_opportunity_summary = opportunity.current_opportunity_summary
 
     is_current_none = current_opportunity_summary is None
     is_none_expected = container.expected_current_summary is None
