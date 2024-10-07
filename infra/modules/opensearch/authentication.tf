@@ -20,7 +20,7 @@ resource "random_password" "opensearch_username" {
 #
 #   terraform state rm "module.opensearch[0].random_password.opensearch_password"
 resource "random_password" "opensearch_password" {
-  length           = 16
+  length           = 128
   min_lower        = 1
   min_upper        = 1
   min_numeric      = 1
