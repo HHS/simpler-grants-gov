@@ -1,5 +1,3 @@
-import React from "react";
-
 import pick from "lodash/pick";
 import { Metadata } from "next";
 import SubscriptionForm from "src/app/[locale]/subscribe/SubscriptionForm";
