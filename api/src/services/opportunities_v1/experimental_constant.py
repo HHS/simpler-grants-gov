@@ -37,9 +37,6 @@ AGENCY = [
 
 
 class ScoringRule(StrEnum):
-    def __init__(self):
-        self.scoring_rule = None
-
     DEFAULT = "default"
     EXPANDED = "expanded"
     AGENCY = "agency"

@@ -129,19 +129,6 @@ examples = {
             },
         },
     },
-    "example7": {
-        "summary": "Query & search config",
-        "value": {
-            "query": "research",
-            "experimental": {"scoring_rule": "default"},
-            "pagination": {
-                "order_by": "opportunity_id",
-                "page_offset": 1,
-                "page_size": 25,
-                "sort_direction": "descending",
-            },
-        },
-    },
 }
 
 
