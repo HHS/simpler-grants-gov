@@ -47,46 +47,51 @@ const ProcessMilestones = () => {
         bottomBorder="dark"
         gridGap={6}
       >
-        {high_level_roadmap_items.map((_unusedItem, index) => {
-          const title = t(`high_level_roadmap_items.${index}.title`);
-          const content = t.rich(`high_level_roadmap_items.${index}.content`, {
-            p: (chunks) => (
-              <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-                {chunks}
-              </p>
-            ),
-            italics: (chunks) => <em>{chunks}</em>,
-          });
+        <IconList className="usa-icon-list--size-lg">
+          <Grid row>
+            {high_level_roadmap_items.map((_unusedItem, index) => {
+              const title = t(`high_level_roadmap_items.${index}.title`);
+              const content = t.rich(
+                `high_level_roadmap_items.${index}.content`,
+                {
+                  p: (chunks) => (
+                    <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+                      {chunks}
+                    </p>
+                  ),
+                  italics: (chunks) => <em>{chunks}</em>,
+                },
+              );
 
-          return (
-            <Grid key={title + "-key"} tabletLg={{ col: 4 }}>
-              <IconList className="usa-icon-list--size-lg">
-                <IconListItem className="margin-top-4">
-                  <IconListIcon>{getIcon(index)}</IconListIcon>
-                  <IconListContent className="tablet-lg:padding-right-3 desktop-lg:padding-right-105">
-                    <IconListTitle className="margin-bottom-2" type="h3">
-                      {title}
-                    </IconListTitle>
-                    <div className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-                      {content}
-                    </div>
-                    {
-                      // Don't show the chevron in the last row item.
-                      index < high_level_roadmap_items.length - 1 ? (
-                        <USWDSIcon
-                          className="usa-icon usa-icon--size-9 display-none tablet-lg:display-block text-base-lighter position-absolute right-0 top-0 margin-right-neg-5"
-                          name="navigate_next"
-                        />
-                      ) : (
-                        ""
-                      )
-                    }
-                  </IconListContent>
-                </IconListItem>
-              </IconList>
-            </Grid>
-          );
-        })}
+              return (
+                <Grid key={title + "-key"} tabletLg={{ col: true }}>
+                  <IconListItem className="margin-top-4">
+                    <IconListIcon>{getIcon(index)}</IconListIcon>
+                    <IconListContent>
+                      <IconListTitle className="margin-bottom-2" type="h3">
+                        {title}
+                      </IconListTitle>
+                      <div className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6 tablet:padding-right-50">
+                        {content}
+                      </div>
+                      {
+                        // Don't show the chevron in the last row item.
+                        index < high_level_roadmap_items.length - 1 ? (
+                          <USWDSIcon
+                            className="usa-icon usa-icon--size-9 display-none tablet-lg:display-block text-base-lighter position-absolute right-0 top-0"
+                            name="navigate_next"
+                          />
+                        ) : (
+                          ""
+                        )
+                      }
+                    </IconListContent>
+                  </IconListItem>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </IconList>
       </ContentLayout>
       <ContentLayout
         title={
