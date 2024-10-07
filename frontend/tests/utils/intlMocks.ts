@@ -15,7 +15,7 @@ export const mockMessages = {
       boxes: ["firstKey"],
     },
     milestones: {
-      icon_list: ["firstIcon"],
+      high_level_roadmap_items: ["firstIcon"],
     },
   },
   Research: {
