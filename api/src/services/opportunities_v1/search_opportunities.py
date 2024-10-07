@@ -47,7 +47,7 @@ REQUEST_FIELD_NAME_MAPPING = {
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
 }
 
-SCORING_RULE_MAPPING = {
+FILTER_RULE_MAPPING = {
     ScoringRule.EXPANDED: EXPANDED,
     ScoringRule.AGENCY: AGENCY,
     ScoringRule.DEFAULT: DEFAULT,
@@ -85,7 +85,7 @@ class SearchOpportunityParams(BaseModel):
 
     query: str | None = Field(default=None)
     filters: OpportunityFilters | None = Field(default=None)
-    experimental: ScoringRule = Field(default=ScoringRule())
+    experimental: Experimental = Field(default=Experimental())
 
 
 def _adjust_field_name(field: str) -> str:
@@ -153,10 +153,10 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
 
     # Query
     if params.query:
-        scoring_rule = SCORING_RULE_MAPPING.get(
-            params.experimental.scoring_rule, ScoringRule.DEFAULT
+        filter_rule = FILTER_RULE_MAPPING.get(
+            params.experimental.scoring_rule, DEFAULT
         )
-        builder.simple_query(params.query, scoring_rule)
+        builder.simple_query(params.query, filter_rule)
 
     # Filters
     _add_search_filters(builder, params.filters)
