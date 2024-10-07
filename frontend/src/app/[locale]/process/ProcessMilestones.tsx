@@ -10,7 +10,6 @@ import {
   IconListContent,
   IconListIcon,
   IconListItem,
-  IconListTitle,
 } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";
@@ -64,14 +63,17 @@ const ProcessMilestones = () => {
               );
 
               return (
-                <Grid key={title + "-key"} tabletLg={{ col: true }}>
+                <Grid key={title + "-key"} tabletLg={{ col: 4 }}>
                   <IconListItem className="margin-top-4">
                     <IconListIcon>{getIcon(index)}</IconListIcon>
-                    <IconListContent>
-                      <IconListTitle className="margin-bottom-2" type="h3">
+                    <IconListContent className="tablet:padding-right-7">
+                      <h4
+                        aria-label={`Step ${index + 1}: ${title}`}
+                        className="margin-bottom-2 usa-icon-list__title"
+                      >
                         {title}
-                      </IconListTitle>
-                      <div className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6 tablet:padding-right-50">
+                      </h4>
+                      <div className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
                         {content}
                       </div>
                       {
