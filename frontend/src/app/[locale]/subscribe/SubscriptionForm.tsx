@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 import {
@@ -10,33 +12,25 @@ import {
 
 import { useTranslations } from "next-intl";
 
+import { useFormState, useFormStatus } from 'react-dom'
+import subscribeEmail from '../../actions';
+
 export default function SubscriptionForm() {
     const t = useTranslations("Subscribe");
 
-    const validateField = (fieldName: string) => {
-        return "valid";
-    };
+    const { pending } = useFormStatus()
+    
+    const [state, formAction] = useFormState(subscribeEmail, {
+        errorMessage: '',
+        validationErrors: {}
+    });
 
-    const showError = (fieldName: string): boolean => false
-
-    async function subscribeAction(formData: FormData) {
-        // Server Action
-        'use server';
-
-        console.log('server action!!')
-
-        const rawFormData = {
-            name: formData.get('name'),
-            LastName: formData.get('LastName'),
-            email: formData.get('email'),
-            hp: formData.get('hp'),
-        }
-
-        console.log(rawFormData)
-      }
+    const showError = (fieldName: string): boolean => {
+        return state?.validationErrors[fieldName] !== undefined;
+    }
 
     return (
-        <form action={subscribeAction}>
+        <form action={formAction}>
             <FormGroup error={showError("name")}>
                 <Label htmlFor="name">
                     First Name{" "}
@@ -46,12 +40,13 @@ export default function SubscriptionForm() {
                 </Label>
                 {showError("name") ? (
                     <ErrorMessage className="maxw-mobile-lg">
-                        {validateField("name")}
+                        {state?.validationErrors['name']![0]}
                     </ErrorMessage>
                 ) : (
                     <></>
                 )}
                 <TextInput
+                    disabled={pending}
                     aria-required
                     type="text"
                     name="name"
@@ -62,6 +57,7 @@ export default function SubscriptionForm() {
                 Last Name
             </Label>
             <TextInput
+                disabled={pending}
                 type="text"
                 name="LastName"
                 id="LastName"
@@ -75,12 +71,13 @@ export default function SubscriptionForm() {
                 </Label>
                 {showError("email") ? (
                     <ErrorMessage className="maxw-mobile-lg">
-                        {validateField("email")}
+                        {state?.validationErrors['email']![0]}
                     </ErrorMessage>
                 ) : (
                     <></>
                 )}
                 <TextInput
+                     disabled={pending}
                     aria-required
                     type="email"
                     name="email"
@@ -90,14 +87,18 @@ export default function SubscriptionForm() {
             <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
                 <TextInput
+                    disabled={pending}
                     type="text"
                     name="hp"
                     id="hp"
                 />
             </div>
-            <Button type="submit" name="submit" id="submit" className="margin-top-4">
+            <Button disabled={pending} type="submit" name="submit" id="submit" className="margin-top-4 margin-bottom-1">
                 Subscribe
             </Button>
+            {state?.errorMessage.length > 0 ? (<ErrorMessage className="maxw-mobile-lg">
+                {state?.errorMessage}
+            </ErrorMessage>) : <></>}
         </form>
     )
 }
