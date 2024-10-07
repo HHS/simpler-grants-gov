@@ -17,10 +17,13 @@ import ContentLayout from "src/components/ContentLayout";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 const ProcessMilestones = () => {
-  const t = useTranslations("Process");
+  const t = useTranslations("Process.milestones");
 
-  const messages = useMessages() as unknown as IntlMessages;
-  const keys = Object.keys(messages.Process.milestones.icon_list);
+  const {
+    Process: {
+      milestones: { high_level_roadmap_items },
+    },
+  } = useMessages() as unknown as IntlMessages;
 
   const getIcon = (iconIndex: number) => {
     switch (iconIndex) {
@@ -38,15 +41,15 @@ const ProcessMilestones = () => {
   return (
     <>
       <ContentLayout
-        title={t("milestones.tag")}
+        title={t("tag")}
         data-test-id="process-high-level-content"
         titleSize="m"
         bottomBorder="dark"
         gridGap={6}
       >
-        {keys.map((key, index) => {
-          const title = t(`milestones.icon_list.${key}.title`);
-          const content = t.rich(`milestones.icon_list.${key}.content`, {
+        {high_level_roadmap_items.map((_unusedItem, index) => {
+          const title = t(`high_level_roadmap_items.${index}.title`);
+          const content = t.rich(`high_level_roadmap_items.${index}.content`, {
             p: (chunks) => (
               <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
                 {chunks}
@@ -69,7 +72,7 @@ const ProcessMilestones = () => {
                     </div>
                     {
                       // Don't show the chevron in the last row item.
-                      index < keys.length - 1 ? (
+                      index < high_level_roadmap_items.length - 1 ? (
                         <USWDSIcon
                           className="usa-icon usa-icon--size-9 display-none tablet-lg:display-block text-base-lighter position-absolute right-0 top-0 margin-right-neg-5"
                           name="navigate_next"
@@ -89,14 +92,14 @@ const ProcessMilestones = () => {
         title={
           <>
             <small className="display-block font-sans-lg margin-bottom-105">
-              {t("milestones.roadmap_1")}
+              {t("roadmap_1")}
               <USWDSIcon
                 className="usa-icon usa-icon--size-4 text-middle text-base-light"
                 name="navigate_next"
               />
-              {t("milestones.title_1")}
+              {t("title_1")}
             </small>
-            {t("milestones.name_1")}
+            {t("name_1")}
           </>
         }
         data-testid="process-methodology-content"
@@ -104,24 +107,24 @@ const ProcessMilestones = () => {
         bottomBorder="none"
       >
         <Grid tabletLg={{ col: 6 }}>
-          <p className="usa-intro">{t("milestones.paragraph_1")}</p>
+          <p className="usa-intro">{t("paragraph_1")}</p>
         </Grid>
         <Grid tabletLg={{ col: 6 }}>
           <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
-            {t("milestones.sub_title_1")}
+            {t("sub_title_1")}
           </h3>
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-            {t("milestones.sub_paragraph_1")}
+            {t("sub_paragraph_1")}
           </p>
           <h3 className="tablet-lg:font-sans-lg margin-top-4 margin-bottom-2">
-            {t("milestones.sub_title_2")}
+            {t("sub_title_2")}
           </h3>
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
-            {t("milestones.sub_paragraph_2")}
+            {t("sub_paragraph_2")}
           </p>
           <Link href={ExternalRoutes.MILESTONE_GET_OPPORTUNITIES} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
-              <span className="margin-right-5">{t("milestones.cta_1")}</span>
+              <span className="margin-right-5">{t("cta_1")}</span>
               <USWDSIcon
                 name="launch"
                 className="usa-icon usa-icon--size-4 text-middle margin-left-neg-4"
@@ -134,14 +137,14 @@ const ProcessMilestones = () => {
         title={
           <>
             <small className="display-block font-sans-lg margin-bottom-105">
-              {t("milestones.roadmap_2")}
+              {t("roadmap_2")}
               <USWDSIcon
                 className="usa-icon usa-icon--size-4 text-middle text-base-light"
                 name="navigate_next"
               />
-              {t("milestones.title_2")}
+              {t("title_2")}
             </small>
-            {t("milestones.name_2")}
+            {t("name_2")}
           </>
         }
         data-testid="process-methodology-content"
@@ -150,17 +153,17 @@ const ProcessMilestones = () => {
         bottomBorder="none"
       >
         <Grid tabletLg={{ col: 6 }}>
-          <p className="usa-intro">{t("milestones.paragraph_2")}</p>
+          <p className="usa-intro">{t("paragraph_2")}</p>
         </Grid>
         <Grid tabletLg={{ col: 6 }}>
           <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
-            {t("milestones.sub_title_3")}
+            {t("sub_title_3")}
           </h3>
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"></p>
           <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6"></p>
           <Link href={ExternalRoutes.MILESTONE_SEARCH_MVP} passHref>
             <Button className="margin-bottom-4" type="button" size="big">
-              <span className="margin-right-5">{t("milestones.cta_2")}</span>
+              <span className="margin-right-5">{t("cta_2")}</span>
               <USWDSIcon
                 name="launch"
                 className="usa-icon usa-icon--size-4 text-middle margin-left-neg-4"
