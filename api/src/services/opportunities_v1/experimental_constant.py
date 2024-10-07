@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 DEFAULT = [
     # Note that we do keyword for agency & opportunity number
     # as we don't want to compare to a tokenized value which
@@ -32,3 +34,12 @@ AGENCY = [
     "summary.agency_email_address_description",
     "summary.agency_phone_number.keyword",
 ]
+
+
+class ScoringRule(StrEnum):
+    def __init__(self):
+        self.scoring_rule = None
+
+    DEFAULT = "default"
+    EXPANDED = "expanded"
+    AGENCY = "agency"
