@@ -14,11 +14,12 @@ import { useTranslations } from "next-intl";
 
 import { useFormState, useFormStatus } from 'react-dom'
 import subscribeEmail from '../../actions';
+import { SubscriptionSubmitButton } from './SubscriptionSubmitButton';
 
 export default function SubscriptionForm() {
     const t = useTranslations("Subscribe");
 
-    const { pending } = useFormStatus()
+    
     
     const [state, formAction] = useFormState(subscribeEmail, {
         errorMessage: '',
@@ -46,7 +47,6 @@ export default function SubscriptionForm() {
                     <></>
                 )}
                 <TextInput
-                    disabled={pending}
                     aria-required
                     type="text"
                     name="name"
@@ -57,7 +57,6 @@ export default function SubscriptionForm() {
                 Last Name
             </Label>
             <TextInput
-                disabled={pending}
                 type="text"
                 name="LastName"
                 id="LastName"
@@ -77,7 +76,6 @@ export default function SubscriptionForm() {
                     <></>
                 )}
                 <TextInput
-                     disabled={pending}
                     aria-required
                     type="email"
                     name="email"
@@ -87,15 +85,12 @@ export default function SubscriptionForm() {
             <div className="display-none">
                 <Label htmlFor="hp">HP</Label>
                 <TextInput
-                    disabled={pending}
                     type="text"
                     name="hp"
                     id="hp"
                 />
             </div>
-            <Button disabled={pending} type="submit" name="submit" id="submit" className="margin-top-4 margin-bottom-1">
-                Subscribe
-            </Button>
+            <SubscriptionSubmitButton />
             {state?.errorMessage.length > 0 ? (<ErrorMessage className="maxw-mobile-lg">
                 {state?.errorMessage}
             </ErrorMessage>) : <></>}
