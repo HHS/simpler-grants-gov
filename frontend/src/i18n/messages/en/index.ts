@@ -1,3 +1,5 @@
+import { optimizeImage } from "next/dist/server/image-optimizer";
+
 export const messages = {
   Beta_alert: {
     alert_title:
@@ -332,16 +334,20 @@ export const messages = {
       "If you sign up for the Simpler.Grants.gov product updates, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.", 
+    form: {
+      name: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      req: "required",
+      opt: "optional",
+      button: "Subscribe",
+    },
     errors: {
-      missing_name: "Enter your first name.",
-      missing_email: "Enter your email address.",
+      missing_name: "Please enter a name.",
+      missing_email: "Please enter an email address.",
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
-      already_subscribed:
-        "<email_address/> is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
-      sendy:
-        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
     },
   },
   Subscription_confirmation: {
