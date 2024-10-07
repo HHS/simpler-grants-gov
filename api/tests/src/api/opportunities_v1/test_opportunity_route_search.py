@@ -540,42 +540,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
             ),
-            # TESTING REQUEST WITH QUERY
-            # default scoring rule
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=1,
-                    order_by="agency_code",
-                    sort_direction=SortDirection.DESCENDING,
-                    query="research"
-                ),
-                [],
-            ),
-            # # agency scoring rule
-            (
-                    get_search_request(
-                        page_size=3,
-                        page_offset=1,
-                        order_by="agency_code",
-                        sort_direction=SortDirection.DESCENDING,
-                        query="research",
-                        experimental={"scoring_rule": "agency"}
-                    ),
-                    [],
-            ),
-            # # expanded scoring rule
-            (
-                    get_search_request(
-                        page_size=3,
-                        page_offset=1,
-                        order_by="agency_code",
-                        sort_direction=SortDirection.DESCENDING,
-                        query="research",
-                        experimental={"scoring_rule": "expanded"}
-                    ),
-                    [],
-            ),
         ],
         ids=search_scenario_id_fnc,
     )
@@ -1267,6 +1231,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         [
             # Note that the sorting is not relevancy for this as we intend to update the relevancy scores a bit
             # and don't want to break this every time we adjust those.
+            # default scoring rule
             (
                 get_search_request(
                     order_by="opportunity_id", sort_direction=SortDirection.ASCENDING, query="space"
@@ -1341,3 +1306,55 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "funding_category",
             "opportunity_status",
         }
+
+    @pytest.mark.parametrize(
+        "search_request,expected_response",
+        [
+            # default scoring rule
+            (
+                get_search_request(
+                    order_by="opportunity_id",
+                    sort_direction=SortDirection.ASCENDING,
+                    query="literacy",
+                ),
+                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
+                [],
+            ),
+            # agency scoring rule
+            (
+                get_search_request(
+                    order_by="opportunity_id",
+                    sort_direction=SortDirection.ASCENDING,
+                    query="literacy",
+                    experimental={"scoring_rule": "agency"},
+                ),
+                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
+                [],
+            ),
+            # expanded scoring rule
+            (
+                get_search_request(
+                    order_by="opportunity_id",
+                    sort_direction=SortDirection.ASCENDING,
+                    query="literacy",
+                    experimental={"scoring_rule": "expanded"},
+                ),
+                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
+                [],
+            ),
+        ],
+    )
+    def test_search_experimental_200(
+        self, client, api_auth_token, search_request, expected_response
+    ):
+        # We are only testing for 200 responses when adding the experimental field into the request body.
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
+
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
