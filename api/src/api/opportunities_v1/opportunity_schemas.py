@@ -429,7 +429,7 @@ class ScoringRuleEnum(StrEnum):
     AGENCY = "agency"
 
 
-class ScoringRuleSchema:
+class ScoringRuleSchema(Schema):
     scoring_rule = fields.Enum(
         ScoringRuleEnum,
         load_default=ScoringRuleEnum.DEFAULT,
