@@ -25,7 +25,7 @@ variable "opensearch_instance_type" {
 }
 
 variable "opensearch_engine_version" {
-  type = number
+  type = string
 }
 
 variable "opensearch_volume_size" {

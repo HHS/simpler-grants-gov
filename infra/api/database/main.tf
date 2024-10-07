@@ -90,12 +90,12 @@ module "opensearch" {
   dedicated_master_enabled      = var.environment_name == "prod" ? true : false
   dedicated_master_count        = var.environment_name == "prod" ? 3 : 1
   instance_count                = var.environment_name == "prod" ? 3 : 1
-  subnet_ids                    = slice(data.aws_subnets.database.ids, 0, local.opensearch_config.dedicated_master_count)
+  subnet_ids                    = slice(data.aws_subnets.database.ids, 0, var.environment_name == "prod" ? 3 : 1)
   cidr_block                    = data.aws_vpc.network.cidr_block
-  engine_version                = var.opensearch_config.engine_version
+  engine_version                = local.opensearch_config.engine_version
   dedicated_master_type         = local.opensearch_config.dedicated_master_type
   instance_type                 = local.opensearch_config.instance_type
-  volume_size                   = var.opensearch_config.volume_size
+  volume_size                   = local.opensearch_config.volume_size
   vpc_id                        = data.aws_vpc.network.id
 }
 

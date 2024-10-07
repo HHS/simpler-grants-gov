@@ -29,7 +29,7 @@ resource "random_password" "opensearch_password" {
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
-  name        = "/opensearch/${var.environment_name}/username"
+  name        = "/opensearch/${var.name}/username"
   description = "The username for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_username.result
@@ -37,7 +37,7 @@ resource "aws_ssm_parameter" "opensearch_username" {
 }
 
 resource "aws_ssm_parameter" "opensearch_password" {
-  name        = "/opensearch/${var.environment_name}/password"
+  name        = "/opensearch/${var.name}/password"
   description = "The password for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_password.result
@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "opensearch_access" {
     }
     effect    = "Allow"
     actions   = ["es:*"]
-    resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.environment_name}/*"]
+    resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.name}/*"]
   }
 }
 
