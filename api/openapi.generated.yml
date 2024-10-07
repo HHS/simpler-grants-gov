@@ -251,6 +251,17 @@ paths:
                     page_offset: 1
                     page_size: 25
                     sort_direction: descending
+              example7:
+                summary: Query & search config
+                value:
+                  query: research
+                  experimental:
+                    scoring_rule: default
+                  pagination:
+                    order_by: opportunity_id
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v0.1/opportunities/search:
@@ -1036,6 +1047,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/CloseDateFilterV1'
+    ScoringRule:
+      type: object
+      properties:
+        scoring_rule:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.ScoringRuleEnum
+          - default
+          description: Scoring rule to query against OpenSearch
+          enum:
+          - default
+          - expanded
+          - agency
+          type:
+          - string
     OpportunityPaginationV1:
       type: object
       properties:
@@ -1086,6 +1110,11 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+        experimental:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ScoringRule'
         pagination:
           type:
           - object
