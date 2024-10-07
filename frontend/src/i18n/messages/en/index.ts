@@ -271,7 +271,7 @@ export const messages = {
     },
     milestones: {
       tag: "The high-level roadmap",
-      icon_list: [
+      high_level_roadmap_items: [
         {
           title: "Find",
           content:
