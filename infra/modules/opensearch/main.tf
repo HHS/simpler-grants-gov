@@ -22,7 +22,7 @@ resource "aws_cloudwatch_log_resource_policy" "opensearch" {
 
 resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.name
-  engine_version  = "OpenSearch_2.11"
+  engine_version  = "OpenSearch_2.15"
   access_policies = data.aws_iam_policy_document.opensearch_access.json
 
   encrypt_at_rest {
