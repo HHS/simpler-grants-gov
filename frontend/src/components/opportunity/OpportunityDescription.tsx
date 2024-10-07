@@ -49,10 +49,9 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
     ? opportunityData.summary.agency_phone_number.replace(/-/g, "")
     : "";
 
-  const additionalInformationOnEligibility = opportunityData.summary
-    .applicant_eligibility_description
-    ? opportunityData.summary.applicant_eligibility_description
-    : "--";
+  const additionalInformationOnEligibility =
+    opportunityData.summary.applicant_eligibility_description ?? "--";
+  const agency_email = opportunityData.summary.agency_email_address ?? "";
   return (
     <>
       <div className="usa-prose">
@@ -60,7 +59,7 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              opportunityData.summary.summary_description,
+              opportunityData.summary.summary_description ?? "",
             ),
           }}
         />
@@ -76,13 +75,15 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              opportunityData.summary.agency_contact_description,
+              opportunityData.summary.agency_contact_description
+                ? opportunityData.summary.agency_contact_description
+                : "",
             ),
           }}
         />
-        <p>{opportunityData.summary.agency_email_address}</p>
+        <p>{agency_email}</p>
         <p>
-          <a href={`mailto:${opportunityData.summary.agency_email_address}`}>
+          <a href={`mailto:${agency_email}`}>
             {opportunityData.summary.agency_email_address_description}
           </a>
         </p>

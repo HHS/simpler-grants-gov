@@ -210,3 +210,10 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
     ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
     : 0;
 }
+
+export async function toggleMobileSearchFilters(page: Page) {
+  const toggleButton = page.locator(
+    "div[data-testid='content-display-toggle'] .usa-button--unstyled",
+  );
+  await toggleButton.click();
+}

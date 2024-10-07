@@ -80,13 +80,24 @@ def test_transform_update_create_timestamp(
 
 @pytest.mark.parametrize(
     "value,expected_value",
-    [("Y", True), ("N", False), ("Yes", True), ("No", False), ("", None), (None, None)],
+    [
+        ("Y", True),
+        ("N", False),
+        ("Yes", True),
+        ("No", False),
+        ("Y", True),
+        ("n", False),
+        ("yes", True),
+        ("no", False),
+        ("", None),
+        (None, None),
+    ],
 )
 def test_convert_yn_boolean(value, expected_value):
     assert transform_util.convert_yn_bool(value) == expected_value
 
 
-@pytest.mark.parametrize("value", ["X", "Z", "y", "n", "1", "0", "yes", "no"])
+@pytest.mark.parametrize("value", ["X", "Z", "1", "0", "yEs", "nO"])
 def test_convert_yn_boolean_unexpected_value(value):
     with pytest.raises(ValueError, match="Unexpected Y/N bool value"):
         transform_util.convert_yn_bool(value)

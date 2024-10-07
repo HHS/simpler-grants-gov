@@ -59,6 +59,7 @@ data "aws_iam_policy_document" "vpc_flow_log_cloudwatch" {
     ]
 
     # checkov:skip=CKV_AWS_111:This is literally the AWS reccomended way to do this. Also its just logs.
+    # checkov:skip=CKV_AWS_356:This is literally the AWS reccomended way to do this. Also its just logs.
     resources = ["*"]
   }
 }

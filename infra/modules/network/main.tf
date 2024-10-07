@@ -9,6 +9,7 @@ locals {
 module "aws_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.13.0"
+  # checkov:skip=CKV_TF_1:Difference of opinion, I think using the version number is fine here.
 
   name = var.name
   azs  = local.availability_zones

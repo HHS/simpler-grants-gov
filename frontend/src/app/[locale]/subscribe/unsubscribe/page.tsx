@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { NEWSLETTER_UNSUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
+import { UNSUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
@@ -13,22 +13,22 @@ import PageSEO from "src/components/PageSEO";
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
   const meta: Metadata = {
-    title: t("Newsletter.page_title"),
+    title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
   };
 
   return meta;
 }
 
-export default function NewsletterUnsubscribe() {
+export default function Unsubscribe() {
   unstable_setRequestLocale("en");
-  const t = useTranslations("Newsletter_unsubscribe");
+  const t = useTranslations("Unsubscription_confirmation");
 
   return (
     <>
       <PageSEO title={t("page_title")} description={t("intro")} />
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={NEWSLETTER_UNSUBSCRIBE_CRUMBS} />
+      <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
@@ -40,7 +40,7 @@ export default function NewsletterUnsubscribe() {
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p className="usa-intro">{t("paragraph_1")}</p>
-            <Link className="usa-button margin-bottom-4" href="/newsletter">
+            <Link className="usa-button margin-bottom-4" href="/subscribe">
               {t("button_resub")}
             </Link>
           </Grid>

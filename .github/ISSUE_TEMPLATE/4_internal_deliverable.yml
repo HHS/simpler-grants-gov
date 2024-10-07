@@ -1,0 +1,51 @@
+name: Internal - Deliverable
+description: Describe an agile deliverable
+type: Deliverable
+body:
+  - type: textarea
+    id: press_release
+    attributes:
+      label: Press release
+      description: A brief summary that captures what is exciting and important about this deliverable
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: One to three short acceptance criteria that are clear indicators of whether this deliverable is complete
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      description: Two to three metrics relating to customer experience that this deliverable is intended to impact
+    validations:
+      required: true
+
+  - type: textarea
+    id: related_goals
+    attributes:
+      label: Related goals
+      description: Which of the overall project goals will this deliverable advance?
+    validations:
+      required: false
+
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Assumptions and dependencies
+      description: A bulleted list of assumptions and dependencies
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Additional information
+      description: Any important additional information about this deliverable that is not captured above
+    validations:
+      required: false

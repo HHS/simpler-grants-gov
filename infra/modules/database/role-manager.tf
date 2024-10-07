@@ -82,6 +82,7 @@ data "aws_kms_key" "default_ssm_key" {
 resource "aws_kms_key" "role_manager" {
   description         = "Key for Lambda function ${local.role_manager_name}"
   enable_key_rotation = true
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 data "aws_secretsmanager_secret" "db_password" {

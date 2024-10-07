@@ -5,6 +5,8 @@ import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.
 // Process all of them so they're just a string (or number for page)
+
+// The above doesn't seem to still be true, should we update? - DWS
 export function convertSearchParamsToProperTypes(
   params: ServerSideSearchParams,
 ): QueryParamData {

@@ -41,7 +41,7 @@ const ResearchMethodology = () => {
         <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
           {t("methodology.title_3")}
         </p>
-        <Link href="/newsletter" passHref>
+        <Link href="/subscribe" passHref>
           <Button className="margin-bottom-4" type="button" outline>
             <span className="margin-right-4">{t("methodology.cta")}</span>
             <USWDSIcon

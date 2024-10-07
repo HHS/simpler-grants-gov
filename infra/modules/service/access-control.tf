@@ -34,6 +34,7 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
 
 data "aws_iam_policy_document" "task_executor" {
   # checkov:skip=CKV_AWS_111:Ignore some IAM policy checks for the task executor role
+  # checkov:skip=CKV_AWS_356:TODO: https://github.com/HHS/simpler-grants-gov/issues/2365
 
   # Allow ECS to log to Cloudwatch.
   statement {

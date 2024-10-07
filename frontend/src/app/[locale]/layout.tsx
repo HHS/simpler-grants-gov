@@ -6,6 +6,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Metadata } from "next";
 import { environment, PUBLIC_ENV } from "src/constants/environments";
 
+import "src/styles/styles.scss";
+
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, unstable_setRequestLocale } from "next-intl/server";
 
@@ -39,7 +41,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
       </head>

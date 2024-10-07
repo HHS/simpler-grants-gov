@@ -1,14 +1,9 @@
-import pick from "lodash/pick";
 import { Metadata } from "next";
-import NewsletterForm from "src/app/[locale]/newsletter/NewsletterForm";
-import { NEWSLETTER_CRUMBS } from "src/constants/breadcrumbs";
+import { SUBSCRIBE_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
 
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
+import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import Link from "next/link";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
@@ -18,23 +13,22 @@ import PageSEO from "src/components/PageSEO";
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
   const meta: Metadata = {
-    title: t("Newsletter.page_title"),
+    title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
   };
 
   return meta;
 }
 
-export default function Newsletter() {
+export default function SubscriptionConfirmation() {
   unstable_setRequestLocale("en");
-  const t = useTranslations("Newsletter");
-  const messages = useMessages();
+  const t = useTranslations("Subscription_confirmation");
 
   return (
     <>
       <PageSEO title={t("page_title")} description={t("intro")} />
       <BetaAlert />
-      <Breadcrumbs breadcrumbList={NEWSLETTER_CRUMBS} />
+      <Breadcrumbs breadcrumbList={SUBSCRIBE_CONFIRMATION_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <h1 className="margin-0 tablet-lg:font-sans-xl desktop-lg:font-sans-2xl">
@@ -46,22 +40,22 @@ export default function Newsletter() {
         <Grid row gap className="flex-align-start">
           <Grid tabletLg={{ col: 6 }}>
             <p className="usa-intro">{t("paragraph_1")}</p>
-            {t.rich("list", {
-              ul: (chunks) => (
-                <ul className="usa-list margin-top-0 tablet-lg:margin-top-3 font-sans-md line-height-sans-4">
-                  {chunks}
-                </ul>
-              ),
-              li: (chunks) => <li>{chunks}</li>,
-            })}
           </Grid>
           <Grid tabletLg={{ col: 6 }}>
-            <NextIntlClientProvider
-              locale="en"
-              messages={pick(messages, "Newsletter")}
-            >
-              <NewsletterForm />
-            </NextIntlClientProvider>
+            <h2 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
+              {t("heading")}
+            </h2>
+            <p className="margin-top-0 font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+              {t.rich("paragraph_2", {
+                strong: (chunks) => <strong>{chunks}</strong>,
+                "process-link": (chunks) => (
+                  <Link href="/process">{chunks}</Link>
+                ),
+                "research-link": (chunks) => (
+                  <Link href="/research">{chunks}</Link>
+                ),
+              })}
+            </p>
           </Grid>
         </Grid>
       </GridContainer>
