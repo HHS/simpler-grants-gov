@@ -16,6 +16,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.pagination.pagination_schema import generate_pagination_schema
+from src.services.opportunities_v1.experimental_constant import ScoringRule
 
 
 class SearchResponseFormat(StrEnum):
@@ -423,19 +424,13 @@ class OpportunityFacetV1Schema(Schema):
     )
 
 
-class ScoringRuleEnum(StrEnum):
-    DEFAULT = "default"
-    EXPANDED = "expanded"
-    AGENCY = "agency"
-
-
-class ScoringRuleSchema(Schema):
+class ExperimentalV1Schema(Schema):
     scoring_rule = fields.Enum(
-        ScoringRuleEnum,
-        load_default=ScoringRuleEnum.DEFAULT,
+        ScoringRule,
+        load_default=ScoringRule.DEFAULT,
         metadata={
             "description": "Scoring rule to query against OpenSearch",
-            "default": ScoringRuleEnum.DEFAULT,
+            "default": ScoringRule.DEFAULT,
         },
     )
 
@@ -450,7 +445,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
-    experimental = fields.Nested(ScoringRuleSchema())
+    experimental = fields.Nested(ExperimentalV1Schema())
     pagination = fields.Nested(
         generate_pagination_schema(
             "OpportunityPaginationV1Schema",
