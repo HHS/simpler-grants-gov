@@ -8,6 +8,11 @@ variable "cidr_block" {
   type        = string
 }
 
+variable "cold_storage_enabled" {
+  description = "Whether to enable cold storage"
+  type        = bool
+}
+
 variable "dedicated_master_enabled" {
   description = "Whether to enable dedicated master nodes"
   type        = bool
@@ -51,6 +56,21 @@ variable "name" {
 variable "subnet_ids" {
   description = "The subnet IDs of the VPC"
   type        = list(string)
+}
+
+variable "warm_count" {
+  description = "The number of warm nodes"
+  type        = number
+}
+
+variable "warm_enabled" {
+  description = "Whether to enable warm nodes"
+  type        = bool
+}
+
+variable "warm_type" {
+  description = "The instance type of the warm nodes"
+  type        = string
 }
 
 variable "volume_size" {

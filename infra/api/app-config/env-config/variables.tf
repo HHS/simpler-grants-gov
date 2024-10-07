@@ -28,6 +28,11 @@ variable "opensearch_engine_version" {
   type = string
 }
 
+variable "opensearch_warm_type" {
+  type    = string
+  default = null
+}
+
 variable "opensearch_volume_size" {
   type = number
 }

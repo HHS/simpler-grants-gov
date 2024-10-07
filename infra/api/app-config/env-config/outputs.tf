@@ -4,6 +4,7 @@ output "opensearch_config" {
     dedicated_master_type = var.opensearch_dedicated_master_type
     engine_version        = var.opensearch_engine_version
     volume_size           = var.opensearch_volume_size
+    warm_type             = var.opensearch_warm_type
   } : null
 }
 
