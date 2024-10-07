@@ -16,35 +16,19 @@ variable "has_opensearch" {
   type = bool
 }
 
-variable "opensearch_multi_az_with_standby_enabled" {
-  type = bool
-}
-
-variable "opensearch_zone_awareness_enabled" {
-  type = bool
-}
-
-variable "opensearch_dedicated_master_enabled" {
-  type = bool
-}
-
-variable "opensearch_dedicated_master_count" {
-  type = number
-}
-
 variable "opensearch_dedicated_master_type" {
   type = string
-}
-
-variable "opensearch_instance_count" {
-  type = number
 }
 
 variable "opensearch_instance_type" {
   type = string
 }
 
-variable "opensearch_availability_zone_count" {
+variable "opensearch_engine_version" {
+  type = number
+}
+
+variable "opensearch_volume_size" {
   type = number
 }
 

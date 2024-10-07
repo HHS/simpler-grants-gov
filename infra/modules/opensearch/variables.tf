@@ -23,8 +23,8 @@ variable "dedicated_master_type" {
   type        = string
 }
 
-variable "environment_name" {
-  description = "The environment to deploy to"
+variable "engine_version" {
+  description = "The version of OpenSearch to deploy"
   type        = string
 }
 
@@ -51,6 +51,11 @@ variable "name" {
 variable "subnet_ids" {
   description = "The subnet IDs of the VPC"
   type        = list(string)
+}
+
+variable "volume_size" {
+  description = "The EBS volume size of the OpenSearch domain"
+  type        = number
 }
 
 variable "vpc_id" {

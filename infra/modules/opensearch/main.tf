@@ -7,7 +7,7 @@ data "aws_ssm_parameter" "aws_canonical_user_id" {
 }
 
 resource "aws_cloudwatch_log_group" "opensearch" {
-  name_prefix = "opensearch-${var.environment_name}"
+  name_prefix = "opensearch-${var.name}"
 
   # Conservatively retain logs for 5 years.
   retention_in_days = 1827
@@ -16,13 +16,13 @@ resource "aws_cloudwatch_log_group" "opensearch" {
 }
 
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
-  policy_name     = "opensearch-${var.environment_name}"
+  policy_name     = "opensearch-${var.name}"
   policy_document = data.aws_iam_policy_document.opensearch_cloudwatch.json
 }
 
 resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.name
-  engine_version  = "OpenSearch_2.15"
+  engine_version  = var.engine_version
   access_policies = data.aws_iam_policy_document.opensearch_access.json
 
   encrypt_at_rest {
@@ -54,7 +54,7 @@ resource "aws_opensearch_domain" "opensearch" {
 
   ebs_options {
     ebs_enabled = true
-    volume_size = 20
+    volume_size = var.volume_size
   }
 
   node_to_node_encryption {

@@ -11,15 +11,11 @@ module "prod_config" {
   database_max_capacity           = 32
   database_min_capacity           = 2
 
-  has_opensearch                           = true
-  opensearch_multi_az_with_standby_enabled = true
-  opensearch_zone_awareness_enabled        = true
-  opensearch_dedicated_master_enabled      = true
-  opensearch_instance_count                = 3
-  opensearch_instance_type                 = "or1.medium.search"
-  opensearch_dedicated_master_count        = 3
-  opensearch_dedicated_master_type         = "m6g.large.search"
-  opensearch_availability_zone_count       = 3
+  has_opensearch                   = true
+  opensearch_instance_type         = "or1.medium.search"
+  opensearch_dedicated_master_type = "m6g.large.search"
+  opensearch_engine_version        = "OpenSearch_2.15"
+  opensearch_volume_size           = 20
 
   # See api/src/data_migration/command/load_transform.py for argument specifications.
   load_transform_args = [

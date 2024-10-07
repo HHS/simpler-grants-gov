@@ -10,15 +10,11 @@ module "dev_config" {
   database_max_capacity           = 16
   database_min_capacity           = 2
 
-  has_opensearch                           = true
-  opensearch_multi_az_with_standby_enabled = false
-  opensearch_zone_awareness_enabled        = false
-  opensearch_dedicated_master_enabled      = false
-  opensearch_dedicated_master_count        = 1
-  opensearch_dedicated_master_type         = "m6g.large.search"
-  opensearch_instance_count                = 1
-  opensearch_instance_type                 = "or1.medium.search"
-  opensearch_availability_zone_count       = 3
+  has_opensearch                   = true
+  opensearch_dedicated_master_type = "m6g.large.search"
+  opensearch_instance_type         = "or1.medium.search"
+  opensearch_engine_version        = "OpenSearch_2.15"
+  opensearch_volume_size           = 20
 
   # Runs, but with everything disabled.
   # See api/src/data_migration/command/load_transform.py for argument specifications.
