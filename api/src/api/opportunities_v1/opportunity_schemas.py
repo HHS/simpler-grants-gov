@@ -423,6 +423,23 @@ class OpportunityFacetV1Schema(Schema):
     )
 
 
+class ScoringRuleEnum(StrEnum):
+    DEFAULT = "default"
+    EXPANDED = "expanded"
+    AGENCY = "agency"
+
+
+class ScoringRuleSchema:
+    scoring_rule = fields.Enum(
+        ScoringRuleEnum,
+        load_default=ScoringRuleEnum.DEFAULT,
+        metadata={
+            "description": "Scoring rule to query against OpenSearch",
+            "default": ScoringRuleEnum.DEFAULT,
+        },
+    )
+
+
 class OpportunitySearchRequestV1Schema(Schema):
     query = fields.String(
         metadata={
@@ -433,7 +450,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
-
+    experimental = fields.Nested(ScoringRuleSchema())
     pagination = fields.Nested(
         generate_pagination_schema(
             "OpportunityPaginationV1Schema",
