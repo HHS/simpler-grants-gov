@@ -12,8 +12,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
-    "types": ["jest", "node"],
+    "jsx": "preserve",
     // Prevent .js source files. We only want to use TypeScript to
     // support comprehensive type checking.
     "allowJs": false,
