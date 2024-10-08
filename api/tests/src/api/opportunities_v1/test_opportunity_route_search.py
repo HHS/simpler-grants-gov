@@ -1325,9 +1325,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
         ],
     )
-    def test_search_experimental_200(
-        self, client, api_auth_token, search_request, expected_response
-    ):
+    def test_search_experimental_200(self, client, api_auth_token, search_request):
         # We are only testing for 200 responses when adding the experimental field into the request body.
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
