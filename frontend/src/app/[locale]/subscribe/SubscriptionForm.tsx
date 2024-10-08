@@ -16,16 +16,23 @@ import { useFormState } from 'react-dom'
 import subscribeEmail from '../../actions';
 import { SubscriptionSubmitButton } from './SubscriptionSubmitButton';
 
+type validationErrors = {
+    name?: string[];
+    email?: string[];
+}
+
 export default function SubscriptionForm() {
     const t = useTranslations("Subscribe");
     
     const [state, formAction] = useFormState(subscribeEmail, {
         errorMessage: '',
-        validationErrors: {}
+        validationErrors: {},
     });
 
     const showError = (fieldName: string): boolean => {
-        return state?.validationErrors[fieldName] !== undefined;
+        if(!state?.validationErrors) return false;
+
+        return (state?.validationErrors[fieldName as keyof validationErrors] !== undefined);
     }
 
     return (
@@ -92,7 +99,7 @@ export default function SubscriptionForm() {
                 />
             </div>
             <SubscriptionSubmitButton />
-            {state?.errorMessage.length > 0 ? (<ErrorMessage className="maxw-mobile-lg">
+            {state?.errorMessage?.length > 0 ? (<ErrorMessage className="maxw-mobile-lg">
                 {state?.errorMessage}
             </ErrorMessage>) : <></>}
         </form>
