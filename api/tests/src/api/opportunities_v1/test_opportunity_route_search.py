@@ -1231,7 +1231,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         [
             # Note that the sorting is not relevancy for this as we intend to update the relevancy scores a bit
             # and don't want to break this every time we adjust those.
-            # default scoring rule
             (
                 get_search_request(
                     order_by="opportunity_id", sort_direction=SortDirection.ASCENDING, query="space"
