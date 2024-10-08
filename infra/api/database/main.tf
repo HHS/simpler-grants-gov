@@ -88,10 +88,6 @@ module "opensearch" {
   zone_awareness_enabled        = var.environment_name == "prod" ? true : false
   multi_az_with_standby_enabled = var.environment_name == "prod" ? true : false
   dedicated_master_enabled      = var.environment_name == "prod" ? true : false
-  warm_enabled                  = var.environment_name == "prod" ? true : false
-  cold_storage_enabled          = var.environment_name == "prod" ? true : false
-  warm_type                     = var.environment_name == "prod" ? local.opensearch_config.warm_type : null
-  warm_count                    = var.environment_name == "prod" ? 3 : null
   dedicated_master_count        = var.environment_name == "prod" ? 3 : 1
   instance_count                = var.environment_name == "prod" ? 3 : 1
   subnet_ids                    = slice(data.aws_subnets.database.ids, 0, var.environment_name == "prod" ? 3 : 1)
