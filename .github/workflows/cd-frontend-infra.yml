@@ -1,5 +1,5 @@
 name: Deploy Frontend Infra
-run-name: Deploy ${{ github.ref_name }} to Frontend ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
+run-name: Deploy ${{ github.ref_name }} to Frontend Infra ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
