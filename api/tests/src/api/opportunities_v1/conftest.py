@@ -109,8 +109,6 @@ def get_search_request(
 
     if experimental is not None:
         req["experimental"] = experimental
-    else:
-        req["experimental"] = {"scoring_rule": "default"}
 
     return req
 

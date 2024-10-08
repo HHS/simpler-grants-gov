@@ -1307,39 +1307,21 @@ class TestOpportunityRouteSearch(BaseTestClass):
         }
 
     @pytest.mark.parametrize(
-        "search_request,expected_response",
+        "search_request",
         [
             # default scoring rule
-            (
-                get_search_request(
-                    order_by="opportunity_id",
-                    sort_direction=SortDirection.ASCENDING,
-                    query="literacy",
-                ),
-                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
-                [],
+            get_search_request(
+                query="literacy",
             ),
             # agency scoring rule
-            (
-                get_search_request(
-                    order_by="opportunity_id",
-                    sort_direction=SortDirection.ASCENDING,
-                    query="literacy",
-                    experimental={"scoring_rule": "agency"},
-                ),
-                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
-                [],
+            get_search_request(
+                query="literacy",
+                experimental={"scoring_rule": "agency"},
             ),
             # expanded scoring rule
-            (
-                get_search_request(
-                    order_by="opportunity_id",
-                    sort_direction=SortDirection.ASCENDING,
-                    query="literacy",
-                    experimental={"scoring_rule": "expanded"},
-                ),
-                # TODO: Not asserting responses right now. Experimental feature. Will be updated in the future
-                [],
+            get_search_request(
+                query="literacy",
+                experimental={"scoring_rule": "expanded"},
             ),
         ],
     )
