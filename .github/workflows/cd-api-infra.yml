@@ -1,5 +1,4 @@
 name: Deploy API Infra
-
 run-name: Deploy ${{ github.ref_name }} to API ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:

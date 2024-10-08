@@ -1,5 +1,4 @@
 name: Deploy Analytics Infra
-
 run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
