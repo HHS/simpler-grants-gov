@@ -153,9 +153,7 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
 
     # Query
     if params.query:
-        filter_rule = FILTER_RULE_MAPPING.get(
-            params.experimental.scoring_rule, DEFAULT
-        )
+        filter_rule = FILTER_RULE_MAPPING.get(params.experimental.scoring_rule, DEFAULT)
         builder.simple_query(params.query, filter_rule)
 
     # Filters
