@@ -17,7 +17,6 @@ RUN apt-get update \
     # https://pythonspeed.com/articles/security-updates-in-docker/
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
-        libc-bin libc6 \
         build-essential \
         libpq-dev \
         postgresql \
