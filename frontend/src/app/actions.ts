@@ -75,14 +75,14 @@ export default async function subscribeEmail(prevState: any, formData: FormData)
 
         if (!sendyResponse.ok || !["1", "true"].includes(responseData)) {
             return {
-                errorMessage: 'Failed to subscribe user due to a server error. Try again later.',
+                errorMessage: t('errors.server'),
                 validationErrors: {},
             }
         }
     } catch (error) {
         console.error("Error subscribing user:", (<Error>error).message);
         return {
-            errorMessage: 'Internal Server Error',
+            errorMessage: t('errors.server'),
             validationErrors: {},
         }
     }
