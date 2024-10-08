@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.10
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.10
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -63,5 +63,5 @@ jobs:
       - name: Terraform Init and Apply
         run: |
           ./bin/terraform-init.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
-          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
+          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}"
           ./bin/terraform-apply.sh infra/frontend/${{ matrix.directory }} ${{ matrix.envs }}
