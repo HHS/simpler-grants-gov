@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.10
+          terraform_version: 1.9
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.10
+          terraform_version: 1.9
           terraform_wrapper: false
 
       - name: Configure AWS credentials
