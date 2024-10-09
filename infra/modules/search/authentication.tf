@@ -77,15 +77,17 @@ resource "aws_ssm_parameter" "opensearch_password" {
 resource "aws_ssm_parameter" "opensearch_username" {
   name        = "/opensearch/${var.name}/username"
   description = "The username for the OpenSearch domain"
-  type        = "String"
+  type        = "SecureString"
   value       = random_password.opensearch_username.result
+  key_id      = aws_kms_key.opensearch.arn
 }
 
 resource "aws_ssm_parameter" "opensearch_endpoint" {
   name        = "/opensearch/${var.name}/endpoint"
   description = "The endpoint for the OpenSearch domain"
-  type        = "String"
+  type        = "SecureString"
   value       = aws_opensearch_domain.opensearch.endpoint
+  key_id      = aws_kms_key.opensearch.arn
 }
 
 data "aws_iam_policy_document" "opensearch_access" {
