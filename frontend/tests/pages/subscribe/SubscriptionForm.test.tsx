@@ -14,11 +14,15 @@ jest.mock('react-dom', () => {
         [
           {
             // Return a mock state object
-            errorMessage: "",
+            errorMessage: "errors.server",
             validationErrors: {name: ['errors.missing_name'], email: ['errors.missing_email', 'errors.invalid_email']},
           },
           // Mock setState function
-          jest.fn(),
+          ((payload: any) => {
+            'use server';
+            
+            console.log('mock fn')
+          }),
         ],
       ],
     };
@@ -46,6 +50,9 @@ describe('SubscriptionForm', () => {
         await userEvent.click(button);
 
         const validationErrors = screen.getAllByTestId('errorMessage');
+
+        console.log(screen)
+        console.log(validationErrors)
 
         expect(validationErrors).toHaveLength(2);
     });
