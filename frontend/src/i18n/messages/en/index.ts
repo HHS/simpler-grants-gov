@@ -1,5 +1,3 @@
-import { optimizeImage } from "next/dist/server/image-optimizer";
-
 export const messages = {
   Beta_alert: {
     alert_title:
