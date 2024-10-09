@@ -138,7 +138,7 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = local.service_config.extra_environment_variables
+  extra_environment_variables = merge(local.service_config.extra_environment_variables, { "ENVIRONMENT_NAME" : var.environment_name })
   secrets                     = local.service_config.secrets
 }
 
