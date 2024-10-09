@@ -22,6 +22,7 @@ resource "aws_kms_key" "opensearch" {
   enable_key_rotation = true
   policy = jsonencode({
     Version = "2012-10-17"
+    Id      = var.name
     Statement = [
       {
         Sid    = "Enable IAM User Permissions"
@@ -47,7 +48,7 @@ resource "aws_kms_key" "opensearch" {
         Sid    = "Allow administration of the key for all roles"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/*"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"
         },
         Action = [
           "kms:*",
