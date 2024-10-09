@@ -3,6 +3,7 @@ import Loading from "src/app/[locale]/search/loading";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
@@ -11,17 +12,11 @@ import { Suspense } from "react";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import PageSEO from "src/components/PageSEO";
 import SearchBar from "src/components/search/SearchBar";
 import SearchCallToAction from "src/components/search/SearchCallToAction";
-import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-import {
-  agencyOptions,
-  categoryOptions,
-  eligibilityOptions,
-  fundingOptions,
-} from "src/components/search/SearchFilterAccordion/SearchFilterOptions";
-import SearchOpportunityStatus from "src/components/search/SearchOpportunityStatus";
+import SearchFilters from "src/components/search/SearchFilters";
 import SearchPagination from "src/components/search/SearchPagination";
 import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
@@ -84,31 +79,19 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
           </div>
           <div className="grid-row grid-gap">
             <div className="tablet:grid-col-4">
-              <SearchOpportunityStatus query={status} />
-              <SearchFilterAccordion
-                filterOptions={fundingOptions}
-                title={t("accordion.titles.funding")}
-                queryParamKey="fundingInstrument"
-                query={fundingInstrument}
-              />
-              <SearchFilterAccordion
-                filterOptions={eligibilityOptions}
-                title={t("accordion.titles.eligibility")}
-                queryParamKey="eligibility"
-                query={eligibility}
-              />
-              <SearchFilterAccordion
-                filterOptions={agencyOptions}
-                title={t("accordion.titles.agency")}
-                queryParamKey="agency"
-                query={agency}
-              />
-              <SearchFilterAccordion
-                filterOptions={categoryOptions}
-                title={t("accordion.titles.category")}
-                queryParamKey="category"
-                query={category}
-              />
+              <ContentDisplayToggle
+                showCallToAction={t("filterDisplayToggle.showFilters")}
+                hideCallToAction={t("filterDisplayToggle.hideFilters")}
+                breakpoint={Breakpoints.TABLET}
+              >
+                <SearchFilters
+                  opportunityStatus={status}
+                  eligibility={eligibility}
+                  category={category}
+                  fundingInstrument={fundingInstrument}
+                  agency={agency}
+                />
+              </ContentDisplayToggle>
             </div>
             <div className="tablet:grid-col-8">
               <Suspense

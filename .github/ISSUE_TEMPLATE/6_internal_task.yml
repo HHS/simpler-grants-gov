@@ -1,8 +1,6 @@
 name: Internal - Task
-description: Describes an individual task that needs to be completed
-title: "[Task]: "
-assignees:
-  - octocat
+description: Describe a task that needs to be completed
+type: Task
 body:
   - type: textarea
     id: summary
@@ -12,10 +10,10 @@ body:
     validations:
       required: true
   - type: textarea
-    id: acceptance-criteria
+    id: acceptance_criteria
     attributes:
       label: Acceptance criteria
-      description: A clear and concise checklist of expectations including definition of done.
+      description: A clear and concise checklist of expectations including definition of done
       placeholder: Explain the steps to success!
     validations:
-      required: false
+      required: true

@@ -60,6 +60,7 @@
 
 * [Development](contributing/development/README.md)
   * [GitHub - Code](contributing/development/github-code.md)
+* [Fall 2024 Coding Challenge](contributing/fall-2024-coding-challenge.md)
 
 ## ANALYTICS
 

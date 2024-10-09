@@ -498,5 +498,9 @@ export const messages = {
       clear: "Clear All",
     },
     loading: "Loading Results",
+    filterDisplayToggle: {
+      showFilters: "Show Filters",
+      hideFilters: "Hide Filters",
+    },
   },
 };

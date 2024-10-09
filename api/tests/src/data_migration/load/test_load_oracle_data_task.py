@@ -85,6 +85,9 @@ class TestLoadOracleData(BaseTestClass):
         source_record4 = ForeignTopportunityFactory.create(
             opportunity_id=4, oppnumber="A-4-update", cfdas=[], last_upd_date=time3
         )
+        source_record5 = ForeignTopportunityFactory.create(
+            opportunity_id=6, oppnumber="A-6-update", cfdas=[], last_upd_date=time3
+        )
 
         ## Destination records
         # unchanged:
@@ -94,6 +97,9 @@ class TestLoadOracleData(BaseTestClass):
         # update:
         StagingTopportunityFactory.create(
             opportunity_id=4, oppnumber="A-4", cfdas=[], last_upd_date=time1
+        )
+        StagingTopportunityFactory.create(
+            opportunity_id=6, oppnumber="A-6", cfdas=[], last_upd_date=None
         )
         # delete:
         StagingTopportunityFactory.create(
@@ -109,8 +115,8 @@ class TestLoadOracleData(BaseTestClass):
         # this prevents some weirdness with the value comparison we'll do
         db_session.expire_all()
 
-        assert db_session.query(source_table).count() == 4
-        assert db_session.query(destination_table).count() == 5
+        assert db_session.query(source_table).count() == 5
+        assert db_session.query(destination_table).count() == 6
 
         destination_records = (
             db_session.query(destination_table).order_by(destination_table.c.opportunity_id).all()
@@ -123,13 +129,14 @@ class TestLoadOracleData(BaseTestClass):
         )
         validate_copied_value(source_table, source_record4, destination_records[3])
         validate_copied_value(source_table, None, destination_records[4], is_delete=True)
+        validate_copied_value(source_table, source_record5, destination_records[5])
 
         assert task.metrics["count.delete.topportunity"] == 1
         assert task.metrics["count.insert.topportunity"] == 2
-        assert task.metrics["count.update.topportunity"] == 1
+        assert task.metrics["count.update.topportunity"] == 2
         assert task.metrics["count.delete.total"] == 1
         assert task.metrics["count.insert.total"] == 2
-        assert task.metrics["count.update.total"] == 1
+        assert task.metrics["count.update.total"] == 2
 
     def test_raises_if_table_dicts_different(self, db_session, foreign_tables, staging_tables):
         with pytest.raises(

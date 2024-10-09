@@ -1,0 +1,52 @@
+name: Bug
+description: Report a bug
+type: Bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Please describe the bug you experienced
+      placeholder: What happened? What did you want to happen?
+    validations:
+      required: true
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      description: Please describe the frequency of the bug
+      options:
+        - It happened once then I did not try again
+        - It happened once then I tried again and everything worked
+        - I tried multiple times and saw the bug every time
+        - I tried multiple times and saw the bug intermittently
+        - None of the above
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: How to reproduce the bug
+      description: To see the bug with our own eyes, what steps should we follow?
+    validations:
+      required: false
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: Which web browser were you using when you experienced the bug? (if any)
+      options:
+        - Chrome
+        - Firefox
+        - Internet Explorer
+        - Microsoft Edge
+        - Safari
+        - Other
+        - I do not know
+        - Not applicable
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/HHS/simpler-grants-gov/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
