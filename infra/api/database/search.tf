@@ -8,6 +8,7 @@ module "search" {
   source = "../../modules/search"
 
   name                          = "${local.prefix}${var.environment_name}"
+  service_name                  = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
   availability_zone_count       = 3
   zone_awareness_enabled        = var.environment_name == "prod" ? true : false
   multi_az_with_standby_enabled = var.environment_name == "prod" ? true : false

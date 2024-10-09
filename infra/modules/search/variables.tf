@@ -48,6 +48,11 @@ variable "name" {
   type        = string
 }
 
+variable "service_name" {
+  description = "The name of the service calling into the OpenSearch domain, used for the KMS policy"
+  type        = string
+}
+
 variable "subnet_ids" {
   description = "The subnet IDs of the VPC"
   type        = list(string)
