@@ -4,6 +4,7 @@ resource "random_password" "opensearch_username" {
   min_lower   = 1
   min_upper   = 1
   min_numeric = 1
+  special     = false
 }
 
 resource "random_password" "opensearch_password" {
@@ -21,34 +22,23 @@ resource "aws_kms_key" "opensearch" {
   description         = "Key for Opensearch Domain ${var.name}"
   enable_key_rotation = true
   policy = jsonencode({
-    Version = "2012-10-17"
-    Id      = var.name
+    Id      = var.name,
+    Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "Enable IAM User Permissions"
-        Effect = "Allow"
+        Sid    = "Enable IAM User Permissions",
+        Effect = "Allow",
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         },
-        Action   = "kms:*"
+        Action   = "kms:*",
         Resource = "*"
       },
       {
-        Sid    = "Allow administration of the key for all users"
-        Effect = "Allow"
+        Sid    = "Allow access for Key Administrators",
+        Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*"
-        },
-        Action = [
-          "kms:*",
-        ],
-        Resource = "*"
-      },
-      {
-        Sid    = "Allow administration of the key for all roles"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"
+          "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
         },
         Action = [
           "kms:*",
