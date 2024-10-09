@@ -11,12 +11,15 @@ module "prod_config" {
   database_max_capacity           = 32
   database_min_capacity           = 2
 
-  has_opensearch = false
+  has_search = false
   # https://aws.amazon.com/opensearch-service/pricing/
-  opensearch_dedicated_master_type = "m6g.large.search"
-  opensearch_instance_type         = "or1.medium.search"
+  opensearch_master_instance_type = "m6g.large.search"
+  opensearch_data_instance_type   = "or1.medium.search"
   # 20 is the minimum volume size for the or1.medium.search instance type.
+  # Scale this number to meet your storage needs.
   opensearch_volume_size = 20
+  # Scale this number to meet your compute needs.
+  opensearch_instance_count = 3
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   opensearch_engine_version = "OpenSearch_2.15"
 

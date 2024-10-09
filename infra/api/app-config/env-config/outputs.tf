@@ -1,10 +1,9 @@
 output "opensearch_config" {
-  value = var.has_opensearch ? {
-    instance_type         = var.opensearch_instance_type
-    dedicated_master_type = var.opensearch_dedicated_master_type
+  value = var.has_search ? {
+    instance_type         = var.opensearch_master_instance_type
+    dedicated_master_type = var.opensearch_data_instance_type
     engine_version        = var.opensearch_engine_version
     volume_size           = var.opensearch_volume_size
-    warm_type             = var.opensearch_warm_type
   } : null
 }
 

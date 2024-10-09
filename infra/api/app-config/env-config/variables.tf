@@ -12,29 +12,33 @@ variable "default_region" {
   type        = string
 }
 
-variable "has_opensearch" {
-  type = bool
+variable "has_search" {
+  type    = bool
+  default = false
 }
 
-variable "opensearch_dedicated_master_type" {
-  type = string
+variable "opensearch_data_instance_type" {
+  type    = string
+  default = "or1.medium.search"
 }
 
-variable "opensearch_instance_type" {
-  type = string
+variable "opensearch_master_instance_type" {
+  type    = string
+  default = "m6g.large.search"
 }
 
 variable "opensearch_engine_version" {
   type = string
 }
 
-variable "opensearch_warm_type" {
-  type    = string
-  default = null
+variable "opensearch_instance_count" {
+  type    = number
+  default = 3
 }
 
 variable "opensearch_volume_size" {
-  type = number
+  type    = number
+  default = 20
 }
 
 variable "has_database" {

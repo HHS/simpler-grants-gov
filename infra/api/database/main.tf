@@ -33,7 +33,6 @@ locals {
 
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
-  opensearch_config  = local.environment_config.opensearch_config
 }
 
 terraform {
@@ -76,27 +75,6 @@ data "aws_security_groups" "aws_services" {
     name   = "vpc-id"
     values = [data.aws_vpc.network.id]
   }
-}
-
-module "opensearch" {
-  count = local.opensearch_config != null ? 1 : 0
-
-  source = "../../modules/opensearch"
-
-  name                          = "${local.prefix}${var.environment_name}"
-  availability_zone_count       = 3
-  zone_awareness_enabled        = var.environment_name == "prod" ? true : false
-  multi_az_with_standby_enabled = var.environment_name == "prod" ? true : false
-  dedicated_master_enabled      = var.environment_name == "prod" ? true : false
-  dedicated_master_count        = var.environment_name == "prod" ? 3 : 1
-  instance_count                = var.environment_name == "prod" ? 3 : 1
-  subnet_ids                    = slice(data.aws_subnets.database.ids, 0, var.environment_name == "prod" ? 3 : 1)
-  cidr_block                    = data.aws_vpc.network.cidr_block
-  engine_version                = local.opensearch_config.engine_version
-  dedicated_master_type         = local.opensearch_config.dedicated_master_type
-  instance_type                 = local.opensearch_config.instance_type
-  volume_size                   = local.opensearch_config.volume_size
-  vpc_id                        = data.aws_vpc.network.id
 }
 
 module "database" {
