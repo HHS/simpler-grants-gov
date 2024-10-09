@@ -24,12 +24,6 @@ type Props = {
   locale?: string;
 };
 
-const toNavLinkItem = (linkDetails: { linkText: string; href: string }) => (
-  <a href={linkDetails.href} key={linkDetails.href}>
-    {linkDetails.linkText}
-  </a>
-);
-
 const toNavLinkItems = (linkDetails: { linkText: string; href: string }[]) => {
   return linkDetails.map((link) => (
     <a href={link.href} key={link.href}>
