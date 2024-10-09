@@ -216,6 +216,13 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkOpportunitySummaryApplicantType(applicant_type=obj),
     )
 
+    # We configure a relationship from a summary to the current opportunity summary
+    # Just in case we delete this record, we can cascade to deleting the current_opportunity_summary
+    # record as well automatically.
+    current_opportunity_summary: Mapped["CurrentOpportunitySummary | None"] = relationship(
+        back_populates="opportunity_summary", single_parent=True, cascade="delete"
+    )
+
     def for_json(self) -> dict:
         json_valid_dict = super().for_json()
 
