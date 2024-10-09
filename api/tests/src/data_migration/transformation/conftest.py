@@ -98,6 +98,7 @@ def setup_synopsis_forecast(
     opportunity: Opportunity | None,
     is_delete: bool = False,
     is_already_processed: bool = False,
+    is_existing_current_opportunity_summary: bool = False,
     source_values: dict | None = None,
 ):
     if source_values is None:
@@ -128,9 +129,13 @@ def setup_synopsis_forecast(
     )
 
     if create_existing:
-        f.OpportunitySummaryFactory.create(
+        opportunity_summary = f.OpportunitySummaryFactory.create(
             opportunity=opportunity, is_forecast=is_forecast, revision_number=revision_number
         )
+        if is_existing_current_opportunity_summary:
+            f.CurrentOpportunitySummaryFactory.create(
+                opportunity=opportunity, opportunity_summary=opportunity_summary
+            )
 
     return source_summary
 
