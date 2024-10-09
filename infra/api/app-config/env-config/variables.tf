@@ -17,26 +17,26 @@ variable "has_search" {
   default = false
 }
 
-variable "opensearch_data_instance_type" {
+variable "search_data_instance_type" {
   type    = string
   default = "or1.medium.search"
 }
 
-variable "opensearch_master_instance_type" {
+variable "search_master_instance_type" {
   type    = string
   default = "m6g.large.search"
 }
 
-variable "opensearch_engine_version" {
+variable "search_engine_version" {
   type = string
 }
 
-variable "opensearch_instance_count" {
+variable "search_data_instance_count" {
   type    = number
   default = 3
 }
 
-variable "opensearch_volume_size" {
+variable "search_data_volume_size" {
   type    = number
   default = 20
 }

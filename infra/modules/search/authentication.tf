@@ -1,7 +1,9 @@
 resource "random_password" "opensearch_username" {
   # loose requirements so its easy to type by hand if necessary
-  length    = 16
-  min_lower = 1
+  length      = 16
+  min_lower   = 1
+  min_upper   = 1
+  min_numeric = 1
 }
 
 resource "random_password" "opensearch_password" {
@@ -31,11 +33,21 @@ resource "aws_kms_key" "opensearch" {
         Resource = "*"
       },
       {
-        Sid    = "Allow administration of the key to all users / roles"
+        Sid    = "Allow administration of the key for all users"
         Effect = "Allow"
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*"
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:assumed-role/*"
+        },
+        Action = [
+          "kms:*",
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow administration of the key for all roles"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/*"
         },
         Action = [
           "kms:*",
@@ -60,6 +72,20 @@ resource "aws_ssm_parameter" "opensearch_password" {
   type        = "SecureString"
   value       = random_password.opensearch_password.result
   key_id      = aws_kms_key.opensearch.arn
+}
+
+resource "aws_ssm_parameter" "opensearch_username" {
+  name        = "/opensearch/${var.name}/username"
+  description = "The username for the OpenSearch domain"
+  type        = "String"
+  value       = random_password.opensearch_username.result
+}
+
+resource "aws_ssm_parameter" "opensearch_endpoint" {
+  name        = "/opensearch/${var.name}/endpoint"
+  description = "The endpoint for the OpenSearch domain"
+  type        = "String"
+  value       = aws_opensearch_domain.opensearch.endpoint
 }
 
 data "aws_iam_policy_document" "opensearch_access" {

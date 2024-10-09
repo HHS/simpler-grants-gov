@@ -12,7 +12,7 @@ module "dev_config" {
 
   has_search = true
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
-  opensearch_engine_version = "OpenSearch_2.15"
+  search_engine_version = "OpenSearch_2.15"
 
   # Runs, but with everything disabled.
   # See api/src/data_migration/command/load_transform.py for argument specifications.

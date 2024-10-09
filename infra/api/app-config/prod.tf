@@ -13,15 +13,15 @@ module "prod_config" {
 
   has_search = false
   # https://aws.amazon.com/opensearch-service/pricing/
-  opensearch_master_instance_type = "m6g.large.search"
-  opensearch_data_instance_type   = "or1.medium.search"
+  search_master_instance_type = "m6g.large.search"
   # 20 is the minimum volume size for the or1.medium.search instance type.
-  # Scale this number to meet your storage needs.
-  opensearch_volume_size = 20
+  # Scale the `search_data_volume_size` number to meet your storage needs.
+  search_data_instance_type  = "or1.medium.search"
+  search_data_volume_size    = 20
+  search_data_instance_count = 3
   # Scale this number to meet your compute needs.
-  opensearch_instance_count = 3
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
-  opensearch_engine_version = "OpenSearch_2.15"
+  search_engine_version = "OpenSearch_2.15"
 
   # See api/src/data_migration/command/load_transform.py for argument specifications.
   load_transform_args = [
