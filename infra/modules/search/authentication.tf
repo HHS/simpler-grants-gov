@@ -74,14 +74,6 @@ resource "aws_ssm_parameter" "opensearch_password" {
   key_id      = aws_kms_key.opensearch.arn
 }
 
-resource "aws_ssm_parameter" "opensearch_username" {
-  name        = "/opensearch/${var.name}/username"
-  description = "The username for the OpenSearch domain"
-  type        = "SecureString"
-  value       = random_password.opensearch_username.result
-  key_id      = aws_kms_key.opensearch.arn
-}
-
 resource "aws_ssm_parameter" "opensearch_endpoint" {
   name        = "/opensearch/${var.name}/endpoint"
   description = "The endpoint for the OpenSearch domain"
