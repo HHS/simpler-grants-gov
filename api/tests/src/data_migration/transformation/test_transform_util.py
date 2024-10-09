@@ -16,6 +16,7 @@ from tests.src.db.models.factories import OpportunityFactory, StagingTopportunit
         ("M", OpportunityCategory.MANDATORY),
         ("O", OpportunityCategory.OTHER),
         (None, None),
+        (" ", None),
         ("", None),
     ],
 )
@@ -90,6 +91,7 @@ def test_transform_update_create_timestamp(
         ("yes", True),
         ("no", False),
         ("", None),
+        (" ", None),
         (None, None),
     ],
 )
@@ -104,7 +106,7 @@ def test_convert_yn_boolean_unexpected_value(value):
 
 
 @pytest.mark.parametrize(
-    "value,expected_value", [("D", True), ("U", False), ("", False), (None, False)]
+    "value,expected_value", [("D", True), ("U", False), ("", False), (" ", False), (None, False)]
 )
 def test_convert_action_type_to_is_deleted(value, expected_value):
     assert transform_util.convert_action_type_to_is_deleted(value) == expected_value
@@ -124,6 +126,7 @@ def test_convert_action_type_to_is_deleted_unexpected_value(value):
         ("123123123", 123123123),
         ("-5", -5),
         ("", None),
+        (" ", None),
         (None, None),
         ("words", None),
         ("zero", None),

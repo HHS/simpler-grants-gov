@@ -69,6 +69,7 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             create_existing=True,
             is_delete=True,
             opportunity=opportunity3,
+            is_existing_current_opportunity_summary=True,
         )
         synopsis_delete1 = setup_synopsis_forecast(
             is_forecast=False,
@@ -98,6 +99,7 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             create_existing=False,
             is_delete=True,
             opportunity=opportunity4,
+            is_existing_current_opportunity_summary=True,
         )
         synopsis_update_invalid_yn_field = setup_synopsis_forecast(
             is_forecast=False,
