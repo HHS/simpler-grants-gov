@@ -59,7 +59,7 @@ resource "aws_kms_key" "opensearch" {
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
-  name        = "/opensearch/${var.name}/username"
+  name        = "/search/${var.name}/username"
   description = "The username for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_username.result
@@ -67,7 +67,7 @@ resource "aws_ssm_parameter" "opensearch_username" {
 }
 
 resource "aws_ssm_parameter" "opensearch_password" {
-  name        = "/opensearch/${var.name}/password"
+  name        = "/search/${var.name}/password"
   description = "The password for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_password.result
@@ -75,7 +75,7 @@ resource "aws_ssm_parameter" "opensearch_password" {
 }
 
 resource "aws_ssm_parameter" "opensearch_endpoint" {
-  name        = "/opensearch/${var.name}/endpoint"
+  name        = "/search/${var.name}/endpoint"
   description = "The endpoint for the OpenSearch domain"
   type        = "SecureString"
   value       = aws_opensearch_domain.opensearch.endpoint
