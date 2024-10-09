@@ -24,7 +24,7 @@ export default function SearchResults({
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
   return (
-    <div className="tablet:grid-col-8">
+    <>
       <Suspense
         key={key}
         fallback={<SearchResultsHeader sortby={sortby} loading={false} />}
@@ -56,6 +56,6 @@ export default function SearchResults({
           <SearchPaginationFetch searchParams={searchParams} scroll={true} />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }

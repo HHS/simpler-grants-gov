@@ -64,11 +64,13 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
             />
           </ContentDisplayToggle>
         </div>
-        <SearchResults
-          searchParams={convertedSearchParams}
-          query={query}
-          loadingMessage={t("loading")}
-        ></SearchResults>
+        <div className="tablet:grid-col-8">
+          <SearchResults
+            searchParams={convertedSearchParams}
+            query={query}
+            loadingMessage={t("loading")}
+          ></SearchResults>
+        </div>
       </div>
     </>
   );
