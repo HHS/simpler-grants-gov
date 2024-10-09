@@ -43,7 +43,7 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const primaryLinksRef = useRef<PrimaryLinks>([
+  const primaryLinkConfigs = [
     { linkText: t("nav_link_home"), href: "/" },
     {
       linkText: t("nav_link_search"),
@@ -53,13 +53,21 @@ const Header = ({ logoPath, locale }: Props) => {
     { linkText: t("nav_link_process"), href: "/process" },
     { linkText: t("nav_link_research"), href: "/research" },
     { linkText: t("nav_link_subscribe"), href: "/subscribe" },
-  ]);
+  ];
+
+  const primaryLinksRef = useRef<PrimaryLinks>(
+    primaryLinkConfigs.filter((config) => !config.flag),
+  );
 
   // note that this will not update when feature flags are updated without a refresh
   useEffect(() => {
-    primaryLinksRef.current = primaryLinksRef.current.filter(
-      (link) => !link.flag || featureFlags[link.flag],
-    );
+    const navLinksFromFlags = primaryLinkConfigs.reduce((acc, link) => {
+      if (!link.flag || featureFlags[link.flag]) {
+        acc.push(link);
+      }
+      return acc;
+    }, [] as PrimaryLinks);
+    primaryLinksRef.current = navLinksFromFlags;
   }, [featureFlags]);
 
   const language = useMemo(
