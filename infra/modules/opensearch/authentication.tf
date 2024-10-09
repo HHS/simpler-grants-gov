@@ -15,12 +15,43 @@ resource "random_password" "opensearch_password" {
   override_special = "-"
 }
 
+resource "aws_kms_key" "opensearch" {
+  description         = "Key for Opensearch Domain ${var.name}"
+  enable_key_rotation = true
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        },
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow administration of the key to all users / roles"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:assumed-role/*"
+        },
+        Action = [
+          "kms:*",
+        ],
+        Resource = "*"
+      },
+    ]
+  })
+}
+
 resource "aws_ssm_parameter" "opensearch_username" {
   name        = "/opensearch/${var.name}/username"
   description = "The username for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_username.result
-
+  key_id      = aws_kms_key.opensearch.arn
 }
 
 resource "aws_ssm_parameter" "opensearch_password" {
@@ -28,6 +59,7 @@ resource "aws_ssm_parameter" "opensearch_password" {
   description = "The password for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_password.result
+  key_id      = aws_kms_key.opensearch.arn
 }
 
 data "aws_iam_policy_document" "opensearch_access" {
