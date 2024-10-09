@@ -67,6 +67,6 @@ test.skip("error during signup", async ({ page }) => {
   await page.getByRole("button", { name: /subscribe/i }).click();
 
   await expect(
-    page.getByRole("heading", { name: "Internal Server Error" }),
+    page.getByRole("heading", { name: "Failed to subscribe, due to a server error. Please try again later." }),
   ).toBeVisible();
 });

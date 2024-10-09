@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Subscribe from "src/app/[locale]/subscribe/page";
 import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
 
+//TODO: This mock is not working as expected, I suspect
 jest.mock('react-dom', () => {
   const originalModule =
     jest.requireActual('react-dom');
@@ -19,11 +19,7 @@ jest.mock('react-dom', () => {
           validationErrors: {name: ['errors.missing_name'], email: ['errors.missing_email', 'errors.invalid_email']},
         },
         // Mock setState function
-        ((payload: any) => {
-          'use server';
-          
-          console.log('mock fn')
-        }),
+        (() => {}),
       ],
     ],
   };

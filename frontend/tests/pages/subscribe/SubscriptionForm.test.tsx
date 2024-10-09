@@ -20,7 +20,7 @@ jest.mock('react-dom', () => {
           // Mock setState function
           ((payload: any) => {
             'use server';
-            
+
             console.log('mock fn')
           }),
         ],
