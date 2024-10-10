@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import {
@@ -23,7 +22,6 @@ export default function SearchFilters({
   category: Set<string>;
   opportunityStatus: Set<string>;
 }) {
-  unstable_setRequestLocale("en");
   const t = useTranslations("Search");
 
   return (
