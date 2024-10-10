@@ -28,38 +28,75 @@ resource "aws_kms_key" "opensearch" {
         Resource = "*"
       },
       {
-        Sid    = "Allow use of the key",
+        Sid    = "Allow use of the key to the task executor role (eg. the ECS task)",
         Effect = "Allow",
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}"
         },
         Action = [
+          "kms:List*",
+          "kms:Describe*",
           "kms:Encrypt",
           "kms:Decrypt",
+          "kms:CreateGrant",
+          "kms:RevokeGrant",
           "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+          "kms:GenerateDataKey*"
         ],
         Resource = "*"
       },
       {
-        Sid    = "Allow attachment of persistent resources",
+        Sid    = "Allow access to the key for CloudWatch Logs",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}"
+          Service = "logs.${data.aws_region.current.name}.amazonaws.com"
         },
         Action = [
+          "kms:List*",
+          "kms:Describe*",
+          "kms:Encrypt",
+          "kms:Decrypt",
           "kms:CreateGrant",
-          "kms:ListGrants",
-          "kms:RevokeGrant"
+          "kms:RevokeGrant",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*"
+        ],
+        Resource = "*"
+        Condition = {
+          ArnEquals = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:*"
+          }
+        }
+      },
+      {
+        Sid       = "Allow access to AWS managed services",
+        Effect    = "Allow",
+        Principal = { AWS = ["*"] },
+        Action = [
+          "kms:List*",
+          "kms:Describe*",
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:CreateGrant",
+          "kms:RevokeGrant",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*"
         ],
         Resource = "*",
         Condition = {
+          "ForAnyValue:StringLike" = {
+            # The service we are granting access to is OpenSearch, which is somtimes denoted as "os" in AWS.
+            # And other times as "es" (for "ElasticSearch"). So we just allow both, to be safe.
+            "kms:ViaService" : [
+              "os.${data.aws_region.current.name}.amazonaws.com",
+              "es.${data.aws_region.current.name}.amazonaws.com"
+            ]
+          },
           Bool = {
-            "kms:GrantIsForAWSResource" = "true"
+            "kms:GrantIsForAWSResource" : true
           }
         }
-      }
+      },
     ]
   })
 }
