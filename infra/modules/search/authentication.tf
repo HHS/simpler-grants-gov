@@ -36,7 +36,7 @@ resource "aws_kms_key" "opensearch" {
         Sid    = "Allow use of the key to the task executor role (eg. the ECS task)",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app/*"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}/*"
         },
         Action = [
           "kms:List*",
