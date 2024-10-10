@@ -3,11 +3,6 @@ variable "availability_zone_count" {
   type        = number
 }
 
-variable "cidr_block" {
-  description = "The CIDR block of the VPC"
-  type        = string
-}
-
 variable "dedicated_master_enabled" {
   description = "Whether to enable dedicated master nodes"
   type        = bool
