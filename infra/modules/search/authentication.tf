@@ -170,20 +170,12 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
 data "aws_iam_policy_document" "allow_vpc_access" {
   statement {
     effect = "Allow"
-
     principals {
-      type        = "*"
-      identifiers = ["*"]
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.task_executor_role_name}"]
     }
-
     actions   = ["es:*"]
     resources = ["${aws_opensearch_domain.opensearch.arn}/*"]
-
-    condition {
-      test     = "IpAddress"
-      variable = "aws:SourceIp"
-      values   = [data.aws_vpc.vpc.cidr_block]
-    }
   }
 }
 
