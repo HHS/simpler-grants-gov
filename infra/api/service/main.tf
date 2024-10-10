@@ -139,7 +139,25 @@ module "service" {
   } : null
 
   extra_environment_variables = merge(local.service_config.extra_environment_variables, { "ENVIRONMENT" : var.environment_name })
-  secrets                     = local.service_config.secrets
+
+  secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_USERNAME"
+      valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
+    }] : [],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_PASSWORD"
+      valueFrom = data.aws_ssm_parameter.search_password_arn[0].arn
+    }] : [],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_ENDPOINT"
+      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
+    }] : []
+  )
 }
 
 module "monitoring" {

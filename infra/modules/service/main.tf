@@ -94,7 +94,7 @@ resource "aws_ecs_task_definition" "app" {
         command  = var.healthcheck_command
       } : null,
       environment = local.environment_variables,
-      secrets     = local.secrets,
+      secrets     = var.secrets,
       portMappings = [
         {
           containerPort = var.container_port,
