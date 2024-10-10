@@ -19,11 +19,6 @@ test.describe("Search page tests", () => {
     page,
     browserName,
   }: PageProps) => {
-    // TODO (Issue #2005): fix test for webkit
-    test.skip(
-      browserName === "webkit",
-      "Skipping test for WebKit due to a query param issue.",
-    );
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
 
