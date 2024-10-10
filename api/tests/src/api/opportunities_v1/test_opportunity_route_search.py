@@ -1305,3 +1305,35 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "funding_category",
             "opportunity_status",
         }
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # default scoring rule
+            get_search_request(
+                query="literacy",
+            ),
+            # agency scoring rule
+            get_search_request(
+                query="literacy",
+                experimental={"scoring_rule": "agency"},
+            ),
+            # expanded scoring rule
+            get_search_request(
+                query="literacy",
+                experimental={"scoring_rule": "expanded"},
+            ),
+        ],
+    )
+    def test_search_experimental_200(self, client, api_auth_token, search_request):
+        # We are only testing for 200 responses when adding the experimental field into the request body.
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200
+
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 200

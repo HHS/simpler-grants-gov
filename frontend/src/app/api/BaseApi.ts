@@ -117,12 +117,12 @@ export default abstract class BaseApi {
       // or parsing the response.
       throw fetchErrorToNetworkError(error, queryParamData);
     }
+    if (!response.ok) {
+      handleNotOkResponse(responseBody, url, queryParamData);
+    }
 
     const { data, message, pagination_info, status_code, warnings } =
       responseBody;
-    if (!response.ok) {
-      handleNotOkResponse(responseBody, message, status_code, queryParamData);
-    }
 
     return {
       data,
@@ -183,7 +183,7 @@ function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
 /**
  * Handle request errors
  */
-export function fetchErrorToNetworkError(
+function fetchErrorToNetworkError(
   error: unknown,
   searchInputs?: QueryParamData,
 ) {
@@ -197,29 +197,32 @@ export function fetchErrorToNetworkError(
 
 function handleNotOkResponse(
   response: APIResponse,
-  message: string,
-  status_code: number,
+  url: string,
   searchInputs?: QueryParamData,
 ) {
   const { errors } = response;
   if (isEmpty(errors)) {
     // No detailed errors provided, throw generic error based on status code
-    throwError(message, status_code, searchInputs);
+    throwError(response, url, searchInputs);
   } else {
     if (errors) {
       const firstError = errors[0] as APIResponseError;
-      throwError(message, status_code, searchInputs, firstError);
+      throwError(response, url, searchInputs, firstError);
     }
   }
 }
 
 const throwError = (
-  message: string,
-  status_code: number,
+  response: APIResponse,
+  url: string,
   searchInputs?: QueryParamData,
   firstError?: APIResponseError,
 ) => {
-  console.error("Throwing error: ", message, status_code, searchInputs);
+  const { status_code, message } = response;
+  console.error(
+    `API request error at ${url} (${status_code}): ${message}`,
+    searchInputs,
+  );
 
   // Include just firstError for now, we can expand this
   // If we need ValidationErrors to be more expanded

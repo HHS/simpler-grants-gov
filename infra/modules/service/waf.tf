@@ -183,6 +183,7 @@ resource "aws_wafv2_web_acl" "waf" {
     }
   }
 
+  # checkov:skip=CKV2_AWS_31:TODO: https://github.com/HHS/simpler-grants-gov/issues/2367
 }
 
 

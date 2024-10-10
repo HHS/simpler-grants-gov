@@ -35,7 +35,7 @@ The application can be ran natively or in a Docker container.
 
 #### Native
 
-There are several secret environment variables necessary to submit the form related to the newsletter. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
+There are several secret environment variables necessary to submit the form related to email subscription. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
 
 From the `frontend/` directory:
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { NEWSLETTER_CONFIRMATION } from "src/constants/breadcrumbs";
+import { SUBSCRIBE_CONFIRMATION } from "src/constants/breadcrumbs";
 import { ExternalRoutes } from "src/constants/routes";
 import { Data } from "src/pages/api/subscribe";
 
@@ -16,8 +16,8 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-export default function NewsletterForm() {
-  const t = useTranslations("Newsletter");
+export default function SubscriptionForm() {
+  const t = useTranslations("Subscribe");
 
   const router = useRouter();
   const email = ExternalRoutes.EMAIL_SIMPLERGRANTSGOV;
@@ -75,7 +75,7 @@ export default function NewsletterForm() {
 
     if (res.ok) {
       const { message } = (await res.json()) as Data;
-      router.push(`${NEWSLETTER_CONFIRMATION.path}?sendy=${message as string}`);
+      router.push(`${SUBSCRIBE_CONFIRMATION.path}?sendy=${message as string}`);
       return setSendyError("");
     } else {
       const { error } = (await res.json()) as Data;

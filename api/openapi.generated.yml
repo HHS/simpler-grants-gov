@@ -1036,6 +1036,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/CloseDateFilterV1'
+    ExperimentalV1:
+      type: object
+      properties:
+        scoring_rule:
+          default: !!python/object/apply:src.services.opportunities_v1.experimental_constant.ScoringRule
+          - default
+          description: Scoring rule to query against OpenSearch
+          enum:
+          - default
+          - expanded
+          - agency
+          type:
+          - string
     OpportunityPaginationV1:
       type: object
       properties:
@@ -1086,6 +1099,11 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunitySearchFilterV1'
+        experimental:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExperimentalV1'
         pagination:
           type:
           - object

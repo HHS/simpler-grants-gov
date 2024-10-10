@@ -45,7 +45,7 @@ export default function SearchResultsListItem({
               <h2 className="margin-y-105 line-height-serif-2">
                 <a
                   href={`/opportunity/${opportunity?.opportunity_id}`}
-                  className="usa-link usa-link--external"
+                  className="usa-link usa-link"
                 >
                   {opportunity?.opportunity_title}
                 </a>
