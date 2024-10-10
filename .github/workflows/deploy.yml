@@ -27,7 +27,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: [database-migrations]
+    needs: [build-and-publish]
     permissions:
       contents: read
       id-token: write

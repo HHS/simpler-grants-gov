@@ -8,7 +8,7 @@ on:
       - "chouinar/2327-api-opensearch"
     paths:
       - "api/**"
-      - ".github/"
+      - ".github/**"
   release:
     types: [published]
   workflow_dispatch:
