@@ -74,9 +74,8 @@ resource "aws_kms_key" "opensearch" {
         }
       },
       {
-        Sid       = "Allow access to AWS managed services",
-        Effect    = "Allow",
-        Principal = { AWS = ["*"] },
+        Sid    = "Allow access to AWS managed services",
+        Effect = "Allow",
         Action = [
           "kms:List*",
           "kms:Describe*",

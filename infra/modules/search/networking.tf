@@ -17,6 +17,8 @@ resource "aws_security_group" "opensearch" {
   lifecycle {
     create_before_destroy = true
   }
+
+  # checkov:skip=CKV2_AWS_5: https://github.com/bridgecrewio/checkov/issues/6760
 }
 
 resource "aws_opensearch_vpc_endpoint" "opensearch" {
