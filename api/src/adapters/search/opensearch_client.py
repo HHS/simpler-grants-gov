@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Generator, Iterable
 
+import boto3
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
@@ -263,11 +264,12 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
         pool_maxsize=opensearch_config.search_connection_pool_size,
     )
 
-    # If username and password are supplied (ie. when running non-locally)
-    # we will add http_auth to the client connection
-    if opensearch_config.search_username and opensearch_config.search_password:
-        # Get credentials and authorize with AWS Opensearch Serverless (aoss)
-        auth = (opensearch_config.search_username, opensearch_config.search_password)
+    # We'll assume if the aws_region is set, we're running in AWS
+    # and should connect using the session credentials
+    if opensearch_config.aws_region is not None:
+        # Get credentials and authorize with AWS Opensearch Serverless (es)
+        credentials = boto3.Session().get_credentials()
+        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
 
     return params

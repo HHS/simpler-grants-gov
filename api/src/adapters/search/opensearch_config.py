@@ -19,6 +19,8 @@ class OpensearchConfig(PydanticBaseEnvConfig):
     search_verify_certs: bool = Field(default=True)  # SEARCH_VERIFY_CERTS
     search_connection_pool_size: int = Field(default=10)  # SEARCH_CONNECTION_POOL_SIZE
 
+    aws_region: str | None = Field(default=None)
+
 
 def get_opensearch_config() -> OpensearchConfig:
     opensearch_config = OpensearchConfig()
