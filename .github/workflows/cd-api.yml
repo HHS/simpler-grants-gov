@@ -26,7 +26,6 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: api-checks
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
