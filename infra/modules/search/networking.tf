@@ -4,9 +4,10 @@ resource "aws_security_group" "opensearch" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    description = "Allow inbound HTTPS traffic"
 
     cidr_blocks = [
       var.cidr_block,
@@ -16,9 +17,6 @@ resource "aws_security_group" "opensearch" {
   lifecycle {
     create_before_destroy = true
   }
-
-  # checkov:skip=CKV_AWS_23:false positve, we do have a description
-  # checkov:skip=CKV2_AWS_5:false positve, this security group is attached to opensearch
 }
 
 resource "aws_opensearch_vpc_endpoint" "opensearch" {
