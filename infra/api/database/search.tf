@@ -14,7 +14,6 @@ module "search" {
   dedicated_master_enabled      = var.environment_name == "prod" ? true : false
   dedicated_master_count        = var.environment_name == "prod" ? 3 : 1
   subnet_ids                    = slice(data.aws_subnets.database.ids, 0, var.environment_name == "prod" ? 3 : 1)
-  cidr_block                    = data.aws_vpc.network.cidr_block
   instance_count                = local.search_config.instance_count
   engine_version                = local.search_config.engine_version
   dedicated_master_type         = local.search_config.dedicated_master_type
