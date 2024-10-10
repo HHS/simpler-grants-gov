@@ -15,15 +15,7 @@ test.describe("Search page tests", () => {
     await page.goto("/search?_ff=showSearchV0:true");
   });
 
-  test("should show and hide loading state", async ({
-    page,
-    browserName,
-  }: PageProps) => {
-    // TODO (Issue #2005): fix test for webkit
-    test.skip(
-      browserName === "webkit",
-      "Skipping test for WebKit due to a query param issue.",
-    );
+  test("should show and hide loading state", async ({ page }: PageProps) => {
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
 
