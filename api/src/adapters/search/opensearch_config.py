@@ -1,7 +1,6 @@
 import logging
 
 from pydantic import Field
-from pydantic_settings import SettingsConfigDict
 
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -9,18 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class OpensearchConfig(PydanticBaseEnvConfig):
-    model_config = SettingsConfigDict(env_prefix="OPENSEARCH_")
 
-    # TODO - hacky fix to get the API working again, host/port should
-    #        be defined in terraform env vars
-    host: str = Field(default="NOT_DEFINED")  # OPENSEARCH_HOST
-    port: int = Field(default=1)  # OPENSEARCH_PORT
-    use_ssl: bool = Field(default=True)  # OPENSEARCH_USE_SSL
-    verify_certs: bool = Field(default=True)  # OPENSEARCH_VERIFY_CERTS
-    connection_pool_size: int = Field(default=10)  # OPENSEARCH_CONNECTION_POOL_SIZE
+    search_endpoint: str = Field(default="NOT_DEFINED")  # SEARCH_ENDPOINT
+    search_port: int = Field(default=443)  # SEARCH_PORT
 
-    # AWS configuration
-    aws_region: str | None = Field(default=None)  # OPENSEARCH_AWS_REGION
+    search_username: str | None = Field(default=None)  # SEARCH_USERNAME
+    search_password: str | None = Field(default=None)  # SEARCH_PASSWORD
+
+    search_use_ssl: bool = Field(default=True)  # SEARCH_USE_SSL
+    search_verify_certs: bool = Field(default=True)  # SEARCH_VERIFY_CERTS
+    search_connection_pool_size: int = Field(default=10)  # SEARCH_CONNECTION_POOL_SIZE
 
 
 def get_opensearch_config() -> OpensearchConfig:
@@ -29,11 +26,11 @@ def get_opensearch_config() -> OpensearchConfig:
     logger.info(
         "Constructed opensearch configuration",
         extra={
-            "host": opensearch_config.host,
-            "port": opensearch_config.port,
-            "use_ssl": opensearch_config.use_ssl,
-            "verify_certs": opensearch_config.verify_certs,
-            "connection_pool_size": opensearch_config.connection_pool_size,
+            "search_endpoint": opensearch_config.search_endpoint,
+            "search_port": opensearch_config.search_port,
+            "search_use_ssl": opensearch_config.search_use_ssl,
+            "search_verify_certs": opensearch_config.search_verify_certs,
+            "search_connection_pool_size": opensearch_config.search_connection_pool_size,
         },
     )
 

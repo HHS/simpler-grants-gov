@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - "api/**"
+      - ".github/"
   release:
     types: [published]
   workflow_dispatch:
@@ -22,9 +23,6 @@ on:
           - prod
 
 jobs:
-  api-checks:
-    name: Run API Checks
-    uses: ./.github/workflows/ci-api.yml
 
   deploy:
     name: Deploy
@@ -33,7 +31,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
+        envs: ${{ fromJSON('["dev", "staging"]') }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}

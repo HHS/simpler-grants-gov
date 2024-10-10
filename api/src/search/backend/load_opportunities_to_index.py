@@ -117,6 +117,7 @@ class LoadOpportunitiesToIndex(Task):
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                 )
+                .limit(50)  # TODO - remove
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
                 .execution_options(yield_per=5000)
             )
