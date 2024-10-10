@@ -2,17 +2,11 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-data "aws_ssm_parameter" "aws_canonical_user_id" {
-  name = "/canonical-user-id"
-}
-
 resource "aws_cloudwatch_log_group" "opensearch" {
-  name_prefix = "opensearch-${var.name}"
-
   # Conservatively retain logs for 5 years.
   retention_in_days = 1827
-
-  # checkov:skip=CKV_AWS_158:skip requirement to encrypt with customer managed KMS key
+  name_prefix       = "opensearch-${var.name}"
+  kms_key_id        = aws_kms_key.opensearch.arn
 }
 
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
@@ -26,7 +20,8 @@ resource "aws_opensearch_domain" "opensearch" {
   access_policies = data.aws_iam_policy_document.opensearch_access.json
 
   encrypt_at_rest {
-    enabled = true
+    enabled    = true
+    kms_key_id = aws_kms_key.opensearch.arn
   }
 
   cluster_config {
@@ -94,9 +89,4 @@ resource "aws_opensearch_domain" "opensearch" {
   software_update_options {
     auto_software_update_enabled = true
   }
-
-  # checkov:skip=CKV_AWS_247: skip requirement to encrypt with customer managed KMS key
-  # checkov:skip=CKV_AWS_317: false positve, we do have audit logs enabled
-  # checkov:skip=CKV_AWS_318: we use a high availability setup in prod
-  # checkov:skip=CKV2_AWS_59: we use a high availability setup in prod
 }

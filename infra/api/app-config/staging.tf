@@ -10,7 +10,7 @@ module "staging_config" {
   database_max_capacity           = 16
   database_min_capacity           = 2
 
-  has_search = true
+  has_search = false
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
 

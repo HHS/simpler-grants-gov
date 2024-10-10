@@ -2,26 +2,6 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
 }
 
-resource "random_password" "opensearch_username" {
-  # loose requirements so its easy to type by hand if necessary
-  length      = 16
-  min_lower   = 1
-  min_upper   = 1
-  min_numeric = 1
-  special     = false
-}
-
-resource "random_password" "opensearch_password" {
-  # very strict requirements!!!
-  length           = 128
-  min_lower        = 1
-  min_upper        = 1
-  min_numeric      = 1
-  min_special      = 1
-  special          = true
-  override_special = "-"
-}
-
 resource "aws_kms_key" "opensearch" {
   description         = "Key for Opensearch Domain ${var.name}"
   enable_key_rotation = true
@@ -39,14 +19,12 @@ resource "aws_kms_key" "opensearch" {
         Resource = "*"
       },
       {
-        Sid    = "Allow access for Key Administrators",
+        Sid    = "Allow access for SSOed humans",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/*"
         },
-        Action = [
-          "kms:*",
-        ],
+        Action   = "kms:*",
         Resource = "*"
       },
       {
@@ -84,6 +62,26 @@ resource "aws_kms_key" "opensearch" {
       }
     ]
   })
+}
+
+resource "random_password" "opensearch_username" {
+  # loose requirements so its easy to type by hand if necessary
+  length      = 16
+  min_lower   = 1
+  min_upper   = 1
+  min_numeric = 1
+  special     = false
+}
+
+resource "random_password" "opensearch_password" {
+  # very strict requirements!!!
+  length           = 128
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+  min_special      = 1
+  special          = true
+  override_special = "-"
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
