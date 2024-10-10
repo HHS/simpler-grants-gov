@@ -1,7 +1,9 @@
 "use client";
 
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 import { Breakpoints } from "src/types/uiTypes";
+import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
@@ -19,22 +21,9 @@ interface ErrorProps {
 
 export interface ParsedError {
   message: string;
-  searchInputs: QueryParamData;
+  searchInputs: ServerSideSearchParams;
   status: number;
   type: string;
-}
-
-function convertSearchInputArraysToSets(
-  searchInputs: QueryParamData,
-): QueryParamData {
-  return {
-    ...searchInputs,
-    status: new Set(searchInputs.status || []),
-    fundingInstrument: new Set(searchInputs.fundingInstrument || []),
-    eligibility: new Set(searchInputs.eligibility || []),
-    agency: new Set(searchInputs.agency || []),
-    category: new Set(searchInputs.category || []),
-  };
 }
 
 function isValidJSON(str: string) {
@@ -46,47 +35,43 @@ function isValidJSON(str: string) {
   }
 }
 
-function getParsedError() {
+function createBlankParsedError(): ParsedError {
   return {
     type: "NetworkError",
     searchInputs: {
-      status: new Set(),
-      fundingInstrument: new Set(),
-      eligibility: new Set(),
-      agency: new Set(),
-      category: new Set(),
-      sortby: null,
-      page: 1,
+      query: "",
+      status: "",
+      fundingInstrument: "",
+      eligibility: "",
+      agency: "",
+      category: "",
+      sortby: undefined,
+      page: "1",
       actionType: "initialLoad",
     },
-    message: "Invalid JSON returned",
+    message: "Invalid error message JSON returned",
     status: -1,
-  } as ParsedError;
+  };
 }
 
 export default function Error({ error }: ErrorProps) {
   const t = useTranslations("Search");
+
   // The error message is passed as an object that's been stringified.
   // Parse it here.
-
   let parsedErrorData;
-  let convertedSearchParams;
 
   if (!isValidJSON(error.message)) {
     // the error likely is just a string with a non-specific Server Component error when running the built app
     // "An error occurred in the Server Components render. The specific message is omitted in production builds..."
-    parsedErrorData = getParsedError();
-    convertedSearchParams = parsedErrorData.searchInputs;
+    parsedErrorData = createBlankParsedError();
   } else {
     // Valid error thrown from server component
     parsedErrorData = JSON.parse(error.message) as ParsedError;
-
-    // The error message search inputs had to be converted to arrays in order to be stringified,
-    // convert those back to sets as we do in non-error flow.
-    convertedSearchParams = convertSearchInputArraysToSets(
-      parsedErrorData.searchInputs,
-    );
   }
+  const convertedSearchParams = convertSearchParamsToProperTypes(
+    parsedErrorData.searchInputs,
+  );
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
 
@@ -95,28 +80,32 @@ export default function Error({ error }: ErrorProps) {
   }, [error]);
 
   return (
-    <>
-      <div className="search-bar">
-        <SearchBar query={query} />
-      </div>
-      <div className="grid-row grid-gap">
-        <div className="tablet:grid-col-4">
-          <ContentDisplayToggle
-            showCallToAction={t("filterDisplayToggle.showFilters")}
-            hideCallToAction={t("filterDisplayToggle.hideFilters")}
-            breakpoint={Breakpoints.TABLET}
-          >
-            <SearchFilters
-              opportunityStatus={status}
-              eligibility={eligibility}
-              category={category}
-              fundingInstrument={fundingInstrument}
-              agency={agency}
-            />
-          </ContentDisplayToggle>
+    <QueryProvider>
+      <div className="grid-container">
+        <div className="search-bar">
+          <SearchBar query={query} />
         </div>
-        <SearchErrorAlert />
+        <div className="grid-row grid-gap">
+          <div className="tablet:grid-col-4">
+            <ContentDisplayToggle
+              showCallToAction={t("filterDisplayToggle.showFilters")}
+              hideCallToAction={t("filterDisplayToggle.hideFilters")}
+              breakpoint={Breakpoints.TABLET}
+            >
+              <SearchFilters
+                opportunityStatus={status}
+                eligibility={eligibility}
+                category={category}
+                fundingInstrument={fundingInstrument}
+                agency={agency}
+              />
+            </ContentDisplayToggle>
+          </div>
+          <div className="tablet:grid-col-8">
+            <SearchErrorAlert />
+          </div>
+        </div>
       </div>
-    </>
+    </QueryProvider>
   );
 }

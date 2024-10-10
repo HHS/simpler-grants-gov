@@ -10,6 +10,7 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
+import QueryProvider from "./QueryProvider";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -45,33 +46,37 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
 
   return (
     <>
-      <div className="search-bar">
-        <SearchBar query={query} />
-      </div>
-      <div className="grid-row grid-gap">
-        <div className="tablet:grid-col-4">
-          <ContentDisplayToggle
-            showCallToAction={t("filterDisplayToggle.showFilters")}
-            hideCallToAction={t("filterDisplayToggle.hideFilters")}
-            breakpoint={Breakpoints.TABLET}
-          >
-            <SearchFilters
-              opportunityStatus={status}
-              eligibility={eligibility}
-              category={category}
-              fundingInstrument={fundingInstrument}
-              agency={agency}
-            />
-          </ContentDisplayToggle>
+      <QueryProvider>
+        <div className="grid-container">
+          <div className="search-bar">
+            <SearchBar query={query} />
+          </div>
+          <div className="grid-row grid-gap">
+            <div className="tablet:grid-col-4">
+              <ContentDisplayToggle
+                showCallToAction={t("filterDisplayToggle.showFilters")}
+                hideCallToAction={t("filterDisplayToggle.hideFilters")}
+                breakpoint={Breakpoints.TABLET}
+              >
+                <SearchFilters
+                  opportunityStatus={status}
+                  eligibility={eligibility}
+                  category={category}
+                  fundingInstrument={fundingInstrument}
+                  agency={agency}
+                />
+              </ContentDisplayToggle>
+            </div>
+            <div className="tablet:grid-col-8">
+              <SearchResults
+                searchParams={convertedSearchParams}
+                query={query}
+                loadingMessage={t("loading")}
+              ></SearchResults>
+            </div>
+          </div>
         </div>
-        <div className="tablet:grid-col-8">
-          <SearchResults
-            searchParams={convertedSearchParams}
-            query={query}
-            loadingMessage={t("loading")}
-          ></SearchResults>
-        </div>
-      </div>
+      </QueryProvider>
     </>
   );
 }
