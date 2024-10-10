@@ -2,11 +2,16 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
 }
 
+resource "aws_kms_alias" "opensearch" {
+  name          = "alias/search/${var.service_name}"
+  target_key_id = aws_kms_key.opensearch.key_id
+}
+
 resource "aws_kms_key" "opensearch" {
-  description         = "Key for Opensearch Domain ${var.name}"
+  description         = "Key for Opensearch Domain ${var.service_name}"
   enable_key_rotation = true
   policy = jsonencode({
-    Id      = var.name,
+    Id      = var.service_name,
     Version = "2012-10-17",
     Statement = [
       {
@@ -22,7 +27,7 @@ resource "aws_kms_key" "opensearch" {
         Sid    = "Allow access for SSOed humans",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/*"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
         },
         Action   = "kms:*",
         Resource = "*"
@@ -92,9 +97,6 @@ resource "aws_kms_key" "opensearch" {
               "es.${data.aws_region.current.name}.amazonaws.com"
             ]
           },
-          Bool = {
-            "kms:GrantIsForAWSResource" : true
-          }
         }
       },
     ]
@@ -122,7 +124,7 @@ resource "random_password" "opensearch_password" {
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
-  name        = "/search/${var.name}/username"
+  name        = "/search/${var.service_name}/username"
   description = "The username for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_username.result
@@ -130,7 +132,7 @@ resource "aws_ssm_parameter" "opensearch_username" {
 }
 
 resource "aws_ssm_parameter" "opensearch_password" {
-  name        = "/search/${var.name}/password"
+  name        = "/search/${var.service_name}/password"
   description = "The password for the OpenSearch domain"
   type        = "SecureString"
   value       = random_password.opensearch_password.result
@@ -138,7 +140,7 @@ resource "aws_ssm_parameter" "opensearch_password" {
 }
 
 resource "aws_ssm_parameter" "opensearch_endpoint" {
-  name        = "/search/${var.name}/endpoint"
+  name        = "/search/${var.service_name}/endpoint"
   description = "The endpoint for the OpenSearch domain"
   type        = "SecureString"
   value       = aws_opensearch_domain.opensearch.endpoint
@@ -153,7 +155,7 @@ data "aws_iam_policy_document" "opensearch_access" {
     }
     effect    = "Allow"
     actions   = ["es:*"]
-    resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.name}/*"]
+    resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.service_name}/*"]
   }
 }
 

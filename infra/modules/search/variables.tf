@@ -43,11 +43,6 @@ variable "multi_az_with_standby_enabled" {
   type        = bool
 }
 
-variable "name" {
-  description = "The name of the OpenSearch domain"
-  type        = string
-}
-
 variable "service_name" {
   description = "The name of the service calling into the OpenSearch domain, used for the KMS policy"
   type        = string

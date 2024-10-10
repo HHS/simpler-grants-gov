@@ -3,19 +3,18 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_cloudwatch_log_group" "opensearch" {
-  # Conservatively retain logs for 5 years.
   retention_in_days = 1827
-  name_prefix       = "opensearch-${var.name}"
+  name_prefix       = "opensearch-${var.service_name}"
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
 resource "aws_cloudwatch_log_resource_policy" "opensearch" {
-  policy_name     = "opensearch-${var.name}"
+  policy_name     = "opensearch-${var.service_name}"
   policy_document = data.aws_iam_policy_document.opensearch_cloudwatch.json
 }
 
 resource "aws_opensearch_domain" "opensearch" {
-  domain_name     = var.name
+  domain_name     = var.service_name
   engine_version  = var.engine_version
   access_policies = data.aws_iam_policy_document.opensearch_access.json
 

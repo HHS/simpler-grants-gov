@@ -1,6 +1,6 @@
 resource "aws_security_group" "opensearch" {
-  name_prefix = "opensearch-${var.name}"
-  description = "Security group for OpenSearch domain ${var.name}"
+  name_prefix = "opensearch-${var.service_name}"
+  description = "Security group for OpenSearch domain ${var.service_name}"
   vpc_id      = var.vpc_id
 
   ingress {
