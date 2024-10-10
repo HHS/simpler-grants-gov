@@ -43,30 +43,41 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const primaryLinkConfigs = [
+  const primaryNavLinkConfigs: PrimaryLinks = [
     { linkText: t("nav_link_home"), href: "/" },
-    {
-      linkText: t("nav_link_search"),
-      href: "/search?status=forecasted,posted",
-      flag: "showSearchV0",
-    },
     { linkText: t("nav_link_process"), href: "/process" },
     { linkText: t("nav_link_research"), href: "/research" },
     { linkText: t("nav_link_subscribe"), href: "/subscribe" },
   ];
 
-  const primaryLinksRef = useRef<PrimaryLinks>(
-    primaryLinkConfigs.filter((config) => !config.flag),
-  );
+  const featureFlaggedNavLinkConfigs: PrimaryLinks = [
+    {
+      linkText: t("nav_link_search"),
+      href: "/search?status=forecasted,posted",
+      flag: "showSearchV0",
+    },
+  ];
+
+  const primaryLinksRef = useRef<PrimaryLinks>(primaryNavLinkConfigs);
 
   // note that this will not update when feature flags are updated without a refresh
   useEffect(() => {
-    const navLinksFromFlags = primaryLinkConfigs.reduce((acc, link) => {
-      if (!link.flag || featureFlags[link.flag]) {
-        acc.push(link);
-      }
-      return acc;
-    }, [] as PrimaryLinks);
+    const navLinksFromFlags = featureFlaggedNavLinkConfigs.reduce(
+      (acc, link) => {
+        const { flag = "" } = link;
+        console.log("####", featureFlags[flag]);
+        if (
+          featureFlags[flag] &&
+          !primaryLinksRef.current.some(
+            (existingLink) => existingLink.href === link.href,
+          )
+        ) {
+          acc.splice(1, 0, link);
+        }
+        return acc;
+      },
+      primaryNavLinkConfigs,
+    );
     primaryLinksRef.current = navLinksFromFlags;
   }, [featureFlags]);
 
