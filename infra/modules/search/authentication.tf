@@ -74,7 +74,10 @@ resource "aws_kms_key" "opensearch" {
         }
       },
       {
-        Sid    = "Allow access to AWS managed services",
+        Sid = "Allow access to AWS OpenSearch",
+        Principal = {
+          Service = "es.${data.aws_region.current.name}.amazonaws.com"
+        },
         Effect = "Allow",
         Action = [
           "kms:List*",
@@ -87,16 +90,6 @@ resource "aws_kms_key" "opensearch" {
           "kms:GenerateDataKey*"
         ],
         Resource = "*",
-        Condition = {
-          "ForAnyValue:StringLike" = {
-            # The service we are granting access to is OpenSearch, which is somtimes denoted as "os" in AWS.
-            # And other times as "es" (for "ElasticSearch"). So we just allow both, to be safe.
-            "kms:ViaService" : [
-              "os.${data.aws_region.current.name}.amazonaws.com",
-              "es.${data.aws_region.current.name}.amazonaws.com"
-            ]
-          },
-        }
       },
     ]
   })
