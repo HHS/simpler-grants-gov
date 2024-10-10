@@ -14,6 +14,12 @@ from src.search.search_models import (
     IntSearchFilter,
     StrSearchFilter,
 )
+from src.services.opportunities_v1.experimental_constant import (
+    AGENCY,
+    DEFAULT,
+    EXPANDED,
+    ScoringRule,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,17 +47,11 @@ REQUEST_FIELD_NAME_MAPPING = {
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
 }
 
-SEARCH_FIELDS = [
-    # Note that we do keyword for agency & opportunity number
-    # as we don't want to compare to a tokenized value which
-    # may have split on the dashes.
-    "agency.keyword^16",
-    "opportunity_title^2",
-    "opportunity_number.keyword^12",
-    "summary.summary_description",
-    "opportunity_assistance_listings.assistance_listing_number^10",
-    "opportunity_assistance_listings.program_title^4",
-]
+FILTER_RULE_MAPPING = {
+    ScoringRule.EXPANDED: EXPANDED,
+    ScoringRule.AGENCY: AGENCY,
+    ScoringRule.DEFAULT: DEFAULT,
+}
 
 SCHEMA = OpportunityV1Schema()
 
@@ -76,11 +76,16 @@ class OpportunityFilters(BaseModel):
     close_date: DateSearchFilter | None = None
 
 
+class Experimental(BaseModel):
+    scoring_rule: ScoringRule = Field(default=ScoringRule.DEFAULT)
+
+
 class SearchOpportunityParams(BaseModel):
     pagination: PaginationParams
 
     query: str | None = Field(default=None)
     filters: OpportunityFilters | None = Field(default=None)
+    experimental: Experimental = Field(default=Experimental())
 
 
 def _adjust_field_name(field: str) -> str:
@@ -148,7 +153,8 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
 
     # Query
     if params.query:
-        builder.simple_query(params.query, SEARCH_FIELDS)
+        filter_rule = FILTER_RULE_MAPPING.get(params.experimental.scoring_rule, DEFAULT)
+        builder.simple_query(params.query, filter_rule)
 
     # Filters
     _add_search_filters(builder, params.filters)

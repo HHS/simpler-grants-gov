@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
     "--set-current/--no-set-current", default=True, help="run SetCurrentOpportunitiesTask"
 )
 @click.option(
-    "--insert-chunk-size", default=4000, help="chunk size for load inserts", show_default=True
+    "--insert-chunk-size", default=800, help="chunk size for load inserts", show_default=True
 )
 @click.option("--tables-to-load", "-t", help="table to load", multiple=True)
 @flask_db.with_db_session()

@@ -67,7 +67,15 @@ def build_select_updated_rows_sql(
             == sqlalchemy.tuple_(*source_table.primary_key.columns),
         )
         # `WHERE ...`
-        .where(destination_table.c.last_upd_date < source_table.c.last_upd_date)
+        # NOTE: The legacy system doesn't populate the last_upd_date unless at least one update
+        #       has occurred, so we need to fallback to the created_date otherwise it will always be
+        #       null on the destination table side
+        .where(
+            sqlalchemy.func.coalesce(
+                destination_table.c.last_upd_date, destination_table.c.created_date
+            )
+            < source_table.c.last_upd_date
+        )
         .order_by(*source_table.primary_key.columns)
     )
 
