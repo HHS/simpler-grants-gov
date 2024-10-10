@@ -4,12 +4,10 @@ import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
 import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
 
-import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -21,12 +19,8 @@ export async function generateMetadata() {
 }
 
 export default function Process() {
-  unstable_setRequestLocale("en");
-  const t = useTranslations("Process");
-
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("meta_description")} />
       <BetaAlert />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessIntro />
