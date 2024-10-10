@@ -23,12 +23,6 @@ jobs:
       app_name: ${{ inputs.app_name }}
       ref: ${{ github.ref }}
 
-  database-migrations:
-    name: Database migrations
-    uses: ./.github/workflows/database-migrations.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      environment: ${{ inputs.environment }}
 
   deploy:
     name: Deploy
