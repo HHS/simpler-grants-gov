@@ -14,7 +14,7 @@ import { getMessages, unstable_setRequestLocale } from "next-intl/server";
 import Layout from "src/components/Layout";
 
 export const metadata: Metadata = {
-  icons: [`${environment.NEXT_PUBLIC_BASE_PATH}}/img/favicon.ico`],
+  icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
 };
 
 interface Props {
