@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import SearchResults from "src/app/[locale]/search/SearchResults";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
@@ -10,6 +9,7 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
+import SearchResults from "src/components/search/SearchResults";
 import QueryProvider from "./QueryProvider";
 
 export async function generateMetadata() {
