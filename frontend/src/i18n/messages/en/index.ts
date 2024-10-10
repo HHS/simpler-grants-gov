@@ -345,6 +345,7 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       server: 'Failed to subscribe, due to a server error. Please try again later.',
+      already_subscribed: 'This email address has already been subscribed.',
     },
   },
   Subscription_confirmation: {

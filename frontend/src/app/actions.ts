@@ -72,7 +72,17 @@ export default async function subscribeEmail(prevState: any, formData: FormData)
         });
 
         const responseData = await sendyResponse.text();
+        console.log("SENDY Response:", responseData, sendyResponse);
+        
+        // If the user is already subscribed, return an error message
+        if(responseData.includes("Already subscribed")) {
+            return {
+                errorMessage: t('errors.already_subscribed'),
+                validationErrors: {},
+            }
+        }
 
+        // If the response is not ok or the response data is not what we expect, return an error message
         if (!sendyResponse.ok || !["1", "true"].includes(responseData)) {
             return {
                 errorMessage: t('errors.server'),
@@ -80,6 +90,7 @@ export default async function subscribeEmail(prevState: any, formData: FormData)
             }
         }
     } catch (error) {
+        //General try failure catch error
         console.error("Error subscribing user:", (<Error>error).message);
         return {
             errorMessage: t('errors.server'),
