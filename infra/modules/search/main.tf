@@ -69,24 +69,31 @@ resource "aws_opensearch_domain" "opensearch" {
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "AUDIT_LOGS"
+    enabled                  = true
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "ES_APPLICATION_LOGS"
+    enabled                  = true
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "INDEX_SLOW_LOGS"
+    enabled                  = true
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "SEARCH_SLOW_LOGS"
+    enabled                  = true
   }
 
   software_update_options {
     auto_software_update_enabled = true
   }
+
+  # checkov:skip=CKV_AWS_318: false positve, we use a high availability setup in prod
+  # checkov:skip=CKV2_AWS_59: false positve, we use a high availability setup in prod
 }
