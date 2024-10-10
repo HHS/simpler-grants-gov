@@ -20,7 +20,6 @@ test.describe("Search page tests", () => {
 
   test("should return 0 results when searching for obscure term", async ({
     page,
-    browserName,
   }: PageProps) => {
     const searchTerm = "0resultearch";
 

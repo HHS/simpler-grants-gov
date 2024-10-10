@@ -17,7 +17,6 @@ test.describe("Search page tests", () => {
 
   test("should show and hide loading state", async ({
     page,
-    browserName,
   }: PageProps) => {
     const searchTerm = "advanced";
     await fillSearchInputAndSubmit(searchTerm, page);
