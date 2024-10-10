@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - "chouinar/2327-api-opensearch"
     paths:
       - "api/**"
       - ".github/"
@@ -30,7 +31,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        envs: ${{ fromJSON('["dev", "staging"]') }}
+        envs: [ "dev" ]
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
