@@ -145,17 +145,17 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
-    local.environment_config.search_config.has_search ? [{
+    local.environment_config.search_config != null ? [{
       name      = "SEARCH_USERNAME"
-      valueFrom = data.aws_ssm_parameter.search_username_arn.value
+      valueFrom = data.aws_ssm_parameter.search_username_arn[0].value
     }] : [],
-    local.environment_config.search_config.has_search ? [{
+    local.environment_config.search_config != null ? [{
       name      = "SEARCH_PASSWORD"
-      valueFrom = data.aws_ssm_parameter.search_password_arn.value
+      valueFrom = data.aws_ssm_parameter.search_password_arn[0].value
     }] : [],
-    local.environment_config.search_config.has_search ? [{
+    local.environment_config.search_config != null ? [{
       name      = "SEARCH_ENDPOINT"
-      valueFrom = data.aws_ssm_parameter.search_endpoint_arn.value
+      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].value
     }] : []
   )
 }
