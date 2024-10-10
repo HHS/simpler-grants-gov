@@ -15,14 +15,10 @@ import {
 import ContentLayout from "src/components/ContentLayout";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+const highLevelRoadmapItems = ["find", "advanced_reporting", "apply"] as const;
+
 const ProcessMilestones = () => {
   const t = useTranslations("Process.milestones");
-
-  const {
-    Process: {
-      milestones: { high_level_roadmap_items },
-    },
-  } = useMessages() as unknown as IntlMessages;
 
   const getIcon = (iconIndex: number) => {
     switch (iconIndex) {
@@ -47,10 +43,10 @@ const ProcessMilestones = () => {
         gridGap={6}
       >
         <IconList className="usa-icon-list--size-lg grid-row">
-          {high_level_roadmap_items.map((_unusedItem, index) => {
-            const title = t(`high_level_roadmap_items.${index}.title`);
+          {highLevelRoadmapItems.map((itemKey, index) => {
+            const title = t(`high_level_roadmap_items.${itemKey}.title`);
             const content = t.rich(
-              `high_level_roadmap_items.${index}.content`,
+              `high_level_roadmap_items.${itemKey}.content`,
               {
                 p: (chunks) => (
                   <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
@@ -79,7 +75,7 @@ const ProcessMilestones = () => {
                   </div>
                   {
                     // Don't show the chevron in the last row item.
-                    index < high_level_roadmap_items.length - 1 ? (
+                    index < highLevelRoadmapItems.length - 1 ? (
                       <USWDSIcon
                         className="usa-icon usa-icon--size-9 display-none tablet-lg:display-block text-base-lighter position-absolute right-0 top-0"
                         name="navigate_next"
