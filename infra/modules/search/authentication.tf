@@ -166,3 +166,20 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
     resources = ["arn:aws:logs:*"]
   }
 }
+
+data "aws_iam_policy_document" "allow_vpc_access" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"]
+    }
+    actions   = ["es:*"]
+    resources = ["${aws_opensearch_domain.opensearch.arn}/*"]
+  }
+}
+
+resource "aws_opensearch_domain_policy" "main" {
+  domain_name     = aws_opensearch_domain.opensearch.domain_name
+  access_policies = data.aws_iam_policy_document.allow_vpc_access.json
+}
