@@ -1,3 +1,3 @@
 output "endpoint" {
-  value = aws_elasticsearch_domain.search.endpoint
+  value = aws_opensearch_domain.opensearch.endpoint
 }

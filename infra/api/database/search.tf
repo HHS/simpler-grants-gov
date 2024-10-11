@@ -24,7 +24,8 @@ module "search" {
 }
 
 provider "opensearch" {
-  url = module.search_instance.outputs.endpoint
+  count = local.search_config != null ? 1 : 0
+  url   = module.search[0].endpoint
 }
 
 module "search_configuration" {
