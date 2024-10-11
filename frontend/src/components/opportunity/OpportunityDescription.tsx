@@ -33,8 +33,11 @@ enum ApplicantType {
 
 type ApplicantTypeKey = keyof typeof ApplicantType;
 
-const eligibleApplicantsFormatter = (applicant_types: string[]) => {
-  return applicant_types.map((type, index) => {
+const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
+  if (!applicantTypes || !applicantTypes.length) {
+    return "--";
+  }
+  return applicantTypes.map((type, index) => {
     if (type in ApplicantType) {
       return <p key={index}>{ApplicantType[type as ApplicantTypeKey]}</p>;
     }
@@ -45,13 +48,27 @@ const eligibleApplicantsFormatter = (applicant_types: string[]) => {
 const OpportunityDescription = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.description");
   const agency_phone_number_stripped = opportunityData.summary
-    .agency_phone_number
+    ?.agency_phone_number
     ? opportunityData.summary.agency_phone_number.replace(/-/g, "")
     : "";
 
   const additionalInformationOnEligibility =
     opportunityData.summary.applicant_eligibility_description ?? "--";
-  const agency_email = opportunityData.summary.agency_email_address ?? "";
+  const agencyEmailLink = opportunityData.summary?.agency_email_address ? (
+    <a href={`mailto:${opportunityData.summary.agency_email_address}`}>
+      {opportunityData.summary.agency_email_address}
+    </a>
+  ) : (
+    "--"
+  );
+
+  const telephoneLink = opportunityData.summary?.agency_phone_number ? (
+    <a href={`tel:${agency_phone_number_stripped}`}>
+      {opportunityData.summary.agency_phone_number}
+    </a>
+  ) : (
+    "--"
+  );
   return (
     <>
       <div className="usa-prose">
@@ -59,7 +76,7 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              opportunityData.summary.summary_description ?? "",
+              opportunityData.summary.summary_description ?? "--",
             ),
           }}
         />
@@ -75,23 +92,17 @@ const OpportunityDescription = ({ opportunityData }: Props) => {
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              opportunityData.summary.agency_contact_description
-                ? opportunityData.summary.agency_contact_description
-                : "",
+              opportunityData.summary?.agency_contact_description || "--",
             ),
           }}
         />
-        <p>{agency_email}</p>
-        <p>
-          <a href={`mailto:${agency_email}`}>
-            {opportunityData.summary.agency_email_address_description}
-          </a>
-        </p>
-        <p>
-          <a href={`tel:${agency_phone_number_stripped}`}>
-            {opportunityData.summary.agency_phone_number}
-          </a>
-        </p>
+        <h3>{t("email")}</h3>
+        {opportunityData.summary?.agency_email_address_description && (
+          <p>{opportunityData.summary.agency_email_address_description}</p>
+        )}
+        <p>{agencyEmailLink}</p>
+        <h3>{t("telephone")}</h3>
+        <p>{telephoneLink}</p>
       </div>
     </>
   );

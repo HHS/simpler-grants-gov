@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
-import { useTranslationsMock } from "tests/utils/intlMocks";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SearchFilters from "src/components/search/SearchFilters";
 

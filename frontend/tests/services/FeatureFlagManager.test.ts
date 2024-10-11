@@ -4,11 +4,11 @@
 
 import Cookies from "js-cookie";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
-import { mockProcessEnv } from "tests/utils/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
-} from "tests/utils/FeatureFlagTestUtils";
+} from "src/utils/testing/FeatureFlagTestUtils";
+import { mockProcessEnv } from "tests/utils/commonTestUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 
