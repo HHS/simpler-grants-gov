@@ -167,7 +167,7 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
   }
 }
 
-data "aws_iam_policy_document" "allow_vpc_access" {
+data "aws_iam_policy_document" "allow_all_aws_access" {
   statement {
     effect = "Allow"
     principals {
@@ -181,5 +181,5 @@ data "aws_iam_policy_document" "allow_vpc_access" {
 
 resource "aws_opensearch_domain_policy" "main" {
   domain_name     = aws_opensearch_domain.opensearch.domain_name
-  access_policies = data.aws_iam_policy_document.allow_vpc_access.json
+  access_policies = data.aws_iam_policy_document.allow_all_aws_access.json
 }
