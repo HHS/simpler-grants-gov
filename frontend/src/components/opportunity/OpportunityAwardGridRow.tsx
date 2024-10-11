@@ -5,7 +5,7 @@ type Props = {
   content: string | number | null;
 };
 
-type AwardDataKeys =
+export type AwardDataKeys =
   | "program_funding"
   | "expected_awards"
   | "award_ceiling"
