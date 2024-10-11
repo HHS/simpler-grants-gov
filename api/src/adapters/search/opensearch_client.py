@@ -266,10 +266,11 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
 
     # We'll assume if the aws_region is set, we're running in AWS
     # and should connect using the session credentials
-    if opensearch_config.aws_region is not None:
+    if opensearch_config.search_username and opensearch_config.search_password:
         # Get credentials and authorize with AWS Opensearch Serverless (es)
-        credentials = boto3.Session().get_credentials()
-        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
+        #credentials = boto3.Session().get_credentials()
+        #auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
+        auth = (opensearch_config.search_username, opensearch_config.search_password)
         params["http_auth"] = auth
 
     return params
