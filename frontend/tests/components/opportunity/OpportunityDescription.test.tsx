@@ -108,7 +108,7 @@ describe("OpportunityDescription", () => {
     expect(screen.getByText("123-456-7890")).toBeInTheDocument();
 
     const mailtoLink = screen.getByRole("link", {
-      name: "Contact Email Description",
+      name: "contact@example.com",
     });
     const agency_email = "contact@example.com";
     expect(mailtoLink).toHaveAttribute("href", `mailto:${agency_email}`);

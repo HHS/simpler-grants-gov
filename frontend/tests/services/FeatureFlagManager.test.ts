@@ -1,14 +1,14 @@
 /**
- * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
+ * @jest-environment ./src/utils/testing/jsdomNodeEnvironment.ts
  */
 
 import Cookies from "js-cookie";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+import { mockProcessEnv } from "src/utils/testing/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
 } from "src/utils/testing/FeatureFlagTestUtils";
-import { mockProcessEnv } from "tests/utils/commonTestUtils";
 
 import { NextRequest, NextResponse } from "next/server";
 

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
 
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
@@ -22,17 +22,15 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
-const mockOpportunityData: Opportunity = {
-  summary: {
-    post_date: "2024-01-15",
-    close_date: "2024-06-30",
-    archive_date: "2024-12-31",
-  },
-} as Opportunity;
+const mockSummary = {
+  post_date: "2024-01-15",
+  close_date: "2024-06-30",
+  archive_date: "2024-12-31",
+} as Summary;
 
 describe("OpportunityHistory", () => {
   it("renders history section with dates formatted correctly", () => {
-    render(<OpportunityHistory opportunityData={mockOpportunityData} />);
+    render(<OpportunityHistory summary={mockSummary} />);
 
     // Check for section heading
     expect(screen.getByText("History")).toBeInTheDocument();
@@ -55,7 +53,7 @@ describe("OpportunityHistory", () => {
   });
 
   it("calls formatDate for date fields", () => {
-    render(<OpportunityHistory opportunityData={mockOpportunityData} />);
+    render(<OpportunityHistory summary={mockSummary} />);
 
     // Check that formatDate is called with the right dates
     expect(formatDate).toHaveBeenCalledWith("2024-01-15");
