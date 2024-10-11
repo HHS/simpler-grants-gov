@@ -1,15 +1,15 @@
 import { useTranslations } from "next-intl";
 
-type Props = {
-  title: AwardDataKeys;
-  content: string | number | null;
-};
-
 export type AwardDataKeys =
   | "program_funding"
   | "expected_awards"
   | "award_ceiling"
   | "award_floor";
+
+type Props = {
+  title: AwardDataKeys;
+  content: string | number | null;
+};
 
 const defaultContentByType = (type: AwardDataKeys) =>
   type === "expected_awards" ? "--" : "$--";

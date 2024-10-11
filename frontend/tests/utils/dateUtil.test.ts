@@ -1,8 +1,9 @@
+import { identity } from "lodash";
 import { formatDate } from "src/utils/dateUtil";
 
 describe("formatDate", () => {
   beforeEach(() => {
-    jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.spyOn(console, "warn").mockImplementation(identity);
   });
   it("returns empty string when an incorrectly formatted string is passed", () => {
     expect(formatDate(null)).toEqual("");

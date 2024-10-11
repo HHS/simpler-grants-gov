@@ -1,3 +1,5 @@
+/* eslint-disable testing-library/no-node-access */
+
 import { render, screen } from "@testing-library/react";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
