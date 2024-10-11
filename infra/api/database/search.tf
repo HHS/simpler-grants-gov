@@ -23,27 +23,26 @@ module "search" {
   vpc_id                        = data.aws_vpc.network.id
 }
 
-provider "opensearch" {
-  count = local.search_config != null ? 1 : 0
-  url   = module.search[0].endpoint
-}
+# provider "opensearch" {
+#   url = local.search_config != null ? module.search[0].endpoint : ""
+# }
 
-module "search_configuration" {
-  count = local.search_config != null ? 1 : 0
+# module "search_configuration" {
+#   count = local.search_config != null ? 1 : 0
 
-  source = "../../modules/search-configuration"
+#   source = "../../modules/search-configuration"
 
-  providers = {
-    opensearch = opensearch
-  }
+#   providers = {
+#     opensearch = opensearch
+#   }
 
-  role_mappings = [
-    {
-      name        = "admin"
-      description = "admin access"
-      roles = [
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-app"
-      ]
-    }
-  ]
-}
+#   role_mappings = [
+#     {
+#       name        = "admin"
+#       description = "admin access"
+#       roles = [
+#         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-app"
+#       ]
+#     }
+#   ]
+# }

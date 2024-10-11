@@ -9,7 +9,7 @@ terraform {
 resource "opensearch_roles_mapping" "mapper" {
   for_each = { for mapping in var.role_mappings : mapping.name => mapping }
 
-  role_name     = each.name
-  description   = each.description
-  backend_roles = each.roles
+  role_name     = each.value.name
+  description   = each.value.description
+  backend_roles = each.value.roles
 }

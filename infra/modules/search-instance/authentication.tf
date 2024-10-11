@@ -172,7 +172,7 @@ data "aws_iam_policy_document" "allow_vpc_access" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"]
+      identifiers = ["*"]
     }
     actions   = ["es:*"]
     resources = ["${aws_opensearch_domain.opensearch.arn}/*"]
