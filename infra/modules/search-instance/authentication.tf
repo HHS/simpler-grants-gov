@@ -175,7 +175,7 @@ data "aws_iam_policy_document" "allow_vpc_access" {
       identifiers = ["*"]
     }
     actions   = ["es:*"]
-    resources = ["${aws_opensearch_domain.opensearch.arn}/*"]
+    resources = ["*"]
   }
 }
 
