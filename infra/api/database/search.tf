@@ -1,13 +1,14 @@
 locals {
   search_config = local.environment_config.search_config
+  service_name  = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 }
 
 module "search" {
   count = local.search_config != null ? 1 : 0
 
-  source = "../../modules/search"
+  source = "../../modules/search-instance"
 
-  service_name                  = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
+  service_name                  = local.service_name
   availability_zone_count       = 3
   zone_awareness_enabled        = var.environment_name == "prod" ? true : false
   multi_az_with_standby_enabled = var.environment_name == "prod" ? true : false
@@ -20,4 +21,28 @@ module "search" {
   instance_type                 = local.search_config.instance_type
   volume_size                   = local.search_config.volume_size
   vpc_id                        = data.aws_vpc.network.id
+}
+
+provider "opensearch" {
+  url = module.search_instance.outputs.endpoint
+}
+
+module "search_configuration" {
+  count = local.search_config != null ? 1 : 0
+
+  source = "../../modules/search-configuration"
+
+  providers = {
+    opensearch = opensearch
+  }
+
+  role_mappings = [
+    {
+      name        = "admin"
+      description = "admin access"
+      roles = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-app"
+      ]
+    }
+  ]
 }

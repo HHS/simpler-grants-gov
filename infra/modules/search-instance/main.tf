@@ -2,19 +2,6 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-terraform {
-  required_providers {
-    opensearch = {
-      source  = "opensearch-project/opensearch"
-      version = "2.3.1"
-    }
-  }
-}
-
-provider "opensearch" {
-  url = aws_opensearch_domain.opensearch.endpoint
-}
-
 resource "aws_cloudwatch_log_group" "opensearch" {
   retention_in_days = 1827
   name_prefix       = "opensearch-${var.service_name}"
