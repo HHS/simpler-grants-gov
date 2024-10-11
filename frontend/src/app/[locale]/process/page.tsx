@@ -4,7 +4,7 @@ import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
 import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
 
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -19,6 +19,7 @@ export async function generateMetadata() {
 }
 
 export default function Process() {
+  unstable_setRequestLocale("en");
   return (
     <>
       <BetaAlert />

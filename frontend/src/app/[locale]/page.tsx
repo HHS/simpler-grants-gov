@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import BetaAlert from "src/components/BetaAlert";
 import IndexGoalContent from "src/components/content/IndexGoalContent";
@@ -17,6 +17,7 @@ export async function generateMetadata() {
 }
 
 export default function Home() {
+  unstable_setRequestLocale("en");
   return (
     <>
       <Hero />
