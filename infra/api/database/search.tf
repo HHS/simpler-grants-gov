@@ -6,7 +6,7 @@ locals {
 module "search" {
   count = local.search_config != null ? 1 : 0
 
-  source = "../../modules/search-instance"
+  source = "../../modules/search"
 
   service_name                  = local.service_name
   availability_zone_count       = 3
@@ -22,27 +22,3 @@ module "search" {
   volume_size                   = local.search_config.volume_size
   vpc_id                        = data.aws_vpc.network.id
 }
-
-# provider "opensearch" {
-#   url = local.search_config != null ? module.search[0].endpoint : ""
-# }
-
-# module "search_configuration" {
-#   count = local.search_config != null ? 1 : 0
-
-#   source = "../../modules/search-configuration"
-
-#   providers = {
-#     opensearch = opensearch
-#   }
-
-#   role_mappings = [
-#     {
-#       name        = "admin"
-#       description = "admin access"
-#       roles = [
-#         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-app"
-#       ]
-#     }
-#   ]
-# }
