@@ -268,9 +268,12 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
     # and should connect using the session credentials
     if opensearch_config.search_username and opensearch_config.search_password:
         # Get credentials and authorize with AWS Opensearch Serverless (es)
-        #credentials = boto3.Session().get_credentials()
-        #auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
-        auth = (opensearch_config.search_username, opensearch_config.search_password)
+        credentials = boto3.Session().get_credentials()
+        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
+
+        # TODO hacky - do this a better way
+        path = f"https://{opensearch_config.search_username}:{opensearch_config.search_password}@{opensearch_config.search_endpoint}:{opensearch_config.search_port}"
+        params["hosts"] = [path]
 
     return params
