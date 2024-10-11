@@ -26,6 +26,7 @@ const mockSummary = {
   post_date: "2024-01-15",
   close_date: "2024-06-30",
   archive_date: "2024-12-31",
+  version_number: 1,
 } as Summary;
 
 describe("OpportunityHistory", () => {
@@ -37,7 +38,7 @@ describe("OpportunityHistory", () => {
 
     // Check version label
     expect(screen.getByText("Version:")).toBeInTheDocument();
-    expect(screen.getByText("--")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
 
     // Check Posted Date
     expect(screen.getByText("Posted date:")).toBeInTheDocument();
@@ -59,5 +60,34 @@ describe("OpportunityHistory", () => {
     expect(formatDate).toHaveBeenCalledWith("2024-01-15");
     expect(formatDate).toHaveBeenCalledWith("2024-06-30");
     expect(formatDate).toHaveBeenCalledWith("2024-12-31");
+  });
+
+  it("displays correct defaults when null values are present", () => {
+    render(
+      <OpportunityHistory
+        summary={
+          {
+            post_date: null,
+            close_date: null,
+            archive_date: null,
+            version_number: null,
+          } as Summary
+        }
+      />,
+    );
+
+    const firstHeading = screen.getByText("History");
+    expect(firstHeading.nextSibling).toHaveTextContent("--");
+
+    const secondHeading = screen.getByText("Version:");
+    expect(secondHeading.nextSibling).toHaveTextContent("--");
+    const thirdHeading = screen.getByText("Posted date:");
+    expect(thirdHeading.nextSibling).toHaveTextContent("--");
+    const fourthHeading = screen.getByText(
+      "Original closing date for applications:",
+    );
+    expect(fourthHeading.nextSibling).toHaveTextContent("--");
+    const fifthHeading = screen.getByText("Archive date:");
+    expect(fifthHeading.nextSibling).toHaveTextContent("--");
   });
 });

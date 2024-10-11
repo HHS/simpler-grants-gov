@@ -112,7 +112,7 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
       <GridContainer>
         <div className="grid-row grid-gap">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
-            <OpportunityDescription opportunityData={opportunityData} />
+            <OpportunityDescription summary={opportunityData.summary} />
             <OpportunityLink opportunityData={opportunityData} />
           </div>
 
