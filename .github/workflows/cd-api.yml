@@ -5,10 +5,8 @@ on:
   push:
     branches:
       - "main"
-      - "chouinar/2327-api-opensearch"
     paths:
       - "api/**"
-      - ".github/**"
   release:
     types: [published]
   workflow_dispatch:
@@ -24,14 +22,18 @@ on:
           - prod
 
 jobs:
+  api-checks:
+    name: Run API Checks
+    uses: ./.github/workflows/ci-api.yml
 
   deploy:
     name: Deploy
+    needs: api-checks
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
       matrix:
-        envs: [ "dev" ]
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
