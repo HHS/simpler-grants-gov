@@ -3,3 +3,5 @@ analytics
 api
 .next
 .terraform
+**/.terraform/**
+.git
