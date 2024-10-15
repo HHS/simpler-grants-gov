@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Generator, Iterable
 
-import boto3
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
@@ -253,24 +252,25 @@ class SearchClient:
 
 
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
-    # See: https://opensearch.org/docs/latest/clients/python-low-level/#connecting-to-amazon-opensearch-serverless
+    # See: https://opensearch.org/docs/latest/clients/python-low-level/#connecting-to-opensearch
     # for further details on configuring the connection to OpenSearch
-
     params = dict(
-        hosts=[{"host": opensearch_config.host, "port": opensearch_config.port}],
+        hosts=[{"host": opensearch_config.search_endpoint, "port": opensearch_config.search_port}],
         http_compress=True,
-        use_ssl=opensearch_config.use_ssl,
-        verify_certs=opensearch_config.verify_certs,
+        use_ssl=opensearch_config.search_use_ssl,
+        verify_certs=opensearch_config.search_verify_certs,
         connection_class=opensearchpy.RequestsHttpConnection,
-        pool_maxsize=opensearch_config.connection_pool_size,
+        pool_maxsize=opensearch_config.search_connection_pool_size,
     )
 
-    # If an AWS region is set, we assume we're running non-locally
-    # and will attempt to authenticate with AOSS
-    if opensearch_config.aws_region is not None:
-        # Get credentials and authorize with AWS Opensearch Serverless (aoss)
-        credentials = boto3.Session().get_credentials()
-        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "aoss")
+    # We'll assume if the aws_region is set, we're running in AWS
+    # and should connect using the session credentials
+    if opensearch_config.aws_region:
+        # Get credentials and authorize with AWS Opensearch Serverless (es)
+        # TODO - once we have the user setup in Opensearch, we want to change to this approach
+        # credentials = boto3.Session().get_credentials()
+        # auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
+        auth = (opensearch_config.search_username, opensearch_config.search_password)
         params["http_auth"] = auth
 
     return params
