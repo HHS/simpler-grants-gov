@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 
 type Props = {
   title: string | number;
-  content: string | number;
+  content: string | number | null;
 };
 
 type TranslationKeys =

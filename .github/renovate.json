@@ -2,7 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base",
-    "group:monorepos"
+    "group:monorepos",
+    "config:recommended",
+    ":dependencyDashboard"
   ],
   "schedule": [
     "on the 2nd and 4th day instance on sunday after 9pm"

@@ -55,10 +55,6 @@ export async function waitForURLContainsQueryParam(
   );
 }
 
-export async function clickSearchNavLink(page: Page) {
-  await page.click("nav >> text=Search");
-}
-
 export function getMobileMenuButton(page: Page) {
   return page.locator("button >> text=MENU");
 }
@@ -209,4 +205,11 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
   return opportunitiesText
     ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
     : 0;
+}
+
+export async function toggleMobileSearchFilters(page: Page) {
+  const toggleButton = page.locator(
+    "div[data-testid='content-display-toggle'] .usa-button--unstyled",
+  );
+  await toggleButton.click();
 }

@@ -7,6 +7,7 @@ import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
+from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
@@ -14,6 +15,7 @@ import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.constants.schema import Schemas
 from src.db import models
+from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
@@ -102,6 +104,7 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
         with db_client.get_connection() as conn, conn.begin():
             models.metadata.create_all(bind=conn)
             staging_metadata.create_all(bind=conn)
+            foreign_metadata.create_all(bind=conn)
 
         sync_lookup_values(db_client)
         yield db_client
@@ -134,12 +137,17 @@ def db_schema_prefix():
     return f"test_{uuid.uuid4().int}_"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_api_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.API}"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+def test_staging_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.STAGING}"
+
+
+@pytest.fixture(scope="session")
 def test_foreign_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.LEGACY}"
 
@@ -318,4 +326,18 @@ class BaseTestClass:
             db_session.delete(opp)
 
         # Force the deletes to the DB
+        db_session.commit()
+
+    @pytest.fixture(scope="class")
+    def truncate_staging_tables(self, db_session, test_staging_schema):
+        for table in staging_metadata.tables.values():
+            db_session.execute(text(f"TRUNCATE TABLE {test_staging_schema}.{table.name}"))
+
+        db_session.commit()
+
+    @pytest.fixture(scope="class")
+    def truncate_foreign_tables(self, db_session, test_foreign_schema):
+        for table in foreign_metadata.tables.values():
+            db_session.execute(text(f"TRUNCATE TABLE {test_foreign_schema}.{table.name}"))
+
         db_session.commit()

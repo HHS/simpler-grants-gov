@@ -12,6 +12,35 @@ variable "default_region" {
   type        = string
 }
 
+variable "has_search" {
+  type    = bool
+  default = false
+}
+
+variable "search_data_instance_type" {
+  type    = string
+  default = "or1.medium.search"
+}
+
+variable "search_master_instance_type" {
+  type    = string
+  default = "m6g.large.search"
+}
+
+variable "search_engine_version" {
+  type = string
+}
+
+variable "search_data_instance_count" {
+  type    = number
+  default = 3
+}
+
+variable "search_data_volume_size" {
+  type    = number
+  default = 20
+}
+
 variable "has_database" {
   type = bool
 }
@@ -55,4 +84,8 @@ variable "service_override_extra_environment_variables" {
     Map from environment variable name to environment variable value
     EOT
   default     = {}
+}
+
+variable "load_transform_args" {
+  type = list(string)
 }

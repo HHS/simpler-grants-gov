@@ -22,13 +22,13 @@ jobs:
       ACTION: show-results # show results, but don't post them to slack
     steps:
       # set up python
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       # install poetry
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
 
       - name: Install analytics package using poetry
         run: make install

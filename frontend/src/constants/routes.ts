@@ -14,9 +14,9 @@ export const ExternalRoutes = {
     "https://github.com/HHS/simpler-grants-gov/tree/main/documentation/decisions",
   GRANTS_HOME: "https://www.grants.gov",
   GRANTS_NEWSLETTER:
-    "https://www.grants.gov/web/grants/connect/newsletter-archive.html",
+    "https://grants.gov/connect/manage-subscriptions/newsletter-archive",
   GRANTS_RSS: "https://grants.gov/connect/rss-feeds",
-  GRANTS_TWITTER: "https://twitter.com/grantsdotgov",
+  GRANTS_X_TWITTER: "https://x.com/grantsdotgov",
   GRANTS_YOUTUBE: "https://www.youtube.com/user/GrantsGovUS",
   GRANTS_BLOG: "https://grantsgovprod.wordpress.com/",
   HHS: "https://www.hhs.gov",

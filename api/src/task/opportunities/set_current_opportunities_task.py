@@ -81,6 +81,7 @@ class SetCurrentOpportunitiesTask(Task):
 
         log_extra = {
             "opportunity_id": opportunity.opportunity_id,
+            "is_draft": opportunity.is_draft,
             "existing_opportunity_status": opportunity.opportunity_status,
         }
         log_extra |= get_log_extra_for_summary(
@@ -147,6 +148,10 @@ class SetCurrentOpportunitiesTask(Task):
         # Determine latest forecasted and non-forecasted opportunity summaries
         latest_forecasted_summary: OpportunitySummary | None = None
         latest_non_forecasted_summary: OpportunitySummary | None = None
+
+        # If the opportunity is a draft, we don't want to create a status
+        if opportunity.is_draft:
+            return None, None
 
         # Latest is based entirely off of the revision number, the latest
         # will always have a null revision number, and because of how the

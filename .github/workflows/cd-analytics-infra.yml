@@ -1,6 +1,5 @@
 name: Deploy Analytics Infra
-
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
+run-name: Deploy ${{ github.ref_name }} to Analytics Infra ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -20,10 +19,10 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.9.7
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -49,10 +48,10 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.9.7
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -64,5 +63,5 @@ jobs:
       - name: Terraform Init and Apply
         run: |
           ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
-          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
+          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}"
           ./bin/terraform-apply.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}

@@ -11,7 +11,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 class TestTransformOpportunity(BaseTransformTestClass):
     @pytest.fixture()
-    def transform_opportunity(self, transform_oracle_data_task):
+    def transform_opportunity(self, transform_oracle_data_task, truncate_staging_tables):
         return TransformOpportunity(transform_oracle_data_task)
 
     def test_process_opportunities(self, db_session, transform_opportunity):
@@ -72,31 +72,20 @@ class TestTransformOpportunity(BaseTransformTestClass):
         # Note this insert counts the case where the category fails
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning does mostly nothing, it will attempt to re-process the two that errored
+        # Rerunning does mostly nothing, it will attempt to re-process the one that errored
         # but otherwise won't find anything else
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_opportunity.run_subtask()
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 13
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 12
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
         # Note this insert counts the case where the category fails
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 4
-
-    def test_process_opportunity_delete_but_current_missing(
-        self, db_session, transform_opportunity
-    ):
-        # Verify an error is raised when we try to delete something that doesn't exist
-        delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
-
-        with pytest.raises(
-            ValueError, match="Cannot delete opportunity record as it does not exist"
-        ):
-            transform_opportunity.process_opportunity(delete_but_current_missing, None)
-
-        validate_opportunity(db_session, delete_but_current_missing, expect_in_db=False)
+        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     def test_process_opportunity_invalid_category(self, db_session, transform_opportunity):
         # This will error in the transform as that isn't a category we have configured

@@ -13,15 +13,15 @@ describe("Footer", () => {
   it("Renders social links", () => {
     render(<Footer />);
 
-    const twitter = screen.getByTitle("Twitter");
+    const x_twitter = screen.getByTitle("X (Twitter)");
     const youtube = screen.getByTitle("YouTube");
     const github = screen.getByTitle("Github");
     const rss = screen.getByTitle("RSS");
     const newsletter = screen.getByTitle("Newsletter");
     const blog = screen.getByTitle("Blog");
 
-    expect(twitter).toBeInTheDocument();
-    expect(twitter).toHaveAttribute("href", ExternalRoutes.GRANTS_TWITTER);
+    expect(x_twitter).toBeInTheDocument();
+    expect(x_twitter).toHaveAttribute("href", ExternalRoutes.GRANTS_X_TWITTER);
 
     expect(youtube).toBeInTheDocument();
     expect(youtube).toHaveAttribute("href", ExternalRoutes.GRANTS_YOUTUBE);

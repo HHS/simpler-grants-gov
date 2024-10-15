@@ -1,7 +1,5 @@
 name: Deploy Analytics
-# Need to set a default value for when the workflow is triggered from a git push
-# which bypasses the default configuration for inputs
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}} # changed for consistency with other files
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
 
 on:
   push:
@@ -34,6 +32,7 @@ jobs:
     needs: analytics-checks
     uses: ./.github/workflows/deploy.yml
     strategy:
+      max-parallel: 1
       matrix:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:

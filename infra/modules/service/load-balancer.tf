@@ -132,6 +132,7 @@ resource "aws_lb_listener_rule" "app_https_forward" {
 
 resource "aws_lb_target_group" "app_tg" {
   # you must use a prefix, to facilitate successful tg changes
+  # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
   count                = var.enable_load_balancer ? 1 : 0
   name_prefix          = "app-"
   port                 = var.container_port

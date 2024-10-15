@@ -21,11 +21,18 @@ export interface AccordionItemProps {
 }
 
 export interface FilterOption {
+  children?: FilterOption[];
   id: string;
+  isChecked?: boolean;
   label: string;
   value: string;
-  isChecked?: boolean;
-  children?: FilterOption[];
+}
+
+export interface SearchFilterAccordionProps {
+  filterOptions: FilterOption[];
+  query: Set<string>;
+  queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
+  title: string; // Title in header of accordion
 }
 
 export interface FilterOptionWithChildren {
@@ -34,13 +41,6 @@ export interface FilterOptionWithChildren {
   value: string;
   isChecked?: boolean;
   children: FilterOption[];
-}
-
-interface SearchFilterAccordionProps {
-  filterOptions: FilterOption[];
-  title: string; // Title in header of accordion
-  query: Set<string>;
-  queryParamKey: QueryParamKey; // Ex - In query params, search?{key}=first,second,third
 }
 
 export function SearchFilterAccordion({

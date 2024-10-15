@@ -57,7 +57,10 @@ module.exports = {
       rules: {
         camelcase: "off",
         // Prevent dead code accumulation
-        "@typescript-eslint/no-unused-vars": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { argsIgnorePattern: "^_" },
+        ],
         // The usage of `any` defeats the purpose of typescript. Consider using `unknown` type instead instead.
         "@typescript-eslint/no-explicit-any": "error",
         // Just warn since playwright tests may not use screen the way jest would

@@ -18,7 +18,7 @@ jobs:
     name: Check wiki links in SUMMARY.md
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Check all wiki files are linked in SUMMARY.md
         run: ./scripts/check-wiki-pages-linked-to-summary.sh

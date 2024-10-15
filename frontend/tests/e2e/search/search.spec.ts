@@ -16,6 +16,7 @@ import {
   refreshPageWithCurrentURL,
   selectSortBy,
   toggleCheckboxes,
+  toggleMobileSearchFilters,
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
 
@@ -31,9 +32,9 @@ test.describe("Search page tests", () => {
     await page.goto("/search?_ff=showSearchV0:true");
   });
 
-  test("should refresh and retain filters in a new tab", async ({
-    page,
-  }: PageProps) => {
+  test("should refresh and retain filters in a new tab", async ({ page }, {
+    project,
+  }) => {
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
@@ -62,7 +63,13 @@ test.describe("Search page tests", () => {
     await selectSortBy(page, "agencyDesc");
 
     await waitForSearchResultsInitialLoad(page);
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
+
     await fillSearchInputAndSubmit(searchTerm, page);
+
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     await clickAccordionWithTitle(page, "Funding instrument");
@@ -110,9 +117,9 @@ test.describe("Search page tests", () => {
     }
   });
 
-  test("resets page back to 1 when choosing a filter", async ({
-    page,
-  }: PageProps) => {
+  test("resets page back to 1 when choosing a filter", async ({ page }, {
+    project,
+  }) => {
     await clickPaginationPageNumber(page, 2);
 
     // Verify that page 1 is highlighted
@@ -125,6 +132,11 @@ test.describe("Search page tests", () => {
     const statusCheckboxes = {
       "status-closed": "closed",
     };
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
+
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
@@ -160,7 +172,7 @@ test.describe("Search page tests", () => {
 
   test("number of results is the same with none or all opportunity status checked", async ({
     page,
-  }: PageProps) => {
+  }, { project }) => {
     const initialNumberOfOpportunityResults =
       await getNumberOfOpportunitySearchResults(page);
 
@@ -171,6 +183,10 @@ test.describe("Search page tests", () => {
       "status-closed": "closed",
       "status-archived": "archived",
     };
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
 
     await toggleCheckboxes(page, statusCheckboxes, "status");
 

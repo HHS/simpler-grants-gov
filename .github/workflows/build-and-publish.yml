@@ -1,4 +1,5 @@
 name: Build and Publish
+run-name: Build and Publish ${{ inputs.ref }} to ${{ inputs.app_name }} ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   workflow_call:
@@ -42,12 +43,11 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          ref: ${{ inputs.ref }}
-
-      - name: Build release
-        run: make APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} release-build
+          terraform_version: 1.9.7
+          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
@@ -55,5 +55,17 @@ jobs:
           app_name: ${{ inputs.app_name }}
           environment: shared
 
+      - name: Check if image is already published
+        id: check-image-published
+        run: |
+          is_image_published=$(./bin/is-image-published "${{ inputs.app_name }}" "${{ inputs.ref }}")
+          echo "Is image published: $is_image_published"
+          echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
+
+      - name: Build release
+        if: steps.check-image-published.outputs.is_image_published == 'false'
+        run: make APP_NAME=${{ inputs.app_name }} release-build
+
       - name: Publish release
+        if: steps.check-image-published.outputs.is_image_published == 'false'
         run: make APP_NAME=${{ inputs.app_name }} release-publish

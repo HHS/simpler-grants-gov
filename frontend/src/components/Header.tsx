@@ -4,6 +4,7 @@ import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   GovBanner,
@@ -38,7 +39,7 @@ const Header = ({ logoPath, locale }: Props) => {
       { i18nKey: t("nav_link_home"), href: "/" },
       { i18nKey: t("nav_link_process"), href: "/process" },
       { i18nKey: t("nav_link_research"), href: "/research" },
-      { i18nKey: t("nav_link_newsletter"), href: "/newsletter" },
+      { i18nKey: t("nav_link_subscribe"), href: "/subscribe" },
     ];
     const searchNavLink = {
       i18nKey: t("nav_link_search"),
@@ -50,9 +51,9 @@ const Header = ({ logoPath, locale }: Props) => {
   }, [featureFlagsManager, t]);
 
   const navItems = primaryLinksRef.current.map((link) => (
-    <a href={link.href} key={link.href}>
+    <Link href={link.href} key={link.href}>
       {link.i18nKey}
-    </a>
+    </Link>
   ));
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 

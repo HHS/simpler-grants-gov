@@ -94,6 +94,12 @@ FUNDING_INSTRUMENT_MAP = {
 }
 
 
+def is_empty_str(value: str | None) -> bool:
+    # null/None, "" and any amount of just whitespace
+    # are treated as an empty string
+    return value is None or value.strip() == ""
+
+
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
@@ -125,7 +131,7 @@ def transform_opportunity(
 
 
 def transform_opportunity_category(value: str | None) -> OpportunityCategory | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     if value not in OPPORTUNITY_CATEGORY_MAP:
@@ -135,7 +141,7 @@ def transform_opportunity_category(value: str | None) -> OpportunityCategory | N
 
 
 def transform_applicant_type(value: str | None) -> ApplicantType | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     if value not in APPLICANT_TYPE_MAP:
@@ -145,7 +151,7 @@ def transform_applicant_type(value: str | None) -> ApplicantType | None:
 
 
 def transform_funding_category(value: str | None) -> FundingCategory | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     if value not in FUNDING_CATEGORY_MAP:
@@ -155,7 +161,7 @@ def transform_funding_category(value: str | None) -> FundingCategory | None:
 
 
 def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     if value not in FUNDING_INSTRUMENT_MAP:
@@ -421,14 +427,14 @@ def transform_update_create_timestamp(
     target.updated_at = updated_timestamp
 
 
-TRUTHY = {"Y", "Yes"}
-FALSEY = {"N", "No"}
+TRUTHY = {"Y", "Yes", "y", "yes"}
+FALSEY = {"N", "No", "n", "no"}
 
 
 def convert_yn_bool(value: str | None) -> bool | None:
     # Booleans in the Oracle database are stored as varchar/char
     # columns with the values as Y/N (very rarely Yes/No)
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     if value in TRUTHY:
@@ -442,7 +448,7 @@ def convert_yn_bool(value: str | None) -> bool | None:
 
 
 def convert_true_false_bool(value: str | None) -> bool | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     return value == "TRUE"
@@ -463,7 +469,7 @@ def convert_action_type_to_is_deleted(value: str | None) -> bool:
     # however many older records seem to not have this set at all
     # The legacy system looks like it treats anything that isn't D
     # the same, so we'll go with that assumption as well.
-    if value is None or value == "":
+    if is_empty_str(value):
         return False
 
     if value == "D":  # D = Delete
@@ -476,11 +482,13 @@ def convert_action_type_to_is_deleted(value: str | None) -> bool:
 
 
 def convert_numeric_str_to_int(value: str | None) -> int | None:
-    if value is None or value == "":
+    if is_empty_str(value):
         return None
 
     try:
-        return int(value)
+        # We know the value is a string and not None from the above
+        # function call but mypy can't see that, so ignore it here.
+        return int(value)  # type: ignore
     except ValueError:
         # From what we've found in the legacy data, some of these numeric strings
         # are written out as "none", "not available", "n/a" or similar. All of these

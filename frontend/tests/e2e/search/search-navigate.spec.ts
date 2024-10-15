@@ -3,7 +3,6 @@ import { BrowserContextOptions } from "playwright-core";
 
 import {
   clickMobileNavMenu,
-  clickSearchNavLink,
   expectCheckboxIDIsChecked,
   expectURLContainsQueryParam,
   getMobileMenuButton,
@@ -28,15 +27,15 @@ test("should navigate from index to search page", async ({
     await clickMobileNavMenu(menuButton);
   }
 
-  await clickSearchNavLink(page);
-
-  // Verify that the new URL is correct
-  expectURLContainsQueryParam(page, "status", "forecasted,posted");
+  await page.click("nav >> text=Search");
 
   // Verify the presence of "Search" content on the page
   await expect(page.locator("h1")).toContainText(
     "Search funding opportunities",
   );
+
+  // Verify that the new URL is correct
+  expectURLContainsQueryParam(page, "status", "forecasted,posted");
 
   // Verify that the 'forecasted' and 'posted' are checked
   await expectCheckboxIDIsChecked(page, "#status-forecasted");

@@ -16,8 +16,8 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
 
   const statusTagFormatter = (
     status: string,
-    closeDate: string,
-    archiveDate: string,
+    closeDate: string | null,
+    archiveDate: string | null,
   ) => {
     switch (status) {
       case "archived":
