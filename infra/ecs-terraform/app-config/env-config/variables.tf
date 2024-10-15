@@ -11,6 +11,7 @@ variable "default_region" {
   description = "default region for the project"
   type        = string
 }
+
 variable "service_override_extra_environment_variables" {
   type        = map(string)
   description = <<EOT
