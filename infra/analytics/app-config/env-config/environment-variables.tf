@@ -4,7 +4,7 @@ locals {
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
     MB_DB_TYPE   = "postgres"
-    MB_DB_USER   = "metabase"
+    MB_DB_USER   = "metabaseuser"
     MB_DB_DBNAME = "metabase"
   }
 
@@ -35,12 +35,13 @@ locals {
     }
     # Create this manually in the AWS console via the RDS Query Editor
     #
-    # CREATE USER metabase WITH PASSWORD 'REDACTED';
-    # CREATE DATABASE metabase OWNER metabase;
-    # GRANT ALL PRIVILEGES ON DATABASE metabase TO metabase;
-    # GRANT CONNECT ON DATABASE metabase TO metabase;
-    # GRANT ALL ON public TO metabase;
-    # GRANT ALL ON SCHEMA public TO metabase;
+    # CREATE ROLE metabaserole;
+    # GRANT metabase TO "< ROOT USER >";
+    # CREATE DATABASE metabase OWNER = "< ROOT USER >";
+    # CREATE USER metabaseuser WITH PASSWORD "< RANDOM PASSWORD >"; <== add this to Parameter Store
+    # GRANT ALL PRIVILEGES ON DATABASE metabase TO metabaseuser;
+    # GRANT CONNECT ON DATABASE metabase TO metabaseuser;
+    # GRANT metabaserole TO metabaseuser;
     MB_DB_PASS = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
