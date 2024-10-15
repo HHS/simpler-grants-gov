@@ -168,6 +168,10 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
 }
 
 data "aws_iam_policy_document" "allow_all_aws_access" {
+  # checkov:skip=CKV_AWS_109: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_111: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_283: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_356: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
   statement {
     effect = "Allow"
     principals {
