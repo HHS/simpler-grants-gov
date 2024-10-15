@@ -25,6 +25,8 @@ psycopg = { extras = ["binary"], version = "^3.1.19" }
 pydantic-settings = "^2.0.3"
 flask-cors = "^5.0.0"
 opensearch-py = "^2.5.0"
+graphviz = "^0.20.3"
+sqlalchemy-schemadisplay = "^2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
