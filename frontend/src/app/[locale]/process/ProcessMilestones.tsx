@@ -1,6 +1,6 @@
 import { ExternalRoutes } from "src/constants/routes";
 
-import { useMessages, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import React from "react";
 import {
