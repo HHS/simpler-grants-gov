@@ -97,10 +97,8 @@ module "service" {
   healthcheck_command      = null
   healthcheck_path         = "/"
   extra_environment_variables = {
-    MB_DB_TYPE   = "postgres"
-    MB_DB_DBNAME = "metabase"
-    MB_DB_PORT   = data.aws_rds_cluster.db_cluster.port
-    MB_DB_HOST   = data.aws_rds_cluster.db_cluster.endpoint
+    MB_DB_PORT = data.aws_rds_cluster.db_cluster.port
+    MB_DB_HOST = data.aws_rds_cluster.db_cluster.endpoint
   }
 
   secrets = concat(

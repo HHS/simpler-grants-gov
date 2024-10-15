@@ -3,10 +3,9 @@ locals {
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
-    # Example environment variables
-    # WORKER_THREADS_COUNT    = 4
-    # LOG_LEVEL               = "info"
-    # DB_CONNECTION_POOL_SIZE = 5
+    MB_DB_TYPE   = "postgres"
+    MB_DB_USER   = "metabase"
+    MB_DB_DBNAME = "metabase"
   }
 
   # Configuration for secrets
@@ -19,24 +18,31 @@ locals {
   #   }
   # }
   secrets = {
+    # Create this in Github
     GH_TOKEN = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/github-token"
     }
+    # Create this in Slack
     ANALYTICS_SLACK_BOT_TOKEN = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/slack-bot-token"
     }
+    # Retrieve this from Slack
     ANALYTICS_REPORTING_CHANNEL_ID = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
     }
-    MB_DB_USER = {
-      manage_method     = "generated"
-      secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-user"
-    }
+    # Create this manually in the AWS console via the RDS Query Editor
+    #
+    # CREATE USER metabase WITH PASSWORD 'REDACTED';
+    # CREATE DATABASE metabase OWNER metabase;
+    # GRANT ALL PRIVILEGES ON DATABASE metabase TO metabase;
+    # GRANT CONNECT ON DATABASE metabase TO metabase;
+    # GRANT ALL ON public TO metabase;
+    # GRANT ALL ON SCHEMA public TO metabase;
     MB_DB_PASS = {
-      manage_method     = "generated"
+      manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
     }
   }
