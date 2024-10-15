@@ -2,40 +2,8 @@
 # Constants #
 #############
 
-ORG ?= HHS
-REPO ?= simpler-grants-gov
-SPRINT_PROJECT ?= 13
-ROADMAP_PROJECT ?= 12
-OUTPUT_DIR ?= data
-SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
-ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
-ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
-SPRINT ?= @current
-UNIT ?= points
-ACTION ?= show-results
-MIN_TEST_COVERAGE ?= 80
-APP_NAME ?= grants-analytics
-
 # Required for CI to work properly
 SHELL = /bin/bash -o pipefail
-
-ifdef CI
- DOCKER_EXEC_ARGS := -T -e CI -e GH_TOKEN -e ANALYTICS_SLACK_BOT_TOKEN -e ANALYTICS_REPORTING_CHANNEL_ID
-else
- DOCKER_EXEC_ARGS := -e GH_TOKEN
-endif
-
-# By default, all python/poetry commands will run inside of the docker container
-# if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
-# You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
-# it to your ~/.zshrc file (and run `source ~/.zshrc`)
-ifeq "$(PY_RUN_APPROACH)" "local"
-POETRY := poetry run
-GITHUB := gh
-else
-POETRY := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
-GITHUB := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
-endif
 
 # Docker user configuration
 # This logic is to avoid issues with permissions and mounting local volumes,
