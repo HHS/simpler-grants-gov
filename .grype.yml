@@ -1,3 +1,5 @@
+fail-on-severity: "medium"
+
 # List of vulnerabilities to ignore for the anchore scan
 # https://github.com/anchore/grype#specifying-matches-to-ignore
 # More info can be found in the docs/infra/vulnerability-management.md file
@@ -16,20 +18,3 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
-  # Golang vulnerability inside of a python docker image. It's basically impossible to find
-  # out where the impacted golang vulnerability is coming from. The python image in question
-  # does not even have golang installed, yet somehow still there's a golang vulnerability.
-  # We are ignoring the finding because it would take undue effort to track down the source.
-  - vulnerability: GHSA-4v7x-pqxf-cx7m
-  # https://github.com/anchore/grype/issues/1172
-  - vulnerability: GHSA-xqr8-7jwr-rhp7
-  - vulnerability: GHSA-7fh5-64p2-3v2j
-  # pip vulnerability, need to wait for the Python image to update to 23.x
-  # https://github.com/docker-library/python/blob/402b993af9ca7a5ee22d8ecccaa6197bfb957bc5/3.12/slim-bookworm/Dockerfile#L137
-  - vulnerability: GHSA-mq26-g339-26xf
-  # 11/14/2023 - Postgres vulnerabilities in the Debian image
-  - vulnerability: CVE-2023-39417
-  - vulnerability: CVE-2023-5869
-  - vulnerability: CVE-2023-39418
-  - vulnerability: CVE-2023-5868
-  - vulnerability: CVE-2023-5870

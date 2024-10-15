@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import GoalContent from "src/pages/content/IndexGoalContent";
+import { render, screen } from "tests/react-utils";
+
+import GoalContent from "src/components/content/IndexGoalContent";
 
 describe("Goal Content", () => {
   it("Renders without errors", () => {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Checkbox } from "@trussworks/react-uswds";
 import React from "react";
+import { Checkbox } from "@trussworks/react-uswds";
 
 interface FilterCheckboxProps {
   id: string;

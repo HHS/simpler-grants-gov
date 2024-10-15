@@ -32,7 +32,7 @@ root
 │   └── setup.cfg           Python config for tools that don't support pyproject.toml yet
 │   └── Dockerfile          Docker build file for project
 │
-└── docker-compose.yml  Config file for docker-compose tool, used for local development
+└── docker-compose.yml  Config file for docker compose tool, used for local development
 ```
 
 ## Local Development
@@ -46,4 +46,4 @@ See [development.md](../documentation/api/development.md) for installation and d
 * [Formatting and Linting](../documentation/api/formatting-and-linting.md)
 * [Writing Tests](../documentation/api/writing-tests.md)
 * [Logging configuration](../documentation/api/monitoring-and-observability/logging-configuration.md)
-* [Loggin conventions](../documentation/api/monitoring-and-observability/logging-conventions.md)
+* [Logging conventions](../documentation/api/monitoring-and-observability/logging-conventions.md)

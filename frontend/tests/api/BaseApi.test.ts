@@ -1,6 +1,6 @@
 import "server-only";
 
-import BaseApi, { ApiMethod, JSONRequestBody } from "../../src/app/api/BaseApi";
+import BaseApi, { ApiMethod, JSONRequestBody } from "src/app/api/BaseApi";
 import { NetworkError, UnauthorizedError } from "src/errors";
 
 // Define a concrete implementation of BaseApi for testing

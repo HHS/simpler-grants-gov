@@ -1,6 +1,5 @@
 name: Deploy API Infra
-
-run-name: Deploy ${{ github.ref_name }} to API ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
+run-name: Deploy ${{ github.ref_name }} to API Infra ${{ (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   push:
@@ -20,10 +19,10 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.9.7
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -42,16 +41,16 @@ jobs:
       matrix:
         directory: ["database", "service"]
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # deploy prod on releases, otherwise deploy staging and dev
-  
+
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.8.2
+          terraform_version: 1.9.7
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -63,5 +62,5 @@ jobs:
       - name: Terraform Init and Apply
         run: |
           ./bin/terraform-init.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
-          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}" 
+          export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}"
           ./bin/terraform-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}

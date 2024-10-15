@@ -17,6 +17,7 @@ import src.logging
 from src.api.response import ApiResponse, ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
 from src.auth.api_key_auth import api_key_auth
 from src.util.dict_util import flatten_dict
 from tests.src.schemas.schema_validation_utils import (
@@ -35,8 +36,12 @@ def header(api_auth_token):
     return {"X-Auth": api_auth_token}
 
 
-class OutputSchema(Schema):
+class OutputData(Schema):
     output_val = fields.String()
+
+
+class OutputSchema(AbstractResponseSchema, WarningMixinSchema):
+    data = fields.Nested(OutputData())
 
 
 test_blueprint = APIBlueprint("test", __name__, tag="test")
@@ -111,7 +116,6 @@ def test_exception(simple_client, api_auth_token, monkeypatch, exception):
 
     assert resp.status_code == 500
     resp_json = resp.get_json()
-    assert resp_json["data"] == {}
     assert resp_json["errors"] == []
     assert resp_json["message"] == "Internal Server Error"
 

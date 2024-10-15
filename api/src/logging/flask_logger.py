@@ -16,7 +16,9 @@ Usage:
 
     flask_logger.init_app(logger, app)
 """
+
 import logging
+import os
 import time
 import uuid
 
@@ -24,6 +26,8 @@ import flask
 
 logger = logging.getLogger(__name__)
 EXTRA_LOG_DATA_ATTR = "extra_log_data"
+
+_GLOBAL_LOG_CONTEXT: dict = {}
 
 
 def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
@@ -49,7 +53,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     # set on the ancestors.
     # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
     for handler in app_logger.handlers:
-        handler.addFilter(_add_app_context_info_to_log_record)
+        handler.addFilter(_add_global_context_info_to_log_record)
         handler.addFilter(_add_request_context_info_to_log_record)
 
     # Add request context data to every log record for the current request
@@ -61,6 +65,11 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     app.before_request(_track_request_start_time)
     app.before_request(_log_start_request)
     app.after_request(_log_end_request)
+
+    # Add some metadata to all log messages globally
+    add_extra_data_to_global_logs(
+        {"app.name": app.name, "environment": os.environ.get("ENVIRONMENT")}
+    )
 
     app_logger.info("initialized flask logger")
 
@@ -74,6 +83,12 @@ def add_extra_data_to_current_request_logs(
     extra_log_data = getattr(flask.g, EXTRA_LOG_DATA_ATTR, {})
     extra_log_data.update(data)
     setattr(flask.g, EXTRA_LOG_DATA_ATTR, extra_log_data)
+
+
+def add_extra_data_to_global_logs(data: dict[str, str | int | float | bool | None]) -> None:
+    """Add metadata to all logs for the rest of the lifecycle of this app process"""
+    global _GLOBAL_LOG_CONTEXT
+    _GLOBAL_LOG_CONTEXT.update(data)
 
 
 def _track_request_start_time() -> None:
@@ -116,20 +131,6 @@ def _log_end_request(response: flask.Response) -> flask.Response:
     return response
 
 
-def _add_app_context_info_to_log_record(record: logging.LogRecord) -> bool:
-    """Add app context data to the log record.
-
-    If there is no app context, then do not add any data.
-    """
-    if not flask.has_app_context():
-        return True
-
-    assert flask.current_app is not None
-    record.__dict__ |= _get_app_context_info(flask.current_app)
-
-    return True
-
-
 def _add_request_context_info_to_log_record(record: logging.LogRecord) -> bool:
     """Add request context data to the log record.
 
@@ -145,8 +146,11 @@ def _add_request_context_info_to_log_record(record: logging.LogRecord) -> bool:
     return True
 
 
-def _get_app_context_info(app: flask.Flask) -> dict:
-    return {"app.name": app.name}
+def _add_global_context_info_to_log_record(record: logging.LogRecord) -> bool:
+    global _GLOBAL_LOG_CONTEXT
+    record.__dict__ |= _GLOBAL_LOG_CONTEXT
+
+    return True
 
 
 def _get_request_context_info(request: flask.Request) -> dict:

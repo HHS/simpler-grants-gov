@@ -6,7 +6,13 @@ export interface SearchFilterRequestBody {
   funding_category?: { one_of: string[] };
 }
 
-export type PaginationOrderBy = "opportunity_id" | "opportunity_number";
+export type PaginationOrderBy =
+  | "opportunity_id"
+  | "opportunity_number"
+  | "opportunity_title"
+  | "agency_code"
+  | "post_date"
+  | "close_date";
 export type PaginationSortDirection = "ascending" | "descending";
 export interface PaginationRequestBody {
   order_by: PaginationOrderBy;

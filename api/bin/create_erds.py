@@ -12,7 +12,7 @@ import src.db.models.staging.forecast as staging_forecast_models
 import src.db.models.staging.opportunity as staging_opportunity_models
 import src.db.models.staging.synopsis as staging_synopsis_models
 import src.logging
-from src.db.models import opportunity_models
+from src.db.models import agency_models, opportunity_models
 from src.db.models.transfer import topportunity_models
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 
 # If we want to generate separate files for more specific groups, we can set that up here
-API_MODULES = (opportunity_models,)
+API_MODULES = (
+    opportunity_models,
+    agency_models,
+)
 STAGING_TABLE_MODULES = (
     staging_opportunity_models,
     staging_forecast_models,

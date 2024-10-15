@@ -7,12 +7,15 @@ import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
+from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
+from src.adapters import search
 from src.constants.schema import Schemas
 from src.db import models
+from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
@@ -101,6 +104,7 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
         with db_client.get_connection() as conn, conn.begin():
             models.metadata.create_all(bind=conn)
             staging_metadata.create_all(bind=conn)
+            foreign_metadata.create_all(bind=conn)
 
         sync_lookup_values(db_client)
         yield db_client
@@ -133,14 +137,62 @@ def db_schema_prefix():
     return f"test_{uuid.uuid4().int}_"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_api_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.API}"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+def test_staging_schema(db_schema_prefix):
+    return f"{db_schema_prefix}{Schemas.STAGING}"
+
+
+@pytest.fixture(scope="session")
 def test_foreign_schema(db_schema_prefix):
     return f"{db_schema_prefix}{Schemas.LEGACY}"
+
+
+####################
+# Opensearch Fixtures
+####################
+
+
+@pytest.fixture(scope="session")
+def search_client() -> search.SearchClient:
+    client = search.SearchClient()
+    try:
+        yield client
+    finally:
+        # Just in case a test setup an index
+        # in a way that didn't clean it up, delete
+        # all indexes at the end of a run that start with test
+        client.delete_index("test-*")
+
+
+@pytest.fixture(scope="session")
+def opportunity_index(search_client):
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+
+    search_client.create_index(index_name)
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-opportunity-index-*")
+
+
+@pytest.fixture(scope="session")
+def opportunity_index_alias(search_client, monkeypatch_session):
+    # Note we don't actually create anything, this is just a random name
+    alias = f"test-opportunity-index-alias-{uuid.uuid4().int}"
+    monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+    return alias
 
 
 ####################
@@ -151,7 +203,7 @@ def test_foreign_schema(db_schema_prefix):
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client) -> APIFlask:
+def app(db_client, opportunity_index_alias) -> APIFlask:
     return app_entry.create_app()
 
 
@@ -196,7 +248,8 @@ def reset_aws_env_vars(monkeypatch):
 
 @pytest.fixture
 def mock_s3(reset_aws_env_vars):
-    with moto.mock_s3():
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
         yield boto3.resource("s3")
 
 
@@ -273,4 +326,18 @@ class BaseTestClass:
             db_session.delete(opp)
 
         # Force the deletes to the DB
+        db_session.commit()
+
+    @pytest.fixture(scope="class")
+    def truncate_staging_tables(self, db_session, test_staging_schema):
+        for table in staging_metadata.tables.values():
+            db_session.execute(text(f"TRUNCATE TABLE {test_staging_schema}.{table.name}"))
+
+        db_session.commit()
+
+    @pytest.fixture(scope="class")
+    def truncate_foreign_tables(self, db_session, test_foreign_schema):
+        for table in foreign_metadata.tables.values():
+            db_session.execute(text(f"TRUNCATE TABLE {test_foreign_schema}.{table.name}"))
+
         db_session.commit()

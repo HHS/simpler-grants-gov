@@ -1,32 +1,23 @@
-"""Loads configuration variables from settings files and settings files
+"""Loads configuration variables from settings files
 
-Dynaconf provides a few valuable features for configuration management:
-- Load variables from env vars and files with predictable overrides
-- Validate the existence and format of required configs
-- Connect with secrets managers like HashiCorp's Vault server
-- Load different configs based on environment (e.g. DEV, PROD, STAGING)
-
-For more information visit: https://www.dynaconf.com/
 """
-from dynaconf import Dynaconf, Validator, ValidationError
+import os 
+from typing import Optional
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
-settings = Dynaconf(
-    # set env vars with `export ANALYTICS_FOO=bar`
-    envvar_prefix="ANALYTICS",
-    # looks for config vars in the following files
-    # with vars in .secrets.toml overriding vars in settings.toml
-    settings_files=["settings.toml", ".secrets.toml"],
-    # add validators for our required config vars
-    validators=[
-        Validator("SLACK_BOT_TOKEN", must_exist=True),
-        Validator("REPORTING_CHANNEL_ID", must_exist=True),
-    ],
-)
+# reads environment variables from .env files defaulting to "local.env"
+class PydanticBaseEnvConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_file="%s.env" % os.getenv("ENVIRONMENT", "local"), extra="ignore") # set extra to ignore so that it ignores variables irrelevant to the database config (e.g. metabase settings)
 
-# raises after all possible errors are evaluated
-try:
-    settings.validators.validate_all()
-except ValidationError as error:
-    list_of_all_errors = error.details
-    print(list_of_all_errors)
-    raise
+class DBSettings(PydanticBaseEnvConfig):
+     db_host: str = Field(alias="DB_HOST")
+     port: int = Field(5432,alias="DB_PORT")
+     user: str = Field (alias="DB_USER")
+     password: str = Field(alias="DB_PASSWORD")
+     ssl_mode: str = Field(alias="DB_SSL_MODE")
+     slack_bot_token: str = Field(alias="ANALYTICS_SLACK_BOT_TOKEN")
+     reporting_channel_id: str = Field(alias="ANALYTICS_REPORTING_CHANNEL_ID")
+
+def get_db_settings() -> DBSettings:
+     return DBSettings()

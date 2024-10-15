@@ -1,4 +1,5 @@
 """Test the BaseMetric class."""
+
 # pylint: disable=abstract-method
 import pandas as pd  # noqa: I001
 import pytest

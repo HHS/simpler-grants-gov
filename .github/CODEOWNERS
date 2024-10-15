@@ -1,6 +1,11 @@
-# We are limiting this to 4 engineers and choosing not to select "Require review from Code Owners."
-* @acouch @aplybeah @chouinar @SammySteiner
+# We are limiting this to a few engineers and choosing not to select "Require review from Code Owners."
+* @acouch @chouinar @mdragon 
 
-/documentation/ @sumiat @widal001 @andycochran @acouch @SammySteiner
-/frontend/ @andycochran @acouch @SammySteiner
-/infra/ @aplybeah @coilysiren
+/documentation/ @mxk0  @widal001 @andycochran @mdragon
+/frontend/ @andycochran @acouch @doug-s-nava 
+/api/ @chouinar @mdragon
+/analytics/ @coilysiren @widal001 @acouch 
+
+/infra/ @coilysiren @acouch @mdragon 
+/bin/ @coilysiren @acouch
+/.github/ @coilysiren @acouch

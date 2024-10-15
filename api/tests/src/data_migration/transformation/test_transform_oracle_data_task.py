@@ -1,782 +1,604 @@
-from typing import Tuple
-
 import pytest
 
+import tests.src.db.models.factories as f
+from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
-from src.db.models.opportunity_models import (
-    Opportunity,
-    OpportunityAssistanceListing,
-    OpportunitySummary,
-)
-from src.db.models.staging.forecast import TforecastHist
-from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
-from src.db.models.staging.synopsis import Tsynopsis, TsynopsisHist
+from src.db.models import staging
+from src.db.models.opportunity_models import Opportunity
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import (
-    OpportunityAssistanceListingFactory,
-    OpportunityFactory,
-    OpportunitySummaryFactory,
-    StagingTforecastFactory,
-    StagingTforecastHistFactory,
-    StagingTopportunityCfdaFactory,
-    StagingTopportunityFactory,
-    StagingTsynopsisFactory,
-    StagingTsynopsisHistFactory,
+from tests.src.data_migration.transformation.conftest import (
+    get_summary_from_source,
+    setup_cfda,
+    setup_opportunity,
+    setup_synopsis_forecast,
+    validate_applicant_type,
+    validate_assistance_listing,
+    validate_funding_category,
+    validate_funding_instrument,
+    validate_opportunity,
+    validate_opportunity_summary,
+    validate_summary_and_nested,
 )
 
 
-def setup_opportunity(
-    create_existing: bool,
-    is_delete: bool = False,
-    is_already_processed: bool = False,
-    source_values: dict | None = None,
-    all_fields_null: bool = False,
-) -> Topportunity:
-    if source_values is None:
-        source_values = {}
+class TestTransformFullRunTask(BaseTestClass):
+    # The above tests validated we could run the tests
 
-    source_opportunity = StagingTopportunityFactory.create(
-        **source_values,
-        is_deleted=is_delete,
-        already_transformed=is_already_processed,
-        all_fields_null=all_fields_null,
-        cfdas=[],
-    )
+    @pytest.fixture()
+    def truncate_all_staging_tables(self, db_session):
+        # Iterate over all the staging tables and truncate them to avoid
+        # any collisions with prior test data. There are no foreign keys
+        # between these tables, so the order doesn't matter here.
+        for table in staging.metadata.tables.values():
+            db_session.query(table).delete()
 
-    if create_existing:
-        OpportunityFactory.create(
-            opportunity_id=source_opportunity.opportunity_id,
-            # set created_at/updated_at to an earlier time so its clear
-            # when they were last updated
-            timestamps_in_past=True,
-        )
-
-    return source_opportunity
-
-
-def setup_cfda(
-    create_existing: bool,
-    is_delete: bool = False,
-    is_already_processed: bool = False,
-    source_values: dict | None = None,
-    all_fields_null: bool = False,
-    opportunity: Opportunity | None = None,
-) -> TopportunityCfda:
-    if source_values is None:
-        source_values = {}
-
-    # If you don't provide an opportunity, you need to provide an ID
-    if opportunity is not None:
-        source_values["opportunity_id"] = opportunity.opportunity_id
-
-    source_cfda = StagingTopportunityCfdaFactory.create(
-        **source_values,
-        opportunity=None,  # To override the factory trying to create something
-        is_deleted=is_delete,
-        already_transformed=is_already_processed,
-        all_fields_null=all_fields_null,
-    )
-
-    if create_existing:
-        OpportunityAssistanceListingFactory.create(
-            opportunity=opportunity,
-            opportunity_assistance_listing_id=source_cfda.opp_cfda_id,
-            # set created_at/updated_at to an earlier time so its clear
-            # when they were last updated
-            timestamps_in_past=True,
-        )
-
-    return source_cfda
-
-
-def setup_synopsis_forecast(
-    is_forecast: bool,
-    revision_number: int | None,
-    create_existing: bool,
-    opportunity: Opportunity,
-    is_delete: bool = False,
-    is_already_processed: bool = False,
-    source_values: dict | None = None,
-):
-    if source_values is None:
-        source_values = {}
-
-    if is_forecast:
-        if revision_number is None:
-            factory_cls = StagingTforecastFactory
-        else:
-            factory_cls = StagingTforecastHistFactory
-    else:
-        if revision_number is None:
-            factory_cls = StagingTsynopsisFactory
-        else:
-            factory_cls = StagingTsynopsisHistFactory
-
-    if revision_number is not None:
-        source_values["revision_number"] = revision_number
-
-    source_summary = factory_cls.create(
-        **source_values,
-        opportunity=None,  # To override the factory trying to create something
-        opportunity_id=opportunity.opportunity_id,
-        is_deleted=is_delete,
-        already_transformed=is_already_processed,
-    )
-
-    if create_existing:
-        OpportunitySummaryFactory.create(
-            opportunity=opportunity, is_forecast=is_forecast, revision_number=revision_number
-        )
-
-    return source_summary
-
-
-def validate_matching_fields(
-    source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
-):
-    mismatched_fields = []
-
-    for source_field, destination_field in fields:
-        source_value = getattr(source, source_field)
-        destination_value = getattr(destination, destination_field)
-        if source_value != destination_value:
-            mismatched_fields.append(
-                f"{source_field}/{destination_field}: '{source_value}' != '{destination_value}'"
-            )
-
-    # If a values weren't copied in an update
-    # then we should expect most things to not match,
-    # but randomness in the factories might cause some overlap
-    if expect_all_to_match:
-        assert (
-            len(mismatched_fields) == 0
-        ), f"Expected all fields to match between {source.__class__} and {destination.__class__}, but found mismatched fields: {','.join(mismatched_fields)}"
-    else:
-        assert (
-            len(mismatched_fields) != 0
-        ), f"Did not expect all fields to match between {source.__class__} and {destination.__class__}, but they did which means an unexpected update occurred"
-
-
-def validate_opportunity(
-    db_session,
-    source_opportunity: Topportunity,
-    expect_in_db: bool = True,
-    expect_values_to_match: bool = True,
-):
-    opportunity = (
-        db_session.query(Opportunity)
-        .filter(Opportunity.opportunity_id == source_opportunity.opportunity_id)
-        .one_or_none()
-    )
-
-    if not expect_in_db:
-        assert opportunity is None
-        return
-
-    assert opportunity is not None
-    # For fields that we expect to match 1:1, verify that they match as expected
-    validate_matching_fields(
-        source_opportunity,
-        opportunity,
-        [
-            ("oppnumber", "opportunity_number"),
-            ("opptitle", "opportunity_title"),
-            ("owningagency", "agency"),
-            ("category_explanation", "category_explanation"),
-            ("revision_number", "revision_number"),
-            ("modified_comments", "modified_comments"),
-            ("publisheruid", "publisher_user_id"),
-            ("publisher_profile_id", "publisher_profile_id"),
-        ],
-        expect_values_to_match,
-    )
-
-    # Validation of fields that aren't copied exactly
-    if expect_values_to_match:
-        # Deliberately validating is_draft with a different calculation
-        if source_opportunity.is_draft == "N":
-            assert opportunity.is_draft is False
-        else:
-            assert opportunity.is_draft is True
-
-
-def validate_assistance_listing(
-    db_session,
-    source_cfda: TopportunityCfda,
-    expect_in_db: bool = True,
-    expect_values_to_match: bool = True,
-):
-    assistance_listing = (
-        db_session.query(OpportunityAssistanceListing)
-        .filter(
-            OpportunityAssistanceListing.opportunity_assistance_listing_id
-            == source_cfda.opp_cfda_id
-        )
-        .one_or_none()
-    )
-
-    if not expect_in_db:
-        assert assistance_listing is None
-        return
-
-    assert assistance_listing is not None
-    # For fields that we expect to match 1:1, verify that they match as expected
-    validate_matching_fields(
-        source_cfda,
-        assistance_listing,
-        [
-            ("cfdanumber", "assistance_listing_number"),
-            ("programtitle", "program_title"),
-        ],
-        expect_values_to_match,
-    )
-
-
-def validate_opportunity_summary(
-    db_session, source_summary, expect_in_db: bool = True, expect_values_to_match: bool = True
-):
-    revision_number = None
-    is_forecast = source_summary.is_forecast
-    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-        revision_number = source_summary.revision_number
-
-    opportunity_summary = (
-        db_session.query(OpportunitySummary)
-        .filter(
-            OpportunitySummary.opportunity_id == source_summary.opportunity_id,
-            OpportunitySummary.revision_number == revision_number,
-            OpportunitySummary.is_forecast == is_forecast,
-        )
-        .one_or_none()
-    )
-
-    if not expect_in_db:
-        assert opportunity_summary is None
-        return
-
-    matching_fields = [
-        ("version_nbr", "version_number"),
-        ("posting_date", "post_date"),
-        ("archive_date", "archive_date"),
-        ("fd_link_url", "additional_info_url"),
-        ("fd_link_desc", "additional_info_url_description"),
-        ("modification_comments", "modification_comments"),
-        ("oth_cat_fa_desc", "funding_category_description"),
-        ("applicant_elig_desc", "applicant_eligibility_description"),
-        ("ac_name", "agency_name"),
-        ("ac_email_addr", "agency_email_address"),
-        ("ac_email_desc", "agency_email_address_description"),
-        ("publisher_profile_id", "publisher_profile_id"),
-        ("publisheruid", "publisher_user_id"),
-        ("last_upd_id", "updated_by"),
-        ("creator_id", "created_by"),
-    ]
-
-    if isinstance(source_summary, (Tsynopsis, TsynopsisHist)):
-        matching_fields.extend(
-            [
-                ("syn_desc", "summary_description"),
-                ("a_sa_code", "agency_code"),
-                ("ac_phone_number", "agency_phone_number"),
-                ("agency_contact_desc", "agency_contact_description"),
-                ("response_date", "close_date"),
-                ("response_date_desc", "close_date_description"),
-                ("unarchive_date", "unarchive_date"),
-            ]
-        )
-    else:  # Forecast+ForecastHist
-        matching_fields.extend(
-            [
-                ("forecast_desc", "summary_description"),
-                ("agency_code", "agency_code"),
-                ("ac_phone", "agency_phone_number"),
-                ("est_synopsis_posting_date", "forecasted_post_date"),
-                ("est_appl_response_date", "forecasted_close_date"),
-                ("est_appl_response_date_desc", "forecasted_close_date_description"),
-                ("est_award_date", "forecasted_award_date"),
-                ("est_project_start_date", "forecasted_project_start_date"),
-                ("fiscal_year", "fiscal_year"),
-            ]
-        )
-
-    # History only fields
-    is_deleted = False
-    if isinstance(source_summary, (TsynopsisHist, TforecastHist)):
-        matching_fields.extend([("revision_number", "revision_number")])
-
-        is_deleted = source_summary.action_type == "D"
-
-    assert opportunity_summary is not None
-    validate_matching_fields(
-        source_summary, opportunity_summary, matching_fields, expect_values_to_match
-    )
-
-    assert opportunity_summary.is_deleted == is_deleted
-
-
-class TestTransformOpportunity(BaseTestClass):
     @pytest.fixture()
     def transform_oracle_data_task(
-        self, db_session, enable_factory_create, truncate_opportunities
+        self, db_session, enable_factory_create, truncate_opportunities, truncate_all_staging_tables
     ) -> TransformOracleDataTask:
         return TransformOracleDataTask(db_session)
 
-    def test_process_opportunities(self, db_session, transform_oracle_data_task):
-        ordinary_delete = setup_opportunity(
-            create_existing=True, is_delete=True, all_fields_null=True
+    def test_all_inserts(self, db_session, transform_oracle_data_task):
+        # Test that we're fully capable of processing inserts across an entire opportunity record
+        opportunity = setup_opportunity(create_existing=False)
+
+        cfda1 = setup_cfda(create_existing=False, opportunity=opportunity)
+        cfda2 = setup_cfda(create_existing=False, opportunity=opportunity)
+
+        ### Forecast
+        forecast = setup_synopsis_forecast(
+            create_existing=False, is_forecast=True, revision_number=None, opportunity=opportunity
         )
-        ordinary_delete2 = setup_opportunity(
-            create_existing=True, is_delete=True, all_fields_null=False
+        f.StagingTapplicanttypesForecastFactory(forecast=forecast, at_id="01")
+        # This is a duplicate record (same at_id, but will have a different at_frcst_id), verifying we handle duplicates
+        f.StagingTapplicanttypesForecastFactory(forecast=forecast, at_id="01")
+        f.StagingTfundactcatForecastFactory(forecast=forecast, fac_id="RA")
+        f.StagingTfundactcatForecastFactory(forecast=forecast, fac_id="HO")
+        # Duplicate here too
+        f.StagingTfundactcatForecastFactory(forecast=forecast, fac_id="HO")
+
+        f.StagingTfundinstrForecastFactory(forecast=forecast, fi_id="CA")
+        f.StagingTfundinstrForecastFactory(forecast=forecast, fi_id="G")
+        # Duplicate here as well
+        f.StagingTfundinstrForecastFactory(forecast=forecast, fi_id="G")
+
+        ### Forecast Hist 1 (only applicant types)
+        forecast_hist1 = setup_synopsis_forecast(
+            create_existing=False, is_forecast=True, revision_number=1, opportunity=opportunity
         )
-        delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
+        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="05")
+        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="06")
+        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="25")
+        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="13")
+        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="11")
 
-        basic_insert = setup_opportunity(create_existing=False)
-        basic_insert2 = setup_opportunity(create_existing=False, all_fields_null=True)
-        basic_insert3 = setup_opportunity(create_existing=False)
-
-        basic_update = setup_opportunity(
-            create_existing=True,
+        ### Forecast Hist 2 (only funding instrument and funding categories)
+        forecast_hist2 = setup_synopsis_forecast(
+            create_existing=False, is_forecast=True, revision_number=2, opportunity=opportunity
         )
-        basic_update2 = setup_opportunity(create_existing=True, all_fields_null=True)
-        basic_update3 = setup_opportunity(create_existing=True, all_fields_null=True)
-        basic_update4 = setup_opportunity(create_existing=True)
+        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="ED")
+        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="HU")
+        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="IIJ")
+        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="T")
+        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="G")
+        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="CA")
+        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="PC")
 
-        # Something else deleted it
-        already_processed_insert = setup_opportunity(
-            create_existing=False, is_already_processed=True
+        ### Synopsis (has some invalid values)
+        synopsis = setup_synopsis_forecast(
+            create_existing=False, is_forecast=False, revision_number=None, opportunity=opportunity
         )
-        already_processed_update = setup_opportunity(
-            create_existing=True, is_already_processed=True
-        )
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="06")
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="07")
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="11")
+        # Invalid value
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="x")
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis, fac_id="ACA")
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis, fac_id="O")
+        # Invalid value
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis, fac_id="BOB")
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="G")
+        # Invalid value
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="x")
 
-        insert_that_will_fail = setup_opportunity(
-            create_existing=False, source_values={"oppcategory": "X"}
-        )
-
-        transform_oracle_data_task.process_opportunities()
-
-        validate_opportunity(db_session, ordinary_delete, expect_in_db=False)
-        validate_opportunity(db_session, ordinary_delete2, expect_in_db=False)
-        validate_opportunity(db_session, delete_but_current_missing, expect_in_db=False)
-
-        validate_opportunity(db_session, basic_insert)
-        validate_opportunity(db_session, basic_insert2)
-        validate_opportunity(db_session, basic_insert3)
-
-        validate_opportunity(db_session, basic_update)
-        validate_opportunity(db_session, basic_update2)
-        validate_opportunity(db_session, basic_update3)
-        validate_opportunity(db_session, basic_update4)
-
-        validate_opportunity(db_session, already_processed_insert, expect_in_db=False)
-        validate_opportunity(db_session, already_processed_update, expect_values_to_match=False)
-
-        validate_opportunity(db_session, insert_that_will_fail, expect_in_db=False)
-
-        metrics = transform_oracle_data_task.metrics
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 11
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        # Note this insert counts the case where the category fails
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
-
-        # Rerunning does mostly nothing, it will attempt to re-process the two that errored
-        # but otherwise won't find anything else
-        transform_oracle_data_task.process_opportunities()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 13
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        # Note this insert counts the case where the category fails
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
-
-    def test_process_opportunity_delete_but_current_missing(
-        self, db_session, transform_oracle_data_task
-    ):
-        # Verify an error is raised when we try to delete something that doesn't exist
-        delete_but_current_missing = setup_opportunity(create_existing=False, is_delete=True)
-
-        with pytest.raises(ValueError, match="Cannot delete opportunity as it does not exist"):
-            transform_oracle_data_task.process_opportunity(delete_but_current_missing, None)
-
-        validate_opportunity(db_session, delete_but_current_missing, expect_in_db=False)
-
-    def test_process_opportunity_invalid_category(self, db_session, transform_oracle_data_task):
-        # This will error in the transform as that isn't a category we have configured
-        insert_that_will_fail = setup_opportunity(
-            create_existing=False, source_values={"oppcategory": "X"}
+        # Synopsis Hist (has no link values, is also marked as deleted)
+        synopsis_hist = setup_synopsis_forecast(
+            create_existing=False, is_forecast=False, revision_number=5, opportunity=opportunity
         )
 
-        with pytest.raises(ValueError, match="Unrecognized opportunity category"):
-            transform_oracle_data_task.process_opportunity(insert_that_will_fail, None)
+        transform_oracle_data_task.run()
 
-        validate_opportunity(db_session, insert_that_will_fail, expect_in_db=False)
-
-
-class TestTransformAssistanceListing(BaseTestClass):
-    @pytest.fixture()
-    def transform_oracle_data_task(
-        self, db_session, enable_factory_create, truncate_opportunities
-    ) -> TransformOracleDataTask:
-        return TransformOracleDataTask(db_session)
-
-    def test_process_opportunity_assistance_listings(self, db_session, transform_oracle_data_task):
-        opportunity1 = OpportunityFactory.create(opportunity_assistance_listings=[])
-        cfda_insert1 = setup_cfda(create_existing=False, opportunity=opportunity1)
-        cfda_insert2 = setup_cfda(create_existing=False, opportunity=opportunity1)
-        cfda_update1 = setup_cfda(create_existing=True, opportunity=opportunity1)
-        cfda_delete1 = setup_cfda(create_existing=True, is_delete=True, opportunity=opportunity1)
-        cfda_update_already_processed1 = setup_cfda(
-            create_existing=True, is_already_processed=True, opportunity=opportunity1
-        )
-
-        opportunity2 = OpportunityFactory.create(opportunity_assistance_listings=[])
-        cfda_insert3 = setup_cfda(create_existing=False, opportunity=opportunity2)
-        cfda_update_already_processed2 = setup_cfda(
-            create_existing=True, is_already_processed=True, opportunity=opportunity2
-        )
-        cfda_delete_already_processed1 = setup_cfda(
-            create_existing=False,
-            is_already_processed=True,
-            is_delete=True,
-            opportunity=opportunity2,
-        )
-        cfda_delete2 = setup_cfda(create_existing=True, is_delete=True, opportunity=opportunity2)
-
-        opportunity3 = OpportunityFactory.create(opportunity_assistance_listings=[])
-        cfda_update2 = setup_cfda(create_existing=True, opportunity=opportunity3)
-        cfda_delete_but_current_missing = setup_cfda(
-            create_existing=False, is_delete=True, opportunity=opportunity3
-        )
-
-        cfda_insert_without_opportunity = setup_cfda(
-            create_existing=False, source_values={"opportunity_id": 12345678}, opportunity=None
-        )
-        cfda_delete_without_opportunity = setup_cfda(
-            create_existing=False, source_values={"opportunity_id": 34567890}, opportunity=None
-        )
-
-        transform_oracle_data_task.process_assistance_listings()
-
-        validate_assistance_listing(db_session, cfda_insert1)
-        validate_assistance_listing(db_session, cfda_insert2)
-        validate_assistance_listing(db_session, cfda_insert3)
-        validate_assistance_listing(db_session, cfda_update1)
-        validate_assistance_listing(db_session, cfda_update2)
-        validate_assistance_listing(db_session, cfda_delete1, expect_in_db=False)
-        validate_assistance_listing(db_session, cfda_delete2, expect_in_db=False)
-
-        # Records that won't have been fetched
-        validate_assistance_listing(
-            db_session,
-            cfda_update_already_processed1,
-            expect_in_db=True,
-            expect_values_to_match=False,
-        )
-        validate_assistance_listing(
-            db_session,
-            cfda_update_already_processed2,
-            expect_in_db=True,
-            expect_values_to_match=False,
-        )
-        validate_assistance_listing(db_session, cfda_delete_already_processed1, expect_in_db=False)
-
-        validate_assistance_listing(db_session, cfda_delete_but_current_missing, expect_in_db=False)
-
-        validate_assistance_listing(db_session, cfda_insert_without_opportunity, expect_in_db=False)
-        validate_assistance_listing(db_session, cfda_delete_without_opportunity, expect_in_db=False)
-
-        metrics = transform_oracle_data_task.metrics
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 10
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 1
-
-        # Rerunning just attempts to re-process the error record, nothing else gets picked up
-        transform_oracle_data_task.process_assistance_listings()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 11
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 3
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 2
-
-    def test_process_assistance_listing_orphaned_record(
-        self, db_session, transform_oracle_data_task
-    ):
-        cfda_insert_without_opportunity = setup_cfda(
-            create_existing=False, source_values={"opportunity_id": 987654321}, opportunity=None
-        )
-
-        # Verify it gets marked as transformed
-        assert cfda_insert_without_opportunity.transformed_at is None
-        transform_oracle_data_task.process_assistance_listing(
-            cfda_insert_without_opportunity, None, None
-        )
-        assert cfda_insert_without_opportunity.transformed_at is not None
-        assert (
-            transform_oracle_data_task.metrics[
-                transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED
-            ]
-            == 1
-        )
-
-        # Verify nothing actually gets created
-        opportunity = (
+        created_opportunity: Opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == cfda_insert_without_opportunity.opportunity_id)
+            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
             .one_or_none()
         )
-        assert opportunity is None
-        assistance_listing = (
-            db_session.query(OpportunityAssistanceListing)
-            .filter(
-                OpportunityAssistanceListing.opportunity_assistance_listing_id
-                == cfda_insert_without_opportunity.opp_cfda_id
-            )
-            .one_or_none()
-        )
-        assert assistance_listing is None
 
-    def test_process_assistance_listing_delete_but_current_missing(
+        # Validate that all of the expected records were created
+        # not worrying about all of the transforms specifically here,
+        # just that everything is in place
+
+        assert created_opportunity is not None
+        validate_opportunity(db_session, opportunity)
+        assert {
+            al.opportunity_assistance_listing_id
+            for al in created_opportunity.opportunity_assistance_listings
+        } == {cfda1.opp_cfda_id, cfda2.opp_cfda_id}
+
+        assert len(created_opportunity.all_opportunity_summaries) == 5
+
+        created_forecast = get_summary_from_source(db_session, forecast)
+        assert created_forecast is not None
+        validate_summary_and_nested(
+            db_session,
+            forecast,
+            [ApplicantType.COUNTY_GOVERNMENTS],
+            [FundingCategory.RECOVERY_ACT, FundingCategory.HOUSING],
+            [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT],
+        )
+        validate_summary_and_nested(
+            db_session,
+            forecast_hist1,
+            [
+                ApplicantType.OTHER,
+                ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS,
+                ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3,
+                ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS,
+            ],
+            [],
+            [],
+        )
+        validate_summary_and_nested(
+            db_session,
+            forecast_hist2,
+            [],
+            [
+                FundingCategory.TRANSPORTATION,
+                FundingCategory.EDUCATION,
+                FundingCategory.INFRASTRUCTURE_INVESTMENT_AND_JOBS_ACT,
+                FundingCategory.HUMANITIES,
+            ],
+            [
+                FundingInstrument.COOPERATIVE_AGREEMENT,
+                FundingInstrument.GRANT,
+                FundingInstrument.PROCUREMENT_CONTRACT,
+            ],
+        )
+        validate_summary_and_nested(
+            db_session,
+            synopsis,
+            [
+                ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+                ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS,
+            ],
+            [FundingCategory.AFFORDABLE_CARE_ACT, FundingCategory.OTHER],
+            [FundingInstrument.GRANT],
+        )
+        validate_summary_and_nested(db_session, synopsis_hist, [], [], [])
+
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 37,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 31,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 0,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 0,
+            transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 3,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
+            transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT: 3,
+        }.items() <= transform_oracle_data_task.metrics.items()
+
+    def test_mix_of_inserts_updates_deletes(self, db_session, transform_oracle_data_task):
+        existing_opportunity = f.OpportunityFactory(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        opportunity = f.StagingTopportunityFactory(
+            opportunity_id=existing_opportunity.opportunity_id, cfdas=[]
+        )
+
+        cfda_insert = setup_cfda(create_existing=False, opportunity=existing_opportunity)
+        cfda_update = setup_cfda(create_existing=True, opportunity=existing_opportunity)
+        setup_cfda(create_existing=True, is_delete=True, opportunity=existing_opportunity)
+
+        ### Forecast (update)
+        summary_forecast = f.OpportunitySummaryFactory(
+            is_forecast=True, opportunity=existing_opportunity, no_link_values=True
+        )
+        forecast_update = f.StagingTforecastFactory(opportunity=opportunity)
+
+        ## Forecast applicant type
+        # insert
+        f.StagingTapplicanttypesForecastFactory(forecast=forecast_update, at_id="01")
+        # update
+        f.StagingTapplicanttypesForecastFactory(
+            forecast=forecast_update, at_id="02", at_frcst_id=1000
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_forecast,
+            applicant_type=ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS,
+            legacy_applicant_type_id=1000,
+        )
+        # delete
+        f.StagingTapplicanttypesForecastFactory(
+            forecast=forecast_update, at_id="04", at_frcst_id=1001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_forecast,
+            applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+            legacy_applicant_type_id=1001,
+        )
+
+        ## Forecast funding category
+        # insert
+        f.StagingTfundactcatForecastFactory(forecast=forecast_update, fac_id="OZ")
+        # update
+        f.StagingTfundactcatForecastFactory(
+            forecast=forecast_update, fac_id="NR", fac_frcst_id=2000
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_forecast,
+            funding_category=FundingCategory.NATURAL_RESOURCES,
+            legacy_funding_category_id=2000,
+        )
+        # delete
+        f.StagingTfundactcatForecastFactory(
+            forecast=forecast_update, fac_id="ST", fac_frcst_id=2001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_forecast,
+            funding_category=FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
+            legacy_funding_category_id=2001,
+        )
+
+        ## Forecast funding instrument
+        # insert
+        f.StagingTfundinstrForecastFactory(forecast=forecast_update, fi_id="G")
+        # update
+        f.StagingTfundinstrForecastFactory(forecast=forecast_update, fi_id="CA", fi_frcst_id=3000)
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_forecast,
+            funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
+            legacy_funding_instrument_id=3000,
+        )
+        # delete
+        f.StagingTfundinstrForecastFactory(
+            forecast=forecast_update, fi_id="O", fi_frcst_id=3001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_forecast,
+            funding_instrument=FundingInstrument.OTHER,
+            legacy_funding_instrument_id=3001,
+        )
+
+        ### Forecast Hist (deleted)
+        # note that by default the factory creates 1-3 of each link value, those will automatically get deleted uneventfully by cascades
+        f.OpportunitySummaryFactory(
+            is_forecast=True, revision_number=1, opportunity=existing_opportunity
+        )
+        forecast_hist_delete = f.StagingTforecastHistFactory(
+            revision_number=1, is_deleted=True, opportunity=opportunity
+        )
+
+        ### Synopsis (not modified as the update was already processed)
+        summary_synopsis = f.OpportunitySummaryFactory(
+            is_forecast=False, opportunity=existing_opportunity, no_link_values=True
+        )
+        synopsis_already_processed = f.StagingTsynopsisFactory(
+            opportunity=opportunity, already_transformed=True
+        )
+
+        ## Synopsis applicant type (many duplicates)
+        # insert
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis_already_processed, at_id="99")
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis_already_processed, at_id="99")
+        f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis_already_processed, at_id="99")
+        # update
+        f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis_already_processed, at_id="07", at_syn_id=1000
+        )
+        f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis_already_processed, at_id="07", at_syn_id=11000
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+            legacy_applicant_type_id=1000,
+        )
+        # delete
+        f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis_already_processed, at_id="21", at_syn_id=1001, is_deleted=True
+        )
+        # this will actually error because we don't yet handle these dupe deletes
+        f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis_already_processed, at_id="21", at_syn_id=11001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.INDIVIDUALS,
+            legacy_applicant_type_id=1001,
+        )
+
+        ## Synopsis funding category
+        # insert
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis_already_processed, fac_id="IIJ")
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis_already_processed, fac_id="IIJ")
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis_already_processed, fac_id="IIJ")
+        f.StagingTfundactcatSynopsisFactory(synopsis=synopsis_already_processed, fac_id="IIJ")
+        # update
+        f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis_already_processed, fac_id="FN", fac_syn_id=2000
+        )
+        f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis_already_processed, fac_id="FN", fac_syn_id=20000
+        )
+        f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis_already_processed, fac_id="FN", fac_syn_id=21000
+        )
+        f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis_already_processed, fac_id="FN", fac_syn_id=22000
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.FOOD_AND_NUTRITION,
+            legacy_funding_category_id=2000,
+        )
+        # delete
+        f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis_already_processed, fac_id="HL", fac_syn_id=2001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.HEALTH,
+            legacy_funding_category_id=2001,
+        )
+
+        ## Synopsis funding instrument
+        # insert
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis_already_processed, fi_id="PC")
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis_already_processed, fi_id="PC")
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis_already_processed, fi_id="PC")
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis_already_processed, fi_id="PC")
+        f.StagingTfundinstrSynopsisFactory(synopsis=synopsis_already_processed, fi_id="PC")
+        # update
+        f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis_already_processed, fi_id="O", fi_syn_id=3000
+        )
+        f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis_already_processed, fi_id="O", fi_syn_id=30000
+        )
+        f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis_already_processed, fi_id="O", fi_syn_id=31000
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.OTHER,
+            legacy_funding_instrument_id=3000,
+        )
+        # delete
+        f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis_already_processed, fi_id="G", fi_syn_id=3001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.GRANT,
+            legacy_funding_instrument_id=3001,
+        )
+
+        ### Synopsis Hist (Insert - no nested values created)
+        synopsis_hist_insert = f.StagingTsynopsisHistFactory(opportunity=opportunity)
+
+        transform_oracle_data_task.run()
+
+        updated_opportunity: Opportunity = (
+            db_session.query(Opportunity)
+            .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+            .one_or_none()
+        )
+
+        assert updated_opportunity is not None
+        validate_opportunity(db_session, opportunity)
+        assert {
+            al.opportunity_assistance_listing_id
+            for al in updated_opportunity.opportunity_assistance_listings
+        } == {cfda_insert.opp_cfda_id, cfda_update.opp_cfda_id}
+
+        validate_summary_and_nested(
+            db_session,
+            forecast_update,
+            [ApplicantType.COUNTY_GOVERNMENTS, ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS],
+            [FundingCategory.OPPORTUNITY_ZONE_BENEFITS, FundingCategory.NATURAL_RESOURCES],
+            [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT],
+        )
+        validate_summary_and_nested(
+            db_session, forecast_hist_delete, [], [], [], expect_in_db=False
+        )
+        validate_summary_and_nested(
+            db_session,
+            synopsis_already_processed,
+            [
+                ApplicantType.UNRESTRICTED,
+                ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS,
+            ],
+            [
+                FundingCategory.INFRASTRUCTURE_INVESTMENT_AND_JOBS_ACT,
+                FundingCategory.FOOD_AND_NUTRITION,
+            ],
+            [FundingInstrument.PROCUREMENT_CONTRACT, FundingInstrument.OTHER],
+            expect_values_to_match=False,
+        )
+        validate_summary_and_nested(db_session, synopsis_hist_insert, [], [], [])
+
+        print(transform_oracle_data_task.metrics)
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 41,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 8,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 9,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 8,
+            transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 15,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 1,
+        }.items() <= transform_oracle_data_task.metrics.items()
+
+    def test_delete_opportunity_with_deleted_children(self, db_session, transform_oracle_data_task):
+        # We create an opportunity with a synopsis/forecast record, and various other child values
+        # We then delete all of them at once. Deleting the opportunity will recursively delete the others
+        # but we'll still have delete events for the others - this verfies how we handle that.
+        existing_opportunity = f.OpportunityFactory(
+            no_current_summary=True, opportunity_assistance_listings=[]
+        )
+        opportunity = f.StagingTopportunityFactory(
+            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True
+        )
+
+        cfda = setup_cfda(create_existing=True, is_delete=True, opportunity=existing_opportunity)
+
+        ### Forecast - has several children that will be deleted
+        summary_forecast = f.OpportunitySummaryFactory(
+            is_forecast=True, opportunity=existing_opportunity, no_link_values=True
+        )
+        forecast = f.StagingTforecastFactory(opportunity=opportunity, is_deleted=True)
+        forecast_applicant_type = f.StagingTapplicanttypesForecastFactory(
+            forecast=forecast, at_id="04", at_frcst_id=91001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_forecast,
+            applicant_type=ApplicantType.SPECIAL_DISTRICT_GOVERNMENTS,
+            legacy_applicant_type_id=91001,
+        )
+        forecast_funding_category = f.StagingTfundactcatForecastFactory(
+            forecast=forecast, fac_id="ST", fac_frcst_id=92001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_forecast,
+            funding_category=FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
+            legacy_funding_category_id=92001,
+        )
+        forecast_funding_instrument = f.StagingTfundinstrForecastFactory(
+            forecast=forecast, fi_id="O", fi_frcst_id=93001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_forecast,
+            funding_instrument=FundingInstrument.OTHER,
+            legacy_funding_instrument_id=93001,
+        )
+
+        ### Synopsis
+        summary_synopsis = f.OpportunitySummaryFactory(
+            is_forecast=False, opportunity=existing_opportunity, no_link_values=True
+        )
+        synopsis = f.StagingTsynopsisFactory(opportunity=opportunity, is_deleted=True)
+        synopsis_applicant_type = f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis, at_id="21", at_syn_id=81001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.INDIVIDUALS,
+            legacy_applicant_type_id=81001,
+        )
+        synopsis_funding_category = f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis, fac_id="HL", fac_syn_id=82001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.HEALTH,
+            legacy_funding_category_id=82001,
+        )
+        synopsis_funding_instrument = f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis, fi_id="G", fi_syn_id=83001, is_deleted=True
+        )
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.GRANT,
+            legacy_funding_instrument_id=83001,
+        )
+        # Need to put an expire all so SQLAlchemy doesn't read from its cache
+        # otherwise when it does the recursive deletes, it doesn't see the later-added link table objects
+        db_session.expire_all()
+
+        transform_oracle_data_task.run_task()
+
+        # verify everything is not in the DB
+        validate_opportunity(db_session, opportunity, expect_in_db=False)
+        validate_assistance_listing(db_session, cfda, expect_in_db=False)
+        validate_opportunity_summary(db_session, forecast, expect_in_db=False)
+        validate_opportunity_summary(db_session, synopsis, expect_in_db=False)
+
+        validate_applicant_type(db_session, forecast_applicant_type, expect_in_db=False)
+        validate_applicant_type(db_session, synopsis_applicant_type, expect_in_db=False)
+
+        validate_funding_category(db_session, forecast_funding_category, expect_in_db=False)
+        validate_funding_category(db_session, synopsis_funding_category, expect_in_db=False)
+
+        validate_funding_instrument(db_session, forecast_funding_instrument, expect_in_db=False)
+        validate_funding_instrument(db_session, synopsis_funding_instrument, expect_in_db=False)
+
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 10,
+            # Despite processing 10 records, only the opportunity is actually deleted directly
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
+            f"opportunity.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 9,
+        }.items() <= transform_oracle_data_task.metrics.items()
+
+    def test_delete_opportunity_summary_with_deleted_children(
         self, db_session, transform_oracle_data_task
     ):
-        opportunity = OpportunityFactory.create(opportunity_assistance_listings=[])
-        delete_but_current_missing = setup_cfda(
-            create_existing=False, is_delete=True, opportunity=opportunity
-        )
-
-        with pytest.raises(
-            ValueError, match="Cannot delete assistance listing as it does not exist"
-        ):
-            transform_oracle_data_task.process_assistance_listing(
-                delete_but_current_missing, None, opportunity
-            )
-
-        validate_assistance_listing(db_session, delete_but_current_missing, expect_in_db=False)
-
-
-class TestTransformOpportunitySummary(BaseTestClass):
-    @pytest.fixture()
-    def transform_oracle_data_task(
-        self, db_session, enable_factory_create, truncate_opportunities
-    ) -> TransformOracleDataTask:
-        return TransformOracleDataTask(db_session)
-
-    def test_process_opportunity_summaries(self, db_session, transform_oracle_data_task):
-        # Basic inserts
-        opportunity1 = OpportunityFactory.create(
+        # Similar to the above test, but we're leaving the opportunity alone and just deleting
+        # an opportunity summary. Should be the same thing, just on a smaller scale.
+        existing_opportunity = f.OpportunityFactory(
             no_current_summary=True, opportunity_assistance_listings=[]
         )
-        forecast_insert1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=None, create_existing=False, opportunity=opportunity1
-        )
-        synopsis_insert1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=None, create_existing=False, opportunity=opportunity1
-        )
-        forecast_hist_insert1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=1, create_existing=False, opportunity=opportunity1
-        )
-        synopsis_hist_insert1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=1, create_existing=False, opportunity=opportunity1
+        opportunity = f.StagingTopportunityFactory(
+            opportunity_id=existing_opportunity.opportunity_id, cfdas=[], already_transformed=True
         )
 
-        # Mix of updates and inserts, somewhat resembling what happens when summary objects
-        # get moved to the historical table (we'd update the synopsis/forecast records, and create new historical)
-        opportunity2 = OpportunityFactory.create(
-            no_current_summary=True, opportunity_assistance_listings=[]
+        summary_synopsis = f.OpportunitySummaryFactory(
+            is_forecast=False, opportunity=existing_opportunity, no_link_values=True
         )
-        forecast_update1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=None, create_existing=True, opportunity=opportunity2
+        synopsis = f.StagingTsynopsisFactory(opportunity=opportunity, is_deleted=True)
+        synopsis_applicant_type = f.StagingTapplicanttypesSynopsisFactory(
+            synopsis=synopsis, at_id="21", at_syn_id=71001, is_deleted=True
         )
-        synopsis_update1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=None, create_existing=True, opportunity=opportunity2
+        f.LinkOpportunitySummaryApplicantTypeFactory(
+            opportunity_summary=summary_synopsis,
+            applicant_type=ApplicantType.INDIVIDUALS,
+            legacy_applicant_type_id=71001,
         )
-        forecast_hist_update1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=1, create_existing=True, opportunity=opportunity2
+        synopsis_funding_category = f.StagingTfundactcatSynopsisFactory(
+            synopsis=synopsis, fac_id="HL", fac_syn_id=72001, is_deleted=True
         )
-        synopsis_hist_update1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=1, create_existing=True, opportunity=opportunity2
+        f.LinkOpportunitySummaryFundingCategoryFactory(
+            opportunity_summary=summary_synopsis,
+            funding_category=FundingCategory.HEALTH,
+            legacy_funding_category_id=72001,
         )
-        forecast_hist_insert2 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity2
+        synopsis_funding_instrument = f.StagingTfundinstrSynopsisFactory(
+            synopsis=synopsis, fi_id="G", fi_syn_id=73001, is_deleted=True
         )
-        synopsis_hist_insert2 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=2, create_existing=False, opportunity=opportunity2
+        f.LinkOpportunitySummaryFundingInstrumentFactory(
+            opportunity_summary=summary_synopsis,
+            funding_instrument=FundingInstrument.GRANT,
+            legacy_funding_instrument_id=73001,
         )
+        # Need to put an expire all so SQLAlchemy doesn't read from its cache
+        # otherwise when it does the recursive deletes, it doesn't see the later-added link table objects
+        db_session.expire_all()
 
-        # Mix of inserts, updates, and deletes
-        opportunity3 = OpportunityFactory.create(
-            no_current_summary=True, opportunity_assistance_listings=[]
-        )
-        forecast_delete1 = setup_synopsis_forecast(
-            is_forecast=True,
-            revision_number=None,
-            create_existing=True,
-            is_delete=True,
-            opportunity=opportunity3,
-        )
-        synopsis_delete1 = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=None,
-            create_existing=True,
-            is_delete=True,
-            opportunity=opportunity3,
-        )
-        forecast_hist_insert3 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity3
-        )
-        synopsis_hist_update2 = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=1,
-            create_existing=True,
-            source_values={"action_type": "D"},
-            opportunity=opportunity3,
-        )
+        transform_oracle_data_task.run_task()
 
-        # A few error scenarios
-        opportunity4 = OpportunityFactory.create(
-            no_current_summary=True, opportunity_assistance_listings=[]
+        # verify everything is not in the DB
+        validate_opportunity(
+            db_session, opportunity, expect_in_db=True, expect_values_to_match=False
         )
-        forecast_delete_but_current_missing = setup_synopsis_forecast(
-            is_forecast=True,
-            revision_number=None,
-            create_existing=False,
-            is_delete=True,
-            opportunity=opportunity4,
-        )
-        synopsis_update_invalid_yn_field = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=None,
-            create_existing=True,
-            source_values={"sendmail": "E"},
-            opportunity=opportunity4,
-        )
-        synopsis_hist_insert_invalid_yn_field = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=1,
-            create_existing=False,
-            source_values={"cost_sharing": "1"},
-            opportunity=opportunity4,
-        )
-        forecast_hist_update_invalid_action_type = setup_synopsis_forecast(
-            is_forecast=True,
-            revision_number=2,
-            create_existing=True,
-            source_values={"action_type": "X"},
-            opportunity=opportunity4,
-        )
+        validate_opportunity_summary(db_session, synopsis, expect_in_db=False)
+        validate_applicant_type(db_session, synopsis_applicant_type, expect_in_db=False)
+        validate_funding_category(db_session, synopsis_funding_category, expect_in_db=False)
+        validate_funding_instrument(db_session, synopsis_funding_instrument, expect_in_db=False)
 
-        transform_oracle_data_task.process_opportunity_summaries()
-
-        validate_opportunity_summary(db_session, forecast_insert1)
-        validate_opportunity_summary(db_session, synopsis_insert1)
-        validate_opportunity_summary(db_session, forecast_hist_insert1)
-        validate_opportunity_summary(db_session, synopsis_hist_insert1)
-        validate_opportunity_summary(db_session, forecast_hist_insert2)
-        validate_opportunity_summary(db_session, synopsis_hist_insert2)
-        validate_opportunity_summary(db_session, forecast_hist_insert3)
-
-        validate_opportunity_summary(db_session, forecast_update1)
-        validate_opportunity_summary(db_session, synopsis_update1)
-        validate_opportunity_summary(db_session, forecast_hist_update1)
-        validate_opportunity_summary(db_session, synopsis_hist_update1)
-        validate_opportunity_summary(db_session, synopsis_hist_update2)
-
-        validate_opportunity_summary(db_session, forecast_delete1, expect_in_db=False)
-        validate_opportunity_summary(db_session, synopsis_delete1, expect_in_db=False)
-
-        validate_opportunity_summary(
-            db_session, forecast_delete_but_current_missing, expect_in_db=False
-        )
-        validate_opportunity_summary(
-            db_session,
-            synopsis_update_invalid_yn_field,
-            expect_in_db=True,
-            expect_values_to_match=False,
-        )
-        validate_opportunity_summary(
-            db_session, synopsis_hist_insert_invalid_yn_field, expect_in_db=False
-        )
-        validate_opportunity_summary(
-            db_session,
-            forecast_hist_update_invalid_action_type,
-            expect_in_db=True,
-            expect_values_to_match=False,
-        )
-
-        metrics = transform_oracle_data_task.metrics
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 18
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 4
-
-        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 4
-        transform_oracle_data_task.process_opportunity_summaries()
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED] == 22
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED] == 7
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_oracle_data_task.Metrics.TOTAL_ERROR_COUNT] == 8
-
-    @pytest.mark.parametrize(
-        "is_forecast,revision_number", [(True, None), (False, None), (True, 5), (False, 10)]
-    )
-    def test_process_opportunity_summary_delete_but_current_missing(
-        self, db_session, transform_oracle_data_task, is_forecast, revision_number
-    ):
-        opportunity = OpportunityFactory.create(
-            no_current_summary=True, opportunity_assistance_listings=[]
-        )
-        delete_but_current_missing = setup_synopsis_forecast(
-            is_forecast=is_forecast,
-            revision_number=revision_number,
-            create_existing=False,
-            is_delete=True,
-            opportunity=opportunity,
-        )
-
-        with pytest.raises(
-            ValueError, match="Cannot delete opportunity summary as it does not exist"
-        ):
-            transform_oracle_data_task.process_opportunity_summary(
-                delete_but_current_missing, None, opportunity
-            )
-
-    @pytest.mark.parametrize(
-        "is_forecast,revision_number,source_values,expected_error",
-        [
-            (True, None, {"sendmail": "z"}, "Unexpected Y/N bool value: z"),
-            (False, None, {"cost_sharing": "v"}, "Unexpected Y/N bool value: v"),
-            (True, 5, {"action_type": "T"}, "Unexpected action type value: T"),
-            (False, 10, {"action_type": "5"}, "Unexpected action type value: 5"),
-        ],
-    )
-    def test_process_opportunity_summary_invalid_value_errors(
-        self,
-        db_session,
-        transform_oracle_data_task,
-        is_forecast,
-        revision_number,
-        source_values,
-        expected_error,
-    ):
-        opportunity = OpportunityFactory.create(
-            no_current_summary=True, opportunity_assistance_listings=[]
-        )
-        source_summary = setup_synopsis_forecast(
-            is_forecast=is_forecast,
-            revision_number=revision_number,
-            create_existing=False,
-            opportunity=opportunity,
-            source_values=source_values,
-        )
-
-        with pytest.raises(ValueError, match=expected_error):
-            transform_oracle_data_task.process_opportunity_summary(
-                source_summary, None, opportunity
-            )
+        assert {
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 4,
+            # Despite processing 4 records, only the opportunity_summary is actually deleted directly
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
+            f"opportunity_summary.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
+            transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 3,
+        }.items() <= transform_oracle_data_task.metrics.items()

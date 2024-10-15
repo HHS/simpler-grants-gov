@@ -5,13 +5,13 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# Logging Bucket 
+# Logging Bucket
 resource "aws_s3_bucket" "canary-reports" {
   # contains the zip and the canary logs
   # checkov:skip=CKV_AWS_144: CORS access not relevant to this bucket
   # checkov:skip=CKV2_AWS_62:S3 bucket does not need notifications enabled
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
-  # checkov:skip=CKV2_AWS_61:No need to define S3 bucket lifecycle configuration to expire. Stored files are screenshots and a JSON with a small file size 
+  # checkov:skip=CKV2_AWS_61:No need to define S3 bucket lifecycle configuration to expire. Stored files are screenshots and a JSON with a small file size
   bucket = "s3-canaries-reports-${data.aws_caller_identity.current.account_id}"
 }
 resource "aws_s3_bucket_versioning" "canary-reports" {
@@ -48,6 +48,7 @@ resource "aws_kms_key" "canary-reports" {
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 # Assume role for the canary

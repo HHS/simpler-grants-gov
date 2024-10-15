@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import pytest
 
 from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import CurrentOpportunitySummary, OpportunitySummary
+from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 from src.util.datetime_util import get_now_us_eastern_date
 from tests.conftest import BaseTestClass
@@ -131,11 +131,16 @@ class OpportunityContainer:
 def validate_current_opportunity(
     db_session, container: OpportunityContainer, expected_status: OpportunityStatus | None
 ):
-    current_opportunity_summary = (
-        db_session.query(CurrentOpportunitySummary)
-        .where(CurrentOpportunitySummary.opportunity_id == container.opportunity.opportunity_id)
+    # Force all opportunity changes to be flushed to the DB and removed from any session cache
+    db_session.commit()
+    db_session.expunge_all()
+
+    opportunity = (
+        db_session.query(Opportunity)
+        .where(Opportunity.opportunity_id == container.opportunity.opportunity_id)
         .one_or_none()
     )
+    current_opportunity_summary = opportunity.current_opportunity_summary
 
     is_current_none = current_opportunity_summary is None
     is_none_expected = container.expected_current_summary is None
@@ -224,6 +229,26 @@ class TestProcessOpportunity(BaseTestClass):
 
     def test_process_opportunity_no_summaries(self, set_current_opportunities_task, db_session):
         container = OpportunityContainer()
+
+        set_current_opportunities_task._process_opportunity(container.opportunity)
+        validate_current_opportunity(db_session, container, None)
+
+    @pytest.mark.parametrize(
+        "summary_info,expected_opportunity_status",
+        SINGLE_SUMMARY_PARAMS,
+    )
+    def test_process_opportunity_is_draft(
+        self, set_current_opportunities_task, db_session, summary_info, expected_opportunity_status
+    ):
+        # Regardless of the state of the opportunity summary, if the opportunity
+        # is a draft, it will not get a status
+        container = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=summary_info.is_forecast,
+            post_date=summary_info.post_date,
+            close_date=summary_info.close_date,
+            archive_date=summary_info.archive_date,
+            is_expected_current=False,
+        )
 
         set_current_opportunities_task._process_opportunity(container.opportunity)
         validate_current_opportunity(db_session, container, None)
@@ -503,6 +528,15 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
             )
         )
 
+        # A scenario where the opportunity summary is valid, but the opportunity is a draft
+        container6 = OpportunityContainer(is_draft=True).with_summary(
+            is_forecast=NON_FORECAST_AFTER_POST_DATE_2.is_forecast,
+            post_date=NON_FORECAST_AFTER_POST_DATE_2.post_date,
+            close_date=NON_FORECAST_AFTER_POST_DATE_2.close_date,
+            archive_date=NON_FORECAST_AFTER_POST_DATE_2.archive_date,
+            is_expected_current=False,
+        )
+
         set_current_opportunities_task.run()
 
         validate_current_opportunity(db_session, container1, OpportunityStatus.POSTED)
@@ -510,12 +544,13 @@ class TestSetCurrentOpportunitiesTaskRun(BaseTestClass):
         validate_current_opportunity(db_session, container3, None)
         validate_current_opportunity(db_session, container4, None)
         validate_current_opportunity(db_session, container5, OpportunityStatus.POSTED)
+        validate_current_opportunity(db_session, container6, None)
 
         # Check a few basic metrics that should be set
         metrics = set_current_opportunities_task.metrics
 
-        assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 5
-        assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 1
+        assert metrics[set_current_opportunities_task.Metrics.OPPORTUNITY_COUNT] == 6
+        assert metrics[set_current_opportunities_task.Metrics.UNMODIFIED_OPPORTUNITY_COUNT] == 2
         assert metrics[set_current_opportunities_task.Metrics.MODIFIED_OPPORTUNITY_COUNT] == 4
 
 

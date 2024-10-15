@@ -1,8 +1,5 @@
-version: "3.8"
-
 # run with `docker compose -f`
 # combines ports and env vars with the main docker-compose.yml main-app service
-
 services:
   grants-api:
     command: [

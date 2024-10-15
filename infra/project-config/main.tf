@@ -18,18 +18,23 @@ locals {
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
 
   network_configs = {
-    # TODO(https://github.com/HHS/simpler-grants-gov/issues/1051) deploy to a non-default VPC in every environment
     dev = {
+      account_name                 = "simpler-grants-gov"
+      database_subnet_group_name   = "dev"
       vpc_name                     = "dev"
       second_octet                 = 0               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
     }
     staging = {
+      account_name                 = "simpler-grants-gov"
+      database_subnet_group_name   = "staging"
       vpc_name                     = "staging"
       second_octet                 = 1               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
     }
     prod = {
+      account_name                 = "simpler-grants-gov"
+      database_subnet_group_name   = "prod"
       vpc_name                     = "prod"
       second_octet                 = 3               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.250.0.0/16" # MicroHealth managed CIDR block where the prod origin Oracle database for Grants.gov is located

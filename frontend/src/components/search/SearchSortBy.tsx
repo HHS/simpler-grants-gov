@@ -1,64 +1,81 @@
-import { useSearchParamUpdater } from "../../hooks/useSearchParamUpdater";
-import { useState } from "react";
+"use client";
+
+import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+
+import { useTranslations } from "next-intl";
+import { useContext } from "react";
+import { Select } from "@trussworks/react-uswds";
 
 type SortOption = {
   label: string;
   value: string;
 };
 
-const SORT_OPTIONS: SortOption[] = [
-  { label: "Opportunity Number (Ascending)", value: "opportunityNumberAsc" },
-  { label: "Opportunity Number (Descending)", value: "opportunityNumberDesc" },
-  { label: "Opportunity Title (Ascending)", value: "opportunityTitleAsc" },
-  { label: "Opportunity Title (Descending)", value: "opportunityTitleDesc" },
-  { label: "Agency (Ascending)", value: "agencyAsc" },
-  { label: "Agency (Descending)", value: "agencyDesc" },
-  { label: "Posted Date (Ascending)", value: "postedDateAsc" },
-  { label: "Posted Date (Descending)", value: "postedDateDesc" },
-  { label: "Close Date (Ascending)", value: "closeDateAsc" },
-  { label: "Close Date (Descending)", value: "closeDateDesc" },
-];
-
 interface SearchSortByProps {
-  formRef: React.RefObject<HTMLFormElement>;
-  initialQueryParams: string;
+  queryTerm: string | null | undefined;
+  sortby: string | null;
+  totalResults: string;
 }
 
-const SearchSortBy: React.FC<SearchSortByProps> = ({
-  formRef,
-  initialQueryParams,
-}) => {
-  const [sortBy, setSortBy] = useState(
-    initialQueryParams || SORT_OPTIONS[0].value,
-  );
+export default function SearchSortBy({
+  queryTerm,
+  sortby,
+  totalResults,
+}: SearchSortByProps) {
   const { updateQueryParams } = useSearchParamUpdater();
+  const { updateTotalResults } = useContext(QueryContext);
+  const t = useTranslations("Search");
+
+  const SORT_OPTIONS: SortOption[] = [
+    { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
+    { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
+    { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
+    { label: t("sortBy.options.close_date_asc"), value: "closeDateAsc" },
+    {
+      label: t("sortBy.options.opportunity_title_asc"),
+      value: "opportunityTitleAsc",
+    },
+    {
+      label: t("sortBy.options.opportunity_title_desc"),
+      value: "opportunityTitleDesc",
+    },
+    { label: t("sortBy.options.agency_asc"), value: "agencyAsc" },
+    { label: t("sortBy.options.agency_desc"), value: "agencyDesc" },
+    {
+      label: t("sortBy.options.opportunity_number_desc"),
+      value: "opportunityNumberDesc",
+    },
+    {
+      label: t("sortBy.options.opportunity_number_asc"),
+      value: "opportunityNumberAsc",
+    },
+  ];
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value;
-    setSortBy(newValue);
-    const key = "sortby";
-    updateQueryParams(newValue, key);
-    formRef?.current?.requestSubmit();
+    updateTotalResults(totalResults);
+    updateQueryParams(newValue, "sortby", queryTerm);
   };
 
   return (
     <div id="search-sort-by">
-      <select
-        className="usa-select"
-        name="search-sort-by"
+      <label htmlFor="search-sort-by-select" className="usa-sr-only">
+        {t("sortBy.label")}
+      </label>
+
+      <Select
         id="search-sort-by-select"
+        name="search-sort-by"
         onChange={handleChange}
-        value={sortBy}
-        aria-label="Sort By"
+        value={sortby || ""}
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
-};
-
-export default SearchSortBy;
+}

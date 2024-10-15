@@ -3,6 +3,7 @@ This module contains the DBClient class, which is used to manage database connec
 
 For usage information look at the package docstring in __init__.py
 """
+
 import abc
 import logging
 

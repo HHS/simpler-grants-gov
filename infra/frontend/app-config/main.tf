@@ -2,15 +2,10 @@ locals {
   app_name                        = "frontend"
   environments                    = ["dev", "staging", "prod"]
   project_name                    = module.project_config.project_name
-  image_repository_name           = "${local.project_name}-${local.app_name}"
   has_database                    = false
   has_incident_management_service = false
   enable_autoscaling              = true
   hostname                        = "0.0.0.0"
-
-  build_repository_config = {
-    region = module.project_config.default_region
-  }
 
   environment_configs = {
     dev     = module.dev_config
@@ -52,6 +47,13 @@ locals {
     staging = "simpler-grants-gov"
     prod    = "simpler-grants-gov"
   }
+
+  # The name of the network that contains the resources shared across all
+  # application environments, such as the build repository.
+  # The list of networks can be found in /infra/networks
+  # by looking for the backend config files of the form:
+  #   <NETWORK_NAME>.s3.tfbackend
+  shared_network_name = "staging"
 }
 
 module "project_config" {

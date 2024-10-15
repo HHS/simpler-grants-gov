@@ -57,11 +57,15 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def set_metrics(self, metrics: dict[str, Any]) -> None:
         self.metrics.update(**metrics)
 
-    def increment(self, name: str, value: int = 1) -> None:
+    def increment(self, name: str, value: int = 1, prefix: str | None = None) -> None:
         if name not in self.metrics:
             self.metrics[name] = 0
 
         self.metrics[name] += value
+
+        if prefix is not None:
+            # Rather than re-implement the above, just re-use the function without a prefix
+            self.increment(f"{prefix}.{name}", value, prefix=None)
 
     def cls_name(self) -> str:
         return self.__class__.__name__

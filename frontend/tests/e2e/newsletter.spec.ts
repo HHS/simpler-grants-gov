@@ -1,8 +1,8 @@
 /* eslint-disable testing-library/prefer-screen-queries */
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/newsletter");
+  await page.goto("/subscribe");
 });
 
 test.afterEach(async ({ context }) => {
@@ -10,7 +10,7 @@ test.afterEach(async ({ context }) => {
 });
 
 test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle(/Newsletter | Simpler.Grants.gov/);
+  await expect(page).toHaveTitle(/Subscribe | Simpler.Grants.gov/);
 });
 
 test("client side errors", async ({ page }) => {

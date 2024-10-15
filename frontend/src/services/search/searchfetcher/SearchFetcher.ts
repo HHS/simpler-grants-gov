@@ -1,7 +1,7 @@
 import "server-only";
 
-import { SearchAPIResponse } from "../../../types/search/searchResponseTypes";
-import { SearchFetcherActionType } from "../../../types/search/searchRequestTypes";
+import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export interface QueryParamData {
   page: number;

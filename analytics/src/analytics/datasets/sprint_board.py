@@ -4,6 +4,7 @@ Implements the SprintBoard dataset.
 This is a sub-class of BaseDataset that stores the tickets and metadata
 set for each ticket in the Sprint Planning Board
 """
+
 from __future__ import annotations
 
 from typing import Self

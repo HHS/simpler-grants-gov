@@ -1,4 +1,5 @@
 """Helper functions for testing database code."""
+
 import contextlib
 import logging
 

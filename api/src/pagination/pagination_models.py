@@ -11,6 +11,11 @@ class SortDirection(StrEnum):
     ASCENDING = "ascending"
     DESCENDING = "descending"
 
+    def short_form(self) -> str:
+        if self == SortDirection.DESCENDING:
+            return "desc"
+        return "asc"
+
 
 class SortingParamsV0(BaseModel):
     order_by: str

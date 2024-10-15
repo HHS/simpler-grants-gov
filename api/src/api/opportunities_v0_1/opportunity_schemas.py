@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -10,7 +11,7 @@ from src.constants.lookup_constants import (
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
-class OpportunitySummarySchema(Schema):
+class OpportunitySummaryV01Schema(Schema):
     summary_description = fields.String(
         metadata={
             "description": "The summary of the opportunity",
@@ -178,7 +179,7 @@ class OpportunitySummarySchema(Schema):
     applicant_types = fields.List(fields.Enum(ApplicantType))
 
 
-class OpportunityAssistanceListingSchema(Schema):
+class OpportunityAssistanceListingV01Schema(Schema):
     program_title = fields.String(
         metadata={
             "description": "The name of the program, see https://sam.gov/content/assistance-listings for more detail",
@@ -193,7 +194,7 @@ class OpportunityAssistanceListingSchema(Schema):
     )
 
 
-class OpportunitySchema(Schema):
+class OpportunityV01Schema(Schema):
     opportunity_id = fields.Integer(
         dump_only=True,
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
@@ -227,9 +228,9 @@ class OpportunitySchema(Schema):
     )
 
     opportunity_assistance_listings = fields.List(
-        fields.Nested(OpportunityAssistanceListingSchema())
+        fields.Nested(OpportunityAssistanceListingV01Schema())
     )
-    summary = fields.Nested(OpportunitySummarySchema())
+    summary = fields.Nested(OpportunitySummaryV01Schema())
 
     opportunity_status = fields.Enum(
         OpportunityStatus,
@@ -243,35 +244,35 @@ class OpportunitySchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
-class OpportunitySearchFilterSchema(Schema):
+class OpportunitySearchFilterV01Schema(Schema):
     funding_instrument = fields.Nested(
-        StrSearchSchemaBuilder("FundingInstrumentFilterSchema")
+        StrSearchSchemaBuilder("FundingInstrumentFilterV01Schema")
         .with_one_of(allowed_values=FundingInstrument)
         .build()
     )
     funding_category = fields.Nested(
-        StrSearchSchemaBuilder("FundingCategoryFilterSchema")
+        StrSearchSchemaBuilder("FundingCategoryFilterV01Schema")
         .with_one_of(allowed_values=FundingCategory)
         .build()
     )
     applicant_type = fields.Nested(
-        StrSearchSchemaBuilder("ApplicantTypeFilterSchema")
+        StrSearchSchemaBuilder("ApplicantTypeFilterV01Schema")
         .with_one_of(allowed_values=ApplicantType)
         .build()
     )
     opportunity_status = fields.Nested(
-        StrSearchSchemaBuilder("OpportunityStatusFilterSchema")
+        StrSearchSchemaBuilder("OpportunityStatusFilterV01Schema")
         .with_one_of(allowed_values=OpportunityStatus)
         .build()
     )
     agency = fields.Nested(
-        StrSearchSchemaBuilder("AgencyFilterSchema")
+        StrSearchSchemaBuilder("AgencyFilterV01Schema")
         .with_one_of(example="US-ABC", minimum_length=2)
         .build()
     )
 
 
-class OpportunitySearchRequestSchema(Schema):
+class OpportunitySearchRequestV01Schema(Schema):
     query = fields.String(
         metadata={
             "description": "Query string which searches against several text fields",
@@ -280,7 +281,7 @@ class OpportunitySearchRequestSchema(Schema):
         validate=[validators.Length(min=1, max=100)],
     )
 
-    filters = fields.Nested(OpportunitySearchFilterSchema())
+    filters = fields.Nested(OpportunitySearchFilterV01Schema())
 
     pagination = fields.Nested(
         generate_pagination_schema(
@@ -296,3 +297,11 @@ class OpportunitySearchRequestSchema(Schema):
         ),
         required=True,
     )
+
+
+class OpportunityGetResponseV01Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunityV01Schema())
+
+
+class OpportunitySearchResponseV01Schema(AbstractResponseSchema, PaginationMixinSchema):
+    data = fields.Nested(OpportunityV01Schema(many=True))

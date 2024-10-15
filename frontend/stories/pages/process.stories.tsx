@@ -1,5 +1,5 @@
 import { Meta } from "@storybook/react";
-import Process from "src/pages/process";
+import Process from "src/app/[locale]/process/page";
 
 const meta: Meta<typeof Process> = {
   title: "Pages/Process",

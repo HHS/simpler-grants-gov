@@ -1121,6 +1121,5 @@ def test_opportunity_search_invalid_request_422(
     )
     assert resp.status_code == 422
 
-    print(resp.get_json())
     response_data = resp.get_json()["errors"]
     assert response_data == expected_response_data
