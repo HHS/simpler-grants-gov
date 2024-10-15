@@ -1,3 +1,5 @@
 node_modules
+analytics
+api
 .next
 .terraform
