@@ -2,7 +2,7 @@ FROM hashicorp/terraform:1.9.7 AS base
 
 RUN mkdir -p /app
 WORKDIR /app
-ENTRYPOINT [ "sh" ]
+ENTRYPOINT [ "sh", "-c" ]
 
 COPY --from=top-level-directory bin /app/bin
 COPY --from=top-level-directory infra /app/infra
