@@ -3,7 +3,6 @@
 import React from 'react';
 
 import {
-    Button,
     ErrorMessage,
     FormGroup,
     Label,
@@ -13,7 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { useFormState } from 'react-dom'
-import subscribeEmail from '../../actions';
+import subscribeEmail from 'src/app/actions';
 import { SubscriptionSubmitButton } from './SubscriptionSubmitButton';
 
 type validationErrors = {

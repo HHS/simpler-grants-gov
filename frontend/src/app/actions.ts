@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { environment } from '../constants/environments'
+import { environment } from 'src/constants/environments'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server';
 
