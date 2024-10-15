@@ -172,10 +172,10 @@ data "aws_iam_policy_document" "allow_all_aws_access" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["*"]
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"]
     }
     actions   = ["es:*"]
-    resources = ["*"]
+    resources = ["${aws_opensearch_domain.opensearch.arn}/*"]
   }
 }
 
