@@ -1,0 +1,5 @@
+services:
+  ecs-terraform:
+    build:
+      context: .
+    container_name: ecs-terraform

@@ -1,6 +1,6 @@
 locals {
-  app_name                        = "api"
-  environments                    = ["dev", "prod"]
+  app_name                        = "ecs-terraform"
+  environments                    = ["dev", "staging", "prod"]
   project_name                    = module.project_config.project_name
   has_database                    = true
   has_incident_management_service = false
