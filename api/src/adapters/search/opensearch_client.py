@@ -1,9 +1,7 @@
 import logging
 from typing import Any, Generator, Iterable
 
-import boto3
 import opensearchpy
-from requests.auth import HTTPBasicAuth
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
@@ -253,22 +251,6 @@ class SearchClient:
         self._client.clear_scroll(scroll_id=scroll_id)
 
 
-class CustomAuth(opensearchpy.RequestsAWSV4SignerAuth):
-    # TODO - better name  once we see if this works
-    def __init__(self, credentials, region, username: str, password: str, service: str = "es") -> None:  # type: ignore
-        super().__init__(credentials, region, service)
-
-        self.username = username
-        self.password = password
-
-    def __call__(self, request):  # type: ignore
-        # Use HTTPBasicAuth's __call__ method to add a
-        # username+password authorization header
-        request = HTTPBasicAuth(self.username, self.password)(request)
-
-        return self._sign_request(request)
-
-
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
     # See: https://opensearch.org/docs/latest/clients/python-low-level/#connecting-to-opensearch
     # for further details on configuring the connection to OpenSearch
@@ -283,15 +265,12 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
 
     # We'll assume if the aws_region is set, we're running in AWS
     # and should connect using the session credentials
-    if opensearch_config.search_username and opensearch_config.search_password:
+    if opensearch_config.aws_region:
         # Get credentials and authorize with AWS Opensearch Serverless (es)
-        credentials = boto3.Session().get_credentials()
-        auth = CustomAuth(
-            credentials=credentials,
-            region=opensearch_config.aws_region,
-            username=opensearch_config.search_username,
-            password=opensearch_config.search_password,
-        )
+        # TODO - once we have the user setup in Opensearch, we want to change to this approach
+        # credentials = boto3.Session().get_credentials()
+        # auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
+        auth = (opensearch_config.search_username, opensearch_config.search_password)
         params["http_auth"] = auth
 
     return params
