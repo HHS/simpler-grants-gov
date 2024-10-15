@@ -8,6 +8,8 @@ services:
       - "5432:5432"
     volumes:
       - grantsdbdata:/var/lib/postgresql/data
+    networks:
+      - default
 
   opensearch-node:
     image: opensearchproject/opensearch:latest
@@ -32,6 +34,8 @@ services:
     ports:
       - 9200:9200 # REST API
       - 9600:9600 # Performance Analyzer
+    networks:
+      - default
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
@@ -43,13 +47,15 @@ services:
     environment:
       - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
+    networks:
+      - default
 
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
     image: localstack/localstack
     ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559" # external services port range
     environment:
       # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
       - DEBUG=${DEBUG:-0}
@@ -59,6 +65,8 @@ services:
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - default
 
   grants-api:
     build:
@@ -67,7 +75,20 @@ services:
       args:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-api}
-    command: ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+    command:
+      [
+        "poetry",
+        "run",
+        "flask",
+        "--app",
+        "src.app",
+        "run",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+        "--reload",
+      ]
     container_name: grants-api
     env_file: ./local.env
     ports:
@@ -78,7 +99,14 @@ services:
       - grants-db
       - opensearch-node
       - localstack
+    networks:
+      - grants_backend
+      - default
 
 volumes:
   grantsdbdata:
   opensearch-data:
+
+networks:
+  grants_backend:
+    driver: bridge
