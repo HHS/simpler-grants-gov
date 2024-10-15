@@ -31,10 +31,14 @@ export RUN_UID
 ##################
 
 build:
-	docker compose build
+	docker buildx build \
+		--build-context top-level-directory=../ \
+		--tag $(notdir $(shell pwd)):latest \
+		.
 
 release-build:
 	docker buildx build \
+		--build-context top-level-directory=../ \
 		--target release \
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
