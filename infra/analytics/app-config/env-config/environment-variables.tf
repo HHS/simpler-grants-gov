@@ -12,19 +12,32 @@ locals {
   # Configuration for secrets
   # List of configurations for defining environment variables that pull from SSM parameter
   # store. Configurations are of the format
-  # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
-  secrets = [
-    {
-      name           = "GH_TOKEN"
-      ssm_param_name = "/${var.app_name}/${var.environment}/github-token"
-    },
-    {
-      name           = "ANALYTICS_SLACK_BOT_TOKEN"
-      ssm_param_name = "/${var.app_name}/${var.environment}/slack-bot-token"
-    },
-    {
-      name           = "ANALYTICS_REPORTING_CHANNEL_ID"
-      ssm_param_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
+  # {
+  #   ENV_VAR_NAME = {
+  #     manage_method     = "generated" # or "manual" for a secret that was created and stored in SSM manually
+  #     secret_store_name = "/ssm/param/name"
+  #   }
+  # }
+  secrets = {
+    GH_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/github-token"
     }
-  ]
+    ANALYTICS_SLACK_BOT_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/slack-bot-token"
+    }
+    ANALYTICS_REPORTING_CHANNEL_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
+    }
+    MB_DB_USER = {
+      manage_method     = "generated"
+      secret_store_name = "/metabase/${var.environment}/db_user"
+    }
+    MB_DB_PASS = {
+      manage_method     = "generated"
+      secret_store_name = "/metabase/${var.environment}/db_pass"
+    }
+  }
 }

@@ -39,6 +39,8 @@ locals {
 
   service_name = "metabase-${var.environment_name}"
 
+  is_temporary = startswith(terraform.workspace, "t-")
+
   environment_config = module.app_config.environment_configs[var.environment_name]
   service_config     = local.environment_config.service_config
   database_config    = local.environment_config.database_config
@@ -99,16 +101,13 @@ module "service" {
     MB_DB_PORT   = data.aws_rds_cluster.db_cluster.port
     MB_DB_HOST   = data.aws_rds_cluster.db_cluster.endpoint
   }
-  secrets = [
-    {
-      name           = "MB_DB_USER"
-      ssm_param_name = "/metabase/${var.environment_name}/db_user"
-    },
-    {
-      name           = "MB_DB_PASS"
-      ssm_param_name = "/metabase/${var.environment_name}/db_pass"
-    },
-  ]
+
+  secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+  )
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null
