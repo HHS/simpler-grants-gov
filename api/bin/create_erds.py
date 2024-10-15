@@ -44,12 +44,10 @@ def create_erds(modules: Any, file_name: str) -> None:
     for module in modules:
         items.extend([getattr(module, attr) for attr in dir(module) if attr[0] != "_"])
 
-    for item in items:  # get mapped classes
+    for item in items:
         try:
             all_mappers.extend([cls for cls in item.registry.mappers])
         except AttributeError as e:
-            # import pdb; pdb.set_trace()
-            # not a mapper
             logger.error(f"Not a mapped object: {e}")
             pass
 
