@@ -93,6 +93,9 @@ module "service" {
   cpu                   = 1024
   memory                = 2048
 
+  # This is a task based service, not a web server, so we don't need to run any instances of the service at rest.
+  desired_instance_count = 0
+
   extra_environment_variables = local.service_config.extra_environment_variables
 
   secrets = concat(
