@@ -16,11 +16,11 @@ locals {
   secrets = {
     GH_TOKEN = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/github-token"
+      secret_store_name = "/${var.app_name}/github-token"
     },
     ANALYTICS_SLACK_BOT_TOKEN = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/slack-bot-token"
+      secret_store_name = "/${var.app_name}/slack-bot-token"
     },
     ANALYTICS_REPORTING_CHANNEL_ID = {
       manage_method     = "manual"

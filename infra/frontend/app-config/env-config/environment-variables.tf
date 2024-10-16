@@ -41,8 +41,8 @@ locals {
     },
     # Token that the frontend uses to authenticate when making Grants API fetch requests.
     API_AUTH_TOKEN = {
-      manage_method      = "manual"
-      secret_store_names = "/${var.app_name}/${var.environment}/api-auth-token"
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
     }
   }
 }
