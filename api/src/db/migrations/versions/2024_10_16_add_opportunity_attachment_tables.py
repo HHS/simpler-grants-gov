@@ -1,8 +1,8 @@
 """Add opportunity attachment tables
 
-Revision ID: 1ad92a9f40ad
+Revision ID: 63262ed8ca30
 Revises: fa38970d0cef
-Create Date: 2024-10-15 19:29:42.143685
+Create Date: 2024-10-16 15:39:58.658620
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "1ad92a9f40ad"
+revision = "63262ed8ca30"
 down_revision = "fa38970d0cef"
 branch_labels = None
 depends_on = None
@@ -48,10 +48,10 @@ def upgrade():
         sa.Column("mime_type", sa.Text(), nullable=False),
         sa.Column("file_name", sa.Text(), nullable=False),
         sa.Column("file_description", sa.Text(), nullable=False),
-        sa.Column("file_size_bytes", sa.Integer(), nullable=False),
+        sa.Column("file_size_bytes", sa.BigInteger(), nullable=False),
         sa.Column("created_by", sa.Text(), nullable=True),
         sa.Column("updated_by", sa.Text(), nullable=True),
-        sa.Column("legacy_folder_id", sa.Integer(), nullable=True),
+        sa.Column("legacy_folder_id", sa.BigInteger(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
