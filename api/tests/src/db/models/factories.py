@@ -1745,7 +1745,7 @@ def create_tgroups_agency(
     # The agency_code value is actually just the first bit (the top-level agency)
     kwargs["AgencyCode"] = agency_code.split("-")[0]
     kwargs["AgencyEnroll"] = agency_code
-    kwargs["ldapGp"] = agency_code
+    kwargs["ldapGp"] = agency_code # TODO - set only if not passed in
 
     field_values = StagingTgroupsAgencyFactory.build(**kwargs)
 
