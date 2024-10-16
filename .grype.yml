@@ -1,5 +1,8 @@
 fail-on-severity: "medium"
 
+output: "json"
+file: ""
+
 # List of vulnerabilities to ignore for the anchore scan
 # https://github.com/anchore/grype#specifying-matches-to-ignore
 # More info can be found in the docs/infra/vulnerability-management.md file
