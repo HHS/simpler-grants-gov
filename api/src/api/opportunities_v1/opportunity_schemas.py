@@ -308,6 +308,60 @@ class OpportunityV1Schema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
+class OpportunityAttachmentV1Schema(Schema):
+    file_location = fields.String(
+        metadata={
+            "description": "The URL to download the attachment",
+            "example": "https://...",
+        }
+    )
+    mime_type = fields.String(
+        metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the attachment file", "example": "my_NOFO.pdf"}
+    )
+    file_description = fields.String(
+        metadata={
+            "description": "A description of the attachment",
+            "example": "The full announcement NOFO",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={"description": "The size of the attachment in bytes", "example": 10012}
+    )
+    opportunity_attachment_type = fields.String(
+        metadata={
+            "description": "The type of attachment",
+            "example": "notice_of_funding_opportunity",
+        }
+    )
+    created_by = fields.String(
+        metadata={
+            "description": "The user who created the attachment",
+        }
+    )
+    updated_by = fields.String(
+        metadata={
+            "description": "The user who last updated the attachment",
+        }
+    )
+
+    legacy_folder_id = fields.Integer(
+        metadata={
+            "description": "The legacy folder ID",
+        }
+    )
+
+
+class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
+    attachments = fields.List(
+        fields.Nested(OpportunityAttachmentV1Schema),
+        attribute="opportunity_attachments",  # This maps to the model's field name
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
+
+
 class OpportunitySearchFilterV1Schema(Schema):
     funding_instrument = fields.Nested(
         StrSearchSchemaBuilder("FundingInstrumentFilterV1Schema")
@@ -473,7 +527,7 @@ class OpportunitySearchRequestV1Schema(Schema):
 
 
 class OpportunityGetResponseV1Schema(AbstractResponseSchema):
-    data = fields.Nested(OpportunityV1Schema())
+    data = fields.Nested(OpportunityWithAttachmentsV1Schema())
 
 
 class OpportunityVersionV1Schema(Schema):

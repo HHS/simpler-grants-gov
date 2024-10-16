@@ -15,6 +15,7 @@ from typing import Optional
 import factory
 import factory.fuzzy
 import faker
+from factory.declarations import LazyAttribute
 from faker.providers import BaseProvider
 from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
@@ -31,6 +32,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -232,6 +234,27 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         abstract = True
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
+
+
+class OpportunityAttachmentFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAttachment
+
+    attachment_id = factory.Sequence(lambda n: n)
+
+    file_location = factory.Faker("url")
+    mime_type = factory.Faker("mime_type")
+    file_name = factory.Faker("file_name")
+    file_description = factory.Faker("sentence")
+    file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
+    opportunity_attachment_type = factory.Faker(
+        "random_element", elements=OpportunityAttachmentType
+    )
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
 
 
 class OpportunityFactory(BaseFactory):
