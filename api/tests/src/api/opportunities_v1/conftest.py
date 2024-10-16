@@ -32,6 +32,7 @@ def get_search_request(
     order_by: str = "opportunity_id",
     sort_direction: str = "ascending",
     query: str | None = None,
+    experimental: dict | None = None,
     funding_instrument_one_of: list[FundingInstrument] | None = None,
     funding_category_one_of: list[FundingCategory] | None = None,
     applicant_type_one_of: list[ApplicantType] | None = None,
@@ -105,6 +106,9 @@ def get_search_request(
 
     if format is not None:
         req["format"] = format
+
+    if experimental is not None:
+        req["experimental"] = experimental
 
     return req
 

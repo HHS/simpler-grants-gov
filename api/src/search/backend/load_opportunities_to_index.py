@@ -118,7 +118,7 @@ class LoadOpportunitiesToIndex(Task):
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                 )
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-                .execution_options(yield_per=5000)
+                .execution_options(yield_per=1000)
             )
             .scalars()
             .partitions()

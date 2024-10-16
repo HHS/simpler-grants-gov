@@ -77,8 +77,8 @@ variable "extra_environment_variables" {
 
 variable "secrets" {
   type = set(object({
-    name           = string
-    ssm_param_name = string
+    name      = string
+    valueFrom = string
   }))
   description = "List of configurations for defining environment variables that pull from SSM parameter store"
   default     = []

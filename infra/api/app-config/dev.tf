@@ -10,6 +10,10 @@ module "dev_config" {
   database_max_capacity           = 16
   database_min_capacity           = 2
 
+  has_search = true
+  # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
+  search_engine_version = "OpenSearch_2.15"
+
   # Runs, but with everything disabled.
   # See api/src/data_migration/command/load_transform.py for argument specifications.
   load_transform_args = [

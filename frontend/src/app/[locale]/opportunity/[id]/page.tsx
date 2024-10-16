@@ -1,6 +1,6 @@
 import { Metadata } from "next";
+import NotFound from "src/app/[locale]/not-found";
 import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
-import NotFound from "src/app/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";

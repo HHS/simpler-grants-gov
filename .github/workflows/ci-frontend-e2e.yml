@@ -51,7 +51,10 @@ jobs:
         shell: bash
 
       - name: Run E2E Tests
-        run: npm run test:e2e
+        run: |
+          npm run build
+          cat .env.development >> .env.local
+          npm run test:e2e
 
       - uses: actions/upload-artifact@v4
         if: always()

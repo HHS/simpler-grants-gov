@@ -54,7 +54,7 @@ locals {
 }
 
 terraform {
-  required_version = "< 1.9.7"
+  required_version = "< 1.10"
 
   required_providers {
     aws = {
@@ -141,7 +141,12 @@ module "service" {
   } : null
 
   extra_environment_variables = local.service_config.extra_environment_variables
-  secrets                     = local.service_config.secrets
+  secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+  )
 }
 
 module "monitoring" {

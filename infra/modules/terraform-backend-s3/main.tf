@@ -19,6 +19,7 @@ resource "aws_kms_key" "tf_backend" {
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {

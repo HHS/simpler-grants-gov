@@ -1,0 +1,41 @@
+name: Internal - Epic
+description: Describe a large body of work that can be broken down into smaller tasks
+type: Epic
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Description
+      description: A brief summary that captures how this epic will achieve the goals of a deliverable
+    validations:
+      required: false
+
+  - type: textarea
+    id: success_probability
+    attributes:
+      label: Probability of success and key risks
+      description: Estimated probability that this epic succeeds; and a brief summary of key risks
+    validations:
+      required: true
+
+  - type: input
+    id: delivery_date_estimated
+    attributes:
+      label: Date of delivery (estimated)
+      description: Estimated delivery date for this epic
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loe_tshirt
+    attributes:
+      label: Level of effort
+      options:
+        - "XS"
+        - "S"
+        - "M"
+        - "L"
+        - "XL"
+        - "XXL"
+    validations:
+      required: false

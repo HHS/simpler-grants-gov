@@ -1,4 +1,5 @@
-name: Deploy
+name: Chained Deploy
+run-name: Chained Deploy Layer for ${{ github.ref_name }} to ${{ inputs.app_name }} ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:
   workflow_call:
@@ -38,6 +39,10 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.7
+          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials

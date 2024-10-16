@@ -54,7 +54,7 @@ locals {
 }
 
 terraform {
-  required_version = "< 1.9.7"
+  required_version = "< 1.10"
 
   required_providers {
     aws = {
@@ -138,8 +138,26 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = local.service_config.extra_environment_variables
-  secrets                     = local.service_config.secrets
+  extra_environment_variables = merge(local.service_config.extra_environment_variables, { "ENVIRONMENT" : var.environment_name })
+
+  secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_USERNAME"
+      valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
+    }] : [],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_PASSWORD"
+      valueFrom = data.aws_ssm_parameter.search_password_arn[0].arn
+    }] : [],
+    local.environment_config.search_config != null ? [{
+      name      = "SEARCH_ENDPOINT"
+      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
+    }] : []
+  )
 }
 
 module "monitoring" {
