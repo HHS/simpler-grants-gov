@@ -71,6 +71,7 @@ export default abstract class BaseApi {
       additionalHeaders?: HeadersDict;
     } = {},
   ) {
+    debugger;
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,
