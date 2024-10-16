@@ -13,18 +13,18 @@ locals {
   # List of configurations for defining environment variables that pull from SSM parameter
   # store. Configurations are of the format
   # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
-  secrets = [
-    {
-      name           = "GH_TOKEN"
-      ssm_param_name = "/${var.app_name}/${var.environment}/github-token"
+  secrets = {
+    GH_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/github-token"
     },
-    {
-      name           = "ANALYTICS_SLACK_BOT_TOKEN"
-      ssm_param_name = "/${var.app_name}/${var.environment}/slack-bot-token"
+    ANALYTICS_SLACK_BOT_TOKEN = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/slack-bot-token"
     },
-    {
-      name           = "ANALYTICS_REPORTING_CHANNEL_ID"
-      ssm_param_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
+    ANALYTICS_REPORTING_CHANNEL_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
     }
-  ]
+  }
 }

@@ -34,6 +34,7 @@ export interface Summary {
   is_forecast: boolean;
   post_date: string | null;
   summary_description: string | null;
+  version_number: number | null;
 }
 
 export interface Opportunity {

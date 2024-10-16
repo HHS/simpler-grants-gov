@@ -35,7 +35,7 @@ describe("OpportunityLink", () => {
     expect(linkElement).toHaveAttribute("href", "https://example.com");
   });
 
-  it("renders a placeholder if URL is missing", () => {
+  it("renders no additional info link if URL is missing", () => {
     const mockDataWithoutUrl: Opportunity = {
       ...mockOpportunityData,
       summary: {
@@ -62,7 +62,7 @@ describe("OpportunityLink", () => {
     render(<OpportunityLink opportunityData={mockDataWithoutDescription} />);
 
     const linkElement = screen.getByRole("link", {
-      name: "",
+      name: "https://example.com",
     });
     expect(linkElement).toBeInTheDocument();
     expect(linkElement).toHaveAttribute("href", "https://example.com");

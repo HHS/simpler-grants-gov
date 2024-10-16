@@ -19,7 +19,7 @@ output "service_config" {
       var.service_override_extra_environment_variables
     )
 
-    secrets = toset(local.secrets)
+    secrets = local.secrets
   }
 }
 
