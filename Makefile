@@ -9,6 +9,8 @@ CURRENT_ACCOUNT_ID = $(./bin/current-account-id.sh)
 # Get the list of reusable terraform modules by getting out all the modules
 # in infra/modules and then stripping out the "infra/modules/" prefix
 MODULES := $(notdir $(wildcard infra/modules/*))
+SERVICES := $(filter-out infra/modules/service, $(wildcard infra/**/service))
+DATABASES := $(filter-out infra/modules/database, $(wildcard infra/**/database))
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
@@ -123,6 +125,20 @@ infra-validate-module-%:
 	@echo "Validate library module: $*"
 	terraform -chdir=infra/modules/$* init -backend=false
 	terraform -chdir=infra/modules/$* validate
+
+infra-validate-services: $(patsubst %, infra-validate-services-%, $(SERVICES)) ## Run terraform validate on service config
+
+infra-validate-services-infra/%/service:
+	@echo "Validating services: infra/$*/service"
+	terraform -chdir=infra/$*/service init -backend=false
+	terraform -chdir=infra/$*/service validate
+
+infra-validate-databases: $(patsubst %, infra-validate-databases-%, $(DATABASES)) ## Run terraform validate on database config
+
+infra-validate-databases-infra/%/database:
+	@echo "Validating databases: infra/$*/database"
+	terraform -chdir=infra/$*/database init -backend=false
+	terraform -chdir=infra/$*/database validate
 
 infra-check-app-database-roles: ## Check that app database roles have been configured properly
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

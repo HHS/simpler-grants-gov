@@ -29,6 +29,7 @@ jobs:
       - name: Check workflow files
         run: ${{ steps.get_actionlint.outputs.executable }} -color
         shell: bash
+
   lint-scripts:
     name: Lint scripts
     runs-on: ubuntu-latest
@@ -36,6 +37,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Shellcheck
         run: make infra-lint-scripts
+
   check-terraform-format:
     name: Check Terraform format
     runs-on: ubuntu-latest
@@ -49,6 +51,7 @@ jobs:
         run: |
           echo "If this fails, run 'make infra-format'"
           make infra-lint-terraform
+
   validate-terraform:
     name: Validate Terraform modules
     runs-on: ubuntu-latest
@@ -58,8 +61,13 @@ jobs:
         with:
           terraform_version: 1.9.7
           terraform_wrapper: false
-      - name: Validate
+      - name: Validate Modules
         run: make infra-validate-modules
+      - name: Validate Services
+        run: make infra-validate-serivces
+      - name: Validate Databases
+        run: make infra-validate-databases
+
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-latest
@@ -79,6 +87,7 @@ jobs:
           directory: infra
           framework: terraform
           quiet: true # only displays failed checks
+
   check-compliance-with-tfsec:
     name: Check compliance with tfsec
     runs-on: ubuntu-latest
