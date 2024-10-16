@@ -399,7 +399,7 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     attachment_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
     opportunity_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(single_parent=True)
     opportunity_attachment_type: Mapped[OpportunityAttachmentType] = mapped_column(
