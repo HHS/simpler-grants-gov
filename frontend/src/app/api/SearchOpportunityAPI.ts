@@ -14,6 +14,10 @@ import {
 import BaseApi from "./BaseApi";
 
 export default class SearchOpportunityAPI extends BaseApi {
+  get version(): string {
+    return "v1";
+  }
+
   get basePath(): string {
     return environment.API_URL;
   }
