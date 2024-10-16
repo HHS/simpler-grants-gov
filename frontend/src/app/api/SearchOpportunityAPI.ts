@@ -35,7 +35,7 @@ export default class SearchOpportunityAPI extends BaseApi {
 
     const requestBody: SearchRequestBody = { pagination };
 
-    // Only add filters if there are some
+    // Only add filters if there are somea
     if (Object.keys(filters).length > 0) {
       requestBody.filters = filters;
     }
