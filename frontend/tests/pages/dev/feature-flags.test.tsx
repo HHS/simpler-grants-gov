@@ -1,10 +1,10 @@
 /**
- * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
+ * @jest-environment ./src/utils/testing/jsdomNodeEnvironment.ts
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
-import { mockDefaultFeatureFlags } from "tests/utils/FeatureFlagTestUtils";
+import { mockDefaultFeatureFlags } from "src/utils/testing/FeatureFlagTestUtils";
 
 describe("Feature flags page", () => {
   const MOCK_DEFAULT_FEATURE_FLAGS = {

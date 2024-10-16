@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
 import { MockSearchFetcher } from "src/services/search/searchfetcher/MockSearchFetcher";
-import { useTranslationsMock } from "tests/utils/intlMocks";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // test without feature flag functionality
 jest.mock("src/hoc/search/withFeatureFlag", () =>
