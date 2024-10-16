@@ -410,7 +410,7 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     mime_type: Mapped[str]
     file_name: Mapped[str]
     file_description: Mapped[str]
-    file_size_bytes: Mapped[int]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
     created_by: Mapped[str | None]
     updated_by: Mapped[str | None]
-    legacy_folder_id: Mapped[int | None]
+    legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
