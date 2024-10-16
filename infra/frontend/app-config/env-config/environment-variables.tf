@@ -12,32 +12,37 @@ locals {
   # Configuration for secrets
   # List of configurations for defining environment variables that pull from SSM parameter
   # store. Configurations are of the format
-  # { name = "ENV_VAR_NAME", ssm_param_name = "/ssm/param/name" }
-  secrets = [
-    {
-      # Sendy API key to pass with requests for sendy subscriber endpoints.
-      name           = "SENDY_API_KEY"
-      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-api-key"
+  # {
+  #   ENV_VAR_NAME = {
+  #     manage_method     = "generated" # or "manual" for a secret that was created and stored in SSM manually
+  #     secret_store_name = "/ssm/param/name"
+  #   }
+  # }
+  secrets = {
+    # Sendy API key to pass with requests for sendy subscriber endpoints.
+    SENDY_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-key"
     },
-    {
-      # Sendy API base url for requests to manage subscribers.
-      name           = "SENDY_API_URL"
-      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-api-url"
+    # Sendy API base url for requests to manage subscribers.
+    SENDY_API_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/sendy-api-url"
     },
-    {
-      # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
-      name           = "SENDY_LIST_ID"
-      ssm_param_name = "/${var.app_name}/${var.environment}/sendy-list-id"
+    # Sendy list ID to for requests to manage subscribers to the Simpler Grants distribution list.
+    SENDY_LIST_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/sendy-list-id"
     },
-    {
-      # URL that the frontend uses to make fetch requests to the Grants API.
-      name           = "API_URL"
-      ssm_param_name = "/${var.app_name}/${var.environment}/api-url"
+    # URL that the frontend uses to make fetch requests to the Grants API.
+    API_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/api-url"
     },
-    {
-      # Token that the frontend uses to authenticate when making Grants API fetch requests.
-      name           = "API_AUTH_TOKEN"
-      ssm_param_name = "/${var.app_name}/${var.environment}/api-auth-token"
+    # Token that the frontend uses to authenticate when making Grants API fetch requests.
+    API_AUTH_TOKEN = {
+      manage_method      = "manual"
+      secret_store_names = "/${var.app_name}/${var.environment}/api-auth-token"
     }
-  ]
+  }
 }
