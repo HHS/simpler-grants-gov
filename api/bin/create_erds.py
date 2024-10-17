@@ -21,8 +21,7 @@ ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 STAGING_BASE_METADATA = StagingBase.metadata
 API_BASE_METADATA = ApiSchemaTable.metadata
 
-
-# Any modules you add above, merge together for the full schema to be generated
+# Any metadata you add above, merge together for the full schema to be generated
 ALL_METADATA = [StagingBase.metadata, ApiSchemaTable.metadata]
 
 
