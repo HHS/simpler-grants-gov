@@ -1,3 +1,7 @@
+data "aws_vpc" "vpc" {
+  id = var.vpc_id
+}
+
 resource "aws_security_group" "opensearch" {
   name_prefix = "opensearch-${var.service_name}"
   description = "Security group for OpenSearch domain ${var.service_name}"
@@ -7,10 +11,10 @@ resource "aws_security_group" "opensearch" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    description = "Allow inbound HTTPS traffic"
+    description = "Allow inbound HTTPS traffic from the VPC"
 
     cidr_blocks = [
-      var.cidr_block,
+      data.aws_vpc.vpc.cidr_block,
     ]
   }
 

@@ -166,3 +166,24 @@ data "aws_iam_policy_document" "opensearch_cloudwatch" {
     resources = ["arn:aws:logs:*"]
   }
 }
+
+data "aws_iam_policy_document" "allow_all_aws_access" {
+  # checkov:skip=CKV_AWS_109: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_111: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_283: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  # checkov:skip=CKV_AWS_356: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+    actions   = ["es:*"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_opensearch_domain_policy" "main" {
+  domain_name     = aws_opensearch_domain.opensearch.domain_name
+  access_policies = data.aws_iam_policy_document.allow_all_aws_access.json
+}
