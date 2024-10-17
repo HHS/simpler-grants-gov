@@ -1,7 +1,6 @@
 # Generate database schema diagrams from our SQLAlchemy models
 import logging
 import pathlib
-from typing import Any
 
 from eralchemy import render_er
 from sqlalchemy import MetaData
