@@ -336,20 +336,14 @@ class OpportunityAttachmentV1Schema(Schema):
             "example": "notice_of_funding_opportunity",
         }
     )
-    created_by = fields.String(
+    created_at = fields.String(
         metadata={
-            "description": "The user who created the attachment",
+            "description": "The date the attachment was created",
         }
     )
-    updated_by = fields.String(
+    updated_at = fields.String(
         metadata={
-            "description": "The user who last updated the attachment",
-        }
-    )
-
-    legacy_folder_id = fields.Integer(
-        metadata={
-            "description": "The legacy folder ID",
+            "description": "The date the attachment was updated",
         }
     )
 

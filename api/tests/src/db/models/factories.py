@@ -15,7 +15,6 @@ from typing import Optional
 import factory
 import factory.fuzzy
 import faker
-from factory.declarations import LazyAttribute
 from faker.providers import BaseProvider
 from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
@@ -303,6 +302,12 @@ class OpportunityFactory(BaseFactory):
     current_opportunity_summary = factory.RelatedFactory(
         "tests.src.db.models.factories.CurrentOpportunitySummaryFactory",
         factory_related_name="opportunity",
+    )
+
+    opportunity_attachments = factory.RelatedFactoryList(
+        OpportunityAttachmentFactory,
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 2),
     )
 
     class Params:
