@@ -38,10 +38,12 @@ data "aws_ssm_parameter" "search_endpoint_arn" {
 }
 
 provider "opensearch" {
-  url         = data.aws_ssm_parameter.search_endpoint_arn.value
-  username    = data.aws_ssm_parameter.search_username.value
-  password    = data.aws_ssm_parameter.search_password.value
-  healthcheck = false
+  url               = data.aws_ssm_parameter.search_endpoint_arn.value
+  username          = data.aws_ssm_parameter.search_username.value
+  password          = data.aws_ssm_parameter.search_password.value
+  aws_region        = data.aws_region.current.name
+  healthcheck       = false
+  sign_aws_requests = false
 }
 
 resource "opensearch_role" "admin" {
