@@ -14,14 +14,6 @@ import {
 import BaseApi from "./BaseApi";
 
 export default class SearchOpportunityAPI extends BaseApi {
-  get version(): string {
-    return "v1";
-  }
-
-  get basePath(): string {
-    return environment.API_URL;
-  }
-
   get namespace(): string {
     return "opportunities";
   }
@@ -51,8 +43,8 @@ export default class SearchOpportunityAPI extends BaseApi {
     const subPath = "search";
     const response = await this.request(
       "POST",
-      this.basePath,
-      this.namespace,
+      // this.basePath,
+      // this.namespace,
       subPath,
       searchInputs,
       requestBody,

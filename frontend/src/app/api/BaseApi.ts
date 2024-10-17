@@ -35,8 +35,10 @@ export interface HeadersDict {
 }
 
 export default abstract class BaseApi {
-  // Root path of API resource without leading slash.
-  abstract get basePath(): string;
+  // Root path of API resource without leading slash, can be overridden by implementing API classes as necessary
+  get basePath() {
+    return environment.API_URL;
+  }
 
   // API version, can be overridden by implementing API classes as necessary
   get version() {
@@ -54,6 +56,7 @@ export default abstract class BaseApi {
     if (environment.API_AUTH_TOKEN) {
       headers["X-AUTH"] = environment.API_AUTH_TOKEN;
     }
+    headers["Content-Type"] = "application/json";
     return headers;
   }
 
@@ -62,8 +65,8 @@ export default abstract class BaseApi {
    */
   async request(
     method: ApiMethod,
-    basePath: string,
-    namespace: string,
+    // basePath: string,
+    // namespace: string,
     subPath: string,
     queryParamData?: QueryParamData,
     body?: JSONRequestBody,
@@ -74,9 +77,9 @@ export default abstract class BaseApi {
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,
-      basePath,
+      this.basePath,
       this.version,
-      namespace,
+      this.namespace,
       subPath,
       body,
     );
@@ -85,7 +88,6 @@ export default abstract class BaseApi {
       ...this.headers,
     };
 
-    headers["Content-Type"] = "application/json";
     const response = await this.sendRequest(
       url,
       {
