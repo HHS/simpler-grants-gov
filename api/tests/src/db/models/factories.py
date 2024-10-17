@@ -247,9 +247,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     file_name = factory.Faker("file_name")
     file_description = factory.Faker("sentence")
     file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
-    opportunity_attachment_type = factory.Faker(
-        "random_element", elements=OpportunityAttachmentType
-    )
+    opportunity_attachment_type = factory.fuzzy.FuzzyChoice(OpportunityAttachmentType)
 
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     updated_at = factory.LazyAttribute(
