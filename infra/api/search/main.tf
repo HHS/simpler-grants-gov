@@ -1,9 +1,4 @@
 locals {
-  # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
-  # if you choose not to use workspaces set this value to "dev"
-  prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
-
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     environment = var.environment_name
@@ -11,7 +6,10 @@ locals {
   })
 }
 
+module "project_config" {
+  source = "../../project-config"
+}
+
 data "aws_ssm_parameter" "search_endpoint_arn" {
-  count = local.environment_config.search_config != null ? 1 : 0
-  name  = "/search/api-${var.environment_name}/endpoint"
+  name = "/search/api-${var.environment_name}/endpoint"
 }
