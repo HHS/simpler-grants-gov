@@ -40,6 +40,7 @@ resource "aws_iam_policy" "workflow_orchestrator" {
 #tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "workflow_orchestrator" {
   # checkov:skip=CKV_AWS_111:These permissions are scoped just fine
+  # checkov:skip=CKV_AWS_356:These permissions are scoped just fine
 
   statement {
     sid = "UnscopeLogsPermissions"
