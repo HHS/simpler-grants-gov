@@ -36,12 +36,6 @@ resource "aws_sfn_state_machine" "load_transform" {
             "ContainerOverrides" : [
               {
                 "Name" : local.service_name,
-                "Environment" : [
-                  {
-                    "Name" : "FLASK_APP",
-                    "Value" : "src.app:create_app()",
-                  }
-                ]
                 "Command" : module.app_config.environment_configs[var.environment_name].load_transform_args
               }
             ]
