@@ -26,6 +26,7 @@ jobs:
   database-migrations:
     name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
+    needs: [build-and-publish]
     with:
       app_name: ${{ inputs.app_name }}
       environment: ${{ inputs.environment }}

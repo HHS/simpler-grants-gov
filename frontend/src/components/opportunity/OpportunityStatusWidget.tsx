@@ -25,7 +25,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
           <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("archived")}</strong>
-              <span>{formatDate(archiveDate)}</span>
+              <span>{formatDate(archiveDate) || "--"}</span>
             </p>
           </div>
         );
@@ -34,7 +34,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
           <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("closed")}</strong>
-              <span>{formatDate(closeDate)}</span>
+              <span>{formatDate(closeDate) || "--"}</span>
             </p>
           </div>
         );
@@ -44,7 +44,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
             <div className="usa-tag bg-accent-warm-dark width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
               <p>
                 <strong>{t("closing")}</strong>
-                <span>{formatDate(closeDate)}</span>
+                <span>{formatDate(closeDate) || "--"}</span>
               </p>
             </div>
             <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">

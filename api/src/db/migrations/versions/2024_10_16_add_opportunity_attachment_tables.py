@@ -1,8 +1,8 @@
 """Add opportunity attachment tables
 
-Revision ID: 63262ed8ca30
+Revision ID: 56448a3ecb8f
 Revises: fa38970d0cef
-Create Date: 2024-10-16 15:39:58.658620
+Create Date: 2024-10-16 22:00:42.274537
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "63262ed8ca30"
+revision = "56448a3ecb8f"
 down_revision = "fa38970d0cef"
 branch_labels = None
 depends_on = None
@@ -76,9 +76,7 @@ def upgrade():
             ["api.opportunity.opportunity_id"],
             name=op.f("opportunity_attachment_opportunity_id_opportunity_fkey"),
         ),
-        sa.PrimaryKeyConstraint(
-            "attachment_id", "opportunity_id", name=op.f("opportunity_attachment_pkey")
-        ),
+        sa.PrimaryKeyConstraint("attachment_id", name=op.f("opportunity_attachment_pkey")),
         schema="api",
     )
     op.create_index(

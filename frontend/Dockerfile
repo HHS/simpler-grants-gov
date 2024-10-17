@@ -8,7 +8,9 @@ WORKDIR /frontend
 COPY package.json package-lock.json ./
 COPY public ./public
 COPY scripts ./scripts
-RUN npm ci --no-audit
+RUN npm ci --no-audit \
+  # Remove dev packages not removed by `npm prune` maybe from older storybook?
+  && rm -rf /frontend/node_modules/@esbuild
 
 # =============================================================================
 # Development stage
