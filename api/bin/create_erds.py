@@ -1,15 +1,24 @@
 # Generate database schema diagrams from our SQLAlchemy models
+import inspect
 import logging
 import pathlib
+import pdb
+import subprocess
 from typing import Any
 
+from eralchemy import render_er
+from sqlalchemy import MetaData
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy_schemadisplay import create_uml_graph
 
 import src.db.models.staging.forecast as staging_forecast_models
 import src.db.models.staging.opportunity as staging_opportunity_models
 import src.db.models.staging.synopsis as staging_synopsis_models
 import src.logging
+from src.constants.schema import Schemas
 from src.db.models import agency_models, opportunity_models
+from src.db.models.base import ApiSchemaTable, Base
+from src.db.models.staging.staging_base import StagingBase
 from src.db.models.transfer import topportunity_models
 
 logger = logging.getLogger(__name__)
@@ -20,48 +29,37 @@ logger = logging.getLogger(__name__)
 ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 
 # If we want to generate separate files for more specific groups, we can set that up here
-API_MODULES = (
-    opportunity_models,
-    agency_models,
-)
-STAGING_TABLE_MODULES = (
-    staging_opportunity_models,
-    staging_forecast_models,
-    staging_synopsis_models,
-)
-TRANSFER_TABLE_MODULES = (topportunity_models,)
+STAGING_BASE_METADATA = StagingBase.metadata
+API_BASE_METADATA = ApiSchemaTable.metadata
+
 
 # Any modules you add above, merge together for the full schema to be generated
-ALL_MODULES = API_MODULES + STAGING_TABLE_MODULES + TRANSFER_TABLE_MODULES
+ALL_METADATA = [StagingBase.metadata, ApiSchemaTable.metadata]
 
 
-def create_erds(modules: Any, file_name: str) -> None:
+def _combine_metadata(metadata: list) -> MetaData:
+
+    combined_metadata = MetaData()
+    for m in metadata:
+        for table in m.sorted_tables:
+            table.to_metadata(combined_metadata)
+    return combined_metadata
+
+
+def create_erds(metadata: Any, file_name: str) -> None:
     logger.info("Generating ERD diagrams for %s", file_name)
 
-    items = []
-    all_mappers = []
+    if isinstance(metadata, list):
+        metadata = _combine_metadata(metadata)
 
-    for module in modules:
-        items.extend([getattr(module, attr) for attr in dir(module) if attr[0] != "_"])
-
-    for item in items:
-        try:
-            all_mappers.extend([cls for cls in item.registry.mappers])
-        except AttributeError as e:
-            logger.error(f"Not a mapped object: {e}")
-            pass
-
-    graph = create_uml_graph(all_mappers, show_operations=False, show_multiplicity_one=False)
-
-    png_file_path = ERD_FOLDER / f"{file_name}.png"
-    graph.write_png(png_file_path)
+    png_file_path = str(ERD_FOLDER / f"{file_name}.png")
+    render_er(metadata, png_file_path)
 
 
 def main() -> None:
     with src.logging.init(__package__):
         logger.info("Generating ERD diagrams")
 
-        create_erds(ALL_MODULES, "full-schema")
-        create_erds(API_MODULES, "api-schema")
-        create_erds(STAGING_TABLE_MODULES, "staging-schema")
-        create_erds(TRANSFER_TABLE_MODULES, "transfer-schema")
+        create_erds(STAGING_BASE_METADATA, "staging-schema")
+        create_erds(API_BASE_METADATA, "api-schema")
+        create_erds(ALL_METADATA, "full-schema")
