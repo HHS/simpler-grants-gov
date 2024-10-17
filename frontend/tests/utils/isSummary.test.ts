@@ -34,6 +34,7 @@ describe("isSummary", () => {
       is_forecast: false,
       post_date: "2024-06-01",
       summary_description: "This is a summary description",
+      version_number: 1,
     };
 
     expect(isSummary(validSummary)).toBe(true);
