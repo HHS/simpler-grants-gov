@@ -316,6 +316,8 @@ class OpportunityFactory(BaseFactory):
 
         no_current_summary = factory.Trait(current_opportunity_summary=None)
 
+        no_attachments = factory.Trait(opportunity_attachments=None)
+
         # We set a trait for the OpportunitySummaryFactory for each of these as well as set the opportunity status
         is_posted_summary = factory.Trait(current_opportunity_summary__is_posted_summary=True)
         is_forecasted_summary = factory.Trait(
@@ -721,6 +723,8 @@ class AgencyFactory(BaseFactory):
     is_image_workspace_enabled = factory.Faker("boolean")
     is_validation_workspace_enabled = factory.Faker("boolean")
 
+    top_level_agency = factory.Faker("agency")
+    top_level_agency_id = factory.LazyAttribute(lambda a: a.top_level_agency.agency_id)
     agency_download_file_types = factory.Faker(
         "random_elements",
         length=random.randint(1, 2),

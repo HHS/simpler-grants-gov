@@ -96,13 +96,11 @@ class Agency(ApiSchemaTable, TimestampMixin):
 
     top_level_agency_id: Mapped[int | None] = mapped_column(
         BigInteger,
-        ForeignKey("agency.agency_id"),
+        ForeignKey(agency_id),
         nullable=True,
-        index=True,
     )
     top_level_agency: Mapped["Agency"] = relationship(
         lambda: Agency,
-        backref=backref("top_level_agency_id", uselist=False),
         remote_side=[agency_id],
     )
 

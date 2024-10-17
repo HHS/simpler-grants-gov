@@ -56,18 +56,34 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         logger.info(f"Creating opportunity batch number {i}")
         # Create a few opportunities in various scenarios
         forecasted_opps = factories.OpportunityFactory.create_batch(
-            size=5, is_forecasted_summary=True
+            size=5,
+            is_forecasted_summary=True,
+            no_attachments=True,
         )
-        posted_opps = factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
-        closed_opps = factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
+        posted_opps = factories.OpportunityFactory.create_batch(
+            size=5,
+            is_posted_summary=True,
+            no_attachments=True,
+        )
+        closed_opps = factories.OpportunityFactory.create_batch(
+            size=5,
+            is_closed_summary=True,
+            no_attachments=True,
+        )
         archived_non_forecast_opps = factories.OpportunityFactory.create_batch(
-            size=5, is_archived_non_forecast_summary=True
+            size=5,
+            is_archived_non_forecast_summary=True,
+            no_attachments=True,
         )
         archived_forecast_opps = factories.OpportunityFactory.create_batch(
-            size=5, is_archived_forecast_summary=True
+            size=5,
+            is_archived_forecast_summary=True,
+            no_attachments=True,
         )
         no_current_summary_opps = factories.OpportunityFactory.create_batch(
-            size=5, no_current_summary=True
+            size=5,
+            no_current_summary=True,
+            no_attachments=True,
         )
 
         if include_history:
@@ -89,7 +105,9 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
-            size=5, all_fields_null=True
+            size=5,
+            all_fields_null=True,
+            no_attachments=True,
         )
         for all_null_opportunity in all_null_opportunities:
             summary = factories.OpportunitySummaryFactory.create(
@@ -134,6 +152,7 @@ AGENCIES_TO_CREATE = [
     {
         "agency_code": "DOC-EDA",
         "agency_name": "Agency for International Development",
+        "top_level_agency": "DOC",
     },
 ]
 
@@ -142,13 +161,28 @@ def _build_agencies(db_session: db.Session) -> None:
     # Create a static set of agencies, only if they don't already exist
     agencies = db_session.query(Agency).all()
     agency_codes = set([a.agency_code for a in agencies])
+    agency_dict = {a.agency_code: a for a in agencies}
 
     for agency_to_create in AGENCIES_TO_CREATE:
         if agency_to_create["agency_code"] in agency_codes:
             continue
 
         logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
-        factories.AgencyFactory.create(**agency_to_create)
+
+        top_level_agency_code = agency_to_create.get("top_level_agency")
+        top_level_agency = None
+        if top_level_agency_code:
+            top_level_agency = agency_dict.get(top_level_agency_code)
+            if not top_level_agency:
+                logger.warning(
+                    f"Top-level agency {top_level_agency_code} not found for {agency_to_create['agency_code']}"
+                )
+
+        new_agency = factories.AgencyFactory.create(
+            agency_code=agency_to_create["agency_code"],
+            agency_name=agency_to_create["agency_name"],
+            top_level_agency=top_level_agency,
+        )
 
 
 @click.command()
