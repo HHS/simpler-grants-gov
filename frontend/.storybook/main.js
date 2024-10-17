@@ -24,8 +24,13 @@ function blockSearchEnginesInHead(head) {
  * @type {import("@storybook/nextjs").StorybookConfig}
  */
 const config = {
-  stories: ["../stories/**/*.stories.@(mdx|js|jsx|ts|tsx)"],
-  addons: ["@storybook/addon-essentials", "@storybook/addon-designs"],
+  stories: ["../stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
+  addons: [
+    "@storybook/addon-essentials",
+    "@storybook/addon-designs",
+    "@chromatic-com/storybook"
+  ],
+
   framework: {
     name: "@storybook/nextjs",
     options: {
@@ -38,19 +43,26 @@ const config = {
       },
     },
   },
+
   core: {
     disableTelemetry: true,
   },
+
   staticDirs: ["../public"],
+
   // Support deploying Storybook to a subdirectory (like GitHub Pages).
   // This makes `process.env.NEXT_PUBLIC_BASE_PATH` available to our source code.
   env: (config) => ({
     ...config,
     NEXT_PUBLIC_BASE_PATH,
   }),
+
   managerHead: blockSearchEnginesInHead,
-  docs: {
-    autodocs: true,
-  },
+
+  docs: {},
+
+  typescript: {
+    reactDocgen: "react-docgen-typescript"
+  }
 };
 export default config;
