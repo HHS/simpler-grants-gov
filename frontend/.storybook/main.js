@@ -1,3 +1,5 @@
+import path from "path";
+
 /**
  * @file Storybook's main configuration file that controls the generation of Storybook.
  * Handles things like config for location of story files and managing presets (which configure webpack and babel).
@@ -28,12 +30,13 @@ const config = {
   addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-designs",
-    "@chromatic-com/storybook"
+    "@chromatic-com/storybook",
   ],
 
   framework: {
     name: "@storybook/nextjs",
     options: {
+      nextConfigPath: path.resolve(__dirname, "../next.config.js"),
       builder: {
         // Cache build output between runs, to speed up subsequent startup times
         fsCache: true,
@@ -62,7 +65,7 @@ const config = {
   docs: {},
 
   typescript: {
-    reactDocgen: "react-docgen-typescript"
-  }
+    reactDocgen: "react-docgen-typescript",
+  },
 };
 export default config;
