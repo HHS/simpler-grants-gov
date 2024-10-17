@@ -72,9 +72,9 @@ class Agency(ApiSchemaTable, TimestampMixin):
 
     # These values come from the legacy system, but their exact usage isn't entirely
     # clear at this point in time.
-    ldap_group: Mapped[str]
-    description: Mapped[str]
-    label: Mapped[str]
+    ldap_group: Mapped[str | None]
+    description: Mapped[str | None]
+    label: Mapped[str | None]
 
     is_multilevel_agency: Mapped[bool] = mapped_column(default=False)
     is_multiproject: Mapped[bool] = mapped_column(default=False)
