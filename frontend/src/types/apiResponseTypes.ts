@@ -1,3 +1,9 @@
+interface APIResponseError {
+  field: string;
+  message: string;
+  type: string;
+}
+
 export interface PaginationInfo {
   order_by: string;
   page_offset: number;
@@ -15,3 +21,9 @@ export interface APIResponse {
   warnings?: unknown[] | null | undefined;
   errors?: unknown[] | null | undefined;
 }
+
+// export interface BaseResponse {
+//   errors?: APIResponseError[];
+//   message?: string;
+//   status_code?: number;
+// }
