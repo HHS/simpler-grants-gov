@@ -4,6 +4,8 @@ locals {
     environment = var.environment_name
     description = "Application resources created in ${var.environment_name} environment"
   })
+  environment_config = module.app_config.environment_configs[var.environment_name]
+  search_config      = local.environment_config.search_config
 }
 
 terraform {
@@ -27,6 +29,10 @@ module "project_config" {
   source = "../../project-config"
 }
 
+module "app_config" {
+  source = "../app-config"
+}
+
 data "aws_ssm_parameter" "search_username" {
   name = "/search/api-${var.environment_name}/username"
 }
@@ -40,12 +46,13 @@ data "aws_ssm_parameter" "search_endpoint_arn" {
 }
 
 provider "opensearch" {
-  url               = "http://${data.aws_ssm_parameter.search_endpoint_arn.value}"
-  username          = data.aws_ssm_parameter.search_username.value
-  password          = data.aws_ssm_parameter.search_password.value
-  aws_region        = data.aws_region.current.name
-  healthcheck       = false
-  sign_aws_requests = false
+  url                = "http://${data.aws_ssm_parameter.search_endpoint_arn.value}"
+  username           = data.aws_ssm_parameter.search_username.value
+  password           = data.aws_ssm_parameter.search_password.value
+  opensearch_version = local.search_config.engine_version
+  aws_region         = data.aws_region.current.name
+  healthcheck        = false
+  sign_aws_requests  = false
 }
 
 resource "opensearch_role" "admin" {
