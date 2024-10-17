@@ -1,13 +1,11 @@
 import pytest
 
-from src.constants.lookup_constants import OpportunityAttachmentType
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,
 )
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
-    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
