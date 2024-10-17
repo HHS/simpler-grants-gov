@@ -22,6 +22,14 @@ resource "aws_kms_key" "tf_backend" {
   # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
+resource "aws_ssm_parameter" "kms_key_arn" {
+  name        = "/dynamodb/kms_key_arn"
+  description = "The KMS key ARN for DynamoDB"
+  type        = "SecureString"
+  value       = aws_kms_key.tf_backend.arn
+  # checkov:skip=CKV_AWS_337: Recursive - we can't use the KMS key to encrypt its own ARN, as then we can't decrypt with it
+}
+
 resource "aws_dynamodb_table" "terraform_lock" {
   name                        = local.tf_locks_table_name
   hash_key                    = "LockID"

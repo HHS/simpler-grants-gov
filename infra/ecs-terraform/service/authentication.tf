@@ -4,8 +4,12 @@ locals {
   }
 }
 
-data "aws_ssm_parameter" "kms_key_arn" {
+data "aws_ssm_parameter" "search_kms_key_arn" {
   name = "/search/api-${var.environment_name}/kms_key_arn"
+}
+
+data "aws_ssm_parameter" "dynamodb_kms_key_arn" {
+  name = "/dynamodb/kms_key_arn"
 }
 
 data "aws_iam_policy_document" "search_deployment" {
@@ -17,10 +21,13 @@ data "aws_iam_policy_document" "search_deployment" {
   }
 
   statement {
-    sid       = "ReadSearchKMSKey"
-    effect    = "Allow"
-    actions   = ["kms:Decrypt"]
-    resources = [data.aws_ssm_parameter.kms_key_arn.value]
+    sid     = "ReadSearchKMSKey"
+    effect  = "Allow"
+    actions = ["kms:Decrypt"]
+    resources = [
+      data.aws_ssm_parameter.search_kms_key_arn.value,
+      data.aws_ssm_parameter.dynamodb_kms_key_arn.value
+    ]
   }
 
   statement {
