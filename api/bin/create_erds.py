@@ -1,25 +1,14 @@
 # Generate database schema diagrams from our SQLAlchemy models
-import inspect
 import logging
 import pathlib
-import pdb
-import subprocess
 from typing import Any
 
 from eralchemy import render_er
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy_schemadisplay import create_uml_graph
 
-import src.db.models.staging.forecast as staging_forecast_models
-import src.db.models.staging.opportunity as staging_opportunity_models
-import src.db.models.staging.synopsis as staging_synopsis_models
 import src.logging
-from src.constants.schema import Schemas
-from src.db.models import agency_models, opportunity_models
-from src.db.models.base import ApiSchemaTable, Base
+from src.db.models.base import ApiSchemaTable
 from src.db.models.staging.staging_base import StagingBase
-from src.db.models.transfer import topportunity_models
 
 logger = logging.getLogger(__name__)
 
