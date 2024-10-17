@@ -6,28 +6,28 @@ locals {
 
 data "aws_iam_policy_document" "search_deployment" {
   statement {
-    sid       = "get-ssm-parameters"
+    sid       = "read-search-ssm-parameters"
     effect    = "Allow"
     actions   = ["ssm:GetParameters"]
     resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/endpoint"]
   }
 
   statement {
-    sid       = "read-s3-objects"
+    sid       = "read-terraform-s3-bucket"
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
     resources = ["arn:aws:s3:::simpler-grants-gov-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf"]
   }
 
   statement {
-    sid       = "write-s3-objects"
+    sid       = "write-search-s3-objects"
     effect    = "Allow"
     actions   = ["s3:GetObject", "s3:PutObject"]
     resources = ["arn:aws:s3:::simpler-grants-gov-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf/infra/api/opensearch/${var.environment_name}.tfstate"]
   }
 
   statement {
-    sid    = "dynamodb-access"
+    sid    = "readwrite-terraform-dynamodb"
     effect = "Allow"
     actions = [
       "dynamodb:DescribeTable",
