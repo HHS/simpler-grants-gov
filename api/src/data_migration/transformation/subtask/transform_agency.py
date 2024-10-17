@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 NULLABLE_FIELDS = {
     "AgencyCode",  # Note this is the sub_agency_code in our system
     "AgencyContactEMail2",
+    "ldapGp",
+    "description",
+    "label",
 }
 
 AGENCY_FIELD_MAP = {
