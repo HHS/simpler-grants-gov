@@ -1,5 +1,6 @@
 import logging
 
+import boto3
 import botocore.client
 import botocore.exceptions
 
@@ -27,7 +28,12 @@ def does_s3_bucket_exist(s3_client: botocore.client.BaseClient, bucket_name: str
 
 def setup_s3() -> None:
     s3_config = S3Config()
-    s3_client = get_s3_client(s3_config)
+    # This is only used locally - to avoid any accidental running of commands here
+    # against a real AWS account (ie. you've authed in your local terminal where you're running this)
+    # we'll override the access keys explicitly.
+    s3_client = get_s3_client(
+        s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+    )
 
     if s3_config.s3_opportunity_bucket is None:
         raise Exception("S3_OPPORTUNITY_BUCKET env var must be set")

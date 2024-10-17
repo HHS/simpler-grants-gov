@@ -19,12 +19,17 @@ class S3Config(PydanticBaseEnvConfig):
     s3_opportunity_bucket: str | None = None
 
 
-def get_s3_client(s3_config: S3Config | None = None) -> botocore.client.BaseClient:
+def get_s3_client(
+    s3_config: S3Config | None = None, session: boto3.Session | None = None
+) -> botocore.client.BaseClient:
     if s3_config is None:
         s3_config = S3Config()
 
     params = {}
     if s3_config.s3_endpoint_url is not None:
         params["endpoint_url"] = s3_config.s3_endpoint_url
+
+    if session is not None:
+        return session.client("s3", **params)
 
     return boto3.client("s3", **params)
