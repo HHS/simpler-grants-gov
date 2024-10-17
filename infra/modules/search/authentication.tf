@@ -120,6 +120,7 @@ resource "aws_ssm_parameter" "kms_key_arn" {
   description = "The KMS key ARN for the OpenSearch domain"
   type        = "SecureString"
   value       = aws_kms_key.opensearch.arn
+  # checkov:skip=CKV_AWS_337: Recursive - we can't use the KMS key to encrypt its own ARN, as then we can't decrypt with it
 }
 
 resource "aws_ssm_parameter" "opensearch_username" {
