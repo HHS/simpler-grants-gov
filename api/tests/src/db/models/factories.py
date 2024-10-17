@@ -302,12 +302,6 @@ class OpportunityFactory(BaseFactory):
         factory_related_name="opportunity",
     )
 
-    opportunity_attachments = factory.RelatedFactoryList(
-        OpportunityAttachmentFactory,
-        factory_related_name="opportunity",
-        size=lambda: random.randint(1, 2),
-    )
-
     class Params:
         # These are common scenarios we might want for an opportunity.
         # Simply pass the in `trait_name=True` to the factory when making an object
