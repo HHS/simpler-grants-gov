@@ -17,7 +17,11 @@ data "aws_iam_policy_document" "search_deployment" {
     sid       = "ReadSearchSSMParameters"
     effect    = "Allow"
     actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/endpoint"]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/endpoint",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/username",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/password"
+    ]
   }
 
   statement {
