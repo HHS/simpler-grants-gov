@@ -71,18 +71,7 @@ def test_get_opportunity_with_attachment_200(
     client, api_auth_token, enable_factory_create, db_session
 ):
     # Create an opportunity with an attachment
-    opportunity = OpportunityFactory.create(
-        opportunity_attachments=[
-            OpportunityAttachmentFactory.build(
-                file_name="test_attachment.pdf",
-                file_description="Test attachment description",
-                file_location="https://example.com/test_attachment.pdf",
-                mime_type="application/pdf",
-                file_size_bytes=1024,
-                opportunity_attachment_type=OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
-            )
-        ]
-    )
+    opportunity = OpportunityFactory.create()
 
     # Ensure the opportunity is committed to the database
     db_session.commit()
@@ -97,6 +86,7 @@ def test_get_opportunity_with_attachment_200(
     response_data = resp.get_json()["data"]
 
     # Validate the opportunity data
+    assert len(response_data["attachments"]) > 0
     validate_opportunity_with_attachments(opportunity, response_data)
 
 

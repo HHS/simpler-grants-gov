@@ -158,10 +158,10 @@ def validate_opportunity_attachments(
         assert db_attachment.file_name == resp_attachment["file_name"]
         assert db_attachment.file_description == resp_attachment["file_description"]
         assert db_attachment.file_size_bytes == resp_attachment["file_size_bytes"]
-        assert db_attachment.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f%z+00:00") == str(
+        assert db_attachment.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f%:z") == str(
             resp_attachment["created_at"]
         )
-        assert db_attachment.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%f%z+00:00") == str(
+        assert db_attachment.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%f%:z") == str(
             resp_attachment["updated_at"]
         )
 
