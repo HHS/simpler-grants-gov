@@ -2047,15 +2047,22 @@ components:
           description: The size of the attachment in bytes
           example: 10012
         opportunity_attachment_type:
-          type: string
           description: The type of attachment
-          example: notice_of_funding_opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
+          - notice_of_funding_opportunity
+          enum:
+          - notice_of_funding_opportunity
+          - other
+          type:
+          - string
         created_at:
           type: string
-          description: The date the attachment was created
+          format: date-time
+          readOnly: true
         updated_at:
           type: string
-          description: The date the attachment was updated
+          format: date-time
+          readOnly: true
     OpportunityWithAttachmentsV1:
       type: object
       properties:
