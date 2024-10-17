@@ -9,6 +9,7 @@ from src.constants.lookup_constants import (
 from src.db.models.opportunity_models import (
     Opportunity,
     OpportunityAssistanceListing,
+    OpportunityAttachment,
     OpportunitySummary,
 )
 
@@ -134,6 +135,35 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
     )
 
     assert db_opportunity.opportunity_status == resp_opportunity["opportunity_status"]
+
+
+def validate_opportunity_with_attachments(db_opportunity: Opportunity, resp_opportunity: dict):
+    validate_opportunity(db_opportunity, resp_opportunity)
+    validate_opportunity_attachments(
+        db_opportunity.opportunity_attachments,
+        resp_opportunity["attachments"],
+    )
+
+
+def validate_opportunity_attachments(
+    db_attachments: list[OpportunityAttachment], resp_attachments: list[dict]
+):
+    db_attachments.sort(key=lambda a: (a.file_size_bytes, a.file_name))
+    resp_attachments.sort(key=lambda a: (a["file_size_bytes"], a["file_name"]))
+
+    assert len(db_attachments) == len(resp_attachments)
+    for db_attachment, resp_attachment in zip(db_attachments, resp_attachments, strict=True):
+        assert db_attachment.file_location == resp_attachment["file_location"]
+        assert db_attachment.mime_type == resp_attachment["mime_type"]
+        assert db_attachment.file_name == resp_attachment["file_name"]
+        assert db_attachment.file_description == resp_attachment["file_description"]
+        assert db_attachment.file_size_bytes == resp_attachment["file_size_bytes"]
+        assert db_attachment.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f%:z") == str(
+            resp_attachment["created_at"]
+        )
+        assert db_attachment.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%f%:z") == str(
+            resp_attachment["updated_at"]
+        )
 
 
 def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: dict):
