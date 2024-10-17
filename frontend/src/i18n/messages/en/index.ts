@@ -10,14 +10,16 @@ export const messages = {
     meta_description: "Summary details for the specific opportunity listing.",
     intro: {
       agency: "Agency: ",
-      assistanceListings: "Assistance Listings: ",
-      lastUpdated: "Last Updated: ",
+      assistance_listings: "Assistance Listings: ",
+      last_updated: "Last Updated: ",
     },
     description: {
       description: "Description",
       eligible_applicants: "Eligible Applicants",
       additional_info: "Additional Information on eligibility",
       contact_info: "Grantor contact information",
+      email: "Email",
+      telephone: "Telephone",
     },
     award_info: {
       yes: "Yes",
@@ -271,23 +273,23 @@ export const messages = {
     },
     milestones: {
       tag: "The high-level roadmap",
-      icon_list: [
-        {
+      high_level_roadmap_items: {
+        find: {
           title: "Find",
           content:
             "<p>Improve how applicants discover funding opportunities that they’re qualified for and that meet their needs.</p>",
         },
-        {
+        advanced_reporting: {
           title: "Advanced reporting",
           content:
             "<p>Improve stakeholders’ capacity to understand, analyze, and assess grants from application to acceptance.</p><p>Make non-confidential Grants.gov data open for public analysis.</p>",
         },
-        {
+        apply: {
           title: "Apply",
           content:
             "<p>Streamline the application process to make it easier for all applicants to apply for funding opportunities.</p>",
         },
-      ],
+      },
       roadmap_1: "Find",
       title_1: "Milestone 1",
       name_1:

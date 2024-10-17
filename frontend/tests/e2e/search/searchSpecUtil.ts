@@ -55,10 +55,6 @@ export async function waitForURLContainsQueryParam(
   );
 }
 
-export async function clickSearchNavLink(page: Page) {
-  await page.click("nav >> text=Search");
-}
-
 export function getMobileMenuButton(page: Page) {
   return page.locator("button >> text=MENU");
 }

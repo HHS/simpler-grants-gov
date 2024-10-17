@@ -6,7 +6,7 @@
  *
  * By keeping this file separate, tests that don't need these methods can simply use either the
  * default `jsdom` test environment or specify the `node` environments. Otherwise, they would need
- * to manually specify the custom `./src/utils/test/jsdomNodeEnvironment.ts` environment.
+ * to manually specify the custom `./src/utils/testing/jsdomNodeEnvironment.ts` environment.
  */
 
 import {

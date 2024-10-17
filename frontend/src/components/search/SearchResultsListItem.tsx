@@ -5,6 +5,7 @@ import { formatDate } from "src/utils/dateUtil";
 import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
@@ -43,12 +44,12 @@ export default function SearchResultsListItem({
           <div className="grid-row flex-column">
             <div className="grid-col tablet:order-2">
               <h2 className="margin-y-105 line-height-serif-2">
-                <a
+                <Link
                   href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link"
                 >
                   {opportunity?.opportunity_title}
-                </a>
+                </Link>
               </h2>
             </div>
             <div className="grid-col tablet:order-1 overflow-hidden font-body-xs">

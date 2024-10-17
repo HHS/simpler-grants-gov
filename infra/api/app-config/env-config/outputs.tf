@@ -1,3 +1,13 @@
+output "search_config" {
+  value = var.has_search ? {
+    instance_type         = var.search_master_instance_type
+    instance_count        = var.search_data_instance_count
+    dedicated_master_type = var.search_data_instance_type
+    engine_version        = var.search_engine_version
+    volume_size           = var.search_data_volume_size
+  } : null
+}
+
 output "database_config" {
   value = var.has_database ? {
     region                      = var.default_region
@@ -23,7 +33,7 @@ output "service_config" {
       var.service_override_extra_environment_variables
     )
 
-    secrets = toset(local.secrets)
+    secrets = local.secrets
   }
 }
 

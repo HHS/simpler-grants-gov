@@ -13,7 +13,6 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
-import PageSEO from "src/components/PageSEO";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -32,7 +31,6 @@ export default function Subscribe() {
 
   return (
     <>
-      <PageSEO title={t("page_title")} description={t("intro")} />
       <BetaAlert />
       <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
 

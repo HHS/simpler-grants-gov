@@ -146,3 +146,6 @@ dmypy.json
 
 # vim
 *.swp
+
+# Terraform plan outputs
+*.tfplan

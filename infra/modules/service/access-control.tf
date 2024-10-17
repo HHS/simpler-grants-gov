@@ -145,7 +145,7 @@ data "aws_iam_policy_document" "task_executor" {
     content {
       sid       = "SecretsAccess"
       actions   = ["ssm:GetParameters"]
-      resources = local.secret_arn_patterns
+      resources = [for secret in var.secrets : secret.valueFrom]
     }
   }
 }
