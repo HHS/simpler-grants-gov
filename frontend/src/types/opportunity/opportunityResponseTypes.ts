@@ -1,3 +1,5 @@
+import { APIResponse } from "src/types/apiResponseTypes";
+
 export interface OpportunityAssistanceListing {
   assistance_listing_number: string;
   program_title: string;
@@ -53,8 +55,6 @@ export interface Opportunity {
   updated_at: string;
 }
 
-export interface OpportunityApiResponse {
+export interface OpportunityApiResponse extends APIResponse {
   data: Opportunity;
-  message: string;
-  status_code: number;
 }
