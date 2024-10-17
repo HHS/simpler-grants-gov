@@ -1,6 +1,7 @@
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import backref, Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
@@ -91,6 +92,18 @@ class Agency(ApiSchemaTable, TimestampMixin):
         "link_agency_download_file_types",
         "agency_download_file_type",
         creator=lambda obj: LinkAgencyDownloadFileType(agency_download_file_type=obj),
+    )
+
+    top_level_agency_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("agency.agency_id"),
+        nullable=True,
+        index=True,
+    )
+    top_level_agency: Mapped["Agency"] = relationship(
+        lambda: Agency,
+        backref=backref("top_level_agency_id", uselist=False),
+        remote_side=[agency_id],
     )
 
 

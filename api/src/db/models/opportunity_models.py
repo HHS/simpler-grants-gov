@@ -74,6 +74,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
 
     @property
+    def top_level_agency_name(self) -> str | None:
+        if self.agency_record is not None and self.agency_record.top_level_agency is not None:
+            return self.agency_record.top_level_agency.agency_name
+
+        return None
+
+    @property
     def agency_name(self) -> str | None:
         # Fetch the agency name from the agency table record (if one was found)
         if self.agency_record is not None:
