@@ -6,8 +6,8 @@ locals {
   scheduled_jobs = {
     copy-oracle-data = {
       task_command        = ["poetry", "run", "flask", "data-migration", "copy-oracle-data"]
-      schedule_expression = "rate (2 minutes)"
+      schedule_expression = "rate(2 minutes)"
     }
   }
 }
-g
+
