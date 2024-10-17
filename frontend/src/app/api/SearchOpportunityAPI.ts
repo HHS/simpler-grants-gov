@@ -1,6 +1,6 @@
 import "server-only";
 
-import { environment } from "src/constants/environments";
+import BaseApi from "src/app/api/BaseApi";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
@@ -10,18 +10,9 @@ import {
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
-
-import BaseApi from "./BaseApi";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export default class SearchOpportunityAPI extends BaseApi {
-  get version(): string {
-    return "v1";
-  }
-
-  get basePath(): string {
-    return environment.API_URL;
-  }
-
   get namespace(): string {
     return "opportunities";
   }
@@ -49,10 +40,8 @@ export default class SearchOpportunityAPI extends BaseApi {
     }
 
     const subPath = "search";
-    const response = await this.request(
+    const response = await this.request<SearchAPIResponse>(
       "POST",
-      this.basePath,
-      this.namespace,
       subPath,
       searchInputs,
       requestBody,

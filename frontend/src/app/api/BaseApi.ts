@@ -15,8 +15,6 @@ import {
   ValidationError,
 } from "src/errors";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-// TODO (#1682): replace search specific references (since this is a generic API file that any
-// future page or different namespace could use)
 import { APIResponse } from "src/types/apiResponseTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
@@ -24,19 +22,15 @@ export interface JSONRequestBody {
   [key: string]: unknown;
 }
 
-interface APIResponseError {
-  field: string;
-  message: string;
-  type: string;
-}
-
 export interface HeadersDict {
   [header: string]: string;
 }
 
 export default abstract class BaseApi {
-  // Root path of API resource without leading slash.
-  abstract get basePath(): string;
+  // Root path of API resource without leading slash, can be overridden by implementing API classes as necessary
+  get basePath() {
+    return environment.API_URL;
+  }
 
   // API version, can be overridden by implementing API classes as necessary
   get version() {
@@ -54,29 +48,28 @@ export default abstract class BaseApi {
     if (environment.API_AUTH_TOKEN) {
       headers["X-AUTH"] = environment.API_AUTH_TOKEN;
     }
+    headers["Content-Type"] = "application/json";
     return headers;
   }
 
   /**
    * Send an API request.
    */
-  async request(
+  async request<ResponseType extends APIResponse>(
     method: ApiMethod,
-    basePath: string,
-    namespace: string,
     subPath: string,
     queryParamData?: QueryParamData,
     body?: JSONRequestBody,
     options: {
       additionalHeaders?: HeadersDict;
     } = {},
-  ) {
+  ): Promise<ResponseType> {
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,
-      basePath,
+      this.basePath,
       this.version,
-      namespace,
+      this.namespace,
       subPath,
       body,
     );
@@ -85,8 +78,7 @@ export default abstract class BaseApi {
       ...this.headers,
     };
 
-    headers["Content-Type"] = "application/json";
-    const response = await this.sendRequest(
+    const response = await this.sendRequest<ResponseType>(
       url,
       {
         body: method === "GET" || !body ? null : createRequestBody(body),
@@ -102,16 +94,16 @@ export default abstract class BaseApi {
   /**
    * Send a request and handle the response
    */
-  private async sendRequest(
+  private async sendRequest<ResponseType extends APIResponse>(
     url: string,
     fetchOptions: RequestInit,
     queryParamData?: QueryParamData,
-  ) {
-    let response: Response;
-    let responseBody: APIResponse;
+  ): Promise<ResponseType> {
+    let response;
+    let responseBody;
     try {
       response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as APIResponse;
+      responseBody = (await response.json()) as ResponseType;
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request
       // or parsing the response.
@@ -121,16 +113,7 @@ export default abstract class BaseApi {
       handleNotOkResponse(responseBody, url, queryParamData);
     }
 
-    const { data, message, pagination_info, status_code, warnings } =
-      responseBody;
-
-    return {
-      data,
-      message,
-      pagination_info,
-      status_code,
-      warnings,
-    };
+    return responseBody;
   }
 }
 
@@ -206,7 +189,7 @@ function handleNotOkResponse(
     throwError(response, url, searchInputs);
   } else {
     if (errors) {
-      const firstError = errors[0] as APIResponseError;
+      const firstError = errors[0];
       throwError(response, url, searchInputs, firstError);
     }
   }
@@ -216,9 +199,9 @@ const throwError = (
   response: APIResponse,
   url: string,
   searchInputs?: QueryParamData,
-  firstError?: APIResponseError,
+  firstError?: unknown,
 ) => {
-  const { status_code, message } = response;
+  const { status_code = 0, message = "" } = response;
   console.error(
     `API request error at ${url} (${status_code}): ${message}`,
     searchInputs,
