@@ -23,18 +23,6 @@ module "prod_config" {
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
 
-  # See api/src/data_migration/command/load_transform.py for argument specifications.
-  load_transform_args = [
-    "poetry",
-    "run",
-    "flask",
-    "data-migration",
-    "load-transform",
-    "--load",
-    "--transform",
-    "--set-current",
-  ]
-
   service_override_extra_environment_variables = {
   }
 }

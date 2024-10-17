@@ -85,7 +85,3 @@ variable "service_override_extra_environment_variables" {
     EOT
   default     = {}
 }
-
-variable "load_transform_args" {
-  type = list(string)
-}

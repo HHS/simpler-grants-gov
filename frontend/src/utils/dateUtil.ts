@@ -1,11 +1,18 @@
 // Convert "2024-02-21" to "February 21, 2024"
-export function formatDate(dateStr: string | null) {
-  if (dateStr === "" || dateStr === null) {
+export function formatDate(dateStr: string | null): string {
+  if (!dateStr || dateStr.length !== 10) {
+    console.warn("invalid date string provided for parse");
     return "";
   }
 
-  const [year, month, day] = dateStr.split("-").map(Number);
+  const parts = dateStr.split("-");
 
+  if (parts.length !== 3) {
+    console.warn("invalid date string provided for parse");
+    return "";
+  }
+
+  const [year, month, day] = parts.map(Number);
   // Create a new Date object using the local time
   const date = new Date(year, month - 1, day);
 

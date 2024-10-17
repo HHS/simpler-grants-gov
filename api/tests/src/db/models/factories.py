@@ -31,6 +31,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -234,6 +235,25 @@ class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "commit"
 
 
+class OpportunityAttachmentFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAttachment
+
+    attachment_id = factory.Sequence(lambda n: n)
+
+    file_location = factory.Faker("url")
+    mime_type = factory.Faker("mime_type")
+    file_name = factory.Faker("file_name")
+    file_description = factory.Faker("sentence")
+    file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
+    opportunity_attachment_type = factory.fuzzy.FuzzyChoice(OpportunityAttachmentType)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
@@ -280,6 +300,12 @@ class OpportunityFactory(BaseFactory):
     current_opportunity_summary = factory.RelatedFactory(
         "tests.src.db.models.factories.CurrentOpportunitySummaryFactory",
         factory_related_name="opportunity",
+    )
+
+    opportunity_attachments = factory.RelatedFactoryList(
+        OpportunityAttachmentFactory,
+        factory_related_name="opportunity",
+        size=lambda: random.randint(1, 2),
     )
 
     class Params:
@@ -1743,9 +1769,9 @@ def create_tgroups_agency(
     **kwargs,
 ) -> list[staging.tgroups.Tgroups]:
     # The agency_code value is actually just the first bit (the top-level agency)
-    kwargs["AgencyCode"] = agency_code.split("-")[0]
-    kwargs["AgencyEnroll"] = agency_code
-    kwargs["ldapGp"] = agency_code
+    kwargs.setdefault("AgencyCode", agency_code.split("-")[-1])
+    kwargs.setdefault("AgencyEnroll", agency_code)
+    kwargs.setdefault("ldapGp", agency_code)
 
     field_values = StagingTgroupsAgencyFactory.build(**kwargs)
 

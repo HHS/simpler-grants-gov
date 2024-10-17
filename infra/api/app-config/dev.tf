@@ -14,19 +14,6 @@ module "dev_config" {
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
 
-  # Runs, but with everything disabled.
-  # See api/src/data_migration/command/load_transform.py for argument specifications.
-  load_transform_args = [
-    "poetry",
-    "run",
-    "flask",
-    "data-migration",
-    "load-transform",
-    "--no-load",
-    "--no-transform",
-    "--no-set-current",
-  ]
-
   service_override_extra_environment_variables = {
   }
 }

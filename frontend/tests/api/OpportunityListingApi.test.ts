@@ -94,6 +94,7 @@ function getValidMockResponse() {
         post_date: "2024-06-20",
         summary_description:
           "This opportunity aims to unravel the mysteries of the universe.",
+        version_number: 1,
       },
       updated_at: "2024-06-20T18:43:04.555Z",
     },

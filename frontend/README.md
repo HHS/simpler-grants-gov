@@ -13,9 +13,8 @@
 │   └── locales       # Internationalized content
 ├── src               # Source code
 │   ├── components    # Reusable UI components
-│   ├── pages         # Page routes and data fetching
-│   │   ├── api       # API routes (optional)
-│   │   └── _app.tsx  # Global entry point
+│   ├── app           # Page routes and data fetching
+│   │   └── api       # API routes (optional)
 │   └── styles        # Sass & design system settings
 ├── stories           # Storybook pages
 └── tests
@@ -23,15 +22,13 @@
 
 ## 💻 Development
 
-[Next.js](https://nextjs.org/docs) provides the React framework for building the web application. Pages are defined in the `pages/` directory. Pages are automatically routed based on the file name. For example, `pages/index.tsx` is the home page.
-
-Files in the `pages/api` are treated as [API routes](https://nextjs.org/docs/api-routes/introduction). An example can be accessed at [localhost:3000/api/hello](http://localhost:3000/api/hello) when running locally.
+[Next.js](https://nextjs.org/docs) provides the React framework for building the web application. Pages are defined in the `app/` directory. Pages are automatically routed based on the file name. For example, `pages/[locale]/page.tsx` is the home page.
 
 [**Learn more about developing Next.js applications** ↗️](https://nextjs.org/docs)
 
 ### Getting started
 
-The application can be ran natively or in a Docker container.
+The application can be run natively or in a Docker container.
 
 #### Native
 
@@ -71,6 +68,8 @@ From the `frontend/` directory:
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
 - If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
+
+**Note:** To run the fully integrated app, uncomment the correct environment variable for the API_URL in your .env.development file, and run `make start` in the API directory before starting your local frontend container.
 
 ##### Testing Release Target Locally
 

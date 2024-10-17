@@ -10,14 +10,16 @@ export const messages = {
     meta_description: "Summary details for the specific opportunity listing.",
     intro: {
       agency: "Agency: ",
-      assistanceListings: "Assistance Listings: ",
-      lastUpdated: "Last Updated: ",
+      assistance_listings: "Assistance Listings: ",
+      last_updated: "Last Updated: ",
     },
     description: {
       description: "Description",
       eligible_applicants: "Eligible Applicants",
       additional_info: "Additional Information on eligibility",
       contact_info: "Grantor contact information",
+      email: "Email",
+      telephone: "Telephone",
     },
     award_info: {
       yes: "Yes",

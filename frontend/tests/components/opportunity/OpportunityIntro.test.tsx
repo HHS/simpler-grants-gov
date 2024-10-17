@@ -8,8 +8,8 @@ jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
       agency: "Agency:",
-      assistanceListings: "Assistance Listings:",
-      lastUpdated: "Last updated:",
+      assistance_listings: "Assistance Listings:",
+      last_updated: "Last updated:",
     };
     return translations[key] || key;
   }),
@@ -66,7 +66,7 @@ describe("OpportunityIntro", () => {
     render(<OpportunityIntro opportunityData={opportunityDataWithNulls} />);
 
     expect(screen.getByText("Agency: --")).toBeInTheDocument();
-    expect(screen.getByText("Assistance Listings: --")).toBeInTheDocument(); // No assistance listings
+    expect(screen.getByText("Assistance Listings: —")).toBeInTheDocument(); // No assistance listings
   });
 
   it("handles null updated date", () => {
