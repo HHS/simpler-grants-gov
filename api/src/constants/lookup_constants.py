@@ -116,3 +116,8 @@ class AgencySubmissionNotificationSetting(StrEnum):
     NEVER = "never"
     FIRST_APPLICATION_ONLY = "first_application_only"
     ALWAYS = "always"
+
+
+class OpportunityAttachmentType(StrEnum):
+    NOTICE_OF_FUNDING_OPPORTUNITY = "notice_of_funding_opportunity"
+    OTHER = "other"

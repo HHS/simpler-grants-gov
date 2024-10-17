@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Research from "src/app/[locale]/research/page";
-import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
+import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,

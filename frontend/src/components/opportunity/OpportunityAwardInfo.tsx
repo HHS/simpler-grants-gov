@@ -3,7 +3,9 @@ import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import OpportunityAwardGridRow from "./OpportunityAwardGridRow";
+import OpportunityAwardGridRow, {
+  AwardDataKeys,
+} from "./OpportunityAwardGridRow";
 
 type Props = {
   opportunityData: Opportunity;
@@ -89,7 +91,10 @@ const OpportunityAwardInfo = ({ opportunityData }: Props) => {
             key={`category ${index}`}
             tabletLg={{ col: 6 }}
           >
-            <OpportunityAwardGridRow content={content} title={title} />
+            <OpportunityAwardGridRow
+              content={content}
+              title={title as AwardDataKeys}
+            />
           </Grid>
         ))}
       </Grid>

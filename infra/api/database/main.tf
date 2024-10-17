@@ -1,4 +1,5 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
+data "aws_caller_identity" "current" {}
+
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -6,7 +7,6 @@ data "aws_vpc" "network" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "database" {
   filter {
     name   = "vpc-id"
