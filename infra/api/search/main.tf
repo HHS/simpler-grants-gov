@@ -9,11 +9,9 @@ locals {
     environment = var.environment_name
     description = "Application resources created in ${var.environment_name} environment"
   })
-
-  service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 }
 
 data "aws_ssm_parameter" "search_endpoint_arn" {
   count = local.environment_config.search_config != null ? 1 : 0
-  name  = "/search/${local.service_name}/endpoint"
+  name  = "/search/api-${var.environment_name}/endpoint"
 }
