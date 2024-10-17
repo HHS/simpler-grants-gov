@@ -2050,15 +2050,12 @@ components:
           type: string
           description: The type of attachment
           example: notice_of_funding_opportunity
-        created_by:
+        created_at:
           type: string
-          description: The user who created the attachment
-        updated_by:
+          description: The date the attachment was created
+        updated_at:
           type: string
-          description: The user who last updated the attachment
-        legacy_folder_id:
-          type: integer
-          description: The legacy folder ID
+          description: The date the attachment was updated
     OpportunityWithAttachmentsV1:
       type: object
       properties:
