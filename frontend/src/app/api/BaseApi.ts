@@ -38,9 +38,9 @@ export default abstract class BaseApi {
   // Root path of API resource without leading slash.
   abstract get basePath(): string;
 
-  // API version
+  // API version, can be overridden by implementing API classes as necessary
   get version() {
-    return "v0.1";
+    return "v1";
   }
 
   // Namespace representing the API resource
@@ -71,7 +71,6 @@ export default abstract class BaseApi {
       additionalHeaders?: HeadersDict;
     } = {},
   ) {
-    debugger;
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,
