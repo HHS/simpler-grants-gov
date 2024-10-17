@@ -50,7 +50,3 @@ output "incident_management_service_integration" {
 output "domain" {
   value = var.domain
 }
-
-output "load_transform_args" {
-  value = var.load_transform_args
-}
