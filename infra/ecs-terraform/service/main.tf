@@ -1,4 +1,7 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -6,7 +9,6 @@ data "aws_vpc" "network" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
@@ -18,7 +20,6 @@ data "aws_subnets" "private" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
