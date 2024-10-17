@@ -13,6 +13,10 @@ terraform {
       version = "2.3.1"
     }
   }
+
+  backend "s3" {
+    encrypt = "true"
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -21,12 +25,23 @@ module "project_config" {
   source = "../../project-config"
 }
 
+data "aws_ssm_parameter" "search_username" {
+  name = "/search/api-${var.environment_name}/username"
+}
+
+data "aws_ssm_parameter" "search_password" {
+  name = "/search/api-${var.environment_name}/password"
+}
+
 data "aws_ssm_parameter" "search_endpoint_arn" {
   name = "/search/api-${var.environment_name}/endpoint"
 }
 
 provider "opensearch" {
-  url = data.aws_ssm_parameter.search_endpoint_arn.value
+  url         = data.aws_ssm_parameter.search_endpoint_arn.value
+  username    = data.aws_ssm_parameter.search_username.value
+  password    = data.aws_ssm_parameter.search_password.value
+  healthcheck = false
 }
 
 resource "opensearch_role" "admin" {
