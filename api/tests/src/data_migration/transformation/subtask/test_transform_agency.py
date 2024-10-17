@@ -31,14 +31,21 @@ class TestTransformAgency(BaseTransformTestClass):
         insert_agency1 = setup_agency("INSERT-AGENCY-1", create_existing=False)
         insert_agency2 = setup_agency("INSERT-AGENCY-2", create_existing=False)
         insert_agency3 = setup_agency("INSERT-AGENCY-3", create_existing=False)
-        insert_agency4 = setup_agency("INSERT-AGENCY-4", create_existing=False)
+        insert_agency4 = setup_agency(
+            "INSERT-AGENCY-4",
+            create_existing=False,
+            # None passed in here will make it not appear at all in the tgroups rows
+            source_values={"ldapGp": None, "description": None, "label": None},
+        )
         insert_test_agency = setup_agency("GDIT", create_existing=False)
 
         # Already processed fields are ones that were handled on a prior run and won't be updated
         # during this specific run
         update_agency1 = setup_agency("UPDATE-AGENCY-1", create_existing=True)
         update_agency2 = setup_agency(
-            "UPDATE-AGENCY-2", create_existing=True, deleted_fields={"AgencyContactEMail2"}
+            "UPDATE-AGENCY-2",
+            create_existing=True,
+            deleted_fields={"AgencyContactEMail2", "ldapGp", "description"},
         )
         update_agency3 = setup_agency(
             "UPDATE-AGENCY-3",
@@ -82,7 +89,7 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, insert_test_agency, is_test_agency=True)
 
         validate_agency(db_session, update_agency1)
-        validate_agency(db_session, update_agency2)
+        validate_agency(db_session, update_agency2, deleted_fields={"ldapGp", "description"})
         validate_agency(
             db_session,
             update_agency3,
