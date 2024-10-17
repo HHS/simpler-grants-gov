@@ -4,12 +4,23 @@ locals {
   }
 }
 
+data "aws_ssm_parameter" "kms_key_arn" {
+  name = "/search/api-${var.environment_name}/kms_key_arn"
+}
+
 data "aws_iam_policy_document" "search_deployment" {
   statement {
     sid       = "ReadSearchSSMParameters"
     effect    = "Allow"
-    actions   = ["ssm:GetParameters"]
+    actions   = ["ssm:GetParameter"]
     resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/search/api-${var.environment_name}/endpoint"]
+  }
+
+  statement {
+    sid       = "ReadSearchKMSKey"
+    effect    = "Allow"
+    actions   = ["kms:Decrypt"]
+    resources = [data.aws_ssm_parameter.kms_key_arn.value]
   }
 
   statement {

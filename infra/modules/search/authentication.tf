@@ -115,6 +115,13 @@ resource "random_password" "opensearch_password" {
   override_special = "-"
 }
 
+resource "aws_ssm_parameter" "kms_key_arn" {
+  name        = "/search/${var.service_name}/kms_key_arn"
+  description = "The KMS key ARN for the OpenSearch domain"
+  type        = "SecureString"
+  value       = aws_kms_key.opensearch.arn
+}
+
 resource "aws_ssm_parameter" "opensearch_username" {
   name        = "/search/${var.service_name}/username"
   description = "The username for the OpenSearch domain"

@@ -6,10 +6,23 @@ locals {
   })
 }
 
+terraform {
+  required_providers {
+    opensearch = {
+      source  = "opensearch-project/opensearch"
+      version = "2.3.1"
+    }
+  }
+}
+
 module "project_config" {
   source = "../../project-config"
 }
 
 data "aws_ssm_parameter" "search_endpoint_arn" {
   name = "/search/api-${var.environment_name}/endpoint"
+}
+
+provider "opensearch" {
+  url = data.aws_ssm_parameter.search_endpoint_arn.value
 }
