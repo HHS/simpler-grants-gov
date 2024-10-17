@@ -5,7 +5,7 @@ resource "aws_scheduler_schedule" "scheduled_jobs" {
   # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
 
   name                         = "${var.service_name}-${each.key}"
-  state                        = "ENABLED"
+  state                        = each.value.state
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = "Etc/UTC"
 

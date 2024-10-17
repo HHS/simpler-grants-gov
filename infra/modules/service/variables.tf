@@ -80,6 +80,7 @@ variable "scheduled_jobs" {
   type = map(object({
     task_command        = list(string)
     schedule_expression = string
+    state               = string
   }))
   default = {}
 }
