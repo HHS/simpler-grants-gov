@@ -12,6 +12,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -330,22 +331,15 @@ class OpportunityAttachmentV1Schema(Schema):
     file_size_bytes = fields.Integer(
         metadata={"description": "The size of the attachment in bytes", "example": 10012}
     )
-    opportunity_attachment_type = fields.String(
+    opportunity_attachment_type = fields.Enum(
+        OpportunityAttachmentType,
         metadata={
             "description": "The type of attachment",
-            "example": "notice_of_funding_opportunity",
-        }
+            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
+        },
     )
-    created_at = fields.String(
-        metadata={
-            "description": "The date the attachment was created",
-        }
-    )
-    updated_at = fields.String(
-        metadata={
-            "description": "The date the attachment was updated",
-        }
-    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
