@@ -13,6 +13,9 @@ services:
     restart: always
     ports:
       - 3000:3000
+    networks:
+      - default
+      - api_grants_backend
 
   storybook:
     container_name: storybook
@@ -29,3 +32,9 @@ services:
     restart: always
     ports:
       - 6006:6006
+    networks:
+      - default
+
+networks:
+  api_grants_backend:
+    external: true

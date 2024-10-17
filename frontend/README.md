@@ -69,6 +69,8 @@ From the `frontend/` directory:
 
 - If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
 
+**Note:** To run the fully integrated app, uncomment the correct environment variable for the API_URL in your .env.development file, and run `make start` in the API directory before starting your local frontend container.
+
 ##### Testing Release Target Locally
 
 To test the release target locally, run:
