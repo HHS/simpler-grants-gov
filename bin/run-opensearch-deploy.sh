@@ -10,18 +10,12 @@ ENVIRONMENT="$1"
 COMMAND=$(
   cat <<EOF
 [
-  "terraform -chdir=infra/api/search init -input=false -reconfigure -backend-config=$ENVIRONMENT.s3.tfbackend"
+  "set -x &&
+    terraform -chdir=infra/api/search init -input=false -reconfigure -backend-config=$ENVIRONMENT.s3.tfbackend &&
+    terraform -chdir=infra/api/search apply -var=environment_name=$ENVIRONMENT -auto-approve
+  "
 ]
 EOF
 )
-
-# COMMAND=$(
-#   cat <<EOF
-# [
-#   "terraform", "-chdir=infra/api/search", "init", "-input=false", "-reconfigure", "-backend-config=$ENVIRONMENT.s3.tfbackend", "&&",
-#   "terraform", "-chdir=infra/api/search", "apply", "-var=environment_name=$ENVIRONMENT", "-auto-approve"
-# ]
-# EOF
-# )
 
 ./bin/run-command.sh "ecs-terraform" "$ENVIRONMENT" "$COMMAND"
