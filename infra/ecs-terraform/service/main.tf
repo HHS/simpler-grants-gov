@@ -104,4 +104,6 @@ module "service" {
       valueFrom = module.secrets[secret_name].secret_arn
     }],
   )
+
+  extra_policies = local.extra_policies
 }
