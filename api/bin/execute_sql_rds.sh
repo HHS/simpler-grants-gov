@@ -15,6 +15,7 @@ PROGRAM_NAME=$(basename "$0")
 
 CYAN='\033[96m'
 GREEN='\033[92m'
+RED='\033[01;31m'
 END='\033[0m'
 
 CLUSTER=api-dev
@@ -32,6 +33,15 @@ main() {
   print_log "using cluster $cluster"
   read_cluster_arns
   create_temporary_directory
+
+  # Note that to use jtbl, it needs to be installed directly
+  # by the user with pip - if we wanted it to work with our poetry
+  # setup we'd have to run many of these commands via poetry
+  if ! command -v jtbl 2>&1 >/dev/null
+  then
+    printf "\n${RED}jtbl command not found${END} - please install before running: https://github.com/kellyjonbrazil/jtbl \n\n"
+    exit 1
+  fi
 
   count=1
   if [ $multiple ]
@@ -73,7 +83,7 @@ read_cluster_arns() {
 
 
 create_temporary_directory() {
-  tmp_dir="/tmp/execute_sql_rds/execute_sql_rds.$(date +%s)"
+  tmp_dir="/tmp/execute_sql_rds/execute_sql_rds.$(date "+%Y-%m-%d_%H:%M:%S")"
   mkdir -m "u=rwx,g=,o=" -p "$tmp_dir"
   print_log "temporary directory $tmp_dir"
 }
@@ -81,7 +91,9 @@ create_temporary_directory() {
 
 execute_statement() {
   print_log "$1"
-  result_path="$tmp_dir/result_$count.json"
+  result_path="$tmp_dir/raw_result_$count.json"
+  json_result_path="$tmp_dir/result_$count.json"
+  csv_result_path="$tmp_dir/result_$count.csv"
 
   aws rds-data execute-statement \
       --resource-arn "$resource_arn" \
@@ -94,7 +106,13 @@ execute_statement() {
 
   if grep formattedRecords "$result_path" >/dev/null
   then
+    # Print a pretty table to the user
     jq -r .formattedRecords "$result_path" | jtbl --truncate --markdown
+    # Pull the results out and write to a CSV + JSON
+    jq -r .formattedRecords "$result_path" | jtbl --csv > $csv_result_path
+    jq -r .formattedRecords "$result_path" > $json_result_path
+    print_log "----"
+    print_log "Output written to $tmp_dir/"
   else
     cat "$result_path"
   fi
