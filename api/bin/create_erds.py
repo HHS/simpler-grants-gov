@@ -21,24 +21,9 @@ ERD_FOLDER = pathlib.Path(__file__).parent.resolve()
 STAGING_BASE_METADATA = StagingBase.metadata
 API_BASE_METADATA = ApiSchemaTable.metadata
 
-# Any metadata you add above, merge together for the full schema to be generated
-ALL_METADATA = [StagingBase.metadata, ApiSchemaTable.metadata]
 
-
-def _combine_metadata(metadata: list) -> MetaData:
-
-    combined_metadata = MetaData()
-    for m in metadata:
-        for table in m.sorted_tables:
-            table.to_metadata(combined_metadata)
-    return combined_metadata
-
-
-def create_erds(metadata: Any, file_name: str) -> None:
+def create_erds(metadata: MetaData, file_name: str) -> None:
     logger.info("Generating ERD diagrams for %s", file_name)
-
-    if isinstance(metadata, list):
-        metadata = _combine_metadata(metadata)
 
     png_file_path = str(ERD_FOLDER / f"{file_name}.png")
     render_er(metadata, png_file_path)
@@ -50,4 +35,3 @@ def main() -> None:
 
         create_erds(STAGING_BASE_METADATA, "staging-schema")
         create_erds(API_BASE_METADATA, "api-schema")
-        create_erds(ALL_METADATA, "full-schema")
