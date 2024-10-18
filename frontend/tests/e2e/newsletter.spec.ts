@@ -1,6 +1,8 @@
 /* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
 
+import { generateRandomString } from "./search/searchSpecUtil";
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/subscribe");
 });
@@ -32,7 +34,9 @@ test("successful signup", async ({ page }) => {
   );
 
   // Fill out form
-  await page.getByLabel("First Name (required)").fill("Apple");
+  await page
+    .getByLabel("First Name (required)")
+    .fill(generateRandomString([10]));
   await page.getByLabel("Email (required)").fill("name@example.com");
 
   await page.getByRole("button", { name: /subscribe/i }).click();
@@ -54,7 +58,9 @@ test("error during signup", async ({ page }) => {
   );
 
   // Fill out form
-  await page.getByLabel("First Name (required)").fill("Apple");
+  await page
+    .getByLabel("First Name (required)")
+    .fill(generateRandomString([10]));
   await page.getByLabel("Email (required)").fill("name@example.com");
 
   await page.getByRole("button", { name: /subscribe/i }).click();
