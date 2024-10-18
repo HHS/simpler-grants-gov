@@ -28,10 +28,11 @@ jobs:
         with:
           # Checkout the feature branch associated with the pull request
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0
       - name: Pull Latest Changes
         run: |
-          git pull origin ${{ github.head_ref }}
+          git fetch origin ${{ github.head_ref }}  
+          git reset --hard origin/${{ github.head_ref }}  
 
       - name: Update OpenAPI spec
         run: make openapi-spec
