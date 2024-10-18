@@ -64,6 +64,7 @@ export default abstract class BaseApi {
       additionalHeaders?: HeadersDict;
     } = {},
   ): Promise<ResponseType> {
+    console.log("!!! actual request");
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,

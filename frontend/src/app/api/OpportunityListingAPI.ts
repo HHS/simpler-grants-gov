@@ -12,12 +12,9 @@ export default class OpportunityListingAPI extends BaseApi {
   async getOpportunityById(
     opportunityId: number,
   ): Promise<OpportunityApiResponse> {
-    const subPath = `${opportunityId}`;
     const response = await this.request<OpportunityApiResponse>(
       "GET",
-      // this.basePath,
-      // this.namespace,
-      subPath,
+      `${opportunityId}`,
     );
     return response;
   }
