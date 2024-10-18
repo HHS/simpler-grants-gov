@@ -29,14 +29,12 @@ jobs:
           # Checkout the feature branch associated with the pull request
           ref: ${{ github.head_ref }}
           fetch-depth: 0
+      - name: Update OpenAPI spec
+        run: make openapi-spec
       - name: Pull Latest Changes
         run: |
           git fetch origin ${{ github.head_ref }}  
-          git reset --hard origin/${{ github.head_ref }}  
-
-      - name: Update OpenAPI spec
-        run: make openapi-spec
-
+          git reset --hard origin/${{ github.head_ref }}
       - name: Push changes
         run: |
           git config user.name nava-platform-bot
