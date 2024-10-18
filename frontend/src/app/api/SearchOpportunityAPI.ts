@@ -20,36 +20,36 @@ const orderByFieldLookup = {
   closeDate: "close_date",
 };
 
-// Build with one_of syntax
+type FrontendFilterNames =
+  | "status"
+  | "fundingInstrument"
+  | "eligibility"
+  | "agency"
+  | "category";
+
+const filterNameMap = {
+  status: "opportunity_status",
+  fundingInstrument: "funding_instrument",
+  eligibility: "applicant_type",
+  agency: "agency",
+  category: "funding_category",
+} as const;
+
+// Translate frontend filter param names to expected backend parameter names, and use one_of syntax
 export const buildFilters = (
   searchInputs: QueryParamData,
 ): SearchFilterRequestBody => {
-  const { status, fundingInstrument, eligibility, agency, category } =
-    searchInputs;
-  const filters: SearchFilterRequestBody = {};
-
-  if (status && status.size > 0) {
-    filters.opportunity_status = { one_of: Array.from(status) };
-  }
-  if (fundingInstrument && fundingInstrument.size > 0) {
-    filters.funding_instrument = { one_of: Array.from(fundingInstrument) };
-  }
-
-  if (eligibility && eligibility.size > 0) {
-    // Note that eligibility gets remapped to the API name of "applicant_type"
-    filters.applicant_type = { one_of: Array.from(eligibility) };
-  }
-
-  if (agency && agency.size > 0) {
-    filters.agency = { one_of: Array.from(agency) };
-  }
-
-  if (category && category.size > 0) {
-    // Note that category gets remapped to the API name of "funding_category"
-    filters.funding_category = { one_of: Array.from(category) };
-  }
-
-  return filters;
+  return Object.entries(filterNameMap).reduce(
+    (filters, [frontendFilterName, backendFilterName]) => {
+      const filterData =
+        searchInputs[frontendFilterName as FrontendFilterNames];
+      if (filterData && filterData.size) {
+        filters[backendFilterName] = { one_of: Array.from(filterData) };
+      }
+      return filters;
+    },
+    {} as SearchFilterRequestBody,
+  );
 };
 
 export const buildPagination = (
