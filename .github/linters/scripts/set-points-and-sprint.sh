@@ -6,7 +6,8 @@
 #  --org "HHS" \
 #  --project 13 \
 #  --sprint-field "Sprint" \
-#  --points-field "Points"
+#  --points-field "Points" \
+#  --dry-run # allows users to run in dry run mode
 
 
 # #######################################################
@@ -134,13 +135,19 @@ fi
 
 if jq -e ".points == null or .points == 0" $item_data_file > /dev/null; then
 
-    echo "Updating points field for issue: ${issue_url}"
-    point_field_id=$(jq -r '.points.fieldId' "$field_data_file")
-    gh project item-edit \
-     --id "${item_id}" \
-     --project-id "${project_id}" \
-     --field-id "${point_field_id}" \
-     --number 1
+    if [[ $dry_run == "YES" ]]; then
+      echo "Would set points field to 1 for issue: ${issue_url}"
+    else
+      echo "Setting points field to 1 for issue: ${issue_url}"
+      # Get fieldId from field data
+      point_field_id=$(jq -r '.points.fieldId' "$field_data_file")
+      # Use GitHub CLI to update field
+      gh project item-edit \
+        --id "${item_id}" \
+        --project-id "${project_id}" \
+        --field-id "${point_field_id}" \
+        --number 1
+    fi
 
 else
     echo "Point value already set for issue: ${issue_url}"
@@ -152,14 +159,21 @@ fi
 
 if jq -e ".sprint == null" $item_data_file > /dev/null; then
 
-    echo "Updating sprint field for issue: ${issue_url}"
-    sprint_field_id=$(jq -r '.sprint.fieldId' "$field_data_file")
-    iteration_id=$(jq -r '.sprint.iterationId' "$field_data_file")
-    gh project item-edit \
-     --id "${item_id}" \
-     --project-id "${project_id}" \
-     --field-id "${sprint_field_id}" \
-     --iteration-id "${iteration_id}"
+    # Skip actual update in dry-run mode
+    if [[ $dry_run == "YES" ]]; then
+      echo "Would set sprint field to current sprint for issue: ${issue_url}"
+    else
+      echo "Setting sprint field to current sprint for issue: ${issue_url}"
+      # Get fieldId and iterationId from field data
+      sprint_field_id=$(jq -r '.sprint.fieldId' "$field_data_file")
+      iteration_id=$(jq -r '.sprint.iterationId' "$field_data_file")
+      # Use GitHub CLI to update project field
+      gh project item-edit \
+        --id "${item_id}" \
+        --project-id "${project_id}" \
+        --field-id "${sprint_field_id}" \
+        --iteration-id "${iteration_id}"
+    fi
 
 else
     echo "Sprint value already set for issue: ${issue_url}"
