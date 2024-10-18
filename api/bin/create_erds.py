@@ -24,7 +24,7 @@ API_BASE_METADATA = ApiSchemaTable.metadata
 def create_erds(metadata: MetaData, file_name: str) -> None:
     logger.info("Generating ERD diagrams for %s", file_name)
 
-    png_file_path = str(ERD_FOLDER / f"{file_name}_test.png")
+    png_file_path = str(ERD_FOLDER / f"{file_name}.png")
     render_er(metadata, png_file_path)
 
 
