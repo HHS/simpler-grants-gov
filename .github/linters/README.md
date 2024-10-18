@@ -21,9 +21,10 @@ root
 
 ### Review automated linters
 
-| Workflow name                                 | Description                                                       | Interval           |
-| --------------------------------------------- | ----------------------------------------------------------------- | ------------------ |
-| [Lint - Close done issues][close-done-issues] | Close issues that are marked as done in a project but still open. | Nightly at 12am ET |
+| Workflow name                                         | Description                                                            | Interval           |
+| ----------------------------------------------------- | ---------------------------------------------------------------------- | ------------------ |
+| [Lint - Close done issues][close-done-issues]         | Close issues that are marked as done in a project but still open.      | Nightly at 12am ET |
+| [Lint - Set points and sprint][set-points-and-sprint] | Sets default points and sprint value (if unset) when issues are closed | On issue close     |
 
 ### Manually run the linters
 
@@ -57,3 +58,4 @@ root
 [close-done-issues]: ../workflows/lint-close-done-issues.yml
 [close-done-issues-script]: ./scripts/close-issues-in-done-col.sh
 [get-project-items-query]: ./queries/get-project-items.graphql
+[set-points-and-sprint]: ../workflows/lint-set-points-and-sprint.yml

@@ -1,0 +1,32 @@
+query (
+  $org: String!
+  $project: Int!
+  $sprintField: String = "Sprint"
+  $pointsField: String = "Points"
+) {
+  organization(login: $org) {
+    projectV2(number: $project) {
+      sprint: field(name: $sprintField) {
+        ...iterationMetadata
+      }
+      points: field(name: $pointsField) {
+        ...numberMetadata
+      }
+    }
+  }
+}
+
+fragment numberMetadata on ProjectV2Field {
+  fieldId: id
+}
+
+fragment iterationMetadata on ProjectV2IterationField {
+  fieldId: id
+  configuration {
+    iterations {
+      id
+      startDate
+      duration
+    }
+  }
+}
