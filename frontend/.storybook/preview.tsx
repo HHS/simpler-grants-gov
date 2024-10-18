@@ -50,6 +50,7 @@ const preview: Preview = {
   loaders: [i18nMessagesLoader],
   decorators: [I18nStoryWrapper],
   parameters,
+
   globalTypes: {
     locale: {
       description: "Active language",
@@ -60,6 +61,8 @@ const preview: Preview = {
       },
     },
   },
+
+  tags: ["autodocs", "autodocs"]
 };
 
 export default preview;
