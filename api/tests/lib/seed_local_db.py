@@ -56,28 +56,18 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         logger.info(f"Creating opportunity batch number {i}")
         # Create a few opportunities in various scenarios
         forecasted_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            is_forecasted_summary=True,
+            size=5, is_forecasted_summary=True
         )
-        posted_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            is_posted_summary=True,
-        )
-        closed_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            is_closed_summary=True,
-        )
+        posted_opps = factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
+        closed_opps = factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
         archived_non_forecast_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            is_archived_non_forecast_summary=True,
+            size=5, is_archived_non_forecast_summary=True
         )
         archived_forecast_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            is_archived_forecast_summary=True,
+            size=5, is_archived_forecast_summary=True
         )
         no_current_summary_opps = factories.OpportunityFactory.create_batch(
-            size=5,
-            no_current_summary=True,
+            size=5, no_current_summary=True
         )
 
         if include_history:
@@ -99,8 +89,7 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
-            size=5,
-            all_fields_null=True,
+            size=5, all_fields_null=True
         )
         for all_null_opportunity in all_null_opportunities:
             summary = factories.OpportunitySummaryFactory.create(
