@@ -18,3 +18,4 @@ def test_get_healthcheck_503_db_bad_state(client, monkeypatch):
     response = client.get("/health")
     assert response.status_code == 503
     assert response.get_json()["message"] == "Service Unavailable"
+    assert response.get_json()["internal_request_id"] is not None

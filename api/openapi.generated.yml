@@ -587,6 +587,10 @@ components:
             - object
             allOf:
             - $ref: '#/components/schemas/ValidationIssue'
+        internal_request_id:
+          type: string
+          description: An internal tracking ID
+          example: 550e8400-e29b-41d4-a716-446655440000
     OpportunitySorting:
       type: object
       properties:
