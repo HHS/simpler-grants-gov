@@ -5,7 +5,6 @@ import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher"
 import {
   PaginationOrderBy,
   PaginationRequestBody,
-  PaginationSortDirection,
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
