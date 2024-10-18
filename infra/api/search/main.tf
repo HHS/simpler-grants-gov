@@ -68,7 +68,7 @@ resource "opensearch_role" "admin" {
 }
 
 resource "opensearch_roles_mapping" "admin" {
-  role_name   = "logs_writer"
+  role_name   = "admin"
   description = "Mapping AWS IAM roles to ES role"
   backend_roles = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/api-${var.environment_name}-app"
