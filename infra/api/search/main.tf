@@ -1,3 +1,7 @@
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 locals {
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
@@ -18,10 +22,6 @@ terraform {
     encrypt = "true"
   }
 }
-
-data "aws_caller_identity" "current" {}
-
-data "aws_region" "current" {}
 
 module "project_config" {
   source = "../../project-config"
