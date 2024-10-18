@@ -40,10 +40,12 @@ data "aws_ssm_parameter" "search_endpoint_arn" {
 }
 
 provider "opensearch" {
-  url               = "https://${data.aws_ssm_parameter.search_endpoint_arn.value}"
-  username          = data.aws_ssm_parameter.search_username.value
-  password          = data.aws_ssm_parameter.search_password.value
-  sign_aws_requests = false
+  url                = "https://${data.aws_ssm_parameter.search_endpoint_arn.value}"
+  username           = data.aws_ssm_parameter.search_username.value
+  password           = data.aws_ssm_parameter.search_password.value
+  opensearch_version = "2.15"
+  healthcheck        = false
+  sign_aws_requests  = false
 }
 
 resource "opensearch_role" "admin" {
