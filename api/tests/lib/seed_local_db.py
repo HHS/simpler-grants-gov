@@ -120,24 +120,25 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
 # we can consider shoving this into a CSV that we load instead.
 AGENCIES_TO_CREATE = [
     {
+        "agency_id": 1,
         "agency_code": "USAID",
         "agency_name": "Agency for International Development",
     },
     {
+        "agency_id": 2,
         "agency_code": "ARPAH",
         "agency_name": "Advanced Research Projects Agency for Health",
     },
     {
+        "agency_id": 3,
         "agency_code": "DOC",
         "agency_name": "Agency for International Development",
     },
-]
-
-SUB_AGENCIES_TO_CREATE = [
     {
+        "agency_id": 4,
         "agency_code": "DOC-EDA",
         "agency_name": "Agency for International Development",
-        "top_level_agency": "DOC",
+        "top_level_agency_id": 3,  # DOC
     },
 ]
 
@@ -146,7 +147,6 @@ def _build_agencies(db_session: db.Session) -> None:
     # Create a static set of agencies, only if they don't already exist
     agencies = db_session.query(Agency).all()
     agency_codes = set([a.agency_code for a in agencies])
-    agency_dict = {a.agency_code: a for a in agencies}
 
     for agency_to_create in AGENCIES_TO_CREATE:
         if agency_to_create["agency_code"] in agency_codes:
@@ -154,30 +154,7 @@ def _build_agencies(db_session: db.Session) -> None:
 
         logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
 
-        new_agency = factories.AgencyFactory.create(**agency_to_create)
-        agency_dict[new_agency.agency_code] = new_agency
-
-    for agency_to_create in SUB_AGENCIES_TO_CREATE:
-        if agency_to_create["agency_code"] in agency_codes:
-            continue
-
-        logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
-
-        top_level_agency_code = agency_to_create.get("top_level_agency")
-        top_level_agency_id = None
-        if top_level_agency_code:
-            top_level_agency_id = agency_dict.get(top_level_agency_code).agency_id
-            if not top_level_agency_id:
-                logger.warning(
-                    f"Top-level agency {top_level_agency_code} not found for {agency_to_create['agency_code']}"
-                )
-            agency_to_create["top_level_agency_id"] = top_level_agency_id
-
-        factories.AgencyFactory.create(
-            agency_code=agency_to_create["agency_code"],
-            agency_name=agency_to_create["agency_name"],
-            top_level_agency_id=agency_to_create["top_level_agency_id"],
-        )
+        factories.AgencyFactory.create(**agency_to_create)
 
 
 @click.command()
