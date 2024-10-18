@@ -35,6 +35,38 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
+export default class SearchOpportunityAPI extends BaseApi {
+  get namespace(): string {
+    return "opportunities";
+  }
+
+  async searchOpportunities(searchInputs: QueryParamData) {
+    const { query } = searchInputs;
+    const filters = buildFilters(searchInputs);
+    const pagination = buildPagination(searchInputs);
+
+    const requestBody: SearchRequestBody = { pagination };
+
+    // Only add filters if there are some
+    if (Object.keys(filters).length > 0) {
+      requestBody.filters = filters;
+    }
+
+    if (query) {
+      requestBody.query = query;
+    }
+
+    const response = await this.request<SearchAPIResponse>(
+      "POST",
+      "search",
+      searchInputs,
+      requestBody,
+    );
+
+    return response;
+  }
+}
+
 // Translate frontend filter param names to expected backend parameter names, and use one_of syntax
 export const buildFilters = (
   searchInputs: QueryParamData,
@@ -89,35 +121,3 @@ export const buildPagination = (
     sort_direction,
   };
 };
-
-export default class SearchOpportunityAPI extends BaseApi {
-  get namespace(): string {
-    return "opportunities";
-  }
-
-  async searchOpportunities(searchInputs: QueryParamData) {
-    const { query } = searchInputs;
-    const filters = buildFilters(searchInputs);
-    const pagination = buildPagination(searchInputs);
-
-    const requestBody: SearchRequestBody = { pagination };
-
-    // Only add filters if there are some
-    if (Object.keys(filters).length > 0) {
-      requestBody.filters = filters;
-    }
-
-    if (query) {
-      requestBody.query = query;
-    }
-
-    const response = await this.request<SearchAPIResponse>(
-      "POST",
-      "search",
-      searchInputs,
-      requestBody,
-    );
-
-    return response;
-  }
-}
