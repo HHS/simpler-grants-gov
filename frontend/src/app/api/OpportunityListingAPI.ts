@@ -1,19 +1,10 @@
 import "server-only";
 
-import { environment } from "src/constants/environments";
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 
 import BaseApi from "./BaseApi";
 
 export default class OpportunityListingAPI extends BaseApi {
-  get version(): string {
-    return "v1";
-  }
-
-  get basePath(): string {
-    return environment.API_URL;
-  }
-
   get namespace(): string {
     return "opportunities";
   }
@@ -21,13 +12,10 @@ export default class OpportunityListingAPI extends BaseApi {
   async getOpportunityById(
     opportunityId: number,
   ): Promise<OpportunityApiResponse> {
-    const subPath = `${opportunityId}`;
-    const response = (await this.request(
+    const response = await this.request<OpportunityApiResponse>(
       "GET",
-      this.basePath,
-      this.namespace,
-      subPath,
-    )) as OpportunityApiResponse;
+      `${opportunityId}`,
+    );
     return response;
   }
 }
