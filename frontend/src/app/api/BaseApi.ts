@@ -64,7 +64,6 @@ export default abstract class BaseApi {
       additionalHeaders?: HeadersDict;
     } = {},
   ): Promise<ResponseType> {
-    console.log("!!! actual request");
     const { additionalHeaders = {} } = options;
     const url = createRequestUrl(
       method,
@@ -133,14 +132,14 @@ export function createRequestUrl(
   let url = [...cleanedPaths].join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
-    const body: { [key: string]: string } = {};
+    const newBody: { [key: string]: string } = {};
     Object.entries(body).forEach(([key, value]) => {
       const stringValue =
         typeof value === "string" ? value : JSON.stringify(value);
-      body[key] = stringValue;
+      newBody[key] = stringValue;
     });
 
-    const params = new URLSearchParams(body).toString();
+    const params = new URLSearchParams(newBody).toString();
     url = `${url}?${params}`;
   }
   return url;
