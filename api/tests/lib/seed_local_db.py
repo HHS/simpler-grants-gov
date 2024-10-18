@@ -178,11 +178,8 @@ def _build_agencies(db_session: db.Session) -> None:
                     f"Top-level agency {top_level_agency_code} not found for {agency_to_create['agency_code']}"
                 )
 
-        new_agency = factories.AgencyFactory.create(
-            agency_code=agency_to_create["agency_code"],
-            agency_name=agency_to_create["agency_name"],
-            top_level_agency=top_level_agency,
-        )
+        agency_to_create["top_level_agency"] = top_level_agency
+        factories.AgencyFactory.create(**agency_to_create)
 
 
 @click.command()
