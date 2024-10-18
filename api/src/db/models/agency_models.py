@@ -45,7 +45,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
     agency_code: Mapped[str] = mapped_column(index=True, unique=True)
     sub_agency_code: Mapped[str | None]
 
-    assistance_listing_number: Mapped[str]
+    assistance_listing_number: Mapped[str | None]
 
     agency_submission_notification_setting: Mapped[AgencySubmissionNotificationSetting] = (
         mapped_column(
