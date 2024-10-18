@@ -40,7 +40,7 @@ data "aws_ssm_parameter" "search_endpoint_arn" {
 }
 
 provider "opensearch" {
-  url                = "https://${data.aws_ssm_parameter.search_endpoint_arn.value}"
+  url                = "https://${data.aws_ssm_parameter.search_username.value}:${data.aws_ssm_parameter.search_password.value}@${data.aws_ssm_parameter.search_endpoint_arn.value}"
   username           = data.aws_ssm_parameter.search_username.value
   password           = data.aws_ssm_parameter.search_password.value
   opensearch_version = "2.15"
