@@ -47,7 +47,7 @@ provider "opensearch" {
   opensearch_version = "2.15"
   insecure           = true
   healthcheck        = false
-  sign_aws_requests  = false
+  # sign_aws_requests  = false
 }
 
 resource "opensearch_role" "admin" {
