@@ -17,7 +17,7 @@ defaults:
 # If new commits are pushed to the branch, cancel in progress runs and start
 # a new one.
 concurrency:
-  group: erd-diagram-workflow-${{ github.head_ref }}
+  group: ${{ github.head_ref }}
   cancel-in-progress: true
 
 
