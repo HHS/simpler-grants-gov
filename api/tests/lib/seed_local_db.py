@@ -153,7 +153,6 @@ def _build_agencies(db_session: db.Session) -> None:
             continue
 
         logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
-
         factories.AgencyFactory.create(**agency_to_create)
 
 
