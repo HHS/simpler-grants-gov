@@ -4,6 +4,7 @@ import { BrowserContextOptions } from "playwright-core";
 import {
   expectURLContainsQueryParam,
   fillSearchInputAndSubmit,
+  generateRandomString,
 } from "./searchSpecUtil";
 
 interface PageProps {
@@ -21,7 +22,7 @@ test.describe("Search page tests", () => {
   test("should return 0 results when searching for obscure term", async ({
     page,
   }: PageProps) => {
-    const searchTerm = "0resultearch";
+    const searchTerm = generateRandomString([10]);
 
     await fillSearchInputAndSubmit(searchTerm, page);
     await new Promise((resolve) => setTimeout(resolve, 3250));
