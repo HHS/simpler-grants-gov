@@ -1,7 +1,9 @@
 import { expect, Page, test } from "@playwright/test";
 import { BrowserContextOptions } from "playwright-core";
-
-import { fillSearchInputAndSubmit } from "./searchSpecUtil";
+import {
+  fillSearchInputAndSubmit,
+  generateRandomString,
+} from "tests/e2e/search/searchSpecUtil";
 
 interface PageProps {
   page: Page;
@@ -16,16 +18,18 @@ test.describe("Search page tests", () => {
   });
 
   test("should show and hide loading state", async ({ page }: PageProps) => {
-    const searchTerm = "advanced";
-    await fillSearchInputAndSubmit(searchTerm, page);
-
+    // if this doesn't work we can try https://playwright.dev/docs/api/class-browsertype#browser-type-launch-option-slow-mo
+    const searchTerm = generateRandomString([4, 5]);
     const loadingIndicator = page.getByTestId("loading-message");
-    await expect(loadingIndicator).toBeVisible();
+    await fillSearchInputAndSubmit(searchTerm, page);
+    await Promise.all([expect(loadingIndicator).toBeVisible()]);
     await expect(loadingIndicator).toBeHidden();
 
-    const searchTerm2 = "agency";
-    await fillSearchInputAndSubmit(searchTerm2, page);
-    await expect(loadingIndicator).toBeVisible();
+    const searchTerm2 = generateRandomString([8]);
+    await Promise.all([
+      fillSearchInputAndSubmit(searchTerm2, page),
+      expect(loadingIndicator).toBeVisible(),
+    ]);
     await expect(loadingIndicator).toBeHidden();
   });
 });
