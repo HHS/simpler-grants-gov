@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import backref, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (

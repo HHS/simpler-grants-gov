@@ -239,8 +239,6 @@ class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
 
-    attachment_id = factory.Sequence(lambda n: n)
-
     file_location = factory.Faker("url")
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
@@ -315,8 +313,6 @@ class OpportunityFactory(BaseFactory):
         # See: https://factoryboy.readthedocs.io/en/stable/reference.html#traits
 
         no_current_summary = factory.Trait(current_opportunity_summary=None)
-
-        no_attachments = factory.Trait(opportunity_attachments=None)
 
         # We set a trait for the OpportunitySummaryFactory for each of these as well as set the opportunity status
         is_posted_summary = factory.Trait(current_opportunity_summary__is_posted_summary=True)
@@ -723,8 +719,7 @@ class AgencyFactory(BaseFactory):
     is_image_workspace_enabled = factory.Faker("boolean")
     is_validation_workspace_enabled = factory.Faker("boolean")
 
-    top_level_agency = factory.Faker("agency")
-    top_level_agency_id = factory.LazyAttribute(lambda a: a.top_level_agency.agency_id)
+    top_level_agency_id = None
     agency_download_file_types = factory.Faker(
         "random_elements",
         length=random.randint(1, 2),

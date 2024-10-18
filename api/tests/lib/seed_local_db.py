@@ -58,32 +58,26 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         forecasted_opps = factories.OpportunityFactory.create_batch(
             size=5,
             is_forecasted_summary=True,
-            no_attachments=True,
         )
         posted_opps = factories.OpportunityFactory.create_batch(
             size=5,
             is_posted_summary=True,
-            no_attachments=True,
         )
         closed_opps = factories.OpportunityFactory.create_batch(
             size=5,
             is_closed_summary=True,
-            no_attachments=True,
         )
         archived_non_forecast_opps = factories.OpportunityFactory.create_batch(
             size=5,
             is_archived_non_forecast_summary=True,
-            no_attachments=True,
         )
         archived_forecast_opps = factories.OpportunityFactory.create_batch(
             size=5,
             is_archived_forecast_summary=True,
-            no_attachments=True,
         )
         no_current_summary_opps = factories.OpportunityFactory.create_batch(
             size=5,
             no_current_summary=True,
-            no_attachments=True,
         )
 
         if include_history:
@@ -107,7 +101,6 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         all_null_opportunities = factories.OpportunityFactory.create_batch(
             size=5,
             all_fields_null=True,
-            no_attachments=True,
         )
         for all_null_opportunity in all_null_opportunities:
             summary = factories.OpportunitySummaryFactory.create(
@@ -149,6 +142,9 @@ AGENCIES_TO_CREATE = [
         "agency_code": "DOC",
         "agency_name": "Agency for International Development",
     },
+]
+
+SUB_AGENCIES_TO_CREATE = [
     {
         "agency_code": "DOC-EDA",
         "agency_name": "Agency for International Development",
@@ -169,17 +165,30 @@ def _build_agencies(db_session: db.Session) -> None:
 
         logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
 
+        new_agency = factories.AgencyFactory.create(**agency_to_create)
+        agency_dict[new_agency.agency_code] = new_agency
+
+    for agency_to_create in SUB_AGENCIES_TO_CREATE:
+        if agency_to_create["agency_code"] in agency_codes:
+            continue
+
+        logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
+
         top_level_agency_code = agency_to_create.get("top_level_agency")
-        top_level_agency = None
+        top_level_agency_id = None
         if top_level_agency_code:
-            top_level_agency = agency_dict.get(top_level_agency_code)
-            if not top_level_agency:
+            top_level_agency_id = agency_dict.get(top_level_agency_code).agency_id
+            if not top_level_agency_id:
                 logger.warning(
                     f"Top-level agency {top_level_agency_code} not found for {agency_to_create['agency_code']}"
                 )
+            agency_to_create["top_level_agency_id"] = top_level_agency_id
 
-        agency_to_create["top_level_agency"] = top_level_agency
-        factories.AgencyFactory.create(**agency_to_create)
+        factories.AgencyFactory.create(
+            agency_code=agency_to_create["agency_code"],
+            agency_name=agency_to_create["agency_name"],
+            top_level_agency_id=agency_to_create["top_level_agency_id"],
+        )
 
 
 @click.command()
