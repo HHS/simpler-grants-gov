@@ -16,7 +16,7 @@ defaults:
 # If new commits are pushed to the branch, cancel in progress runs and start
 # a new one.
 concurrency:
-  group: ${{ github.head_ref }}
+  group:  open-api-workflow-${{ github.head_ref }}
   cancel-in-progress: true
 
 
