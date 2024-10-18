@@ -40,9 +40,9 @@ data "aws_ssm_parameter" "search_endpoint_arn" {
 }
 
 provider "opensearch" {
-  url                = "https://${data.aws_ssm_parameter.search_endpoint_arn.value}"
-  username           = data.aws_ssm_parameter.search_username.value
-  password           = data.aws_ssm_parameter.search_password.value
+  url = "https://${data.aws_ssm_parameter.search_endpoint_arn.value}"
+  # username           = data.aws_ssm_parameter.search_username.value
+  # password           = data.aws_ssm_parameter.search_password.value
   aws_region         = data.aws_region.current.name
   opensearch_version = "2.15"
   insecure           = true
