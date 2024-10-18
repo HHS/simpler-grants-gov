@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           # Checkout the feature branch associated with the pull request
-          ref: ${{ github.head_ref }}
+          ref:  erd-diagram-workflow-${{ github.head_ref }}
 
       - name: Update OpenAPI spec
         run: make create-erds
