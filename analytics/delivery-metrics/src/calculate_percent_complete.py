@@ -244,6 +244,8 @@ class DeliveryMetricsPercentCompleteTotals:
 
 
 if __name__ == "__main__":
+	
+	perf_start = time.perf_counter()
 
 	def parseDateArg(d):
 		return time.strptime(d, '%Y%m%d')
@@ -265,6 +267,11 @@ if __name__ == "__main__":
 	print("verbose mode is {state}".format(state="ON" if args.verbose else "OFF"))
 	metrics = DeliveryMetricsPercentComplete(config, args.verbose)
 	metrics.calculate()
+	metrics = None
 	print("metrics calculations are done")
+
+	# measure execution time
+	elapsed_time = round(time.perf_counter() - perf_start, 4)
+	print("elapsed time: {} seconds".format(elapsed_time))
 
 

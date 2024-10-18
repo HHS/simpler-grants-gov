@@ -9,6 +9,11 @@ DROP TABLE IF EXISTS issue_history;
 DROP TABLE IF EXISTS issue_sprint_map;
 DROP TABLE IF EXISTS sprint;
 DROP TABLE IF EXISTS quad;
+DROP INDEX IF EXISTS dqm_i1;
+DROP INDEX IF EXISTS edm_i1;
+DROP INDEX IF EXISTS issue_i1;
+DROP INDEX IF EXISTS ih_i1;
+DROP INDEX IF EXISTS quad_i1;
 
 # create tables
 
@@ -29,6 +34,7 @@ CREATE TABLE deliverable_quad_map (
 	t_modified TIMESTAMP,
 	UNIQUE(deliverable_id, d_effective)
 );
+CREATE INDEX dqm_i1 on deliverable_quad_map(quad_id, d_effective);
 
 CREATE TABLE epic (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +52,7 @@ CREATE TABLE epic_deliverable_map (
 	t_modified TIMESTAMP,
 	UNIQUE(epic_id, d_effective)
 );
+CREATE INDEX edm_i1 on epic_deliverable_map(deliverable_id, d_effective);
 
 CREATE TABLE issue (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,6 +66,7 @@ CREATE TABLE issue (
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP 
 );
+CREATE INDEX issue_i1 on issue(epic_id);
 
 CREATE TABLE issue_history (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,6 +78,7 @@ CREATE TABLE issue_history (
 	t_modified TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
+CREATE INDEX ih_i1 on issue_history(issue_id, d_effective);
 
 CREATE TABLE issue_sprint_map (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,4 +111,5 @@ CREATE TABLE quad (
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP 
 );
+CREATE INDEX quad_i1 on quad(start_date);
  

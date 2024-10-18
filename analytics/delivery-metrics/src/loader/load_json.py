@@ -3,6 +3,7 @@
 from argparse import ArgumentParser, FileType
 from delivery_metrics_config import DeliveryMetricsConfig
 from delivery_metrics_loader import DeliveryMetricsDataLoader
+import functools 
 import os.path 
 import time
 
@@ -11,6 +12,8 @@ def parseDateArg(d):
 
 
 if __name__ == "__main__":
+
+	perf_start = time.perf_counter()
 
 	# define command line args
 	parser = ArgumentParser(description="Load a json file into the delivery metrics database")
@@ -30,5 +33,10 @@ if __name__ == "__main__":
 	print("...\nrunning data loader with effective date {}".format(config.effectiveDate()))
 	loader = DeliveryMetricsDataLoader(config, file_path)
 	loader.loadData()
-	print("data loader is done!")
+	loader = None
 
+	print("data loader is done")
+
+	# measure execution time
+	elapsed_time = round(time.perf_counter() - perf_start, 4)
+	print("elapsed time: {} seconds".format(elapsed_time))
