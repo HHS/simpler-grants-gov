@@ -45,6 +45,7 @@ provider "opensearch" {
   password           = data.aws_ssm_parameter.search_password.value
   aws_region         = data.aws_region.current.name
   opensearch_version = "2.15"
+  insecure           = true
   healthcheck        = false
   sign_aws_requests  = false
 }
