@@ -81,7 +81,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
     has_system_to_system_certificate: Mapped[bool] = mapped_column(default=False)
     can_view_packages_in_grace_period: Mapped[bool] = mapped_column(default=False)
     is_image_workspace_enabled: Mapped[bool] = mapped_column(default=False)
-    is_validation_workspace_enabled: Mapped[bool] = mapped_column(default=True)
+    is_validation_workspace_enabled: Mapped[bool] = mapped_column(default=False)
 
     link_agency_download_file_types: Mapped[list["LinkAgencyDownloadFileType"]] = relationship(
         back_populates="agency", uselist=True, cascade="all, delete-orphan"
