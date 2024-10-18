@@ -29,6 +29,7 @@ jobs:
         with:
           # Checkout the feature branch associated with the pull request
           ref: ${{ github.head_ref }}
+          fetch-depth: 1
 
       - name: Update OpenAPI spec
         run: make create-erds
