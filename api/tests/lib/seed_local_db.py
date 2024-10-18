@@ -120,20 +120,25 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
 # we can consider shoving this into a CSV that we load instead.
 AGENCIES_TO_CREATE = [
     {
+        "agency_id": 1,
         "agency_code": "USAID",
         "agency_name": "Agency for International Development",
     },
     {
+        "agency_id": 2,
         "agency_code": "ARPAH",
         "agency_name": "Advanced Research Projects Agency for Health",
     },
     {
+        "agency_id": 3,
         "agency_code": "DOC",
         "agency_name": "Agency for International Development",
     },
     {
+        "agency_id": 4,
         "agency_code": "DOC-EDA",
         "agency_name": "Agency for International Development",
+        "top_level_agency_id": 3,  # DOC
     },
 ]
 

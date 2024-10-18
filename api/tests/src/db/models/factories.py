@@ -239,8 +239,6 @@ class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
 
-    attachment_id = factory.Sequence(lambda n: n)
-
     file_location = factory.Faker("url")
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
@@ -721,6 +719,7 @@ class AgencyFactory(BaseFactory):
     is_image_workspace_enabled = factory.Faker("boolean")
     is_validation_workspace_enabled = factory.Faker("boolean")
 
+    top_level_agency_id = None
     agency_download_file_types = factory.Faker(
         "random_elements",
         length=random.randint(1, 2),
