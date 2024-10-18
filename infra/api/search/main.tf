@@ -27,10 +27,6 @@ module "project_config" {
   source = "../../project-config"
 }
 
-module "app_config" {
-  source = "../app-config"
-}
-
 data "aws_ssm_parameter" "search_username" {
   name = "/search/api-${var.environment_name}/username"
 }
