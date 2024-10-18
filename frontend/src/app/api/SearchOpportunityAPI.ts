@@ -112,6 +112,7 @@ export default class SearchOpportunityAPI extends BaseApi {
       agency: "agency_code",
       postedDate: "post_date",
       closeDate: "close_date",
+      relevancy: "relevancy",
     };
 
     let order_by: PaginationOrderBy = "post_date";

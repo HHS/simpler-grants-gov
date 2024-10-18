@@ -50,6 +50,10 @@ export default function SearchSortBy({
       label: t("sortBy.options.opportunity_number_asc"),
       value: "opportunityNumberAsc",
     },
+    {
+      label: t("sortBy.options.relevancy"),
+      value: "relevancyDesc",
+    },
   ];
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
