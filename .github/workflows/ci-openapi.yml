@@ -6,7 +6,7 @@ on:
     paths:
       - api/**
       - Makefile
-      - .github/workflows/ci-erd-openapi.yml
+      - ci-openapi.yml
 
 defaults:
   run:
