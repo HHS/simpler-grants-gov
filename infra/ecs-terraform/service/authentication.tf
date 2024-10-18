@@ -59,6 +59,15 @@ data "aws_iam_policy_document" "search_deployment" {
     ]
     resources = ["arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/simpler-grants-gov-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.name}-tf-state-locks"]
   }
+
+  statement {
+    sid = "TestingOpensearchAdminAccess"
+    effect = "Allow"
+    actions = [
+      "es:*",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "search_deployment" {
