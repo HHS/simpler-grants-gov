@@ -33,6 +33,7 @@ NULLABLE_FIELDS = {
 
 AGENCY_FIELD_MAP = {
     "AgencyName": "agency_name",
+    "TopAgencyName": "top_agency_name",
     "AgencyCode": "sub_agency_code",
     "AgencyCFDA": "assistance_listing_number",
     "AgencyDownload": "agency_download_file_types",

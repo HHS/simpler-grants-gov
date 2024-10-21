@@ -177,6 +177,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 
     agency_code: Mapped[str | None]
     agency_name: Mapped[str | None]
+    top_agency_name: Mapped[str | None]
     agency_phone_number: Mapped[str | None]
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]

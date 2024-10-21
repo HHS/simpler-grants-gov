@@ -41,6 +41,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
     agency_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
     agency_name: Mapped[str]
+    top_agency_name: Mapped[str]
 
     agency_code: Mapped[str] = mapped_column(index=True, unique=True)
     sub_agency_code: Mapped[str | None]

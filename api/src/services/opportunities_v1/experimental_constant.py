@@ -15,6 +15,7 @@ DEFAULT = [
 EXPANDED = [
     "agency.keyword",
     "agency_name",
+    "top_agency_name",
     "opportunity_title",
     "opportunity_number.keyword",
     "category_explanation",
@@ -29,6 +30,7 @@ EXPANDED = [
 AGENCY = [
     "agency.keyword",
     "agency_name",
+    "top_agency_name",
     "summary.agency_contact_description",
     "summary.agency_email_address.keyword",
     "summary.agency_email_address_description",
