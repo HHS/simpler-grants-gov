@@ -64,6 +64,7 @@ done
 # #######################################################
 
 mkdir -p tmp
+raw_data_file="tmp/closed-issue-data-raw.json"
 item_data_file="tmp/closed-issue-data.json"
 field_data_file="tmp/field-data.json"
 item_query=$(cat "queries/getItemMetadata.graphql")
@@ -74,11 +75,18 @@ field_query=$(cat "queries/getFieldMetadata.graphql")
 # #######################################################
 
 gh api graphql \
+ --header 'GraphQL-Features:issue_types' \
  --field url="${issue_url}" \
  --field sprintField="${sprint_field}" \
  --field pointsField="${points_field}" \
- -f query="${item_query}" \
- --jq ".data.resource.projectItems.nodes[] |
+ -f query="${item_query}" > $raw_data_file
+
+# #######################################################
+# Isolate the correct project item and issue type
+# #######################################################
+
+# Get project item
+jq ".data.resource.projectItems.nodes[] |
 
  # filter for the item in the given project
  select(.project.number == ${project}) |
@@ -93,31 +101,45 @@ gh api graphql \
    sprint: .sprint.iterationId,
    points: .points.number,
  }
- " > $item_data_file  # write output to a file
+ " $raw_data_file > $item_data_file  # read from raw and write to item_data_file
+
+# Get issue type
+issue_type=$(jq -r ".data.resource.issueType.name" $raw_data_file)
 
 # #######################################################
 # Fetch project metadata
 # #######################################################
 
-# if the output file contains a record
+# If the output file contains a record
 if [[ -s $item_data_file ]]; then
-    # fetch the project metadata
-    gh api graphql \
-     --field org="${org}" \
-     --field project="${project}" \
-     --field sprintField="${sprint_field}" \
-     --field pointsField="${points_field}" \
-     -f query="${field_query}" \
-     --jq ".data.organization.projectV2 |
 
-     # reformat the field metadata
-    {
-      points,
-      sprint: {
-        fieldId: .sprint.fieldId,
-        iterationId: .sprint.configuration.iterations[0].id,
-    }
-    }" > $field_data_file  # write output to a file
+    # If issue is a Task, Bug, or Enhancement, fetch the project metadata
+    case "${issue_type}" in
+    "Task"|"Bug"|"Enhancement")
+        gh api graphql \
+        --field org="${org}" \
+        --field project="${project}" \
+        --field sprintField="${sprint_field}" \
+        --field pointsField="${points_field}" \
+        -f query="${field_query}" \
+        --jq ".data.organization.projectV2 |
+
+        # reformat the field metadata
+        {
+          points,
+          sprint: {
+            fieldId: .sprint.fieldId,
+            iterationId: .sprint.configuration.iterations[0].id,
+          }
+        }" > $field_data_file  # write output to a file
+    ;;
+
+    # If it's some other type, print a message and exit
+    *)
+        echo "Not updating because issue has type: ${issue_type}"
+        exit 0
+    ;;
+    esac
 
     # get the itemId and the projectId
     item_id=$(jq -r '.itemId' "$item_data_file")
@@ -177,4 +199,20 @@ if jq -e ".sprint == null" $item_data_file > /dev/null; then
 
 else
     echo "Sprint value already set for issue: ${issue_url}"
+fi
+
+# #######################################################
+# Set the sprint value, if empty
+# #######################################################
+
+comment="Beep boop: Automatically setting the point and sprint values for this issue "
+comment+="in project ${org}/${project} because they were unset when the issue was closed."
+
+# Skip actual posting in dry-run mode
+if [[ $dry_run == "YES" ]]; then
+  echo "Would post comment: ${comment}"
+# otherwise post the comment
+else
+  gh issue comment "${issue_url}" \
+    --body "${comment}"
 fi
