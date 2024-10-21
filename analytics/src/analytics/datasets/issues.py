@@ -1,13 +1,20 @@
 """Transform exported issue data into a flattened list."""
 
-from enum import Enum
+from enum import StrEnum
+from typing import Self
 
+from pandas import DataFrame
 from pydantic import BaseModel, Field
 
-from analytics.datasets.utils import dump_to_json, load_json_file
+from analytics.datasets.base import BaseDataset
+from analytics.datasets.utils import load_json_file
+
+# ===============================================================
+# Dataset schema and enums
+# ===============================================================
 
 
-class IssueType(Enum):
+class IssueType(StrEnum):
     """Supported issue types."""
 
     BUG = "Bug"
@@ -15,7 +22,6 @@ class IssueType(Enum):
     EPIC = "Epic"
     ENHANCEMENT = "Enhancement"
     DELIVERABLE = "Deliverable"
-    NONE = None
 
 
 class IssueMetadata(BaseModel):
@@ -49,6 +55,47 @@ class IssueMetadata(BaseModel):
     deliverable_title: str | None = Field(default=None)
     epic_url: str | None = Field(default=None)
     epic_title: str | None = Field(default=None)
+
+
+# ===============================================================
+# Dataset class
+# ===============================================================
+
+
+class GitHubIssues(BaseDataset):
+    """GitHub issues with metadata about their parents (Epics and Deliverables) and sprints."""
+
+    def __init__(self, df: DataFrame) -> None:
+        """Initialize the GitHub Issues dataset."""
+        self.opened_col = "issue_created_at"
+        self.closed_col = "issue_closed_at"
+        self.sprint_col = "sprint_name"
+        self.sprint_start_col = "sprint_start"
+        self.sprint_end_col = "sprint_end"
+        super().__init__(df)
+
+    @classmethod
+    def load_from_json_files(
+        cls,
+        sprint_file: str = "data/sprint-data.json",
+        roadmap_file: str = "data/roadmap-data.json",
+    ) -> Self:
+        """Load GitHubIssues dataset from input json files."""
+        # Load sprint and roadmap data
+        sprint_data_in = load_json_file(sprint_file)
+        roadmap_data_in = load_json_file(roadmap_file)
+        # Populate a lookup table with this data
+        lookup: dict = {}
+        lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
+        lookup = populate_issue_lookup_table(lookup, sprint_data_in)
+        # Flatten and write issue level data to output file
+        issues = flatten_issue_data(lookup)
+        return cls(DataFrame(data=issues))
+
+
+# ===============================================================
+# Transformation helper functions
+# ===============================================================
 
 
 def populate_issue_lookup_table(
@@ -146,21 +193,3 @@ def flatten_issue_data(lookup: dict[str, IssueMetadata]) -> list[dict]:
 
     # Return the results
     return result
-
-
-def run_transformations(
-    sprint_file_in: str,
-    roadmap_file_in: str,
-    task_file_out: str,
-) -> None:
-    """Run a transformation pipeline to transform issue data to the correct format."""
-    # Load sprint and roadmap data
-    sprint_data_in = load_json_file(sprint_file_in)
-    roadmap_data_in = load_json_file(roadmap_file_in)
-    # Populate a lookup table with this data
-    lookup = {}
-    lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
-    lookup = populate_issue_lookup_table(lookup, sprint_data_in)
-    # Flatten and write issue level data to output file
-    tasks_out = flatten_issue_data(lookup)
-    dump_to_json(task_file_out, tasks_out)
