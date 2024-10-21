@@ -52,6 +52,13 @@ export const messages = {
       closing_warn:
         "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
     },
+    cta: {
+      title: "How to apply",
+      apply_content:
+        "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
+      closed_content: "",
+      button_content: "View on Grants.gov",
+    },
   },
   Index: {
     page_title: "Simpler.Grants.gov",
