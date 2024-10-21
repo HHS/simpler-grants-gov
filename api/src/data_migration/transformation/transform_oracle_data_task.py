@@ -5,7 +5,10 @@ from pydantic_settings import SettingsConfigDict
 
 import src.data_migration.transformation.transform_constants as transform_constants
 from src.adapters import db
-from src.data_migration.transformation.subtask.transform_agency import TransformAgency
+from src.data_migration.transformation.subtask.transform_agency import (
+    TransformAgency,
+    TransformAgencyHierarchy,
+)
 from src.data_migration.transformation.subtask.transform_applicant_type import (
     TransformApplicantType,
 )
@@ -81,3 +84,4 @@ class TransformOracleDataTask(Task):
 
         if self.transform_config.enable_agency:
             TransformAgency(self).run()
+            TransformAgencyHierarchy(self).run()
