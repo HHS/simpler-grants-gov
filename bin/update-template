@@ -1,0 +1,39 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# This script updates template-infra in your project. Run
+# this script from your project's root directory.
+#
+# Positional parameters:
+#   target_version (optional) – the version of template-infra to upgrade to.
+#     Defaults to main.
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+target_version=${1:-"main"}
+
+current_version=$(cat .template-version)
+
+echo "Clone template-infra"
+git clone https://github.com/navapbc/template-infra.git
+
+echo "Creating patch"
+cd template-infra
+git checkout "${target_version}"
+
+# Get version hash to update .template-version after patch is successful
+target_version_hash=$(git rev-parse HEAD)
+
+# Note: Keep this list in sync with the files copied in install-template
+git diff "${current_version}" "${target_version}" --binary -- .github bin docs infra e2e Makefile .dockleconfig .gitignore .grype.yml .hadolint.yaml .trivyignore .terraform-version >update.patch
+cd -
+
+echo "Applying patch"
+# Note: Keep this list in sync with the removed files in install-template
+exclude_opt="--exclude=.github/workflows/template-only-*"
+git apply "${exclude_opt}" --allow-empty template-infra/update.patch
+
+echo "Saving new template version to .template-infra"
+echo "${target_version_hash}" >.template-version
+
+echo "Clean up template-infra folder"
+rm -fr template-infra
