@@ -514,7 +514,7 @@ export const messages = {
         agency_desc: "Agency (Z to A)",
         opportunity_number_asc: "Opportunity Number (descending)",
         opportunity_number_desc: "Opportunity Number (ascending)",
-        relevancy: "Relevancy",
+        default: "Default / Most Relevant",
       },
       label: "Sort By",
     },

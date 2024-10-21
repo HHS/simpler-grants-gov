@@ -7,6 +7,7 @@ export interface SearchFilterRequestBody {
 }
 
 export type PaginationOrderBy =
+  | "relevancy"
   | "opportunity_id"
   | "opportunity_number"
   | "opportunity_title"
@@ -33,6 +34,24 @@ export enum SearchFetcherActionType {
   Update = "update",
 }
 
+export type SortOptions =
+  | "relevancy"
+  | "postedDateDesc"
+  | "postedDateAsc"
+  | "closeDateDesc"
+  | "closeDateAsc"
+  | "opportunityTitleAsc"
+  | "opportunityTitleDesc"
+  | "agencyAsc"
+  | "agencyDesc"
+  | "opportunityNumberDesc"
+  | "opportunityNumberAsc";
+
+export type SortOption = {
+  label: string;
+  value: SortOptions;
+};
+
 export interface QueryParamData {
   page: number;
   query: string | null | undefined;
@@ -41,7 +60,7 @@ export interface QueryParamData {
   eligibility: Set<string>;
   agency: Set<string>;
   category: Set<string>;
-  sortby: string | null;
+  sortby: SortOptions | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }

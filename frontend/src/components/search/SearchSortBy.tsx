@@ -2,15 +2,11 @@
 
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { SortOption } from "src/services/search/searchfetcher/SearchFetcher";
 
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
 import { Select } from "@trussworks/react-uswds";
-
-type SortOption = {
-  label: string;
-  value: string;
-};
 
 interface SearchSortByProps {
   queryTerm: string | null | undefined;
@@ -28,6 +24,10 @@ export default function SearchSortBy({
   const t = useTranslations("Search");
 
   const SORT_OPTIONS: SortOption[] = [
+    {
+      label: t("sortBy.options.default"),
+      value: "relevancy",
+    },
     { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
     { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
     { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
@@ -49,10 +49,6 @@ export default function SearchSortBy({
     {
       label: t("sortBy.options.opportunity_number_asc"),
       value: "opportunityNumberAsc",
-    },
-    {
-      label: t("sortBy.options.relevancy"),
-      value: "relevancyDesc",
     },
   ];
 
