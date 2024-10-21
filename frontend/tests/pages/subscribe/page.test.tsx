@@ -1,9 +1,8 @@
-import { render, screen } from "tests/react-utils";
 import { identity } from "lodash";
 import Subscribe from "src/app/[locale]/subscribe/page";
+import { render, screen } from "tests/react-utils";
 
 jest.mock("react-dom", () => {
-  
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const originalModule = jest.requireActual("react-dom");
 
@@ -22,7 +21,9 @@ jest.mock("react-dom", () => {
           },
         },
         // Mock setState function
-        () => {''},
+        () => {
+          ("");
+        },
       ],
     ],
   };
@@ -37,7 +38,9 @@ describe("Subscribe", () => {
   it("renders intro text", () => {
     render(<Subscribe />);
 
-    const content = screen.getByText("Subscribe to get Simpler.Grants.gov project updates in your inbox!");
+    const content = screen.getByText(
+      "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
+    );
 
     expect(content).toBeInTheDocument();
   });

@@ -15,7 +15,6 @@ jest.mock("next-intl/server", () => ({
   unstable_setRequestLocale: identity,
 }));
 
-
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
   useMessages: () => mockMessages,

@@ -13,7 +13,10 @@ type sendyResponse = {
   errorMessage: string;
 };
 
-export async function subscribeEmail(prevState: sendyResponse, formData: FormData) {
+export async function subscribeEmail(
+  prevState: sendyResponse,
+  formData: FormData,
+) {
   const t = await getTranslations("Subscribe");
 
   const { errorMessage, validationErrors } = await subscribeEmailAction(
