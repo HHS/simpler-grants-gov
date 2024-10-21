@@ -239,6 +239,7 @@ def transform_opportunity_summary(
     target_summary.funding_category_description = source_summary.oth_cat_fa_desc
     target_summary.applicant_eligibility_description = source_summary.applicant_elig_desc
     target_summary.agency_name = source_summary.ac_name
+    target_summary.top_agency_name = ''
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
