@@ -1,6 +1,9 @@
 import "server-only";
 
-import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import {
+  SearchFetcherActionType,
+  SortOptions,
+} from "src/types/search/searchRequestTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export interface QueryParamData {
@@ -11,7 +14,7 @@ export interface QueryParamData {
   eligibility: Set<string>;
   agency: Set<string>;
   category: Set<string>;
-  sortby: string | null;
+  sortby: SortOptions | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }

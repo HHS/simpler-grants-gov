@@ -99,7 +99,7 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
 
     # Add a secondary sort for relevancy to sort by post date (matching the sort direction)
     if pagination.order_by == "relevancy":
-        sort_by.append((_adjust_field_name("post_date"), pagination.sort_direction))
+        sort_by.append((_adjust_field_name("post_date"), SortDirection.DESCENDING))
 
     return sort_by
 
