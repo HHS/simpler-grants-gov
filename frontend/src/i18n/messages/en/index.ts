@@ -332,7 +332,7 @@ export const messages = {
       "If you sign up for the Simpler.Grants.gov product updates, we’ll keep you informed of our progress and you’ll know about every opportunity to get involved.",
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.", 
+      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
     form: {
       name: "First Name",
       lastName: "Last Name",
@@ -346,8 +346,9 @@ export const messages = {
       missing_email: "Please enter an email address.",
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
-      server: 'Failed to subscribe, due to a server error. Please try again later.',
-      already_subscribed: 'This email address has already been subscribed.',
+      server:
+        "Failed to subscribe, due to a server error. Please try again later.",
+      already_subscribed: "This email address has already been subscribed.",
     },
   },
   Subscription_confirmation: {

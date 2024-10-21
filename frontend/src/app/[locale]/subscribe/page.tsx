@@ -25,6 +25,7 @@ export async function generateMetadata() {
 }
 
 export default function Subscribe() {
+ 
   unstable_setRequestLocale("en");
   const t = useTranslations("Subscribe");
   const messages = useMessages();

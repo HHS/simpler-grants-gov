@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
+import { mockMessages, useTranslationsMock } from "tests/utils/intMocks";
 
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 

@@ -46,7 +46,7 @@ export default function SubscriptionForm() {
         </Label>
         {showError("name") ? (
           <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors["name"]![0]}
+            {state?.validationErrors.name?.[0]}
           </ErrorMessage>
         ) : (
           <></>
@@ -69,7 +69,7 @@ export default function SubscriptionForm() {
         </Label>
         {showError("email") ? (
           <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors["email"]![0]}
+            {state?.validationErrors.email?.[0]}
           </ErrorMessage>
         ) : (
           <></>
