@@ -9,6 +9,8 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
+rm -rf template-infra/
+
 target_version=${1:-"main"}
 
 current_version=$(cat .template-version)
@@ -30,7 +32,7 @@ cd -
 echo "Applying patch"
 # Note: Keep this list in sync with the removed files in install-template
 exclude_opt="--exclude=.github/workflows/template-only-*"
-git apply "${exclude_opt}" --allow-empty template-infra/update.patch
+git apply "${exclude_opt}" -3 --allow-empty template-infra/update.patch
 
 echo "Saving new template version to .template-infra"
 echo "${target_version_hash}" >.template-version
