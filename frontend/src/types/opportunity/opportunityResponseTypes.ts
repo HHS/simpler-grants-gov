@@ -1,3 +1,5 @@
+import { APIResponse } from "src/types/apiResponseTypes";
+
 export type OpportunityStatus = "archived" | "closed" | "posted" | "forecasted";
 
 export interface OpportunityAssistanceListing {
@@ -55,8 +57,6 @@ export interface Opportunity {
   updated_at: string;
 }
 
-export interface OpportunityApiResponse {
+export interface OpportunityApiResponse extends APIResponse {
   data: Opportunity;
-  message: string;
-  status_code: number;
 }
