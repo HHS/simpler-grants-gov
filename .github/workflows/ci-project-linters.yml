@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      # Test issue with points and sprint values unset
+      # to be used with set-points-and-sprint.sh test
       UNSET_ISSUE: "https://github.com/HHS/simpler-grants-gov/issues/1932"
     steps:
       - uses: actions/checkout@v4
