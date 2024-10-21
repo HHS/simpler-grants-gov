@@ -15,6 +15,7 @@ export interface Summary {
   agency_email_address: string | null;
   agency_email_address_description: string | null;
   agency_name: string | null;
+  top_agency_name: string | null;
   agency_phone_number: string | null;
   applicant_eligibility_description: string | null;
   applicant_types: string[] | null;
