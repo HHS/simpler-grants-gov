@@ -1,37 +1,48 @@
 import "server-only";
 
-import { environment } from "src/constants/environments";
+import BaseApi from "src/app/api/BaseApi";
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
-  PaginationSortDirection,
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
-import BaseApi from "./BaseApi";
+const orderByFieldLookup = {
+  opportunityNumber: "opportunity_number",
+  opportunityTitle: "opportunity_title",
+  agency: "agency_code",
+  postedDate: "post_date",
+  closeDate: "close_date",
+};
+
+type FrontendFilterNames =
+  | "status"
+  | "fundingInstrument"
+  | "eligibility"
+  | "agency"
+  | "category";
+
+const filterNameMap = {
+  status: "opportunity_status",
+  fundingInstrument: "funding_instrument",
+  eligibility: "applicant_type",
+  agency: "agency",
+  category: "funding_category",
+} as const;
 
 export default class SearchOpportunityAPI extends BaseApi {
-  get basePath(): string {
-    return environment.API_URL;
-  }
-
   get namespace(): string {
     return "opportunities";
   }
 
-  get headers() {
-    const baseHeaders = super.headers;
-    const searchHeaders = {};
-    return { ...baseHeaders, ...searchHeaders };
-  }
-
   async searchOpportunities(searchInputs: QueryParamData) {
     const { query } = searchInputs;
-    const filters = this.buildFilters(searchInputs);
-    const pagination = this.buildPagination(searchInputs);
+    const filters = buildFilters(searchInputs);
+    const pagination = buildPagination(searchInputs);
 
     const requestBody: SearchRequestBody = { pagination };
 
@@ -44,93 +55,68 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody.query = query;
     }
 
-    const subPath = "search";
-    const response = await this.request(
+    const response = await this.request<SearchAPIResponse>(
       "POST",
-      this.basePath,
-      this.namespace,
-      subPath,
+      "search",
       searchInputs,
       requestBody,
     );
 
     return response;
   }
+}
 
-  // Build with one_of syntax
-  private buildFilters(searchInputs: QueryParamData): SearchFilterRequestBody {
-    const { status, fundingInstrument, eligibility, agency, category } =
-      searchInputs;
-    const filters: SearchFilterRequestBody = {};
+// Translate frontend filter param names to expected backend parameter names, and use one_of syntax
+export const buildFilters = (
+  searchInputs: QueryParamData,
+): SearchFilterRequestBody => {
+  return Object.entries(filterNameMap).reduce(
+    (filters, [frontendFilterName, backendFilterName]) => {
+      const filterData =
+        searchInputs[frontendFilterName as FrontendFilterNames];
+      if (filterData && filterData.size) {
+        filters[backendFilterName] = { one_of: Array.from(filterData) };
+      }
+      return filters;
+    },
+    {} as SearchFilterRequestBody,
+  );
+};
 
-    if (status && status.size > 0) {
-      filters.opportunity_status = { one_of: Array.from(status) };
-    }
-    if (fundingInstrument && fundingInstrument.size > 0) {
-      filters.funding_instrument = { one_of: Array.from(fundingInstrument) };
-    }
+export const buildPagination = (
+  searchInputs: QueryParamData,
+): PaginationRequestBody => {
+  const { sortby, page, fieldChanged } = searchInputs;
 
-    if (eligibility && eligibility.size > 0) {
-      // Note that eligibility gets remapped to the API name of "applicant_type"
-      filters.applicant_type = { one_of: Array.from(eligibility) };
-    }
+  // When performing an update (query, filter, sortby change) - we want to
+  // start back at the 1st page (we never want to retain the current page).
+  // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
+  // clear the page query param and set the page back to 1.
+  // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
+  // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
+  const page_offset =
+    searchInputs.actionType === SearchFetcherActionType.Update &&
+    fieldChanged !== "pagination"
+      ? 1
+      : page;
 
-    if (agency && agency.size > 0) {
-      filters.agency = { one_of: Array.from(agency) };
-    }
-
-    if (category && category.size > 0) {
-      // Note that category gets remapped to the API name of "funding_category"
-      filters.funding_category = { one_of: Array.from(category) };
-    }
-
-    return filters;
-  }
-
-  private buildPagination(searchInputs: QueryParamData): PaginationRequestBody {
-    const { sortby, page, fieldChanged } = searchInputs;
-
-    // When performing an update (query, filter, sortby change) - we want to
-    // start back at the 1st page (we never want to retain the current page).
-    // In addition to this statement - on the client (handleSubmit in useSearchFormState), we
-    // clear the page query param and set the page back to 1.
-    // On initial load (SearchFetcherActionType.InitialLoad) we honor the page the user sent. There is validation guards
-    // in convertSearchParamstoProperTypes keep 1<= page <= max_possible_page
-    const page_offset =
-      searchInputs.actionType === SearchFetcherActionType.Update &&
-      fieldChanged !== "pagination"
-        ? 1
-        : page;
-
-    const orderByFieldLookup = {
-      opportunityNumber: "opportunity_number",
-      opportunityTitle: "opportunity_title",
-      agency: "agency_code",
-      postedDate: "post_date",
-      closeDate: "close_date",
-    };
-
-    let order_by: PaginationOrderBy = "post_date";
-    if (sortby) {
-      for (const [key, value] of Object.entries(orderByFieldLookup)) {
-        if (sortby.startsWith(key)) {
-          order_by = value as PaginationOrderBy;
-          break; // Stop searching after the first match is found
-        }
+  let order_by: PaginationOrderBy = "post_date";
+  if (sortby) {
+    for (const [key, value] of Object.entries(orderByFieldLookup)) {
+      if (sortby.startsWith(key)) {
+        order_by = value as PaginationOrderBy;
+        break; // Stop searching after the first match is found
       }
     }
-
-    // default to descending
-    let sort_direction: PaginationSortDirection = "descending";
-    if (sortby) {
-      sort_direction = sortby?.endsWith("Desc") ? "descending" : "ascending";
-    }
-
-    return {
-      order_by,
-      page_offset,
-      page_size: 25,
-      sort_direction,
-    };
   }
-}
+
+  const sort_direction =
+    sortby && !sortby.endsWith("Desc") ? "ascending" : "descending";
+
+  return {
+    order_by,
+    page_offset,
+    page_size: 25,
+    sort_direction,
+  };
+};

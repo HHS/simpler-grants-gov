@@ -14,6 +14,26 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   await page.click(".usa-search > button[type='submit']");
 }
 
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+// adapted from https://stackoverflow.com/a/1349426
+export const generateRandomString = (desiredPattern: number[]) => {
+  const numberOfPossibleCharacters = characters.length;
+  return desiredPattern.reduce((randomString, numberOfCharacters, index) => {
+    let counter = 0;
+    while (counter < numberOfCharacters) {
+      randomString += characters.charAt(
+        Math.floor(Math.random() * numberOfPossibleCharacters),
+      );
+      counter += 1;
+    }
+    if (index < desiredPattern.length - 1) {
+      randomString += " ";
+    }
+    return randomString;
+  }, "");
+};
+
 export function expectURLContainsQueryParam(
   page: Page,
   queryParamName: string,
