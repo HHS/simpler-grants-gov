@@ -21,7 +21,7 @@ jobs:
 
       - name: Set default values for sprint and points if unset
         run: |
-          ./set-points-and-sprint.sh \
+          ./scripts/set-points-and-sprint.sh \
             --url "$ISSUE_URL" \
             --org HHS \
             --project 13 \
