@@ -22,7 +22,7 @@ test("client side errors", async ({ page }) => {
   await expect(page.getByText("Please enter an email address.")).toBeVisible();
 });
 
-//eslint-disable-next-line jest/no-disabled-tests
+// eslint-disable-next-line jest/no-disabled-tests
 test.skip("successful signup", async ({ page }) => {
   // TODO: mock a successful response
   //
@@ -45,7 +45,7 @@ test.skip("successful signup", async ({ page }) => {
   ).toBeVisible();
 });
 
-//eslint-disable-next-line jest/no-disabled-tests
+// eslint-disable-next-line jest/no-disabled-tests
 test.skip("error during signup", async ({ page }) => {
   // TODO: mock a error response
   //
