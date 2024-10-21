@@ -1,8 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import SubscriptionForm from "src/app/[locale]/subscribe/SubscriptionForm";
-import subscribeEmail from "src/app/actions";
+import { render, screen } from "@testing-library/react";
 import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
+
+import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import subscribeEmail from "src/app/actions";
+import { subscribeEmail } from "src/app/[locale]/subscribe/actions";
 
 import { useTranslations } from "next-intl";
 import React from "react";
@@ -14,7 +14,7 @@ import {
 
 import { SubscriptionSubmitButton } from "./SubscriptionSubmitButton";
 
-type validationErrors = {
+export type ValidationErrors = {
   name?: string[];
   email?: string[];
 };
@@ -31,7 +31,7 @@ export default function SubscriptionForm() {
     if (!state?.validationErrors) return false;
 
     return (
-      state?.validationErrors[fieldName as keyof validationErrors] !== undefined
+      state?.validationErrors[fieldName as keyof ValidationErrors] !== undefined
     );
   };
 

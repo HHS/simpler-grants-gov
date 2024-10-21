@@ -6,6 +6,13 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { ValidationErrors } from "../../../components/subscribe/SubscriptionForm";
+
+type sendyResponse = {
+  validationErrors: ValidationErrors;
+  errorMessage: string;
+};
+
 export async function subscribeEmail(prevState: any, formData: FormData) {
   const t = await getTranslations("Subscribe");
 
@@ -28,7 +35,7 @@ export async function subscribeEmailAction(
   t: any,
   prevState: any,
   formData: FormData,
-) {
+): Promise<sendyResponse> {
   const schema = z.object({
     name: z.string().min(1, {
       message: t("errors.missing_name"),
@@ -65,11 +72,6 @@ export async function subscribeEmailAction(
     hp: formData.get("hp") as string,
   };
 
-  console.log(
-    "Server Action: TODO - Subscribe a user entered email to a email sending service (sendy?)",
-  );
-  console.log("Form Data:", rawFormData);
-
   // TODO: Implement the email subscription logic here, putting old SENDY code here for reference
   // Note: Noone is sure where the api url/key/list ID are at the moment and I believe the intention is
   // to move away from SENDY to a different service.
@@ -96,11 +98,7 @@ export async function subscribeEmailAction(
       body: new URLSearchParams(requestData),
     });
 
-    console.log(sendyResponse);
-
     const responseData = await sendyResponse.text();
-    console.log("SENDY Response:", responseData);
-
     // If the user is already subscribed, return an error message
     if (responseData.includes("Already subscribed")) {
       return {
@@ -117,7 +115,7 @@ export async function subscribeEmailAction(
       };
     }
   } catch (error) {
-    //General try failure catch error
+    // General try failure catch error
     console.error("Error subscribing user:", (<Error>error).message);
     return {
       errorMessage: t("errors.server"),

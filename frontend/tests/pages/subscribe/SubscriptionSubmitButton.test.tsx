@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { SubscriptionSubmitButton } from "src/app/[locale]/subscribe/SubscriptionSubmitButton";
 import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
+
+import { SubscriptionSubmitButton } from "src/components/subscribe/SubscriptionSubmitButton";
 
 jest.mock("react-dom", () => {
   const originalModule = jest.requireActual("react-dom");
