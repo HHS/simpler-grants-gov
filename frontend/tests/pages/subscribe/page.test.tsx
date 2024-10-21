@@ -4,9 +4,8 @@ import Subscribe from "src/app/[locale]/subscribe/page";
 import { mockMessages, useTranslationsMock } from "tests/utils/intlMocks";
 
 //TODO: This mock is not working as expected, I suspect
-jest.mock('react-dom', () => {
-  const originalModule =
-    jest.requireActual('react-dom');
+jest.mock("react-dom", () => {
+  const originalModule = jest.requireActual("react-dom");
 
   return {
     ...originalModule,
@@ -16,10 +15,13 @@ jest.mock('react-dom', () => {
         {
           // Return a mock state object
           errorMessage: "errors.server",
-          validationErrors: {name: ['errors.missing_name'], email: ['errors.missing_email', 'errors.invalid_email']},
+          validationErrors: {
+            name: ["errors.missing_name"],
+            email: ["errors.missing_email", "errors.invalid_email"],
+          },
         },
         // Mock setState function
-        (() => {}),
+        () => {},
       ],
     ],
   };
@@ -35,7 +37,7 @@ jest.mock("next-intl", () => ({
   useMessages: () => mockMessages,
 }));
 
-jest.mock('src/app/actions', () => ({
+jest.mock("src/app/actions", () => ({
   __esModule: true,
   default: jest.fn(), // The server action that is called when the form is submitted
 }));
