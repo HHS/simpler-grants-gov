@@ -41,7 +41,7 @@ locals {
     # to access the "app" database where the analytics data is stored.
     #
     # You can find the value of < ROOT USER > by running:
-    # SELECT username AS role_name FROM pg_catalog.pg_user ORDER BY role_name desc;
+    # SELECT usename AS role_name FROM pg_catalog.pg_user ORDER BY role_name desc;
     # It is the user that starts with `root`
     #
     #     CREATE ROLE metabaserole;
