@@ -285,7 +285,6 @@ class TransformAgencyHierarchy(AbstractTransformSubTask):
             if top_level_agency_code and top_level_agency_code in agency_map:
                 agency.top_level_agency = agency_map[top_level_agency_code]
 
-        self.db_session.commit()
 
     def get_top_level_agency_code(self, agency_code: str) -> str | None:
         if "-" not in agency_code:
