@@ -10,7 +10,8 @@ from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.integrations import db, github, slack
+from analytics.integrations import db, slack
+from analytics.integrations.github import main
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -61,7 +62,7 @@ def export_github_project_data(
     output_file: Annotated[str, OUTPUT_FILE_ARG],
 ) -> None:
     """Export data about items in a GitHub project and write it to an output file."""
-    github.export_project_data(owner, project, output_file)
+    main.export_project_data(owner, project, output_file)
 
 
 @export_app.command(name="gh_issue_data")
@@ -71,7 +72,7 @@ def export_github_issue_data(
     output_file: Annotated[str, OUTPUT_FILE_ARG],
 ) -> None:
     """Export data about issues a GitHub repo and write it to an output file."""
-    github.export_issue_data(owner, repo, output_file)
+    main.export_issue_data(owner, repo, output_file)
 
 
 @metrics_app.command(name="sprint_burndown")
