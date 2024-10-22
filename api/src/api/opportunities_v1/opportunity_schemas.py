@@ -185,13 +185,6 @@ class OpportunitySummaryV1Schema(Schema):
             "example": "US Alphabetical Basic Corp",
         },
     )
-    top_agency_name = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The name of the top level agency who owns the opportunity",
-            "example": "US Alphabetical Basic Corp",
-        },
-    )
     agency_phone_number = fields.String(
         allow_none=True,
         metadata={
