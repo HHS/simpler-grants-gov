@@ -1,5 +1,3 @@
-trigger build
-
 # Simpler Grants Analytics
 
 ## Introduction
