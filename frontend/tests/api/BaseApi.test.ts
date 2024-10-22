@@ -6,6 +6,7 @@ import BaseApi, {
   JSONRequestBody,
 } from "src/app/api/BaseApi";
 import { NetworkError, UnauthorizedError } from "src/errors";
+import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
 // Define a concrete implementation of BaseApi for testing
 class TestApi extends BaseApi {
@@ -18,14 +19,14 @@ class TestApi extends BaseApi {
   }
 }
 
-const searchInputs = {
+const searchInputs: QueryParamData = {
   status: new Set(["active"]),
   fundingInstrument: new Set(["grant"]),
   eligibility: new Set(["public"]),
   agency: new Set(["NASA"]),
   category: new Set(["science"]),
   query: "space exploration",
-  sortby: "date",
+  sortby: "relevancy",
   page: 1,
 };
 

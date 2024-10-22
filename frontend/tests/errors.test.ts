@@ -10,7 +10,7 @@ describe("BadRequestError", () => {
     agency: new Set(["NASA"]),
     category: new Set(["science"]),
     query: "space exploration",
-    sortby: "date",
+    sortby: "relevancy",
     page: 1,
   };
 
