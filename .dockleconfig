@@ -3,4 +3,4 @@
 # DOCKLE_ACCEPT_FILES="file1,path/to/file2,file3/path,etc"
 # https://github.com/goodwithtech/dockle#accept-suspicious-environment-variables--files--file-extensions
 # The apiflask/settings file is a stub file that apiflask creates, and has no sensitive data in. We are ignoring it since it is unused
-DOCKLE_ACCEPT_FILES=api/.venv/lib/python3.12/site-packages/apiflask/settings.py,analytics/.venv/lib/python3.12/site-packages/jedi/settings.py
+DOCKLE_ACCEPT_FILES=api/.venv/lib/python3.13/site-packages/apiflask/settings.py,analytics/.venv/lib/python3.12/site-packages/jedi/settings.py
