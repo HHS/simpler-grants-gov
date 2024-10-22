@@ -6,38 +6,47 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const OpportunityContentBox = ({
+export const OpportunityContentBox = ({
   title,
   content,
 }: {
-  title: string | ReactNode;
+  title?: string | ReactNode;
   content: string | ReactNode;
 }) => {
   return (
     <div className="border radius-md border-base-lighter padding-x-2">
-      <p className="font-sans-sm text-bold margin-bottom-0">{title}</p>
+      {title && <p className="text-bold margin-bottom-0">{title}</p>}
       <p className="desktop-lg:font-sans-sm margin-top-0">{content}</p>
     </div>
   );
 };
 
-const OpportunityCTA = ({ status }: { status: OpportunityStatus }) => {
+const OpportunityCTA = ({
+  status,
+  id,
+}: {
+  status: OpportunityStatus;
+  id: number;
+}) => {
   const t = useTranslations("OpportunityListing.cta");
 
   // will likely be dynamic based on status
   const titleKey = status === "posted" ? "apply_title" : "closed_title";
   const contentKey = status === "posted" ? "apply_content" : "closed_content";
+  const externalOpportunity = `https://grants.gov/search-results-detail/${id}`;
 
   const content = (
     <>
       <span>{t(contentKey)}</span>
-      <Button type="button" outline={true} className="margin-top-2">
-        <span>{t("button_content")}</span>
-        <USWDSIcon
-          name="launch"
-          className="usa-icon usa-icon--size-4 text-middle"
-        />
-      </Button>
+      <a href={externalOpportunity} target="_blank" rel="noopener noreferrer">
+        <Button type="button" outline={true} className="margin-top-2">
+          <span>{t("button_content")}</span>
+          <USWDSIcon
+            name="launch"
+            className="usa-icon usa-icon--size-4 text-middle"
+          />
+        </Button>
+      </a>
     </>
   );
 
