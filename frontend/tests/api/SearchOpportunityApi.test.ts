@@ -136,7 +136,7 @@ describe("SearchOpportunityAPI", () => {
         ...{ page: 5, sortby: null },
       });
 
-      expect(pagination.order_by).toEqual("post_date");
+      expect(pagination.order_by).toEqual("relevancy");
       expect(pagination.page_offset).toEqual(5);
       expect(pagination.sort_direction).toEqual("descending");
     });
@@ -182,14 +182,14 @@ describe("SearchOpportunityAPI", () => {
     it("builds correct order_by based on sortby", () => {
       const pagination = buildPagination({
         ...searchProps,
-        ...{ sortby: "closeDate" },
+        ...{ sortby: "closeDateAsc" },
       });
 
       expect(pagination.order_by).toEqual("close_date");
 
       const secondPagination = buildPagination({
         ...searchProps,
-        ...{ sortby: "postedDate" },
+        ...{ sortby: "postedDateAsc" },
       });
 
       expect(secondPagination.order_by).toEqual("post_date");

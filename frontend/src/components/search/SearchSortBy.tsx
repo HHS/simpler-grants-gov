@@ -2,7 +2,7 @@
 
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { SortOption } from "src/services/search/searchfetcher/SearchFetcher";
+import { SortOption } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
