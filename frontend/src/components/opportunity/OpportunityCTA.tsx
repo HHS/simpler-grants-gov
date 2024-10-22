@@ -30,7 +30,6 @@ const OpportunityCTA = ({
 }) => {
   const t = useTranslations("OpportunityListing.cta");
 
-  // will likely be dynamic based on status
   const titleKey = status === "posted" ? "apply_title" : "closed_title";
   const contentKey = status === "posted" ? "apply_content" : "closed_content";
   const externalOpportunity = `https://grants.gov/search-results-detail/${id}`;
