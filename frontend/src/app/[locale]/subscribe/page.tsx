@@ -1,6 +1,5 @@
 import pick from "lodash/pick";
 import { Metadata } from "next";
-import SubscriptionForm from "src/app/[locale]/subscribe/SubscriptionForm";
 import { SUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 
 import {
@@ -13,6 +12,7 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
