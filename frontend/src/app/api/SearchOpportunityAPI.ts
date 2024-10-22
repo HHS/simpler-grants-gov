@@ -12,6 +12,7 @@ import {
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 const orderByFieldLookup = {
+  relevancy: "relevancy",
   opportunityNumber: "opportunity_number",
   opportunityTitle: "opportunity_title",
   agency: "agency_code",
@@ -100,7 +101,7 @@ export const buildPagination = (
       ? 1
       : page;
 
-  let order_by: PaginationOrderBy = "post_date";
+  let order_by: PaginationOrderBy = "relevancy";
   if (sortby) {
     for (const [key, value] of Object.entries(orderByFieldLookup)) {
       if (sortby.startsWith(key)) {
@@ -110,8 +111,9 @@ export const buildPagination = (
     }
   }
 
+  // sort relevancy descending without suffix
   const sort_direction =
-    sortby && !sortby.endsWith("Desc") ? "ascending" : "descending";
+    sortby && sortby.endsWith("Asc") ? "ascending" : "descending";
 
   return {
     order_by,
