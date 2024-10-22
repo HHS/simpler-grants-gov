@@ -72,3 +72,10 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_role_
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.role_manager.id
 }
+
+resource "aws_ssm_parameter" "database_security_group_id" {
+  name        = "/${var.name}/security-group-id"
+  description = "The id of the security group for the database"
+  type        = "SecureString"
+  value       = aws_security_group.db.id
+}
