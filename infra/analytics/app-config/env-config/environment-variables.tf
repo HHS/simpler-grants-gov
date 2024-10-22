@@ -33,18 +33,46 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/reporting-channel-id"
     }
+    #
     # Create this manually in the AWS console via the RDS Query Editor
+    # inside of the analytics RDS instance and the `app` database.
+    #
+    # This database is configured by Metabase on application startup.
+    #
+    # You can find the value of < ROOT USER > by running:
+    # SELECT usename AS role_name FROM pg_catalog.pg_user ORDER BY role_name desc;
+    # It is the user that starts with `root`
     #
     # CREATE ROLE metabaserole;
-    # GRANT metabase TO "< ROOT USER >";
-    # CREATE DATABASE metabase OWNER = "< ROOT USER >";
-    # CREATE USER metabaseuser WITH PASSWORD "< RANDOM PASSWORD >"; <== add this to Parameter Store
+    # GRANT metabase TO '< ROOT USER >';                            -- retrieve this from the database
+    # CREATE DATABASE metabase OWNER = '< ROOT USER >';
+    # CREATE USER metabaseuser WITH PASSWORD '< RANDOM PASSWORD >'; -- add this to Parameter Store
     # GRANT ALL PRIVILEGES ON DATABASE metabase TO metabaseuser;
     # GRANT CONNECT ON DATABASE metabase TO metabaseuser;
     # GRANT metabaserole TO metabaseuser;
+    #
     MB_DB_PASS = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
-    }
+    },
+    #
+    # Create this manually in the AWS console via the RDS Query Editor
+    # inside of the API RDS instance and the `app` database.
+    #
+    # This database is configured inside of the Metabase UI.
+    # Which is to say, this environment variable is not used by Metabase directly.
+    # It's being added here for documentation purposes, as it is
+    # configured in a similar way to the Metabase analytics database.
+    #
+    # CREATE ROLE metabaserole;
+    # CREATE USER metabaseuser WITH PASSWORD '< RANDOM PASSWORD >'; -- add this to Parameter Store
+    # GRANT ALL PRIVILEGES ON DATABASE app TO metabaseuser;
+    # GRANT CONNECT ON DATABASE app TO metabaseuser;
+    # GRANT metabaserole TO metabaseuser;
+    #
+    # API_DB_PASS = {
+    #   manage_method     = "manual"
+    #   secret_store_name = "/${var.app_name}/${var.environment}/metabase-api-db-pass"
+    # }
   }
 }
