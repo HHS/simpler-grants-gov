@@ -34,6 +34,7 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         [
             AgencyFactory.create(agency_code="DHS"),
             AgencyFactory.create(agency_code="DHS-ICE"),
+            AgencyFactory.create(agency_code="DHS--ICE"),
             AgencyFactory.create(agency_code="DHS-ICE-123"),
             AgencyFactory.create(agency_code="ABC-ICE"),
         ]
@@ -46,12 +47,14 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
         agency2 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE").one_or_none()
         agency3 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE-123").one_or_none()
         agency4 = db_session.query(Agency).filter(Agency.agency_code == "ABC-ICE").one_or_none()
+        agency5 = db_session.query(Agency).filter(Agency.agency_code == "DHS--ICE").one_or_none()
 
         # Verify that the top-level agencies are set correctly
         assert agency1.top_level_agency_id is None
         assert agency2.top_level_agency_id == agency1.agency_id
         assert agency3.top_level_agency_id == agency1.agency_id
         assert agency4.top_level_agency_id is None
+        assert agency5.top_level_agency_id == agency1.agency_id
 
     def test_get_top_level_agency_code(self, transform_agency_hierarchy):
         assert transform_agency_hierarchy.get_top_level_agency_code("DHS-ICE") == "DHS"
