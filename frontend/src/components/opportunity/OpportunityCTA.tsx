@@ -1,3 +1,5 @@
+import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
+
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
 import { Button } from "@trussworks/react-uswds";
@@ -19,15 +21,12 @@ const OpportunityContentBox = ({
   );
 };
 
-const OpportunityCTA = ({ status }: { status: string }) => {
+const OpportunityCTA = ({ status }: { status: OpportunityStatus }) => {
   const t = useTranslations("OpportunityListing.cta");
 
   // will likely be dynamic based on status
-  const titleKey = "title";
-  const contentKey =
-    status === "closed" || status === "archived"
-      ? "closed_content"
-      : "apply_content";
+  const titleKey = status === "posted" ? "apply_title" : "closed_title";
+  const contentKey = status === "posted" ? "apply_content" : "closed_content";
 
   const content = (
     <>
