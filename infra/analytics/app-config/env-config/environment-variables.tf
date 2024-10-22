@@ -47,7 +47,7 @@ locals {
     #     CREATE ROLE metabaserole;
     #     GRANT metabase TO '< ROOT USER >';                            -- retrieve this from the database
     #     CREATE DATABASE metabase OWNER = '< ROOT USER >';
-    #     CREATE USER metabaseuser WITH PASSWORD '< RANDOM PASSWORD >'; -- add this to Parameter Store
+    #     CREATE USER metabaseuser WITH PASSWORD '< RANDOM PASSWORD >'; -- add this to Parameter Store at the "secret_store_name" path
     #     GRANT metabaserole TO metabaseuser;
     #
     #     -- the "metabase" database is where metabase configuration is stored, like user logins
