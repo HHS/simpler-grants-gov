@@ -12,7 +12,7 @@ Opportunities include supporting documents that help define the opportunity, pro
 
 ## Decision Drivers <!-- RECOMMENDED -->
 
-- Use the platform
+- Use the AWS and Nava platforms whenever feasible
 - Minimize cost per file (there will be a large number of files, but most will be rarely, if ever, accessed once the Opportunity closes)
 - Ease of processing - Use the best tools, with already supported libraries as they're intended
 - Follow best practices
