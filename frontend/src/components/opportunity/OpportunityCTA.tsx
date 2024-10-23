@@ -30,7 +30,6 @@ const OpportunityCTA = ({
 }) => {
   const t = useTranslations("OpportunityListing.cta");
 
-  const titleKey = status === "posted" ? "apply_title" : "closed_title";
   const contentKey = status === "posted" ? "apply_content" : "closed_content";
   const externalOpportunity = `https://grants.gov/search-results-detail/${id}`;
 
@@ -51,7 +50,7 @@ const OpportunityCTA = ({
 
   return (
     <div className="usa-prose margin-top-2">
-      <OpportunityContentBox title={t(titleKey)} content={content} />
+      <OpportunityContentBox title={t("apply_title")} content={content} />
     </div>
   );
 };

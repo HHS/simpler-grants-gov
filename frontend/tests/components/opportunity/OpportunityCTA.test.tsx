@@ -20,17 +20,14 @@ describe("OpportunityCTA", () => {
   it("renders the expected content based on closed / non-posted status", () => {
     const { rerender } = render(<OpportunityCTA status={"closed"} id={1} />);
 
-    expect(screen.getByText("closed_title")).toBeInTheDocument();
     expect(screen.getByText("closed_content")).toBeInTheDocument();
 
     rerender(<OpportunityCTA status={"archived"} id={1} />);
 
-    expect(screen.getByText("closed_title")).toBeInTheDocument();
     expect(screen.getByText("closed_content")).toBeInTheDocument();
 
     rerender(<OpportunityCTA status={"forecasted"} id={1} />);
 
-    expect(screen.getByText("closed_title")).toBeInTheDocument();
     expect(screen.getByText("closed_content")).toBeInTheDocument();
   });
 
