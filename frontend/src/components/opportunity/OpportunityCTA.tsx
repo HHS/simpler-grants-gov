@@ -1,4 +1,4 @@
-import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
+import { environment } from "src/constants/environments";
 
 import { useTranslations } from "next-intl";
 import { ReactNode } from "react";
@@ -21,22 +21,14 @@ export const OpportunityContentBox = ({
   );
 };
 
-const OpportunityCTA = ({
-  status,
-  id,
-}: {
-  status: OpportunityStatus;
-  id: number;
-}) => {
+const OpportunityCTA = ({ id }: { id: number }) => {
   const t = useTranslations("OpportunityListing.cta");
-
-  const contentKey = status === "posted" ? "apply_content" : "closed_content";
-  const externalOpportunity = `https://grants.gov/search-results-detail/${id}`;
+  const legacyOpportunityURL = `${environment.LEGACY_HOST}/search-results-detail/${id}`;
 
   const content = (
     <>
-      <span>{t(contentKey)}</span>
-      <a href={externalOpportunity} target="_blank" rel="noopener noreferrer">
+      <span>{t("apply_content")}</span>
+      <a href={legacyOpportunityURL} target="_blank" rel="noopener noreferrer">
         <Button type="button" outline={true} className="margin-top-2">
           <span>{t("button_content")}</span>
           <USWDSIcon

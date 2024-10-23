@@ -10,35 +10,21 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("OpportunityCTA", () => {
-  it("renders the expected content based on posted status", () => {
-    render(<OpportunityCTA status={"posted"} id={1} />);
+  it("renders the expected content and title", () => {
+    render(<OpportunityCTA id={1} />);
 
     expect(screen.getByText("apply_title")).toBeInTheDocument();
     expect(screen.getByText("apply_content")).toBeInTheDocument();
   });
 
-  it("renders the expected content based on closed / non-posted status", () => {
-    const { rerender } = render(<OpportunityCTA status={"closed"} id={1} />);
-
-    expect(screen.getByText("closed_content")).toBeInTheDocument();
-
-    rerender(<OpportunityCTA status={"archived"} id={1} />);
-
-    expect(screen.getByText("closed_content")).toBeInTheDocument();
-
-    rerender(<OpportunityCTA status={"forecasted"} id={1} />);
-
-    expect(screen.getByText("closed_content")).toBeInTheDocument();
-  });
-
   it("renders a link that links out to the opportunity detail on grants.gov", () => {
-    render(<OpportunityCTA status={"posted"} id={1} />);
+    render(<OpportunityCTA id={1} />);
 
     const link = screen.getByRole("link");
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute(
       "href",
-      "https://grants.gov/search-results-detail/1",
+      "https://test.grants.gov/search-results-detail/1",
     );
   });
 });

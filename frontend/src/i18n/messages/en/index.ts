@@ -56,8 +56,6 @@ export const messages = {
       apply_title: "Application process",
       apply_content:
         "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
-      closed_content:
-        "This site is a work in progress. Go to www.grants.gov to subscribe for updates and track application status.",
       button_content: "View on Grants.gov",
     },
   },
