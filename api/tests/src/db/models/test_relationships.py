@@ -5,6 +5,7 @@ primarily with regards to the behavior of how deletes propagate
 
 import random
 
+import pytest
 from sqlalchemy import select
 
 from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
@@ -367,3 +368,34 @@ def test_delete_link_values(db_session, enable_factory_create):
 
     applicant_types = db_session.query(LkApplicantType).all()
     assert len(applicant_types) == len([a for a in ApplicantType])
+
+
+def test_delete_child_agency(db_session, enable_factory_create):
+    parent_agency = AgencyFactory.create(agency_code=f"TOP{random.randint(1, 100_000_000)}")
+    child_agency = AgencyFactory.create(
+        agency_code=parent_agency.agency_code + "-xyz", top_level_agency=parent_agency
+    )
+
+    db_session.delete(child_agency)
+    db_session.commit()
+    db_session.expunge_all()
+
+    # Deleting the child should not affect the parent
+    db_agency = (
+        db_session.query(Agency).filter(Agency.agency_id == parent_agency.agency_id).one_or_none()
+    )
+    assert db_agency is not None
+
+
+def test_delete_parent_agency(db_session, enable_factory_create):
+    parent_agency = AgencyFactory.create(agency_code=f"TOP{random.randint(1, 100_000_000)}")
+    AgencyFactory.create(
+        agency_code=parent_agency.agency_code + "-xyz", top_level_agency=parent_agency
+    )
+
+    # Trying to delete the parent will give a foreign key constraint error, we don't
+    # have the relationships setup in a way that would support this right now
+    with pytest.raises(Exception, match="violates foreign key constraint"):
+        db_session.delete(parent_agency)
+        db_session.commit()
+        db_session.expunge_all()
