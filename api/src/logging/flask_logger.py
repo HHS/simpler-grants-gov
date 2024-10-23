@@ -154,14 +154,17 @@ def _add_global_context_info_to_log_record(record: logging.LogRecord) -> bool:
 
 
 def _get_request_context_info(request: flask.Request) -> dict:
+    internal_request_id = str(uuid.uuid4())
+    flask.g.internal_request_id = internal_request_id
+
     data = {
         "request.id": request.headers.get("x-amzn-requestid", ""),
         "request.method": request.method,
         "request.path": request.path,
         "request.url_rule": str(request.url_rule),
-        # A backup ID in case the x-amzn-requestid isn't passed in
-        # doesn't help with tracing across systems, but at least links within a request
-        "request.internal_id": str(uuid.uuid4()),
+        # This ID is used to group all logs for a given request
+        # and is returned in the API response for any 4xx/5xx scenarios
+        "request.internal_id": internal_request_id,
     }
 
     # Add query parameter data in the format request.query.<key> = <value>
