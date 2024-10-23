@@ -3,9 +3,13 @@ locals {
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
-    MB_DB_TYPE   = "postgres"
-    MB_DB_USER   = "metabaseuser"
-    MB_DB_DBNAME = "metabase"
+    MB_DB_TYPE      = "postgres"
+    MB_DB_USER      = "metabaseuser"
+    MB_DB_DBNAME    = "metabase"
+    PY_RUN_APPROACH = "local"
+    SPRINT_FILE     = "/tmp/sprint-data.json"
+    ISSUE_FILE      = "/tmp/issue-data.json"
+    OUTPUT_DIR      = "/tmp/"
   }
 
   # Configuration for secrets
