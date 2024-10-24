@@ -1,5 +1,4 @@
-name: Chained Deploy
-run-name: Chained Deploy Layer for ${{ github.ref_name }} to ${{ inputs.app_name }} ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+name: Deploy
 
 on:
   workflow_call:
@@ -12,25 +11,27 @@ on:
         description: "the name of the application environment (e.g. dev, staging, prod)"
         required: true
         type: string
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+    outputs:
+      commit_hash:
+        description: The SHA that was deployed
+        value: ${{ jobs.database-migrations.outputs.commit_hash }}
 
-concurrency: cd-${{ inputs.environment }}
+concurrency: cd-${{inputs.app_name}}-${{ inputs.environment }}
 
 jobs:
-  build-and-publish:
-    name: Build
-    uses: ./.github/workflows/build-and-publish.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      ref: ${{ github.ref }}
-
+  # Don't need to call the build-and-publish workflow since the database-migrations
+  # workflow already calls it
   database-migrations:
     name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
-    needs: [build-and-publish]
     with:
       app_name: ${{ inputs.app_name }}
       environment: ${{ inputs.environment }}
-
+      version: ${{ inputs.version }}
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -40,7 +41,9 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
         with:
           terraform_version: 1.9.7
           terraform_wrapper: false
@@ -52,4 +55,4 @@ jobs:
           environment: ${{ inputs.environment }}
 
       - name: Deploy release
-        run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }}
+        run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ needs.database-migrations.outputs.commit_hash }}

@@ -1,5 +1,5 @@
-name: Build and Publish
-run-name: Build and Publish ${{ inputs.ref }} to ${{ inputs.app_name }} ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+name: Build and publish
+run-name: Build and publish ${{ inputs.app_name }}:${{ inputs.ref }}
 
 on:
   workflow_call:
@@ -12,11 +12,10 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
-      environment:
-        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
-        default: dev
-        required: false
-        type: string
+    outputs:
+      commit_hash:
+        description: The SHA that was built
+        value: ${{ jobs.get-commit-hash.outputs.commit_hash }}
   workflow_dispatch:
     inputs:
       app_name:
@@ -27,16 +26,28 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
-      environment:
-        description: "The environment where the build will be deployed. eg. dev or prod. Will default to dev."
-        default: dev
-        required: false
-        type: string
 
 jobs:
+  get-commit-hash:
+    name: Get commit hash
+    runs-on: ubuntu-latest
+    outputs:
+      commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+          COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
+          echo "Commit hash: $COMMIT_HASH"
+          echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    needs: get-commit-hash
+    concurrency: ${{ github.workflow }}-${{ needs.get-commit-hash.outputs.commit_hash }}
 
     permissions:
       contents: read
@@ -44,10 +55,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.7
-          terraform_wrapper: false
+          ref: ${{ inputs.ref }}
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
@@ -58,7 +67,7 @@ jobs:
       - name: Check if image is already published
         id: check-image-published
         run: |
-          is_image_published=$(./bin/is-image-published "${{ inputs.app_name }}" "${{ inputs.ref }}")
+          is_image_published=$(./bin/is-image-published "${{ inputs.app_name }}" "${{ needs.get-commit-hash.outputs.commit_hash }}")
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 

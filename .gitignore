@@ -149,3 +149,6 @@ dmypy.json
 
 # Terraform plan outputs
 *.tfplan
+
+# Python testing stuff
+*__pycache__*

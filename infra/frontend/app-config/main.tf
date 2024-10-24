@@ -12,6 +12,7 @@ locals {
     staging = module.staging_config
     prod    = module.prod_config
   }
+
   # Map from environment name to the account name for the AWS account that
   # contains the resources for that environment. Resources that are shared
   # across environments use the key "shared".

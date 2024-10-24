@@ -20,6 +20,10 @@ on:
           - dev
           - staging
           - prod
+      version:
+        required: true
+        default: "main"
+        description: Tag or branch or SHA to deploy
 
 jobs:
   api-checks:
@@ -37,3 +41,4 @@ jobs:
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
+      version: ${{ inputs.version || 'main' }}

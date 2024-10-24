@@ -91,6 +91,12 @@ data "aws_secretsmanager_secret" "db_password" {
   arn = aws_rds_cluster.db.master_user_secret[0].secret_arn
 }
 
+data "aws_secretsmanager_secret" "db_password" {
+  # master_user_secret is available when aws_rds_cluster.db.manage_master_user_password
+  # is true (see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#master_user_secret)
+  arn = aws_rds_cluster.db.master_user_secret[0].secret_arn
+}
+
 # IAM for Role Manager lambda function
 resource "aws_iam_role" "role_manager" {
   name               = "${var.name}-manager"
