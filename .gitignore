@@ -1,6 +1,3 @@
-# Nava platform files
-.template-infra/
-
 # Files ignored because they're binary/unnecessary
 .DS_STORE
 .idea
