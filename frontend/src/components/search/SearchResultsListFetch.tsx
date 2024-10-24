@@ -1,5 +1,5 @@
 import fetchers from "src/app/api/Fetchers";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { getTranslations } from "next-intl/server";
 

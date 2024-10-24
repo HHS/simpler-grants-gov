@@ -1,6 +1,6 @@
 import { ParsedError } from "src/app/[locale]/search/error";
 import { BadRequestError } from "src/errors";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 describe("BadRequestError", () => {
   const dummySearchInputs: QueryParamData = {

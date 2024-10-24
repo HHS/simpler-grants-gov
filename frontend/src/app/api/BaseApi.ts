@@ -14,8 +14,8 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "src/errors";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {

@@ -1,5 +1,7 @@
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import {
+  QueryParamData,
+  SearchFetcherActionType,
+} from "src/types/search/searchRequestTypes";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server

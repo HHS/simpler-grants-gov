@@ -1,5 +1,5 @@
 import Loading from "src/app/[locale]/search/loading";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
 
