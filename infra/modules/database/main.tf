@@ -38,6 +38,8 @@ resource "aws_rds_cluster" "db" {
   storage_encrypted           = true
   kms_key_id                  = aws_kms_key.db.arn
 
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
+
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
   iam_database_authentication_enabled = true

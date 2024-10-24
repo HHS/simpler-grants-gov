@@ -69,12 +69,6 @@ variable "private_subnet_ids" {
   description = "Private subnet ids in VPC"
 }
 
-variable "extra_environment_variables" {
-  type        = map(string)
-  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
-  default     = {}
-}
-
 variable "scheduled_jobs" {
   description = "Variable for configuration of the step functions scheduled job"
   type = map(object({
@@ -91,6 +85,12 @@ variable "secrets" {
     valueFrom = string
   }))
   description = "List of configurations for defining environment variables that pull from SSM parameter store"
+  default     = []
+}
+
+variable "extra_environment_variables" {
+  type        = list(object({ name = string, value = string }))
+  description = "Additional environment variables to pass to the service container"
   default     = []
 }
 
