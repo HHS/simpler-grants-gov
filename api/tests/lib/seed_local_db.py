@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
 
 
-def upload_opportunity_attachments_s3():
+def _upload_opportunity_attachments_s3():
     s3_config = S3Config()
     s3_client = get_s3_client(
         s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
@@ -38,11 +38,12 @@ def upload_opportunity_attachments_s3():
 
             try:
                 s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
-                print(
-                    f"Successfully uploaded {file_path} to s3://{s3_config.s3_opportunity_bucket}/{object_name}"
-                )  # log?
+                logger.info("Successfully uploaded files")
             except ClientError as e:
-                print(f"Error uploading {file_path}: {e}")
+                logger.error(
+                    "Error uploading to s3: %s",
+                    extra={"object_name": object_name, "file_path": file_path, "error": e},
+                )
 
 
 def _add_history(
@@ -201,7 +202,7 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
         logger.info("Running seed script for local DB")
         error_if_not_local()
 
-        upload_opportunity_attachments_s3()
+        _upload_opportunity_attachments_s3()
 
         db_client = PostgresDBClient()
 
