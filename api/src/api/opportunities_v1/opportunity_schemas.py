@@ -252,6 +252,8 @@ class OpportunityV1Schema(Schema):
         metadata={"description": "The internal ID of the opportunity", "example": 12345},
     )
 
+    new_one = fields.String(allow_none=True, metadata={"description": "new_one"})
+
     opportunity_number = fields.String(
         allow_none=True,
         metadata={"description": "The funding opportunity number", "example": "ABC-123-XYZ-001"},

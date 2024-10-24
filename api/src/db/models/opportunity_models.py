@@ -69,6 +69,8 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    new_column: Mapped[str | None]
+
     agency_record: Mapped[Agency | None] = relationship(
         Agency,
         primaryjoin="Opportunity.agency == foreign(Agency.agency_code)",
