@@ -70,7 +70,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
 
     agency_record: Mapped[Agency | None] = relationship(
-        Agency, primaryjoin="Opportunity.agency == foreign(Agency.agency_code)", uselist=False
+        Agency,
+        primaryjoin="Opportunity.agency == foreign(Agency.agency_code)",
+        uselist=False,
+        viewonly=True,
     )
 
     @property
