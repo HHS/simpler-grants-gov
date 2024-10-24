@@ -96,7 +96,11 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
   try {
     opportunityData = await getOpportunityData(id);
   } catch (error) {
-    return <NotFound />;
+    const { message } = error as ApiRequestError;
+    if (JSON.parse(message).status === 404) {
+      return <NotFound />;
+    }
+    throw error;
   }
   opportunityData.summary = opportunityData?.summary
     ? opportunityData.summary
