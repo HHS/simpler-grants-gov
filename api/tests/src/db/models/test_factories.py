@@ -10,7 +10,7 @@ from tests.src.db.models.factories import OpportunityFactory
 opportunity_params = {
     "opportunity_number": 100123456,
     "opportunity_title": "Study math",
-    "agency": "Agency of Math",
+    "agency_code": "ABC-XYZ",
     "category": OpportunityCategory.CONTINUATION,
     "is_draft": False,
 }
@@ -79,6 +79,6 @@ def test_opportunity_factory_create(enable_factory_create, db_session: db.Sessio
     validate_opportunity_record(db_record, db_record.for_json())
 
     # Make certain nullable fields can be overriden
-    null_params = {"agency": None}
+    null_params = {"agency_code": None}
     opportunity = OpportunityFactory.create(**null_params)
     validate_opportunity_record(opportunity, null_params)

@@ -32,8 +32,12 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
+    agency_code: Mapped[str | None] = mapped_column(index=True)
 
-    agency: Mapped[str | None] = mapped_column(index=True)
+    @property
+    def agency(self) -> str | None:
+        # TODO - this is temporary until the frontend no longer needs this name
+        return self.agency_code
 
     category: Mapped[OpportunityCategory | None] = mapped_column(
         "opportunity_category_id",
@@ -71,7 +75,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     agency_record: Mapped[Agency | None] = relationship(
         Agency,
-        primaryjoin="Opportunity.agency == foreign(Agency.agency_code)",
+        primaryjoin="Opportunity.agency_code == foreign(Agency.agency_code)",
         uselist=False,
         viewonly=True,
     )
@@ -178,8 +182,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     funding_category_description: Mapped[str | None]
     applicant_eligibility_description: Mapped[str | None]
 
-    agency_code: Mapped[str | None]
-    agency_name: Mapped[str | None]
     agency_phone_number: Mapped[str | None]
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
@@ -193,6 +195,12 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     publisher_user_id: Mapped[str | None]
     updated_by: Mapped[str | None]
     created_by: Mapped[str | None]
+
+    # Do not use these agency fields, they're kept for now, but
+    # are simply copying behavior from the legacy system - prefer
+    # the same named values in the opportunity itself
+    agency_code: Mapped[str | None]
+    agency_name: Mapped[str | None]
 
     link_funding_instruments: Mapped[list["LinkOpportunitySummaryFundingInstrument"]] = (
         relationship(

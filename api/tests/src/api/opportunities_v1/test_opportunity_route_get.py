@@ -5,6 +5,7 @@ from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity_with_attachments,
 )
 from tests.src.db.models.factories import (
+    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
@@ -86,6 +87,25 @@ def test_get_opportunity_with_attachment_200(
     # Validate the opportunity data
     assert len(response_data["attachments"]) > 0
     validate_opportunity_with_attachments(opportunity, response_data)
+
+
+def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_create):
+    parent_agency = AgencyFactory.create(agency_code="EXAMPLEAGENCYXYZ")
+    child_agency = AgencyFactory.create(
+        agency_code="EXAMPLEAGENCYXYZ-12345678", top_level_agency=parent_agency
+    )
+
+    opportunity = OpportunityFactory.create(agency_code=child_agency.agency_code)
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+
+    assert response_data["agency_code"] == child_agency.agency_code
+    assert response_data["agency_name"] == child_agency.agency_name
+    assert response_data["top_level_agency_name"] == parent_agency.agency_name
 
 
 def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):

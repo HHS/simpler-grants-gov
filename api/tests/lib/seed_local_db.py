@@ -137,7 +137,7 @@ AGENCIES_TO_CREATE = [
     {
         "agency_id": 4,
         "agency_code": "DOC-EDA",
-        "agency_name": "Agency for International Development",
+        "agency_name": "Economic Development Administration",
         "top_level_agency_id": 3,  # DOC
     },
 ]

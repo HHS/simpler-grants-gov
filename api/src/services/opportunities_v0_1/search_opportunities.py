@@ -82,7 +82,7 @@ def _add_query_filters(stmt: Select[tuple[Any]], query: str | None) -> Select[tu
             # Number partial match
             Opportunity.opportunity_number.ilike(ilike_query),
             # Agency (code) partial match
-            Opportunity.agency.ilike(ilike_query),
+            Opportunity.agency_code.ilike(ilike_query),
             # Summary description partial match
             OpportunitySummary.summary_description.ilike(ilike_query),
             # assistance listing number matches exactly or program title partial match
@@ -143,7 +143,7 @@ def _add_filters(
         # Note that we filter against the agency code in the opportunity, not in the summary
         one_of_agencies = filters.agency.get("one_of")
         if one_of_agencies:
-            stmt = stmt.where(Opportunity.agency.in_(one_of_agencies))
+            stmt = stmt.where(Opportunity.agency_code.in_(one_of_agencies))
 
     return stmt
 
@@ -174,7 +174,7 @@ def _add_order_by(
             # Need to add joins to the query stmt to order by field from opportunity summary
             stmt = _join_stmt_to_current_summary(stmt)
         case "agency_code":
-            field = Opportunity.agency
+            field = Opportunity.agency_code
         case _:
             # If this exception happens, it means our API schema
             # allows for values we don't have implemented. This
