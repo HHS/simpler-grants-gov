@@ -1,3 +1,4 @@
-_commit: fe5c7cd
+# Changes here will be overwritten by Copier
+_commit: v0.3.0-9-g5a1aed1
 _src_path: https://github.com/navapbc/template-infra
 app_name: frontend
