@@ -41,7 +41,7 @@ class OpportunitySummaryV1Schema(Schema):
     )
     is_forecast = fields.Boolean(
         metadata={
-            "description": "Whether the opportunity is forecasted, that is, the information is only an estimate and not yet official",
+            "description": "Whether the opportunity is forecasted, that is, the information is only an estimate and not yet official 123123",
             "example": False,
         }
     )
