@@ -1,0 +1,69 @@
+query (
+  $endCursor: String
+  $login: String!
+  $project: Int!
+  $batch: Int!
+  $sprintField: String = "Sprint"
+  $pointsField: String = "Points"
+) {
+  # get the project by the organization login and project number
+  organization(login: $login) {
+    projectV2(number: $project) {
+      items(first: $batch, after: $endCursor) {
+        # allows us to use --paginate in the gh api call
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        # fetch details per item in the list
+        nodes {
+          ... on ProjectV2Item {
+            content {
+              ...issueContent
+            }
+            sprint: fieldValueByName(name: $sprintField) {
+              ...iterationContent
+            }
+            points: fieldValueByName(name: $pointsField) {
+              ... on ProjectV2ItemFieldNumberValue {
+                number
+              }
+            }
+            status: fieldValueByName(name: "Status") {
+              ...singleSelectContent
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment issueContent on Issue {
+  title
+  url
+  issueType {
+    name
+  }
+  # information about issue open/closed status
+  closed
+  createdAt
+  closedAt
+  # details about the parent issue
+  parent {
+    title
+    url
+  }
+}
+
+fragment iterationContent on ProjectV2ItemFieldIterationValue {
+  iterationId
+  title
+  startDate
+  duration
+}
+
+fragment singleSelectContent on ProjectV2ItemFieldSingleSelectValue {
+  optionId
+  name
+}
