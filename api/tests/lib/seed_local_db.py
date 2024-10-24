@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import random
+
 import boto3
 import click
 from botocore.exceptions import ClientError
@@ -11,18 +12,19 @@ import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
+from src.adapters.aws import S3Config, get_s3_client
 from src.adapters.db import PostgresDBClient
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
-from src.adapters.aws import S3Config, get_s3_client
 
 logger = logging.getLogger(__name__)
 # from reportlab.lib.pagesizes import letter
 # from reportlab.pdfgen import canvas
 
 TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
+
 
 def upload_opportunity_attachments_s3():
     s3_config = S3Config()
@@ -38,9 +40,12 @@ def upload_opportunity_attachments_s3():
 
             try:
                 s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
-                print(f'Successfully uploaded {file_path} to s3://{s3_config.s3_opportunity_bucket}/{object_name}') #log?
+                print(
+                    f"Successfully uploaded {file_path} to s3://{s3_config.s3_opportunity_bucket}/{object_name}"
+                )  # log?
             except ClientError as e:
-                print(f'Error uploading {file_path}: {e}')
+                print(f"Error uploading {file_path}: {e}")
+
 
 def _add_history(
     opps: list[Opportunity],

@@ -7,7 +7,7 @@ from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.util.datetime_util as datetime_util
-from src.adapters.aws import get_s3_client, S3Config
+from src.adapters.aws import S3Config, get_s3_client
 from src.api.route_utils import raise_flask_error
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 
@@ -34,8 +34,10 @@ def _fetch_opportunity(
 
 
 def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
-    opportunity = _fetch_opportunity(db_session, opportunity_id, load_all_opportunity_summaries=False)
-    opportunity_copy =  copy.deepcopy(opportunity)
+    opportunity = _fetch_opportunity(
+        db_session, opportunity_id, load_all_opportunity_summaries=False
+    )
+    opportunity_copy = copy.deepcopy(opportunity)
 
     s3_config = S3Config()
     s3_config.s3_endpoint_url = "http://localstack:4566"
@@ -44,12 +46,19 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     )
 
     for opp_attachment in opportunity_copy.opportunity_attachments:
-        file_loc= opp_attachment.file_location
-        object_key = file_loc.split(f"{s3_config.s3_opportunity_bucket}/")[1]  # should be same as filename in db ?
-        pre_sign_file_loc = s3_client.generate_presigned_url("get_object", Params={"Bucket": s3_config.s3_opportunity_bucket, "Key": object_key},ExpiresIn=1800) # do we want to put limit
+        file_loc = opp_attachment.file_location
+        object_key = file_loc.split(f"{s3_config.s3_opportunity_bucket}/")[
+            1
+        ]  # should be same as filename in db ?
+        pre_sign_file_loc = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": s3_config.s3_opportunity_bucket, "Key": object_key},
+            ExpiresIn=1800,
+        )  # do we want to put limit
         opp_attachment.file_location = pre_sign_file_loc
 
     return opportunity_copy
+
 
 def get_opportunity_versions(db_session: db.Session, opportunity_id: int) -> dict:
     opportunity = _fetch_opportunity(
