@@ -23,7 +23,7 @@ def issue(
     """Create a new issue."""
     return IssueMetadata(
         issue_title=name,
-        issue_type=kind,
+        issue_type=kind.value,
         issue_url=name,
         issue_is_closed=False,
         issue_opened_at="2024-02-01",

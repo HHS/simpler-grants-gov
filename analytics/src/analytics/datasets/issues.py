@@ -1,20 +1,23 @@
 """Transform exported issue data into a flattened list."""
 
-from enum import StrEnum
+import logging
+from enum import Enum
 from typing import Self
 
 from pandas import DataFrame
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_file
+
+logger = logging.getLogger(__name__)
 
 # ===============================================================
 # Dataset schema and enums
 # ===============================================================
 
 
-class IssueType(StrEnum):
+class IssueType(Enum):
     """Supported issue types."""
 
     BUG = "Bug"
@@ -22,6 +25,7 @@ class IssueType(StrEnum):
     EPIC = "Epic"
     ENHANCEMENT = "Enhancement"
     DELIVERABLE = "Deliverable"
+    NONE = None
 
 
 class IssueMetadata(BaseModel):
@@ -31,12 +35,12 @@ class IssueMetadata(BaseModel):
     issue_title: str
     issue_url: str
     issue_parent: str | None
-    issue_type: IssueType
+    issue_type: str | None
     issue_is_closed: bool
     issue_opened_at: str
     issue_closed_at: str | None
     # Sprint metadata -- custom fields specific to the sprint board project
-    issue_points: int | None = Field(default=None)
+    issue_points: int | float | None = Field(default=None)
     issue_status: str | None = Field(default=None)
     sprint_id: str | None = Field(default=None)
     sprint_name: str | None = Field(default=None)
@@ -103,8 +107,13 @@ def populate_issue_lookup_table(
     issues: list[dict],
 ) -> dict[str, IssueMetadata]:
     """Populate a lookup table that maps issue URLs to their issue type and parent."""
-    for issue in issues:
-        entry = IssueMetadata(**issue)
+    for i, issue in enumerate(issues):
+        try:
+            entry = IssueMetadata.model_validate(issue)
+        except ValidationError as err:  # noqa: PERF203
+            logger.error("Error with row %d", i)  # noqa: TRY400
+            logger.info("Error: %s", err)
+            continue
         lookup[entry.issue_url] = entry
     return lookup
 
