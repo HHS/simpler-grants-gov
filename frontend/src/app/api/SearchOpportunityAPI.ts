@@ -1,10 +1,10 @@
 import "server-only";
 
 import BaseApi from "src/app/api/BaseApi";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
+  QueryParamData,
   SearchFetcherActionType,
   SearchFilterRequestBody,
   SearchRequestBody,
