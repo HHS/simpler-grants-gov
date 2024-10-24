@@ -20,8 +20,6 @@ from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
-# from reportlab.lib.pagesizes import letter
-# from reportlab.pdfgen import canvas
 
 TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
 
