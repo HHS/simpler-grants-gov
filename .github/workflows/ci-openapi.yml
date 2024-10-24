@@ -19,10 +19,13 @@ concurrency:
   group: ${{ github.head_ref }}
   cancel-in-progress: true
 
+permissions:
+   content: write
 
 jobs:
   update-openapi-docs:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
