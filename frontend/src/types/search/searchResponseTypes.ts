@@ -1,6 +1,6 @@
 import { PaginationInfo } from "src/types/apiResponseTypes";
-
-import { SearchFetcherActionType } from "./searchRequestTypes";
+import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
+import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
 
 export interface AssistanceListing {
   assistance_listing_number: string;
@@ -49,7 +49,7 @@ export interface Opportunity {
   opportunity_assistance_listings: AssistanceListing[];
   opportunity_id: number;
   opportunity_number: string;
-  opportunity_status: string;
+  opportunity_status: OpportunityStatus;
   opportunity_title: string;
   summary: Summary;
   updated_at: string;

@@ -18,7 +18,7 @@ const OpportunityAwardGridRow = ({ title, content }: Props) => {
   const t = useTranslations("OpportunityListing.award_info");
 
   return (
-    <div className="border radius-md border-base-lighter padding-x-2  ">
+    <div className="border radius-md border-base-lighter padding-x-2">
       <p className="font-sans-sm text-bold margin-bottom-0">
         {content || defaultContentByType(title)}
       </p>

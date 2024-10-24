@@ -16,7 +16,7 @@ describe("OpportunityListingAPI", () => {
   });
 
   it("should return opportunity data for a valid ID", async () => {
-    const mockResponse: OpportunityApiResponse = getValidMockResponse();
+    const mockResponse = getValidMockResponse();
 
     mockedRequest.mockResolvedValue(mockResponse);
 
@@ -41,7 +41,7 @@ describe("OpportunityListingAPI", () => {
   });
 });
 
-function getValidMockResponse() {
+function getValidMockResponse(): OpportunityApiResponse {
   return {
     data: {
       agency: "US-ABC",

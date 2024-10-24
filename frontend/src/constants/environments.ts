@@ -35,6 +35,10 @@ export const PUBLIC_ENV = PUBLIC_ENV_VARS_BY_ENV[CURRENT_ENV];
 
 // home for all interpreted server side environment variables
 export const environment: { [key: string]: string } = {
+  LEGACY_HOST:
+    NODE_ENV === "production"
+      ? "https://grants.gov"
+      : "https://test.grants.gov",
   NEXT_PUBLIC_BASE_PATH: NEXT_PUBLIC_BASE_PATH ?? "",
   USE_SEARCH_MOCK_DATA,
   SENDY_API_URL: SENDY_API_URL || "",
