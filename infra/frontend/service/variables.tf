@@ -8,9 +8,3 @@ variable "image_tag" {
   description = "image tag to deploy to the environment"
   default     = null
 }
-
-variable "domain" {
-  type        = string
-  description = "DNS domain of the website managed by HHS"
-  default     = null
-}
