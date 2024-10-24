@@ -26,6 +26,16 @@ LABEL_30K = "deliverable: 30k ft"
 LABEL_10K = "deliverable: 10k ft"
 
 
+def pytest_addoption(parser: pytest.Parser):
+    """Add a command line flag to collect tests that require a slack token."""
+    parser.addoption(
+        "--slack-token-set",
+        action="store_true",
+        default=False,
+        help="Run tests that require a slack token",
+    )
+
+
 class MockSlackbot:
     """Create a mock slackbot issue for unit tests."""
 
