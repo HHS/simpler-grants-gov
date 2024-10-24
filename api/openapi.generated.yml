@@ -1396,6 +1396,11 @@ components:
           type: integer
           description: The internal ID of the opportunity
           example: 12345
+        new_one:
+          type:
+          - string
+          - 'null'
+          description: new_one
         opportunity_number:
           type:
           - string
@@ -2080,6 +2085,11 @@ components:
           type: integer
           description: The internal ID of the opportunity
           example: 12345
+        new_one:
+          type:
+          - string
+          - 'null'
+          description: new_one
         opportunity_number:
           type:
           - string
