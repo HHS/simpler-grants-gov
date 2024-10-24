@@ -1,4 +1,3 @@
-import copy
 from datetime import date
 from typing import List
 
@@ -10,6 +9,7 @@ import src.adapters.db as db
 import src.util.datetime_util as datetime_util
 from src.adapters.aws import S3Config, get_s3_client
 from src.api.route_utils import raise_flask_error
+from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
 
 
@@ -21,6 +21,10 @@ def _fetch_opportunity(
         .where(Opportunity.opportunity_id == opportunity_id)
         .where(Opportunity.is_draft.is_(False))
         .options(selectinload("*"))
+        # To get the top_level_agency field set properly upfront,
+        # we need to explicitly join here as the "*" approach doesn't
+        # seem to work with the way our agency relationships are setup
+        .options(selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency))
     )
 
     if not load_all_opportunity_summaries:
