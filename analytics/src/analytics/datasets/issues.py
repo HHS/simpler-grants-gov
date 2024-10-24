@@ -111,8 +111,8 @@ def populate_issue_lookup_table(
         try:
             entry = IssueMetadata.model_validate(issue)
         except ValidationError as err:  # noqa: PERF203
-            logger.error("Error with row %d", i)  # noqa: TRY400
-            logger.info("Error: %s", err)
+            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
+            logger.debug("Error: %s", err)
             continue
         lookup[entry.issue_url] = entry
     return lookup
