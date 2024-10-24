@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-   content: write
+   contents: write
 
 jobs:
   update-openapi-docs:
