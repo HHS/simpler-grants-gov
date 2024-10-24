@@ -62,6 +62,12 @@ export default class SearchOpportunityAPI extends BaseApi {
       requestBody,
     );
 
+    response.actionType = searchInputs.actionType;
+    response.fieldChanged = searchInputs.fieldChanged;
+
+    if (!response.data) {
+      throw new Error("No data returned from Opportunity Search API");
+    }
     return response;
   }
 }

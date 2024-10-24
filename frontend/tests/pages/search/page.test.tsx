@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
-import { MockSearchFetcher } from "src/services/search/searchfetcher/MockSearchFetcher";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // test without feature flag functionality
@@ -18,10 +17,14 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-// mock API interactions
-jest.mock("src/services/search/searchfetcher/SearchFetcherUtil", () => ({
-  getSearchFetcher: () => new MockSearchFetcher(),
-}));
+// // currently, with Suspense mocked out below to always show fallback content,
+// // the components making the fetch calls are never being rendered so we do not need to mock them out
+// // uncomment this if we figure out a way to properly test the underlying async components
+// jest.mock("src/app/api/fetchers", () => ({
+//   get searchOpportunityFetcher() {
+//     return new MockSearchOpportunityAPI();
+//   },
+// }));
 
 jest.mock("next/navigation", () => ({
   ...jest.requireActual<typeof import("next/navigation")>("next/navigation"),
@@ -37,7 +40,7 @@ jest.mock("next/navigation", () => ({
   Suspense to force display of fallback UI.
 
   for more see https://github.com/testing-library/react-testing-library/issues/1209
-*/
+// */
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,

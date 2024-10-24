@@ -1,7 +1,6 @@
 import "server-only";
 
 import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 export interface QueryParamData {
   page: number;
@@ -14,10 +13,4 @@ export interface QueryParamData {
   sortby: string | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
-}
-
-export abstract class SearchFetcher {
-  abstract fetchOpportunities(
-    props: QueryParamData,
-  ): Promise<SearchAPIResponse>;
 }
