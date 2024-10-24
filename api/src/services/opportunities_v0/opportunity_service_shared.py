@@ -31,7 +31,7 @@ def convert_transfer_opp_to_regular(transfer_opportunity: TransferTopportunity) 
         opportunity_id=transfer_opportunity.opportunity_id,
         opportunity_number=transfer_opportunity.oppnumber,
         opportunity_title=transfer_opportunity.opptitle,
-        agency=transfer_opportunity.owningagency,
+        agency_code=transfer_opportunity.owningagency,
         category=opportunity_category,
         category_explanation=transfer_opportunity.category_explanation,
         is_draft=is_draft,

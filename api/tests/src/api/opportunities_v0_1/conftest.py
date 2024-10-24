@@ -99,7 +99,7 @@ def setup_opportunity(
     opportunity = OpportunityFactory.create(
         opportunity_id=opportunity_id,
         no_current_summary=True,
-        agency=agency,
+        agency_code=agency,
         is_draft=is_draft,
         opportunity_title=opportunity_title,
         opportunity_number=opportunity_number,
@@ -165,7 +165,7 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
     assert db_opportunity.opportunity_id == resp_opportunity["opportunity_id"]
     assert db_opportunity.opportunity_number == resp_opportunity["opportunity_number"]
     assert db_opportunity.opportunity_title == resp_opportunity["opportunity_title"]
-    assert db_opportunity.agency == resp_opportunity["agency"]
+    assert db_opportunity.agency_code == resp_opportunity["agency_code"]
     assert db_opportunity.category == resp_opportunity["category"]
     assert db_opportunity.category_explanation == resp_opportunity["category_explanation"]
 

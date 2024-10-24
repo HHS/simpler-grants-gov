@@ -123,7 +123,7 @@ def validate_opportunity(db_opportunity: Opportunity, resp_opportunity: dict):
     assert db_opportunity.opportunity_id == resp_opportunity["opportunity_id"]
     assert db_opportunity.opportunity_number == resp_opportunity["opportunity_number"]
     assert db_opportunity.opportunity_title == resp_opportunity["opportunity_title"]
-    assert db_opportunity.agency == resp_opportunity["agency"]
+    assert db_opportunity.agency_code == resp_opportunity["agency_code"]
     assert db_opportunity.agency_name == resp_opportunity["agency_name"]
     assert db_opportunity.category == resp_opportunity["category"]
     assert db_opportunity.category_explanation == resp_opportunity["category_explanation"]
@@ -209,8 +209,6 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
         == resp_summary["applicant_eligibility_description"]
     )
 
-    assert db_summary.agency_code == resp_summary["agency_code"]
-    assert db_summary.agency_name == resp_summary["agency_name"]
     assert db_summary.agency_phone_number == resp_summary["agency_phone_number"]
     assert db_summary.agency_contact_description == resp_summary["agency_contact_description"]
     assert db_summary.agency_email_address == resp_summary["agency_email_address"]

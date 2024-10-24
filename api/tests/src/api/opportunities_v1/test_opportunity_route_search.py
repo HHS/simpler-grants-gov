@@ -81,7 +81,7 @@ def build_opp(
     opportunity = OpportunityFactory.build(
         opportunity_title=opportunity_title,
         opportunity_number=opportunity_number,
-        agency=agency,
+        agency_code=agency,
         opportunity_assistance_listings=[],
         current_opportunity_summary=None,
     )

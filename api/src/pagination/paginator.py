@@ -30,7 +30,7 @@ class Paginator(Generic[T]):
         stmt = select(User).order_by(desc("opportunity_id"))
 
         # Add any filters
-        stmt = stmt.where(Opportunity.agency == "US-XYZ")
+        stmt = stmt.where(Opportunity.agency_code == "US-XYZ")
 
         # Use the paginator to get a specific page (page 2 in this case)
         paginator: Paginator[Opportunity] = Paginator(stmt, db_session, page_size=10)

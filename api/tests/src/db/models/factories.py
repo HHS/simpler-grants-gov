@@ -53,11 +53,11 @@ class CustomProvider(BaseProvider):
     fake data for our specific scenarios.
 
     The name of the functions defined in this class is the name of the individual provider.
-    For example, the "agency" method below can be called by doing either of the following::
+    For example, the "agency_code" method below can be called by doing either of the following::
 
-        fake.agency()
+        fake.agency_code()
 
-        factory.Faker("agency")
+        factory.Faker("agency_code")
 
     Below we register this provider class with both the faker instance we setup, as well as
     the underlying one backing the factory's faker instance.
@@ -129,7 +129,7 @@ class CustomProvider(BaseProvider):
     ]
 
     SUMMARY_DESCRIPTION_FORMATS = [
-        "{{agency}} is looking to further investigate this topic. {{paragraph}}",
+        "{{agency_code}} is looking to further investigate this topic. {{paragraph}}",
         "<p>{{paragraph}}</p><p><br></p><p>{{paragraph}}</p>",
         "The purpose of this Notice of Funding Opportunity (NOFO) is to support research into {{job}} and how we might {{catch_phrase}}.",
     ]
@@ -137,7 +137,7 @@ class CustomProvider(BaseProvider):
     # In the formatting, ? becomes a random letter, # becomes a random digit
     OPPORTUNITY_NUMBER_FORMATS = [
         "???-###-FY{{year}}-###",
-        "{{agency}}-##-###",
+        "{{agency_code}}-##-###",
         "???#######",
         "??-##-???-###",
         "{{word}}-###-##",
@@ -147,7 +147,7 @@ class CustomProvider(BaseProvider):
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
-    def agency(self) -> str:
+    def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
 
     def agency_word(self) -> str:
@@ -272,7 +272,7 @@ class OpportunityFactory(BaseFactory):
     opportunity_number = factory.Faker("opportunity_number")
     opportunity_title = factory.Faker("opportunity_title")
 
-    agency = factory.Faker("agency")
+    agency_code = factory.Faker("agency_code")
 
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
     # only set the category explanation if category is Other
@@ -329,7 +329,7 @@ class OpportunityFactory(BaseFactory):
 
         # Set all nullable fields to null
         all_fields_null = factory.Trait(
-            agency=None,
+            agency_code=None,
             category=None,
             category_explanation=None,
             current_opportunity_summary=None,
@@ -401,7 +401,7 @@ class OpportunitySummaryFactory(BaseFactory):
         no_declaration=None,
     )
 
-    agency_code = factory.LazyAttribute(lambda s: s.opportunity.agency)
+    agency_code = factory.LazyAttribute(lambda s: s.opportunity.agency_code)
     agency_name = factory.Faker("agency_name")
     agency_phone_number = Generators.PhoneNumber
     agency_contact_description = factory.Faker("agency_contact_description")
@@ -693,7 +693,7 @@ class AgencyFactory(BaseFactory):
 
     agency_name = factory.Faker("agency_name")
 
-    agency_code = factory.Faker("agency")
+    agency_code = factory.Faker("agency_code")
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
     assistance_listing_number = factory.Faker("random_int", min=1, max=999)
@@ -792,7 +792,7 @@ class TopportunityFactory(BaseFactory):
     oppnumber = factory.Faker("opportunity_number")
     opptitle = factory.Faker("opportunity_title")
 
-    owningagency = factory.Faker("agency")
+    owningagency = factory.Faker("agency_code")
 
     oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
     # only set the category explanation if category is Other
@@ -867,7 +867,7 @@ class TsynopsisFactory(BaseFactory):
     agency_contact_desc = factory.Faker("agency_contact_description")
     ac_email_addr = factory.Faker("email")
     ac_email_desc = factory.LazyAttribute(lambda s: f"Contact {s.ac_name} via email")
-    a_sa_code = factory.Faker("agency")
+    a_sa_code = factory.Faker("agency_code")
     ac_phone_number = Generators.PhoneNumber
     ac_name = factory.Faker("agency_name")
 
@@ -917,7 +917,7 @@ class TforecastFactory(BaseFactory):
     fd_link_desc = factory.Faker("additional_info_desc")
     ac_email_addr = factory.Faker("email")
     ac_email_desc = factory.LazyAttribute(lambda s: f"Contact {s.ac_name} via email")
-    agency_code = factory.Faker("agency")
+    agency_code = factory.Faker("agency_code")
     ac_phone = Generators.PhoneNumber
     ac_name = factory.Faker("agency_name")
 
@@ -1265,7 +1265,7 @@ class TransferTopportunityFactory(BaseFactory):
     oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
     opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
 
-    owningagency = factory.Faker("agency")
+    owningagency = factory.Faker("agency_code")
 
     oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
     # only set the category explanation if category is Other
