@@ -35,7 +35,7 @@ type ApplicantTypeKey = keyof typeof ApplicantType;
 
 const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   if (!applicantTypes || !applicantTypes.length) {
-    return "--";
+    return <p>--</p>;
   }
   return applicantTypes.map((type, index) => {
     if (type in ApplicantType) {

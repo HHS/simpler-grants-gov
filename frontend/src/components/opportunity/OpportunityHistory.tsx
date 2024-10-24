@@ -26,7 +26,7 @@ const OpportunityHistory = ({ summary }: Props) => {
   };
   return (
     <div className="usa-prose margin-top-4">
-      <h3>History</h3>
+      <h3>{t("title")}</h3>
       <div>
         <p className={"text-bold"}>{t("version")}:</p>
         <p className={"margin-top-0"}>{summary.version_number || "--"}</p>

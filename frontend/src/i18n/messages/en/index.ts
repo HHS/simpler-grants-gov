@@ -24,6 +24,7 @@ export const messages = {
     award_info: {
       yes: "Yes",
       no: "No",
+      title: "Award",
       program_funding: "Program Funding",
       expected_awards: "Expected awards",
       award_ceiling: "Award Ceiling",
@@ -36,6 +37,7 @@ export const messages = {
       category_explanation: "Category Explanation",
     },
     history: {
+      title: "History",
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",
