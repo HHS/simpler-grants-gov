@@ -147,6 +147,14 @@ class CustomProvider(BaseProvider):
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
+    OPPORTUNITY_ATTACHMENT_S3_PATHS = [
+        "s3://local-opportunities/test_file_1.txt",
+        "s3://local-opportunities/test_file_2.txt",
+        "s3://local-opportunities/test_file_3.txt",
+        "s3://local-opportunities/test_file_4.pdf",
+        "s3://local-opportunities/test_file_5.pdf",
+    ]
+
     def agency(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -187,6 +195,9 @@ class CustomProvider(BaseProvider):
 
     def yn_yesno_boolean(self) -> str:
         return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
+
+    def opportunity_attachment(self) -> str:
+        return self.random_element(self.OPPORTUNITY_ATTACHMENT_S3_PATHS)
 
 
 fake = faker.Faker()
@@ -239,7 +250,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
 
-    file_location = factory.Faker("url")
+    file_location = factory.Faker("opportunity_attachment")
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
     file_description = factory.Faker("sentence")

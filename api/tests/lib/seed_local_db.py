@@ -1,7 +1,10 @@
 import logging
+import os
+import pathlib
 import random
-
+import boto3
 import click
+from botocore.exceptions import ClientError
 from sqlalchemy import func
 
 import src.adapters.db as db
@@ -13,9 +16,31 @@ from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
+from src.adapters.aws import S3Config, get_s3_client
 
 logger = logging.getLogger(__name__)
+# from reportlab.lib.pagesizes import letter
+# from reportlab.pdfgen import canvas
 
+TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
+
+def upload_opportunity_attachments_s3():
+    s3_config = S3Config()
+    s3_client = get_s3_client(
+        s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+    )
+    test_folder_path = TESTS_FOLDER / "opportunity_attachment_test_files"
+
+    for root, _, files in os.walk(test_folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            object_name = os.path.relpath(file_path, test_folder_path)
+
+            try:
+                s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
+                print(f'Successfully uploaded {file_path} to s3://{s3_config.s3_opportunity_bucket}/{object_name}') #log?
+            except ClientError as e:
+                print(f'Error uploading {file_path}: {e}')
 
 def _add_history(
     opps: list[Opportunity],
@@ -172,6 +197,8 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
+
+        upload_opportunity_attachments_s3()
 
         db_client = PostgresDBClient()
 
