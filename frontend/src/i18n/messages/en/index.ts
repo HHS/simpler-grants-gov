@@ -31,6 +31,7 @@ export const messages = {
       expected_awards: "Expected awards",
       award_ceiling: "Award Ceiling",
       award_floor: "Award Floor",
+      opportunity_number: "Funding opportunity number",
       cost_sharing: "Cost sharing or matching requirement",
       funding_instrument: "Funding instrument type",
       opportunity_category: "Opportunity Category",
