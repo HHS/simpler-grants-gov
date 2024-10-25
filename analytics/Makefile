@@ -154,9 +154,7 @@ sprint-data-export:
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"
 	@echo "====================================================="
-	$(POETRY) analytics import db_import \
-	--sprint-file $(SPRINT_FILE) \
-	--issue-file $(ISSUE_FILE)
+	$(POETRY) analytics import db_import --delivery-file $(DELIVERY_FILE)
 
 roadmap-data-export:
 	@echo "=> Exporting project data from the product roadmap"

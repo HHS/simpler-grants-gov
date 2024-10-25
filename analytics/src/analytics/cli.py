@@ -284,10 +284,7 @@ def test_connection() -> None:
 
 
 @import_app.command(name="db_import")
-def export_json_to_database(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
-    issue_file: Annotated[str, ISSUE_FILE_ARG],
-) -> None:
+def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
     """Import JSON data to the database."""
     logger.info("Beginning import")
 
@@ -295,15 +292,12 @@ def export_json_to_database(
     engine = db.get_db()
 
     # Load data from the sprint board
-    sprint_data = SprintBoard.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
+    issues = GitHubIssues.from_json(delivery_file)
 
-    sprint_data.to_sql(
+    issues.to_sql(
         output_table="github_project_data",
         engine=engine,
         replace_table=True,
     )
-    rows = len(sprint_data.to_dict())
+    rows = len(issues.to_dict())
     logger.info("Number of rows in table: %s", rows)
