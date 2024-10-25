@@ -48,7 +48,12 @@ def export_sprint_data(
     points_field: str,
     output_file: str,
 ) -> None:
-    """Export the issue and project data from a Sprint Board."""
+    """
+    Export the issue and project data from a Sprint Board.
+
+    TODO(widal001): 2024-10-25 - Replace this with a direct call to the GraphQL API
+    https://github.com/HHS/simpler-grants-gov/issues/2590
+    """
     # Get the path script and the GraphQL query
     script = PARENT_DIR / "make-graphql-query.sh"
     query_path = PARENT_DIR / "getSprintData.graphql"
@@ -114,7 +119,12 @@ def export_roadmap_data(
     pillar_field: str,
     output_file: str,
 ) -> None:
-    """Export the issue and project data from a Sprint Board."""
+    """
+    Export the issue and project data from a Sprint Board.
+
+    TODO(widal001): 2024-10-25 - Replace this with a direct call to the GraphQL API
+    https://github.com/HHS/simpler-grants-gov/issues/2590
+    """
     # Get the path script and the GraphQL query
     script = PARENT_DIR / "make-graphql-query.sh"
     query_path = PARENT_DIR / "getRoadmapData.graphql"
