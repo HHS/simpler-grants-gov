@@ -12,6 +12,7 @@ from src.db.models.opportunity_models import (
     OpportunityAttachment,
     OpportunitySummary,
 )
+from src.util.file_util import is_s3_path
 
 
 @pytest.fixture
@@ -153,7 +154,7 @@ def validate_opportunity_attachments(
 
     assert len(db_attachments) == len(resp_attachments)
     for db_attachment, resp_attachment in zip(db_attachments, resp_attachments, strict=True):
-        assert db_attachment.file_location == resp_attachment["file_location"]
+        assert not is_s3_path(resp_attachment["file_location"])  # this might be enough test
         assert db_attachment.mime_type == resp_attachment["mime_type"]
         assert db_attachment.file_name == resp_attachment["file_name"]
         assert db_attachment.file_description == resp_attachment["file_description"]

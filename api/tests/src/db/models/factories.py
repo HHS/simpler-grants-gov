@@ -196,7 +196,7 @@ class CustomProvider(BaseProvider):
     def yn_yesno_boolean(self) -> str:
         return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
 
-    def opportunity_attachment(self) -> str:
+    def s3_file_location(self) -> str:
         return self.random_element(self.OPPORTUNITY_ATTACHMENT_S3_PATHS)
 
 
@@ -250,7 +250,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAttachment
 
-    file_location = factory.Faker("opportunity_attachment")
+    file_location = factory.Faker("s3_file_location")
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
     file_description = factory.Faker("sentence")

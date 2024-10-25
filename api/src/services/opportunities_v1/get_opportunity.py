@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import date
 from typing import List
 
@@ -11,6 +12,7 @@ from src.adapters.aws import S3Config, get_s3_client
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
+from src.util.file_util import split_s3_url
 
 
 def _fetch_opportunity(
@@ -42,20 +44,15 @@ def pre_sign_opportunity_file_location(
     opp_atts: List[OpportunityAttachment],
 ) -> List[OpportunityAttachment]:
     s3_config = S3Config()
-    s3_config.s3_endpoint_url = "http://localstack:4566"
     s3_client = get_s3_client(
         s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
     )
     for opp_att in opp_atts:
         file_loc = opp_att.file_location
-        object_key = file_loc.split(f"{s3_config.s3_opportunity_bucket}/")[
-            1
-        ]  # should be same as filename in db ?
+        split_url = split_s3_url(file_loc)
         pre_sign_file_loc = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": s3_config.s3_opportunity_bucket, "Key": object_key},
-            ExpiresIn=1800,
-        )  # do we want to put limit
+            "get_object", Params={"Bucket": split_url[0], "Key": split_url[1]}
+        )
         opp_att.file_location = pre_sign_file_loc
 
     return opp_atts
@@ -65,7 +62,7 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     opportunity = _fetch_opportunity(
         db_session, opportunity_id, load_all_opportunity_summaries=False
     )
-    opportunity_copy = copy.deepcopy(opportunity)
+    opportunity_copy = deepcopy(opportunity)
 
     pre_sign_opportunity_file_location(opportunity_copy.opportunity_attachments)
 

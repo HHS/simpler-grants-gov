@@ -19,6 +19,7 @@ from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
+from src.util.file_util import split_s3_url
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 
@@ -254,6 +255,14 @@ def mock_s3(reset_aws_env_vars):
 
 
 @pytest.fixture
+def mock_s3_client(reset_aws_env_vars, monkeypatch):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
+        # Create a mock S3 client
+        s3 = boto3.client("s3")
+        yield s3
+
+
+@pytest.fixture
 def mock_s3_bucket_resource(mock_s3):
     bucket = mock_s3.Bucket("test_bucket")
     bucket.create()
@@ -263,6 +272,25 @@ def mock_s3_bucket_resource(mock_s3):
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_presigned_url(monkeypatch, mock_s3_client, mock_s3_bucket):
+    """Fixture to generate a presigned URL for a specified S3 object key."""
+
+    def _generate_presigned_url(file_loc):
+        split_url = split_s3_url(file_loc)
+        # Upload a dummy object to the bucket
+        mock_s3_client.put_object(Bucket=mock_s3_bucket, Key=split_url[1], Body="Hello, world!")
+
+        # Generate a presigned URL for the uploaded object
+        presigned_url = mock_s3_client.generate_presigned_url(
+            "get_object", Params={"Bucket": mock_s3_bucket, "Key": split_url[1]}
+        )
+
+        return presigned_url
+
+    return _generate_presigned_url
 
 
 ####################

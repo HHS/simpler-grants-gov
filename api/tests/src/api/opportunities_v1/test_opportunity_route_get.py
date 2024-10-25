@@ -1,5 +1,8 @@
+from copy import deepcopy
+
 import pytest
 
+from src.db.models.opportunity_models import Opportunity
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,
@@ -47,7 +50,6 @@ def test_get_opportunity_200(
     db_opportunity = OpportunityFactory.create(
         **opportunity_params, current_opportunity_summary=None
     )  # We'll set the current opportunity below
-
     if opportunity_summary_params is not None:
         db_opportunity_summary = OpportunitySummaryFactory.create(
             **opportunity_summary_params, opportunity=db_opportunity
@@ -66,13 +68,17 @@ def test_get_opportunity_200(
 
 
 def test_get_opportunity_with_attachment_200(
-    client, api_auth_token, enable_factory_create, db_session
+    client, api_auth_token, enable_factory_create, db_session, s3_presigned_url
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create()
-
-    # Ensure the opportunity is committed to the database
     db_session.commit()
+
+    # Update file_location with s3 pre-signed url
+    # opportunity_cp: Opportunity = db_session.query(Opportunity).filter(Opportunity.opportunity_id == opportunity.opportunity_id).first()
+    opportunity_cp = deepcopy(opportunity)
+    for opp_att in opportunity_cp.opportunity_attachments:
+        opp_att.file_location = s3_presigned_url(opp_att.file_location)
 
     # Make the GET request
     resp = client.get(
@@ -85,6 +91,7 @@ def test_get_opportunity_with_attachment_200(
 
     # Validate the opportunity data
     assert len(response_data["attachments"]) > 0
+    print(response_data)
     validate_opportunity_with_attachments(opportunity, response_data)
 
 
