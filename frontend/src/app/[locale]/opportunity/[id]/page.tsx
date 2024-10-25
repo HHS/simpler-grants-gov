@@ -6,6 +6,7 @@ import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
@@ -26,6 +27,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
     console.error("Failed to render title");
+    return notFound();
   }
   const meta: Metadata = {
     title,
