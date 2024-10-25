@@ -4,10 +4,11 @@
 
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
-export const parseErrorStatus = (error: ApiRequestError) => {
-  const { message } = error as ApiRequestError;
+export const parseErrorStatus = (error: ApiRequestError): number => {
+  const { message } = error;
   try {
-    return JSON.parse(message).status;
+    const parsedMessage = JSON.parse(message) as { status: number };
+    return parsedMessage.status;
   } catch (e) {
     console.error("Malformed error object");
     return 500;
