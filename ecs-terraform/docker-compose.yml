@@ -1,6 +1,0 @@
-services:
-  ecs-terraform:
-    build:
-      context: .
-      target: dev
-    container_name: ecs-terraform
