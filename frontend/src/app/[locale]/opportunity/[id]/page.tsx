@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
 import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -28,7 +29,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
     console.error("Failed to render title");
-    return notFound();
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      return notFound();
+    }
   }
   const meta: Metadata = {
     title,
@@ -44,7 +47,7 @@ async function getOpportunityData(id: number): Promise<Opportunity> {
     return opportunity.data;
   } catch (error) {
     console.error("Failed to fetch opportunity:", error);
-    throw new Error("Failed to fetch opportunity");
+    throw error;
   }
 }
 
@@ -96,8 +99,7 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
   try {
     opportunityData = await getOpportunityData(id);
   } catch (error) {
-    const { message } = error as ApiRequestError;
-    if (JSON.parse(message).status === 404) {
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
     }
     throw error;
