@@ -71,13 +71,15 @@ const OpportunityDescription = ({ summary }: Props) => {
   return (
     <>
       <div className="usa-prose">
-        <h2>{t("description")}</h2>
+        <h2>{t("title")}</h2>
+        <h3>{t("summary")}</h3>
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(summary.summary_description ?? "--"),
           }}
         />
-        <h2>{t("eligible_applicants")}</h2>
+        <h2>{t("eligibility")}</h2>
+        <h3>{t("eligible_applicants")}</h3>
         {eligibleApplicantsFormatter(summary.applicant_types)}
         <h3>{t("additional_info")}</h3>
         <div
@@ -86,6 +88,7 @@ const OpportunityDescription = ({ summary }: Props) => {
           }}
         />
         <h2>{t("contact_info")}</h2>
+        <h3>{t("description")}</h3>
         <div
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
@@ -93,12 +96,12 @@ const OpportunityDescription = ({ summary }: Props) => {
             ),
           }}
         />
-        <h3>{t("email")}</h3>
+        <h4>{t("email")}</h4>
         {summary?.agency_email_address_description && (
           <p>{summary.agency_email_address_description}</p>
         )}
         <p>{agencyEmailLink}</p>
-        <h3>{t("telephone")}</h3>
+        <h4>{t("telephone")}</h4>
         <p>{telephoneLink}</p>
       </div>
     </>
