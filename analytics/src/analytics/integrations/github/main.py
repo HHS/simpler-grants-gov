@@ -90,8 +90,8 @@ def export_sprint_data(
 """
     # Make the command
     # fmt: off
-    command = [
-        script,
+    command: list[str] = [
+        str(script),
         "--batch", "100",
         "--field", f"login={owner}",
         "--field", f"project={project}",
@@ -155,8 +155,8 @@ def export_roadmap_data(
 """
     # Make the command
     # fmt: off
-    command = [
-        script,
+    command: list[str] = [
+        str(script),
         "--batch", "100",
         "--field", f"login={owner}",
         "--field", f"project={project}",
