@@ -7,10 +7,11 @@
    <summary>Table of contents</summary>
 
 - [Setting up the tool locally](#setting-up-the-tool-locally)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+  - [Docker vs Native](#docker-vs-native)
+    - [Running with Docker](#running-with-docker)
+    - [Running natively](#running-natively)
   - [Configuring secrets](#configuring-secrets)
-    - [Prerequisites](#prerequisites-1)
+    - [Prerequisites](#prerequisites)
     - [Finding reporting channel ID](#finding-reporting-channel-id)
     - [Finding slackbot token](#finding-slackbot-token)
 - [Running the tool locally](#running-the-tool-locally)
@@ -27,39 +28,68 @@
 
 The following sections describe how to install and work with the analytics application on your own computer. If you don't need to run the application locally, view the [usage docs](usage.md) for other ways to monitor our operational metrics.
 
-### Prerequisites
+### Docker vs Native
 
-- **Python version 3.11:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
-   or [asdf](https://asdf-vm.com/).
-- **Poetry:** After installing and activating the right version of Python, [install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx).
-- **GitHub CLI:** [Install the GitHub CLI](https://github.com/cli/cli#installation)
+This project run itself inside of docker by default. If you wish to run this natively, add PY_RUN_APPROACH=local to your environment variables. You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add it to your ~/.zshrc file (and run `source ~/.zshrc`).
 
-Once you follow the steps above, check that you meet the prerequisites with: `make check-prereqs`
+After choosing your approach, following the corresponding setup instructions:
 
-### Installation
+- [Running with Docker](#running-with-docker)
+- [Running natively](#running-natively)
 
-1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
-2. Create a `.secrets.toml` with the following details, see the next section to discover where these values can be found:
+#### Running with Docker
 
-   ```toml
-   reporting_channel_id = "<REPLACE_WITH_CHANNEL_ID>"
-   slack_bot_token = "<REPLACE_WITH_SLACKBOT_TOKEN_ID>"
-   ```
+**Pre-requisites**
 
-3. Set a Github Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
+- Docker installed and running locally: `docker --version`
+- Docker compose installed: `docker-compose --version`
 
+**Steps**
+
+1. Run `make build`
+2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
   - Go to https://github.com/settings/tokens
-  - Create a token
+  - Generate a new token (classic)
   - Give it the following scopes:
     - repo
     - read:org
     - admin:public_key
     - project
   - Add `export GH_TOKEN=...` to your `zshrc` or similar
+3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+   ```
+   export SLACK_BOT_TOKEN=...
+   export REPORTING_CHANNEL_ID=...
+   ```
+4. Run `make test-audit` to confirm the application is running correctly.
 
-### Docker vs Native
+#### Running natively
 
-This project run itself inside of docker by default. If you wish to run this natively, add PY_RUN_APPROACH=local to your environment variables. You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add it to your ~/.zshrc file (and run `source ~/.zshrc`).
+**Pre-requisites**
+
+- **Python version 3.12:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
+   or [asdf](https://asdf-vm.com/).
+- **Poetry:** After installing and activating the right version of Python, [install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx).
+- **GitHub CLI:** [Install the GitHub CLI](https://github.com/cli/cli#installation)
+
+**Steps**
+
+1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
+2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
+  - Go to https://github.com/settings/tokens
+  - Generate a new token (classic)
+  - Give it the following scopes:
+    - repo
+    - read:org
+    - admin:public_key
+    - project
+  - Add `export GH_TOKEN=...` to your `zshrc` or similar
+3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+   ```
+   export SLACK_BOT_TOKEN=...
+   export REPORTING_CHANNEL_ID=...
+   ```
+4. Run `make test-audit` to confirm the application is running correctly.
 
 ### Configuring secrets
 
