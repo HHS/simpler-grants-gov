@@ -1,6 +1,5 @@
+import OpportunityListingAPI from "src/app/api//OpportunityListingAPI";
 import SearchOpportunityAPI from "src/app/api/SearchOpportunityAPI";
-
-import OpportunityListingAPI from "./OpportunityListingAPI";
 
 const fetchers = {
   searchOpportunityFetcher: new SearchOpportunityAPI(),
