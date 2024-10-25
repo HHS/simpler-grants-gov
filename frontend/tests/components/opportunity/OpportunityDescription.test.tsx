@@ -115,7 +115,7 @@ describe("OpportunityDescription", () => {
       />,
     );
 
-    const contactInfoHeading = screen.getByText("contact_info");
+    const contactInfoHeading = screen.getByText("summary");
     expect(contactInfoHeading).toBeInTheDocument();
     expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
 

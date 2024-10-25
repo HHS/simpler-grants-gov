@@ -25,6 +25,13 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
+const createMockOpportunityData = (
+  overrides: Partial<Opportunity>,
+): Opportunity => ({
+  ...mockOpportunityData,
+  ...overrides,
+});
+
 const mockOpportunityData: Opportunity = {
   opportunity_status: "posted",
   summary: {
@@ -45,36 +52,39 @@ describe("OpportunityStatusWidget", () => {
   });
 
   it("renders 'Closed' status tag correctly", () => {
-    const closedData = {
-      ...mockOpportunityData,
-      opportunity_status: "closed",
-    };
-
-    render(<OpportunityStatusWidget opportunityData={closedData} />);
+    render(
+      <OpportunityStatusWidget
+        opportunityData={createMockOpportunityData({
+          opportunity_status: "closed",
+        })}
+      />,
+    );
 
     expect(screen.getByText("Closed:")).toBeInTheDocument();
     expect(screen.getByText("2024-12-01")).toBeInTheDocument();
   });
 
   it("renders 'Archived' status tag correctly", () => {
-    const archivedData = {
-      ...mockOpportunityData,
-      opportunity_status: "archived",
-    };
-
-    render(<OpportunityStatusWidget opportunityData={archivedData} />);
+    render(
+      <OpportunityStatusWidget
+        opportunityData={createMockOpportunityData({
+          opportunity_status: "archived",
+        })}
+      />,
+    );
 
     expect(screen.getByText("Archived:")).toBeInTheDocument();
     expect(screen.getByText("2025-01-01")).toBeInTheDocument();
   });
 
   it("renders 'Forecasted' status tag correctly", () => {
-    const forecastedData = {
-      ...mockOpportunityData,
-      opportunity_status: "forecasted",
-    };
-
-    render(<OpportunityStatusWidget opportunityData={forecastedData} />);
+    render(
+      <OpportunityStatusWidget
+        opportunityData={createMockOpportunityData({
+          opportunity_status: "forecasted",
+        })}
+      />,
+    );
 
     expect(screen.getByText("Forecasted")).toBeInTheDocument();
   });

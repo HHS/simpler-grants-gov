@@ -56,7 +56,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         return (
           <div className="usa-tag bg-base-dark border-radius-2 width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
-              <strong>{t("forecasted")} </strong>
+              <strong>{t("forecasted")}</strong>
             </p>
           </div>
         );

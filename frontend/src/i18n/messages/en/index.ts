@@ -14,12 +14,15 @@ export const messages = {
       last_updated: "Last Updated: ",
     },
     description: {
-      description: "Description",
-      eligible_applicants: "Eligible Applicants",
-      additional_info: "Additional Information on eligibility",
+      title: "Funding opportunity",
+      summary: "Summary",
+      eligibility: "Eligibility",
+      eligible_applicants: "Eligible applicants",
+      additional_info: "Additional information",
       contact_info: "Grantor contact information",
+      description: "Description",
       email: "Email",
-      telephone: "Telephone",
+      telephone: "Phone",
     },
     award_info: {
       yes: "Yes",
@@ -28,6 +31,7 @@ export const messages = {
       expected_awards: "Expected awards",
       award_ceiling: "Award Ceiling",
       award_floor: "Award Floor",
+      opportunity_number: "Funding opportunity number",
       cost_sharing: "Cost sharing or matching requirement",
       funding_instrument: "Funding instrument type",
       opportunity_category: "Opportunity Category",
@@ -51,6 +55,12 @@ export const messages = {
       forecasted: "Forecasted",
       closing_warn:
         "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
+    },
+    cta: {
+      apply_title: "Application process",
+      apply_content:
+        "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
+      button_content: "View on Grants.gov",
     },
   },
   Index: {
