@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import Engine
 
-from analytics.datasets.utils import dump_to_json
+from analytics.datasets.utils import dump_to_json, load_json_file
 
 
 class BaseDataset:
@@ -26,6 +26,12 @@ class BaseDataset:
     @classmethod
     def from_dict(cls, data: list[dict]) -> Self:
         """Load the dataset from a list of python dictionaries representing records."""
+        return cls(df=pd.DataFrame(data))
+
+    @classmethod
+    def from_json(cls, file_path: str | Path) -> Self:
+        """Load the dataset from a JSON file."""
+        data = load_json_file(str(file_path))
         return cls(df=pd.DataFrame(data))
 
     def to_sql(
