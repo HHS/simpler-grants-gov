@@ -10,7 +10,10 @@ OUTPUT_DIR ?= data
 SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
 ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
+DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
+POINTS_FIELD ?= Points # Names of the sprint field in the GitHub project
+SPRINT_FIELD ?= Sprint # Names of the points field in the GitHub project
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
@@ -160,6 +163,17 @@ roadmap-data-export:
 	--owner $(ORG) \
 	--project $(ROADMAP_PROJECT) \
 	--output-file $(ROADMAP_FILE)
+
+delivery-data-export:
+	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
+	@echo "====================================================="
+	$(POETRY)  analytics export gh_delivery_data \
+	--owner $(ORG) \
+	--sprint-project $(SPRINT_PROJECT) \
+	--roadmap-project $(ROADMAP_PROJECT) \
+	--output-file $(DELIVERY_FILE) \
+	--points-field "$(POINTS_FIELD)" \
+	--sprint-field "$(SPRINT_FIELD)"
 
 issue-data-export:
 	@echo "=> Exporting issue data from the repository"
