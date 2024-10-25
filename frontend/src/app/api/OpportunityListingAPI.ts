@@ -21,6 +21,7 @@ export default class OpportunityListingAPI extends BaseApi {
   async getOpportunityById(
     opportunityId: number,
   ): Promise<OpportunityApiResponse> {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const subPath = `${opportunityId}`;
     const response = (await this.request(
       "GET",
