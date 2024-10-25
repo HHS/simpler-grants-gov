@@ -10,7 +10,7 @@ import OpportunityLink from "src/components/opportunity/OpportunityLink";
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn().mockReturnValue((key: string) => {
     const translations: { [key: string]: string } = {
-      title: "Link to additonal information",
+      title: "Link to additional information",
     };
     return translations[key] || key;
   }),
