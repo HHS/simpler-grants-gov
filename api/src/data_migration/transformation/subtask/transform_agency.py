@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 NULLABLE_FIELDS = {
     "AgencyCode",  # Note this is the sub_agency_code in our system
     "AgencyContactEMail2",
+    "ldapGp",
+    "description",
+    "label",
 }
 
 AGENCY_FIELD_MAP = {
@@ -77,9 +80,6 @@ REQUIRED_FIELDS = {
     "AgencyCFDA",
     "AgencyDownload",
     "AgencyNotify",
-    "ldapGp",
-    "description",
-    "label",
     "AgencyContactName",
     "AgencyContactAddress1",
     "AgencyContactCity",
@@ -270,6 +270,25 @@ class TransformAgency(AbstractTransformSubTask):
                     agency=agency, agency_download_file_type=file_type_to_add
                 )
             )
+
+
+class TransformAgencyHierarchy(AbstractTransformSubTask):
+    def __init__(self, task: Task):
+        super().__init__(task)
+
+    def transform_records(self) -> None:
+        agencies = self.db_session.scalars(select(Agency)).all()
+        agency_map = {agency.agency_code: agency for agency in agencies}
+
+        for agency in agencies:
+            top_level_agency_code = self.get_top_level_agency_code(agency.agency_code)
+            if top_level_agency_code and top_level_agency_code in agency_map:
+                agency.top_level_agency = agency_map[top_level_agency_code]
+
+    def get_top_level_agency_code(self, agency_code: str) -> str | None:
+        if "-" not in agency_code:
+            return None
+        return agency_code.split("-")[0]
 
 
 ############################

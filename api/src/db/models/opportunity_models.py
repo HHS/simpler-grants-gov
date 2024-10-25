@@ -9,6 +9,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -18,6 +19,7 @@ from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
     LkFundingInstrument,
+    LkOpportunityAttachmentType,
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
@@ -51,6 +53,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     publisher_user_id: Mapped[str | None]
     publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
 
+    opportunity_attachments: Mapped[list["OpportunityAttachment"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
     opportunity_assistance_listings: Mapped[list["OpportunityAssistanceListing"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
@@ -64,8 +70,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
 
     agency_record: Mapped[Agency | None] = relationship(
-        Agency, primaryjoin="Opportunity.agency == foreign(Agency.agency_code)", uselist=False
+        Agency,
+        primaryjoin="Opportunity.agency == foreign(Agency.agency_code)",
+        uselist=False,
+        viewonly=True,
     )
+
+    @property
+    def top_level_agency_name(self) -> str | None:
+        if self.agency_record is not None and self.agency_record.top_level_agency is not None:
+            return self.agency_record.top_level_agency.agency_name
+
+        return None
 
     @property
     def agency_name(self) -> str | None:
@@ -385,3 +401,29 @@ class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkOpportunityStatus.opportunity_status_id),
         index=True,
     )
+
+
+class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_attachment"
+
+    attachment_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    opportunity_attachment_type: Mapped[OpportunityAttachmentType] = mapped_column(
+        "opportunity_attachment_type_id",
+        LookupColumn(LkOpportunityAttachmentType),
+        ForeignKey(LkOpportunityAttachmentType.opportunity_attachment_type_id),
+        index=True,
+    )
+
+    file_location: Mapped[str]
+    mime_type: Mapped[str]
+    file_name: Mapped[str]
+    file_description: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+    created_by: Mapped[str | None]
+    updated_by: Mapped[str | None]
+    legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)

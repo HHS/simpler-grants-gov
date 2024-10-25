@@ -587,6 +587,10 @@ components:
             - object
             allOf:
             - $ref: '#/components/schemas/ValidationIssue'
+        internal_request_id:
+          type: string
+          description: An internal tracking ID
+          example: 550e8400-e29b-41d4-a716-446655440000
     OpportunitySorting:
       type: object
       properties:
@@ -1416,11 +1420,17 @@ components:
           - 'null'
           description: The name of the agency who created the oppportunity
           example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
+          example: Department of Examples
         category:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum:
+          enum: &id002
           - discretionary
           - mandatory
           - continuation
@@ -1439,12 +1449,12 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type:
+            type: &id003
             - object
             allOf:
             - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type:
+          type: &id004
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunitySummaryV1'
@@ -1452,12 +1462,12 @@ components:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum:
+          enum: &id005
           - forecasted
           - posted
           - closed
           - archived
-          type:
+          type: &id006
           - string
         created_at:
           type: string
@@ -2023,6 +2033,130 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityAttachmentV1:
+      type: object
+      properties:
+        file_location:
+          type: string
+          description: The URL to download the attachment
+          example: https://...
+        mime_type:
+          type: string
+          description: The MIME type of the attachment
+          example: application/pdf
+        file_name:
+          type: string
+          description: The name of the attachment file
+          example: my_NOFO.pdf
+        file_description:
+          type: string
+          description: A description of the attachment
+          example: The full announcement NOFO
+        file_size_bytes:
+          type: integer
+          description: The size of the attachment in bytes
+          example: 10012
+        opportunity_attachment_type:
+          description: The type of attachment
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
+          - notice_of_funding_opportunity
+          enum:
+          - notice_of_funding_opportunity
+          - other
+          type:
+          - string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    OpportunityWithAttachmentsV1:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          description: The internal ID of the opportunity
+          example: 12345
+        opportunity_number:
+          type:
+          - string
+          - 'null'
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
+          type:
+          - string
+          - 'null'
+          description: The agency who created the opportunity
+          example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the oppportunity
+          example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
+          example: Department of Examples
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
+          enum: *id002
+          type:
+          - string
+          - 'null'
+          - 'null'
+        category_explanation:
+          type:
+          - string
+          - 'null'
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        opportunity_assistance_listings:
+          type: array
+          items:
+            type: *id003
+            allOf:
+            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        summary:
+          type: *id004
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySummaryV1'
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum: *id005
+          type: *id006
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        attachments:
+          type: array
+          description: List of attachments associated with the opportunity
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/OpportunityAttachmentV1'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -2034,7 +2168,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/OpportunityV1'
+          - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
         status_code:
           type: integer
           description: The HTTP status code

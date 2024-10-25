@@ -721,6 +721,7 @@ def validate_agency(
     expect_values_to_match: bool = True,
     is_test_agency: bool = False,
     non_matching_fields: set | None = None,
+    deleted_fields: set | None = None,
 ):
     agency_code = source_tgroups[0].get_agency_code()
     agency = db_session.query(Agency).filter(Agency.agency_code == agency_code).one_or_none()
@@ -738,6 +739,13 @@ def validate_agency(
         agency_field_mapping = [m for m in AGENCY_FIELD_MAPPING if m[0] not in non_matching_fields]
     else:
         agency_field_mapping = AGENCY_FIELD_MAPPING
+
+    if deleted_fields is not None:
+        agency_field_mapping = [m for m in agency_field_mapping if m[0] not in deleted_fields]
+
+        deleted_field_mapping = [m for m in AGENCY_FIELD_MAPPING if m[0] in deleted_fields]
+        for deleted_field in deleted_field_mapping:
+            assert getattr(agency, deleted_field[1]) is None
 
     validate_matching_fields(tgroup_map, agency, agency_field_mapping, expect_values_to_match)
     assert agency.is_test_agency == is_test_agency

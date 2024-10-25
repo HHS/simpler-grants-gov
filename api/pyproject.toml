@@ -8,7 +8,7 @@ authors = ["Nava Engineering <engineering@navapbc.com>"]
 [tool.poetry.dependencies]
 # See /documentation/api/package-depedency-management.md#Upgrading Python
 # for details on upgrading your Python version
-python = "~3.12"
+python = "~3.13"
 SQLAlchemy = { version = "^2.0.21", extras = ["mypy"] }
 alembic = "^1.12.0"
 python-dotenv = "^1.0.0"
@@ -40,12 +40,15 @@ pytest = "^8.0.0"
 pytest-watch = "^4.2.0"
 types-pyyaml = "^6.0.12.11"
 setuptools = "^75.0.0"
-pydot = "3.0.1"
+pydot = "3.0.2"
 sadisplay = "0.4.9"
-ruff = "^0.6.0"
+ruff = "^0.7.0"
 debugpy = "^1.8.1"
 freezegun = "^1.5.0"
 types-requests = "^2.31"
+graphviz = "^0.20.3"
+eralchemy = "^1.5.0"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,0 +1,49 @@
+query (
+  $url: URI!
+  $sprintField: String = "Sprint"
+  $pointsField: String = "Points"
+) {
+  resource(url: $url) {
+    ... on Issue {
+      issueType {
+        name
+      }
+      # get all of the project items associated with this issue
+      projectItems(first: 10) {
+        nodes {
+          ... on ProjectV2Item {
+            # Get the project ID, number, and owner, as well as itemId
+            ...projectMetadata
+
+            # Get the value of the "sprint" field, if set
+            sprint: fieldValueByName(name: $sprintField) {
+              ... on ProjectV2ItemFieldIterationValue {
+                iterationId
+              }
+            }
+
+            # Get the value of the "points" field, if set
+            points: fieldValueByName(name: $pointsField) {
+              ... on ProjectV2ItemFieldNumberValue {
+                number
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment projectMetadata on ProjectV2Item {
+  itemId: id
+  project {
+    projectId: id
+    number
+    owner {
+      ... on Organization {
+        login
+      }
+    }
+  }
+}

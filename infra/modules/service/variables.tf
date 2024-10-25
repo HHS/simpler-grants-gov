@@ -75,6 +75,16 @@ variable "extra_environment_variables" {
   default     = {}
 }
 
+variable "scheduled_jobs" {
+  description = "Variable for configuration of the step functions scheduled job"
+  type = map(object({
+    task_command        = list(string)
+    schedule_expression = string
+    state               = string
+  }))
+  default = {}
+}
+
 variable "secrets" {
   type = set(object({
     name      = string

@@ -12,6 +12,7 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
+    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -275,6 +276,14 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the top level agency who created the oppportunity",
+            "example": "Department of Examples",
+        },
+    )
+
     category = fields.Enum(
         OpportunityCategory,
         allow_none=True,
@@ -306,6 +315,47 @@ class OpportunityV1Schema(Schema):
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
+
+class OpportunityAttachmentV1Schema(Schema):
+    file_location = fields.String(
+        metadata={
+            "description": "The URL to download the attachment",
+            "example": "https://...",
+        }
+    )
+    mime_type = fields.String(
+        metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
+    )
+    file_name = fields.String(
+        metadata={"description": "The name of the attachment file", "example": "my_NOFO.pdf"}
+    )
+    file_description = fields.String(
+        metadata={
+            "description": "A description of the attachment",
+            "example": "The full announcement NOFO",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={"description": "The size of the attachment in bytes", "example": 10012}
+    )
+    opportunity_attachment_type = fields.Enum(
+        OpportunityAttachmentType,
+        metadata={
+            "description": "The type of attachment",
+            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
+        },
+    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+
+
+class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
+    attachments = fields.List(
+        fields.Nested(OpportunityAttachmentV1Schema),
+        attribute="opportunity_attachments",  # This maps to the model's field name
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
 
 
 class OpportunitySearchFilterV1Schema(Schema):
@@ -473,7 +523,7 @@ class OpportunitySearchRequestV1Schema(Schema):
 
 
 class OpportunityGetResponseV1Schema(AbstractResponseSchema):
-    data = fields.Nested(OpportunityV1Schema())
+    data = fields.Nested(OpportunityWithAttachmentsV1Schema())
 
 
 class OpportunityVersionV1Schema(Schema):

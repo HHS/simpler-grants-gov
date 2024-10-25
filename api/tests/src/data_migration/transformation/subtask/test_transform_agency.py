@@ -10,16 +10,55 @@ from src.constants.lookup_constants import (
 from src.data_migration.transformation.subtask.transform_agency import (
     TgroupAgency,
     TransformAgency,
+    TransformAgencyHierarchy,
     apply_updates,
     transform_agency_download_file_types,
     transform_agency_notify,
 )
+from src.db.models.agency_models import Agency
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_agency,
     validate_agency,
 )
 from tests.src.db.models.factories import AgencyFactory
+
+
+class TestTransformAgencyHierarchy(BaseTransformTestClass):
+    @pytest.fixture()
+    def transform_agency_hierarchy(self, transform_oracle_data_task):
+        return TransformAgencyHierarchy(transform_oracle_data_task)
+
+    def test_transform_records(self, db_session, transform_agency_hierarchy):
+        # Create agencies with varying top-level agency codes
+        [
+            AgencyFactory.create(agency_code="DHS"),
+            AgencyFactory.create(agency_code="DHS-ICE"),
+            AgencyFactory.create(agency_code="DHS--ICE"),
+            AgencyFactory.create(agency_code="DHS-ICE-123"),
+            AgencyFactory.create(agency_code="ABC-ICE"),
+        ]
+
+        # Run the transformation
+        transform_agency_hierarchy.transform_records()
+
+        # Fetch the agencies again to verify the changes
+        agency1 = db_session.query(Agency).filter(Agency.agency_code == "DHS").one_or_none()
+        agency2 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE").one_or_none()
+        agency3 = db_session.query(Agency).filter(Agency.agency_code == "DHS-ICE-123").one_or_none()
+        agency4 = db_session.query(Agency).filter(Agency.agency_code == "ABC-ICE").one_or_none()
+        agency5 = db_session.query(Agency).filter(Agency.agency_code == "DHS--ICE").one_or_none()
+
+        # Verify that the top-level agencies are set correctly
+        assert agency1.top_level_agency_id is None
+        assert agency2.top_level_agency_id == agency1.agency_id
+        assert agency3.top_level_agency_id == agency1.agency_id
+        assert agency4.top_level_agency_id is None
+        assert agency5.top_level_agency_id == agency1.agency_id
+
+    def test_get_top_level_agency_code(self, transform_agency_hierarchy):
+        assert transform_agency_hierarchy.get_top_level_agency_code("DHS-ICE") == "DHS"
+        assert transform_agency_hierarchy.get_top_level_agency_code("DHS") is None
 
 
 class TestTransformAgency(BaseTransformTestClass):
@@ -31,14 +70,21 @@ class TestTransformAgency(BaseTransformTestClass):
         insert_agency1 = setup_agency("INSERT-AGENCY-1", create_existing=False)
         insert_agency2 = setup_agency("INSERT-AGENCY-2", create_existing=False)
         insert_agency3 = setup_agency("INSERT-AGENCY-3", create_existing=False)
-        insert_agency4 = setup_agency("INSERT-AGENCY-4", create_existing=False)
+        insert_agency4 = setup_agency(
+            "INSERT-AGENCY-4",
+            create_existing=False,
+            # None passed in here will make it not appear at all in the tgroups rows
+            source_values={"ldapGp": None, "description": None, "label": None},
+        )
         insert_test_agency = setup_agency("GDIT", create_existing=False)
 
         # Already processed fields are ones that were handled on a prior run and won't be updated
         # during this specific run
         update_agency1 = setup_agency("UPDATE-AGENCY-1", create_existing=True)
         update_agency2 = setup_agency(
-            "UPDATE-AGENCY-2", create_existing=True, deleted_fields={"AgencyContactEMail2"}
+            "UPDATE-AGENCY-2",
+            create_existing=True,
+            deleted_fields={"AgencyContactEMail2", "ldapGp", "description"},
         )
         update_agency3 = setup_agency(
             "UPDATE-AGENCY-3",
@@ -82,7 +128,7 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, insert_test_agency, is_test_agency=True)
 
         validate_agency(db_session, update_agency1)
-        validate_agency(db_session, update_agency2)
+        validate_agency(db_session, update_agency2, deleted_fields={"ldapGp", "description"})
         validate_agency(
             db_session,
             update_agency3,
