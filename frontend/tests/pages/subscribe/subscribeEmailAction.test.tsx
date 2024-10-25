@@ -1,7 +1,7 @@
 import { identity } from "lodash";
 import { Response } from "node-fetch";
 import { subscribeEmailAction } from "src/app/[locale]/subscribe/actions";
-import { mockMessages, useTranslationsMock } from "tests/utils/intMocks";
+import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const original = console.error;
 console.error = jest.fn();
@@ -33,9 +33,7 @@ describe("subscribeEmailAction", () => {
     testFormData.set("LastName", "Firsty");
     testFormData.set("email", "test@test.com");
     testFormData.set("hp", "honeypot is set");
-    const t = function (i: string) {
-      return i;
-    };
+    const t = useTranslationsMock();
 
     // Test already subscribed
     global.fetch = jest.fn(() =>
