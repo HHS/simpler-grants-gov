@@ -91,7 +91,6 @@ def test_get_opportunity_with_attachment_200(
 
     # Validate the opportunity data
     assert len(response_data["attachments"]) > 0
-    print(response_data)
     validate_opportunity_with_attachments(opportunity, response_data)
 
 
