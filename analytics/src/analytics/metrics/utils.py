@@ -2,16 +2,38 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from dataclasses import dataclass
+from enum import StrEnum
 
 import pandas as pd
 
 from analytics.metrics.base import Unit
 
 
+@dataclass
+class Columns:
+    """List of columns names to use when calculating burnup/down."""
+
+    opened_at_col: str
+    closed_at_col: str
+    unit_col: str
+    date_col: str = "date"
+    opened_count_col: str = "opened"
+    closed_count_col: str = "closed"
+    delta_col: str = "delta"
+
+
+class IssueState(StrEnum):
+    """Whether the issue is open or closed."""
+
+    OPEN = "opened"
+    CLOSED = "closed"
+
+
 def get_daily_tix_counts_by_status(
     df: pd.DataFrame,
-    status: Literal["opened", "closed"],
+    cols: Columns,
+    state: IssueState,
     unit: Unit,
 ) -> pd.DataFrame:
     """
@@ -20,23 +42,22 @@ def get_daily_tix_counts_by_status(
     Notes
     -----
     It does this by:
-    - Grouping on the created_date or opened_date column, depending on status
+    - Grouping on the created_date or opened_date column, depending on state
     - Counting the total number of rows per group
 
     """
-    agg_col = "created_date" if status == "opened" else "closed_date"
-    unit_col = unit.value
+    agg_col = cols.opened_at_col if state == IssueState.OPEN else cols.closed_at_col
+    unit_col = cols.unit_col
     key_cols = [agg_col, unit_col]
     if unit == Unit.issues:
         df[unit_col] = 1
     df_agg = df[key_cols].groupby(agg_col, as_index=False).agg({unit_col: "sum"})
-    return df_agg.rename(columns={agg_col: "date", unit_col: status})
+    return df_agg.rename(columns={agg_col: "date", unit_col: state.value})
 
 
 def get_tix_date_range(
     df: pd.DataFrame,
-    open_col: str | None,
-    closed_col: str | None,
+    cols: Columns,
     sprint_end: pd.Timestamp,
 ) -> pd.DataFrame:
     """
@@ -53,8 +74,8 @@ def get_tix_date_range(
         whichever is the later date.
 
     """
-    opened_min = df[open_col].min()
-    closed_max = df[closed_col].max()
+    opened_min = df[cols.opened_at_col].min()
+    closed_max = df[cols.closed_at_col].max()
     closed_max = sprint_end if pd.isna(closed_max) else max(sprint_end, closed_max)
     return pd.DataFrame(
         pd.date_range(opened_min, closed_max),
@@ -63,10 +84,10 @@ def get_tix_date_range(
 
 
 def get_cum_sum_of_tix(
+    cols: Columns,
     dates: pd.DataFrame,
     opened: pd.DataFrame,
     closed: pd.DataFrame,
-    date_col: str | None = None,
 ) -> pd.DataFrame:
     """
     Create results data frame.
@@ -82,11 +103,11 @@ def get_cum_sum_of_tix(
 
     """
     df = (
-        dates.merge(opened, on=date_col, how="left")
-        .merge(closed, on=date_col, how="left")
+        dates.merge(opened, on=cols.date_col, how="left")
+        .merge(closed, on=cols.date_col, how="left")
         .fillna(0)
     )
-    df["delta"] = df["opened"] - df["closed"]
-    df["total_open"] = df["delta"].cumsum()
-    df["total_closed"] = df["closed"].cumsum()
+    df[cols.delta_col] = df[cols.opened_count_col] - df[cols.closed_count_col]
+    df["total_open"] = df[cols.delta_col].cumsum()
+    df["total_closed"] = df[cols.closed_count_col].cumsum()
     return df
