@@ -46,7 +46,7 @@ export const messages = {
       version: "Version",
     },
     link: {
-      title: "Link to additonal information",
+      title: "Link to additional information",
     },
     status_widget: {
       archived: "Archived: ",
