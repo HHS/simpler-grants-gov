@@ -21,7 +21,7 @@ def upgrade():
     op.create_table(
         "opportunity_search_index_queue",
         sa.Column("opportunity_id", sa.BigInteger(), nullable=False),
-        sa.Column("has_updated", sa.Boolean(), nullable=False),
+        sa.Column("has_update", sa.Boolean(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
