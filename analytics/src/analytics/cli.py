@@ -1,6 +1,7 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
 import logging
+import random
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -9,6 +10,8 @@ from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
+from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource, DeliveryMetricsEntityType
+from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsEntityType as entity
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.integrations import db, github, slack
 from analytics.metrics.base import BaseMetric, Unit
@@ -35,6 +38,7 @@ POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
+DELIVERABLE_FILE_ARG = typer.Option(help="Path to file with exported deliverable data")
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -43,10 +47,12 @@ app = typer.Typer()
 export_app = typer.Typer()
 metrics_app = typer.Typer()
 import_app = typer.Typer()
+etl_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
+app.add_typer(etl_app, name="etl", help="Transform delivery data and load into database")
 
 
 @app.callback()
@@ -257,3 +263,98 @@ def show_and_or_post_results(
             channel_id=settings.reporting_channel_id,
             output_dir=Path(output_dir),
         )
+
+
+@etl_app.command(name="transform_and_load")
+def transform_and_load(
+    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG]
+) -> None:
+
+    """ Transform and load quad delivery data """
+    print("running data loader with effective date of *TBD*")
+
+    # hydrate a model instance from the input data 
+    model = DeliveryMetricsDataSource.load_from_json_file(
+        file_path=deliverable_file
+    )
+    print("found {} issues to process".format(len(model.get_issue_ghids())))
+
+    # initialize a map of github id to db row id
+    map = {
+        entity.DELIVERABLE: {},
+        entity.EPIC: {},
+        entity.SPRINT: {},
+        entity.QUAD: {}
+    }
+
+    # fetch db row id for each quad
+    quad_update_count = 0
+    for ghid in model.get_quad_ghids():
+        if ghid is None:
+            continue
+        quad_update_count += 1
+        quad_df = model.get_quad(ghid)
+        row_id = random.randint(100, 999) # TODO: get actual row id 
+        map[entity.QUAD][ghid] = row_id
+        #print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], row_id)) 
+    print("quad row(s) processed: {}".format(quad_update_count))
+
+    # fetch db row id for each deliverable
+    deliv_update_count = 0
+    for ghid in model.get_deliverable_ghids():
+        if ghid is None:
+            continue
+        deliv_update_count += 1
+        row_id = random.randint(100, 999) # TODO: get actual row id 
+        map[entity.DELIVERABLE][ghid] = row_id
+        #print("DELIVERABLE '{}' row_id = {}".format(str(ghid), row_id))
+    print("deliverable row(s) processed: {}".format(deliv_update_count))
+
+    # fetch db row id for each sprint
+    sprint_update_count = 0
+    for ghid in model.get_sprint_ghids():
+        if ghid is None:
+            continue
+        sprint_update_count += 1
+        row_id = random.randint(100, 999) # TODO: get actual row id 
+        map[entity.SPRINT][ghid] = row_id
+        #print("SPRINT '{}' row_id = {}".format(str(ghid), row_id))
+    print("sprint row(s) processed: {}".format(sprint_update_count))
+
+    # fetch db row id for each epic
+    epic_update_count = 0
+    for ghid in model.get_epic_ghids():
+        if ghid is None:
+            continue
+        epic_update_count += 1
+        row_id = random.randint(100, 999) # TODO: get actual row id 
+        map[entity.EPIC][ghid] = row_id
+        #print("EPIC '{}' row_id = {}".format(str(ghid), row_id))
+    print("epic row(s) processed: {}".format(epic_update_count))
+
+    # iterate over issues
+    issue_update_count = 0
+    for issue_ghid in model.get_issue_ghids():
+        if issue_ghid is None:
+            continue
+        issue_update_count += 1
+
+        issue_df = model.get_issue(issue_ghid)
+        epic_id = map[entity.EPIC].get(issue_df['epic_ghid'])
+        deliverable_id = map[entity.EPIC].get(issue_df['deliverable_ghid'])
+        sprint_id = map[entity.SPRINT].get(issue_df['sprint_ghid'])
+        quad_id = map[entity.QUAD].get(issue_df['quad_ghid'])
+        row_id = random.randint(100, 999) # TODO: get actual row id 
+
+        #print("ISSUE '{}' issue_id = {}, sprint_id = {}, epic_id = {}, ".format(str(issue_ghid), row_id, sprint_id, epic_id))
+    print("issue row(s) processed: {}".format(issue_update_count))
+
+
+
+
+    """
+    print("unique quad ghids: {}".format(str(model.get_quad_ghids())))
+    print("unique deliverable ghids: {}".format(str(model.get_deliverable_ghids())))
+    print("unique epic ghids: {}".format(str(model.get_epic_ghids())))
+    print("unique sprint ghids: {}".format(str(model.get_sprint_ghids())))
+    """
