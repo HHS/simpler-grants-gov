@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from datetime import date
 from typing import List
@@ -40,18 +41,25 @@ def _fetch_opportunity(
     return opportunity
 
 
+def get_boto_session() -> boto3.Session:
+    is_local = bool(os.getenv("IS_LOCAL_AWS", False))
+    if is_local:
+        return boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+
+    return boto3.Session()
+
+
 def pre_sign_opportunity_file_location(
     opp_atts: List[OpportunityAttachment],
 ) -> List[OpportunityAttachment]:
     s3_config = S3Config()
-    s3_client = get_s3_client(
-        s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
-    )
+
+    s3_client = get_s3_client(s3_config, get_boto_session())
     for opp_att in opp_atts:
         file_loc = opp_att.file_location
-        split_url = split_s3_url(file_loc)
+        bucket, key = split_s3_url(file_loc)
         pre_sign_file_loc = s3_client.generate_presigned_url(
-            "get_object", Params={"Bucket": split_url[0], "Key": split_url[1]}
+            "get_object", Params={"Bucket": bucket, "Key": key}
         )
         opp_att.file_location = pre_sign_file_loc
 

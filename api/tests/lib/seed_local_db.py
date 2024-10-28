@@ -36,14 +36,14 @@ def _upload_opportunity_attachments_s3():
             file_path = os.path.join(root, file)
             object_name = os.path.relpath(file_path, test_folder_path)
 
-            try:
-                s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
-                logger.info("Successfully uploaded files")
-            except ClientError as e:
-                logger.error(
-                    "Error uploading to s3: %s",
-                    extra={"object_name": object_name, "file_path": file_path, "error": e},
-                )
+        try:
+            s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
+            logger.info("Successfully uploaded files")
+        except ClientError as e:
+            logger.error(
+                "Error uploading to s3: %s",
+                extra={"object_name": object_name, "file_path": file_path, "error": e},
+            )
 
 
 def _add_history(

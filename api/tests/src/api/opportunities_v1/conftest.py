@@ -155,7 +155,7 @@ def validate_opportunity_attachments(
     for db_attachment, resp_attachment in zip(db_attachments, resp_attachments, strict=True):
         assert (
             db_attachment.file_location != resp_attachment["file_location"]
-        )  # file_location is the pre-signed url
+        )  # response file_location is the pre-signed url not S3 url
         assert db_attachment.mime_type == resp_attachment["mime_type"]
         assert db_attachment.file_name == resp_attachment["file_name"]
         assert db_attachment.file_description == resp_attachment["file_description"]

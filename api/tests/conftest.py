@@ -53,27 +53,26 @@ def env_vars():
 
 
 ### Uploads test file to localstack s3 bucket
-@pytest.fixture
-def upload_opportunity_attachment_s3():
-    s3_client = boto3.client(
-        "s3",
-        endpoint_url=os.environ["S3_ENDPOINT_URL"],
-        aws_access_key_id="NO_CREDS",
-        aws_secret_access_key="NO_CREDS",
-    )
-    s3_client.bucket_name = "test-bucket"
-    s3_client.create_bucket(Bucket=s3_client.bucket_name)
-    file_path = (
-        pathlib.Path(__file__).parent.resolve()
-        / "lib/opportunity_attachment_test_files/test_file_1.txt"
+@pytest.fixture()
+def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
+    s3_client = boto3.client("s3")
+    test_folder_path = (
+        pathlib.Path(__file__).parent.resolve() / "lib/opportunity_attachment_test_files"
     )
 
-    # Upload opportunity attachment file to the bucket
-    s3_client.upload_file(file_path, Bucket=s3_client.bucket_name, Key="test_file_1.txt")
+    for root, _, files in os.walk(test_folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            object_name = os.path.relpath(file_path, test_folder_path)
+
+            # Upload opportunity attachment file to the bucket
+            s3_client.upload_file(
+                file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, object_name)
+            )
 
     # Check file was uploaded to mock s3
-    s3_files = s3_client.list_objects_v2(Bucket=s3_client.bucket_name)
-    assert len(s3_files["Contents"]) == 1
+    s3_files = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
+    assert len(s3_files["Contents"]) == 5
 
 
 ####################
@@ -261,7 +260,7 @@ def api_auth_token(monkeypatch, all_api_auth_tokens):
 ####################
 
 
-@pytest.fixture
+@pytest.fixture()
 def reset_aws_env_vars(monkeypatch):
     # Reset the env vars so you can't accidentally connect
     # to a real AWS account if you were doing some local testing
@@ -270,6 +269,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
 
 
 @pytest.fixture
