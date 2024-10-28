@@ -67,7 +67,7 @@ def test_get_opportunity_200(
 
 
 def test_get_opportunity_with_attachment_200(
-    client, api_auth_token, enable_factory_create, db_session, s3_presigned_url
+    client, api_auth_token, enable_factory_create, db_session
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create()
