@@ -106,7 +106,7 @@ def test_get_opportunity_s3_endpoint_url_200(
     file_loc = response_data["attachments"][0]["file_location"]
 
     # Validate the s3 endpoint url
-    response = requests.get(file_loc)
+    response = requests.get(file_loc, timeout=5)
     assert response.status_code == 200
     assert "Hello, world" in response.text
 
