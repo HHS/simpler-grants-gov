@@ -195,6 +195,17 @@ It's recommended that developers configure their code editor to auto run these t
 
 \*\* Note that debugging the server-side or full-stack here doesn't debug the API. See the API
 
+## Testing the newsletter subscription form
+The project uses [Sendy](https://sendy.co/api) to manage the newsletter. To the `/subscribe` form locally, Sendy test environment variables need to be added to the `.env.local` file or exported as environment variables:
+
+```
+SENDY_API_KEY=
+SENDY_API_URL=
+SENDY_LIST_ID=
+```
+
+These are stored as parameters in AWS System Manager and can be obtained there or from another developer on the team. They are not available for outside contributors.
+
 ## Other topics
 
 - [Internationalization](../documentation/frontend/internationalization.md)
