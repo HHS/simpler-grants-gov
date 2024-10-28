@@ -1,4 +1,4 @@
-"""Add opportunity table triggers 
+"""Add opportunity table triggers
 
 Revision ID: a8ebde13a18a
 Revises: a2e9144cdc6b
@@ -6,7 +6,6 @@ Create Date: 2024-10-28 17:48:02.678523
 
 """
 
-import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
