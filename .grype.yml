@@ -21,3 +21,5 @@ ignore:
 
   # https://github.com/HHS/simpler-grants-gov/issues/2582
   - vulnerability: CVE-2024-34158
+  - vulnerability: CVE-2024-34156
+  - vulnerability: CVE-2024-34155
