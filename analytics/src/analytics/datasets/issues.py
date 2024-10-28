@@ -4,7 +4,7 @@ import logging
 from enum import Enum
 from typing import Self
 
-from pandas import DataFrame
+import pandas as pd
 from pydantic import BaseModel, Field, ValidationError
 
 from analytics.datasets.base import BaseDataset
@@ -69,14 +69,64 @@ class IssueMetadata(BaseModel):
 class GitHubIssues(BaseDataset):
     """GitHub issues with metadata about their parents (Epics and Deliverables) and sprints."""
 
-    def __init__(self, df: DataFrame) -> None:
+    def __init__(self, df: pd.DataFrame) -> None:
         """Initialize the GitHub Issues dataset."""
         self.opened_col = "issue_created_at"
         self.closed_col = "issue_closed_at"
         self.sprint_col = "sprint_name"
         self.sprint_start_col = "sprint_start"
         self.sprint_end_col = "sprint_end"
+        # Convert date cols into dates
+        for col in [self.sprint_start_col, self.sprint_end_col]:
+            # strip off the timestamp portion of the date
+            df[col] = pd.to_datetime(df[col]).dt.floor("d")
         super().__init__(df)
+
+    def sprint_start(self, sprint: str) -> pd.Timestamp:
+        """Return the date on which a given sprint started."""
+        sprint_mask = self.df[self.sprint_col] == sprint
+        sprint_start = self.df.loc[sprint_mask, self.sprint_start_col].min()
+        return sprint_start.tz_localize("UTC")
+
+    def sprint_end(self, sprint: str) -> pd.Timestamp:
+        """Return the date on which a given sprint ended."""
+        sprint_mask = self.df[self.sprint_col] == sprint
+        sprint_end = self.df.loc[sprint_mask, self.sprint_end_col].max()
+        return sprint_end.tz_localize("UTC")
+
+    @property
+    def sprints(self) -> pd.DataFrame:
+        """Return the unique list of sprints with their start and end dates."""
+        sprint_cols = [self.sprint_col, self.sprint_start_col, self.sprint_end_col]
+        return self.df[sprint_cols].drop_duplicates()
+
+    @property
+    def current_sprint(self) -> str | None:
+        """Return the name of the current sprint, if a sprint is currently active."""
+        return self.get_sprint_name_from_date(pd.Timestamp.today().floor("d"))
+
+    def get_sprint_name_from_date(self, date: pd.Timestamp) -> str | None:
+        """Get the name of a sprint from a given date, if that date falls in a sprint."""
+        # fmt: off
+        date_filter = (
+            (self.sprints[self.sprint_start_col] < date)  # after sprint start
+            & (self.sprints[self.sprint_end_col] >= date)  # before sprint end
+        )
+        # fmt: on
+        matching_sprints = self.sprints.loc[date_filter, self.sprint_col]
+        # if there aren't any sprints return None
+        if len(matching_sprints) == 0:
+            return None
+        # if there are, return the first value as a string
+        return str(matching_sprints.squeeze())
+
+    def to_dict(self) -> list[dict]:
+        """Convert this dataset to a python dictionary."""
+        # Convert date cols into dates
+        for col in [self.sprint_start_col, self.sprint_end_col]:
+            # strip off the timestamp portion of the date
+            self.df[col] = self.df[col].dt.strftime("%Y-%m-%d")
+        return super().to_dict()
 
     @classmethod
     def load_from_json_files(
@@ -94,7 +144,7 @@ class GitHubIssues(BaseDataset):
         lookup = populate_issue_lookup_table(lookup, sprint_data_in)
         # Flatten and write issue level data to output file
         issues = flatten_issue_data(lookup)
-        return cls(DataFrame(data=issues))
+        return cls(pd.DataFrame(data=issues))
 
 
 # ===============================================================
