@@ -16,6 +16,7 @@ from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # fmt: off
@@ -162,23 +163,11 @@ def export_json_to_database(
     # Get the database engine and establish a connection
     engine = db.get_db()
 
-    # get data and load from JSON
-    deliverable_data = DeliverableTasks.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
-
     # Load data from the sprint board
     sprint_data = SprintBoard.load_from_json_files(
         sprint_file=sprint_file,
         issue_file=issue_file,
     )
-
-    deliverable_data.to_sql(
-        output_table="github_project_data",
-        engine=engine,
-        replace_table=True,
-    )  # replace_table=True is the default
 
     sprint_data.to_sql(
         output_table="github_project_data",
