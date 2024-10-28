@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
-import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
+import fetchers from "src/app/api/Fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
@@ -25,10 +25,11 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const id = Number(params.id);
   let title = `${t("OpportunityListing.page_title")}`;
   try {
-    const opportunityData = await getOpportunityData(id);
+    const { data: opportunityData } =
+      await fetchers.opportunityFetcher.getOpportunityById(id);
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
-    console.error("Failed to render title");
+    console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return notFound();
     }
@@ -38,17 +39,6 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     description: t("OpportunityListing.meta_description"),
   };
   return meta;
-}
-
-async function getOpportunityData(id: number): Promise<Opportunity> {
-  const api = new OpportunityListingAPI();
-  try {
-    const opportunity = await api.getOpportunityById(id);
-    return opportunity.data;
-  } catch (error) {
-    console.error("Failed to fetch opportunity:", error);
-    throw error;
-  }
 }
 
 function emptySummary() {
@@ -91,13 +81,14 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
   const id = Number(params.id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
   // Opportunity id needs to be a number greater than 1
-  if (isNaN(id) || id < 0) {
+  if (isNaN(id) || id < 1) {
     return <NotFound />;
   }
 
   let opportunityData = {} as Opportunity;
   try {
-    opportunityData = await getOpportunityData(id);
+    const response = await fetchers.opportunityFetcher.getOpportunityById(id);
+    opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;

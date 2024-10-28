@@ -2,8 +2,10 @@ import SearchOpportunityAPI, {
   buildFilters,
   buildPagination,
 } from "src/app/api/SearchOpportunityAPI";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
+import {
+  QueryParamData,
+  SearchFetcherActionType,
+} from "src/types/search/searchRequestTypes";
 
 const validMockedResponse = {
   data: [],

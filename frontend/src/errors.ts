@@ -2,7 +2,7 @@
  * @file Custom Error classes. Useful as a way to see all potential errors that our system may throw/catch
  */
 
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
