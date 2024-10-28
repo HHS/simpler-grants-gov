@@ -27,6 +27,11 @@ class DeliveryMetricsDataSource(BaseDataset):
     """ Models quad, deliverable, epic, issue, and sprint data exported from github """
 
     COLUMN_MAP = {
+        "deliverable_url": "deliverable_ghid",
+        "deliverable_title": "deliverable_title",
+        "deliverable_pillar": "deliverable_pillar",
+        "epic_url": "epic_ghid",
+        "epic_title": "epic_title",
         "issue_url": "issue_ghid",
         "issue_title": "issue_title",
         "issue_parent": "issue_parent",
@@ -45,12 +50,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         "quad_name": "quad_name",
         "quad_start": "quad_start",
         "quad_length": "quad_length",
-        "quad_end": "quad_end",
-        "deliverable_url": "deliverable_ghid",
-        "deliverable_title": "deliverable_title",
-        "deliverable_pillar": "deliverable_pillar",
-        "epic_url": "epic_ghid",
-        "epic_title": "epic_title"
+        "quad_end": "quad_end"
     }
 
 
@@ -99,72 +99,68 @@ class DeliveryMetricsDataSource(BaseDataset):
     # QUADS
 
     def get_quad(self, quad_ghid: str) -> pandas.DataFrame:
-
         """ Fetches data about a given quad """
         query_string = "quad_ghid == '{}'".format(quad_ghid)
         return self.df.query(query_string).iloc[0]
 
 
     def get_quad_ghids(self) -> [str]:
-
-        """ Fetches an array of unique quad ghids """
-        return self.df.quad_ghid.unique()
+        """ Fetches an array of unique non-null quad ghids """
+        df = self.df[self.df.quad_ghid.notnull()]
+        return df.quad_ghid.unique()
 
 
     # DELIVERABLES
 
     def get_deliverable(self, deliverable_ghid: str) -> pandas.DataFrame:
-
         """ Fetches data about a given deliverable """
         query_string = "deliverable_ghid == '{}'".format(deliverable_ghid)
         return self.df.query(query_string).iloc[0]
 
 
     def get_deliverable_ghids(self) -> [str]:
-
-        """ Fetches an array of unique deliverable ghids """
-        return self.df.deliverable_ghid.unique()
+        """ Fetches an array of unique non-null deliverable ghids """
+        df = self.df[self.df.deliverable_ghid.notnull()]
+        return df.deliverable_ghid.unique()
 
 
     # SPRINTS
 
     def get_sprint(self, sprint_ghid: str) -> pandas.DataFrame:
-
         """ Fetches data about a given sprint """
         query_string = "sprint_ghid == '{}'".format(sprint_ghid)
         return self.df.query(query_string).iloc[0]
 
 
     def get_sprint_ghids(self) -> [str]:
-
-        """ Fetches an array of unique sprint ghids """
-        return self.df.sprint_ghid.unique()
+        """ Fetches an array of unique non-null sprint ghids """
+        df = self.df[self.df.sprint_ghid.notnull()]
+        return df.sprint_ghid.unique()
 
 
     # EPICS
 
     def get_epic(self, epic_ghid: str) -> pandas.DataFrame:
-
         """ Fetches data about a given epic """
         query_string = "epic_ghid == '{}'".format(epic_ghid)
         return self.df.query(query_string).iloc[0]
 
 
     def get_epic_ghids(self) -> [str]:
+        """ Fetches an array of unique non-null epic ghids """
+        df = self.df[self.df.epic_ghid.notnull()]
+        return df.epic_ghid.unique()
 
-        """ Fetches an array of unique epic ghids """
-        return self.df.epic_ghid.unique()
 
     # ISSUES
 
     def get_issue(self, issue_ghid: str) -> pandas.DataFrame:
-
         """ Fetches data about a given issue """
         query_string = "issue_ghid == '{}'".format(issue_ghid)
         return self.df.query(query_string).iloc[0]
 
 
     def get_issue_ghids(self) -> [str]:
-
-        """ Fetches an array of unique issue ghids """
-        return self.df.issue_ghid.unique()
+        """ Fetches an array of unique non-null issue ghids """
+        df = self.df[self.df.issue_ghid.notnull()]
+        return df.issue_ghid.unique()

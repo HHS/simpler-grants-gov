@@ -288,57 +288,42 @@ def transform_and_load(
     }
 
     # fetch db row id for each quad
-    quad_update_count = 0
-    for ghid in model.get_quad_ghids():
-        if ghid is None:
-            continue
-        quad_update_count += 1
+    quad_ghids = model.get_quad_ghids()
+    for ghid in quad_ghids:
         quad_df = model.get_quad(ghid)
         row_id = random.randint(100, 999) # TODO: get actual row id 
         map[entity.QUAD][ghid] = row_id
         #print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], row_id)) 
-    print("quad row(s) processed: {}".format(quad_update_count))
+    print("quad row(s) processed: {}".format(len(quad_ghids)))
 
     # fetch db row id for each deliverable
-    deliv_update_count = 0
-    for ghid in model.get_deliverable_ghids():
-        if ghid is None:
-            continue
-        deliv_update_count += 1
+    deliverable_ghids = model.get_deliverable_ghids()
+    for ghid in deliverable_ghids:
         row_id = random.randint(100, 999) # TODO: get actual row id 
         map[entity.DELIVERABLE][ghid] = row_id
         #print("DELIVERABLE '{}' row_id = {}".format(str(ghid), row_id))
-    print("deliverable row(s) processed: {}".format(deliv_update_count))
+    print("deliverable row(s) processed: {}".format(len(deliverable_ghids)))
 
     # fetch db row id for each sprint
-    sprint_update_count = 0
-    for ghid in model.get_sprint_ghids():
-        if ghid is None:
-            continue
-        sprint_update_count += 1
+    sprint_ghids = model.get_sprint_ghids()
+    for ghid in sprint_ghids:
         row_id = random.randint(100, 999) # TODO: get actual row id 
         map[entity.SPRINT][ghid] = row_id
         #print("SPRINT '{}' row_id = {}".format(str(ghid), row_id))
-    print("sprint row(s) processed: {}".format(sprint_update_count))
+    print("sprint row(s) processed: {}".format(len(sprint_ghids)))
 
     # fetch db row id for each epic
-    epic_update_count = 0
-    for ghid in model.get_epic_ghids():
-        if ghid is None:
-            continue
-        epic_update_count += 1
+    epic_ghids = model.get_epic_ghids()
+    for ghid in epic_ghids:
         row_id = random.randint(100, 999) # TODO: get actual row id 
         map[entity.EPIC][ghid] = row_id
         #print("EPIC '{}' row_id = {}".format(str(ghid), row_id))
-    print("epic row(s) processed: {}".format(epic_update_count))
+    print("epic row(s) processed: {}".format(len(epic_ghids)))
 
     # iterate over issues
     issue_update_count = 0
     for issue_ghid in model.get_issue_ghids():
-        if issue_ghid is None:
-            continue
         issue_update_count += 1
-
         issue_df = model.get_issue(issue_ghid)
         epic_id = map[entity.EPIC].get(issue_df['epic_ghid'])
         deliverable_id = map[entity.EPIC].get(issue_df['deliverable_ghid'])
