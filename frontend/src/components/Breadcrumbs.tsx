@@ -13,10 +13,10 @@ export type Breadcrumb = {
 export type BreadcrumbList = Breadcrumb[];
 
 type Props = {
-  breadcrumbList: BreadcrumbList;
+  breadcrumbList: BreadcrumbList | Promise<BreadcrumbList>;
 };
 
-const Breadcrumbs = ({ breadcrumbList }: Props) => {
+const Breadcrumbs = async ({ breadcrumbList }: Props) => {
   const rdfaMetadata = {
     ol: {
       vocab: "http://schema.org/",
@@ -32,14 +32,17 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
     },
   };
 
-  const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
+  const resolvedBreadcrumbs =
+    breadcrumbList instanceof Promise ? await breadcrumbList : breadcrumbList;
+
+  const breadcrumArray = resolvedBreadcrumbs.map((breadcrumbInfo, i) => {
     return (
       <Breadcrumb
         key={breadcrumbInfo.title + "-crumb"}
-        current={i + 1 === breadcrumbList.length}
+        current={i + 1 === resolvedBreadcrumbs.length}
         {...rdfaMetadata.li}
       >
-        {i + 1 !== breadcrumbList.length ? (
+        {i + 1 !== resolvedBreadcrumbs.length ? (
           <BreadcrumbLink href={breadcrumbInfo.path} {...rdfaMetadata.a}>
             {}
             <span property="name">{breadcrumbInfo.title}</span>

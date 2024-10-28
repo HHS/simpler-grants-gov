@@ -11,7 +11,7 @@ import { Suspense } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs, { BreadcrumbList } from "src/components/Breadcrumbs";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
@@ -37,16 +37,16 @@ import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatu
 //   return meta;
 // }
 
-// async function getOpportunityData(id: number): Promise<Opportunity> {
-//   const api = new OpportunityListingAPI();
-//   try {
-//     const opportunity = await api.getOpportunityById(id);
-//     return opportunity.data;
-//   } catch (error) {
-//     console.error("Failed to fetch opportunity:", error);
-//     throw new Error("Failed to fetch opportunity");
-//   }
-// }
+async function getOpportunityData(id: number): Promise<Opportunity> {
+  const api = new OpportunityListingAPI();
+  try {
+    const opportunity = await api.getOpportunityById(id);
+    return opportunity.data;
+  } catch (error) {
+    console.error("Failed to fetch opportunity:", error);
+    throw new Error("Failed to fetch opportunity");
+  }
+}
 
 function emptySummary() {
   return {
@@ -112,10 +112,21 @@ function OpportunityListing({ params }: { params: { id: string } }) {
   //   path: `/opportunity/${opportunityData.opportunity_id}/`,
   // });
 
+  const breadcrumbPromise: Promise<BreadcrumbList> = getOpportunityData(
+    id,
+  ).then((opportunityData: Opportunity) => {
+    const breadcrumbs: BreadcrumbList = Object.assign([], OPPORTUNITY_CRUMBS);
+    breadcrumbs.push({
+      title: opportunityData.opportunity_title,
+      path: `/opportunity/${opportunityData.opportunity_id}/`,
+    });
+    return breadcrumbs;
+  });
+
   return (
     <div>
       <BetaAlert />
-      {/* <Breadcrumbs breadcrumbList={breadcrumbs} /> */}
+      <Breadcrumbs breadcrumbList={breadcrumbPromise} />
       {/* <OpportunityIntro opportunityData={opportunityData} /> */}
       <GridContainer>
         <div className="grid-row grid-gap">
