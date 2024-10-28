@@ -6,7 +6,7 @@ import BaseApi, {
   JSONRequestBody,
 } from "src/app/api/BaseApi";
 import { NetworkError, UnauthorizedError } from "src/errors";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 // Define a concrete implementation of BaseApi for testing
 class TestApi extends BaseApi {
