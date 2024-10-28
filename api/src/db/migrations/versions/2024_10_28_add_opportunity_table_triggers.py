@@ -39,9 +39,9 @@ BEGIN
 
     INSERT INTO api.opportunity_search_index_queue (opportunity_id, has_update)
     VALUES (opp_id, TRUE)
-    ON CONFLICT (opportunity_id) 
+    ON CONFLICT (opportunity_id)
     DO UPDATE SET has_update = TRUE, updated_at = CURRENT_TIMESTAMP;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
