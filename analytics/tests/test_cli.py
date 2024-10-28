@@ -130,6 +130,78 @@ class TestCalculateSprintBurndown:
         assert "issues" in result.stdout
 
 
+class TestCalculateSprintBurnup:
+    """Test the calculate_sprint_burnup entry point with mock data."""
+
+    def test_without_showing_or_posting_results(self, mock_files: MockFiles):
+        """Entrypoint should run successfully but not print slack message to stdout."""
+        # setup - create command
+        command = [
+            "calculate",
+            "sprint_burnup",
+            "--issue-file",
+            str(mock_files.delivery_file),
+            "--sprint",
+            "Sprint 1",
+        ]
+        # execution
+        result = runner.invoke(app, command)
+        print(result.stdout)
+        # validation - check there wasn't an error
+        assert result.exit_code == 0
+        assert "Slack message" not in result.stdout
+
+    def test_stdout_message_includes_points_if_no_unit_is_set(
+        self,
+        mock_files: MockFiles,
+    ):
+        """CLI should uses 'points' as default unit and include it in stdout message."""
+        # setup - create command
+        command = [
+            "calculate",
+            "sprint_burnup",
+            "--issue-file",
+            str(mock_files.delivery_file),
+            "--sprint",
+            "Sprint 1",
+            "--show-results",
+        ]
+        # execution
+        result = runner.invoke(app, command)
+        print(result.stdout)
+        # validation - check there wasn't an error
+        assert result.exit_code == 0
+        # validation - check that slack message is printed and includes 'points'
+        assert "Slack message" in result.stdout
+        assert "points" in result.stdout
+
+    def test_stdout_message_includes_issues_if_unit_set_to_issues(
+        self,
+        mock_files: MockFiles,
+    ):
+        """CLI should use issues if set explicitly and include it in stdout."""
+        # setup - create command
+        command = [
+            "calculate",
+            "sprint_burnup",
+            "--issue-file",
+            str(mock_files.delivery_file),
+            "--sprint",
+            "Sprint 1",
+            "--unit",
+            "issues",
+            "--show-results",
+        ]
+        # execution
+        result = runner.invoke(app, command)
+        print(result.stdout)
+        # validation - check there wasn't an error
+        assert result.exit_code == 0
+        # validation - check that slack message is printed and includes 'points'
+        assert "Slack message" in result.stdout
+        assert "issues" in result.stdout
+
+
 class TestCalculateDeliverablePercentComplete:
     """Test the calculate_deliverable_percent_complete entry point with mock data."""
 
