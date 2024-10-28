@@ -55,7 +55,12 @@ def env_vars():
 ### Uploads test file to localstack s3 bucket
 @pytest.fixture
 def upload_opportunity_attachment_s3():
-    s3_client = boto3.client("s3", endpoint_url=os.environ["S3_ENDPOINT_URL"], aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=os.environ["S3_ENDPOINT_URL"],
+        aws_access_key_id="NO_CREDS",
+        aws_secret_access_key="NO_CREDS",
+    )
     s3_client.bucket_name = "test-bucket"
     s3_client.create_bucket(Bucket=s3_client.bucket_name)
     file_path = (
