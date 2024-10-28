@@ -30,6 +30,22 @@ class IssueState(StrEnum):
     CLOSED = "closed"
 
 
+def sum_tix_by_day(
+    df: pd.DataFrame,
+    cols: Columns,
+    unit: Unit,
+    sprint_end: pd.Timestamp,
+) -> pd.DataFrame:
+    """Count the total number of tix opened, closed, and remaining by day."""
+    # Get the date range for burndown/burnup
+    df_tix_range = get_tix_date_range(df, cols, sprint_end)
+    # Get the number of tix opened and closed by day
+    df_opened = get_daily_tix_counts_by_status(df, cols, IssueState.OPEN, unit)
+    df_closed = get_daily_tix_counts_by_status(df, cols, IssueState.CLOSED, unit)
+    # combine the daily opened and closed counts to get total open and closed per day
+    return get_cum_sum_of_tix(cols, df_tix_range, df_opened, df_closed)
+
+
 def get_daily_tix_counts_by_status(
     df: pd.DataFrame,
     cols: Columns,

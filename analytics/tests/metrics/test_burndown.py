@@ -25,6 +25,7 @@ def result_row(
     closed: int,
     delta: int,
     total: int,
+    closed_total: int,
 ) -> dict:
     """Create a sample result row."""
     return {
@@ -33,6 +34,7 @@ def result_row(
         "closed": closed,
         "delta": delta,
         "total_open": total,
+        "total_closed": closed_total,
     }
 
 
@@ -73,11 +75,13 @@ class TestSprintBurndownByTasks:
         assert df[output.date_col].min() == pd.Timestamp(DAY_1)
         assert df[output.date_col].max() == pd.Timestamp(DAY_3)
         # validation - check burndown output
+        # fmt: off
         expected = [
-            result_row(day=DAY_1, opened=1, closed=0, delta=1, total=1),
-            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=1),
-            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
+            result_row(day=DAY_1, opened=1, closed=0, delta=1, total=1, closed_total=0),
+            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=1, closed_total=0),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0, closed_total=1),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
     def test_count_tix_created_before_sprint_start(self):
@@ -96,12 +100,14 @@ class TestSprintBurndownByTasks:
         assert df[output.date_col].min() == pd.Timestamp(DAY_0)
         assert df[output.date_col].max() == pd.Timestamp(DAY_3)
         # validation - check burndown output
+        # fmt: off
         expected = [
-            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
-            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
-            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
-            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
+            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2, closed_total=0),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2, closed_total=0),
+            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1, closed_total=1),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0, closed_total=2),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
     def test_count_tix_closed_after_sprint_start(self):
@@ -132,12 +138,14 @@ class TestSprintBurndownByTasks:
         assert df[output.date_col].min() == pd.Timestamp(DAY_1)
         assert df[output.date_col].max() == pd.Timestamp(DAY_4)
         # validation - check burndown output
+        # fmt: off
         expected = [
-            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
-            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1),
-            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=1),
-            result_row(day=DAY_4, opened=0, closed=1, delta=-1, total=0),
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2, closed_total=0),
+            result_row(day=DAY_2, opened=0, closed=1, delta=-1, total=1, closed_total=1),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=1, closed_total=1),
+            result_row(day=DAY_4, opened=0, closed=1, delta=-1, total=0, closed_total=2),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
     def test_count_tix_created_after_sprint_start(self):
@@ -153,12 +161,14 @@ class TestSprintBurndownByTasks:
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check burndown output
+        # fmt: off
         expected = [
-            result_row(day=DAY_0, opened=1, closed=0, delta=1, total=1),
-            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=1),
-            result_row(day=DAY_2, opened=1, closed=1, delta=0, total=1),
-            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0),
+            result_row(day=DAY_0, opened=1, closed=0, delta=1, total=1, closed_total=0),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=1, closed_total=0),
+            result_row(day=DAY_2, opened=1, closed=1, delta=0, total=1, closed_total=1),
+            result_row(day=DAY_3, opened=0, closed=1, delta=-1, total=0, closed_total=2),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
     def test_include_all_sprint_days_if_tix_closed_early(self):
@@ -209,11 +219,13 @@ class TestSprintBurndownByTasks:
         output = SprintBurndown(test_data, sprint="@current", unit=Unit.issues)
         df = output.results
         # validation - check burndown output
+        # fmt: off
         expected = [
-            result_row(day=day_1, opened=2, closed=0, delta=2, total=2),
-            result_row(day=day_2, opened=0, closed=1, delta=-1, total=1),
-            result_row(day=day_3, opened=0, closed=0, delta=0, total=1),
+            result_row(day=day_1, opened=2, closed=0, delta=2, total=2, closed_total=0),
+            result_row(day=day_2, opened=0, closed=1, delta=-1, total=1, closed_total=1),
+            result_row(day=day_3, opened=0, closed=0, delta=0, total=1, closed_total=1),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
 
@@ -233,12 +245,14 @@ class TestSprintBurndownByPoints:
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         df = output.results
         # validation
+        # fmt: off
         expected = [
-            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
-            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2),
-            result_row(day=DAY_2, opened=3, closed=0, delta=3, total=5),
-            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=5),
+            result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2, closed_total=0),
+            result_row(day=DAY_1, opened=0, closed=0, delta=0, total=2, closed_total=0),
+            result_row(day=DAY_2, opened=3, closed=0, delta=3, total=5, closed_total=0),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=5, closed_total=0),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
     def test_burndown_excludes_tix_without_points(self):
@@ -255,11 +269,13 @@ class TestSprintBurndownByPoints:
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         df = output.results
         # validation
+        # fmt: off
         expected = [
-            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
-            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=2),
-            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=2),
+            result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2, closed_total=0),
+            result_row(day=DAY_2, opened=0, closed=0, delta=0, total=2, closed_total=0),
+            result_row(day=DAY_3, opened=0, closed=0, delta=0, total=2, closed_total=0),
         ]
+        # fmt: on
         assert df.to_dict("records") == expected
 
 
