@@ -183,7 +183,7 @@ issue-data-export:
 	--repo $(REPO) \
 	--output-file $(ISSUE_FILE)
 
-gh-data-export: sprint-data-export issue-data-export roadmap-data-export
+gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
 
 sprint-burndown:
 	@echo "=> Running sprint burndown report"
