@@ -1,4 +1,6 @@
 import logging
+import os
+import pathlib
 import uuid
 
 import _pytest.monkeypatch
@@ -49,6 +51,25 @@ def env_vars():
     scope levels.
     """
     load_local_env_vars()
+
+
+### Uploads test file to localstack s3 bucket
+@pytest.fixture
+def upload_opportunity_attachment_s3():
+    s3_client = boto3.client("s3", endpoint_url=os.environ["S3_ENDPOINT_URL"])
+    s3_client.bucket_name = "test-bucket"
+    s3_client.create_bucket(Bucket=s3_client.bucket_name)
+    file_path = (
+        pathlib.Path(__file__).parent.resolve()
+        / "lib/opportunity_attachment_test_files/test_file_1.txt"
+    )
+
+    # Upload opportunity attachment file to the bucket
+    s3_client.upload_file(file_path, Bucket=s3_client.bucket_name, Key="test_file_1.txt")
+
+    # Check file was uploaded to mock s3
+    s3_files = s3_client.list_objects_v2(Bucket=s3_client.bucket_name)
+    assert len(s3_files["Contents"]) == 1
 
 
 ####################

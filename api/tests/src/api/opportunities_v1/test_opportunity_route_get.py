@@ -1,14 +1,13 @@
-from copy import deepcopy
-
 import pytest
+import requests
 
-from src.db.models.opportunity_models import Opportunity
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
     validate_opportunity_with_attachments,
 )
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -74,12 +73,6 @@ def test_get_opportunity_with_attachment_200(
     opportunity = OpportunityFactory.create()
     db_session.commit()
 
-    # Update file_location with s3 pre-signed url
-    # opportunity_cp: Opportunity = db_session.query(Opportunity).filter(Opportunity.opportunity_id == opportunity.opportunity_id).first()
-    opportunity_cp = deepcopy(opportunity)
-    for opp_att in opportunity_cp.opportunity_attachments:
-        opp_att.file_location = s3_presigned_url(opp_att.file_location)
-
     # Make the GET request
     resp = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
@@ -92,6 +85,30 @@ def test_get_opportunity_with_attachment_200(
     # Validate the opportunity data
     assert len(response_data["attachments"]) > 0
     validate_opportunity_with_attachments(opportunity, response_data)
+
+
+def test_get_opportunity_s3_endpoint_url_200(
+    upload_opportunity_attachment_s3, client, api_auth_token, enable_factory_create, db_session
+):
+    # Create an opportunity with a specific attachment
+    opportunity = OpportunityFactory.create(opportunity_attachments=[])
+    file_loc = "s3://test-bucket/test_file_1.txt"
+    OpportunityAttachmentFactory.create(file_location=file_loc, opportunity=opportunity)
+
+    # Make the GET request
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    # Check the response
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+    file_loc = response_data["attachments"][0]["file_location"]
+
+    # Validate the s3 endpoint url
+    response = requests.get(file_loc)
+    assert response.status_code == 200
+    assert "Hello, world" in response.text
 
 
 def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):
