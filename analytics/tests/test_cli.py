@@ -10,6 +10,7 @@ from analytics.cli import app
 from tests.conftest import (
     json_issue_row,
     json_sprint_row,
+    issue,
     write_test_data_to_file,
 )
 
@@ -22,6 +23,7 @@ class MockFiles:
 
     issue_file: Path
     sprint_file: Path
+    delivery_file: Path
 
 
 @pytest.fixture(name="mock_files")
@@ -30,15 +32,21 @@ def test_file_fixtures(tmp_path: Path) -> MockFiles:
     # set paths to test files
     issue_file = tmp_path / "data" / "issue-data.json"
     sprint_file = tmp_path / "data" / "sprint-data.json"
+    delivery_file = tmp_path / "data" / "delivery-data.json"
     # create test data
     sprint_data = [json_sprint_row(issue=1, parent_number=2)]
     issue_data = [
         json_issue_row(issue=1, labels=["task"]),
         json_issue_row(issue=2, labels=["deliverable: 30k ft"]),
     ]
+    delivery_data = [
+        issue(issue=1).__dict__,
+        issue(issue=2).__dict__,
+    ]
     # write test data to json files
     write_test_data_to_file(issue_data, issue_file)
     write_test_data_to_file({"items": sprint_data}, sprint_file)
+    write_test_data_to_file(delivery_data, delivery_file)
     # confirm the data was written
     assert issue_file.exists()
     assert sprint_file.exists()
@@ -46,6 +54,7 @@ def test_file_fixtures(tmp_path: Path) -> MockFiles:
     return MockFiles(
         issue_file=issue_file,
         sprint_file=sprint_file,
+        delivery_file=delivery_file,
     )
 
 
@@ -58,10 +67,8 @@ class TestCalculateSprintBurndown:
         command = [
             "calculate",
             "sprint_burndown",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
         ]
@@ -81,10 +88,8 @@ class TestCalculateSprintBurndown:
         command = [
             "calculate",
             "sprint_burndown",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
             "--show-results",
@@ -107,10 +112,8 @@ class TestCalculateSprintBurndown:
         command = [
             "calculate",
             "sprint_burndown",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
             "--unit",

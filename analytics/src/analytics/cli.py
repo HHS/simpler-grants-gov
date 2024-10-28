@@ -133,7 +133,6 @@ def export_github_data(
 
 @metrics_app.command(name="sprint_burndown")
 def calculate_sprint_burndown(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
     unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
@@ -144,10 +143,7 @@ def calculate_sprint_burndown(
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
-    sprint_data = SprintBoard.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
+    sprint_data = GitHubIssues.from_json(issue_file)
     # calculate burndown
     burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
     show_and_or_post_results(
