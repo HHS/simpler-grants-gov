@@ -12,8 +12,9 @@ ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
 DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
-POINTS_FIELD ?= Points # Names of the sprint field in the GitHub project
-SPRINT_FIELD ?= Sprint # Names of the points field in the GitHub project
+# Names of the points and sprint fields in the GitHub project
+POINTS_FIELD ?= Points
+SPRINT_FIELD ?= Sprint
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
@@ -212,4 +213,3 @@ percent-complete:
 sprint-reports: sprint-burndown percent-complete
 
 sprint-reports-with-latest-data: gh-data-export sprint-reports
-

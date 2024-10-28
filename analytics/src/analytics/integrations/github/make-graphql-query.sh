@@ -78,5 +78,4 @@ command+=" \\
  --jq '$paginate_jq' | jq --slurp 'add'"
 
 # Use echo -e to interpret the newline characters
-# echo -e "$command"
 eval "$command" | jq "${transform_jq}"
