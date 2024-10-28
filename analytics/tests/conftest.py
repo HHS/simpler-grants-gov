@@ -168,7 +168,7 @@ def sprint_row(
     created: str = DAY_1,
     closed: str | None = None,
     status: str = "In Progress",
-    points: int = 1,
+    points: int | None = 1,
     sprint: int = 1,
     sprint_start: str = DAY_1,
     sprint_length: int = 2,

@@ -451,8 +451,8 @@ class TestGetStats:
         points = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
         issues = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation - check they're calculated correctly
-        assert points.stats.get(self.SPRINT_START).value == DAY_1
-        assert points.stats.get(self.SPRINT_END).value == DAY_3
+        assert points.stats[self.SPRINT_START].value == DAY_1
+        assert points.stats[self.SPRINT_END].value == DAY_3
         # validation - check that they are the same
         # fmt: off
         assert points.stats.get(self.SPRINT_START) == issues.stats.get(self.SPRINT_START)
@@ -473,13 +473,13 @@ class TestGetStats:
         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
         print(output.results)
         # validation - check that stats were calculated correctly
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 4
-        assert output.stats.get(self.PCT_CLOSED).value == 50.0
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 4
+        assert output.stats[self.PCT_CLOSED].value == 50.0
         # validation - check that message contains string value of Unit.issues
-        assert Unit.issues.value in output.stats.get(self.TOTAL_CLOSED).suffix
-        assert Unit.issues.value in output.stats.get(self.TOTAL_OPENED).suffix
-        assert "%" in output.stats.get(self.PCT_CLOSED).suffix
+        assert Unit.issues.value in output.stats[self.TOTAL_CLOSED].suffix
+        assert Unit.issues.value in output.stats[self.TOTAL_OPENED].suffix
+        assert "%" in output.stats[self.PCT_CLOSED].suffix
 
     def test_get_total_closed_and_opened_when_unit_is_points(self):
         """Test that total_closed is calculated correctly when unit is issues."""
@@ -494,13 +494,13 @@ class TestGetStats:
         # execution
         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 3
-        assert output.stats.get(self.TOTAL_OPENED).value == 9
-        assert output.stats.get(self.PCT_CLOSED).value == 33.33  # rounded to 2 places
+        assert output.stats[self.TOTAL_CLOSED].value == 3
+        assert output.stats[self.TOTAL_OPENED].value == 9
+        assert output.stats[self.PCT_CLOSED].value == 33.33  # rounded to 2 places
         # validation - check that message contains string value of Unit.points
-        assert Unit.points.value in output.stats.get(self.TOTAL_CLOSED).suffix
-        assert Unit.points.value in output.stats.get(self.TOTAL_OPENED).suffix
-        assert "%" in output.stats.get(self.PCT_CLOSED).suffix
+        assert Unit.points.value in output.stats[self.TOTAL_CLOSED].suffix
+        assert Unit.points.value in output.stats[self.TOTAL_OPENED].suffix
+        assert "%" in output.stats[self.PCT_CLOSED].suffix
 
     def test_include_issues_closed_after_sprint_end(self):
         """Issues that are closed after sprint ended should be included in closed count."""
@@ -531,9 +531,9 @@ class TestGetStats:
         # execution
         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 66.67  # rounded to 2 places
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_CLOSED].value == 66.67  # rounded to 2 places
 
     def test_get_percent_pointed(self):
         """Test that percent pointed is calculated correctly."""
@@ -548,12 +548,12 @@ class TestGetStats:
         # execution
         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.points)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 3
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 100
-        assert output.stats.get(self.PCT_POINTED).value == 50
+        assert output.stats[self.TOTAL_CLOSED].value == 3
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_CLOSED].value == 100
+        assert output.stats[self.PCT_POINTED].value == 50
         # validation - check that stat contains '%' suffix
-        assert f"% of {Unit.issues.value}" in output.stats.get(self.PCT_POINTED).suffix
+        assert f"% of {Unit.issues.value}" in output.stats[self.PCT_POINTED].suffix
 
     def test_exclude_other_sprints_in_percent_pointed(self):
         """Only include issues in this sprint when calculating percent pointed."""
@@ -568,9 +568,9 @@ class TestGetStats:
         # execution
         output = SprintBurnup(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_POINTED).value == 66.67  # exclude final row
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_POINTED].value == 66.67  # exclude final row
 
 
 class TestFormatSlackMessage:
@@ -708,7 +708,7 @@ def test_post_to_slack(
     """Test the steps required to post the results to slack, without actually posting."""
     # execution
     sample_burnup.post_results_to_slack(
-        mock_slackbot,
+        mock_slackbot,  # type: ignore[assignment]
         channel_id="test_channel",
         output_dir=tmp_path,
     )
