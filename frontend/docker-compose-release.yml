@@ -1,0 +1,23 @@
+# Docker compose file for testing the release version of the frontend.
+services:
+  nextjs:
+    container_name: next-dev
+    platform: linux/amd64
+    build:
+      context: .
+      target: release
+    env_file:
+      - ./.env.local
+    volumes:
+      - ./src:/frontend/src
+      - ./public:/frontend/public
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - default
+      - api_grants_backend
+
+networks:
+  api_grants_backend:
+    external: true
