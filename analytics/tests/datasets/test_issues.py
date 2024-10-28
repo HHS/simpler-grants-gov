@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 from analytics.datasets.issues import (
     GitHubIssues,
-    IssueMetadata,
     IssueType,
     get_parent_with_type,
 )
@@ -19,48 +18,8 @@ from tests.conftest import (
     DAY_3,
     DAY_4,
     DAY_5,
+    issue,
 )
-
-
-def issue(
-    issue: int,
-    kind: IssueType = IssueType.TASK,
-    parent: str | None = None,
-    points: int | None = None,
-    quad: str | None = None,
-    epic: str | None = None,
-    deliverable: str | None = None,
-    sprint: int = 1,
-    sprint_start: str = DAY_0,
-    sprint_length: int = 2,
-) -> IssueMetadata:
-    """Create a new issue."""
-    # Create issue name
-    name = f"{kind.value}{issue}"
-    # create timestamp and time delta fields
-    sprint_name = f"Sprint {sprint}"
-    sprint_start_ts = pd.Timestamp(sprint_start)
-    sprint_duration = pd.Timedelta(days=sprint_length)
-    sprint_end_ts = sprint_start_ts + sprint_duration
-    return IssueMetadata(
-        issue_title=name,
-        issue_type=kind.value,
-        issue_url=name,
-        issue_is_closed=False,
-        issue_opened_at="2024-02-01",
-        issue_closed_at=None,
-        issue_parent=parent,
-        issue_points=points,
-        quad_name=quad,
-        epic_title=epic,
-        epic_url=epic,
-        deliverable_title=deliverable,
-        deliverable_url=deliverable,
-        sprint_id=sprint_name,
-        sprint_name=sprint_name,
-        sprint_start=sprint_start,
-        sprint_end=sprint_end_ts.strftime("%Y-%m-%d"),
-    )
 
 
 class TestGitHubIssues:

@@ -13,19 +13,19 @@ import pandas as pd
 import plotly.express as px
 from numpy import nan
 
-from analytics.datasets.sprint_board import SprintBoard
+from analytics.datasets.issues import GitHubIssues
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 if TYPE_CHECKING:
     from plotly.graph_objects import Figure
 
 
-class SprintBurndown(BaseMetric[SprintBoard]):
+class SprintBurndown(BaseMetric[GitHubIssues]):
     """Calculates the running total of open issues per day in the sprint."""
 
     def __init__(
         self,
-        dataset: SprintBoard,
+        dataset: GitHubIssues,
         sprint: str,
         unit: Unit,
     ) -> None:
@@ -34,10 +34,13 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.sprint_data = self._isolate_data_for_this_sprint()
         self.date_col = "date"
-        self.points_col = "points"
+        self.points_col = dataset.points_col
         self.opened_col = dataset.opened_col  # type: ignore[attr-defined]
         self.closed_col = dataset.closed_col  # type: ignore[attr-defined]
         self.unit = unit
+        # Set the value of the unit column based on
+        # whether we're summing issues or story points
+        self.unit_col = dataset.points_col if unit == Unit.points else unit.value
         super().__init__(dataset)
 
     def calculate(self) -> pd.DataFrame:
@@ -74,7 +77,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         sprint_end = self.dataset.sprint_end(self.sprint)
         date_mask = self.results[self.date_col].between(
             sprint_start,
-            min(sprint_end, pd.Timestamp.today(tz="utc")),
+            min(sprint_end, pd.Timestamp.today()),
         )
         df = self.results[date_mask]
         # create a line chart from the data in self.results
@@ -108,7 +111,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         total_closed = int(df["closed"].sum())
         pct_closed = round(total_closed / total_opened * 100, 2)
         # get the percentage of tickets that were ticketed
-        is_pointed = self.sprint_data[Unit.points.value] >= 1
+        is_pointed = self.sprint_data[self.dataset.points_col] >= 1
         issues_pointed = len(self.sprint_data[is_pointed])
         issues_total = len(self.sprint_data)
         pct_pointed = round(issues_pointed / issues_total * 100, 2)
@@ -171,7 +174,7 @@ class SprintBurndown(BaseMetric[SprintBoard]):
         """
         # create local copies of the key column names
         agg_col = self.opened_col if status == "opened" else self.closed_col
-        unit_col = self.unit.value
+        unit_col = self.unit_col
         key_cols = [agg_col, unit_col]
         # create a dummy column to sum per row if the unit is tasks
         if self.unit == Unit.issues:

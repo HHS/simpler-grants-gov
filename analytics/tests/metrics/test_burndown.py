@@ -5,7 +5,7 @@ from pathlib import Path  # noqa: I001
 import pandas as pd
 import pytest
 
-from analytics.datasets.sprint_board import SprintBoard
+from analytics.datasets.issues import GitHubIssues
 from analytics.metrics.burndown import SprintBurndown, Unit
 
 from tests.conftest import (
@@ -15,7 +15,7 @@ from tests.conftest import (
     DAY_3,
     DAY_4,
     MockSlackbot,
-    sprint_row,
+    issue,
 )
 
 
@@ -28,7 +28,7 @@ def result_row(
 ) -> dict:
     """Create a sample result row."""
     return {
-        "date": pd.Timestamp(day, tz="UTC"),
+        "date": pd.Timestamp(day),
         "opened": opened,
         "closed": closed,
         "delta": delta,
@@ -41,10 +41,11 @@ def sample_burndown_by_points_fixture() -> SprintBurndown:
     """Create a sample burndown to simplify test setup."""
     # setup - create test data
     sprint_data = [
-        sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-        sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+        issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+        issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
     ]
-    test_data = SprintBoard.from_dict(sprint_data)
+    sprint_data = [i.__dict__ for i in sprint_data]
+    test_data = GitHubIssues.from_dict(sprint_data)
     # return sprint burndown by points
     return SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
 
@@ -58,18 +59,19 @@ class TestSprintBurndownByTasks:
         sprint_data = [
             # fmt: off
             # include this row - assigned to sprint 1
-            sprint_row(issue=1, sprint=1, sprint_start=DAY_1, created=DAY_1, closed=DAY_3),
+            issue(issue=1, sprint=1, sprint_start=DAY_1, created=DAY_1, closed=DAY_3),
             # exclude this row - assigned to sprint 2
-            sprint_row(issue=1, sprint=2, sprint_start=DAY_4, created=DAY_0, closed=DAY_4),
+            issue(issue=1, sprint=2, sprint_start=DAY_4, created=DAY_0, closed=DAY_4),
             # fmt: on
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check min and max dates
-        assert df[output.date_col].min() == pd.Timestamp(DAY_1, tz="UTC")
-        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+        assert df[output.date_col].min() == pd.Timestamp(DAY_1)
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3)
         # validation - check burndown output
         expected = [
             result_row(day=DAY_1, opened=1, closed=0, delta=1, total=1),
@@ -82,16 +84,17 @@ class TestSprintBurndownByTasks:
         """Burndown should include tix opened before the sprint but closed during it."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check min and max dates
-        assert df[output.date_col].min() == pd.Timestamp(DAY_0, tz="UTC")
-        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+        assert df[output.date_col].min() == pd.Timestamp(DAY_0)
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3)
         # validation - check burndown output
         expected = [
             result_row(day=DAY_0, opened=2, closed=0, delta=2, total=2),
@@ -105,14 +108,14 @@ class TestSprintBurndownByTasks:
         """Burndown should include tix closed after the sprint ended."""
         # setup - create test data
         sprint_data = [
-            sprint_row(  # closed before sprint end
+            issue(  # closed before sprint end
                 issue=1,
                 sprint_start=DAY_1,
                 sprint_length=2,
                 created=DAY_1,
                 closed=DAY_2,
             ),
-            sprint_row(  # closed after sprint end
+            issue(  # closed after sprint end
                 issue=1,
                 sprint_start=DAY_1,
                 sprint_length=2,
@@ -120,13 +123,14 @@ class TestSprintBurndownByTasks:
                 closed=DAY_4,
             ),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check min and max dates
-        assert df[output.date_col].min() == pd.Timestamp(DAY_1, tz="UTC")
-        assert df[output.date_col].max() == pd.Timestamp(DAY_4, tz="UTC")
+        assert df[output.date_col].min() == pd.Timestamp(DAY_1)
+        assert df[output.date_col].max() == pd.Timestamp(DAY_4)
         # validation - check burndown output
         expected = [
             result_row(day=DAY_1, opened=2, closed=0, delta=2, total=2),
@@ -140,10 +144,11 @@ class TestSprintBurndownByTasks:
         """Burndown should include tix opened and closed during the sprint."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, closed=DAY_3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, closed=DAY_3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
@@ -160,24 +165,26 @@ class TestSprintBurndownByTasks:
         """All days of the sprint should be included even if all tix were closed early."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         df = output.results
         # validation - check max date is end of sprint not last closed date
-        assert df[output.date_col].max() == pd.Timestamp(DAY_3, tz="UTC")
+        assert df[output.date_col].max() == pd.Timestamp(DAY_3)
 
     def test_raise_value_error_if_sprint_arg_not_in_dataset(self):
         """A ValueError should be raised if the sprint argument isn't valid."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_1),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # validation
         with pytest.raises(
             ValueError,
@@ -193,10 +200,11 @@ class TestSprintBurndownByTasks:
         day_2 = today.strftime("%Y-%m-%d")
         day_3 = (today + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
         sprint_data = [  # note sprint duration is 2 days by default
-            sprint_row(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
-            sprint_row(issue=1, sprint_start=day_1, created=day_1),
+            issue(issue=1, sprint_start=day_1, created=day_1, closed=day_2),
+            issue(issue=1, sprint_start=day_1, created=day_1),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="@current", unit=Unit.issues)
         df = output.results
@@ -216,10 +224,11 @@ class TestSprintBurndownByPoints:
         """Burndown should be calculated correctly with points."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         df = output.results
@@ -236,11 +245,12 @@ class TestSprintBurndownByPoints:
         """Burndown should exclude tickets that are not pointed."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=None),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_1, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=0),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=None),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         df = output.results
@@ -267,16 +277,17 @@ class TestGetStats:
         """Test that sprint start and end are the same regardless of unit."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
-            sprint_row(issue=2, sprint_start=DAY_1, created=DAY_2, closed=DAY_4),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, closed=DAY_2),
+            issue(issue=2, sprint_start=DAY_1, created=DAY_2, closed=DAY_4),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         points = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         issues = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation - check they're calculated correctly
-        assert points.stats.get(self.SPRINT_START).value == DAY_1
-        assert points.stats.get(self.SPRINT_END).value == DAY_3
+        assert points.stats[self.SPRINT_START].value == DAY_1
+        assert points.stats[self.SPRINT_END].value == DAY_3
         # validation - check that they are the same
         # fmt: off
         assert points.stats.get(self.SPRINT_START) == issues.stats.get(self.SPRINT_START)
@@ -287,114 +298,119 @@ class TestGetStats:
         """Test that total_closed is calculated correctly when unit is issues."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint=1, created=DAY_0, closed=DAY_2),
-            sprint_row(issue=2, sprint=1, created=DAY_0, closed=DAY_3),
-            sprint_row(issue=3, sprint=1, created=DAY_2),  # not closed
-            sprint_row(issue=4, sprint=1, created=DAY_2),  # not closed
+            issue(issue=1, sprint=1, created=DAY_0, closed=DAY_2),
+            issue(issue=2, sprint=1, created=DAY_0, closed=DAY_3),
+            issue(issue=3, sprint=1, created=DAY_2),  # not closed
+            issue(issue=4, sprint=1, created=DAY_2),  # not closed
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         print(output.results)
         # validation - check that stats were calculated correctly
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 4
-        assert output.stats.get(self.PCT_CLOSED).value == 50.0
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 4
+        assert output.stats[self.PCT_CLOSED].value == 50.0
         # validation - check that message contains string value of Unit.issues
-        assert Unit.issues.value in output.stats.get(self.TOTAL_CLOSED).suffix
-        assert Unit.issues.value in output.stats.get(self.TOTAL_OPENED).suffix
-        assert "%" in output.stats.get(self.PCT_CLOSED).suffix
+        assert Unit.issues.value in output.stats[self.TOTAL_CLOSED].suffix
+        assert Unit.issues.value in output.stats[self.TOTAL_OPENED].suffix
+        assert "%" in output.stats[self.PCT_CLOSED].suffix
 
     def test_get_total_closed_and_opened_when_unit_is_points(self):
         """Test that total_closed is calculated correctly when unit is issues."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
-            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
-            sprint_row(issue=3, sprint=1, created=DAY_2, points=2),  # not closed
-            sprint_row(issue=4, sprint=1, created=DAY_2, points=4),  # not closed
+            issue(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            issue(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            issue(issue=3, sprint=1, created=DAY_2, points=2),  # not closed
+            issue(issue=4, sprint=1, created=DAY_2, points=4),  # not closed
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 3
-        assert output.stats.get(self.TOTAL_OPENED).value == 9
-        assert output.stats.get(self.PCT_CLOSED).value == 33.33  # rounded to 2 places
+        assert output.stats[self.TOTAL_CLOSED].value == 3
+        assert output.stats[self.TOTAL_OPENED].value == 9
+        assert output.stats[self.PCT_CLOSED].value == 33.33  # rounded to 2 places
         # validation - check that message contains string value of Unit.points
-        assert Unit.points.value in output.stats.get(self.TOTAL_CLOSED).suffix
-        assert Unit.points.value in output.stats.get(self.TOTAL_OPENED).suffix
-        assert "%" in output.stats.get(self.PCT_CLOSED).suffix
+        assert Unit.points.value in output.stats[self.TOTAL_CLOSED].suffix
+        assert Unit.points.value in output.stats[self.TOTAL_OPENED].suffix
+        assert "%" in output.stats[self.PCT_CLOSED].suffix
 
     def test_include_issues_closed_after_sprint_end(self):
         """Issues that are closed after sprint ended should be included in closed count."""
         # setup - create test data
         sprint_data = [
-            sprint_row(  # closed during sprint
+            issue(  # closed during sprint
                 issue=1,
                 sprint_start=DAY_1,
                 sprint_length=2,
                 created=DAY_1,
                 closed=DAY_2,
             ),
-            sprint_row(  # closed after sprint
+            issue(  # closed after sprint
                 issue=2,
                 sprint_start=DAY_1,
                 sprint_length=2,
                 created=DAY_2,
                 closed=DAY_4,
             ),
-            sprint_row(  # not closed
+            issue(  # not closed
                 issue=3,
                 sprint_start=DAY_1,
                 sprint_length=2,
                 created=DAY_2,
             ),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 66.67  # rounded to 2 places
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_CLOSED].value == 66.67  # rounded to 2 places
 
     def test_get_percent_pointed(self):
         """Test that percent pointed is calculated correctly."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
-            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
-            sprint_row(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
-            sprint_row(issue=4, sprint=1, created=DAY_2, points=0),  # not closed
+            issue(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            issue(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            issue(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
+            issue(issue=4, sprint=1, created=DAY_2, points=0),  # not closed
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 3
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_CLOSED).value == 100
-        assert output.stats.get(self.PCT_POINTED).value == 50
+        assert output.stats[self.TOTAL_CLOSED].value == 3
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_CLOSED].value == 100
+        assert output.stats[self.PCT_POINTED].value == 50
         # validation - check that stat contains '%' suffix
-        assert f"% of {Unit.issues.value}" in output.stats.get(self.PCT_POINTED).suffix
+        assert f"% of {Unit.issues.value}" in output.stats[self.PCT_POINTED].suffix
 
     def test_exclude_other_sprints_in_percent_pointed(self):
         """Only include issues in this sprint when calculating percent pointed."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
-            sprint_row(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
-            sprint_row(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
-            sprint_row(issue=4, sprint=2, created=DAY_2, points=None),  # other sprint
+            issue(issue=1, sprint=1, created=DAY_1, points=2, closed=DAY_2),
+            issue(issue=2, sprint=1, created=DAY_2, points=1, closed=DAY_4),
+            issue(issue=3, sprint=1, created=DAY_2, points=None),  # not pointed
+            issue(issue=4, sprint=2, created=DAY_2, points=None),  # other sprint
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         # validation
-        assert output.stats.get(self.TOTAL_CLOSED).value == 2
-        assert output.stats.get(self.TOTAL_OPENED).value == 3
-        assert output.stats.get(self.PCT_POINTED).value == 66.67  # exclude final row
+        assert output.stats[self.TOTAL_CLOSED].value == 2
+        assert output.stats[self.TOTAL_OPENED].value == 3
+        assert output.stats[self.PCT_POINTED].value == 66.67  # exclude final row
 
 
 class TestFormatSlackMessage:
@@ -404,10 +420,11 @@ class TestFormatSlackMessage:
         """Message should contain one line for the title and one for each stat."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         lines = output.format_slack_message().splitlines()
@@ -420,10 +437,11 @@ class TestFormatSlackMessage:
         """Test that the title is formatted correctly when unit is issues."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
         title = output.format_slack_message().splitlines()[0]
@@ -434,10 +452,11 @@ class TestFormatSlackMessage:
         """Test that the title is formatted correctly when unit is points."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         title = output.format_slack_message().splitlines()[0]
@@ -452,10 +471,11 @@ class TestPlotResults:
         """SprintBurndown.chart should contain the output of plot_results()."""
         # setup - create test data
         sprint_data = [
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
-            sprint_row(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_0, points=2),
+            issue(issue=1, sprint_start=DAY_1, created=DAY_2, points=3),
         ]
-        test_data = SprintBoard.from_dict(sprint_data)
+        sprint_data = [i.__dict__ for i in sprint_data]
+        test_data = GitHubIssues.from_dict(sprint_data)
         # execution
         output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
         # validation - check that the chart attribute matches output of plot_results()
@@ -532,7 +552,7 @@ def test_post_to_slack(
     """Test the steps required to post the results to slack, without actually posting."""
     # execution
     sample_burndown.post_results_to_slack(
-        mock_slackbot,
+        mock_slackbot,  # type: ignore[assignment]
         channel_id="test_channel",
         output_dir=tmp_path,
     )

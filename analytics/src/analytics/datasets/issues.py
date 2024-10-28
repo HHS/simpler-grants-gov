@@ -71,13 +71,20 @@ class GitHubIssues(BaseDataset):
 
     def __init__(self, df: pd.DataFrame) -> None:
         """Initialize the GitHub Issues dataset."""
-        self.opened_col = "issue_created_at"
+        self.opened_col = "issue_opened_at"
         self.closed_col = "issue_closed_at"
+        self.points_col = "issue_points"
         self.sprint_col = "sprint_name"
         self.sprint_start_col = "sprint_start"
         self.sprint_end_col = "sprint_end"
+        self.date_cols = [
+            self.sprint_start_col,
+            self.sprint_end_col,
+            self.opened_col,
+            self.closed_col,
+        ]
         # Convert date cols into dates
-        for col in [self.sprint_start_col, self.sprint_end_col]:
+        for col in self.date_cols:
             # strip off the timestamp portion of the date
             df[col] = pd.to_datetime(df[col]).dt.floor("d")
         super().__init__(df)
@@ -85,14 +92,12 @@ class GitHubIssues(BaseDataset):
     def sprint_start(self, sprint: str) -> pd.Timestamp:
         """Return the date on which a given sprint started."""
         sprint_mask = self.df[self.sprint_col] == sprint
-        sprint_start = self.df.loc[sprint_mask, self.sprint_start_col].min()
-        return sprint_start.tz_localize("UTC")
+        return self.df.loc[sprint_mask, self.sprint_start_col].min()
 
     def sprint_end(self, sprint: str) -> pd.Timestamp:
         """Return the date on which a given sprint ended."""
         sprint_mask = self.df[self.sprint_col] == sprint
-        sprint_end = self.df.loc[sprint_mask, self.sprint_end_col].max()
-        return sprint_end.tz_localize("UTC")
+        return self.df.loc[sprint_mask, self.sprint_end_col].max()
 
     @property
     def sprints(self) -> pd.DataFrame:
@@ -123,7 +128,7 @@ class GitHubIssues(BaseDataset):
     def to_dict(self) -> list[dict]:
         """Convert this dataset to a python dictionary."""
         # Convert date cols into dates
-        for col in [self.sprint_start_col, self.sprint_end_col]:
+        for col in self.date_cols:
             # strip off the timestamp portion of the date
             self.df[col] = self.df[col].dt.strftime("%Y-%m-%d")
         return super().to_dict()

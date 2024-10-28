@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from analytics.datasets.issues import IssueMetadata, IssueType
 
 # skips the integration tests in tests/integrations/
 # to run the integration tests, invoke them directly: pytest tests/integrations/
@@ -58,7 +59,7 @@ def mock_slackbot_fixture():
     return MockSlackbot()
 
 
-def write_test_data_to_file(data: dict | list[dict], output_file: str):
+def write_test_data_to_file(data: dict | list[dict], output_file: str | Path):
     """Write test JSON data to a file for use in a test."""
     parent_dir = Path(output_file).parent
     parent_dir.mkdir(exist_ok=True, parents=True)
@@ -201,3 +202,46 @@ def sprint_row(
         "created_date": created_date,
         "closed_date": closed_date,
     }
+
+
+def issue(
+    issue: int,
+    kind: IssueType = IssueType.TASK,
+    parent: str | None = None,
+    points: int | None = 1,
+    quad: str | None = None,
+    epic: str | None = None,
+    deliverable: str | None = None,
+    sprint: int = 1,
+    sprint_start: str = DAY_0,
+    sprint_length: int = 2,
+    created: str = DAY_0,
+    closed: str | None = None,
+) -> IssueMetadata:
+    """Create a new issue."""
+    # Create issue name
+    name = f"{kind.value}{issue}"
+    # Create sprint timestamp fields
+    sprint_name = f"Sprint {sprint}"
+    sprint_start_ts = pd.Timestamp(sprint_start)
+    sprint_duration = pd.Timedelta(days=sprint_length)
+    sprint_end_ts = sprint_start_ts + sprint_duration
+    return IssueMetadata(
+        issue_title=name,
+        issue_type=kind.value,
+        issue_url=name,
+        issue_is_closed=bool(closed),
+        issue_opened_at=created,
+        issue_closed_at=closed,
+        issue_parent=parent,
+        issue_points=points,
+        quad_name=quad,
+        epic_title=epic,
+        epic_url=epic,
+        deliverable_title=deliverable,
+        deliverable_url=deliverable,
+        sprint_id=sprint_name,
+        sprint_name=sprint_name,
+        sprint_start=sprint_start,
+        sprint_end=sprint_end_ts.strftime("%Y-%m-%d"),
+    )
