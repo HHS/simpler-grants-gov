@@ -1,6 +1,7 @@
 "use server";
 
 import { environment } from "src/constants/environments";
+import { TFn } from "src/types/intl";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
@@ -17,7 +18,7 @@ export async function subscribeEmail(
   prevState: sendyResponse,
   formData: FormData,
 ) {
-  const t = await getTranslations("Subscribe");
+  const t = await getTranslations();
 
   const { errorMessage, validationErrors } = await subscribeEmailAction(
     t,
@@ -34,24 +35,20 @@ export async function subscribeEmail(
 }
 
 export async function subscribeEmailAction(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any,
+  t: TFn,
   formData: FormData,
 ): Promise<sendyResponse> {
   const schema = z.object({
     name: z.string().min(1, {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      message: t("errors.missing_name"),
+      message: t("Subscribe.errors.missing_name"),
     }),
     email: z
       .string()
       .min(1, {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        message: t("errors.missing_email"),
+        message: t("Subscribe.errors.missing_email"),
       })
       .email({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        message: t("errors.invalid_email"),
+        message: t("Subscribe.errors.invalid_email"),
       }),
   });
 
@@ -108,7 +105,7 @@ export async function subscribeEmailAction(
     if (responseData.includes("Already subscribed")) {
       return {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        errorMessage: t("errors.already_subscribed"),
+        errorMessage: t("Subscribe.errors.already_subscribed"),
         validationErrors: {},
       };
     }
@@ -117,7 +114,7 @@ export async function subscribeEmailAction(
     if (!sendyResponse.ok || !["1", "true"].includes(responseData)) {
       return {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        errorMessage: t("errors.server"),
+        errorMessage: t("Subscribe.errors.server"),
         validationErrors: {},
       };
     }
@@ -126,7 +123,7 @@ export async function subscribeEmailAction(
     console.error("Error subscribing user:", (<Error>error).message);
     return {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      errorMessage: t("errors.server"),
+      errorMessage: t("Subscribe.errors.server"),
       validationErrors: {},
     };
   }

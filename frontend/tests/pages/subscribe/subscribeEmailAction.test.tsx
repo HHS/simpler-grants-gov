@@ -47,7 +47,7 @@ describe("subscribeEmailAction", () => {
       testFormData,
     );
     expect(testErrorAlreadySubscribed.errorMessage).toBe(
-      "errors.already_subscribed",
+      "Subscribe.errors.already_subscribed",
     );
     expect(testErrorAlreadySubscribed.validationErrors).toEqual({});
 
@@ -59,7 +59,7 @@ describe("subscribeEmailAction", () => {
       }),
     ) as jest.Mock;
     const testErrorResonse = await subscribeEmailAction(t, testFormData);
-    expect(testErrorResonse.errorMessage).toBe("errors.server");
+    expect(testErrorResonse.errorMessage).toBe("Subscribe.errors.server");
     expect(testErrorResonse.validationErrors).toEqual({});
 
     // Test error in fetch
@@ -88,7 +88,7 @@ describe("subscribeEmailAction", () => {
     testFormData.set("email", "this is no good as an email address");
     const testInvalidResponse = await subscribeEmailAction(t, testFormData);
     const invalidEmail = {
-      email: ["errors.invalid_email"],
+      email: ["Subscribe.errors.invalid_email"],
     };
     expect(testInvalidResponse.errorMessage).toBe("");
     expect(testInvalidResponse.validationErrors).toStrictEqual(invalidEmail);
