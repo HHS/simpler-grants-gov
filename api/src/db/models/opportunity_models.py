@@ -427,3 +427,13 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     created_by: Mapped[str | None]
     updated_by: Mapped[str | None]
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
+
+
+class OpportunitySearchIndexQueue(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_search_index_queue"
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    has_update: Mapped[bool]
