@@ -318,7 +318,7 @@ class OpportunityV1Schema(Schema):
 
 
 class OpportunityAttachmentV1Schema(Schema):
-    s3_file = fields.String(
+    download_file = fields.String(
         metadata={
             "description": "The pre-signed s3 URL to download the attachment",
             "example": "https://...",
