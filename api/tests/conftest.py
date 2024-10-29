@@ -52,8 +52,8 @@ def env_vars():
     load_local_env_vars()
 
 
-### Uploads test file to localstack s3 bucket
-@pytest.fixture()
+### Uploads test files
+@pytest.fixture
 def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
     s3_client = boto3.client("s3")
     test_folder_path = (
@@ -63,7 +63,6 @@ def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
     for root, _, files in os.walk(test_folder_path):
         for file in files:
             file_path = os.path.join(root, file)
-            # Upload opportunity attachment file to the bucket
             s3_client.upload_file(
                 file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, test_folder_path)
             )
@@ -258,7 +257,7 @@ def api_auth_token(monkeypatch, all_api_auth_tokens):
 ####################
 
 
-@pytest.fixture()
+@pytest.fixture
 def reset_aws_env_vars(monkeypatch):
     # Reset the env vars so you can't accidentally connect
     # to a real AWS account if you were doing some local testing

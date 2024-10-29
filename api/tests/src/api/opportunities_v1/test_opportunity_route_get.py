@@ -105,12 +105,12 @@ def test_get_opportunity_s3_endpoint_url_200(
     # Check the response
     assert resp.status_code == 200
     response_data = resp.get_json()["data"]
-    presigned_url = response_data["attachments"][0]["s3_file"]
+    presigned_url = response_data["attachments"][0]["download_path"]
 
     # Validate pre-signed url
     response = requests.get(presigned_url)
     assert response.status_code == 200
-    assert response.content == b"Hello, world"
+    assert response.text == "Hello, world"
 
 
 def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):
