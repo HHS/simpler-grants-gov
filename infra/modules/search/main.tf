@@ -8,11 +8,6 @@ resource "aws_cloudwatch_log_group" "opensearch" {
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
-resource "aws_cloudwatch_log_resource_policy" "opensearch" {
-  policy_name     = "opensearch-${var.service_name}"
-  policy_document = data.aws_iam_policy_document.opensearch_cloudwatch.json
-}
-
 resource "aws_opensearch_domain" "opensearch" {
   domain_name     = var.service_name
   engine_version  = var.engine_version

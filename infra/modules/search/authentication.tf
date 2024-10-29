@@ -151,22 +151,6 @@ data "aws_iam_policy_document" "opensearch_access" {
   }
 }
 
-data "aws_iam_policy_document" "opensearch_cloudwatch" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["es.amazonaws.com"]
-    }
-    actions = [
-      "logs:PutLogEvents",
-      "logs:PutLogEventsBatch",
-      "logs:CreateLogStream",
-    ]
-    resources = ["arn:aws:logs:*"]
-  }
-}
-
 data "aws_iam_policy_document" "allow_all_aws_access" {
   # checkov:skip=CKV_AWS_109: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
   # checkov:skip=CKV_AWS_111: TODO: https://github.com/HHS/simpler-grants-gov/issues/2472
