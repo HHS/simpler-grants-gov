@@ -1,7 +1,7 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
 import logging
-import random
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -39,6 +39,7 @@ STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
 DELIVERABLE_FILE_ARG = typer.Option(help="Path to file with exported deliverable data")
+EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -267,11 +268,19 @@ def show_and_or_post_results(
 
 @etl_app.command(name="transform_and_load")
 def transform_and_load(
-    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG]
+    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG]
 ) -> None:
-
     """ Transform and load quad delivery data """
-    print("running data loader with effective date of *TBD*")
+
+    # validate effective date
+    try:
+        dateformat = "%Y-%m-%d"
+        datestamp = datetime.strptime(effective_date, dateformat).strftime(dateformat)
+        print("running data loader with effective date of {}".format(datestamp))
+    except ValueError as e:
+        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        return
 
     # hydrate a model instance from the input data 
     model = DeliveryMetricsDataSource.load_from_json_file(
@@ -287,6 +296,9 @@ def transform_and_load(
         entity.QUAD: {}
     }
 
+    # temporary hack
+    import random
+    
     # fetch db row id for each quad
     quad_ghids = model.get_quad_ghids()
     for ghid in quad_ghids:
@@ -334,12 +346,3 @@ def transform_and_load(
         #print("ISSUE '{}' issue_id = {}, sprint_id = {}, epic_id = {}, ".format(str(issue_ghid), row_id, sprint_id, epic_id))
     print("issue row(s) processed: {}".format(issue_update_count))
 
-
-
-
-    """
-    print("unique quad ghids: {}".format(str(model.get_quad_ghids())))
-    print("unique deliverable ghids: {}".format(str(model.get_deliverable_ghids())))
-    print("unique epic ghids: {}".format(str(model.get_epic_ghids())))
-    print("unique sprint ghids: {}".format(str(model.get_sprint_ghids())))
-    """
