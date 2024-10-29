@@ -266,6 +266,15 @@ def show_and_or_post_results(
         )
 
 
+@etl_app.command(name="initialize_database")
+def initialize_database() -> None:
+    """ Initialize delivery metrics database """
+    print("initializing database")
+    delivery_metrics_db.init_db()
+    print("WARNING: database was NOT initialized because db integration is WIP")
+    return
+
+
 @etl_app.command(name="transform_and_load")
 def transform_and_load(
     deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
@@ -315,3 +324,7 @@ def transform_and_load(
     # sync issue data to db resulting in row id for each quad
     issue_map = delivery_metrics_db.sync_issues(dataset, ghid_map)
     print("issue row(s) processed: {}".format(len(issue_map)))
+
+    # finish
+    print("data loader is done")
+    print("WARNING: no data was actually loaded because db integration is WIP")
