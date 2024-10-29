@@ -108,7 +108,7 @@ def test_get_opportunity_s3_endpoint_url_200(
     presigned_url = response_data["attachments"][0]["download_path"]
 
     # Validate pre-signed url
-    response = requests.get(presigned_url)
+    response = requests.get(presigned_url, timeout=5)
     assert response.status_code == 200
     assert response.text == "Hello, world"
 
