@@ -17,6 +17,18 @@ const formatHistoryDate = (date: string | null) => {
   return date === null ? "--" : formatDate(date);
 };
 
+const OpportunityDate = (title: string, date: string) => {
+  return (
+    <div>
+      <p className={"text-bold"}>
+        {title}
+        {":"}
+      </p>
+      <p className={"margin-top-0"}>{date}</p>
+    </div>
+  );
+};
+
 const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
   const opportunityDates = {
