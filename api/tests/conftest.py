@@ -63,11 +63,9 @@ def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
     for root, _, files in os.walk(test_folder_path):
         for file in files:
             file_path = os.path.join(root, file)
-            object_name = os.path.relpath(file_path, test_folder_path)
-
             # Upload opportunity attachment file to the bucket
             s3_client.upload_file(
-                file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, object_name)
+                file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, test_folder_path)
             )
 
     # Check file was uploaded to mock s3
@@ -269,7 +267,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
-    monkeypatch.setenv("S3_ENDPOINT_URL", "http://localstack:4566")
+    monkeypatch.setenv("IS_LOCAL_AWS", "False")
 
 
 @pytest.fixture

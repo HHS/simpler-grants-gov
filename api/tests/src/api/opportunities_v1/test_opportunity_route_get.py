@@ -1,5 +1,5 @@
+import boto3
 import pytest
-import requests
 
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
@@ -92,7 +92,9 @@ def test_get_opportunity_s3_endpoint_url_200(
 ):
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
-    file_loc = "s3://test-bucket/test_file_1.txt"
+    bucket = "test_bucket"
+    object_name = "test_file_1.txt"
+    file_loc = f"s3://{bucket}/{object_name}"
     OpportunityAttachmentFactory.create(file_location=file_loc, opportunity=opportunity)
 
     # Make the GET request
@@ -103,12 +105,15 @@ def test_get_opportunity_s3_endpoint_url_200(
     # Check the response
     assert resp.status_code == 200
     response_data = resp.get_json()["data"]
-    file_loc = response_data["attachments"][0]["file_location"]
+    presigned_url = response_data["attachments"][0]["s3_file"]
 
-    # Validate the s3 endpoint url
-    response = requests.get(file_loc, timeout=5)
-    assert response.status_code == 200
-    assert "Hello, world" in response.text
+    # Validate pre-signed URL
+    assert bucket in presigned_url
+    assert object_name in presigned_url
+
+    # Validate content of file
+    response = boto3.client("s3").get_object(Bucket=bucket, Key=object_name)
+    assert response["Body"].read() == b"Hello, world"
 
 
 def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):

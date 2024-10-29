@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from datetime import date
 from typing import List
 
@@ -50,7 +49,7 @@ def get_boto_session() -> boto3.Session:
 
 
 def pre_sign_opportunity_file_location(
-    opp_atts: List[OpportunityAttachment],
+    opp_atts: List,
 ) -> List[OpportunityAttachment]:
     s3_config = S3Config()
 
@@ -59,9 +58,11 @@ def pre_sign_opportunity_file_location(
         file_loc = opp_att.file_location
         bucket, key = split_s3_url(file_loc)
         pre_sign_file_loc = s3_client.generate_presigned_url(
-            "get_object", Params={"Bucket": bucket, "Key": key}
+            "get_object",
+            Params={"Bucket": bucket, "Key": key},
+            ExpiresIn=s3_config.presigned_s3_duration,
         )
-        opp_att.file_location = pre_sign_file_loc
+        opp_att.s3_file = pre_sign_file_loc
 
     return opp_atts
 
@@ -70,11 +71,10 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     opportunity = _fetch_opportunity(
         db_session, opportunity_id, load_all_opportunity_summaries=False
     )
-    opportunity_copy = deepcopy(opportunity)
 
-    pre_sign_opportunity_file_location(opportunity_copy.opportunity_attachments)
+    pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
 
-    return opportunity_copy
+    return opportunity
 
 
 def get_opportunity_versions(db_session: db.Session, opportunity_id: int) -> dict:

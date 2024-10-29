@@ -318,9 +318,9 @@ class OpportunityV1Schema(Schema):
 
 
 class OpportunityAttachmentV1Schema(Schema):
-    file_location = fields.String(
+    s3_file = fields.String(
         metadata={
-            "description": "The URL to download the attachment",
+            "description": "The pre-signed s3 URL to download the attachment",
             "example": "https://...",
         }
     )
