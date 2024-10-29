@@ -12,6 +12,7 @@ const getCurrentFilters = (params: SearchParamsTypes): string => {
 
 function SearchAnalytics({ params }: { params: SearchParamsTypes }) {
   useEffect(() => {
+    // send list of filters defined in page query params on each page load
     sendGAEvent("event", "search_attempt", {
       search_filters: getCurrentFilters(params),
     });
