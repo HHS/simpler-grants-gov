@@ -1,11 +1,28 @@
 """Integrate with database to read and write delivery metrics data."""
 
 import random     # temporary hack
+from pathlib import Path
 
 from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource
 from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsEntityType as entity
 
 DEBUG = False
+
+def init_db() -> None:
+    """ Initialize delivery metrics database """
+
+    # define the path to the sql file
+    parent_path = Path(__file__).resolve().parent
+    sql_path = "{}/create_delivery_metrics_db.sql".format(parent_path)
+
+    # read sql file
+    with open(sql_path) as f:
+        sql = f.read()
+
+    # TODO: execute sql
+
+    return
+
 
 def sync_deliverables(dataset: DeliveryMetricsDataSource) -> dict:
     """ Insert or update (if necessary) a row for each deliverable and return a map of row ids """
