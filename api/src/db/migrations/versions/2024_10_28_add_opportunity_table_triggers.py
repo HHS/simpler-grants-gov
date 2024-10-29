@@ -77,7 +77,7 @@ def upgrade():
 def downgrade():
     # Drop triggers
     for table in tables:
-        op.execute(f"DROP TRIGGER IF EXISTS {table}_queue_trigger ON {table};")
+        op.execute(f"DROP TRIGGER IF EXISTS {table}_queue_trigger ON api.{table};")
 
     # Drop the trigger function
     op.execute("DROP FUNCTION IF EXISTS update_opportunity_search_queue();")
