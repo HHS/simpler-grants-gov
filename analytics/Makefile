@@ -190,8 +190,7 @@ sprint-burndown:
 	@echo "=> Running sprint burndown report"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
-	--sprint-file $(SPRINT_FILE) \
-	--issue-file $(ISSUE_FILE) \
+	--issue-file $(DELIVERY_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
 	--unit $(UNIT) \
