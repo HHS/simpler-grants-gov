@@ -62,7 +62,7 @@ def pre_sign_opportunity_file_location(
             Params={"Bucket": bucket, "Key": key},
             ExpiresIn=s3_config.presigned_s3_duration,
         )
-        opp_att.download_file = pre_sign_file_loc
+        opp_att.download_path = pre_sign_file_loc
 
     return opp_atts
 
