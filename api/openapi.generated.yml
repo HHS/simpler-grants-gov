@@ -2036,7 +2036,7 @@ components:
     OpportunityAttachmentV1:
       type: object
       properties:
-        download_file:
+        download_path:
           type: string
           description: The pre-signed s3 URL to download the attachment
           example: https://...
