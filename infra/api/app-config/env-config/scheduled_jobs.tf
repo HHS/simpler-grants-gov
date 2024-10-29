@@ -40,14 +40,10 @@ locals {
     ],
   }
   scheduled_jobs = {
-    copy-oracle-data = {
-      task_command        = ["poetry", "run", "flask", "data-migration", "copy-oracle-data"]
-      schedule_expression = "rate(2 minutes)"
-      state               = "ENABLED"
-    }
     load-transform = {
       task_command        = local.load-transform-args[var.environment]
-      schedule_expression = "rate(1 days)"
+      # Every hour at the top of the hour
+      schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
     }
   }
