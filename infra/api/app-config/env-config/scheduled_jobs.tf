@@ -41,7 +41,7 @@ locals {
   }
   scheduled_jobs = {
     load-transform = {
-      task_command        = local.load-transform-args[var.environment]
+      task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
