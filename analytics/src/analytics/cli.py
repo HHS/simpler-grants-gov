@@ -10,10 +10,10 @@ from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource, DeliveryMetricsEntityType
+from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource
 from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsEntityType as entity
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.integrations import db, github, slack
+from analytics.integrations import db, github, slack, delivery_metrics_db
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -271,9 +271,9 @@ def transform_and_load(
     deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG]
 ) -> None:
-    """ Transform and load quad delivery data """
+    """ Transform and load delivery data """
 
-    # validate effective date
+    # validate effective date arg
     try:
         dateformat = "%Y-%m-%d"
         datestamp = datetime.strptime(effective_date, dateformat).strftime(dateformat)
@@ -282,67 +282,36 @@ def transform_and_load(
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
 
-    # hydrate a model instance from the input data 
-    model = DeliveryMetricsDataSource.load_from_json_file(
+    # hydrate a dataset instance from the input data 
+    dataset = DeliveryMetricsDataSource.load_from_json_file(
         file_path=deliverable_file
     )
-    print("found {} issues to process".format(len(model.get_issue_ghids())))
+    print("found {} issues to process".format(len(dataset.get_issue_ghids())))
 
     # initialize a map of github id to db row id
-    map = {
+    ghid_map = {
         entity.DELIVERABLE: {},
         entity.EPIC: {},
         entity.SPRINT: {},
         entity.QUAD: {}
     }
 
-    # temporary hack
-    import random
-    
-    # fetch db row id for each quad
-    quad_ghids = model.get_quad_ghids()
-    for ghid in quad_ghids:
-        quad_df = model.get_quad(ghid)
-        row_id = random.randint(100, 999) # TODO: get actual row id 
-        map[entity.QUAD][ghid] = row_id
-        #print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], row_id)) 
-    print("quad row(s) processed: {}".format(len(quad_ghids)))
+    # sync quad data to db resulting in row id for each quad
+    ghid_map[entity.QUAD] = delivery_metrics_db.sync_quads(dataset)
+    print("quad row(s) processed: {}".format(len(ghid_map[entity.QUAD])))
 
-    # fetch db row id for each deliverable
-    deliverable_ghids = model.get_deliverable_ghids()
-    for ghid in deliverable_ghids:
-        row_id = random.randint(100, 999) # TODO: get actual row id 
-        map[entity.DELIVERABLE][ghid] = row_id
-        #print("DELIVERABLE '{}' row_id = {}".format(str(ghid), row_id))
-    print("deliverable row(s) processed: {}".format(len(deliverable_ghids)))
+    # sync deliverable data to db resulting in row id for each quad
+    ghid_map[entity.DELIVERABLE] = delivery_metrics_db.sync_deliverables(dataset)
+    print("deliverable row(s) processed: {}".format(len(ghid_map[entity.DELIVERABLE])))
 
-    # fetch db row id for each sprint
-    sprint_ghids = model.get_sprint_ghids()
-    for ghid in sprint_ghids:
-        row_id = random.randint(100, 999) # TODO: get actual row id 
-        map[entity.SPRINT][ghid] = row_id
-        #print("SPRINT '{}' row_id = {}".format(str(ghid), row_id))
-    print("sprint row(s) processed: {}".format(len(sprint_ghids)))
+    # sync sprint data to db resulting in row id for each quad
+    ghid_map[entity.SPRINT] = delivery_metrics_db.sync_sprints(dataset)
+    print("sprint row(s) processed: {}".format(len(ghid_map[entity.SPRINT])))
 
-    # fetch db row id for each epic
-    epic_ghids = model.get_epic_ghids()
-    for ghid in epic_ghids:
-        row_id = random.randint(100, 999) # TODO: get actual row id 
-        map[entity.EPIC][ghid] = row_id
-        #print("EPIC '{}' row_id = {}".format(str(ghid), row_id))
-    print("epic row(s) processed: {}".format(len(epic_ghids)))
+    # sync epic data to db resulting in row id for each quad
+    ghid_map[entity.EPIC] = delivery_metrics_db.sync_epics(dataset)
+    print("epic row(s) processed: {}".format(len(ghid_map[entity.EPIC])))
 
-    # iterate over issues
-    issue_update_count = 0
-    for issue_ghid in model.get_issue_ghids():
-        issue_update_count += 1
-        issue_df = model.get_issue(issue_ghid)
-        epic_id = map[entity.EPIC].get(issue_df['epic_ghid'])
-        deliverable_id = map[entity.EPIC].get(issue_df['deliverable_ghid'])
-        sprint_id = map[entity.SPRINT].get(issue_df['sprint_ghid'])
-        quad_id = map[entity.QUAD].get(issue_df['quad_ghid'])
-        row_id = random.randint(100, 999) # TODO: get actual row id 
-
-        #print("ISSUE '{}' issue_id = {}, sprint_id = {}, epic_id = {}, ".format(str(issue_ghid), row_id, sprint_id, epic_id))
-    print("issue row(s) processed: {}".format(issue_update_count))
-
+    # sync issue data to db resulting in row id for each quad
+    issue_map = delivery_metrics_db.sync_issues(dataset, ghid_map)
+    print("issue row(s) processed: {}".format(len(issue_map)))
