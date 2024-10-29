@@ -96,7 +96,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         return value.replace(prefix, '')
 
 
-    # QUADS
+    # QUAD getters
 
     def get_quad(self, quad_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given quad """
@@ -110,7 +110,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         return df.quad_ghid.unique()
 
 
-    # DELIVERABLES
+    # DELIVERABLE getters
 
     def get_deliverable(self, deliverable_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given deliverable """
@@ -124,7 +124,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         return df.deliverable_ghid.unique()
 
 
-    # SPRINTS
+    # SPRINT getters
 
     def get_sprint(self, sprint_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given sprint """
@@ -138,7 +138,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         return df.sprint_ghid.unique()
 
 
-    # EPICS
+    # EPIC getters
 
     def get_epic(self, epic_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given epic """
@@ -152,7 +152,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         return df.epic_ghid.unique()
 
 
-    # ISSUES
+    # ISSUE getters
 
     def get_issue(self, issue_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given issue """
