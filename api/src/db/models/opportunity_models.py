@@ -435,5 +435,7 @@ class OpportunitySearchIndexQueue(ApiSchemaTable, TimestampMixin):
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
-    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+    opportunity: Mapped[Opportunity] = relationship(
+        Opportunity, cascade="all, delete-orphan", single_parent=True
+    )
     has_update: Mapped[bool]
