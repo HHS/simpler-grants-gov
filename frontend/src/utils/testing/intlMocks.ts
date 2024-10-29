@@ -1,3 +1,5 @@
+import { TFn } from "src/types/intl";
+
 function mockUseTranslations(translationKey: string) {
   return translationKey;
 }
@@ -5,7 +7,7 @@ function mockUseTranslations(translationKey: string) {
 mockUseTranslations.rich = (translationKey: string) => translationKey;
 
 export function useTranslationsMock() {
-  return mockUseTranslations;
+  return mockUseTranslations as TFn;
 }
 
 // mocking all types of messages, could split by message type in the future
