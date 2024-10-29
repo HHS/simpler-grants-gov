@@ -9,9 +9,9 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
+import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ErrorProps {
   // Next's error boundary also includes a reset function as a prop for retries,
@@ -102,7 +102,7 @@ export default function Error({ error }: ErrorProps) {
             </ContentDisplayToggle>
           </div>
           <div className="tablet:grid-col-8">
-            <SearchErrorAlert />
+            <ServerErrorAlert callToAction={t("generic_error_cta")} />
           </div>
         </div>
       </div>

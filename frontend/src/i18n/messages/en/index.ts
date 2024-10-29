@@ -62,6 +62,7 @@ export const messages = {
         "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
       button_content: "View on Grants.gov",
     },
+    generic_error_cta: "Please try refreshing the page.",
   },
   Index: {
     page_title: "Simpler.Grants.gov",
@@ -434,6 +435,10 @@ export const messages = {
   Layout: {
     skip_to_main: "Skip to main content",
   },
+  Errors: {
+    heading: "We're sorry.",
+    generic_message: "There seems to have been an error.",
+  },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
     meta_description:
@@ -514,5 +519,6 @@ export const messages = {
       showFilters: "Show Filters",
       hideFilters: "Hide Filters",
     },
+    generic_error_cta: "Please try your search again.",
   },
 };
