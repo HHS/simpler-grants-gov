@@ -1,4 +1,4 @@
-"""Read and write data from/to sqlite."""
+"""Read and write data from/to delivery metrics database."""
 
 __all__ = [
     "sync_deliverables",
