@@ -36,14 +36,14 @@ def _upload_opportunity_attachments_s3():
             file_path = os.path.join(root, file)
             object_name = os.path.relpath(file_path, test_folder_path)
 
-        try:
-            s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
-            logger.info("Successfully uploaded files")
-        except ClientError as e:
-            logger.error(
-                "Error uploading to s3: %s",
-                extra={"object_name": object_name, "file_path": file_path, "error": e},
-            )
+            try:
+                s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
+                logger.info("Successfully uploaded files")
+            except ClientError as e:
+                logger.error(
+                    "Error uploading to s3: %s",
+                    extra={"object_name": object_name, "file_path": file_path, "error": e},
+                )
 
 
 def _add_history(
@@ -203,15 +203,15 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
         error_if_not_local()
 
         _upload_opportunity_attachments_s3()
-
-        db_client = PostgresDBClient()
-
-        with db_client.get_session() as db_session:
-            factories._db_session = db_session
-
-            _build_opportunities(db_session, iterations, include_history)
-            # Need to commit to force any updates made
-            # after factories created objects
-            db_session.commit()
-
-            _build_agencies(db_session)
+        #
+        # db_client = PostgresDBClient()
+        #
+        # with db_client.get_session() as db_session:
+        #     factories._db_session = db_session
+        #
+        #     _build_opportunities(db_session, iterations, include_history)
+        #     # Need to commit to force any updates made
+        #     # after factories created objects
+        #     db_session.commit()
+        #
+        #     _build_agencies(db_session)
