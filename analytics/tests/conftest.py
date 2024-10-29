@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 """
 Configure pytest settings and create reusable fixtures and functions.
 
@@ -204,7 +205,7 @@ def sprint_row(
     }
 
 
-def issue(
+def issue(  # pylint: disable=too-many-locals
     issue: int,
     kind: IssueType = IssueType.TASK,
     parent: str | None = None,
