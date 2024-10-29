@@ -2,15 +2,18 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
 import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
+import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
@@ -26,6 +29,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
     console.error("Failed to render title");
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      return notFound();
+    }
   }
   const meta: Metadata = {
     title,
@@ -41,7 +47,7 @@ async function getOpportunityData(id: number): Promise<Opportunity> {
     return opportunity.data;
   } catch (error) {
     console.error("Failed to fetch opportunity:", error);
-    throw new Error("Failed to fetch opportunity");
+    throw error;
   }
 }
 
@@ -93,7 +99,10 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
   try {
     opportunityData = await getOpportunityData(id);
   } catch (error) {
-    return <NotFound />;
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      return <NotFound />;
+    }
+    throw error;
   }
   opportunityData.summary = opportunityData?.summary
     ? opportunityData.summary
@@ -118,6 +127,7 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
 
           <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
             <OpportunityStatusWidget opportunityData={opportunityData} />
+            <OpportunityCTA id={opportunityData.opportunity_id} />
             <OpportunityAwardInfo opportunityData={opportunityData} />
             <OpportunityHistory summary={opportunityData.summary} />
           </div>

@@ -3,6 +3,7 @@ import logging
 from typing import Any, Optional, Tuple
 
 import apiflask
+import flask
 
 from src.api.schemas.extension import MarshmallowErrorContainer
 from src.pagination.pagination_models import PaginationInfo
@@ -92,6 +93,7 @@ def restructure_error_response(error: apiflask.exceptions.HTTPError) -> Tuple[di
         # we rename detail to data so success and error responses are consistent
         "data": error.detail,
         "status_code": error.status_code,
+        "internal_request_id": getattr(flask.g, "internal_request_id", None),
     }
     validation_errors: list[ValidationErrorDetail] = []
 

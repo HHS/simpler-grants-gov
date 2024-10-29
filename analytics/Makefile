@@ -65,8 +65,8 @@ export RUN_UID
 check-prereqs:
 	@echo "=> Checking for pre-requisites"
 	@if ! poetry --version; then echo "=> Poetry isn't installed"; fi
-	@if ! github --version; then echo "=> GitHub CLI isn't installed"; fi
-	@echo "=> All pre-requisites satisfied"
+	@if ! gh --version; then echo "=> GitHub CLI isn't installed" && exit 1; fi
+	@echo "=> Poetry and GitHub CLI installed"
 
 install: check-prereqs
 	@echo "=> Installing python dependencies"
@@ -74,6 +74,8 @@ install: check-prereqs
 
 login:
 	$(GITHUB) auth login
+
+setup: install login
 
 build:
 	docker compose build
@@ -198,3 +200,4 @@ percent-complete:
 sprint-reports: sprint-burndown percent-complete
 
 sprint-reports-with-latest-data: gh-data-export sprint-reports
+

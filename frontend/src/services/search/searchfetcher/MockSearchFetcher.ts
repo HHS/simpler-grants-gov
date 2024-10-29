@@ -9,6 +9,6 @@ export class MockSearchFetcher extends SearchFetcher {
   async fetchOpportunities(): Promise<SearchAPIResponse> {
     // simulate delay
     await new Promise((resolve) => setTimeout(resolve, 750));
-    return mockData;
+    return mockData as SearchAPIResponse;
   }
 }

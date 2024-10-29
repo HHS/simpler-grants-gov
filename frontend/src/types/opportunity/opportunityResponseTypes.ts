@@ -1,3 +1,5 @@
+export type OpportunityStatus = "archived" | "closed" | "posted" | "forecasted";
+
 export interface OpportunityAssistanceListing {
   assistance_listing_number: string;
   program_title: string;
@@ -40,13 +42,14 @@ export interface Summary {
 export interface Opportunity {
   agency: string;
   agency_name: string;
+  top_level_agency_name: string;
   category: string;
   category_explanation: string | null;
   created_at: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
   opportunity_number: string;
-  opportunity_status: string;
+  opportunity_status: OpportunityStatus;
   opportunity_title: string;
   summary: Summary;
   updated_at: string;

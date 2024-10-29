@@ -276,6 +276,14 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the top level agency who created the oppportunity",
+            "example": "Department of Examples",
+        },
+    )
+
     category = fields.Enum(
         OpportunityCategory,
         allow_none=True,

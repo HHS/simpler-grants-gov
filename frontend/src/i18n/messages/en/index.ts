@@ -14,12 +14,15 @@ export const messages = {
       last_updated: "Last Updated: ",
     },
     description: {
-      description: "Description",
-      eligible_applicants: "Eligible Applicants",
-      additional_info: "Additional Information on eligibility",
+      title: "Funding opportunity",
+      summary: "Summary",
+      eligibility: "Eligibility",
+      eligible_applicants: "Eligible applicants",
+      additional_info: "Additional information",
       contact_info: "Grantor contact information",
+      description: "Description",
       email: "Email",
-      telephone: "Telephone",
+      telephone: "Phone",
     },
     award_info: {
       yes: "Yes",
@@ -28,6 +31,7 @@ export const messages = {
       expected_awards: "Expected awards",
       award_ceiling: "Award Ceiling",
       award_floor: "Award Floor",
+      opportunity_number: "Funding opportunity number",
       cost_sharing: "Cost sharing or matching requirement",
       funding_instrument: "Funding instrument type",
       opportunity_category: "Opportunity Category",
@@ -42,7 +46,7 @@ export const messages = {
       version: "Version",
     },
     link: {
-      title: "Link to additonal information",
+      title: "Link to additional information",
     },
     status_widget: {
       archived: "Archived: ",
@@ -52,6 +56,13 @@ export const messages = {
       closing_warn:
         "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
     },
+    cta: {
+      apply_title: "Application process",
+      apply_content:
+        "This site is a work in progress. Go to www.grants.gov to apply, track application status, and subscribe to updates.",
+      button_content: "View on Grants.gov",
+    },
+    generic_error_cta: "Please try refreshing the page.",
   },
   Index: {
     page_title: "Simpler.Grants.gov",
@@ -333,15 +344,22 @@ export const messages = {
     list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+    form: {
+      name: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      req: "required",
+      opt: "optional",
+      button: "Subscribe",
+    },
     errors: {
-      missing_name: "Enter your first name.",
-      missing_email: "Enter your email address.",
+      missing_name: "Please enter a name.",
+      missing_email: "Please enter an email address.",
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
-      already_subscribed:
-        "<email_address/> is already subscribed. If you’re not seeing our emails, check your spam folder and add no-reply@grants.gov to your contacts, address book, or safe senders list. If you continue to not receive our emails, contact <email>simpler@grants.gov</email>.",
-      sendy:
-        "Sorry, an unexpected error in our system occured when trying to save your subscription. If this continues to happen, you may email <email>simpler@grants.gov</email>. Error: <sendy_error/>",
+      server:
+        "Failed to subscribe, due to a server error. Please try again later.",
+      already_subscribed: "This email address has already been subscribed.",
     },
   },
   Subscription_confirmation: {
@@ -424,6 +442,10 @@ export const messages = {
   Layout: {
     skip_to_main: "Skip to main content",
   },
+  Errors: {
+    heading: "We're sorry.",
+    generic_message: "There seems to have been an error.",
+  },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
     meta_description:
@@ -504,5 +526,6 @@ export const messages = {
       showFilters: "Show Filters",
       hideFilters: "Hide Filters",
     },
+    generic_error_cta: "Please try your search again.",
   },
 };
