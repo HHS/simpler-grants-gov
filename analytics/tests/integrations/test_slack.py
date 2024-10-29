@@ -18,7 +18,13 @@ def mock_slackbot() -> SlackBot:
     return SlackBot(client=client)
 
 
-@pytest.mark.skip(reason="requires Slack token")
+slack_token_required = pytest.mark.skipif(
+    "not config.getoption('--slack-token-set')",
+    reason="requires Slack token",
+)
+
+
+@slack_token_required
 def test_fetch_slack_channels(slackbot: SlackBot):
     """The fetch_slack_channels() function should execute correctly."""
     result = slackbot.fetch_slack_channel_info(
@@ -28,7 +34,7 @@ def test_fetch_slack_channels(slackbot: SlackBot):
     assert result["channel"]["name"] == "z_bot-analytics-ci-test"
 
 
-@pytest.mark.skip(reason="requires Slack token")
+@slack_token_required
 def test_upload_files_to_slack_channel(slackbot: SlackBot):
     """The upload_files_to_slack_channel() function should execute correctly."""
     # setup - create test files to upload
