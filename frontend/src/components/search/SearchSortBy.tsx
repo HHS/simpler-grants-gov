@@ -60,7 +60,10 @@ export default function SearchSortBy({
 
   return (
     <div id="search-sort-by">
-      <label htmlFor="search-sort-by-select" className="usa-sr-only">
+      <label
+        htmlFor="search-sort-by-select"
+        className="usa-label tablet:display-inline-block tablet:margin-right-2"
+      >
         {t("sortBy.label")}
       </label>
 
@@ -69,6 +72,7 @@ export default function SearchSortBy({
         name="search-sort-by"
         onChange={handleChange}
         value={sortby || ""}
+        className="tablet:display-inline-block tablet:width-auto"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
