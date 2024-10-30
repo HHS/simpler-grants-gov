@@ -69,7 +69,6 @@ def pre_sign_opportunity_file_location(
 
         opp_att.download_path = pre_sign_file_loc
 
-
     return opp_atts
 
 
