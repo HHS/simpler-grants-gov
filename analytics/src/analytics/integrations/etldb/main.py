@@ -2,9 +2,10 @@
 
 import random     # temporary hack
 from pathlib import Path
-
+from sqlalchemy import text
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.integrations.etldb.etldb import EtlDb
 
 DEBUG = False
 
@@ -19,7 +20,11 @@ def init_db() -> None:
     with open(sql_path) as f:
         sql = f.read()
 
-    # TODO: execute sql
+    # execute sql
+    db = EtlDb()
+    cursor = db.connection()
+    result = cursor.execute(text(sql),)
+    db.commit(cursor)
 
     return
 
