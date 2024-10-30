@@ -9,9 +9,8 @@ resource "aws_cloudwatch_log_group" "opensearch" {
 }
 
 resource "aws_opensearch_domain" "opensearch" {
-  domain_name     = var.service_name
-  engine_version  = var.engine_version
-  access_policies = data.aws_iam_policy_document.opensearch_access.json
+  domain_name    = var.service_name
+  engine_version = var.engine_version
 
   encrypt_at_rest {
     enabled    = true
