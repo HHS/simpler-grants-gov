@@ -1,0 +1,64 @@
+// splits a string containing markup at a specified character length
+// tracks open tags to ensure that split does not occur until all open tags are closed.
+// will throw on malformed markup, so any callers will need to gracefully handle that error
+export const splitMarkup = (
+  markupString: string,
+  splitAt: number,
+): {
+  preSplit: string;
+  postSplit: string;
+} => {
+  if (splitAt > markupString.length) {
+    return { preSplit: markupString, postSplit: "" };
+  }
+  const { preSplit, postSplit } = Array.from(markupString).reduce(
+    (tracker, character, index) => {
+      if (!tracker.splitComplete && !tracker.tagOpen && index > splitAt) {
+        tracker.splitComplete = true;
+      }
+      if (tracker.splitComplete) {
+        tracker.postSplit += character;
+        return tracker;
+      }
+      if (character === "<") {
+        if (tracker.openTagIndicator) {
+          throw new Error("Malformed markup: unclosed tag");
+        }
+        tracker.openTagIndicator = true;
+      }
+      if (tracker.openTagIndicator && character === "/") {
+        if (tracker.closeTagIndicator) {
+          throw new Error("Malformed markup: improperly closed tag");
+        }
+        tracker.closeTagIndicator = true;
+      }
+      if (tracker.openTagIndicator && character === ">") {
+        if (tracker.closeTagIndicator) {
+          tracker.tagOpen--;
+          tracker.closeTagIndicator = false;
+          tracker.openTagIndicator = false;
+          if (tracker.tagOpen < 0) {
+            throw new Error("Malformed markup: tag open close mismatch");
+          }
+        } else {
+          tracker.tagOpen++;
+          tracker.openTagIndicator = false;
+        }
+      }
+      tracker.preSplit += character;
+      return tracker;
+    },
+    {
+      preSplit: "",
+      postSplit: "",
+      tagOpen: 0,
+      openTagIndicator: false,
+      closeTagIndicator: false,
+      splitComplete: false,
+    },
+  );
+  return {
+    preSplit,
+    postSplit,
+  };
+};

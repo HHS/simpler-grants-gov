@@ -1,7 +1,10 @@
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
+import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
+
+import ContentDisplayToggle from "../ContentDisplayToggle";
 
 type Props = {
   summary: Summary;
@@ -45,6 +48,47 @@ const eligibleApplicantsFormatter = (applicantTypes: string[]) => {
   });
 };
 
+const SummaryDescriptionDisplay = ({
+  summaryDescription = "",
+}: {
+  summaryDescription: string;
+}) => {
+  const t = useTranslations("OpportunityListing.description");
+  if (summaryDescription?.length < 600) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(summaryDescription ?? "--"),
+        }}
+      />
+    );
+  }
+
+  const purifiedSummary = DOMPurify.sanitize(summaryDescription);
+
+  const { preSplit, postSplit } = splitMarkup(purifiedSummary, 600);
+  return (
+    <>
+      <div
+        dangerouslySetInnerHTML={{
+          __html: preSplit,
+        }}
+      />
+      <ContentDisplayToggle
+        showCallToAction={t("show_summary")}
+        hideCallToAction={t("hide_summary_description")}
+        positionButtonBelowContent={false}
+      >
+        <div
+          dangerouslySetInnerHTML={{
+            __html: postSplit,
+          }}
+        />
+      </ContentDisplayToggle>
+    </>
+  );
+};
+
 const OpportunityDescription = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.description");
   const agency_phone_number_stripped = summary?.agency_phone_number
@@ -68,15 +112,14 @@ const OpportunityDescription = ({ summary }: Props) => {
   ) : (
     "--"
   );
+
   return (
     <>
       <div className="usa-prose">
         <h2>{t("title")}</h2>
         <h3>{t("summary")}</h3>
-        <div
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(summary.summary_description ?? "--"),
-          }}
+        <SummaryDescriptionDisplay
+          summaryDescription={summary.summary_description || ""}
         />
         <h2>{t("eligibility")}</h2>
         <h3>{t("eligible_applicants")}</h3>
