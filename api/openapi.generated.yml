@@ -2036,7 +2036,7 @@ components:
     OpportunityAttachmentV1:
       type: object
       properties:
-        file_location:
+        download_path:
           type: string
           description: The URL to download the attachment
           example: https://...

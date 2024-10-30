@@ -318,7 +318,7 @@ class OpportunityV1Schema(Schema):
 
 
 class OpportunityAttachmentV1Schema(Schema):
-    file_location = fields.String(
+    download_path = fields.String(
         metadata={
             "description": "The URL to download the attachment",
             "example": "https://...",

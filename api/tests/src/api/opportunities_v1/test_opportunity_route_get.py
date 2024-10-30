@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from tests.src.api.opportunities_v1.conftest import (
     validate_opportunity,
@@ -6,6 +7,7 @@ from tests.src.api.opportunities_v1.conftest import (
 )
 from tests.src.db.models.factories import (
     CurrentOpportunitySummaryFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
@@ -47,7 +49,6 @@ def test_get_opportunity_200(
     db_opportunity = OpportunityFactory.create(
         **opportunity_params, current_opportunity_summary=None
     )  # We'll set the current opportunity below
-
     if opportunity_summary_params is not None:
         db_opportunity_summary = OpportunitySummaryFactory.create(
             **opportunity_summary_params, opportunity=db_opportunity
@@ -70,8 +71,6 @@ def test_get_opportunity_with_attachment_200(
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create()
-
-    # Ensure the opportunity is committed to the database
     db_session.commit()
 
     # Make the GET request
@@ -86,6 +85,33 @@ def test_get_opportunity_with_attachment_200(
     # Validate the opportunity data
     assert len(response_data["attachments"]) > 0
     validate_opportunity_with_attachments(opportunity, response_data)
+
+
+def test_get_opportunity_s3_endpoint_url_200(
+    upload_opportunity_attachment_s3, client, api_auth_token, enable_factory_create, db_session
+):
+    # Create an opportunity with a specific attachment
+    opportunity = OpportunityFactory.create(opportunity_attachments=[])
+    bucket = "test_bucket"
+    object_name = "test_file_1.txt"
+    file_loc = f"s3://{bucket}/{object_name}"
+    OpportunityAttachmentFactory.create(file_location=file_loc, opportunity=opportunity)
+
+    # Make the GET request
+    resp = client.get(
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-Auth": api_auth_token}
+    )
+
+    # Check the response
+    assert resp.status_code == 200
+    response_data = resp.get_json()["data"]
+    print("response_data", response_data)
+    presigned_url = response_data["attachments"][0]["download_path"]
+
+    # Validate pre-signed url
+    response = requests.get(presigned_url, timeout=5)
+    assert response.status_code == 200
+    assert response.text == "Hello, world"
 
 
 def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):

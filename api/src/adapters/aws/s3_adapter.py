@@ -8,6 +8,7 @@ class S3Config(PydanticBaseEnvConfig):
     # We should generally not need to set this except
     # locally to use localstack
     s3_endpoint_url: str | None = None
+    presigned_s3_duration: int = 1800
 
     ### S3 Buckets
     # note that we default these to None
