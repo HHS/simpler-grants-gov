@@ -271,7 +271,7 @@ def initialize_database() -> None:
     """ Initialize etl database """
     print("initializing database")
     etldb.init_db()
-    print("WARNING: database was NOT initialized because db integration is WIP")
+    print("done")
     return
 
 
