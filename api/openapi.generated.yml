@@ -2038,7 +2038,7 @@ components:
       properties:
         download_path:
           type: string
-          description: The pre-signed s3 URL to download the attachment
+          description: The URL to download the attachment
           example: https://...
         mime_type:
           type: string
