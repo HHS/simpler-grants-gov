@@ -7,51 +7,45 @@ type Props = {
   summary: Summary;
 };
 
-type TranslationKeys =
-  | "version"
-  | "posted_date"
-  | "closing_date"
-  | "archive_date";
-
 const formatHistoryDate = (date: string | null) => {
   return date === null ? "--" : formatDate(date);
 };
 
-const OpportunityDate = (title: string, date: string) => {
+const OpportunityHistoryItem = ({
+  title,
+  content,
+}: {
+  title: string;
+  content: string;
+}) => {
   return (
     <div>
       <p className={"text-bold"}>
         {title}
         {":"}
       </p>
-      <p className={"margin-top-0"}>{date}</p>
+      <p className={"margin-top-0"}>{content}</p>
     </div>
   );
 };
 
 const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
-  const opportunityDates = {
-    posted_date: summary.post_date,
-    closing_date: summary.close_date,
-    archive_date: summary.archive_date,
-  };
   return (
     <div className="usa-prose margin-top-4">
       <h3>History</h3>
-      <div>
-        <p className={"text-bold"}>{t("version")}:</p>
-        <p className={"margin-top-0"}>{summary.version_number || "--"}</p>
-      </div>
-      {Object.entries(opportunityDates).map(([title, date], index) => (
-        <div key={`historyInfo-${index}`}>
-          <p className={"text-bold"}>
-            {t(`${title as TranslationKeys}`)}
-            {":"}
-          </p>
-          <p className={"margin-top-0"}>{formatHistoryDate(date)}</p>
-        </div>
-      ))}
+      <OpportunityHistoryItem
+        title={t("version")}
+        content={summary.version_number ? summary.version_number.toString() || "--"}
+      />
+      <OpportunityHistoryItem
+        title={t("posted_date") + ":"}
+        content={formatHistoryDate(summary.post_date)}
+      />
+      <OpportunityHistoryItem
+        title={t("archive_date")}
+        content={formatHistoryDate(summary.archive_date)}
+      />
     </div>
   );
 };
