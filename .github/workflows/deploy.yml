@@ -13,7 +13,13 @@ on:
         required: true
         type: string
 
-concurrency: cd-${{ inputs.environment }}
+concurrency: cd-${{inputs.app_name}}-${{ inputs.environment }}
+
+env:
+  # Set a timeout of two minutes for all terraform commands in the workflow
+  # to account for parallel jobs working in the same environment with the same
+  # terraform state files.
+  TF_CLI_ARGS: "-lock-timeout=120s"
 
 jobs:
   build-and-publish:
