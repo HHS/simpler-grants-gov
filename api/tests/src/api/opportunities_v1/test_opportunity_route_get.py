@@ -105,6 +105,7 @@ def test_get_opportunity_s3_endpoint_url_200(
     # Check the response
     assert resp.status_code == 200
     response_data = resp.get_json()["data"]
+    print("response_data", response_data)
     presigned_url = response_data["attachments"][0]["download_path"]
 
     # Validate pre-signed url

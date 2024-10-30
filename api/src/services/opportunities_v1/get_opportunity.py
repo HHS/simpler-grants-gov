@@ -63,9 +63,12 @@ def pre_sign_opportunity_file_location(
             ExpiresIn=s3_config.presigned_s3_duration,
         )
         if s3_config.s3_endpoint_url:
-            opp_att.download_path = pre_sign_file_loc.replace(
+            pre_sign_file_loc = pre_sign_file_loc.replace(
                 s3_config.s3_endpoint_url, "http://localhost:4566"
             )
+
+        opp_att.download_path = pre_sign_file_loc
+
 
     return opp_atts
 
