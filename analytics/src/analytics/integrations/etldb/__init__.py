@@ -9,7 +9,7 @@ __all__ = [
     "sync_quads",
 ]
 
-from analytics.integrations.delivery_metrics_db.main import (
+from analytics.integrations.etldb.main import (
     init_db,
     sync_deliverables,
     sync_epics,

@@ -10,10 +10,10 @@ from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource
-from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsEntityType as entity
+from analytics.datasets.etl_dataset import EtlDataset
+from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.datasets.sprint_board import SprintBoard
-from analytics.integrations import db, github, slack, delivery_metrics_db
+from analytics.integrations import db, github, slack, etldb
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -53,7 +53,7 @@ etl_app = typer.Typer()
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
-app.add_typer(etl_app, name="etl", help="Transform delivery data and load into database")
+app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
 
 @app.callback()
@@ -268,9 +268,9 @@ def show_and_or_post_results(
 
 @etl_app.command(name="initialize_database")
 def initialize_database() -> None:
-    """ Initialize delivery metrics database """
+    """ Initialize etl database """
     print("initializing database")
-    delivery_metrics_db.init_db()
+    etldb.init_db()
     print("WARNING: database was NOT initialized because db integration is WIP")
     return
 
@@ -280,7 +280,7 @@ def transform_and_load(
     deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG]
 ) -> None:
-    """ Transform and load delivery data """
+    """ Transform and load etl data """
 
     # validate effective date arg
     try:
@@ -292,7 +292,7 @@ def transform_and_load(
         return
 
     # hydrate a dataset instance from the input data 
-    dataset = DeliveryMetricsDataSource.load_from_json_file(
+    dataset = EtlDataset.load_from_json_file(
         file_path=deliverable_file
     )
     print("found {} issues to process".format(len(dataset.get_issue_ghids())))
@@ -306,23 +306,23 @@ def transform_and_load(
     }
 
     # sync quad data to db resulting in row id for each quad
-    ghid_map[entity.QUAD] = delivery_metrics_db.sync_quads(dataset)
+    ghid_map[entity.QUAD] = etldb.sync_quads(dataset)
     print("quad row(s) processed: {}".format(len(ghid_map[entity.QUAD])))
 
     # sync deliverable data to db resulting in row id for each quad
-    ghid_map[entity.DELIVERABLE] = delivery_metrics_db.sync_deliverables(dataset)
+    ghid_map[entity.DELIVERABLE] = etldb.sync_deliverables(dataset)
     print("deliverable row(s) processed: {}".format(len(ghid_map[entity.DELIVERABLE])))
 
     # sync sprint data to db resulting in row id for each quad
-    ghid_map[entity.SPRINT] = delivery_metrics_db.sync_sprints(dataset)
+    ghid_map[entity.SPRINT] = etldb.sync_sprints(dataset)
     print("sprint row(s) processed: {}".format(len(ghid_map[entity.SPRINT])))
 
     # sync epic data to db resulting in row id for each quad
-    ghid_map[entity.EPIC] = delivery_metrics_db.sync_epics(dataset)
+    ghid_map[entity.EPIC] = etldb.sync_epics(dataset)
     print("epic row(s) processed: {}".format(len(ghid_map[entity.EPIC])))
 
     # sync issue data to db resulting in row id for each quad
-    issue_map = delivery_metrics_db.sync_issues(dataset, ghid_map)
+    issue_map = etldb.sync_issues(dataset, ghid_map)
     print("issue row(s) processed: {}".format(len(issue_map)))
 
     # finish

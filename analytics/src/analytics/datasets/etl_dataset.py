@@ -1,5 +1,5 @@
 """
-Implements the DeliveryMetricsDataSource dataset.
+Implements the EtlDataset dataset.
 
 This is a sub-class of BaseDataset that models 
 quad, deliverable, epic, issue, and sprint data.
@@ -13,7 +13,7 @@ from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df
 
 
-class DeliveryMetricsEntityType(Enum):
+class EtlEntityType(Enum):
     """ Entity types in the db schema """
 
     DELIVERABLE = "deliverable"
@@ -23,7 +23,7 @@ class DeliveryMetricsEntityType(Enum):
     QUAD = "quad"
 
 
-class DeliveryMetricsDataSource(BaseDataset):
+class EtlDataset(BaseDataset):
     """ Models quad, deliverable, epic, issue, and sprint data exported from github """
 
     COLUMN_MAP = {
@@ -57,7 +57,7 @@ class DeliveryMetricsDataSource(BaseDataset):
     @classmethod
     def load_from_json_file(cls, file_path) -> Self:
         """
-        Loads the input json file and instantiates an instance of DeliveryMetricsDataSource.
+        Loads the input json file and instantiates an instance of EtlDataset.
 
         Parameters
         ----------
@@ -67,7 +67,7 @@ class DeliveryMetricsDataSource(BaseDataset):
         Returns
         -------
         Self:
-            An instance of the DeliveryMetricsDataSource dataset class
+            An instance of the EtlDataset dataset class
         """
 
         # load input datasets
@@ -79,7 +79,7 @@ class DeliveryMetricsDataSource(BaseDataset):
 
         # transform entity id columns
         for col in ('deliverable_ghid', 'epic_ghid', 'issue_ghid', 'issue_parent'):
-            df[col] = df[col].apply(lambda x: DeliveryMetricsDataSource._remove_fqdn_prefix(x))
+            df[col] = df[col].apply(lambda x: EtlDataset._remove_fqdn_prefix(x))
 
         return cls(df)
 

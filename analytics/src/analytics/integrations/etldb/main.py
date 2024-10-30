@@ -1,19 +1,19 @@
-"""Integrate with database to read and write delivery metrics data."""
+"""Integrate with database to read and write etl data."""
 
 import random     # temporary hack
 from pathlib import Path
 
-from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsDataSource
-from analytics.datasets.delivery_metrics_data_source import DeliveryMetricsEntityType as entity
+from analytics.datasets.etl_dataset import EtlDataset
+from analytics.datasets.etl_dataset import EtlEntityType as entity
 
 DEBUG = False
 
 def init_db() -> None:
-    """ Initialize delivery metrics database """
+    """ Initialize etl database """
 
     # define the path to the sql file
     parent_path = Path(__file__).resolve().parent
-    sql_path = "{}/create_delivery_metrics_db.sql".format(parent_path)
+    sql_path = "{}/create_etl_db.sql".format(parent_path)
 
     # read sql file
     with open(sql_path) as f:
@@ -24,7 +24,7 @@ def init_db() -> None:
     return
 
 
-def sync_deliverables(dataset: DeliveryMetricsDataSource) -> dict:
+def sync_deliverables(dataset: EtlDataset) -> dict:
     """ Insert or update (if necessary) a row for each deliverable and return a map of row ids """
     id_map = {}
     for ghid in dataset.get_deliverable_ghids():
@@ -34,7 +34,7 @@ def sync_deliverables(dataset: DeliveryMetricsDataSource) -> dict:
     return id_map
 
 
-def sync_epics(dataset: DeliveryMetricsDataSource) -> dict:
+def sync_epics(dataset: EtlDataset) -> dict:
     """ Insert or update (if necessary) a row for each epic and return a map of row ids """
     id_map = {}
     for ghid in dataset.get_epic_ghids():
@@ -44,7 +44,7 @@ def sync_epics(dataset: DeliveryMetricsDataSource) -> dict:
     return id_map
 
 
-def sync_issues(dataset: DeliveryMetricsDataSource, id_map: dict) -> dict:
+def sync_issues(dataset: EtlDataset, id_map: dict) -> dict:
     """ Insert or update (if necessary) a row for each issue and return a map of row ids """
     issue_map = {}
     for ghid in dataset.get_issue_ghids():
@@ -60,7 +60,7 @@ def sync_issues(dataset: DeliveryMetricsDataSource, id_map: dict) -> dict:
     return issue_map
 
 
-def sync_sprints(dataset: DeliveryMetricsDataSource) -> dict:
+def sync_sprints(dataset: EtlDataset) -> dict:
     """ Insert or update (if necessary) a row for each sprint and return a map of row ids """
     id_map = {}
     for ghid in dataset.get_sprint_ghids():
@@ -70,7 +70,7 @@ def sync_sprints(dataset: DeliveryMetricsDataSource) -> dict:
     return id_map
 
 
-def sync_quads(dataset: DeliveryMetricsDataSource) -> dict:
+def sync_quads(dataset: EtlDataset) -> dict:
     """ Insert or update (if necessary) a row for each quad and return a map of row ids """
     id_map = {}
     for ghid in dataset.get_quad_ghids():
