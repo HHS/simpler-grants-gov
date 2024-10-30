@@ -58,7 +58,9 @@ const SummaryDescriptionDisplay = ({
     return (
       <div
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(summaryDescription ?? "--"),
+          __html: summaryDescription
+            ? DOMPurify.sanitize(summaryDescription)
+            : "--",
         }}
       />
     );

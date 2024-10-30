@@ -43,6 +43,7 @@ export const messages = {
       category_explanation: "Category Explanation",
     },
     history: {
+      history: "History",
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",

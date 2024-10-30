@@ -33,13 +33,15 @@ const OpportunityHistory = ({ summary }: Props) => {
   const t = useTranslations("OpportunityListing.history");
   return (
     <div className="usa-prose margin-top-4">
-      <h3>History</h3>
+      <h3>{t("history")}</h3>
       <OpportunityHistoryItem
         title={t("version")}
-        content={summary.version_number ? summary.version_number.toString() || "--"}
+        content={
+          summary.version_number ? summary.version_number.toString() : "--"
+        }
       />
       <OpportunityHistoryItem
-        title={t("posted_date") + ":"}
+        title={t("posted_date")}
         content={formatHistoryDate(summary.post_date)}
       />
       <OpportunityHistoryItem
