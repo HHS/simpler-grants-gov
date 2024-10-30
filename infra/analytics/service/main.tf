@@ -115,6 +115,8 @@ module "service" {
   cpu                   = 1024
   memory                = 2048
 
+  readonly_root_filesystem = false
+
   # This is a task based service, not a web server, so we don't need to run any instances of the service at rest.
   desired_instance_count = 0
 
@@ -122,6 +124,8 @@ module "service" {
 
   app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
   migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+
+  scheduled_jobs = local.environment_config.scheduled_jobs
 
   db_vars = {
     security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
