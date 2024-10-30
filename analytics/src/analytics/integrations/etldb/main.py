@@ -6,8 +6,13 @@ from sqlalchemy import text
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlDb
+from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
+from analytics.integrations.etldb.epic_model import EtlEpicModel
+from analytics.integrations.etldb.issue_model import EtlIssueModel
+from analytics.integrations.etldb.sprint_model import EtlSprintModel
+from analytics.integrations.etldb.quad_model import EtlQuadModel
 
-DEBUG = False
+DEBUG = True
 
 def init_db() -> None:
     """ Initialize etl database """
@@ -78,9 +83,10 @@ def sync_sprints(dataset: EtlDataset) -> dict:
 def sync_quads(dataset: EtlDataset) -> dict:
     """ Insert or update (if necessary) a row for each quad and return a map of row ids """
     id_map = {}
+    db = EtlQuadModel()
     for ghid in dataset.get_quad_ghids():
-        id_map[ghid] = random.randint(100, 999)   # TODO: get actual row id via insert or select
+        quad_df = dataset.get_quad(ghid)
+        id_map[ghid], change_type = db.syncQuad(quad_df)
         if DEBUG:
-            quad_df = dataset.get_quad(ghid)
             print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], id_map[ghid]))
     return id_map
