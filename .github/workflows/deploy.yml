@@ -13,7 +13,7 @@ on:
         required: true
         type: string
 
-concurrency: cd-${{ inputs.environment }}
+concurrency: cd-${{inputs.app_name}}-${{ inputs.environment }}
 
 jobs:
   build-and-publish:
