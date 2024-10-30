@@ -56,8 +56,6 @@ export const messages = {
       closed: "Closed: ",
       closing: "Closing: ",
       forecasted: "Forecasted",
-      closing_warn:
-        "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
     },
     cta: {
       apply_title: "Application process",

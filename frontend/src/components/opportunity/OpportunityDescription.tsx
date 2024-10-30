@@ -71,7 +71,7 @@ const SummaryDescriptionDisplay = ({
     <>
       <div
         dangerouslySetInnerHTML={{
-          __html: preSplit,
+          __html: preSplit + "...",
         }}
       />
       <ContentDisplayToggle

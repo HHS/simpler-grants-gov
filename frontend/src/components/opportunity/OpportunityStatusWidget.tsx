@@ -3,8 +3,46 @@ import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 
+import ContentDisplayToggle from "../ContentDisplayToggle";
+
 type Props = {
   opportunityData: Opportunity;
+};
+
+const CloseDateDescriptionDisplay = ({
+  closeDateDescription = "",
+}: {
+  closeDateDescription: string;
+}) => {
+  if (!closeDateDescription) {
+    return;
+  }
+
+  const t = useTranslations("OpportunityListing.description");
+  if (closeDateDescription?.length < 120) {
+    return (
+      <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
+        <p className="line-height-sans-5">{closeDateDescription}</p>
+      </div>
+    );
+  }
+
+  // close date description should not contain markup so no need to use splitMarkup
+  const preSplit = closeDateDescription.substring(0, 120);
+  const postSplit = closeDateDescription.substring(121);
+
+  return (
+    <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
+      <p className="line-height-sans-5">{preSplit}...</p>
+      <ContentDisplayToggle
+        showCallToAction={t("show_description")}
+        hideCallToAction={t("hide_summary_description")}
+        positionButtonBelowContent={false}
+      >
+        <p className="line-height-sans-5">{postSplit}</p>
+      </ContentDisplayToggle>
+    </div>
+  );
 };
 
 const OpportunityStatusWidget = ({ opportunityData }: Props) => {
@@ -47,9 +85,11 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
                 <span>{formatDate(closeDate) || "--"}</span>
               </p>
             </div>
-            <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
-              <p className="line-height-sans-5">{t("closing_warn")}</p>
-            </div>
+            <CloseDateDescriptionDisplay
+              closeDateDescription={
+                opportunityData.summary.close_date_description || ""
+              }
+            />
           </>
         );
       case "forecasted":
