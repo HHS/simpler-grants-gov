@@ -13,6 +13,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.aws import S3Config, get_s3_client
+from src.adapters.db import PostgresDBClient
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
@@ -202,15 +203,15 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
         error_if_not_local()
 
         _upload_opportunity_attachments_s3()
-        #
-        # db_client = PostgresDBClient()
-        #
-        # with db_client.get_session() as db_session:
-        #     factories._db_session = db_session
-        #
-        #     _build_opportunities(db_session, iterations, include_history)
-        #     # Need to commit to force any updates made
-        #     # after factories created objects
-        #     db_session.commit()
-        #
-        #     _build_agencies(db_session)
+
+        db_client = PostgresDBClient()
+
+        with db_client.get_session() as db_session:
+            factories._db_session = db_session
+
+            _build_opportunities(db_session, iterations, include_history)
+            # Need to commit to force any updates made
+            # after factories created objects
+            db_session.commit()
+
+            _build_agencies(db_session)

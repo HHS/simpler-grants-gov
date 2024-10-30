@@ -1,14 +1,11 @@
-import os
 from datetime import date
-from typing import List
 
-import boto3
 from sqlalchemy import select
 from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.util.datetime_util as datetime_util
-from src.adapters.aws import S3Config, get_s3_client
+from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
@@ -40,17 +37,9 @@ def _fetch_opportunity(
     return opportunity
 
 
-def get_boto_session() -> boto3.Session:
-    is_local = bool(os.getenv("IS_LOCAL_AWS", False))
-    if is_local:
-        return boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
-
-    return boto3.Session()
-
-
 def pre_sign_opportunity_file_location(
-    opp_atts: List,
-) -> List[OpportunityAttachment]:
+    opp_atts: list,
+) -> list[OpportunityAttachment]:
     s3_config = S3Config()
 
     s3_client = get_s3_client(s3_config, get_boto_session())
@@ -63,6 +52,7 @@ def pre_sign_opportunity_file_location(
             ExpiresIn=s3_config.presigned_s3_duration,
         )
         if s3_config.s3_endpoint_url:
+            # Only relevant when local, due to docker path issues
             pre_sign_file_loc = pre_sign_file_loc.replace(
                 s3_config.s3_endpoint_url, "http://localhost:4566"
             )
