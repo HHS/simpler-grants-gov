@@ -13,7 +13,6 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.aws import S3Config, get_s3_client
-from src.adapters.db import PostgresDBClient
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
