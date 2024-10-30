@@ -3,7 +3,7 @@ import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 
-import ContentDisplayToggle from "../ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
 type Props = {
   opportunityData: Opportunity;
@@ -14,11 +14,11 @@ const CloseDateDescriptionDisplay = ({
 }: {
   closeDateDescription: string;
 }) => {
+  const t = useTranslations("OpportunityListing.description");
   if (!closeDateDescription) {
     return;
   }
 
-  const t = useTranslations("OpportunityListing.description");
   if (closeDateDescription?.length < 120) {
     return (
       <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">

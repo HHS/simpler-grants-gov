@@ -30,7 +30,7 @@ export default function ContentDisplayToggle({
   breakpoint?: Breakpoints;
   showContentByDefault?: boolean;
   children: React.ReactNode;
-  positionButtonBelowContent: boolean;
+  positionButtonBelowContent?: boolean;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
     useState<boolean>(showContentByDefault);

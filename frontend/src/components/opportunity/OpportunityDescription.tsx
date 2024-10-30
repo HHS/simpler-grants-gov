@@ -4,7 +4,7 @@ import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 
-import ContentDisplayToggle from "../ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
 type Props = {
   summary: Summary;
