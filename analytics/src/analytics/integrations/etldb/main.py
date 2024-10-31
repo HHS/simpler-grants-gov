@@ -82,7 +82,7 @@ def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
         epic_df = dataset.get_epic(ghid)
         result[ghid], _ = db.sync_epic(epic_df, ghid_map)
         if DEBUG:
-            print("EPIC '{ghid}' row_id = {result[ghid]}")
+            print(f"EPIC '{ghid}' row_id = {result[ghid]}")
     return result
 
 
@@ -94,7 +94,7 @@ def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
         issue_df = dataset.get_issue(ghid)
         result[ghid], _ = db.sync_issue(issue_df, ghid_map)
         if DEBUG:
-            print("ISSUE '{ghid}' issue_id = {result[ghid]}")
+            print(f"ISSUE '{ghid}' issue_id = {result[ghid]}")
     return result
 
 
@@ -106,7 +106,7 @@ def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
         sprint_df = dataset.get_sprint(ghid)
         result[ghid], _ = db.sync_sprint(sprint_df, ghid_map)
         if DEBUG:
-            print("SPRINT '{ghid}' row_id = {result[ghid]}")
+            print(f"SPRINT '{ghid}' row_id = {result[ghid]}")
     return result
 
 
@@ -118,5 +118,5 @@ def sync_quads(dataset: EtlDataset, effective: str) -> dict:
         quad_df = dataset.get_quad(ghid)
         result[ghid], _ = db.sync_quad(quad_df)
         if DEBUG:
-            print("QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}")
+            print(f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}")
     return result
