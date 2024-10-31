@@ -98,6 +98,7 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         no_current_summary_opps = factories.OpportunityFactory.create_batch(
             size=5, no_current_summary=True
         )
+        long_description_opps = factories.OpportunityFactory.create_batch(size=2, is_posted_summary=True, has_long_descriptions=True)
 
         if include_history:
             _add_history(forecasted_opps, add_forecast_hist=True)
@@ -115,6 +116,7 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
             )
             _add_history(archived_forecast_opps, add_forecast_hist=True)
             _add_history(no_current_summary_opps, is_history_deleted=True)
+            _add_history(long_description_opps, add_non_forecast_hist=True, add_forecast=True, add_forecast_hist=True)
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(

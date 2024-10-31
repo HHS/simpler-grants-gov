@@ -338,6 +338,10 @@ class OpportunityFactory(BaseFactory):
             current_opportunity_summary__is_archived_forecast_summary=True
         )
 
+        has_long_descriptions = factory.Trait(
+            current_opportunity_summary__has_long_descriptions=True
+        )
+
         # Set all nullable fields to null
         all_fields_null = factory.Trait(
             agency=None,
@@ -571,6 +575,11 @@ class OpportunitySummaryFactory(BaseFactory):
             link_applicant_types=[],
         )
 
+        has_long_descriptions = factory.Trait(
+            summary_description=factory.Faker("paragraph", nb_sentences=60),
+            close_date_description=factory.Faker("paragraph", nb_sentences=30),
+        )
+
 
 class CurrentOpportunitySummaryFactory(BaseFactory):
     class Meta:
@@ -606,6 +615,10 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
         is_archived_forecast_summary = factory.Trait(
             opportunity_status=OpportunityStatus.ARCHIVED,
             opportunity_summary__is_archived_forecast_summary=True,
+        )
+
+        has_long_descriptions = factory.Trait(
+            opportunity_summary__has_long_descriptions=True,
         )
 
 
