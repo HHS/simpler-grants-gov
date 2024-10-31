@@ -10,7 +10,7 @@ from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.datasets.issues import GitHubIssues
+from analytics.datasets.issues import GitHubIssues, InputFiles
 from analytics.integrations import db, github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
@@ -95,33 +95,33 @@ def export_github_data(
 ) -> None:
     """Export and flatten metadata about GitHub issues used for delivery metrics."""
     # Specify path to intermediate files
-    sprint_file = Path(tmp_dir) / "sprint-data.json"
-    roadmap_file = Path(tmp_dir) / "roadmap-data.json"
+    sprint_file = str(Path(tmp_dir) / "sprint-data.json")
+    roadmap_file = str(Path(tmp_dir) / "roadmap-data.json")
 
-    # # Export sprint and roadmap data
-    logger.info("Exporting roadmap data")
+    # Export sprint and roadmap data
+    logger.info("Exporting roadmap data from %s/%s", owner, roadmap_project)
     github.export_roadmap_data(
         owner=owner,
         project=roadmap_project,
         quad_field="Quad",
         pillar_field="Pillar",
-        output_file=str(roadmap_file),
+        output_file=roadmap_file,
     )
-    logger.info("Exporting sprint data")
+    logger.info("Exporting sprint data from %s/%s", owner, sprint_project)
     github.export_sprint_data(
         owner=owner,
         project=sprint_project,
         sprint_field=sprint_field,
         points_field=points_field,
-        output_file=str(sprint_file),
+        output_file=sprint_file,
     )
 
-    # load and flatten data into GitHubIssues dataset
+    # Load and flatten data into GitHubIssues dataset
     logger.info("Transforming exported data")
-    issues = GitHubIssues.load_from_json_files(
-        sprint_file=str(sprint_file),
-        roadmap_file=str(roadmap_file),
-    )
+    files = [
+        InputFiles(roadmap=roadmap_file, sprint=sprint_file),
+    ]
+    issues = GitHubIssues.load_from_json_files(files=files)
     issues.to_json(output_file)
 
 

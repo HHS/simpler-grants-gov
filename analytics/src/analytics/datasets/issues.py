@@ -1,6 +1,7 @@
 """Transform exported issue data into a flattened list."""
 
 import logging
+from dataclasses import dataclass
 from enum import Enum
 from typing import Self
 
@@ -15,6 +16,14 @@ logger = logging.getLogger(__name__)
 # ===============================================================
 # Dataset schema and enums
 # ===============================================================
+
+
+@dataclass
+class InputFiles:
+    """Expected input files for loading this dataset."""
+
+    roadmap: str
+    sprint: str
 
 
 class IssueType(Enum):
@@ -134,27 +143,31 @@ class GitHubIssues(BaseDataset):
         return super().to_dict()
 
     @classmethod
-    def load_from_json_files(
-        cls,
-        sprint_file: str = "data/sprint-data.json",
-        roadmap_file: str = "data/roadmap-data.json",
-    ) -> Self:
+    def load_from_json_files(cls, files: list[InputFiles]) -> Self:
         """Load GitHubIssues dataset from input json files."""
         # Load sprint and roadmap data
-        sprint_data_in = load_json_file(sprint_file)
-        roadmap_data_in = load_json_file(roadmap_file)
-        # Populate a lookup table with this data
-        lookup: dict = {}
-        lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
-        lookup = populate_issue_lookup_table(lookup, sprint_data_in)
-        # Flatten and write issue level data to output file
-        issues = flatten_issue_data(lookup)
+        issues = []
+        for f in files:
+            issues.extend(run_transformation_pipeline(files=f))
         return cls(pd.DataFrame(data=issues))
 
 
 # ===============================================================
 # Transformation helper functions
 # ===============================================================
+
+
+def run_transformation_pipeline(files: InputFiles) -> list[dict]:
+    """Load data from input files and apply transformations."""
+    # Load sprint and roadmap data
+    sprint_data_in = load_json_file(files.sprint)
+    roadmap_data_in = load_json_file(files.roadmap)
+    # Populate a lookup table with this data
+    lookup: dict = {}
+    lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
+    lookup = populate_issue_lookup_table(lookup, sprint_data_in)
+    # Flatten and write issue level data to output file
+    return flatten_issue_data(lookup)
 
 
 def populate_issue_lookup_table(

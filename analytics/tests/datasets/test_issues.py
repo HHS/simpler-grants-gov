@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from analytics.datasets.issues import (
     GitHubIssues,
+    InputFiles,
     IssueType,
     get_parent_with_type,
 )
@@ -28,22 +29,22 @@ class TestGitHubIssues:
     def test_load_from_json_files(self, tmp_path: Path):
         """Class method should return the correctly transformed data."""
         # Arrange - create dummy sprint data
-        sprint_file = tmp_path / "sprint-data.json"
+        sprint_file = str(tmp_path / "sprint-data.json")
         sprint_data = [
             issue(issue=1, kind=IssueType.TASK, parent="Epic3", points=2),
             issue(issue=2, kind=IssueType.TASK, parent="Epic4", points=1),
         ]
         roadmap_data = [i.model_dump() for i in sprint_data]
-        dump_to_json(str(sprint_file), roadmap_data)
+        dump_to_json(sprint_file, roadmap_data)
         # Act - create dummy roadmap data
-        roadmap_file = tmp_path / "roadmap-data.json"
+        roadmap_file = str(tmp_path / "roadmap-data.json")
         roadmap_data = [
             issue(issue=3, kind=IssueType.EPIC, parent="Deliverable5"),
             issue(issue=4, kind=IssueType.EPIC, parent="Deliverable6"),
             issue(issue=5, kind=IssueType.DELIVERABLE, quad="quad1"),
         ]
         roadmap_data = [i.model_dump() for i in roadmap_data]
-        dump_to_json(str(roadmap_file), roadmap_data)
+        dump_to_json(roadmap_file, roadmap_data)
         # Arrange
         output_data = [
             issue(
@@ -64,11 +65,9 @@ class TestGitHubIssues:
             ),
         ]
         wanted = [i.model_dump() for i in output_data]
+        files = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
         # Act
-        got = GitHubIssues.load_from_json_files(
-            sprint_file=str(sprint_file),
-            roadmap_file=str(roadmap_file),
-        )
+        got = GitHubIssues.load_from_json_files(files)
         # Assert
         assert got.to_dict() == wanted
 
