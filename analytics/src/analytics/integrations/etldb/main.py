@@ -12,7 +12,7 @@ from analytics.integrations.etldb.issue_model import EtlIssueModel
 from analytics.integrations.etldb.sprint_model import EtlSprintModel
 from analytics.integrations.etldb.quad_model import EtlQuadModel
 
-DEBUG = True
+DEBUG = False
 
 def init_db() -> None:
     """ Initialize etl database """
@@ -26,67 +26,101 @@ def init_db() -> None:
         sql = f.read()
 
     # execute sql
-    db = EtlDb()
+    db = EtlDb(None)
     cursor = db.connection()
     result = cursor.execute(text(sql),)
     db.commit(cursor)
 
     return
 
+def sync_db(dataset: EtlDataset, effective: str) -> None:
 
-def sync_deliverables(dataset: EtlDataset) -> dict:
+    # initialize a map of github id to db row id
+    ghid_map = {
+        entity.DELIVERABLE: {},
+        entity.EPIC: {},
+        entity.SPRINT: {},
+        entity.QUAD: {}
+    }
+
+    # sync quad data to db resulting in row id for each quad
+    ghid_map[entity.QUAD] = sync_quads(dataset, effective)
+    print("quad row(s) processed: {}".format(len(ghid_map[entity.QUAD])))
+
+    # sync deliverable data to db resulting in row id for each deliverable
+    ghid_map[entity.DELIVERABLE] = sync_deliverables(dataset, effective, ghid_map)
+    print("deliverable row(s) processed: {}".format(len(ghid_map[entity.DELIVERABLE])))
+
+    # sync sprint data to db resulting in row id for each sprint
+    ghid_map[entity.SPRINT] = sync_sprints(dataset, effective, ghid_map)
+    print("sprint row(s) processed: {}".format(len(ghid_map[entity.SPRINT])))
+
+    # sync epic data to db resulting in row id for each epic
+    ghid_map[entity.EPIC] = sync_epics(dataset, effective, ghid_map)
+    print("epic row(s) processed: {}".format(len(ghid_map[entity.EPIC])))
+
+    # sync issue data to db resulting in row id for each issue
+    issue_map = sync_issues(dataset, effective, ghid_map)
+    print("issue row(s) processed: {}".format(len(issue_map)))
+
+    return
+
+
+def sync_deliverables(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
     """ Insert or update (if necessary) a row for each deliverable and return a map of row ids """
-    id_map = {}
+    result = {}
+    db = EtlDeliverableModel(effective)
     for ghid in dataset.get_deliverable_ghids():
-        id_map[ghid] = random.randint(100, 999)   # TODO: get actual row id via insert or select
+        deliverable_df = dataset.get_deliverable(ghid)
+        result[ghid], change_type = db.syncDeliverable(deliverable_df, ghid_map)
         if DEBUG:
-            print("DELIVERABLE '{}' row_id = {}".format(str(ghid), id_map[ghid]))
-    return id_map
+            print("DELIVERABLE '{}' row_id = {}".format(str(ghid), result[ghid]))
+    return result
 
 
-def sync_epics(dataset: EtlDataset) -> dict:
+def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
     """ Insert or update (if necessary) a row for each epic and return a map of row ids """
-    id_map = {}
+    result = {}
+    db = EtlEpicModel(effective)
     for ghid in dataset.get_epic_ghids():
-        id_map[ghid] = random.randint(100, 999)   # TODO: get actual row id via insert or select
+        epic_df = dataset.get_epic(ghid)
+        result[ghid], change_type = db.syncEpic(epic_df, ghid_map)
         if DEBUG:
-            print("EPIC '{}' row_id = {}".format(str(ghid), id_map[ghid]))
-    return id_map
+            print("EPIC '{}' row_id = {}".format(str(ghid), result[ghid]))
+    return result
 
 
-def sync_issues(dataset: EtlDataset, id_map: dict) -> dict:
+def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
     """ Insert or update (if necessary) a row for each issue and return a map of row ids """
-    issue_map = {}
+    result = {}
+    db = EtlIssueModel(effective)
     for ghid in dataset.get_issue_ghids():
         issue_df = dataset.get_issue(ghid)
-        epic_id = id_map[entity.EPIC].get(issue_df['epic_ghid'])
-        deliverable_id = id_map[entity.EPIC].get(issue_df['deliverable_ghid'])
-        sprint_id = id_map[entity.SPRINT].get(issue_df['sprint_ghid'])
-        quad_id = id_map[entity.QUAD].get(issue_df['quad_ghid'])
-        row_id = random.randint(100, 999)   # TODO: get actual row id via insert or select
-        issue_map[ghid] = row_id
+        result[ghid], change_type = db.syncIssue(issue_df, ghid_map)
         if DEBUG:
-            print("ISSUE '{}' issue_id = {}, sprint_id = {}, epic_id = {}, ".format(str(ghid), row_id, sprint_id, epic_id))
-    return issue_map
+            print("ISSUE '{}' issue_id = {}".format(str(ghid), result[ghid]))
+    return result
 
 
-def sync_sprints(dataset: EtlDataset) -> dict:
+def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
     """ Insert or update (if necessary) a row for each sprint and return a map of row ids """
-    id_map = {}
+    result = {}
+    db = EtlSprintModel(effective)
     for ghid in dataset.get_sprint_ghids():
-        id_map[ghid] = random.randint(100, 999)   # TODO: get actual row id via insert or select
+        sprint_df = dataset.get_sprint(ghid)
+        result[ghid], change_type = db.syncSprint(sprint_df, ghid_map)
         if DEBUG:
-            print("SPRINT '{}' row_id = {}".format(str(ghid), id_map[ghid]))
-    return id_map
+            print("SPRINT '{}' row_id = {}".format(str(ghid), result[ghid]))
+    return result
 
 
-def sync_quads(dataset: EtlDataset) -> dict:
+def sync_quads(dataset: EtlDataset, effective: str) -> dict:
     """ Insert or update (if necessary) a row for each quad and return a map of row ids """
-    id_map = {}
-    db = EtlQuadModel()
+    result = {}
+    db = EtlQuadModel(effective)
     for ghid in dataset.get_quad_ghids():
         quad_df = dataset.get_quad(ghid)
-        id_map[ghid], change_type = db.syncQuad(quad_df)
+        result[ghid], change_type = db.syncQuad(quad_df)
         if DEBUG:
-            print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], id_map[ghid]))
-    return id_map
+            print("QUAD '{}' title = '{}', row_id = {}".format(str(ghid), quad_df['quad_name'], result[ghid]))
+    return result

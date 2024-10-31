@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS gh_deliverable_quad_map (
 	t_modified TIMESTAMP,
 	UNIQUE(deliverable_id, d_effective)
 );
-CREATE INDEX IF NOT EXISTS dqm_i1 on gh_deliverable_quad_map(quad_id, d_effective);
+CREATE INDEX IF NOT EXISTS gh_dqm_i1 on gh_deliverable_quad_map(quad_id, d_effective);
 
 CREATE TABLE IF NOT EXISTS gh_epic (
 	id SERIAL PRIMARY KEY,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS gh_epic_deliverable_map (
 	t_modified TIMESTAMP,
 	UNIQUE(epic_id, d_effective)
 );
-CREATE INDEX IF NOT EXISTS edm_i1 on gh_epic_deliverable_map(deliverable_id, d_effective);
+CREATE INDEX IF NOT EXISTS gh_edm_i1 on gh_epic_deliverable_map(deliverable_id, d_effective);
 
 CREATE TABLE IF NOT EXISTS gh_issue (
 	id SERIAL PRIMARY KEY,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS gh_issue (
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP 
 );
-CREATE INDEX IF NOT EXISTS issue_i1 on gh_issue(epic_id);
+CREATE INDEX IF NOT EXISTS gh_issue_i1 on gh_issue(epic_id);
 
 CREATE TABLE IF NOT EXISTS gh_issue_history (
 	id SERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS gh_issue_history (
 	t_modified TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
-CREATE INDEX IF NOT EXISTS ih_i1 on gh_issue_history(issue_id, d_effective);
+CREATE INDEX IF NOT EXISTS gh_ih_i1 on gh_issue_history(issue_id, d_effective);
 
 CREATE TABLE IF NOT EXISTS gh_issue_sprint_map (
 	id SERIAL PRIMARY KEY,
@@ -92,5 +92,5 @@ CREATE TABLE IF NOT EXISTS gh_quad (
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP 
 );
-CREATE INDEX IF NOT EXISTS quad_i1 on gh_quad(start_date);
+CREATE INDEX IF NOT EXISTS gh_quad_i1 on gh_quad(start_date);
  

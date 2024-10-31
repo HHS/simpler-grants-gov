@@ -5,9 +5,9 @@ from analytics.integrations import db
 class EtlDb:
     """An abstraction to encapsulate db connection."""
 
-    def __init__(self):
+    def __init__(self, effective):
         self._db_engine = db.get_db()
-        self.effective_date = None
+        self.effective_date = effective
 
     def __del__(self):
         self.disconnect()

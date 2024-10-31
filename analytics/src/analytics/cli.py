@@ -295,36 +295,9 @@ def transform_and_load(
     dataset = EtlDataset.load_from_json_file(
         file_path=deliverable_file
     )
-    print("found {} issues to process".format(len(dataset.get_issue_ghids())))
 
-    # initialize a map of github id to db row id
-    ghid_map = {
-        entity.DELIVERABLE: {},
-        entity.EPIC: {},
-        entity.SPRINT: {},
-        entity.QUAD: {}
-    }
-
-    # sync quad data to db resulting in row id for each quad
-    ghid_map[entity.QUAD] = etldb.sync_quads(dataset)
-    print("quad row(s) processed: {}".format(len(ghid_map[entity.QUAD])))
-
-    # sync deliverable data to db resulting in row id for each quad
-    ghid_map[entity.DELIVERABLE] = etldb.sync_deliverables(dataset)
-    print("deliverable row(s) processed: {}".format(len(ghid_map[entity.DELIVERABLE])))
-
-    # sync sprint data to db resulting in row id for each quad
-    ghid_map[entity.SPRINT] = etldb.sync_sprints(dataset)
-    print("sprint row(s) processed: {}".format(len(ghid_map[entity.SPRINT])))
-
-    # sync epic data to db resulting in row id for each quad
-    ghid_map[entity.EPIC] = etldb.sync_epics(dataset)
-    print("epic row(s) processed: {}".format(len(ghid_map[entity.EPIC])))
-
-    # sync issue data to db resulting in row id for each quad
-    issue_map = etldb.sync_issues(dataset, ghid_map)
-    print("issue row(s) processed: {}".format(len(issue_map)))
+    # sync data to db 
+    etldb.sync_db(dataset, datestamp)
 
     # finish
     print("data loader is done")
-    print("WARNING: no data was actually loaded because db integration is WIP")
