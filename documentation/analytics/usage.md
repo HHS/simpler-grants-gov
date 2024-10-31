@@ -203,3 +203,17 @@ poetry run analytics calculate deliverable_percent_complete \
   --show-results \
   --unit points
 ```
+
+### Extract and Load 
+
+Development is underway on new as-is/as-was reporting capabilities, the foundation of which is an extract-and-load workflow that writes to an ETL DB.
+
+Initialize the ETL DB:
+```bash
+poetry run analytics etl initialize_database
+```
+
+Transform and load a json file into the ETL DB:
+```bash
+poetry run analytics etl transform_and_load --deliverable-file ./data/test-etl-01.json --effective-date 2024-10-28
+```
