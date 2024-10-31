@@ -2,13 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import (
-    CurrentOpportunitySummary,
-    Opportunity,
-    OpportunitySearchIndexQueue,
-    OpportunitySummary,
-)
+from src.db.models.opportunity_models import OpportunitySearchIndexQueue
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
