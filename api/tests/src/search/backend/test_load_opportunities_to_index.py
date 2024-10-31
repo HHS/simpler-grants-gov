@@ -28,27 +28,6 @@ def mock_search_client():
     return client
 
 
-@pytest.fixture
-def test_opportunity():
-    """Create a test opportunity with required relationships"""
-    opportunity = Opportunity(
-        opportunity_id=1, opportunity_title="Test Opportunity", is_draft=False
-    )
-
-    OpportunitySummary(
-        opportunity_summary_id=1,
-        opportunity_id=1,
-        is_forecast=False,
-        summary_description="Test Description",
-    )
-
-    CurrentOpportunitySummary(
-        opportunity_id=1, opportunity_summary_id=1, opportunity_status=OpportunityStatus.POSTED
-    )
-
-    return opportunity
-
-
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
     def load_opportunities_to_index(self, db_session, search_client, opportunity_index_alias):
@@ -201,10 +180,10 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         with pytest.raises(RuntimeError, match="please run the full refresh job"):
             load_opportunities_to_index.run()
 
-    def test_new_opportunity_gets_indexed(
-        self, db_session, test_opportunity, load_opportunities_to_index
-    ):
+    def test_new_opportunity_gets_indexed(self, db_session, load_opportunities_to_index):
         """Test that a new opportunity in the queue gets indexed"""
+        test_opportunity = OpportunityFactory.create()
+
         # Add to queue
         OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
 
@@ -214,21 +193,12 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         remaining_queue = db_session.query(OpportunitySearchIndexQueue).all()
         assert len(remaining_queue) == 0
 
-    def test_draft_opportunity_not_indexed(
-        self, db_session, load_opportunities_to_index, test_opportunity
-    ):
+    def test_draft_opportunity_not_indexed(self, db_session, load_opportunities_to_index):
         """Test that draft opportunities are not indexed"""
-        # Make opportunity a draft
-        test_opportunity.is_draft = True
-
-        db_session.add(test_opportunity)
-        db_session.commit()
+        test_opportunity = OpportunityFactory.create(is_draft=True)
 
         # Add to queue
-        queue_entry = OpportunitySearchIndexQueue(
-            opportunity_id=test_opportunity.opportunity_id, has_update=True
-        )
-        db_session.add(queue_entry)
+        OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
 
         load_opportunities_to_index.run()
 
