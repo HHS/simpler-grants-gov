@@ -38,10 +38,10 @@ BEGIN
             opp_id := NEW.opportunity_id;
     END CASE;
 
-    INSERT INTO api.opportunity_search_index_queue (opportunity_id)
-    VALUES (opp_id)
+    INSERT INTO api.opportunity_search_index_queue (opportunity_id, has_update)
+    VALUES (opp_id, TRUE)
     ON CONFLICT (opportunity_id)
-    DO NOTHING;
+    DO UPDATE SET has_update = TRUE, updated_at = CURRENT_TIMESTAMP;
 
     RETURN NEW;
 END;
