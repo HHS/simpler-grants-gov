@@ -1,13 +1,18 @@
 import logging
+import os
+import pathlib
 import random
 
+import boto3
 import click
+from botocore.exceptions import ClientError
 from sqlalchemy import func
 
 import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
+from src.adapters.aws import S3Config, get_s3_client
 from src.adapters.db import PostgresDBClient
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
@@ -15,6 +20,30 @@ from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
+
+TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
+
+
+def _upload_opportunity_attachments_s3():
+    s3_config = S3Config()
+    s3_client = get_s3_client(
+        s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+    )
+    test_folder_path = TESTS_FOLDER / "opportunity_attachment_test_files"
+
+    for root, _, files in os.walk(test_folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            object_name = os.path.relpath(file_path, test_folder_path)
+
+            try:
+                s3_client.upload_file(file_path, s3_config.s3_opportunity_bucket, object_name)
+                logger.info("Successfully uploaded files")
+            except ClientError as e:
+                logger.error(
+                    "Error uploading to s3: %s",
+                    extra={"object_name": object_name, "file_path": file_path, "error": e},
+                )
 
 
 def _add_history(
@@ -120,20 +149,25 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
 # we can consider shoving this into a CSV that we load instead.
 AGENCIES_TO_CREATE = [
     {
+        "agency_id": 1,
         "agency_code": "USAID",
         "agency_name": "Agency for International Development",
     },
     {
+        "agency_id": 2,
         "agency_code": "ARPAH",
         "agency_name": "Advanced Research Projects Agency for Health",
     },
     {
+        "agency_id": 3,
         "agency_code": "DOC",
         "agency_name": "Agency for International Development",
     },
     {
+        "agency_id": 4,
         "agency_code": "DOC-EDA",
         "agency_name": "Agency for International Development",
+        "top_level_agency_id": 3,  # DOC
     },
 ]
 
@@ -167,6 +201,8 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
+
+        _upload_opportunity_attachments_s3()
 
         db_client = PostgresDBClient()
 

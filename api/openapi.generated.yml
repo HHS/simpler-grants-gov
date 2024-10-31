@@ -587,6 +587,10 @@ components:
             - object
             allOf:
             - $ref: '#/components/schemas/ValidationIssue'
+        internal_request_id:
+          type: string
+          description: An internal tracking ID
+          example: 550e8400-e29b-41d4-a716-446655440000
     OpportunitySorting:
       type: object
       properties:
@@ -1416,6 +1420,12 @@ components:
           - 'null'
           description: The name of the agency who created the oppportunity
           example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
+          example: Department of Examples
         category:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
@@ -2026,7 +2036,7 @@ components:
     OpportunityAttachmentV1:
       type: object
       properties:
-        file_location:
+        download_path:
           type: string
           description: The URL to download the attachment
           example: https://...
@@ -2093,6 +2103,12 @@ components:
           - string
           - 'null'
           description: The name of the agency who created the oppportunity
+          example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
           example: Department of Examples
         category:
           description: The opportunity category

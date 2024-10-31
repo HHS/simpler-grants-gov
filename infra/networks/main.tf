@@ -5,6 +5,17 @@ locals {
     description = "VPC resources"
   })
   region = module.project_config.default_region
+
+  # List of AWS services used by this VPC
+  # This list is used to create VPC endpoints so that the AWS services can
+  # be accessed without network traffic ever leaving the VPC's private network
+  # For a list of AWS services that integrate with AWS PrivateLink
+  # see https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+  #
+  # The database module requires VPC access from private networks to SSM, KMS, and RDS
+  aws_service_integrations = toset(
+    module.app_config.has_database ? ["ssm", "kms", "secretsmanager"] : []
+  )
 }
 
 terraform {

@@ -5,8 +5,11 @@ from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.util.datetime_util as datetime_util
+from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 from src.api.route_utils import raise_flask_error
-from src.db.models.opportunity_models import Opportunity, OpportunitySummary
+from src.db.models.agency_models import Agency
+from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
+from src.util.file_util import split_s3_url
 
 
 def _fetch_opportunity(
@@ -17,6 +20,10 @@ def _fetch_opportunity(
         .where(Opportunity.opportunity_id == opportunity_id)
         .where(Opportunity.is_draft.is_(False))
         .options(selectinload("*"))
+        # To get the top_level_agency field set properly upfront,
+        # we need to explicitly join here as the "*" approach doesn't
+        # seem to work with the way our agency relationships are setup
+        .options(selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency))
     )
 
     if not load_all_opportunity_summaries:
@@ -30,8 +37,39 @@ def _fetch_opportunity(
     return opportunity
 
 
+def pre_sign_opportunity_file_location(
+    opp_atts: list,
+) -> list[OpportunityAttachment]:
+    s3_config = S3Config()
+
+    s3_client = get_s3_client(s3_config, get_boto_session())
+    for opp_att in opp_atts:
+        file_loc = opp_att.file_location
+        bucket, key = split_s3_url(file_loc)
+        pre_sign_file_loc = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": key},
+            ExpiresIn=s3_config.presigned_s3_duration,
+        )
+        if s3_config.s3_endpoint_url:
+            # Only relevant when local, due to docker path issues
+            pre_sign_file_loc = pre_sign_file_loc.replace(
+                s3_config.s3_endpoint_url, "http://localhost:4566"
+            )
+
+        opp_att.download_path = pre_sign_file_loc
+
+    return opp_atts
+
+
 def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
-    return _fetch_opportunity(db_session, opportunity_id, load_all_opportunity_summaries=False)
+    opportunity = _fetch_opportunity(
+        db_session, opportunity_id, load_all_opportunity_summaries=False
+    )
+
+    pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
+
+    return opportunity
 
 
 def get_opportunity_versions(db_session: db.Session, opportunity_id: int) -> dict:

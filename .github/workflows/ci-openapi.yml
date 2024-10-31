@@ -1,5 +1,5 @@
-# Update OpenAPI docs so that they remain up to date with the application
-name: Update OpenAPI Docs
+# Update database ERD diagrams and OpenAPI docs so that they remain up to date with the application
+name: Update Database ERD Diagrams and OpenAPI Docs
 
 on:
   pull_request:
@@ -29,6 +29,9 @@ jobs:
           # Checkout the feature branch associated with the pull request
           ref: ${{ github.head_ref }}
 
+      - name: Create ERD diagram
+        run: make create-erds
+
       - name: Update OpenAPI spec
         run: make openapi-spec
 
@@ -38,5 +41,5 @@ jobs:
           git config user.email platform-admins@navapbc.com
           git add --all
           # Commit changes (if no changes then no-op)
-          git diff-index --quiet HEAD || git commit -m "Update OpenAPI spec"
+          git diff-index --quiet HEAD || git commit -m "Create ERD diagram and Update OpenAPI spec"
           git push

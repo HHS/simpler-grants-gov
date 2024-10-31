@@ -93,6 +93,16 @@ class Agency(ApiSchemaTable, TimestampMixin):
         creator=lambda obj: LinkAgencyDownloadFileType(agency_download_file_type=obj),
     )
 
+    top_level_agency_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey(agency_id),
+        nullable=True,
+    )
+    top_level_agency: Mapped["Agency"] = relationship(
+        lambda: Agency,
+        remote_side=[agency_id],
+    )
+
 
 class LinkAgencyDownloadFileType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_agency_download_file_type"

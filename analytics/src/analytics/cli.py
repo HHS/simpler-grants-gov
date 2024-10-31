@@ -1,7 +1,9 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
 import logging
+
 from datetime import datetime
+import logging.config
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -11,6 +13,7 @@ from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.etl_dataset import EtlDataset
+from analytics.datasets.issues import GitHubIssues
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.integrations import db, github, slack, etldb
 from analytics.metrics.base import BaseMetric, Unit
@@ -18,6 +21,7 @@ from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # fmt: off
@@ -27,9 +31,11 @@ ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
 ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
 OUTPUT_DIR_ARG = typer.Option(help="Path to directory where output files will be saved")
+TMP_DIR_ARG = typer.Option(help="Path to directory where intermediate files will be saved")
 OWNER_ARG = typer.Option(help="GitHub handle of the repo or project owner")
 REPO_ARG = typer.Option(help="Name of the GitHub repo")
 PROJECT_ARG = typer.Option(help="Number of the GitHub project")
+FIELD_ARG = typer.Option(help="Name of the GitHub project field")
 SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating burndown")
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
 SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
@@ -60,6 +66,11 @@ def callback() -> None:
     """Analyze data about the Simpler.Grants.gov project."""
 
 
+# ===========================================================
+# Export commands
+# ===========================================================
+
+
 @export_app.command(name="gh_project_data")
 def export_github_project_data(
     owner: Annotated[str, OWNER_ARG],
@@ -78,6 +89,53 @@ def export_github_issue_data(
 ) -> None:
     """Export data about issues a GitHub repo and write it to an output file."""
     github.export_issue_data(owner, repo, output_file)
+
+
+@export_app.command(name="gh_delivery_data")
+def export_github_data(
+    owner: Annotated[str, OWNER_ARG],
+    sprint_project: Annotated[int, PROJECT_ARG],
+    roadmap_project: Annotated[int, PROJECT_ARG],
+    output_file: Annotated[str, OUTPUT_FILE_ARG],
+    sprint_field: Annotated[str, FIELD_ARG] = "Sprint",
+    points_field: Annotated[str, FIELD_ARG] = "Points",
+    tmp_dir: Annotated[str, TMP_DIR_ARG] = "data",
+) -> None:
+    """Export and flatten metadata about GitHub issues used for delivery metrics."""
+    # Specify path to intermediate files
+    sprint_file = Path(tmp_dir) / "sprint-data.json"
+    roadmap_file = Path(tmp_dir) / "roadmap-data.json"
+
+    # # Export sprint and roadmap data
+    logger.info("Exporting roadmap data")
+    github.export_roadmap_data(
+        owner=owner,
+        project=roadmap_project,
+        quad_field="Quad",
+        pillar_field="Pillar",
+        output_file=str(roadmap_file),
+    )
+    logger.info("Exporting sprint data")
+    github.export_sprint_data(
+        owner=owner,
+        project=sprint_project,
+        sprint_field=sprint_field,
+        points_field=points_field,
+        output_file=str(sprint_file),
+    )
+
+    # load and flatten data into GitHubIssues dataset
+    logger.info("Transforming exported data")
+    issues = GitHubIssues.load_from_json_files(
+        sprint_file=str(sprint_file),
+        roadmap_file=str(roadmap_file),
+    )
+    issues.to_json(output_file)
+
+
+# ===========================================================
+# Calculate commands
+# ===========================================================
 
 
 @metrics_app.command(name="sprint_burndown")
@@ -132,67 +190,6 @@ def calculate_sprint_burnup(
         post_results=post_results,
         output_dir=output_dir,
     )
-
-
-@import_app.command(name="test_connection")
-def test_connection() -> None:
-    """Test function that ensures the DB connection works."""
-    engine = db.get_db()
-    # connection method from sqlalchemy
-    connection = engine.connect()
-
-    # Test INSERT INTO action
-    result = connection.execute(
-        text(
-            "INSERT INTO audit_log (topic,timestamp, end_timestamp, user_id, details)"
-            "VALUES('test','2024-06-11 10:41:15','2024-06-11 10:54:15',87654,'test from command');",
-        ),
-    )
-    # Test SELECT action
-    result = connection.execute(text("SELECT * FROM audit_log WHERE user_id=87654;"))
-    for row in result:
-        print(row)
-    # commits the transaction to the db
-    connection.commit()
-    result.close()
-
-
-@import_app.command(name="db_import")
-def export_json_to_database(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
-    issue_file: Annotated[str, ISSUE_FILE_ARG],
-) -> None:
-    """Import JSON data to the database."""
-    logger.info("Beginning import")
-
-    # Get the database engine and establish a connection
-    engine = db.get_db()
-
-    # get data and load from JSON
-    deliverable_data = DeliverableTasks.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
-
-    # Load data from the sprint board
-    sprint_data = SprintBoard.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
-
-    deliverable_data.to_sql(
-        output_table="github_project_data",
-        engine=engine,
-        replace_table=True,
-    )  # replace_table=True is the default
-
-    sprint_data.to_sql(
-        output_table="github_project_data",
-        engine=engine,
-        replace_table=True,
-    )
-    rows = len(sprint_data.to_dict())
-    logger.info("Number of rows in table: %s", rows)
 
 
 @metrics_app.command(name="deliverable_percent_complete")
@@ -263,6 +260,54 @@ def show_and_or_post_results(
             channel_id=settings.reporting_channel_id,
             output_dir=Path(output_dir),
         )
+
+
+# ===========================================================
+# Import commands
+# ===========================================================
+
+
+@import_app.command(name="test_connection")
+def test_connection() -> None:
+    """Test function that ensures the DB connection works."""
+    engine = db.get_db()
+    # connection method from sqlalchemy
+    connection = engine.connect()
+
+    # Test INSERT INTO action
+    result = connection.execute(
+        text(
+            "INSERT INTO audit_log (topic,timestamp, end_timestamp, user_id, details)"
+            "VALUES('test','2024-06-11 10:41:15','2024-06-11 10:54:15',87654,'test from command');",
+        ),
+    )
+    # Test SELECT action
+    result = connection.execute(text("SELECT * FROM audit_log WHERE user_id=87654;"))
+    for row in result:
+        print(row)
+    # commits the transaction to the db
+    connection.commit()
+    result.close()
+
+
+@import_app.command(name="db_import")
+def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
+    """Import JSON data to the database."""
+    logger.info("Beginning import")
+
+    # Get the database engine and establish a connection
+    engine = db.get_db()
+
+    # Load data from the sprint board
+    issues = GitHubIssues.from_json(delivery_file)
+
+    issues.to_sql(
+        output_table="github_project_data",
+        engine=engine,
+        replace_table=True,
+    )
+    rows = len(issues.to_dict())
+    logger.info("Number of rows in table: %s", rows)
 
 
 @etl_app.command(name="initialize_database")

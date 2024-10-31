@@ -4,8 +4,11 @@
 from pathlib import Path
 from typing import Self
 
+import numpy as np
 import pandas as pd
 from sqlalchemy import Engine
+
+from analytics.datasets.utils import dump_to_json, load_json_file
 
 
 class BaseDataset:
@@ -23,6 +26,12 @@ class BaseDataset:
     @classmethod
     def from_dict(cls, data: list[dict]) -> Self:
         """Load the dataset from a list of python dictionaries representing records."""
+        return cls(df=pd.DataFrame(data))
+
+    @classmethod
+    def from_json(cls, file_path: str | Path) -> Self:
+        """Load the dataset from a JSON file."""
+        data = load_json_file(str(file_path))
         return cls(df=pd.DataFrame(data))
 
     def to_sql(
@@ -112,4 +121,8 @@ class BaseDataset:
 
     def to_dict(self) -> list[dict]:
         """Export the dataset to a list of python dictionaries representing records."""
-        return self.df.to_dict(orient="records")
+        return self.df.replace([np.nan], [None], regex=False).to_dict(orient="records")
+
+    def to_json(self, output_file: str) -> None:
+        """Dump dataset to JSON."""
+        return dump_to_json(output_file, self.to_dict())

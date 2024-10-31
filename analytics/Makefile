@@ -10,7 +10,11 @@ OUTPUT_DIR ?= data
 SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
 ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
+DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
+# Names of the points and sprint fields in the GitHub project
+POINTS_FIELD ?= Points
+SPRINT_FIELD ?= Sprint
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
@@ -65,8 +69,8 @@ export RUN_UID
 check-prereqs:
 	@echo "=> Checking for pre-requisites"
 	@if ! poetry --version; then echo "=> Poetry isn't installed"; fi
-	@if ! github --version; then echo "=> GitHub CLI isn't installed"; fi
-	@echo "=> All pre-requisites satisfied"
+	@if ! gh --version; then echo "=> GitHub CLI isn't installed" && exit 1; fi
+	@echo "=> Poetry and GitHub CLI installed"
 
 install: check-prereqs
 	@echo "=> Installing python dependencies"
@@ -74,6 +78,8 @@ install: check-prereqs
 
 login:
 	$(GITHUB) auth login
+
+setup: install login
 
 build:
 	docker compose build
@@ -149,9 +155,7 @@ sprint-data-export:
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"
 	@echo "====================================================="
-	$(POETRY) analytics import db_import \
-	--sprint-file $(SPRINT_FILE) \
-	--issue-file $(ISSUE_FILE)
+	$(POETRY) analytics import db_import --delivery-file $(DELIVERY_FILE)
 
 roadmap-data-export:
 	@echo "=> Exporting project data from the product roadmap"
@@ -161,6 +165,17 @@ roadmap-data-export:
 	--project $(ROADMAP_PROJECT) \
 	--output-file $(ROADMAP_FILE)
 
+delivery-data-export:
+	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
+	@echo "====================================================="
+	$(POETRY)  analytics export gh_delivery_data \
+	--owner $(ORG) \
+	--sprint-project $(SPRINT_PROJECT) \
+	--roadmap-project $(ROADMAP_PROJECT) \
+	--output-file $(DELIVERY_FILE) \
+	--points-field "$(POINTS_FIELD)" \
+	--sprint-field "$(SPRINT_FIELD)"
+
 issue-data-export:
 	@echo "=> Exporting issue data from the repository"
 	@echo "====================================================="
@@ -169,7 +184,7 @@ issue-data-export:
 	--repo $(REPO) \
 	--output-file $(ISSUE_FILE)
 
-gh-data-export: sprint-data-export issue-data-export roadmap-data-export
+gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
 
 sprint-burndown:
 	@echo "=> Running sprint burndown report"

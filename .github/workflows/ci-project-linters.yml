@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+      # Test issue with points and sprint values unset
+      # to be used with set-points-and-sprint.sh test
+      UNSET_ISSUE: "https://github.com/HHS/simpler-grants-gov/issues/1932"
     steps:
       - uses: actions/checkout@v4
 
@@ -27,4 +30,14 @@ jobs:
             --project 13 \
             --status Done \
             --batch 100 \
+            --dry-run
+
+      - name: Dry run - Set points and sprint field
+        run: |
+          ./scripts/set-points-and-sprint.sh \
+            --url "${UNSET_ISSUE}" \
+            --org "HHS" \
+            --project 13 \
+            --sprint-field "Sprint" \
+            --points-field "Story Points" \
             --dry-run
