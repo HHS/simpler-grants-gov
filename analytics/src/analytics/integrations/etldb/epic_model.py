@@ -1,13 +1,15 @@
+"""Defines EtlEpicModel class to encapsulate db CRUD operations"""
+
 from sqlalchemy import text
-
 from pandas import DataFrame
-
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlEpicModel(EtlDb):
+    """Encapsulates CRUD operations for epic entity"""
 
     def sync_epic(self, epic_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Write epic data to etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -29,6 +31,7 @@ class EtlEpicModel(EtlDb):
 
 
     def _insert_dimensions(self, epic_df: DataFrame) -> int:
+        """Write epic dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -55,6 +58,7 @@ class EtlEpicModel(EtlDb):
 
 
     def _insert_facts(self, epic_id: int, epic_df: DataFrame, ghid_map: dict) -> int:
+        """Write epic fact data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -85,6 +89,7 @@ class EtlEpicModel(EtlDb):
 
 
     def _update_dimensions(self, epic_df: DataFrame) -> (int, EtlChangeType):
+        """Update epic dimension data in etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE

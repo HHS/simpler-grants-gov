@@ -1,13 +1,15 @@
+"""Defines EtlSprintModel class to encapsulate db CRUD operations"""
+
 from sqlalchemy import text
-
 from pandas import DataFrame
-
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlSprintModel(EtlDb):
+    """Encapsulates CRUD operations for sprint entity"""
 
     def sync_sprint(self, sprint_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Write sprint data to etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -25,6 +27,7 @@ class EtlSprintModel(EtlDb):
 
 
     def _insert_dimensions(self, sprint_df: DataFrame, ghid_map: dict) -> int:
+        """Write sprint dimension data in etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -56,6 +59,7 @@ class EtlSprintModel(EtlDb):
 
 
     def _update_dimensions(self, sprint_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Update sprint dimension data in etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE

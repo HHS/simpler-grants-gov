@@ -1,13 +1,15 @@
+"""Defines EtlIssueModel class to encapsulate db CRUD operations"""
+
 from sqlalchemy import text
-
 from pandas import DataFrame
-
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlIssueModel(EtlDb):
+    """Encapsulates CRUD operations for issue entity"""
 
     def sync_issue(self, issue_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Write issue data to etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -29,6 +31,7 @@ class EtlIssueModel(EtlDb):
 
 
     def _insert_dimensions(self, issue_df: DataFrame, ghid_map: dict) -> int:
+        """Write issue dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -62,6 +65,7 @@ class EtlIssueModel(EtlDb):
 
 
     def _insert_facts(self, issue_id: int, issue_df: DataFrame, ghid_map: dict) -> (int, int):
+        """Write issue fact data to etl database"""
 
         # get values needed for sql statement
         issue_df.fillna(0, inplace=True)
@@ -111,6 +115,7 @@ class EtlIssueModel(EtlDb):
 
 
     def _update_dimensions(self, issue_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Update issue dimension data in etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE

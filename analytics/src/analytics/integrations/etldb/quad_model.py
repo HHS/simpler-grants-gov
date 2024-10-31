@@ -1,12 +1,14 @@
+"""Defines EtlQuadModel class to encapsulate db CRUD operations"""
+
 from sqlalchemy import text
-
 from pandas import DataFrame
-
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlQuadModel(EtlDb):
+    """Encapsulates CRUD operations for quad entity"""
 
     def sync_quad(self, quad_df: DataFrame) -> (int, EtlChangeType):
+        """Write quad data to etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -24,6 +26,7 @@ class EtlQuadModel(EtlDb):
 
 
     def _insert_dimensions(self, quad_df: DataFrame) -> int:
+        """Write quad dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -54,6 +57,7 @@ class EtlQuadModel(EtlDb):
 
 
     def _update_dimensions(self, quad_df: DataFrame) -> (int, EtlChangeType):
+        """Update quad dimension data in etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE

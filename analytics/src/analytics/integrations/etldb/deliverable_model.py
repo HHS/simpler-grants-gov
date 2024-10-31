@@ -1,13 +1,15 @@
+"""Defines EtlDeliverableModel class to encapsulate db CRUD operations"""
+
 from sqlalchemy import text
-
 from pandas import DataFrame
-
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlDeliverableModel(EtlDb):
+    """Encapsulates CRUD operations for deliverable entity"""
 
     def sync_deliverable(self, deliverable_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+        """Write deliverable data to etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -29,6 +31,7 @@ class EtlDeliverableModel(EtlDb):
 
 
     def _insert_dimensions(self, deliverable_df: DataFrame) -> int:
+        """Write deliverable dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -57,6 +60,7 @@ class EtlDeliverableModel(EtlDb):
 
 
     def _insert_facts(self, deliverable_id: int, deliverable_df: DataFrame, ghid_map: dict) -> int:
+        """Write deliverable fact data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
@@ -86,6 +90,7 @@ class EtlDeliverableModel(EtlDb):
 
 
     def _update_dimensions(self, deliverable_df: DataFrame) -> (int, EtlChangeType):
+        """Update deliverable fact data in etl database"""
 
         # initialize return value
         change_type = EtlChangeType.NONE

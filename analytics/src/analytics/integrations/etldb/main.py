@@ -14,7 +14,7 @@ from analytics.integrations.etldb.quad_model import EtlQuadModel
 DEBUG = False
 
 def init_db() -> None:
-    """ Initialize etl database """
+    """Initialize etl database"""
 
     # define the path to the sql file
     parent_path = Path(__file__).resolve().parent
@@ -32,7 +32,7 @@ def init_db() -> None:
 
 
 def sync_db(dataset: EtlDataset, effective: str) -> None:
-
+    """Write github data to etl database"""
     # initialize a map of github id to db row id
     ghid_map = {
         entity.DELIVERABLE: {},
@@ -63,7 +63,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
 
 
 def sync_deliverables(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """ Insert or update (if necessary) a row for each deliverable and return a map of row ids """
+    """Insert or update (if necessary) a row for each deliverable and return a map of row ids"""
     result = {}
     db = EtlDeliverableModel(effective)
     for ghid in dataset.get_deliverable_ghids():
@@ -75,7 +75,7 @@ def sync_deliverables(dataset: EtlDataset, effective: str, ghid_map: dict) -> di
 
 
 def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """ Insert or update (if necessary) a row for each epic and return a map of row ids """
+    """Insert or update (if necessary) a row for each epic and return a map of row ids"""
     result = {}
     db = EtlEpicModel(effective)
     for ghid in dataset.get_epic_ghids():
@@ -87,7 +87,7 @@ def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """ Insert or update (if necessary) a row for each issue and return a map of row ids """
+    """Insert or update (if necessary) a row for each issue and return a map of row ids"""
     result = {}
     db = EtlIssueModel(effective)
     for ghid in dataset.get_issue_ghids():
@@ -99,7 +99,7 @@ def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """ Insert or update (if necessary) a row for each sprint and return a map of row ids """
+    """Insert or update (if necessary) a row for each sprint and return a map of row ids"""
     result = {}
     db = EtlSprintModel(effective)
     for ghid in dataset.get_sprint_ghids():
@@ -111,7 +111,7 @@ def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_quads(dataset: EtlDataset, effective: str) -> dict:
-    """ Insert or update (if necessary) a row for each quad and return a map of row ids """
+    """Insert or update (if necessary) a row for each quad and return a map of row ids"""
     result = {}
     db = EtlQuadModel(effective)
     for ghid in dataset.get_quad_ghids():
