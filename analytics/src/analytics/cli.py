@@ -11,7 +11,6 @@ from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.datasets.sprint_board import SprintBoard
 from analytics.integrations import db, github, slack, etldb
 from analytics.metrics.base import BaseMetric, Unit
@@ -272,7 +271,6 @@ def initialize_database() -> None:
     print("initializing database")
     etldb.init_db()
     print("done")
-    return
 
 
 @etl_app.command(name="transform_and_load")
@@ -286,17 +284,17 @@ def transform_and_load(
     try:
         dateformat = "%Y-%m-%d"
         datestamp = datetime.strptime(effective_date, dateformat).strftime(dateformat)
-        print("running data loader with effective date of {}".format(datestamp))
-    except ValueError as e:
+        print(f"running data loader with effective date of {datestamp}")
+    except ValueError:
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
 
-    # hydrate a dataset instance from the input data 
+    # hydrate a dataset instance from the input data
     dataset = EtlDataset.load_from_json_file(
         file_path=deliverable_file
     )
 
-    # sync data to db 
+    # sync data to db
     etldb.sync_db(dataset, datestamp)
 
     # finish

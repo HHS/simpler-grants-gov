@@ -14,7 +14,7 @@ class EtlDb:
 
     def connection(self) -> Connection:
         return self._db_engine.connect()
-    
+
     def commit(self, connection) -> None:
         connection.commit()
 

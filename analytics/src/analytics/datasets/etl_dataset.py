@@ -100,7 +100,7 @@ class EtlDataset(BaseDataset):
 
     def get_quad(self, quad_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given quad """
-        query_string = "quad_ghid == '{}'".format(quad_ghid)
+        query_string = f"quad_ghid == '{quad_ghid}'"
         return self.df.query(query_string).iloc[0]
 
 
@@ -114,7 +114,7 @@ class EtlDataset(BaseDataset):
 
     def get_deliverable(self, deliverable_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given deliverable """
-        query_string = "deliverable_ghid == '{}'".format(deliverable_ghid)
+        query_string = f"deliverable_ghid == '{deliverable_ghid}'"
         return self.df.query(query_string).iloc[0]
 
 
@@ -128,7 +128,7 @@ class EtlDataset(BaseDataset):
 
     def get_sprint(self, sprint_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given sprint """
-        query_string = "sprint_ghid == '{}'".format(sprint_ghid)
+        query_string = f"sprint_ghid == '{sprint_ghid}'"
         return self.df.query(query_string).iloc[0]
 
 
@@ -142,7 +142,7 @@ class EtlDataset(BaseDataset):
 
     def get_epic(self, epic_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given epic """
-        query_string = "epic_ghid == '{}'".format(epic_ghid)
+        query_string = f"epic_ghid == '{epic_ghid}'"
         return self.df.query(query_string).iloc[0]
 
 
@@ -156,7 +156,7 @@ class EtlDataset(BaseDataset):
 
     def get_issue(self, issue_ghid: str) -> pandas.DataFrame:
         """ Fetches data about a given issue """
-        query_string = "issue_ghid == '{}'".format(issue_ghid)
+        query_string = f"issue_ghid == '{issue_ghid}'"
         return self.df.query(query_string).iloc[0]
 
 

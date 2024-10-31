@@ -7,30 +7,24 @@ from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlSprintModel(EtlDb):
 
-    def syncSprint(self, sprint_df: pandas.DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_sprint(self, sprint_df: pandas.DataFrame, ghid_map: dict) -> (int, EtlChangeType):
 
         # initialize return value
         change_type = EtlChangeType.NONE
 
-        # get cursor to keep open across transactions
-        cursor = self.connection()
-
         # insert dimensions
-        sprint_id = self._insertDimensions(cursor, sprint_df, ghid_map)
+        sprint_id = self._insert_dimensions(sprint_df, ghid_map)
         if sprint_id is not None:
             change_type = EtlChangeType.INSERT
 
         # if insert failed, select and update
         if sprint_id is None:
-            sprint_id, change_type = self._updateDimensions(cursor, sprint_df, ghid_map)
-
-        # commit
-        #self.commit(cursor)
+            sprint_id, change_type = self._update_dimensions(sprint_df, ghid_map)
 
         return sprint_id, change_type
 
-    
-    def _insertDimensions(self, cursor, sprint_df: pandas.DataFrame, ghid_map: dict) -> int:
+
+    def _insert_dimensions(self, sprint_df: pandas.DataFrame, ghid_map: dict) -> int:
 
         # get values needed for sql statement
         insert_values = {
@@ -44,7 +38,8 @@ class EtlSprintModel(EtlDb):
         new_row_id = None
 
         # insert into dimension table: sprint
-        insert_sql = f"insert into gh_sprint(ghid, name, start_date, end_date, duration, quad_id) values (:ghid, :name, :start, :end, :duration, :quad_id) on conflict(ghid) do nothing returning id"
+        cursor = self.connection()
+        insert_sql = "insert into gh_sprint(ghid, name, start_date, end_date, duration, quad_id) values (:ghid, :name, :start, :end, :duration, :quad_id) on conflict(ghid) do nothing returning id"
         result = cursor.execute(text(insert_sql), insert_values)
         row = result.fetchone()
         if row:
@@ -56,7 +51,7 @@ class EtlSprintModel(EtlDb):
         return new_row_id
 
 
-    def _updateDimensions(self, cursor, sprint_df: pandas.DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def _update_dimensions(self, sprint_df: pandas.DataFrame, ghid_map: dict) -> (int, EtlChangeType):
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -71,6 +66,7 @@ class EtlSprintModel(EtlDb):
         new_values = (new_name, new_start, new_end, new_duration, new_quad_id)
 
         # select
+        cursor = self.connection()
         select_sql = f"select id, name, start_date, end_date, duration, quad_id from gh_sprint where ghid = '{ghid}'"
         result = cursor.execute(text(select_sql),)
         sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = result.fetchone()
@@ -78,7 +74,7 @@ class EtlSprintModel(EtlDb):
 
         # compare
         if sprint_id is not None:
-            if (new_values != old_values):
+            if new_values != old_values:
                 change_type = EtlChangeType.UPDATE
                 update_sql = f"update gh_sprint set name = '{new_name}', start_date = '{new_start}', end_date = '{new_end}', duration = {new_duration}, quad_id = :quad_id, t_modified = current_timestamp where id = {sprint_id}"
                 update_values = {
@@ -93,4 +89,3 @@ class EtlSprintModel(EtlDb):
                 self.commit(cursor)
 
         return sprint_id, change_type
-
