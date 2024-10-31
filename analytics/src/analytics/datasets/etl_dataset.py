@@ -6,9 +6,7 @@ quad, deliverable, epic, issue, and sprint data.
 """
 from enum import Enum
 from typing import Self
-
 import pandas
-
 from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df
 
