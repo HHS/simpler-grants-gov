@@ -10,7 +10,9 @@ from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.deliverable_tasks import DeliverableTasks
-from analytics.datasets.issues import GitHubIssues, InputFiles
+from analytics.datasets.issues import GitHubIssues
+from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
+from analytics.etl.utils import load_config
 from analytics.integrations import db, github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
+CONFIG_FILE_ARG = typer.Option(help="Path to JSON file with configurations for this entrypoint")
 SPRINT_FILE_ARG = typer.Option(help="Path to file with exported sprint data")
 ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
 ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
@@ -85,44 +88,20 @@ def export_github_issue_data(
 
 @export_app.command(name="gh_delivery_data")
 def export_github_data(
-    owner: Annotated[str, OWNER_ARG],
-    sprint_project: Annotated[int, PROJECT_ARG],
-    roadmap_project: Annotated[int, PROJECT_ARG],
+    config_file: Annotated[str, CONFIG_FILE_ARG],
     output_file: Annotated[str, OUTPUT_FILE_ARG],
-    sprint_field: Annotated[str, FIELD_ARG] = "Sprint",
-    points_field: Annotated[str, FIELD_ARG] = "Points",
-    tmp_dir: Annotated[str, TMP_DIR_ARG] = "data",
+    temp_dir: Annotated[str, TMP_DIR_ARG],
 ) -> None:
     """Export and flatten metadata about GitHub issues used for delivery metrics."""
-    # Specify path to intermediate files
-    sprint_file = str(Path(tmp_dir) / "sprint-data.json")
-    roadmap_file = str(Path(tmp_dir) / "roadmap-data.json")
-
-    # Export sprint and roadmap data
-    logger.info("Exporting roadmap data from %s/%s", owner, roadmap_project)
-    github.export_roadmap_data(
-        owner=owner,
-        project=roadmap_project,
-        quad_field="Quad",
-        pillar_field="Pillar",
-        output_file=roadmap_file,
-    )
-    logger.info("Exporting sprint data from %s/%s", owner, sprint_project)
-    github.export_sprint_data(
-        owner=owner,
-        project=sprint_project,
-        sprint_field=sprint_field,
-        points_field=points_field,
-        output_file=sprint_file,
-    )
-
-    # Load and flatten data into GitHubIssues dataset
-    logger.info("Transforming exported data")
-    files = [
-        InputFiles(roadmap=roadmap_file, sprint=sprint_file),
-    ]
-    issues = GitHubIssues.load_from_json_files(files=files)
-    issues.to_json(output_file)
+    # Configure ETL pipeline
+    config_path = Path(config_file)
+    if not config_path.exists():
+        typer.echo(f"Not a path to a valid config file: {config_path}")
+    config = load_config(config_path, GitHubProjectConfig)
+    config.temp_dir = temp_dir
+    config.output_file = output_file
+    # Run ETL pipeline
+    GitHubProjectETL(config).run()
 
 
 # ===========================================================

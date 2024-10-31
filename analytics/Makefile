@@ -7,6 +7,8 @@ REPO ?= simpler-grants-gov
 SPRINT_PROJECT ?= 13
 ROADMAP_PROJECT ?= 12
 OUTPUT_DIR ?= data
+CONFIG_DIR ?= config
+PROJECT_CONFIG_FILE ?= $(CONFIG_DIR)/github-projects.json
 SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
 ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
@@ -169,12 +171,9 @@ delivery-data-export:
 	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
 	@echo "====================================================="
 	$(POETRY)  analytics export gh_delivery_data \
-	--owner $(ORG) \
-	--sprint-project $(SPRINT_PROJECT) \
-	--roadmap-project $(ROADMAP_PROJECT) \
+	--config-file $(PROJECT_CONFIG_FILE) \
 	--output-file $(DELIVERY_FILE) \
-	--points-field "$(POINTS_FIELD)" \
-	--sprint-field "$(SPRINT_FIELD)"
+	--temp-dir $(OUTPUT_DIR)
 
 issue-data-export:
 	@echo "=> Exporting issue data from the repository"
