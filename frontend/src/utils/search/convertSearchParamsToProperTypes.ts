@@ -1,6 +1,7 @@
 import {
   QueryParamData,
   SearchFetcherActionType,
+  SortOptions,
 } from "src/types/search/searchRequestTypes";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
@@ -20,7 +21,7 @@ export function convertSearchParamsToProperTypes(
     eligibility: paramToSet(params.eligibility),
     agency: paramToSet(params.agency),
     category: paramToSet(params.category),
-    sortby: params.sortby || null, // Convert empty string to null if needed
+    sortby: (params.sortby as SortOptions) || null, // Convert empty string to null if needed
 
     // Ensure page is at least 1 or default to 1 if undefined
     page: getSafePage(params.page),
