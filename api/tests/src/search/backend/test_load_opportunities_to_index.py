@@ -206,10 +206,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     ):
         """Test that a new opportunity in the queue gets indexed"""
         # Add to queue
-        OpportunitySearchIndexQueueFactory.create(
-            opportunity_id=test_opportunity.opportunity_id, has_update=True
-        )
-        db_session.commit()
+        OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
 
         load_opportunities_to_index.run()
 
