@@ -1812,3 +1812,13 @@ def create_tgroups_agency(
         groups.append(tgroup)
 
     return groups
+
+
+class OpportunitySearchIndexQueueFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunitySearchIndexQueue
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    has_update = True

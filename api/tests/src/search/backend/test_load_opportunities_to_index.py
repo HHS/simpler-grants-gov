@@ -1,12 +1,52 @@
+from unittest.mock import Mock
+
 import pytest
 
+from src.constants.lookup_constants import OpportunityStatus
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySearchIndexQueue,
+    OpportunitySummary,
+)
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
 )
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory
+from tests.src.db.models.factories import OpportunityFactory, OpportunitySearchIndexQueueFactory
+
+
+@pytest.fixture
+def mock_search_client():
+    client = Mock()
+    # Mock the alias exists check
+    client.alias_exists.return_value = True
+    # Mock empty initial index
+    client.scroll.return_value = [Mock(records=[])]
+    return client
+
+
+@pytest.fixture
+def test_opportunity():
+    """Create a test opportunity with required relationships"""
+    opportunity = Opportunity(
+        opportunity_id=1, opportunity_title="Test Opportunity", is_draft=False
+    )
+
+    OpportunitySummary(
+        opportunity_summary_id=1,
+        opportunity_id=1,
+        is_forecast=False,
+        summary_description="Test Description",
+    )
+
+    CurrentOpportunitySummary(
+        opportunity_id=1, opportunity_summary_id=1, opportunity_status=OpportunityStatus.POSTED
+    )
+
+    return opportunity
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
@@ -40,6 +80,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         # Create some opportunities that won't get fetched / loaded into search
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
+
+        for opportunity in opportunities:
+            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
 
         load_opportunities_to_index.run()
         # Verify some metrics first
@@ -123,6 +166,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             OpportunityFactory.create_batch(size=6, is_archived_forecast_summary=True)
         )
 
+        for opportunity in opportunities:
+            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
+
         load_opportunities_to_index.run()
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
@@ -135,6 +181,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         opportunities_to_delete = [opportunities.pop(), opportunities.pop(), opportunities.pop()]
         for opportunity in opportunities_to_delete:
             db_session.delete(opportunity)
+
+        for opportunity in opportunities:
+            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
 
         load_opportunities_to_index.run()
 
@@ -151,3 +200,41 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
         with pytest.raises(RuntimeError, match="please run the full refresh job"):
             load_opportunities_to_index.run()
+
+    def test_new_opportunity_gets_indexed(
+        self, db_session, test_opportunity, load_opportunities_to_index
+    ):
+        """Test that a new opportunity in the queue gets indexed"""
+        # Add to queue
+        OpportunitySearchIndexQueueFactory.create(
+            opportunity_id=test_opportunity.opportunity_id, has_update=True
+        )
+        db_session.commit()
+
+        load_opportunities_to_index.run()
+
+        # Verify queue was cleared
+        remaining_queue = db_session.query(OpportunitySearchIndexQueue).all()
+        assert len(remaining_queue) == 0
+
+    def test_draft_opportunity_not_indexed(
+        self, db_session, load_opportunities_to_index, test_opportunity
+    ):
+        """Test that draft opportunities are not indexed"""
+        # Make opportunity a draft
+        test_opportunity.is_draft = True
+
+        db_session.add(test_opportunity)
+        db_session.commit()
+
+        # Add to queue
+        queue_entry = OpportunitySearchIndexQueue(
+            opportunity_id=test_opportunity.opportunity_id, has_update=True
+        )
+        db_session.add(queue_entry)
+
+        load_opportunities_to_index.run()
+
+        # Verify queue was not cleared
+        remaining_queue = db_session.query(OpportunitySearchIndexQueue).all()
+        assert len(remaining_queue) == 1
