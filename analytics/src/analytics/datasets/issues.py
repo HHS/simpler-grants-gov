@@ -40,7 +40,10 @@ class IssueType(Enum):
 class IssueMetadata(BaseModel):
     """Stores information about issue type and parent (if applicable)."""
 
-    # Common metadata -- attributes about the issue common to both projects
+    # Project metadata -- attributes about the sprint project board
+    project_owner: str
+    project_number: int
+    # Issue metadata -- attributes about the issue common to both projects
     issue_title: str
     issue_url: str
     issue_parent: str | None
