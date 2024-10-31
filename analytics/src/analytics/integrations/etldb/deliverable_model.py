@@ -5,10 +5,13 @@ from pandas import DataFrame
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
+
 class EtlDeliverableModel(EtlDb):
     """Encapsulates CRUD operations for deliverable entity"""
 
-    def sync_deliverable(self, deliverable_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_deliverable(
+        self, deliverable_df: DataFrame, ghid_map: dict
+    ) -> (int, EtlChangeType):
         """Write deliverable data to etl database"""
 
         # initialize return value
@@ -29,15 +32,14 @@ class EtlDeliverableModel(EtlDb):
 
         return deliverable_id, change_type
 
-
     def _insert_dimensions(self, deliverable_df: DataFrame) -> int:
         """Write deliverable dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
-            'ghid': deliverable_df['deliverable_ghid'],
-            'title': deliverable_df['deliverable_title'],
-            'pillar': deliverable_df['deliverable_pillar'],
+            "ghid": deliverable_df["deliverable_ghid"],
+            "title": deliverable_df["deliverable_title"],
+            "pillar": deliverable_df["deliverable_pillar"],
         }
         new_row_id = None
 
@@ -58,15 +60,16 @@ class EtlDeliverableModel(EtlDb):
 
         return new_row_id
 
-
-    def _insert_facts(self, deliverable_id: int, deliverable_df: DataFrame, ghid_map: dict) -> int:
+    def _insert_facts(
+        self, deliverable_id: int, deliverable_df: DataFrame, ghid_map: dict
+    ) -> int:
         """Write deliverable fact data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
-            'deliverable_id': deliverable_id,
-            'quad_id': ghid_map[entity.QUAD].get(deliverable_df['quad_ghid']),
-            'effective': self.effective_date,
+            "deliverable_id": deliverable_id,
+            "quad_id": ghid_map[entity.QUAD].get(deliverable_df["quad_ghid"]),
+            "effective": self.effective_date,
         }
         new_row_id = None
 
@@ -88,7 +91,6 @@ class EtlDeliverableModel(EtlDb):
 
         return new_row_id
 
-
     def _update_dimensions(self, deliverable_df: DataFrame) -> (int, EtlChangeType):
         """Update deliverable fact data in etl database"""
 
@@ -96,18 +98,16 @@ class EtlDeliverableModel(EtlDb):
         change_type = EtlChangeType.NONE
 
         # get values needed for sql statement
-        ghid = deliverable_df['deliverable_ghid']
-        new_title = deliverable_df['deliverable_title']
-        new_pillar = deliverable_df['deliverable_pillar']
+        ghid = deliverable_df["deliverable_ghid"]
+        new_title = deliverable_df["deliverable_title"]
+        new_pillar = deliverable_df["deliverable_pillar"]
         new_values = (new_title, new_pillar)
 
         # select
         cursor = self.connection()
         result = cursor.execute(
-            text(
-                "select id, title, pillar from gh_deliverable where ghid = :ghid"
-            ),
-            { 'ghid': ghid }
+            text("select id, title, pillar from gh_deliverable where ghid = :ghid"),
+            {"ghid": ghid},
         )
         deliverable_id, old_title, old_pillar = result.fetchone()
         old_values = (old_title, old_pillar)
@@ -121,9 +121,9 @@ class EtlDeliverableModel(EtlDb):
                     "t_modified = current_timestamp where id = :deliverable_id"
                 )
                 update_values = {
-                    'new_title': new_title,
-                    'new_pillar': new_pillar,
-                    'deliverable_id': deliverable_id,
+                    "new_title": new_title,
+                    "new_pillar": new_pillar,
+                    "deliverable_id": deliverable_id,
                 }
                 cursor.execute(update_sql, update_values)
                 self.commit(cursor)

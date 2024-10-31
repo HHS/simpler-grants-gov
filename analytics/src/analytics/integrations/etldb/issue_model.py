@@ -5,6 +5,7 @@ from pandas import DataFrame
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
+
 class EtlIssueModel(EtlDb):
     """Encapsulates CRUD operations for issue entity"""
 
@@ -29,19 +30,18 @@ class EtlIssueModel(EtlDb):
 
         return issue_id, change_type
 
-
     def _insert_dimensions(self, issue_df: DataFrame, ghid_map: dict) -> int:
         """Write issue dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
-            'ghid': issue_df['issue_ghid'],
-            'title': issue_df['issue_title'],
-            'type': issue_df['issue_type'] or 'None',
-            'opened_date': issue_df['issue_opened_at'],
-            'closed_date': issue_df['issue_closed_at'],
-            'parent_ghid': issue_df['issue_parent'],
-            'epic_id': ghid_map[entity.EPIC].get(issue_df['epic_ghid'])
+            "ghid": issue_df["issue_ghid"],
+            "title": issue_df["issue_title"],
+            "type": issue_df["issue_type"] or "None",
+            "opened_date": issue_df["issue_opened_at"],
+            "closed_date": issue_df["issue_closed_at"],
+            "parent_ghid": issue_df["issue_parent"],
+            "epic_id": ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
         }
         new_row_id = None
 
@@ -63,19 +63,20 @@ class EtlIssueModel(EtlDb):
 
         return new_row_id
 
-
-    def _insert_facts(self, issue_id: int, issue_df: DataFrame, ghid_map: dict) -> (int, int):
+    def _insert_facts(
+        self, issue_id: int, issue_df: DataFrame, ghid_map: dict
+    ) -> (int, int):
         """Write issue fact data to etl database"""
 
         # get values needed for sql statement
         issue_df.fillna(0, inplace=True)
         insert_values = {
-            'issue_id': issue_id,
-            'status': issue_df['issue_status'],
-            'is_closed': int(issue_df['issue_is_closed']),
-            'points': issue_df['issue_points'],
-            'sprint_id': ghid_map[entity.SPRINT].get(issue_df['sprint_ghid']),
-            'effective': self.effective_date,
+            "issue_id": issue_id,
+            "status": issue_df["issue_status"],
+            "is_closed": int(issue_df["issue_is_closed"]),
+            "points": issue_df["issue_points"],
+            "sprint_id": ghid_map[entity.SPRINT].get(issue_df["sprint_ghid"]),
+            "effective": self.effective_date,
         }
         history_id = None
         map_id = None
@@ -88,7 +89,7 @@ class EtlIssueModel(EtlDb):
             "on conflict (issue_id, d_effective) "
             "do update set (status, is_closed, points, t_modified) = "
             "(:status, :is_closed, :points, current_timestamp) "
-            "returning id" 
+            "returning id"
         )
         result1 = cursor.execute(insert_sql1, insert_values)
         row1 = result1.fetchone()
@@ -113,8 +114,9 @@ class EtlIssueModel(EtlDb):
 
         return history_id, map_id
 
-
-    def _update_dimensions(self, issue_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def _update_dimensions(
+        self, issue_df: DataFrame, ghid_map: dict
+    ) -> (int, EtlChangeType):
         """Update issue dimension data in etl database"""
 
         # initialize return value
@@ -122,12 +124,12 @@ class EtlIssueModel(EtlDb):
 
         # get values needed for sql statement
         new_values = (
-            issue_df['issue_title'],
-            issue_df['issue_type'] or 'None',
-            issue_df['issue_opened_at'],
-            issue_df['issue_closed_at'],
-            issue_df['issue_parent'],
-            ghid_map[entity.EPIC].get(issue_df['epic_ghid']),
+            issue_df["issue_title"],
+            issue_df["issue_type"] or "None",
+            issue_df["issue_opened_at"],
+            issue_df["issue_closed_at"],
+            issue_df["issue_parent"],
+            ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
         )
 
         # select
@@ -137,9 +139,11 @@ class EtlIssueModel(EtlDb):
                 "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
                 "from gh_issue where ghid = :ghid"
             ),
-            { 'ghid': issue_df['issue_ghid'] }
+            {"ghid": issue_df["issue_ghid"]},
         )
-        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = r.fetchone()
+        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = (
+            r.fetchone()
+        )
         old_values = (o_title, o_type, o_opened, o_closed, o_parent, o_epic_id)
 
         # compare
@@ -155,15 +159,14 @@ class EtlIssueModel(EtlDb):
                         "where id = :issue_id"
                     ),
                     {
-                        'new_title': issue_df['issue_title'],
-                        'new_type': issue_df['issue_type'] or 'None',
-                        'new_opened': issue_df['issue_opened_at'],
-                        'new_closed': issue_df['issue_closed_at'],
-                        'new_parent': issue_df['issue_parent'],
-                        'new_epic_id': ghid_map[entity.EPIC].get(issue_df['epic_ghid']),
-                        'issue_id': issue_id
-                    }
-
+                        "new_title": issue_df["issue_title"],
+                        "new_type": issue_df["issue_type"] or "None",
+                        "new_opened": issue_df["issue_opened_at"],
+                        "new_closed": issue_df["issue_closed_at"],
+                        "new_parent": issue_df["issue_parent"],
+                        "new_epic_id": ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
+                        "issue_id": issue_id,
+                    },
                 )
                 self.commit(cursor)
 

@@ -317,7 +317,7 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 
 @etl_app.command(name="initialize_database")
 def initialize_database() -> None:
-    """ Initialize etl database """
+    """Initialize etl database"""
     print("initializing database")
     etldb.init_db()
     print("done")
@@ -326,9 +326,9 @@ def initialize_database() -> None:
 @etl_app.command(name="transform_and_load")
 def transform_and_load(
     deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
-    effective_date: Annotated[str, EFFECTIVE_DATE_ARG]
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
-    """ Transform and load etl data """
+    """Transform and load etl data"""
 
     # validate effective date arg
     try:
@@ -340,9 +340,7 @@ def transform_and_load(
         return
 
     # hydrate a dataset instance from the input data
-    dataset = EtlDataset.load_from_json_file(
-        file_path=deliverable_file
-    )
+    dataset = EtlDataset.load_from_json_file(file_path=deliverable_file)
 
     # sync data to db
     etldb.sync_db(dataset, datestamp)

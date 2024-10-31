@@ -13,6 +13,7 @@ from analytics.integrations.etldb.quad_model import EtlQuadModel
 
 VERBOSE = False
 
+
 def init_db() -> None:
     """Initialize etl database"""
 
@@ -27,7 +28,9 @@ def init_db() -> None:
     # execute sql
     db = EtlDb(None)
     cursor = db.connection()
-    cursor.execute(text(sql),)
+    cursor.execute(
+        text(sql),
+    )
     db.commit(cursor)
 
 
@@ -38,7 +41,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
         entity.DELIVERABLE: {},
         entity.EPIC: {},
         entity.SPRINT: {},
-        entity.QUAD: {}
+        entity.QUAD: {},
     }
 
     # sync quad data to db resulting in row id for each quad
@@ -118,5 +121,7 @@ def sync_quads(dataset: EtlDataset, effective: str) -> dict:
         quad_df = dataset.get_quad(ghid)
         result[ghid], _ = db.sync_quad(quad_df)
         if VERBOSE:
-            print(f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}")
+            print(
+                f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}"
+            )
     return result

@@ -4,6 +4,7 @@ from enum import Enum
 from sqlalchemy import Connection
 from analytics.integrations import db
 
+
 class EtlDb:
     """An abstraction to encapsulate etl database connections"""
 
@@ -32,6 +33,7 @@ class EtlDb:
 
 class EtlChangeType(Enum):
     """An enum to describe ETL change types"""
+
     NONE = 0
     INSERT = 1
     UPDATE = 2

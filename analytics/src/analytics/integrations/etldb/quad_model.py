@@ -4,6 +4,7 @@ from sqlalchemy import text
 from pandas import DataFrame
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
+
 class EtlQuadModel(EtlDb):
     """Encapsulates CRUD operations for quad entity"""
 
@@ -24,17 +25,16 @@ class EtlQuadModel(EtlDb):
 
         return quad_id, change_type
 
-
     def _insert_dimensions(self, quad_df: DataFrame) -> int:
         """Write quad dimension data to etl database"""
 
         # get values needed for sql statement
         insert_values = {
-            'ghid': quad_df['quad_ghid'],
-            'name': quad_df['quad_name'],
-            'start_date': quad_df['quad_start'],
-            'end_date': quad_df['quad_end'],
-            'duration': quad_df['quad_length'],
+            "ghid": quad_df["quad_ghid"],
+            "name": quad_df["quad_name"],
+            "start_date": quad_df["quad_start"],
+            "end_date": quad_df["quad_end"],
+            "duration": quad_df["quad_length"],
         }
         new_row_id = None
 
@@ -55,7 +55,6 @@ class EtlQuadModel(EtlDb):
 
         return new_row_id
 
-
     def _update_dimensions(self, quad_df: DataFrame) -> (int, EtlChangeType):
         """Update quad dimension data in etl database"""
 
@@ -64,10 +63,10 @@ class EtlQuadModel(EtlDb):
 
         # get values needed for sql statement
         new_values = (
-            quad_df['quad_name'],
-            quad_df['quad_start'],
-            quad_df['quad_end'],
-            int(quad_df['quad_length']),
+            quad_df["quad_name"],
+            quad_df["quad_start"],
+            quad_df["quad_end"],
+            int(quad_df["quad_length"]),
         )
 
         # select
@@ -77,14 +76,14 @@ class EtlQuadModel(EtlDb):
                 "select id, name, start_date, end_date, duration "
                 "from gh_quad where ghid = :ghid"
             ),
-            { 'ghid': quad_df['quad_ghid'] }
+            {"ghid": quad_df["quad_ghid"]},
         )
         quad_id, old_name, old_start, old_end, old_duration = result.fetchone()
         old_values = (
             old_name,
             old_start.strftime(self.dateformat),
             old_end.strftime(self.dateformat),
-            old_duration
+            old_duration,
         )
 
         # compare
@@ -99,12 +98,12 @@ class EtlQuadModel(EtlDb):
                         "where id = :quad_id"
                     ),
                     {
-                        'new_name': new_values[0],
-                        'new_start': new_values[1],
-                        'new_end': new_values[2],
-                        'new_duration': new_values[3],
-                        'quad_id': quad_id,
-                    }
+                        "new_name": new_values[0],
+                        "new_start": new_values[1],
+                        "new_end": new_values[2],
+                        "new_duration": new_values[3],
+                        "quad_id": quad_id,
+                    },
                 )
                 self.commit(cursor)
 
