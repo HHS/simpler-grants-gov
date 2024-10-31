@@ -2,12 +2,12 @@
 
 from sqlalchemy import text
 from pandas import DataFrame
-from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlEpicModel(EtlDb):
-    """Encapsulates CRUD operations for epic entity"""
+    """Encapsulate CRUD operations for epic entity"""
 
     def sync_epic(self, epic_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
         """Write epic data to etl database"""
@@ -61,7 +61,7 @@ class EtlEpicModel(EtlDb):
 
         # get values needed for sql statement
         insert_values = {
-            "deliverable_id": ghid_map[entity.DELIVERABLE].get(
+            "deliverable_id": ghid_map[EtlEntityType.DELIVERABLE].get(
                 epic_df["deliverable_ghid"]
             ),
             "epic_id": epic_id,

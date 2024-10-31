@@ -1,13 +1,13 @@
-"""Defines EtlIssueModel class to encapsulate db CRUD operations"""
+"""Define EtlIssueModel class to encapsulate db CRUD operations"""
 
 from sqlalchemy import text
 from pandas import DataFrame
-from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlIssueModel(EtlDb):
-    """Encapsulates CRUD operations for issue entity"""
+    """Encapsulate CRUD operations for issue entity"""
 
     def sync_issue(self, issue_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
         """Write issue data to etl database"""
@@ -41,7 +41,7 @@ class EtlIssueModel(EtlDb):
             "opened_date": issue_df["issue_opened_at"],
             "closed_date": issue_df["issue_closed_at"],
             "parent_ghid": issue_df["issue_parent"],
-            "epic_id": ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
+            "epic_id": ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
         }
         new_row_id = None
 
@@ -75,7 +75,7 @@ class EtlIssueModel(EtlDb):
             "status": issue_df["issue_status"],
             "is_closed": int(issue_df["issue_is_closed"]),
             "points": issue_df["issue_points"],
-            "sprint_id": ghid_map[entity.SPRINT].get(issue_df["sprint_ghid"]),
+            "sprint_id": ghid_map[EtlEntityType.SPRINT].get(issue_df["sprint_ghid"]),
             "effective": self.effective_date,
         }
         history_id = None
@@ -129,7 +129,7 @@ class EtlIssueModel(EtlDb):
             issue_df["issue_opened_at"],
             issue_df["issue_closed_at"],
             issue_df["issue_parent"],
-            ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
+            ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
         )
 
         # select
@@ -164,7 +164,7 @@ class EtlIssueModel(EtlDb):
                         "new_opened": issue_df["issue_opened_at"],
                         "new_closed": issue_df["issue_closed_at"],
                         "new_parent": issue_df["issue_parent"],
-                        "new_epic_id": ghid_map[entity.EPIC].get(issue_df["epic_ghid"]),
+                        "new_epic_id": ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
                         "issue_id": issue_id,
                     },
                 )

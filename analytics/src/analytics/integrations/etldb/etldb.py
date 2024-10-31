@@ -1,4 +1,4 @@
-"""Defines EtlDb as abstraction layer for database connections"""
+"""Define EtlDb as an abstraction layer for database connections"""
 
 from enum import Enum
 from sqlalchemy import Connection
@@ -6,24 +6,24 @@ from analytics.integrations import db
 
 
 class EtlDb:
-    """An abstraction to encapsulate etl database connections"""
+    """Encapsulate etl database connections"""
 
-    def __init__(self, effective):
-        """Constructor"""
+    def __init__(self, effective: str):
+        """Construct instance"""
         self._db_engine = db.get_db()
         self.effective_date = effective
         self.dateformat = "%Y-%m-%d"
 
     def __del__(self):
-        """Destructor"""
+        """Destroy instance"""
         self.disconnect()
 
     def connection(self) -> Connection:
-        """Gets a connection object from the db engine"""
+        """Get a connection object from the db engine"""
         return self._db_engine.connect()
 
-    def commit(self, connection) -> None:
-        """Commits an open transaction"""
+    def commit(self, connection: Connection) -> None:
+        """Commit an open transaction"""
         connection.commit()
 
     def disconnect(self) -> None:

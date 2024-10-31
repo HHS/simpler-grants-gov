@@ -1,13 +1,13 @@
-"""Defines EtlDeliverableModel class to encapsulate db CRUD operations"""
+"""Define EtlDeliverableModel class to encapsulate db CRUD operations"""
 
 from sqlalchemy import text
 from pandas import DataFrame
-from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlDeliverableModel(EtlDb):
-    """Encapsulates CRUD operations for deliverable entity"""
+    """Encapsulate CRUD operations for deliverable entity"""
 
     def sync_deliverable(
         self, deliverable_df: DataFrame, ghid_map: dict
@@ -68,7 +68,7 @@ class EtlDeliverableModel(EtlDb):
         # get values needed for sql statement
         insert_values = {
             "deliverable_id": deliverable_id,
-            "quad_id": ghid_map[entity.QUAD].get(deliverable_df["quad_ghid"]),
+            "quad_id": ghid_map[EtlEntityType.QUAD].get(deliverable_df["quad_ghid"]),
             "effective": self.effective_date,
         }
         new_row_id = None

@@ -1,13 +1,13 @@
-"""Defines EtlSprintModel class to encapsulate db CRUD operations"""
+"""Define EtlSprintModel class to encapsulate db CRUD operations"""
 
 from sqlalchemy import text
 from pandas import DataFrame
-from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlSprintModel(EtlDb):
-    """Encapsulates CRUD operations for sprint entity"""
+    """Encapsulate CRUD operations for sprint entity"""
 
     def sync_sprint(self, sprint_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
         """Write sprint data to etl database"""
@@ -36,7 +36,7 @@ class EtlSprintModel(EtlDb):
             "start": sprint_df["sprint_start"],
             "end": sprint_df["sprint_end"],
             "duration": sprint_df["sprint_length"],
-            "quad_id": ghid_map[entity.QUAD].get(sprint_df["quad_ghid"]),
+            "quad_id": ghid_map[EtlEntityType.QUAD].get(sprint_df["quad_ghid"]),
         }
         new_row_id = None
 
@@ -71,7 +71,7 @@ class EtlSprintModel(EtlDb):
             sprint_df["sprint_start"],
             sprint_df["sprint_end"],
             sprint_df["sprint_length"],
-            ghid_map[entity.QUAD].get(sprint_df["quad_ghid"]),
+            ghid_map[EtlEntityType.QUAD].get(sprint_df["quad_ghid"]),
         )
 
         # select

@@ -3,7 +3,7 @@
 from pathlib import Path
 from sqlalchemy import text
 from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.etl_dataset import EtlEntityType as entity
+from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
 from analytics.integrations.etldb.epic_model import EtlEpicModel
@@ -38,27 +38,27 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     """Write github data to etl database"""
     # initialize a map of github id to db row id
     ghid_map = {
-        entity.DELIVERABLE: {},
-        entity.EPIC: {},
-        entity.SPRINT: {},
-        entity.QUAD: {},
+        EtlEntityType.DELIVERABLE: {},
+        EtlEntityType.EPIC: {},
+        EtlEntityType.SPRINT: {},
+        EtlEntityType.QUAD: {},
     }
 
     # sync quad data to db resulting in row id for each quad
-    ghid_map[entity.QUAD] = sync_quads(dataset, effective)
-    print(f"quad row(s) processed: {len(ghid_map[entity.QUAD])}")
+    ghid_map[EtlEntityType.QUAD] = sync_quads(dataset, effective)
+    print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
 
     # sync deliverable data to db resulting in row id for each deliverable
-    ghid_map[entity.DELIVERABLE] = sync_deliverables(dataset, effective, ghid_map)
-    print(f"deliverable row(s) processed: {len(ghid_map[entity.DELIVERABLE])}")
+    ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(dataset, effective, ghid_map)
+    print(f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}")
 
     # sync sprint data to db resulting in row id for each sprint
-    ghid_map[entity.SPRINT] = sync_sprints(dataset, effective, ghid_map)
-    print(f"sprint row(s) processed: {len(ghid_map[entity.SPRINT])}")
+    ghid_map[EtlEntityType.SPRINT] = sync_sprints(dataset, effective, ghid_map)
+    print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
 
     # sync epic data to db resulting in row id for each epic
-    ghid_map[entity.EPIC] = sync_epics(dataset, effective, ghid_map)
-    print(f"epic row(s) processed: {len(ghid_map[entity.EPIC])}")
+    ghid_map[EtlEntityType.EPIC] = sync_epics(dataset, effective, ghid_map)
+    print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
 
     # sync issue data to db resulting in row id for each issue
     issue_map = sync_issues(dataset, effective, ghid_map)
