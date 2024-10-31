@@ -14,6 +14,7 @@ from analytics.datasets.utils import load_json_data_as_df
 
 class EtlEntityType(Enum):
     """Define entity types in the db schema"""
+
     DELIVERABLE = "deliverable"
     EPIC = "epic"
     ISSUE = "issue"

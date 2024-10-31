@@ -324,7 +324,7 @@ def transform_and_load(
     # validate effective date arg
     try:
         dateformat = "%Y-%m-%d"
-        datestamp = datetime.strptime(effective_date, dateformat).strftime(dateformat)
+        datestamp = datetime.strptime(effective_date, dateformat).astimezone().strftime(dateformat)
         print(f"running transform and load with effective date {datestamp}")
     except ValueError:
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")

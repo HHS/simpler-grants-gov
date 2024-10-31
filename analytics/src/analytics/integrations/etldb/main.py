@@ -49,7 +49,9 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
 
     # sync deliverable data to db resulting in row id for each deliverable
-    ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(dataset, effective, ghid_map)
+    ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
+        dataset, effective, ghid_map
+    )
     print(f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}")
 
     # sync sprint data to db resulting in row id for each sprint

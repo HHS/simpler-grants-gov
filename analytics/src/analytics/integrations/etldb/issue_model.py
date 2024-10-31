@@ -164,7 +164,9 @@ class EtlIssueModel(EtlDb):
                         "new_opened": issue_df["issue_opened_at"],
                         "new_closed": issue_df["issue_closed_at"],
                         "new_parent": issue_df["issue_parent"],
-                        "new_epic_id": ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
+                        "new_epic_id": ghid_map[EtlEntityType.EPIC].get(
+                            issue_df["epic_ghid"]
+                        ),
                         "issue_id": issue_id,
                     },
                 )
