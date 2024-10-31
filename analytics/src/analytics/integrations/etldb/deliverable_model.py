@@ -103,9 +103,12 @@ class EtlDeliverableModel(EtlDb):
 
         # select
         cursor = self.connection()
-        select_sql = "select id, title, pillar from gh_deliverable where ghid = :ghid"
-        select_values = { 'ghid': ghid }
-        result = cursor.execute(text(select_sql), select_values)
+        result = cursor.execute(
+            text(
+                "select id, title, pillar from gh_deliverable where ghid = :ghid"
+            ),
+            { 'ghid': ghid }
+        )
         deliverable_id, old_title, old_pillar = result.fetchone()
         old_values = (old_title, old_pillar)
 
@@ -122,7 +125,7 @@ class EtlDeliverableModel(EtlDb):
                     'new_pillar': new_pillar,
                     'deliverable_id': deliverable_id,
                 }
-                result = cursor.execute(update_sql, update_values)
+                cursor.execute(update_sql, update_values)
                 self.commit(cursor)
 
         return deliverable_id, change_type

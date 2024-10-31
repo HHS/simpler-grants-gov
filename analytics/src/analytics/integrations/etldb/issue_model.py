@@ -121,23 +121,24 @@ class EtlIssueModel(EtlDb):
         change_type = EtlChangeType.NONE
 
         # get values needed for sql statement
-        ghid = issue_df['issue_ghid']
-        new_title = issue_df['issue_title']
-        new_type = issue_df['issue_type'] or 'None'
-        new_opened = issue_df['issue_opened_at']
-        new_closed = issue_df['issue_closed_at']
-        new_parent = issue_df['issue_parent']
-        new_epic_id = ghid_map[entity.EPIC].get(issue_df['epic_ghid'])
-        new_values = (new_title, new_type, new_opened, new_closed, new_parent, new_epic_id)
+        new_values = (
+            issue_df['issue_title'],
+            issue_df['issue_type'] or 'None',
+            issue_df['issue_opened_at'],
+            issue_df['issue_closed_at'],
+            issue_df['issue_parent'],
+            ghid_map[entity.EPIC].get(issue_df['epic_ghid']),
+        )
 
         # select
         cursor = self.connection()
-        select_sql = text(
-            "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
-            "from gh_issue where ghid = :ghid"
+        r = cursor.execute(
+            text(
+                "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
+                "from gh_issue where ghid = :ghid"
+            ),
+            { 'ghid': issue_df['issue_ghid'] }
         )
-        select_values = { 'ghid': ghid }
-        r = cursor.execute(select_sql, select_values)
         issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = r.fetchone()
         old_values = (o_title, o_type, o_opened, o_closed, o_parent, o_epic_id)
 
@@ -145,23 +146,25 @@ class EtlIssueModel(EtlDb):
         if issue_id is not None:
             if new_values != old_values:
                 change_type = EtlChangeType.UPDATE
-                update_sql = text(
-                    "update gh_issue set "
-                    "title = :new_title, type = :new_type, opened_date = :new_opened, "
-                    "closed_date = :new_closed, parent_issue_ghid = :new_parent, "
-                    "epic_id = :new_epic_id, t_modified = current_timestamp "
-                    "where id = :issue_id"
+                cursor.execute(
+                    text(
+                        "update gh_issue set "
+                        "title = :new_title, type = :new_type, opened_date = :new_opened, "
+                        "closed_date = :new_closed, parent_issue_ghid = :new_parent, "
+                        "epic_id = :new_epic_id, t_modified = current_timestamp "
+                        "where id = :issue_id"
+                    ),
+                    {
+                        'new_title': issue_df['issue_title'],
+                        'new_type': issue_df['issue_type'] or 'None',
+                        'new_opened': issue_df['issue_opened_at'],
+                        'new_closed': issue_df['issue_closed_at'],
+                        'new_parent': issue_df['issue_parent'],
+                        'new_epic_id': ghid_map[entity.EPIC].get(issue_df['epic_ghid']),
+                        'issue_id': issue_id
+                    }
+
                 )
-                update_values = {
-                    'new_title': new_title,
-                    'new_type': new_type,
-                    'new_opened': new_opened,
-                    'new_closed': new_closed,
-                    'new_parent': new_parent,
-                    'new_epic_id': new_epic_id,
-                    'issue_id': issue_id
-                }
-                cursor.execute(update_sql, update_values)
                 self.commit(cursor)
 
         return issue_id, change_type

@@ -65,22 +65,25 @@ class EtlSprintModel(EtlDb):
         change_type = EtlChangeType.NONE
 
         # get values needed for sql statement
-        ghid = sprint_df['sprint_ghid']
-        new_name = sprint_df['sprint_name']
-        new_start = sprint_df['sprint_start']
-        new_end = sprint_df['sprint_end']
-        new_duration = sprint_df['sprint_length']
-        new_quad_id = ghid_map[entity.QUAD].get(sprint_df['quad_ghid'])
-        new_values = (new_name, new_start, new_end, new_duration, new_quad_id)
+        new_values = (
+            sprint_df['sprint_name'],
+            sprint_df['sprint_start'],
+            sprint_df['sprint_end'],
+            sprint_df['sprint_length'],
+            ghid_map[entity.QUAD].get(sprint_df['quad_ghid']),
+        )
 
         # select
         cursor = self.connection()
-        select_sql = text(
-            "select id, name, start_date, end_date, duration, quad_id "
-            "from gh_sprint where ghid = :ghid"
+        result = cursor.execute(
+            text(
+                "select id, name, start_date, end_date, duration, quad_id "
+                "from gh_sprint where ghid = :ghid"
+            ),
+            {
+                'ghid': sprint_df['sprint_ghid']
+            }
         )
-        select_values = { 'ghid': ghid }
-        result = cursor.execute(select_sql, select_values)
         sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = result.fetchone()
         old_values = (old_name, old_start, old_end, old_duration, old_quad_id)
 
@@ -88,20 +91,21 @@ class EtlSprintModel(EtlDb):
         if sprint_id is not None:
             if new_values != old_values:
                 change_type = EtlChangeType.UPDATE
-                update_sql = text(
-                    "update gh_sprint set name = :new_name, start_date = :new_start, "
-                    "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
-                    "t_modified = current_timestamp where id = :sprint_id"
+                cursor.execute(
+                    text(
+                        "update gh_sprint set name = :new_name, start_date = :new_start, "
+                        "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
+                        "t_modified = current_timestamp where id = :sprint_id"
+                    ),
+                    {
+                        'new_name': sprint_df['sprint_name'],
+                        'new_start': sprint_df['sprint_start'],
+                        'new_end': sprint_df['sprint_end'],
+                        'new_duration': sprint_df['sprint_length'],
+                        'quad_id': ghid_map[entity.QUAD].get(sprint_df['quad_ghid']),
+                        'sprint_id': sprint_id,
+                    }
                 )
-                update_values = {
-                    'new_name': new_name,
-                    'new_start': new_start,
-                    'new_end': new_end,
-                    'new_duration': new_duration,
-                    'quad_id': new_quad_id,
-                    'sprint_id': sprint_id,
-                }
-                result = cursor.execute(update_sql, update_values)
                 self.commit(cursor)
 
         return sprint_id, change_type

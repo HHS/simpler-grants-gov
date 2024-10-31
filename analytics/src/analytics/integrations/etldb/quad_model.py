@@ -64,19 +64,24 @@ class EtlQuadModel(EtlDb):
 
         # get values needed for sql statement
         dateformat = "%Y-%m-%d"
-        new_name = quad_df['quad_name']
-        new_start = quad_df['quad_start']
-        new_end = quad_df['quad_end']
-        new_duration = int(quad_df['quad_length'])
-        new_values = (new_name, new_start, new_end, new_duration)
+        new_values = (
+            quad_df['quad_name'],
+            quad_df['quad_start'],
+            quad_df['quad_end'],
+            int(quad_df['quad_length']),
+        )
 
         # select
         cursor = self.connection()
-        select_sql = text(
-            "select id, name, start_date, end_date, duration "
-            "from gh_quad where ghid = ghid"
+        result = cursor.execute(
+            text(
+                "select id, name, start_date, end_date, duration "
+                "from gh_quad where ghid = :ghid"
+            ),
+            {
+                'ghid': quad_df['quad_ghid']
+            }
         )
-        result = cursor.execute(select_sql,)
         quad_id, old_name, old_start, old_end, old_duration = result.fetchone()
         old_values = (
             old_name,
@@ -89,19 +94,21 @@ class EtlQuadModel(EtlDb):
         if quad_id is not None:
             if new_values != old_values:
                 change_type = EtlChangeType.UPDATE
-                update_sql = text(
-                    "update gh_quad set name = :new_name, start_date = :new_start, "
-                    "end_date = :new_end, duration = :new_duration, t_modified = current_timestamp "
-                    "where id = :quad_id"
+                cursor.execute(
+                    text(
+                        "update gh_quad set name = :new_name, start_date = :new_start, "
+                        "end_date = :new_end, duration = :new_duration, "
+                        "t_modified = current_timestamp "
+                        "where id = :quad_id"
+                    ),
+                    {
+                        'new_name': quad_df['quad_name'],
+                        'new_start': quad_df['quad_start'],
+                        'new_end': quad_df['quad_end'],
+                        'new_duration': int(quad_df['quad_length']),
+                        'quad_id': quad_id,
+                    }
                 )
-                update_values = {
-                    'new_name': new_name,
-                    'new_start': new_start,
-                    'new_end': new_end,
-                    'new_duration': new_duration,
-                    'quad_id': quad_id,
-                }
-                result = cursor.execute(update_sql, update_values)
                 self.commit(cursor)
 
         return quad_id, change_type
