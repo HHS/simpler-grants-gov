@@ -14,7 +14,6 @@ from sqlalchemy import text
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
-from analytics.datasets.sprint_board import SprintBoard
 from analytics.integrations import db, github, slack, etldb
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
@@ -140,7 +139,6 @@ def export_github_data(
 
 @metrics_app.command(name="sprint_burndown")
 def calculate_sprint_burndown(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
     unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
@@ -151,10 +149,7 @@ def calculate_sprint_burndown(
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
-    sprint_data = SprintBoard.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
+    sprint_data = GitHubIssues.from_json(issue_file)
     # calculate burndown
     burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
     show_and_or_post_results(
@@ -167,7 +162,6 @@ def calculate_sprint_burndown(
 
 @metrics_app.command(name="sprint_burnup")
 def calculate_sprint_burnup(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     sprint: Annotated[str, SPRINT_ARG],
     unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
@@ -178,10 +172,7 @@ def calculate_sprint_burnup(
 ) -> None:
     """Calculate the burnup of a particular sprint."""
     # load the input data
-    sprint_data = SprintBoard.load_from_json_files(
-        sprint_file=sprint_file,
-        issue_file=issue_file,
-    )
+    sprint_data = GitHubIssues.from_json(issue_file)
     # calculate burnup
     burnup = SprintBurnup(sprint_data, sprint=sprint, unit=unit)
     show_and_or_post_results(
