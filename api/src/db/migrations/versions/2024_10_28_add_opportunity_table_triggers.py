@@ -37,10 +37,10 @@ BEGIN
             opp_id := NEW.opportunity_id;
     END CASE;
 
-    INSERT INTO api.opportunity_search_index_queue (opportunity_id)
-    VALUES (opp_id)
+    INSERT INTO api.opportunity_search_index_queue (opportunity_id, has_update)
+    VALUES (opp_id, TRUE)
     ON CONFLICT (opportunity_id)
-    DO NOTHING;
+    DO UPDATE SET has_update = TRUE, updated_at = CURRENT_TIMESTAMP;
 
     RETURN NEW;
 END;
@@ -74,8 +74,6 @@ def upgrade():
         """
         )
 
-    op.drop_column("opportunity_search_index_queue", "has_update", schema="api")
-
 
 def downgrade():
     # Drop triggers
@@ -84,9 +82,3 @@ def downgrade():
 
     # Drop the trigger function
     op.execute("DROP FUNCTION IF EXISTS update_opportunity_search_queue();")
-
-    op.add_column(
-        "opportunity_search_index_queue",
-        sa.Column("has_update", sa.BOOLEAN(), autoincrement=False, nullable=False),
-        schema="api",
-    )
