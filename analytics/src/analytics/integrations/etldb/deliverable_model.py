@@ -1,13 +1,13 @@
 from sqlalchemy import text
 
-import pandas
+from pandas import DataFrame
 
 from analytics.datasets.etl_dataset import EtlEntityType as entity
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 class EtlDeliverableModel(EtlDb):
 
-    def sync_deliverable(self, deliverable_df: pandas.DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_deliverable(self, deliverable_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -28,7 +28,7 @@ class EtlDeliverableModel(EtlDb):
         return deliverable_id, change_type
 
 
-    def _insert_dimensions(self, deliverable_df: pandas.DataFrame) -> int:
+    def _insert_dimensions(self, deliverable_df: DataFrame) -> int:
 
         # get values needed for sql statement
         insert_values = {
@@ -40,8 +40,12 @@ class EtlDeliverableModel(EtlDb):
 
         # insert into dimension table: deliverable
         cursor = self.connection()
-        insert_sql = "insert into gh_deliverable(ghid, title, pillar) values (:ghid, :title, :pillar) on conflict(ghid) do nothing returning id"
-        result = cursor.execute(text(insert_sql), insert_values)
+        insert_sql = text(
+            "insert into gh_deliverable(ghid, title, pillar) "
+            "values (:ghid, :title, :pillar) "
+            "on conflict(ghid) do nothing returning id"
+        )
+        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -52,7 +56,7 @@ class EtlDeliverableModel(EtlDb):
         return new_row_id
 
 
-    def _insert_facts(self, deliverable_id: int, deliverable_df: pandas.DataFrame, ghid_map: dict) -> int:
+    def _insert_facts(self, deliverable_id: int, deliverable_df: DataFrame, ghid_map: dict) -> int:
 
         # get values needed for sql statement
         insert_values = {
@@ -64,8 +68,13 @@ class EtlDeliverableModel(EtlDb):
 
         # insert into fact table: deliverable_quad_map
         cursor = self.connection()
-        insert_sql = "insert into gh_deliverable_quad_map(deliverable_id, quad_id, d_effective) values (:deliverable_id, :quad_id, :effective) on conflict(deliverable_id, d_effective) do update set (quad_id, t_modified) = (:quad_id, current_timestamp) returning id"
-        result = cursor.execute(text(insert_sql), insert_values)
+        insert_sql = text(
+            "insert into gh_deliverable_quad_map(deliverable_id, quad_id, d_effective) "
+            "values (:deliverable_id, :quad_id, :effective) "
+            "on conflict(deliverable_id, d_effective) do update "
+            "set (quad_id, t_modified) = (:quad_id, current_timestamp) returning id"
+        )
+        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -76,7 +85,7 @@ class EtlDeliverableModel(EtlDb):
         return new_row_id
 
 
-    def _update_dimensions(self, deliverable_df: pandas.DataFrame) -> (int, EtlChangeType):
+    def _update_dimensions(self, deliverable_df: DataFrame) -> (int, EtlChangeType):
 
         # initialize return value
         change_type = EtlChangeType.NONE
@@ -89,8 +98,9 @@ class EtlDeliverableModel(EtlDb):
 
         # select
         cursor = self.connection()
-        select_sql = f"select id, title, pillar from gh_deliverable where ghid = '{ghid}'"
-        result = cursor.execute(text(select_sql),)
+        select_sql = "select id, title, pillar from gh_deliverable where ghid = :ghid"
+        select_values = { 'ghid': ghid }
+        result = cursor.execute(text(select_sql), select_values)
         deliverable_id, old_title, old_pillar = result.fetchone()
         old_values = (old_title, old_pillar)
 
@@ -98,13 +108,16 @@ class EtlDeliverableModel(EtlDb):
         if deliverable_id is not None:
             if new_values != old_values:
                 change_type = EtlChangeType.UPDATE
-                update_sql = "update gh_deliverable set title = :new_title, pillar = :new_pillar, t_modified = current_timestamp where id = :deliverable_id"
+                update_sql = text(
+                    "update gh_deliverable set title = :new_title, pillar = :new_pillar, "
+                    "t_modified = current_timestamp where id = :deliverable_id"
+                )
                 update_values = {
                     'new_title': new_title,
                     'new_pillar': new_pillar,
                     'deliverable_id': deliverable_id,
                 }
-                result = cursor.execute(text(update_sql), update_values)
+                result = cursor.execute(update_sql, update_values)
                 self.commit(cursor)
 
         return deliverable_id, change_type
