@@ -1820,5 +1820,3 @@ class OpportunitySearchIndexQueueFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
-
-    has_update = True

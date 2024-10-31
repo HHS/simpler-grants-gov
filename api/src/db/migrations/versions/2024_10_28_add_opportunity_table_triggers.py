@@ -6,6 +6,7 @@ Create Date: 2024-10-28 17:48:02.678523
 
 """
 
+import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -36,10 +37,10 @@ BEGIN
             opp_id := NEW.opportunity_id;
     END CASE;
 
-    INSERT INTO api.opportunity_search_index_queue (opportunity_id, has_update)
-    VALUES (opp_id, TRUE)
+    INSERT INTO api.opportunity_search_index_queue (opportunity_id)
+    VALUES (opp_id)
     ON CONFLICT (opportunity_id)
-    DO UPDATE SET has_update = TRUE, updated_at = CURRENT_TIMESTAMP;
+    DO NOTHING;
 
     RETURN NEW;
 END;
@@ -73,6 +74,8 @@ def upgrade():
         """
         )
 
+    op.drop_column("opportunity_search_index_queue", "has_update", schema="api")
+
 
 def downgrade():
     # Drop triggers
@@ -81,3 +84,9 @@ def downgrade():
 
     # Drop the trigger function
     op.execute("DROP FUNCTION IF EXISTS update_opportunity_search_queue();")
+
+    op.add_column(
+        "opportunity_search_index_queue",
+        sa.Column("has_update", sa.BOOLEAN(), autoincrement=False, nullable=False),
+        schema="api",
+    )

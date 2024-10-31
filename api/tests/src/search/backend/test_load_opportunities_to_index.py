@@ -55,7 +55,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
 
         for opportunity in opportunities:
-            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
+            OpportunitySearchIndexQueueFactory.create(
+                opportunity=opportunity,
+            )
 
         load_opportunities_to_index.run()
         # Verify some metrics first
@@ -140,7 +142,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
 
         for opportunity in opportunities:
-            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
+            OpportunitySearchIndexQueueFactory.create(
+                opportunity=opportunity,
+            )
 
         load_opportunities_to_index.run()
 
@@ -156,7 +160,9 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             db_session.delete(opportunity)
 
         for opportunity in opportunities:
-            OpportunitySearchIndexQueueFactory.create(opportunity=opportunity, has_update=True)
+            OpportunitySearchIndexQueueFactory.create(
+                opportunity=opportunity,
+            )
 
         load_opportunities_to_index.run()
 
