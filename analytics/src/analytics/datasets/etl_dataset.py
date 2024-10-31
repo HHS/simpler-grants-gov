@@ -74,20 +74,11 @@ class EtlDataset(BaseDataset):
         )
 
         # transform entity id columns
+        prefix = "https://github.com/"
         for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
-            df[col] = df[col].apply(lambda x: EtlDataset._remove_fqdn_prefix(x))
+            df[col] = df[col].str.replace(prefix, "")
 
         return cls(df)
-
-    @classmethod
-    def _remove_fqdn_prefix(cls, value: str) -> str:
-        """Remove the fully qualified domain name prefix (if any) from a string"""
-        prefix = "https://github.com/"
-
-        if not isinstance(value, str) or not value.startswith(prefix):
-            return value
-
-        return value.replace(prefix, "")
 
     # QUAD getters
 
