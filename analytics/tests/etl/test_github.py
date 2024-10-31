@@ -1,4 +1,5 @@
 # ruff: noqa: SLF001
+# pylint: disable=protected-access
 """Test the GitHubProjectETL class."""
 
 from pathlib import Path
@@ -14,8 +15,8 @@ from analytics.etl.github import (
 )
 
 
-@pytest.fixture()
-def config() -> GitHubProjectConfig:
+@pytest.fixture(name="config")
+def mock_config() -> GitHubProjectConfig:
     """Fixture to create a sample configuration for testing."""
     return GitHubProjectConfig(
         roadmap_project=RoadmapConfig(owner="test_owner", project_number=1),
@@ -25,8 +26,8 @@ def config() -> GitHubProjectConfig:
     )
 
 
-@pytest.fixture()
-def etl(config: GitHubProjectConfig):
+@pytest.fixture(name="etl")
+def mock_etl(config: GitHubProjectConfig):
     """Fixture to initialize the ETL pipeline."""
     return GitHubProjectETL(config)
 
@@ -59,9 +60,9 @@ def test_extract(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
     )
 
     # Verify transient files were set correctly
-    assert len(etl.transient_files) == 1
-    assert etl.transient_files[0].roadmap.endswith("roadmap-data.json")
-    assert etl.transient_files[0].sprint.endswith(
+    assert len(etl._transient_files) == 1
+    assert etl._transient_files[0].roadmap.endswith("roadmap-data.json")
+    assert etl._transient_files[0].sprint.endswith(
         f"sprint-data-{sprint_board.project_number}.json",
     )
 
@@ -72,13 +73,13 @@ def test_transform(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
     monkeypatch.setattr(GitHubIssues, "load_from_json_files", mock_load_from_json_files)
 
     # Provide a sample transient file to `etl`
-    etl.transient_files = [InputFiles(roadmap="roadmap.json", sprint="sprint.json")]
+    etl._transient_files = [InputFiles(roadmap="roadmap.json", sprint="sprint.json")]
 
     # Run the transform method
     etl.transform()
 
     # Check if load_from_json_files was called with correct files
-    mock_load_from_json_files.assert_called_once_with(etl.transient_files)
+    mock_load_from_json_files.assert_called_once_with(etl._transient_files)
 
     # Verify that the dataset was assigned correctly
     assert etl._dataset == "mock_dataset"

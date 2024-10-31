@@ -122,11 +122,11 @@ class GitHubProjectETL:
                 ),
             )
         # store transient files for re-use during the transform step
-        self.transient_files = input_files
+        self._transient_files = input_files
 
     def transform(self) -> None:
         """Run the transformation step of the ETL pipeline."""
-        self._dataset = GitHubIssues.load_from_json_files(self.transient_files)
+        self._dataset = GitHubIssues.load_from_json_files(self._transient_files)
 
     def load(self) -> None:
         """Run the load step of the ETL pipeline."""
