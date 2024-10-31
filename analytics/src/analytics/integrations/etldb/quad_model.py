@@ -63,7 +63,6 @@ class EtlQuadModel(EtlDb):
         change_type = EtlChangeType.NONE
 
         # get values needed for sql statement
-        dateformat = "%Y-%m-%d"
         new_values = (
             quad_df['quad_name'],
             quad_df['quad_start'],
@@ -78,15 +77,13 @@ class EtlQuadModel(EtlDb):
                 "select id, name, start_date, end_date, duration "
                 "from gh_quad where ghid = :ghid"
             ),
-            {
-                'ghid': quad_df['quad_ghid']
-            }
+            { 'ghid': quad_df['quad_ghid'] }
         )
         quad_id, old_name, old_start, old_end, old_duration = result.fetchone()
         old_values = (
             old_name,
-            old_start.strftime(dateformat),
-            old_end.strftime(dateformat),
+            old_start.strftime(self.dateformat),
+            old_end.strftime(self.dateformat),
             old_duration
         )
 
@@ -96,16 +93,16 @@ class EtlQuadModel(EtlDb):
                 change_type = EtlChangeType.UPDATE
                 cursor.execute(
                     text(
-                        "update gh_quad set name = :new_name, start_date = :new_start, "
-                        "end_date = :new_end, duration = :new_duration, "
-                        "t_modified = current_timestamp "
+                        "update gh_quad set name = :new_name, "
+                        "start_date = :new_start, end_date = :new_end, "
+                        "duration = :new_duration, t_modified = current_timestamp "
                         "where id = :quad_id"
                     ),
                     {
-                        'new_name': quad_df['quad_name'],
-                        'new_start': quad_df['quad_start'],
-                        'new_end': quad_df['quad_end'],
-                        'new_duration': int(quad_df['quad_length']),
+                        'new_name': new_values[0],
+                        'new_start': new_values[1],
+                        'new_end': new_values[2],
+                        'new_duration': new_values[3],
                         'quad_id': quad_id,
                     }
                 )

@@ -11,6 +11,7 @@ class EtlDb:
         """Constructor"""
         self._db_engine = db.get_db()
         self.effective_date = effective
+        self.dateformat = "%Y-%m-%d"
 
     def __del__(self):
         """Destructor"""

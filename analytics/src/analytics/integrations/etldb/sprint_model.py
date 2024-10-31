@@ -80,9 +80,7 @@ class EtlSprintModel(EtlDb):
                 "select id, name, start_date, end_date, duration, quad_id "
                 "from gh_sprint where ghid = :ghid"
             ),
-            {
-                'ghid': sprint_df['sprint_ghid']
-            }
+            { 'ghid': sprint_df['sprint_ghid'] }
         )
         sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = result.fetchone()
         old_values = (old_name, old_start, old_end, old_duration, old_quad_id)
@@ -98,11 +96,11 @@ class EtlSprintModel(EtlDb):
                         "t_modified = current_timestamp where id = :sprint_id"
                     ),
                     {
-                        'new_name': sprint_df['sprint_name'],
-                        'new_start': sprint_df['sprint_start'],
-                        'new_end': sprint_df['sprint_end'],
-                        'new_duration': sprint_df['sprint_length'],
-                        'quad_id': ghid_map[entity.QUAD].get(sprint_df['quad_ghid']),
+                        'new_name': new_values[0],
+                        'new_start': new_values[1],
+                        'new_end': new_values[2],
+                        'new_duration': new_values[3],
+                        'quad_id': new_values[4],
                         'sprint_id': sprint_id,
                     }
                 )

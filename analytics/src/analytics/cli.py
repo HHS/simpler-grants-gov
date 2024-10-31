@@ -1,11 +1,11 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
-import logging
 
-from datetime import datetime
+import logging
 import logging.config
 from pathlib import Path
 from typing import Annotated, Optional
+from datetime import datetime
 
 import typer
 from slack_sdk import WebClient
@@ -310,6 +310,11 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
     logger.info("Number of rows in table: %s", rows)
 
 
+# ===========================================================
+# Etl commands
+# ===========================================================
+
+
 @etl_app.command(name="initialize_database")
 def initialize_database() -> None:
     """ Initialize etl database """
@@ -329,7 +334,7 @@ def transform_and_load(
     try:
         dateformat = "%Y-%m-%d"
         datestamp = datetime.strptime(effective_date, dateformat).strftime(dateformat)
-        print(f"running data loader with effective date of {datestamp}")
+        print(f"running transform and load with effective date {datestamp}")
     except ValueError:
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
@@ -343,4 +348,4 @@ def transform_and_load(
     etldb.sync_db(dataset, datestamp)
 
     # finish
-    print("data loader is done")
+    print("transform and load is done")
