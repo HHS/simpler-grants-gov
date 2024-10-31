@@ -7,6 +7,8 @@ import { useState } from "react";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+type ContentDisplayToggleTypes = "default" | "centered";
+
 /*
  * ContentDisplayToggle
  *
@@ -23,14 +25,16 @@ export default function ContentDisplayToggle({
   breakpoint,
   showContentByDefault = false,
   positionButtonBelowContent = true,
+  type = "default",
   children,
 }: {
   hideCallToAction: string;
   showCallToAction: string;
   breakpoint?: Breakpoints;
   showContentByDefault?: boolean;
-  children: React.ReactNode;
+  type?: ContentDisplayToggleTypes;
   positionButtonBelowContent?: boolean;
+  children: React.ReactNode;
 }) {
   const [toggledContentVisible, setToggledContentVisible] =
     useState<boolean>(showContentByDefault);
@@ -55,9 +59,9 @@ export default function ContentDisplayToggle({
       <div
         data-testid="content-display-toggle"
         className={clsx(
-          "display-flex",
-          "flex-column",
-          "flex-align-center",
+          type === "centered" && "display-flex",
+          type === "centered" && "flex-column",
+          type === "centered" && "flex-align-center",
           breakpoint && `${breakpoint}:display-none`,
         )}
       >
@@ -67,7 +71,7 @@ export default function ContentDisplayToggle({
           className="usa-button usa-button--unstyled text-no-underline"
         >
           <USWDSIcon name={iconName} className="usa-icon usa-icon--size-4" />
-          <span className="text-bold">
+          <span className={clsx(type === "centered" && "text-bold")}>
             {toggledContentVisible ? hideCallToAction : showCallToAction}
           </span>
         </button>
