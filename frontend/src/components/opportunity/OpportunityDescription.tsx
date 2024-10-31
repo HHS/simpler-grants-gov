@@ -54,7 +54,7 @@ const SummaryDescriptionDisplay = ({
   summaryDescription: string;
 }) => {
   const t = useTranslations("OpportunityListing.description");
-  if (summaryDescription?.length < 600) {
+  if (summaryDescription?.length < 750) {
     return (
       <div
         dangerouslySetInnerHTML={{
