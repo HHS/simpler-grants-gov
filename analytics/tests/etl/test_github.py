@@ -21,13 +21,13 @@ from tests.conftest import issue
 
 
 @pytest.fixture(name="config")
-def mock_config() -> GitHubProjectConfig:
+def mock_config(tmp_path: Path) -> GitHubProjectConfig:
     """Fixture to create a sample configuration for testing."""
     return GitHubProjectConfig(
         roadmap_project=RoadmapConfig(owner="test_owner", project_number=1),
         sprint_projects=[SprintBoardConfig(owner="test_owner", project_number=2)],
-        temp_dir="test_data",
-        output_file="test_output.json",
+        temp_dir=str(tmp_path),
+        output_file=str(tmp_path / "test_output.json"),
     )
 
 
@@ -35,6 +35,35 @@ def mock_config() -> GitHubProjectConfig:
 def mock_etl(config: GitHubProjectConfig):
     """Fixture to initialize the ETL pipeline."""
     return GitHubProjectETL(config)
+
+
+@pytest.fixture(name="sprint_file")
+def mock_sprint_data_file(config: GitHubProjectConfig) -> str:
+    """Create a path to a JSON file with mock sprint data exported from GitHub."""
+    # Arrange - create dummy sprint data
+    proj_number = config.sprint_projects[0].project_number
+    sprint_file = str(Path(config.temp_dir) / f"sprint-data-{proj_number}.json")
+    sprint_data = [
+        issue(issue=1, kind=IssueType.TASK, parent="Epic3", points=2),
+        issue(issue=2, kind=IssueType.TASK, parent="Epic4", points=1),
+    ]
+    roadmap_data = [i.model_dump() for i in sprint_data]
+    dump_to_json(sprint_file, roadmap_data)
+    return sprint_file
+
+
+@pytest.fixture(name="roadmap_file")
+def mock_roadmap_data_file(config: GitHubProjectConfig) -> str:
+    """Create a path to a JSON file with mock sprint data exported from GitHub."""
+    roadmap_file = str(Path(config.temp_dir) / "roadmap-data.json")
+    roadmap_data = [
+        issue(issue=3, kind=IssueType.EPIC, parent="Deliverable5"),
+        issue(issue=4, kind=IssueType.EPIC, parent="Deliverable6"),
+        issue(issue=5, kind=IssueType.DELIVERABLE, quad="quad1"),
+    ]
+    roadmap_data = [i.model_dump() for i in roadmap_data]
+    dump_to_json(roadmap_file, roadmap_data)
+    return roadmap_file
 
 
 def test_extract(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
@@ -72,25 +101,8 @@ def test_extract(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
     )
 
 
-def test_transform(tmp_path: Path, etl: GitHubProjectETL):
+def test_transform(etl: GitHubProjectETL, sprint_file: str, roadmap_file: str):
     """Test the transform step by mocking GitHubIssues.load_from_json_files."""
-    # Arrange - create dummy sprint data
-    sprint_file = str(tmp_path / "sprint-data.json")
-    sprint_data = [
-        issue(issue=1, kind=IssueType.TASK, parent="Epic3", points=2),
-        issue(issue=2, kind=IssueType.TASK, parent="Epic4", points=1),
-    ]
-    roadmap_data = [i.model_dump() for i in sprint_data]
-    dump_to_json(sprint_file, roadmap_data)
-    # Act - create dummy roadmap data
-    roadmap_file = str(tmp_path / "roadmap-data.json")
-    roadmap_data = [
-        issue(issue=3, kind=IssueType.EPIC, parent="Deliverable5"),
-        issue(issue=4, kind=IssueType.EPIC, parent="Deliverable6"),
-        issue(issue=5, kind=IssueType.DELIVERABLE, quad="quad1"),
-    ]
-    roadmap_data = [i.model_dump() for i in roadmap_data]
-    dump_to_json(roadmap_file, roadmap_data)
     # Arrange
     output_data = [
         issue(
@@ -131,23 +143,44 @@ def test_load(etl: GitHubProjectETL):
     mock_to_json.assert_called_once_with(etl.config.output_file)
 
 
-def test_run(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
+def test_run(
+    monkeypatch: pytest.MonkeyPatch,
+    etl: GitHubProjectETL,
+    sprint_file: str,
+    roadmap_file: str,
+):
     """Test the entire ETL pipeline by verifying method calls in run."""
-    # Mock the extract, transform, and load methods
-    mock_extract = MagicMock()
-    mock_transform = MagicMock()
-    mock_load = MagicMock()
-    monkeypatch.setattr(etl, "extract", mock_extract)
-    monkeypatch.setattr(etl, "transform", mock_transform)
-    monkeypatch.setattr(etl, "load", mock_load)
-
-    # Run the entire ETL process
+    # Arrange - Mock the export private methods
+    mock_export_roadmap_data = MagicMock()
+    mock_export_sprint_data = MagicMock()
+    monkeypatch.setattr(etl, "_export_roadmap_data", mock_export_roadmap_data)
+    monkeypatch.setattr(etl, "_export_sprint_data", mock_export_sprint_data)
+    # Arrange - specify the output wanted
+    output_data = [
+        issue(
+            issue=1,
+            points=2,
+            parent="Epic3",
+            deliverable="Deliverable5",
+            quad="quad1",
+            epic="Epic3",
+        ),
+        issue(
+            issue=2,
+            points=1,
+            parent="Epic4",
+            deliverable=None,
+            quad=None,
+            epic="Epic4",
+        ),
+    ]
+    dataset_wanted = [i.model_dump() for i in output_data]
+    files_wanted = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
+    # Act - run the ETL
     etl.run()
-
-    # Verify that each step was called once
-    mock_extract.assert_called_once()
-    mock_transform.assert_called_once()
-    mock_load.assert_called_once()
+    # Assert
+    assert etl._transient_files == files_wanted
+    assert etl.dataset.to_dict() == dataset_wanted
 
 
 class TestGetParentWithType:

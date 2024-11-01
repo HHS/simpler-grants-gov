@@ -128,8 +128,12 @@ class GitHubIssues(BaseDataset):
 
     def to_dict(self) -> list[dict]:
         """Convert this dataset to a python dictionary."""
-        # Convert date cols into dates
+        # Temporarily convert date cols into strings before exporting
         for col in self.date_cols:
-            # strip off the timestamp portion of the date
             self.df[col] = self.df[col].dt.strftime("%Y-%m-%d")
-        return super().to_dict()
+        # Return the dictionary
+        export_dict = super().to_dict()
+        # Convert date columns back into dates
+        for col in self.date_cols:
+            self.df[col] = pd.to_datetime(self.df[col]).dt.floor("d")
+        return export_dict
