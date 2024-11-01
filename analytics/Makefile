@@ -13,12 +13,13 @@ ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
 DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
 # Names of the points and sprint fields in the GitHub project
-POINTS_FIELD ?= Points
+POINTS_FIELD ?= Story Points
 SPRINT_FIELD ?= Sprint
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
 APP_NAME ?= grants-analytics
+EFFECTIVE_DATE ?= $(shell date +"%Y-%m-%d")
 
 # Required for CI to work properly
 SHELL = /bin/bash -o pipefail
@@ -144,6 +145,20 @@ lint: ## runs code quality checks
 # Data Commands #
 #################
 
+init-db:
+	@echo "=> Initializing the database schema"
+	@echo "====================================================="
+	$(POETRY) analytics etl initialize_database
+	@echo "====================================================="
+
+gh-transform-and-load:
+	@echo "=> Transforming and loading GitHub data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl transform_and_load \
+	--deliverable-file $(DELIVERY_FILE) \
+	--effective-date $(EFFECTIVE_DATE)
+	@echo "====================================================="
+
 sprint-data-export:
 	@echo "=> Exporting project data from the sprint board"
 	@echo "====================================================="
@@ -185,6 +200,8 @@ issue-data-export:
 	--output-file $(ISSUE_FILE)
 
 gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
+
+gh-etl: delivery-data-export gh-transform-and-load
 
 sprint-burndown:
 	@echo "=> Running sprint burndown report"
