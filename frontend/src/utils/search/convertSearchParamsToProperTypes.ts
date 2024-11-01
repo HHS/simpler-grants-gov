@@ -4,6 +4,7 @@ import {
   SortOptions,
 } from "src/types/search/searchRequestTypes";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+import { SEARCH_NO_STATUS_VALUE } from "src/utils/globals";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.
@@ -16,7 +17,7 @@ export function convertSearchParamsToProperTypes(
   return {
     ...params,
     query: params.query || "", // Convert empty string to null if needed
-    status: paramToSet(params.status),
+    status: paramToSet(params.status, "status"),
     fundingInstrument: paramToSet(params.fundingInstrument),
     eligibility: paramToSet(params.eligibility),
     agency: paramToSet(params.agency),
@@ -30,7 +31,18 @@ export function convertSearchParamsToProperTypes(
 }
 
 // Helper function to convert query parameters to set
-function paramToSet(param: string | string[] | undefined): Set<string> {
+function paramToSet(
+  param: string | string[] | undefined,
+  type?: string,
+): Set<string> {
+  if (type === "status") {
+    if (param === SEARCH_NO_STATUS_VALUE) {
+      param = "";
+    } else {
+      param = param ?? "forecasted,posted";
+    }
+  }
+
   if (!param) return new Set();
   if (Array.isArray(param)) {
     return new Set(param);
