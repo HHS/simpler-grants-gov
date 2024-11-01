@@ -88,7 +88,9 @@ class EtlSprintModel(EtlDb):
             ),
             {"ghid": sprint_df["sprint_ghid"]},
         )
-        sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = result.fetchone()
+        sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = (
+            result.fetchone()
+        )
         old_values = (old_name, old_start, old_end, old_duration, old_quad_id)
 
         if sprint_id is not None and new_values != old_values:

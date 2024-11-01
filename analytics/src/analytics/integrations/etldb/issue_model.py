@@ -144,7 +144,9 @@ class EtlIssueModel(EtlDb):
             ),
             {"ghid": issue_df["issue_ghid"]},
         )
-        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = r.fetchone()
+        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = (
+            r.fetchone()
+        )
         old_values = (o_title, o_type, o_opened, o_closed, o_parent, o_epic_id)
 
         # compare
