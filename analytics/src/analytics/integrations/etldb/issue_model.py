@@ -1,21 +1,23 @@
-"""Define EtlIssueModel class to encapsulate db CRUD operations"""
+"""Define EtlIssueModel class to encapsulate db CRUD operations."""
 
 from datetime import datetime
-from typing import Tuple
-from sqlalchemy import text
+
 from pandas import Series
+from sqlalchemy import text
+
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlIssueModel(EtlDb):
-    """Encapsulate CRUD operations for issue entity"""
+    """Encapsulate CRUD operations for issue entity."""
 
     def sync_issue(
-        self, issue_df: Series, ghid_map: dict
-    ) -> Tuple[int | None, EtlChangeType]:
-        """Write issue data to etl database"""
-
+        self,
+        issue_df: Series,
+        ghid_map: dict,
+    ) -> tuple[int | None, EtlChangeType]:
+        """Write issue data to etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -35,8 +37,7 @@ class EtlIssueModel(EtlDb):
         return issue_id, change_type
 
     def _insert_dimensions(self, issue_df: Series, ghid_map: dict) -> int | None:
-        """Write issue dimension data to etl database"""
-
+        """Write issue dimension data to etl database."""
         # insert into dimension table: issue
         new_row_id = None
         cursor = self.connection()
@@ -45,7 +46,7 @@ class EtlIssueModel(EtlDb):
                 "insert into gh_issue "
                 "(ghid, title, type, opened_date, closed_date, parent_issue_ghid, epic_id) "
                 "values (:ghid, :title, :type, :opened_date, :closed_date, :parent_ghid, :epic_id) "
-                "on conflict(ghid) do nothing returning id"
+                "on conflict(ghid) do nothing returning id",
             ),
             {
                 "ghid": issue_df["issue_ghid"],
@@ -67,12 +68,14 @@ class EtlIssueModel(EtlDb):
         return new_row_id
 
     def _insert_facts(
-        self, issue_id: int, issue_df: Series, ghid_map: dict
-    ) -> Tuple[int | None, int | None]:
-        """Write issue fact data to etl database"""
-
+        self,
+        issue_id: int,
+        issue_df: Series,
+        ghid_map: dict,
+    ) -> tuple[int | None, int | None]:
+        """Write issue fact data to etl database."""
         # get values needed for sql statement
-        issue_df.fillna(0, inplace=True)
+        issue_df = issue_df.fillna(0)
         insert_values = {
             "issue_id": issue_id,
             "status": issue_df["issue_status"],
@@ -92,7 +95,7 @@ class EtlIssueModel(EtlDb):
             "on conflict (issue_id, d_effective) "
             "do update set (status, is_closed, points, t_modified) = "
             "(:status, :is_closed, :points, current_timestamp) "
-            "returning id"
+            "returning id",
         )
         result1 = cursor.execute(insert_sql1, insert_values)
         row1 = result1.fetchone()
@@ -105,7 +108,7 @@ class EtlIssueModel(EtlDb):
             "values (:issue_id, :sprint_id, :effective) "
             "on conflict (issue_id, d_effective) "
             "do update set (sprint_id, t_modified) = "
-            "(:sprint_id, current_timestamp) returning id"
+            "(:sprint_id, current_timestamp) returning id",
         )
         result2 = cursor.execute(insert_sql2, insert_values)
         row2 = result2.fetchone()
@@ -118,10 +121,11 @@ class EtlIssueModel(EtlDb):
         return history_id, map_id
 
     def _update_dimensions(
-        self, issue_df: Series, ghid_map: dict
-    ) -> Tuple[int | None, EtlChangeType]:
-        """Update issue dimension data in etl database"""
-
+        self,
+        issue_df: Series,
+        ghid_map: dict,
+    ) -> tuple[int | None, EtlChangeType]:
+        """Update issue dimension data in etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -151,7 +155,7 @@ class EtlIssueModel(EtlDb):
                     "title = :new_title, type = :new_type, opened_date = :new_opened, "
                     "closed_date = :new_closed, parent_issue_ghid = :new_parent, "
                     "epic_id = :new_epic_id, t_modified = current_timestamp "
-                    "where id = :issue_id"
+                    "where id = :issue_id",
                 ),
                 {
                     "new_title": issue_df["issue_title"],
@@ -160,7 +164,7 @@ class EtlIssueModel(EtlDb):
                     "new_closed": issue_df["issue_closed_at"],
                     "new_parent": issue_df["issue_parent"],
                     "new_epic_id": ghid_map[EtlEntityType.EPIC].get(
-                        issue_df["epic_ghid"]
+                        issue_df["epic_ghid"],
                     ),
                     "issue_id": issue_id,
                 },
@@ -169,7 +173,7 @@ class EtlIssueModel(EtlDb):
 
         return issue_id, change_type
 
-    def _select(self, ghid: str) -> Tuple[
+    def _select(self, ghid: str) -> tuple[
         int | None,
         str | None,
         str | None,
@@ -178,13 +182,12 @@ class EtlIssueModel(EtlDb):
         str | None,
         int | None,
     ]:
-        """Select issue data from etl database"""
-
+        """Select issue data from etl database."""
         cursor = self.connection()
         result = cursor.execute(
             text(
                 "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
-                "from gh_issue where ghid = :ghid"
+                "from gh_issue where ghid = :ghid",
             ),
             {"ghid": ghid},
         )

@@ -1,20 +1,21 @@
-"""Defines EtlEpicModel class to encapsulate db CRUD operations"""
+"""Defines EtlEpicModel class to encapsulate db CRUD operations."""
 
-from typing import Tuple
-from sqlalchemy import text
 from pandas import Series
+from sqlalchemy import text
+
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlEpicModel(EtlDb):
-    """Encapsulate CRUD operations for epic entity"""
+    """Encapsulate CRUD operations for epic entity."""
 
     def sync_epic(
-        self, epic_df: Series, ghid_map: dict
-    ) -> Tuple[int | None, EtlChangeType]:
-        """Write epic data to etl database"""
-
+        self,
+        epic_df: Series,
+        ghid_map: dict,
+    ) -> tuple[int | None, EtlChangeType]:
+        """Write epic data to etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -34,15 +35,14 @@ class EtlEpicModel(EtlDb):
         return epic_id, change_type
 
     def _insert_dimensions(self, epic_df: Series) -> int | None:
-        """Write epic dimension data to etl database"""
-
+        """Write epic dimension data to etl database."""
         # insert into dimension table: epic
         new_row_id = None
         cursor = self.connection()
         result = cursor.execute(
             text(
                 "insert into gh_epic(ghid, title) values (:ghid, :title) "
-                "on conflict(ghid) do nothing returning id"
+                "on conflict(ghid) do nothing returning id",
             ),
             {
                 "ghid": epic_df["epic_ghid"],
@@ -59,10 +59,12 @@ class EtlEpicModel(EtlDb):
         return new_row_id
 
     def _insert_facts(
-        self, epic_id: int, epic_df: Series, ghid_map: dict
+        self,
+        epic_id: int,
+        epic_df: Series,
+        ghid_map: dict,
     ) -> int | None:
-        """Write epic fact data to etl database"""
-
+        """Write epic fact data to etl database."""
         # insert into fact table: epic_deliverable_map
         new_row_id = None
         cursor = self.connection()
@@ -72,11 +74,11 @@ class EtlEpicModel(EtlDb):
                 "values (:epic_id, :deliverable_id, :effective) "
                 "on conflict(epic_id, d_effective) do update "
                 "set (deliverable_id, t_modified) = (:deliverable_id, current_timestamp) "
-                "returning id"
+                "returning id",
             ),
             {
                 "deliverable_id": ghid_map[EtlEntityType.DELIVERABLE].get(
-                    epic_df["deliverable_ghid"]
+                    epic_df["deliverable_ghid"],
                 ),
                 "epic_id": epic_id,
                 "effective": self.effective_date,
@@ -91,9 +93,8 @@ class EtlEpicModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(self, epic_df: Series) -> Tuple[int | None, EtlChangeType]:
-        """Update epic dimension data in etl database"""
-
+    def _update_dimensions(self, epic_df: Series) -> tuple[int | None, EtlChangeType]:
+        """Update epic dimension data in etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -110,7 +111,7 @@ class EtlEpicModel(EtlDb):
             cursor.execute(
                 text(
                     "update gh_epic set title = :new_title, t_modified = current_timestamp "
-                    "where id = :epic_id"
+                    "where id = :epic_id",
                 ),
                 {"new_title": new_title, "epic_id": epic_id},
             )
@@ -118,12 +119,12 @@ class EtlEpicModel(EtlDb):
 
         return epic_id, change_type
 
-    def _select(self, ghid: str) -> Tuple[int | None, str | None]:
-        """Select epic data from etl database"""
-
+    def _select(self, ghid: str) -> tuple[int | None, str | None]:
+        """Select epic data from etl database."""
         cursor = self.connection()
         result = cursor.execute(
-            text("select id, title from gh_epic where ghid = :ghid"), {"ghid": ghid}
+            text("select id, title from gh_epic where ghid = :ghid"),
+            {"ghid": ghid},
         )
         row = result.fetchone()
         if row:

@@ -1,21 +1,20 @@
-"""Define EtlSprintModel class to encapsulate db CRUD operations"""
+"""Define EtlSprintModel class to encapsulate db CRUD operations."""
 
-from typing import Tuple
-from sqlalchemy import text
 from pandas import Series
+from sqlalchemy import text
+
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlSprintModel(EtlDb):
-    """Encapsulate CRUD operations for sprint entity"""
+    """Encapsulate CRUD operations for sprint entity."""
 
-    def sync_sprint(self, sprint_df: Series, ghid_map: dict) -> Tuple[
+    def sync_sprint(self, sprint_df: Series, ghid_map: dict) -> tuple[
         int | None,
         EtlChangeType,
     ]:
-        """Write sprint data to etl database"""
-
+        """Write sprint data to etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -31,8 +30,7 @@ class EtlSprintModel(EtlDb):
         return sprint_id, change_type
 
     def _insert_dimensions(self, sprint_df: Series, ghid_map: dict) -> int | None:
-        """Write sprint dimension data in etl database"""
-
+        """Write sprint dimension data in etl database."""
         # insert into dimension table: sprint
         new_row_id = None
         cursor = self.connection()
@@ -40,7 +38,7 @@ class EtlSprintModel(EtlDb):
             text(
                 "insert into gh_sprint(ghid, name, start_date, end_date, duration, quad_id) "
                 "values (:ghid, :name, :start, :end, :duration, :quad_id) "
-                "on conflict(ghid) do nothing returning id"
+                "on conflict(ghid) do nothing returning id",
             ),
             {
                 "ghid": sprint_df["sprint_ghid"],
@@ -60,12 +58,11 @@ class EtlSprintModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(self, sprint_df: Series, ghid_map: dict) -> Tuple[
+    def _update_dimensions(self, sprint_df: Series, ghid_map: dict) -> tuple[
         int | None,
         EtlChangeType,
     ]:
-        """Update sprint dimension data in etl database"""
-
+        """Update sprint dimension data in etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -92,7 +89,7 @@ class EtlSprintModel(EtlDb):
                 text(
                     "update gh_sprint set name = :new_name, start_date = :new_start, "
                     "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
-                    "t_modified = current_timestamp where id = :sprint_id"
+                    "t_modified = current_timestamp where id = :sprint_id",
                 ),
                 {
                     "new_name": new_values[0],
@@ -107,7 +104,7 @@ class EtlSprintModel(EtlDb):
 
         return sprint_id, change_type
 
-    def _select(self, ghid: str) -> Tuple[
+    def _select(self, ghid: str) -> tuple[
         int | None,
         str | None,
         str | None,
@@ -115,13 +112,12 @@ class EtlSprintModel(EtlDb):
         int | None,
         int | None,
     ]:
-        """Select epic data from etl database"""
-
+        """Select epic data from etl database."""
         cursor = self.connection()
         result = cursor.execute(
             text(
                 "select id, name, start_date, end_date, duration, quad_id "
-                "from gh_sprint where ghid = :ghid"
+                "from gh_sprint where ghid = :ghid",
             ),
             {"ghid": ghid},
         )

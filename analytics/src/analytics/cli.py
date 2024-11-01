@@ -3,9 +3,9 @@
 
 import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
-from datetime import datetime
 
 import typer
 from slack_sdk import WebClient
@@ -14,7 +14,7 @@ from sqlalchemy import text
 from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
-from analytics.integrations import db, github, slack, etldb
+from analytics.integrations import db, etldb, github, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -308,7 +308,7 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 
 @etl_app.command(name="initialize_database")
 def initialize_database() -> None:
-    """Initialize etl database"""
+    """Initialize etl database."""
     print("initializing database")
     etldb.init_db()
     print("done")
@@ -319,8 +319,7 @@ def transform_and_load(
     deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
-    """Transform and load etl data"""
-
+    """Transform and load etl data."""
     # validate effective date arg
     try:
         dateformat = "%Y-%m-%d"

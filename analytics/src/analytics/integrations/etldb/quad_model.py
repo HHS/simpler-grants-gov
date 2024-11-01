@@ -1,18 +1,18 @@
-"""Defines EtlQuadModel class to encapsulate db CRUD operations"""
+"""Defines EtlQuadModel class to encapsulate db CRUD operations."""
 
 from datetime import datetime
-from typing import Tuple
-from sqlalchemy import text
+
 from pandas import Series
+from sqlalchemy import text
+
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlQuadModel(EtlDb):
-    """Encapsulates CRUD operations for quad entity"""
+    """Encapsulates CRUD operations for quad entity."""
 
-    def sync_quad(self, quad_df: Series) -> Tuple[int | None, EtlChangeType]:
-        """Write quad data to etl database"""
-
+    def sync_quad(self, quad_df: Series) -> tuple[int | None, EtlChangeType]:
+        """Write quad data to etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -28,8 +28,7 @@ class EtlQuadModel(EtlDb):
         return quad_id, change_type
 
     def _insert_dimensions(self, quad_df: Series) -> int | None:
-        """Write quad dimension data to etl database"""
-
+        """Write quad dimension data to etl database."""
         # insert into dimension table: quad
         new_row_id = None
         cursor = self.connection()
@@ -37,7 +36,7 @@ class EtlQuadModel(EtlDb):
             text(
                 "insert into gh_quad(ghid, name, start_date, end_date, duration) "
                 "values (:ghid, :name, :start_date, :end_date, :duration) "
-                "on conflict(ghid) do nothing returning id"
+                "on conflict(ghid) do nothing returning id",
             ),
             {
                 "ghid": quad_df["quad_ghid"],
@@ -56,9 +55,8 @@ class EtlQuadModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(self, quad_df: Series) -> Tuple[int | None, EtlChangeType]:
-        """Update quad dimension data in etl database"""
-
+    def _update_dimensions(self, quad_df: Series) -> tuple[int | None, EtlChangeType]:
+        """Update quad dimension data in etl database."""
         # initialize return value
         change_type = EtlChangeType.NONE
 
@@ -72,7 +70,7 @@ class EtlQuadModel(EtlDb):
 
         # select old values
         quad_id, old_name, old_start, old_end, old_duration = self._select(
-            quad_df["quad_ghid"]
+            quad_df["quad_ghid"],
         )
         old_values = (
             old_name,
@@ -90,7 +88,7 @@ class EtlQuadModel(EtlDb):
                     "update gh_quad set name = :new_name, "
                     "start_date = :new_start, end_date = :new_end, "
                     "duration = :new_duration, t_modified = current_timestamp "
-                    "where id = :quad_id"
+                    "where id = :quad_id",
                 ),
                 {
                     "new_name": new_values[0],
@@ -104,20 +102,19 @@ class EtlQuadModel(EtlDb):
 
         return quad_id, change_type
 
-    def _select(self, ghid: str) -> Tuple[
+    def _select(self, ghid: str) -> tuple[
         int | None,
         str | None,
         datetime | None,
         datetime | None,
         int | None,
     ]:
-        """Select epic data from etl database"""
-
+        """Select epic data from etl database."""
         cursor = self.connection()
         result = cursor.execute(
             text(
                 "select id, name, start_date, end_date, duration "
-                "from gh_quad where ghid = :ghid"
+                "from gh_quad where ghid = :ghid",
             ),
             {"ghid": ghid},
         )

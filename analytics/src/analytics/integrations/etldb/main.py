@@ -1,23 +1,22 @@
 """Integrate with database to read and write etl data."""
 
 from pathlib import Path
-from typing import Dict
+
 from sqlalchemy import text
-from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlDb
+
+from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
 from analytics.integrations.etldb.epic_model import EtlEpicModel
+from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.etldb.issue_model import EtlIssueModel
-from analytics.integrations.etldb.sprint_model import EtlSprintModel
 from analytics.integrations.etldb.quad_model import EtlQuadModel
+from analytics.integrations.etldb.sprint_model import EtlSprintModel
 
 VERBOSE = False
 
 
 def init_db() -> None:
-    """Initialize etl database"""
-
+    """Initialize etl database."""
     # define the path to the sql file
     parent_path = Path(__file__).resolve().parent
     sql_path = f"{parent_path}/create_etl_db.sql"
@@ -36,9 +35,9 @@ def init_db() -> None:
 
 
 def sync_db(dataset: EtlDataset, effective: str) -> None:
-    """Write github data to etl database"""
+    """Write github data to etl database."""
     # initialize a map of github id to db row id
-    ghid_map: Dict[EtlEntityType, Dict[str, int]] = {
+    ghid_map: dict[EtlEntityType, dict[str, int]] = {
         EtlEntityType.DELIVERABLE: {},
         EtlEntityType.EPIC: {},
         EtlEntityType.SPRINT: {},
@@ -51,7 +50,9 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
 
     # sync deliverable data to db resulting in row id for each deliverable
     ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
-        dataset, effective, ghid_map
+        dataset,
+        effective,
+        ghid_map,
     )
     print(f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}")
 
@@ -69,7 +70,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
 
 
 def sync_deliverables(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """Insert or update (if necessary) a row for each deliverable and return a map of row ids"""
+    """Insert or update (if necessary) a row for each deliverable and return a map of row ids."""
     result = {}
     db = EtlDeliverableModel(effective)
     for ghid in dataset.get_deliverable_ghids():
@@ -81,7 +82,7 @@ def sync_deliverables(dataset: EtlDataset, effective: str, ghid_map: dict) -> di
 
 
 def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """Insert or update (if necessary) a row for each epic and return a map of row ids"""
+    """Insert or update (if necessary) a row for each epic and return a map of row ids."""
     result = {}
     db = EtlEpicModel(effective)
     for ghid in dataset.get_epic_ghids():
@@ -93,7 +94,7 @@ def sync_epics(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """Insert or update (if necessary) a row for each issue and return a map of row ids"""
+    """Insert or update (if necessary) a row for each issue and return a map of row ids."""
     result = {}
     db = EtlIssueModel(effective)
     for ghid in dataset.get_issue_ghids():
@@ -105,7 +106,7 @@ def sync_issues(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
-    """Insert or update (if necessary) a row for each sprint and return a map of row ids"""
+    """Insert or update (if necessary) a row for each sprint and return a map of row ids."""
     result = {}
     db = EtlSprintModel(effective)
     for ghid in dataset.get_sprint_ghids():
@@ -117,7 +118,7 @@ def sync_sprints(dataset: EtlDataset, effective: str, ghid_map: dict) -> dict:
 
 
 def sync_quads(dataset: EtlDataset, effective: str) -> dict:
-    """Insert or update (if necessary) a row for each quad and return a map of row ids"""
+    """Insert or update (if necessary) a row for each quad and return a map of row ids."""
     result = {}
     db = EtlQuadModel(effective)
     for ghid in dataset.get_quad_ghids():
@@ -125,6 +126,6 @@ def sync_quads(dataset: EtlDataset, effective: str) -> dict:
         result[ghid], _ = db.sync_quad(quad_df)
         if VERBOSE:
             print(
-                f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}"
+                f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}",
             )
     return result
