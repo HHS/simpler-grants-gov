@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 
 from src.db.models.opportunity_models import OpportunitySearchIndexQueue
@@ -10,16 +8,6 @@ from src.search.backend.load_opportunities_to_index import (
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import OpportunityFactory, OpportunitySearchIndexQueueFactory
-
-
-@pytest.fixture
-def mock_search_client():
-    client = Mock()
-    # Mock the alias exists check
-    client.alias_exists.return_value = True
-    # Mock empty initial index
-    client.scroll.return_value = [Mock(records=[])]
-    return client
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
