@@ -3,13 +3,13 @@
 from datetime import datetime
 from pandas import Series
 from sqlalchemy import text
-from analytics.integrations.etldb.etldb import EtlChangeType
+from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlQuadModel:
     """Encapsulates CRUD operations for quad entity."""
 
-    def __init__(self, dbh):
+    def __init__(self, dbh: EtlDb):
         """Instantiate a class instance."""
         self.dbh = dbh
 

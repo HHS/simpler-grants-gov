@@ -3,13 +3,13 @@
 from pandas import Series
 from sqlalchemy import text
 from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlChangeType
+from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlEpicModel:
     """Encapsulate CRUD operations for epic entity."""
 
-    def __init__(self, dbh):
+    def __init__(self, dbh: EtlDb):
         """Instantiate a class instance."""
         self.dbh = dbh
 
