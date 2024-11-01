@@ -2230,3 +2230,4 @@ components:
       type: apiKey
       in: header
       name: X-Auth
+
