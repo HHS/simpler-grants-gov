@@ -36,20 +36,19 @@ class EtlEpicModel(EtlDb):
     def _insert_dimensions(self, epic_df: Series) -> int | None:
         """Write epic dimension data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "ghid": epic_df["epic_ghid"],
-            "title": epic_df["epic_title"],
-        }
-        new_row_id = None
-
         # insert into dimension table: epic
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_epic(ghid, title) values (:ghid, :title) "
-            "on conflict(ghid) do nothing returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_epic(ghid, title) values (:ghid, :title) "
+                "on conflict(ghid) do nothing returning id"
+            ),
+            {
+                "ghid": epic_df["epic_ghid"],
+                "title": epic_df["epic_title"],
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -64,26 +63,25 @@ class EtlEpicModel(EtlDb):
     ) -> int | None:
         """Write epic fact data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "deliverable_id": ghid_map[EtlEntityType.DELIVERABLE].get(
-                epic_df["deliverable_ghid"]
-            ),
-            "epic_id": epic_id,
-            "effective": self.effective_date,
-        }
-        new_row_id = None
-
         # insert into fact table: epic_deliverable_map
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_epic_deliverable_map(epic_id, deliverable_id, d_effective) "
-            "values (:epic_id, :deliverable_id, :effective) "
-            "on conflict(epic_id, d_effective) do update "
-            "set (deliverable_id, t_modified) = (:deliverable_id, current_timestamp) "
-            "returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_epic_deliverable_map(epic_id, deliverable_id, d_effective) "
+                "values (:epic_id, :deliverable_id, :effective) "
+                "on conflict(epic_id, d_effective) do update "
+                "set (deliverable_id, t_modified) = (:deliverable_id, current_timestamp) "
+                "returning id"
+            ),
+            {
+                "deliverable_id": ghid_map[EtlEntityType.DELIVERABLE].get(
+                    epic_df["deliverable_ghid"]
+                ),
+                "epic_id": epic_id,
+                "effective": self.effective_date,
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -99,26 +97,36 @@ class EtlEpicModel(EtlDb):
         # initialize return value
         change_type = EtlChangeType.NONE
 
-        # get values needed for sql statement
-        ghid = epic_df["epic_ghid"]
+        # get new values
         new_title = epic_df["epic_title"]
 
-        # select
-        cursor = self.connection()
-        select_sql = text("select id, title from gh_epic where ghid = :ghid")
-        select_values = {"ghid": ghid}
-        result = cursor.execute(select_sql, select_values)
-        epic_id, old_title = result.fetchone()
+        # select old values
+        epic_id, old_title = self._select(epic_df["epic_ghid"])
 
         # compare
         if epic_id is not None and (new_title,) != (old_title,):
             change_type = EtlChangeType.UPDATE
-            update_sql = text(
-                "update gh_epic set title = :new_title, t_modified = current_timestamp "
-                "where id = :epic_id"
+            cursor = self.connection()
+            cursor.execute(
+                text(
+                    "update gh_epic set title = :new_title, t_modified = current_timestamp "
+                    "where id = :epic_id"
+                ),
+                {"new_title": new_title, "epic_id": epic_id},
             )
-            update_values = {"new_title": new_title, "epic_id": epic_id}
-            result = cursor.execute(update_sql, update_values)
             self.commit(cursor)
 
         return epic_id, change_type
+
+    def _select(self, ghid: str) -> Tuple[int | None, str | None]:
+        """Select epic data from etl database"""
+
+        cursor = self.connection()
+        result = cursor.execute(
+            text("select id, title from gh_epic where ghid = :ghid"), {"ghid": ghid}
+        )
+        row = result.fetchone()
+        if row:
+            return row[0], row[1]
+
+        return None, None

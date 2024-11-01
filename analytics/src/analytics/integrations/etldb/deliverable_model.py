@@ -36,22 +36,21 @@ class EtlDeliverableModel(EtlDb):
     def _insert_dimensions(self, deliverable_df: Series) -> int | None:
         """Write deliverable dimension data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "ghid": deliverable_df["deliverable_ghid"],
-            "title": deliverable_df["deliverable_title"],
-            "pillar": deliverable_df["deliverable_pillar"],
-        }
-        new_row_id = None
-
         # insert into dimension table: deliverable
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_deliverable(ghid, title, pillar) "
-            "values (:ghid, :title, :pillar) "
-            "on conflict(ghid) do nothing returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_deliverable(ghid, title, pillar) "
+                "values (:ghid, :title, :pillar) "
+                "on conflict(ghid) do nothing returning id"
+            ),
+            {
+                "ghid": deliverable_df["deliverable_ghid"],
+                "title": deliverable_df["deliverable_title"],
+                "pillar": deliverable_df["deliverable_pillar"],
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -66,23 +65,24 @@ class EtlDeliverableModel(EtlDb):
     ) -> int | None:
         """Write deliverable fact data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "deliverable_id": deliverable_id,
-            "quad_id": ghid_map[EtlEntityType.QUAD].get(deliverable_df["quad_ghid"]),
-            "effective": self.effective_date,
-        }
-        new_row_id = None
-
         # insert into fact table: deliverable_quad_map
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_deliverable_quad_map(deliverable_id, quad_id, d_effective) "
-            "values (:deliverable_id, :quad_id, :effective) "
-            "on conflict(deliverable_id, d_effective) do update "
-            "set (quad_id, t_modified) = (:quad_id, current_timestamp) returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_deliverable_quad_map(deliverable_id, quad_id, d_effective) "
+                "values (:deliverable_id, :quad_id, :effective) "
+                "on conflict(deliverable_id, d_effective) do update "
+                "set (quad_id, t_modified) = (:quad_id, current_timestamp) returning id"
+            ),
+            {
+                "deliverable_id": deliverable_id,
+                "quad_id": ghid_map[EtlEntityType.QUAD].get(
+                    deliverable_df["quad_ghid"]
+                ),
+                "effective": self.effective_date,
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -100,24 +100,21 @@ class EtlDeliverableModel(EtlDb):
         # initialize return value
         change_type = EtlChangeType.NONE
 
-        # get values needed for sql statement
-        ghid = deliverable_df["deliverable_ghid"]
+        # get new values
         new_title = deliverable_df["deliverable_title"]
         new_pillar = deliverable_df["deliverable_pillar"]
         new_values = (new_title, new_pillar)
 
-        # select
-        cursor = self.connection()
-        result = cursor.execute(
-            text("select id, title, pillar from gh_deliverable where ghid = :ghid"),
-            {"ghid": ghid},
+        # select old values
+        deliverable_id, old_title, old_pillar = self._select(
+            deliverable_df["deliverable_ghid"]
         )
-        deliverable_id, old_title, old_pillar = result.fetchone()
         old_values = (old_title, old_pillar)
 
         # compare
         if deliverable_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
+            cursor = self.connection()
             update_sql = text(
                 "update gh_deliverable set title = :new_title, pillar = :new_pillar, "
                 "t_modified = current_timestamp where id = :deliverable_id"
@@ -131,3 +128,17 @@ class EtlDeliverableModel(EtlDb):
             self.commit(cursor)
 
         return deliverable_id, change_type
+
+    def _select(self, ghid: str) -> Tuple[int | None, str | None, str | None]:
+        """Select deliverable data from etl database"""
+
+        cursor = self.connection()
+        result = cursor.execute(
+            text("select id, title, pillar from gh_deliverable where ghid = :ghid"),
+            {"ghid": ghid},
+        )
+        row = result.fetchone()
+        if row:
+            return row[0], row[1], row[2]
+
+        return None, None, None

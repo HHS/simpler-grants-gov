@@ -1,5 +1,6 @@
 """Defines EtlQuadModel class to encapsulate db CRUD operations"""
 
+from datetime import datetime
 from typing import Tuple
 from sqlalchemy import text
 from pandas import Series
@@ -29,24 +30,23 @@ class EtlQuadModel(EtlDb):
     def _insert_dimensions(self, quad_df: Series) -> int | None:
         """Write quad dimension data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "ghid": quad_df["quad_ghid"],
-            "name": quad_df["quad_name"],
-            "start_date": quad_df["quad_start"],
-            "end_date": quad_df["quad_end"],
-            "duration": quad_df["quad_length"],
-        }
-        new_row_id = None
-
         # insert into dimension table: quad
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_quad(ghid, name, start_date, end_date, duration) "
-            "values (:ghid, :name, :start_date, :end_date, :duration) "
-            "on conflict(ghid) do nothing returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_quad(ghid, name, start_date, end_date, duration) "
+                "values (:ghid, :name, :start_date, :end_date, :duration) "
+                "on conflict(ghid) do nothing returning id"
+            ),
+            {
+                "ghid": quad_df["quad_ghid"],
+                "name": quad_df["quad_name"],
+                "start_date": quad_df["quad_start"],
+                "end_date": quad_df["quad_end"],
+                "duration": quad_df["quad_length"],
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -62,7 +62,7 @@ class EtlQuadModel(EtlDb):
         # initialize return value
         change_type = EtlChangeType.NONE
 
-        # get values needed for sql statement
+        # get new values
         new_values = (
             quad_df["quad_name"],
             quad_df["quad_start"],
@@ -70,26 +70,21 @@ class EtlQuadModel(EtlDb):
             int(quad_df["quad_length"]),
         )
 
-        # select
-        cursor = self.connection()
-        result = cursor.execute(
-            text(
-                "select id, name, start_date, end_date, duration "
-                "from gh_quad where ghid = :ghid"
-            ),
-            {"ghid": quad_df["quad_ghid"]},
+        # select old values
+        quad_id, old_name, old_start, old_end, old_duration = self._select(
+            quad_df["quad_ghid"]
         )
-        quad_id, old_name, old_start, old_end, old_duration = result.fetchone()
         old_values = (
             old_name,
-            old_start.strftime(self.dateformat),
-            old_end.strftime(self.dateformat),
+            old_start.strftime(self.dateformat) if old_start is not None else None,
+            old_end.strftime(self.dateformat) if old_end is not None else None,
             old_duration,
         )
 
         # compare
         if quad_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
+            cursor = self.connection()
             cursor.execute(
                 text(
                     "update gh_quad set name = :new_name, "
@@ -108,3 +103,26 @@ class EtlQuadModel(EtlDb):
             self.commit(cursor)
 
         return quad_id, change_type
+
+    def _select(self, ghid: str) -> Tuple[
+        int | None,
+        str | None,
+        datetime | None,
+        datetime | None,
+        int | None,
+    ]:
+        """Select epic data from etl database"""
+
+        cursor = self.connection()
+        result = cursor.execute(
+            text(
+                "select id, name, start_date, end_date, duration "
+                "from gh_quad where ghid = :ghid"
+            ),
+            {"ghid": ghid},
+        )
+        row = result.fetchone()
+        if row:
+            return row[0], row[1], row[2], row[3], row[4]
+
+        return None, None, None, None, None

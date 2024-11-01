@@ -1,5 +1,6 @@
 """Define EtlIssueModel class to encapsulate db CRUD operations"""
 
+from datetime import datetime
 from typing import Tuple
 from sqlalchemy import text
 from pandas import Series
@@ -36,27 +37,26 @@ class EtlIssueModel(EtlDb):
     def _insert_dimensions(self, issue_df: Series, ghid_map: dict) -> int | None:
         """Write issue dimension data to etl database"""
 
-        # get values needed for sql statement
-        insert_values = {
-            "ghid": issue_df["issue_ghid"],
-            "title": issue_df["issue_title"],
-            "type": issue_df["issue_type"] or "None",
-            "opened_date": issue_df["issue_opened_at"],
-            "closed_date": issue_df["issue_closed_at"],
-            "parent_ghid": issue_df["issue_parent"],
-            "epic_id": ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
-        }
-        new_row_id = None
-
         # insert into dimension table: issue
+        new_row_id = None
         cursor = self.connection()
-        insert_sql = text(
-            "insert into gh_issue "
-            "(ghid, title, type, opened_date, closed_date, parent_issue_ghid, epic_id) "
-            "values (:ghid, :title, :type, :opened_date, :closed_date, :parent_ghid, :epic_id) "
-            "on conflict(ghid) do nothing returning id"
+        result = cursor.execute(
+            text(
+                "insert into gh_issue "
+                "(ghid, title, type, opened_date, closed_date, parent_issue_ghid, epic_id) "
+                "values (:ghid, :title, :type, :opened_date, :closed_date, :parent_ghid, :epic_id) "
+                "on conflict(ghid) do nothing returning id"
+            ),
+            {
+                "ghid": issue_df["issue_ghid"],
+                "title": issue_df["issue_title"],
+                "type": issue_df["issue_type"] or "None",
+                "opened_date": issue_df["issue_opened_at"],
+                "closed_date": issue_df["issue_closed_at"],
+                "parent_ghid": issue_df["issue_parent"],
+                "epic_id": ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
+            },
         )
-        result = cursor.execute(insert_sql, insert_values)
         row = result.fetchone()
         if row:
             new_row_id = row[0]
@@ -125,7 +125,7 @@ class EtlIssueModel(EtlDb):
         # initialize return value
         change_type = EtlChangeType.NONE
 
-        # get values needed for sql statement
+        # get new values
         new_values = (
             issue_df["issue_title"],
             issue_df["issue_type"] or "None",
@@ -135,23 +135,16 @@ class EtlIssueModel(EtlDb):
             ghid_map[EtlEntityType.EPIC].get(issue_df["epic_ghid"]),
         )
 
-        # select
-        cursor = self.connection()
-        r = cursor.execute(
-            text(
-                "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
-                "from gh_issue where ghid = :ghid"
-            ),
-            {"ghid": issue_df["issue_ghid"]},
-        )
+        # select old values
         issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = (
-            r.fetchone()
+            self._select(issue_df["issue_ghid"])
         )
         old_values = (o_title, o_type, o_opened, o_closed, o_parent, o_epic_id)
 
         # compare
         if issue_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
+            cursor = self.connection()
             cursor.execute(
                 text(
                     "update gh_issue set "
@@ -175,3 +168,28 @@ class EtlIssueModel(EtlDb):
             self.commit(cursor)
 
         return issue_id, change_type
+
+    def _select(self, ghid: str) -> Tuple[
+        int | None,
+        str | None,
+        str | None,
+        datetime | None,
+        datetime | None,
+        str | None,
+        int | None,
+    ]:
+        """Select issue data from etl database"""
+
+        cursor = self.connection()
+        result = cursor.execute(
+            text(
+                "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
+                "from gh_issue where ghid = :ghid"
+            ),
+            {"ghid": ghid},
+        )
+        row = result.fetchone()
+        if row:
+            return row[0], row[1], row[2], row[3], row[4], row[5], row[6]
+
+        return None, None, None, None, None, None, None

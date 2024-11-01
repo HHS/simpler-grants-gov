@@ -86,13 +86,11 @@ class EtlDataset(BaseDataset):
     def get_quad(self, quad_ghid: str) -> pandas.Series:
         """Fetch data about a given quad"""
         query_string = f"quad_ghid == '{quad_ghid}'"
-        print(f"**** df type = {str(type(self.df.query(query_string).iloc[0]))}")
         return self.df.query(query_string).iloc[0]
 
     def get_quad_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null quad ghids"""
         df = self.df[self.df.quad_ghid.notna()]
-        print(f"**** list type = {str(type(df.quad_ghid.unique()))}")
         return df.quad_ghid.unique()
 
     # DELIVERABLE getters
