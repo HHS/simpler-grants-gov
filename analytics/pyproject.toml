@@ -51,6 +51,7 @@ disable = [
   "R0913", # too-many-arguments
   "R0902", # too-many-instance-attributes
   "R0903", # too-few-public-methods
+  "W1514", # unspecified-encoding
 ]
 
 [tool.ruff]

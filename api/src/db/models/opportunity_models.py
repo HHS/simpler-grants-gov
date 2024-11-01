@@ -65,6 +65,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
+    opportunity_search_index_queue: Mapped["OpportunitySearchIndexQueue | None"] = relationship(
+        back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
+    )
+
     current_opportunity_summary: Mapped["CurrentOpportunitySummary | None"] = relationship(
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
@@ -435,3 +439,12 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     created_by: Mapped[str | None]
     updated_by: Mapped[str | None]
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
+
+
+class OpportunitySearchIndexQueue(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_search_index_queue"
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)

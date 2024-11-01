@@ -3,8 +3,8 @@ import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetche
 
 import { getTranslations } from "next-intl/server";
 
-import SearchErrorAlert from "src/components/search/error/SearchErrorAlert";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ServerPageProps {
   searchParams: QueryParamData;
@@ -19,7 +19,7 @@ export default async function SearchResultsListFetch({
   const t = await getTranslations("Search");
 
   if (searchResults.status_code !== 200) {
-    return <SearchErrorAlert />;
+    return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
   }
 
   if (searchResults.data.length === 0) {

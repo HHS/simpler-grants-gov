@@ -1,4 +1,6 @@
 import logging
+import os
+import pathlib
 import uuid
 
 import _pytest.monkeypatch
@@ -48,6 +50,26 @@ def env_vars():
     scope levels.
     """
     load_local_env_vars()
+
+
+### Uploads test files
+@pytest.fixture
+def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
+    s3_client = boto3.client("s3")
+    test_folder_path = (
+        pathlib.Path(__file__).parent.resolve() / "lib/opportunity_attachment_test_files"
+    )
+
+    for root, _, files in os.walk(test_folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            s3_client.upload_file(
+                file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, test_folder_path)
+            )
+
+    # Check files were uploaded to mock s3
+    s3_files = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
+    assert len(s3_files["Contents"]) == 5
 
 
 ####################
@@ -244,6 +266,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    monkeypatch.delenv("S3_ENDPOINT_URL")
 
 
 @pytest.fixture

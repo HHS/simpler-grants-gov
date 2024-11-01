@@ -9,9 +9,10 @@ resource "random_id" "db_superuser" {
 }
 
 locals {
-  master_username      = random_id.db_superuser.hex
-  role_manager_name    = "${var.name}-role-manager"
-  role_manager_package = "${path.root}/role_manager.zip"
+  master_username       = random_id.db_superuser.hex
+  primary_instance_name = "${var.name}-primary"
+  role_manager_name     = "${var.name}-role-manager"
+  role_manager_package  = "${path.root}/role_manager.zip"
 
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/

@@ -4,6 +4,17 @@
 
 import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
 
+export const parseErrorStatus = (error: ApiRequestError): number => {
+  const { message } = error;
+  try {
+    const parsedMessage = JSON.parse(message) as { status: number };
+    return parsedMessage.status;
+  } catch (e) {
+    console.error("Malformed error object");
+    return 500;
+  }
+};
+
 /**
  * A fetch request failed due to a network error. The error wasn't the fault of the user,
  * and an issue was encountered while setting up or sending a request, or parsing the response.

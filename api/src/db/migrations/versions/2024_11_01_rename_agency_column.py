@@ -1,16 +1,16 @@
 """rename agency column
 
-Revision ID: 66fc09ea856b
-Revises: 39f7f941fc6c
-Create Date: 2024-10-24 13:23:10.851123
+Revision ID: 3640e31e6a85
+Revises: 8b96ade6f6a2
+Create Date: 2024-11-01 12:57:11.887858
 
 """
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "66fc09ea856b"
-down_revision = "39f7f941fc6c"
+revision = "3640e31e6a85"
+down_revision = "8b96ade6f6a2"
 branch_labels = None
 depends_on = None
 
