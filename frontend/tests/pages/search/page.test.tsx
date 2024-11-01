@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
-import { SEARCH_NO_STATUS_VALUE } from "src/utils/globals";
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // test without feature flag functionality
