@@ -2,13 +2,16 @@
 
 from pandas import Series
 from sqlalchemy import text
-
 from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
+from analytics.integrations.etldb.etldb import EtlChangeType
 
 
-class EtlSprintModel(EtlDb):
+class EtlSprintModel:
     """Encapsulate CRUD operations for sprint entity."""
+
+    def __init__(self, dbh):
+        """Instantiate a class instance."""
+        self.dbh = dbh
 
     def sync_sprint(self, sprint_df: Series, ghid_map: dict) -> tuple[
         int | None,
@@ -33,7 +36,7 @@ class EtlSprintModel(EtlDb):
         """Write sprint dimension data in etl database."""
         # insert into dimension table: sprint
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_sprint(ghid, name, start_date, end_date, duration, quad_id) "
@@ -54,7 +57,7 @@ class EtlSprintModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -84,7 +87,7 @@ class EtlSprintModel(EtlDb):
         # compare
         if sprint_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
-            cursor = self.connection()
+            cursor = self.dbh.connection()
             cursor.execute(
                 text(
                     "update gh_sprint set name = :new_name, start_date = :new_start, "
@@ -100,7 +103,7 @@ class EtlSprintModel(EtlDb):
                     "sprint_id": sprint_id,
                 },
             )
-            self.commit(cursor)
+            self.dbh.commit(cursor)
 
         return sprint_id, change_type
 
@@ -113,7 +116,7 @@ class EtlSprintModel(EtlDb):
         int | None,
     ]:
         """Select epic data from etl database."""
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "select id, name, start_date, end_date, duration, quad_id "

@@ -1,15 +1,17 @@
 """Defines EtlQuadModel class to encapsulate db CRUD operations."""
 
 from datetime import datetime
-
 from pandas import Series
 from sqlalchemy import text
+from analytics.integrations.etldb.etldb import EtlChangeType
 
-from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
-
-class EtlQuadModel(EtlDb):
+class EtlQuadModel:
     """Encapsulates CRUD operations for quad entity."""
+
+    def __init__(self, dbh):
+        """Instantiate a class instance."""
+        self.dbh = dbh
 
     def sync_quad(self, quad_df: Series) -> tuple[int | None, EtlChangeType]:
         """Write quad data to etl database."""
@@ -31,7 +33,7 @@ class EtlQuadModel(EtlDb):
         """Write quad dimension data to etl database."""
         # insert into dimension table: quad
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_quad(ghid, name, start_date, end_date, duration) "
@@ -51,7 +53,7 @@ class EtlQuadModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -74,15 +76,15 @@ class EtlQuadModel(EtlDb):
         )
         old_values = (
             old_name,
-            old_start.strftime(self.dateformat) if old_start is not None else None,
-            old_end.strftime(self.dateformat) if old_end is not None else None,
+            old_start.strftime(self.dbh.dateformat) if old_start is not None else None,
+            old_end.strftime(self.dbh.dateformat) if old_end is not None else None,
             old_duration,
         )
 
         # compare
         if quad_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
-            cursor = self.connection()
+            cursor = self.dbh.connection()
             cursor.execute(
                 text(
                     "update gh_quad set name = :new_name, "
@@ -98,7 +100,7 @@ class EtlQuadModel(EtlDb):
                     "quad_id": quad_id,
                 },
             )
-            self.commit(cursor)
+            self.dbh.commit(cursor)
 
         return quad_id, change_type
 
@@ -110,7 +112,7 @@ class EtlQuadModel(EtlDb):
         int | None,
     ]:
         """Select epic data from etl database."""
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "select id, name, start_date, end_date, duration "

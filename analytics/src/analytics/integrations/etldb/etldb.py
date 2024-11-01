@@ -13,6 +13,7 @@ class EtlDb:
     def __init__(self, effective: str | None = None) -> None:
         """Construct instance."""
         self._db_engine = db.get_db()
+        self._connection: Connection | None = None
         self.effective_date = effective
         self.dateformat = "%Y-%m-%d"
 
@@ -22,7 +23,9 @@ class EtlDb:
 
     def connection(self) -> Connection:
         """Get a connection object from the db engine."""
-        return self._db_engine.connect()
+        if self._connection is None:
+            self._connection = self._db_engine.connect()
+        return self._connection
 
     def commit(self, connection: Connection) -> None:
         """Commit an open transaction."""

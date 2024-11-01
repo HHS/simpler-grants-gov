@@ -2,13 +2,16 @@
 
 from pandas import Series
 from sqlalchemy import text
-
 from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
+from analytics.integrations.etldb.etldb import EtlChangeType
 
 
-class EtlEpicModel(EtlDb):
+class EtlEpicModel:
     """Encapsulate CRUD operations for epic entity."""
+
+    def __init__(self, dbh):
+        """Instantiate a class instance."""
+        self.dbh = dbh
 
     def sync_epic(
         self,
@@ -38,7 +41,7 @@ class EtlEpicModel(EtlDb):
         """Write epic dimension data to etl database."""
         # insert into dimension table: epic
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_epic(ghid, title) values (:ghid, :title) "
@@ -54,7 +57,7 @@ class EtlEpicModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -67,7 +70,7 @@ class EtlEpicModel(EtlDb):
         """Write epic fact data to etl database."""
         # insert into fact table: epic_deliverable_map
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_epic_deliverable_map(epic_id, deliverable_id, d_effective) "
@@ -81,7 +84,7 @@ class EtlEpicModel(EtlDb):
                     epic_df["deliverable_ghid"],
                 ),
                 "epic_id": epic_id,
-                "effective": self.effective_date,
+                "effective": self.dbh.effective_date,
             },
         )
         row = result.fetchone()
@@ -89,7 +92,7 @@ class EtlEpicModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -107,7 +110,7 @@ class EtlEpicModel(EtlDb):
         # compare
         if epic_id is not None and (new_title,) != (old_title,):
             change_type = EtlChangeType.UPDATE
-            cursor = self.connection()
+            cursor = self.dbh.connection()
             cursor.execute(
                 text(
                     "update gh_epic set title = :new_title, t_modified = current_timestamp "
@@ -115,13 +118,13 @@ class EtlEpicModel(EtlDb):
                 ),
                 {"new_title": new_title, "epic_id": epic_id},
             )
-            self.commit(cursor)
+            self.dbh.commit(cursor)
 
         return epic_id, change_type
 
     def _select(self, ghid: str) -> tuple[int | None, str | None]:
         """Select epic data from etl database."""
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text("select id, title from gh_epic where ghid = :ghid"),
             {"ghid": ghid},

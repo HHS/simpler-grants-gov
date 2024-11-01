@@ -2,13 +2,16 @@
 
 from pandas import Series
 from sqlalchemy import text
-
 from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
+from analytics.integrations.etldb.etldb import EtlChangeType
 
 
-class EtlDeliverableModel(EtlDb):
+class EtlDeliverableModel:
     """Encapsulate CRUD operations for deliverable entity."""
+
+    def __init__(self, dbh):
+        """Instantiate a class instance."""
+        self.dbh = dbh
 
     def sync_deliverable(
         self,
@@ -38,7 +41,7 @@ class EtlDeliverableModel(EtlDb):
         """Write deliverable dimension data to etl database."""
         # insert into dimension table: deliverable
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_deliverable(ghid, title, pillar) "
@@ -56,7 +59,7 @@ class EtlDeliverableModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -69,7 +72,7 @@ class EtlDeliverableModel(EtlDb):
         """Write deliverable fact data to etl database."""
         # insert into fact table: deliverable_quad_map
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_deliverable_quad_map(deliverable_id, quad_id, d_effective) "
@@ -82,7 +85,7 @@ class EtlDeliverableModel(EtlDb):
                 "quad_id": ghid_map[EtlEntityType.QUAD].get(
                     deliverable_df["quad_ghid"],
                 ),
-                "effective": self.effective_date,
+                "effective": self.dbh.effective_date,
             },
         )
         row = result.fetchone()
@@ -90,7 +93,7 @@ class EtlDeliverableModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -116,7 +119,7 @@ class EtlDeliverableModel(EtlDb):
         # compare
         if deliverable_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
-            cursor = self.connection()
+            cursor = self.dbh.connection()
             update_sql = text(
                 "update gh_deliverable set title = :new_title, pillar = :new_pillar, "
                 "t_modified = current_timestamp where id = :deliverable_id",
@@ -127,13 +130,13 @@ class EtlDeliverableModel(EtlDb):
                 "deliverable_id": deliverable_id,
             }
             cursor.execute(update_sql, update_values)
-            self.commit(cursor)
+            self.dbh.commit(cursor)
 
         return deliverable_id, change_type
 
     def _select(self, ghid: str) -> tuple[int | None, str | None, str | None]:
         """Select deliverable data from etl database."""
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text("select id, title, pillar from gh_deliverable where ghid = :ghid"),
             {"ghid": ghid},

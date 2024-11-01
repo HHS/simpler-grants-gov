@@ -1,16 +1,18 @@
 """Define EtlIssueModel class to encapsulate db CRUD operations."""
 
 from datetime import datetime
-
 from pandas import Series
 from sqlalchemy import text
-
 from analytics.datasets.etl_dataset import EtlEntityType
-from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
+from analytics.integrations.etldb.etldb import EtlChangeType
 
 
-class EtlIssueModel(EtlDb):
+class EtlIssueModel:
     """Encapsulate CRUD operations for issue entity."""
+
+    def __init__(self, dbh):
+        """Instantiate a class instance."""
+        self.dbh = dbh
 
     def sync_issue(
         self,
@@ -40,7 +42,7 @@ class EtlIssueModel(EtlDb):
         """Write issue dimension data to etl database."""
         # insert into dimension table: issue
         new_row_id = None
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "insert into gh_issue "
@@ -63,7 +65,7 @@ class EtlIssueModel(EtlDb):
             new_row_id = row[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return new_row_id
 
@@ -82,13 +84,13 @@ class EtlIssueModel(EtlDb):
             "is_closed": int(issue_df["issue_is_closed"]),
             "points": issue_df["issue_points"],
             "sprint_id": ghid_map[EtlEntityType.SPRINT].get(issue_df["sprint_ghid"]),
-            "effective": self.effective_date,
+            "effective": self.dbh.effective_date,
         }
         history_id = None
         map_id = None
 
         # insert into fact table: issue_history
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         insert_sql1 = text(
             "insert into gh_issue_history (issue_id, status, is_closed, points, d_effective) "
             "values (:issue_id, :status, :is_closed, :points, :effective) "
@@ -116,7 +118,7 @@ class EtlIssueModel(EtlDb):
             map_id = row2[0]
 
         # commit
-        self.commit(cursor)
+        self.dbh.commit(cursor)
 
         return history_id, map_id
 
@@ -148,7 +150,7 @@ class EtlIssueModel(EtlDb):
         # compare
         if issue_id is not None and new_values != old_values:
             change_type = EtlChangeType.UPDATE
-            cursor = self.connection()
+            cursor = self.dbh.connection()
             cursor.execute(
                 text(
                     "update gh_issue set "
@@ -169,7 +171,7 @@ class EtlIssueModel(EtlDb):
                     "issue_id": issue_id,
                 },
             )
-            self.commit(cursor)
+            self.dbh.commit(cursor)
 
         return issue_id, change_type
 
@@ -183,7 +185,7 @@ class EtlIssueModel(EtlDb):
         int | None,
     ]:
         """Select issue data from etl database."""
-        cursor = self.connection()
+        cursor = self.dbh.connection()
         result = cursor.execute(
             text(
                 "select id, title, type, opened_date, closed_date, parent_issue_ghid, epic_id "
