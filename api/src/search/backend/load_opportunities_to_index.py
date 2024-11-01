@@ -97,7 +97,11 @@ class LoadOpportunitiesToIndex(Task):
                 "Processing queued opportunity",
                 extra={
                     "opportunity_id": opportunity.opportunity_id,
-                    "status": "update" if opportunity.opportunity_id in existing_opportunity_ids else "insert",
+                    "status": (
+                        "update"
+                        if opportunity.opportunity_id in existing_opportunity_ids
+                        else "insert"
+                    ),
                 },
             )
 
@@ -114,8 +118,13 @@ class LoadOpportunitiesToIndex(Task):
         # and not in our database (or are drafts)
         opportunity_ids_to_delete = existing_opportunity_ids - processed_opportunity_ids
 
+        for opportunity_id in opportunity_ids_to_delete:
+            logger.info(
+                "Deleting opportunity from search",
+                extra={"opportunity_id": opportunity_id, "status": "delete"},
+            )
+
         if opportunity_ids_to_delete:
-            logger.info(f"Deleting {len(opportunity_ids_to_delete)} opportunities from search")
             self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete)
 
         # Clear processed entries from the queue
