@@ -42,6 +42,7 @@ class Metrics(StrEnum):
     TOTAL_RECORDS_DELETED = "total_records_deleted"
     TOTAL_RECORDS_INSERTED = "total_records_inserted"
     TOTAL_RECORDS_UPDATED = "total_records_updated"
+    TOTAL_RECORDS_SKIPPED = "total_records_skipped"
     TOTAL_RECORDS_ORPHANED = "total_records_orphaned"
     TOTAL_DUPLICATE_RECORDS_SKIPPED = "total_duplicate_records_skipped"
     TOTAL_HISTORICAL_ORPHANS_SKIPPED = "total_historical_orphans_skipped"
