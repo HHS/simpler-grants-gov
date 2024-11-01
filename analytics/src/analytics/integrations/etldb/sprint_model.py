@@ -1,7 +1,8 @@
 """Define EtlSprintModel class to encapsulate db CRUD operations"""
 
+from typing import Tuple
 from sqlalchemy import text
-from pandas import DataFrame
+from pandas import Series
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -9,7 +10,10 @@ from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 class EtlSprintModel(EtlDb):
     """Encapsulate CRUD operations for sprint entity"""
 
-    def sync_sprint(self, sprint_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_sprint(self, sprint_df: Series, ghid_map: dict) -> Tuple[
+        int | None,
+        EtlChangeType,
+    ]:
         """Write sprint data to etl database"""
 
         # initialize return value
@@ -26,7 +30,7 @@ class EtlSprintModel(EtlDb):
 
         return sprint_id, change_type
 
-    def _insert_dimensions(self, sprint_df: DataFrame, ghid_map: dict) -> int:
+    def _insert_dimensions(self, sprint_df: Series, ghid_map: dict) -> int | None:
         """Write sprint dimension data in etl database"""
 
         # get values needed for sql statement
@@ -57,9 +61,10 @@ class EtlSprintModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(
-        self, sprint_df: DataFrame, ghid_map: dict
-    ) -> (int, EtlChangeType):
+    def _update_dimensions(self, sprint_df: Series, ghid_map: dict) -> Tuple[
+        int | None,
+        EtlChangeType,
+    ]:
         """Update sprint dimension data in etl database"""
 
         # initialize return value
@@ -83,30 +88,26 @@ class EtlSprintModel(EtlDb):
             ),
             {"ghid": sprint_df["sprint_ghid"]},
         )
-        sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = (
-            result.fetchone()
-        )
+        sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = result.fetchone()
         old_values = (old_name, old_start, old_end, old_duration, old_quad_id)
 
-        # compare
-        if sprint_id is not None:
-            if new_values != old_values:
-                change_type = EtlChangeType.UPDATE
-                cursor.execute(
-                    text(
-                        "update gh_sprint set name = :new_name, start_date = :new_start, "
-                        "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
-                        "t_modified = current_timestamp where id = :sprint_id"
-                    ),
-                    {
-                        "new_name": new_values[0],
-                        "new_start": new_values[1],
-                        "new_end": new_values[2],
-                        "new_duration": new_values[3],
-                        "quad_id": new_values[4],
-                        "sprint_id": sprint_id,
-                    },
-                )
-                self.commit(cursor)
+        if sprint_id is not None and new_values != old_values:
+            change_type = EtlChangeType.UPDATE
+            cursor.execute(
+                text(
+                    "update gh_sprint set name = :new_name, start_date = :new_start, "
+                    "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
+                    "t_modified = current_timestamp where id = :sprint_id"
+                ),
+                {
+                    "new_name": new_values[0],
+                    "new_start": new_values[1],
+                    "new_end": new_values[2],
+                    "new_duration": new_values[3],
+                    "quad_id": new_values[4],
+                    "sprint_id": sprint_id,
+                },
+            )
+            self.commit(cursor)
 
         return sprint_id, change_type

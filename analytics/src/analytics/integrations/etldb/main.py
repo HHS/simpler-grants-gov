@@ -1,6 +1,7 @@
 """Integrate with database to read and write etl data."""
 
 from pathlib import Path
+from typing import Dict
 from sqlalchemy import text
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.etl_dataset import EtlEntityType
@@ -26,7 +27,7 @@ def init_db() -> None:
         sql = f.read()
 
     # execute sql
-    db = EtlDb(None)
+    db = EtlDb()
     cursor = db.connection()
     cursor.execute(
         text(sql),
@@ -37,7 +38,7 @@ def init_db() -> None:
 def sync_db(dataset: EtlDataset, effective: str) -> None:
     """Write github data to etl database"""
     # initialize a map of github id to db row id
-    ghid_map = {
+    ghid_map: Dict[EtlEntityType, Dict[str, int]] = {
         EtlEntityType.DELIVERABLE: {},
         EtlEntityType.EPIC: {},
         EtlEntityType.SPRINT: {},

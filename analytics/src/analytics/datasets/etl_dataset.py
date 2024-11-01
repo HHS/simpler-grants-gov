@@ -6,7 +6,8 @@ quad, deliverable, epic, issue, and sprint data.
 """
 
 from enum import Enum
-from typing import Self
+from typing import Any, Self
+from numpy.typing import NDArray
 import pandas
 from analytics.datasets.base import BaseDataset
 from analytics.datasets.utils import load_json_data_as_df
@@ -82,60 +83,62 @@ class EtlDataset(BaseDataset):
 
     # QUAD getters
 
-    def get_quad(self, quad_ghid: str) -> pandas.DataFrame:
+    def get_quad(self, quad_ghid: str) -> pandas.Series:
         """Fetch data about a given quad"""
         query_string = f"quad_ghid == '{quad_ghid}'"
+        print(f"**** df type = {str(type(self.df.query(query_string).iloc[0]))}")
         return self.df.query(query_string).iloc[0]
 
-    def get_quad_ghids(self) -> [str]:
+    def get_quad_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null quad ghids"""
         df = self.df[self.df.quad_ghid.notna()]
+        print(f"**** list type = {str(type(df.quad_ghid.unique()))}")
         return df.quad_ghid.unique()
 
     # DELIVERABLE getters
 
-    def get_deliverable(self, deliverable_ghid: str) -> pandas.DataFrame:
+    def get_deliverable(self, deliverable_ghid: str) -> pandas.Series:
         """Fetch data about a given deliverable"""
         query_string = f"deliverable_ghid == '{deliverable_ghid}'"
         return self.df.query(query_string).iloc[0]
 
-    def get_deliverable_ghids(self) -> [str]:
+    def get_deliverable_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null deliverable ghids"""
         df = self.df[self.df.deliverable_ghid.notna()]
         return df.deliverable_ghid.unique()
 
     # SPRINT getters
 
-    def get_sprint(self, sprint_ghid: str) -> pandas.DataFrame:
+    def get_sprint(self, sprint_ghid: str) -> pandas.Series:
         """Fetch data about a given sprint"""
         query_string = f"sprint_ghid == '{sprint_ghid}'"
         return self.df.query(query_string).iloc[0]
 
-    def get_sprint_ghids(self) -> [str]:
+    def get_sprint_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null sprint ghids"""
         df = self.df[self.df.sprint_ghid.notna()]
         return df.sprint_ghid.unique()
 
     # EPIC getters
 
-    def get_epic(self, epic_ghid: str) -> pandas.DataFrame:
+    def get_epic(self, epic_ghid: str) -> pandas.Series:
         """Fetch data about a given epic"""
         query_string = f"epic_ghid == '{epic_ghid}'"
         return self.df.query(query_string).iloc[0]
 
-    def get_epic_ghids(self) -> [str]:
+    def get_epic_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null epic ghids"""
         df = self.df[self.df.epic_ghid.notna()]
         return df.epic_ghid.unique()
 
     # ISSUE getters
 
-    def get_issue(self, issue_ghid: str) -> pandas.DataFrame:
+    def get_issue(self, issue_ghid: str) -> pandas.Series:
         """Fetch data about a given issue"""
         query_string = f"issue_ghid == '{issue_ghid}'"
         return self.df.query(query_string).iloc[0]
 
-    def get_issue_ghids(self) -> [str]:
+    def get_issue_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null issue ghids"""
         df = self.df[self.df.issue_ghid.notna()]
         return df.issue_ghid.unique()

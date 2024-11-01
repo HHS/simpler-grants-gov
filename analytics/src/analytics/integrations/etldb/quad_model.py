@@ -1,14 +1,15 @@
 """Defines EtlQuadModel class to encapsulate db CRUD operations"""
 
+from typing import Tuple
 from sqlalchemy import text
-from pandas import DataFrame
+from pandas import Series
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
 
 class EtlQuadModel(EtlDb):
     """Encapsulates CRUD operations for quad entity"""
 
-    def sync_quad(self, quad_df: DataFrame) -> (int, EtlChangeType):
+    def sync_quad(self, quad_df: Series) -> Tuple[int | None, EtlChangeType]:
         """Write quad data to etl database"""
 
         # initialize return value
@@ -25,7 +26,7 @@ class EtlQuadModel(EtlDb):
 
         return quad_id, change_type
 
-    def _insert_dimensions(self, quad_df: DataFrame) -> int:
+    def _insert_dimensions(self, quad_df: Series) -> int | None:
         """Write quad dimension data to etl database"""
 
         # get values needed for sql statement
@@ -55,7 +56,7 @@ class EtlQuadModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(self, quad_df: DataFrame) -> (int, EtlChangeType):
+    def _update_dimensions(self, quad_df: Series) -> Tuple[int | None, EtlChangeType]:
         """Update quad dimension data in etl database"""
 
         # initialize return value
@@ -87,24 +88,23 @@ class EtlQuadModel(EtlDb):
         )
 
         # compare
-        if quad_id is not None:
-            if new_values != old_values:
-                change_type = EtlChangeType.UPDATE
-                cursor.execute(
-                    text(
-                        "update gh_quad set name = :new_name, "
-                        "start_date = :new_start, end_date = :new_end, "
-                        "duration = :new_duration, t_modified = current_timestamp "
-                        "where id = :quad_id"
-                    ),
-                    {
-                        "new_name": new_values[0],
-                        "new_start": new_values[1],
-                        "new_end": new_values[2],
-                        "new_duration": new_values[3],
-                        "quad_id": quad_id,
-                    },
-                )
-                self.commit(cursor)
+        if quad_id is not None and new_values != old_values:
+            change_type = EtlChangeType.UPDATE
+            cursor.execute(
+                text(
+                    "update gh_quad set name = :new_name, "
+                    "start_date = :new_start, end_date = :new_end, "
+                    "duration = :new_duration, t_modified = current_timestamp "
+                    "where id = :quad_id"
+                ),
+                {
+                    "new_name": new_values[0],
+                    "new_start": new_values[1],
+                    "new_end": new_values[2],
+                    "new_duration": new_values[3],
+                    "quad_id": quad_id,
+                },
+            )
+            self.commit(cursor)
 
         return quad_id, change_type

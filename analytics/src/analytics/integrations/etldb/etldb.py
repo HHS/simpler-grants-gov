@@ -8,7 +8,7 @@ from analytics.integrations import db
 class EtlDb:
     """Encapsulate etl database connections"""
 
-    def __init__(self, effective: str):
+    def __init__(self, effective: str | None = None):
         """Construct instance"""
         self._db_engine = db.get_db()
         self.effective_date = effective

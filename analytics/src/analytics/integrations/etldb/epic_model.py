@@ -1,7 +1,8 @@
 """Defines EtlEpicModel class to encapsulate db CRUD operations"""
 
+from typing import Tuple
 from sqlalchemy import text
-from pandas import DataFrame
+from pandas import Series
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -9,7 +10,9 @@ from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 class EtlEpicModel(EtlDb):
     """Encapsulate CRUD operations for epic entity"""
 
-    def sync_epic(self, epic_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_epic(
+        self, epic_df: Series, ghid_map: dict
+    ) -> Tuple[int | None, EtlChangeType]:
         """Write epic data to etl database"""
 
         # initialize return value
@@ -30,7 +33,7 @@ class EtlEpicModel(EtlDb):
 
         return epic_id, change_type
 
-    def _insert_dimensions(self, epic_df: DataFrame) -> int:
+    def _insert_dimensions(self, epic_df: Series) -> int | None:
         """Write epic dimension data to etl database"""
 
         # get values needed for sql statement
@@ -56,7 +59,9 @@ class EtlEpicModel(EtlDb):
 
         return new_row_id
 
-    def _insert_facts(self, epic_id: int, epic_df: DataFrame, ghid_map: dict) -> int:
+    def _insert_facts(
+        self, epic_id: int, epic_df: Series, ghid_map: dict
+    ) -> int | None:
         """Write epic fact data to etl database"""
 
         # get values needed for sql statement
@@ -88,7 +93,7 @@ class EtlEpicModel(EtlDb):
 
         return new_row_id
 
-    def _update_dimensions(self, epic_df: DataFrame) -> (int, EtlChangeType):
+    def _update_dimensions(self, epic_df: Series) -> Tuple[int | None, EtlChangeType]:
         """Update epic dimension data in etl database"""
 
         # initialize return value
@@ -106,15 +111,14 @@ class EtlEpicModel(EtlDb):
         epic_id, old_title = result.fetchone()
 
         # compare
-        if epic_id is not None:
-            if (new_title,) != (old_title,):
-                change_type = EtlChangeType.UPDATE
-                update_sql = text(
-                    "update gh_epic set title = :new_title, t_modified = current_timestamp "
-                    "where id = :epic_id"
-                )
-                update_values = {"new_title": new_title, "epic_id": epic_id}
-                result = cursor.execute(update_sql, update_values)
-                self.commit(cursor)
+        if epic_id is not None and (new_title,) != (old_title,):
+            change_type = EtlChangeType.UPDATE
+            update_sql = text(
+                "update gh_epic set title = :new_title, t_modified = current_timestamp "
+                "where id = :epic_id"
+            )
+            update_values = {"new_title": new_title, "epic_id": epic_id}
+            result = cursor.execute(update_sql, update_values)
+            self.commit(cursor)
 
         return epic_id, change_type

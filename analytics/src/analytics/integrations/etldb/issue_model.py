@@ -1,7 +1,8 @@
 """Define EtlIssueModel class to encapsulate db CRUD operations"""
 
+from typing import Tuple
 from sqlalchemy import text
-from pandas import DataFrame
+from pandas import Series
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -9,7 +10,9 @@ from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 class EtlIssueModel(EtlDb):
     """Encapsulate CRUD operations for issue entity"""
 
-    def sync_issue(self, issue_df: DataFrame, ghid_map: dict) -> (int, EtlChangeType):
+    def sync_issue(
+        self, issue_df: Series, ghid_map: dict
+    ) -> Tuple[int | None, EtlChangeType]:
         """Write issue data to etl database"""
 
         # initialize return value
@@ -30,7 +33,7 @@ class EtlIssueModel(EtlDb):
 
         return issue_id, change_type
 
-    def _insert_dimensions(self, issue_df: DataFrame, ghid_map: dict) -> int:
+    def _insert_dimensions(self, issue_df: Series, ghid_map: dict) -> int | None:
         """Write issue dimension data to etl database"""
 
         # get values needed for sql statement
@@ -64,8 +67,8 @@ class EtlIssueModel(EtlDb):
         return new_row_id
 
     def _insert_facts(
-        self, issue_id: int, issue_df: DataFrame, ghid_map: dict
-    ) -> (int, int):
+        self, issue_id: int, issue_df: Series, ghid_map: dict
+    ) -> Tuple[int | None, int | None]:
         """Write issue fact data to etl database"""
 
         # get values needed for sql statement
@@ -115,8 +118,8 @@ class EtlIssueModel(EtlDb):
         return history_id, map_id
 
     def _update_dimensions(
-        self, issue_df: DataFrame, ghid_map: dict
-    ) -> (int, EtlChangeType):
+        self, issue_df: Series, ghid_map: dict
+    ) -> Tuple[int | None, EtlChangeType]:
         """Update issue dimension data in etl database"""
 
         # initialize return value
@@ -141,35 +144,32 @@ class EtlIssueModel(EtlDb):
             ),
             {"ghid": issue_df["issue_ghid"]},
         )
-        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = (
-            r.fetchone()
-        )
+        issue_id, o_title, o_type, o_opened, o_closed, o_parent, o_epic_id = r.fetchone()
         old_values = (o_title, o_type, o_opened, o_closed, o_parent, o_epic_id)
 
         # compare
-        if issue_id is not None:
-            if new_values != old_values:
-                change_type = EtlChangeType.UPDATE
-                cursor.execute(
-                    text(
-                        "update gh_issue set "
-                        "title = :new_title, type = :new_type, opened_date = :new_opened, "
-                        "closed_date = :new_closed, parent_issue_ghid = :new_parent, "
-                        "epic_id = :new_epic_id, t_modified = current_timestamp "
-                        "where id = :issue_id"
+        if issue_id is not None and new_values != old_values:
+            change_type = EtlChangeType.UPDATE
+            cursor.execute(
+                text(
+                    "update gh_issue set "
+                    "title = :new_title, type = :new_type, opened_date = :new_opened, "
+                    "closed_date = :new_closed, parent_issue_ghid = :new_parent, "
+                    "epic_id = :new_epic_id, t_modified = current_timestamp "
+                    "where id = :issue_id"
+                ),
+                {
+                    "new_title": issue_df["issue_title"],
+                    "new_type": issue_df["issue_type"] or "None",
+                    "new_opened": issue_df["issue_opened_at"],
+                    "new_closed": issue_df["issue_closed_at"],
+                    "new_parent": issue_df["issue_parent"],
+                    "new_epic_id": ghid_map[EtlEntityType.EPIC].get(
+                        issue_df["epic_ghid"]
                     ),
-                    {
-                        "new_title": issue_df["issue_title"],
-                        "new_type": issue_df["issue_type"] or "None",
-                        "new_opened": issue_df["issue_opened_at"],
-                        "new_closed": issue_df["issue_closed_at"],
-                        "new_parent": issue_df["issue_parent"],
-                        "new_epic_id": ghid_map[EtlEntityType.EPIC].get(
-                            issue_df["epic_ghid"]
-                        ),
-                        "issue_id": issue_id,
-                    },
-                )
-                self.commit(cursor)
+                    "issue_id": issue_id,
+                },
+            )
+            self.commit(cursor)
 
         return issue_id, change_type
