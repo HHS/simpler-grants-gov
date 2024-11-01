@@ -97,7 +97,7 @@ class LoadOpportunitiesToIndex(Task):
                 "Processing queued opportunity",
                 extra={
                     "opportunity_id": opportunity.opportunity_id,
-                    "in_search": opportunity.opportunity_id in existing_opportunity_ids,
+                    "status": "update" if opportunity.opportunity_id in existing_opportunity_ids else "insert",
                 },
             )
 
