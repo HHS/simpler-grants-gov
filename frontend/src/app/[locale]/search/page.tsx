@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
@@ -22,7 +21,8 @@ export async function generateMetadata() {
   };
   return meta;
 }
-function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
+
+export default function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
 
@@ -72,6 +72,3 @@ function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
     </>
   );
 }
-
-// Exports page behind a feature flag
-export default withFeatureFlag(Search, "showSearchV0");

@@ -1,11 +1,10 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -13,11 +12,6 @@ import {
   Title,
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
-
-type PrimaryLinks = {
-  i18nKey: string;
-  href: string;
-}[];
 
 type Props = {
   logoPath?: string;
@@ -31,26 +25,15 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const primaryLinksRef = useRef<PrimaryLinks>([]);
-  const { featureFlagsManager } = useFeatureFlags();
+  const primaryLinksRef = [
+    { i18nKey: t("nav_link_home"), href: "/" },
+    { i18nKey: t("nav_link_search"), href: "/search" },
+    { i18nKey: t("nav_link_process"), href: "/process" },
+    { i18nKey: t("nav_link_research"), href: "/research" },
+    { i18nKey: t("nav_link_subscribe"), href: "/subscribe" },
+  ];
 
-  useEffect(() => {
-    primaryLinksRef.current = [
-      { i18nKey: t("nav_link_home"), href: "/" },
-      { i18nKey: t("nav_link_process"), href: "/process" },
-      { i18nKey: t("nav_link_research"), href: "/research" },
-      { i18nKey: t("nav_link_subscribe"), href: "/subscribe" },
-    ];
-    const searchNavLink = {
-      i18nKey: t("nav_link_search"),
-      href: "/search",
-    };
-    if (featureFlagsManager.isFeatureEnabled("showSearchV0")) {
-      primaryLinksRef.current.splice(1, 0, searchNavLink);
-    }
-  }, [featureFlagsManager, t]);
-
-  const navItems = primaryLinksRef.current.map((link) => (
+  const navItems = primaryLinksRef.map((link) => (
     <Link href={link.href} key={link.href}>
       {link.i18nKey}
     </Link>
