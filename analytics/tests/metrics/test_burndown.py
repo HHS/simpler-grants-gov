@@ -49,7 +49,7 @@ def sample_burndown_by_points_fixture() -> SprintBurndown:
     sprint_data = [i.__dict__ for i in sprint_data]
     test_data = GitHubIssues.from_dict(sprint_data)
     # return sprint burndown by points
-    return SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+    return SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points, project=1)
 
 
 class TestSprintBurndownByTasks:
@@ -69,7 +69,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_1)
@@ -94,7 +99,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_0)
@@ -132,7 +142,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check min and max dates
         assert df[output.date_col].min() == pd.Timestamp(DAY_1)
@@ -158,7 +173,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check burndown output
         # fmt: off
@@ -181,7 +201,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check max date is end of sprint not last closed date
         assert df[output.date_col].max() == pd.Timestamp(DAY_3)
@@ -200,7 +225,7 @@ class TestSprintBurndownByTasks:
             ValueError,
             match="Sprint value doesn't match one of the available sprints",
         ):
-            SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.issues)
+            SprintBurndown(test_data, sprint="Fake sprint", unit=Unit.issues, project=1)
 
     def test_calculate_burndown_for_current_sprint(self):
         """Use the current sprint if the date falls in the middle of a sprint."""
@@ -216,7 +241,12 @@ class TestSprintBurndownByTasks:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="@current", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="@current",
+            unit=Unit.issues,
+            project=1,
+        )
         df = output.results
         # validation - check burndown output
         # fmt: off
@@ -242,7 +272,12 @@ class TestSprintBurndownByPoints:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         df = output.results
         # validation
         # fmt: off
@@ -266,7 +301,12 @@ class TestSprintBurndownByPoints:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         df = output.results
         # validation
         # fmt: off
@@ -299,8 +339,18 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        points = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
-        issues = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        points = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
+        issues = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         # validation - check they're calculated correctly
         assert points.stats[self.SPRINT_START].value == DAY_1
         assert points.stats[self.SPRINT_END].value == DAY_3
@@ -322,7 +372,12 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         print(output.results)
         # validation - check that stats were calculated correctly
         assert output.stats[self.TOTAL_CLOSED].value == 2
@@ -345,7 +400,12 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         # validation
         assert output.stats[self.TOTAL_CLOSED].value == 3
         assert output.stats[self.TOTAL_OPENED].value == 9
@@ -383,7 +443,12 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         # validation
         assert output.stats[self.TOTAL_CLOSED].value == 2
         assert output.stats[self.TOTAL_OPENED].value == 3
@@ -401,7 +466,12 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         # validation
         assert output.stats[self.TOTAL_CLOSED].value == 3
         assert output.stats[self.TOTAL_OPENED].value == 3
@@ -422,7 +492,12 @@ class TestGetStats:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         # validation
         assert output.stats[self.TOTAL_CLOSED].value == 2
         assert output.stats[self.TOTAL_OPENED].value == 3
@@ -442,7 +517,12 @@ class TestFormatSlackMessage:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         lines = output.format_slack_message().splitlines()
         for line in lines:
             print(line)
@@ -459,7 +539,12 @@ class TestFormatSlackMessage:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.issues)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.issues,
+            project=1,
+        )
         title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.issues.value in title
@@ -474,7 +559,12 @@ class TestFormatSlackMessage:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         title = output.format_slack_message().splitlines()[0]
         # validation
         assert Unit.points.value in title
@@ -493,7 +583,12 @@ class TestPlotResults:
         sprint_data = [i.__dict__ for i in sprint_data]
         test_data = GitHubIssues.from_dict(sprint_data)
         # execution
-        output = SprintBurndown(test_data, sprint="Sprint 1", unit=Unit.points)
+        output = SprintBurndown(
+            test_data,
+            sprint="Sprint 1",
+            unit=Unit.points,
+            project=1,
+        )
         # validation - check that the chart attribute matches output of plot_results()
         assert output.chart == output.plot_results()
 

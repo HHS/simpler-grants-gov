@@ -2,13 +2,11 @@
 
 import logging
 from enum import Enum
-from typing import Self
 
 import pandas as pd
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from analytics.datasets.base import BaseDataset
-from analytics.datasets.utils import load_json_file
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +29,10 @@ class IssueType(Enum):
 class IssueMetadata(BaseModel):
     """Stores information about issue type and parent (if applicable)."""
 
-    # Common metadata -- attributes about the issue common to both projects
+    # Project metadata -- attributes about the sprint project board
+    project_owner: str
+    project_number: int
+    # Issue metadata -- attributes about the issue common to both projects
     issue_title: str
     issue_url: str
     issue_parent: str | None
@@ -77,6 +78,7 @@ class GitHubIssues(BaseDataset):
         self.sprint_col = "sprint_name"
         self.sprint_start_col = "sprint_start"
         self.sprint_end_col = "sprint_end"
+        self.project_col = "project_number"
         self.date_cols = [
             self.sprint_start_col,
             self.sprint_end_col,
@@ -127,133 +129,12 @@ class GitHubIssues(BaseDataset):
 
     def to_dict(self) -> list[dict]:
         """Convert this dataset to a python dictionary."""
-        # Convert date cols into dates
+        # Temporarily convert date cols into strings before exporting
         for col in self.date_cols:
-            # strip off the timestamp portion of the date
             self.df[col] = self.df[col].dt.strftime("%Y-%m-%d")
-        return super().to_dict()
-
-    @classmethod
-    def load_from_json_files(
-        cls,
-        sprint_file: str = "data/sprint-data.json",
-        roadmap_file: str = "data/roadmap-data.json",
-    ) -> Self:
-        """Load GitHubIssues dataset from input json files."""
-        # Load sprint and roadmap data
-        sprint_data_in = load_json_file(sprint_file)
-        roadmap_data_in = load_json_file(roadmap_file)
-        # Populate a lookup table with this data
-        lookup: dict = {}
-        lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
-        lookup = populate_issue_lookup_table(lookup, sprint_data_in)
-        # Flatten and write issue level data to output file
-        issues = flatten_issue_data(lookup)
-        return cls(pd.DataFrame(data=issues))
-
-
-# ===============================================================
-# Transformation helper functions
-# ===============================================================
-
-
-def populate_issue_lookup_table(
-    lookup: dict[str, IssueMetadata],
-    issues: list[dict],
-) -> dict[str, IssueMetadata]:
-    """Populate a lookup table that maps issue URLs to their issue type and parent."""
-    for i, issue in enumerate(issues):
-        try:
-            entry = IssueMetadata.model_validate(issue)
-        except ValidationError as err:  # noqa: PERF203
-            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
-            logger.debug("Error: %s", err)
-            continue
-        lookup[entry.issue_url] = entry
-    return lookup
-
-
-def get_parent_with_type(
-    child_url: str,
-    lookup: dict[str, IssueMetadata],
-    type_wanted: IssueType,
-) -> IssueMetadata | None:
-    """
-    Traverse the lookup table to find an issue's parent with a specific type.
-
-    This is useful if we have multiple nested issues, and we want to find the
-    top level deliverable or epic that a given task or bug is related to.
-    """
-    # Get the initial child issue and its parent (if applicable) from the URL
-    child = lookup.get(child_url)
-    if not child:
-        err = f"Lookup doesn't contain issue with url: {child_url}"
-        raise ValueError(err)
-    if not child.issue_parent:
-        return None
-
-    # Travel up the issue hierarchy until we:
-    #  - Find a parent issue with the desired type
-    #  - Get to an issue without a parent
-    #  - Have traversed 5 issues (breaks out of issue cycles)
-    max_traversal = 5
-    parent_url = child.issue_parent
-    for _ in range(max_traversal):
-        parent = lookup.get(parent_url)
-        # If no parent is found, return None
-        if not parent:
-            return None
-        # If the parent matches the desired type, return it
-        if IssueType(parent.issue_type) == type_wanted:
-            return parent
-        # If the parent doesn't have a its own parent, return None
-        if not parent.issue_parent:
-            return None
-        # Otherwise update the parent_url to "grandparent" and continue
-        parent_url = parent.issue_parent
-
-    # Return the URL of the parent deliverable (or None)
-    return None
-
-
-def flatten_issue_data(lookup: dict[str, IssueMetadata]) -> list[dict]:
-    """Flatten issue data and inherit data from parent epic an deliverable."""
-    result: list[dict] = []
-    for issue in lookup.values():
-        # If the issue is a deliverable or epic, move to the next one
-        if IssueType(issue.issue_type) in [IssueType.DELIVERABLE, IssueType.EPIC]:
-            continue
-
-        # Get the parent deliverable, if the issue has one
-        deliverable = get_parent_with_type(
-            child_url=issue.issue_url,
-            lookup=lookup,
-            type_wanted=IssueType.DELIVERABLE,
-        )
-        if deliverable:
-            # Set deliverable metadata
-            issue.deliverable_title = deliverable.issue_title
-            issue.deliverable_url = deliverable.issue_url
-            issue.deliverable_pillar = deliverable.deliverable_pillar
-            # Set quad metadata
-            issue.quad_id = deliverable.quad_id
-            issue.quad_name = deliverable.quad_name
-            issue.quad_start = deliverable.quad_start
-            issue.quad_end = deliverable.quad_end
-            issue.quad_length = deliverable.quad_length
-
-        # Get the parent epic, if the issue has one
-        epic = get_parent_with_type(
-            child_url=issue.issue_url,
-            lookup=lookup,
-            type_wanted=IssueType.EPIC,
-        )
-        if epic:
-            issue.epic_title = epic.issue_title
-            issue.epic_url = epic.issue_url
-
-        # Add the issue to the results
-        result.append(issue.__dict__)
-
-    # Return the results
-    return result
+        # Return the dictionary
+        export_dict = super().to_dict()
+        # Convert date columns back into dates
+        for col in self.date_cols:
+            self.df[col] = pd.to_datetime(self.df[col]).dt.floor("d")
+        return export_dict

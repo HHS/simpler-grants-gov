@@ -28,9 +28,13 @@ class SprintBurndown(BaseMetric[GitHubIssues]):
         dataset: GitHubIssues,
         sprint: str,
         unit: Unit,
+        project: int,
+        owner: str = "HHS",
     ) -> None:
         """Initialize the SprintBurndown metric."""
         self.dataset = dataset
+        self.project = project
+        self.owner = owner
         self.sprint = self._get_and_validate_sprint_name(sprint)
         self.sprint_data = self._isolate_data_for_this_sprint()
         self.date_col = "date"
@@ -76,11 +80,15 @@ class SprintBurndown(BaseMetric[GitHubIssues]):
         )
         df = self.results[date_mask]
         # create a line chart from the data in self.results
+        title = (
+            f"{self.owner}/{self.project} {self.sprint} burndown "
+            f"in project by {self.unit.value}"
+        )
         chart = px.line(
             data_frame=df,
             x=self.date_col,
             y="total_open",
-            title=f"{self.sprint} burndown by {self.unit.value}",
+            title=title,
             labels={"total_open": f"total {self.unit.value} open"},
         )
         # set the scale of the y axis to start at 0
@@ -126,7 +134,8 @@ class SprintBurndown(BaseMetric[GitHubIssues]):
     def format_slack_message(self) -> str:
         """Format the message that will be included with the charts posted to slack."""
         message = (
-            f"*:github: Burndown summary for {self.sprint} by {self.unit.value}*\n"
+            f"*:github: Burndown summary for {self.sprint} "
+            f"in project {self.owner}/{self.project} by {self.unit.value}*\n"
         )
         for label, stat in self.stats.items():
             message += f"• *{label}:* {stat.value}{stat.suffix}\n"
@@ -148,6 +157,7 @@ class SprintBurndown(BaseMetric[GitHubIssues]):
         return sprint
 
     def _isolate_data_for_this_sprint(self) -> pd.DataFrame:
-        """Filter out issues that are not assigned to the current sprint."""
+        """Filter out issues that are not assigned to the current sprint or project."""
         sprint_filter = self.dataset.df[self.dataset.sprint_col] == self.sprint
-        return self.dataset.df[sprint_filter]
+        project_filter = self.dataset.df[self.dataset.project_col] == self.project
+        return self.dataset.df[((sprint_filter) & (project_filter))]
