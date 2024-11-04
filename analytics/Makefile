@@ -210,9 +210,7 @@ percent-complete:
 	@echo "=> Running percent complete deliverable"
 	@echo "====================================================="
 	$(POETRY) analytics calculate deliverable_percent_complete \
-	--sprint-file $(SPRINT_FILE) \
-	--roadmap-file $(ROADMAP_FILE) \
-	--issue-file $(ISSUE_FILE) \
+	--issue-file $(DELIVERY_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--include-status "In Progress" \
   	--include-status "Planning" \

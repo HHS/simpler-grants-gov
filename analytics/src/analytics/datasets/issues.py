@@ -4,7 +4,7 @@ import logging
 from enum import Enum
 
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from analytics.datasets.base import BaseDataset
 
@@ -24,6 +24,13 @@ class IssueType(Enum):
     ENHANCEMENT = "Enhancement"
     DELIVERABLE = "Deliverable"
     NONE = None
+
+
+class IssueState(Enum):
+    """Whether the issue is open or closed."""
+
+    OPEN = "open"
+    CLOSED = "closed"
 
 
 class IssueMetadata(BaseModel):
@@ -58,8 +65,18 @@ class IssueMetadata(BaseModel):
     # Parent metadata -- attributes about parent issues populated via lookup
     deliverable_url: str | None = Field(default=None)
     deliverable_title: str | None = Field(default=None)
+    deliverable_status: str | None = Field(default=None)
     epic_url: str | None = Field(default=None)
     epic_title: str | None = Field(default=None)
+
+    # See https://docs.pydantic.dev/2.0/usage/computed_fields/
+    @computed_field  # type: ignore[misc]
+    @property
+    def issue_state(self) -> str:
+        """Whether the issue is open or closed."""
+        if self.issue_is_closed:
+            return IssueState.CLOSED.value
+        return IssueState.OPEN.value
 
 
 # ===============================================================

@@ -9,7 +9,6 @@ import typer
 from slack_sdk import WebClient
 from sqlalchemy import text
 
-from analytics.datasets.deliverable_tasks import DeliverableTasks
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
@@ -165,7 +164,6 @@ def calculate_sprint_burnup(
 
 @metrics_app.command(name="deliverable_percent_complete")
 def calculate_deliverable_percent_complete(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     # Typer uses the Unit enum to validate user inputs from the CLI
     # but the default arg must be a string or the CLI will throw an error
@@ -174,23 +172,10 @@ def calculate_deliverable_percent_complete(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    roadmap_file: Annotated[Optional[str], ROADMAP_FILE_ARG] = None,  # noqa: UP007
     include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
 ) -> None:
     """Calculate percentage completion by deliverable."""
-    if roadmap_file:
-        # load the input data using the new join path with roadmap data
-        task_data = DeliverableTasks.load_from_json_files_with_roadmap_data(
-            sprint_file=sprint_file,
-            issue_file=issue_file,
-            roadmap_file=roadmap_file,
-        )
-    else:
-        # load the input data using the original join path without roadmap data
-        task_data = DeliverableTasks.load_from_json_files(
-            sprint_file=sprint_file,
-            issue_file=issue_file,
-        )
+    task_data = GitHubIssues.from_json(issue_file)
     # calculate percent complete
     metric = DeliverablePercentComplete(
         dataset=task_data,
