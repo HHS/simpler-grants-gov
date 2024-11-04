@@ -1,10 +1,10 @@
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import {
   QueryParamData,
   SearchFetcherActionType,
   SortOptions,
 } from "src/types/search/searchRequestTypes";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
-import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.

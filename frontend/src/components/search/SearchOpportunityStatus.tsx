@@ -1,8 +1,8 @@
 "use client";
 
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
-import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
