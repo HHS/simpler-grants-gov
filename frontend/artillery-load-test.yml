@@ -1,5 +1,4 @@
 config:
-  target: http://localhost:3000
   tls:
     rejectUnauthorized: false
   http:
@@ -18,6 +17,11 @@ config:
       maxVusers: 1000
       name: Spike phase
   environments:
+    local:
+      target: http://localhost:3000
+      phases:
+        - arrivalCount: 10
+          duration: 30
     prod:
       target: https://simpler.grants.gov
     staging:
@@ -32,22 +36,36 @@ config:
     metrics-by-endpoint: {}
   apdex:
     threshold: 100
+  payload:
+    - path: 'tests/artillery/{{ $environment}}-opportunities.csv'
+      fields:
+        - opp_id
+      skipHeader: true
+      name: opps
+    - path: 'tests/artillery/{{ $environment}}-search.csv'
+      fields:
+        - query
+        - page
+        - status
+        - agency
+      skipHeader: true
+      name: opps
 scenarios:
-  - name: root
+  - name: opportunities
     flow:
-      - get:
-          url: "/"
-          expect:
-            - statusCode: 200
-  - name: health
+      - loop:
+        - get:
+            url: "/opportunity/{{ opp_id }}"
+        - think: 1
+        count: 10
+        over: opps
+        log: "/opportunity/{{ opp_id }}"
+  - name: search
     flow:
-      - get:
-          url: "/health"
-          expect:
-            - statusCode: 200
-  - name: hello
-    flow:
-      - get:
-          url: "/api/hello"
-          expect:
-            - statusCode: 200
+      - loop:
+        - get:
+            url: "/search?query={{ query }}&page={{ page }}&status={{ status }}"
+        - think: 1
+        count: 10
+        over: opps
+        log: "/opportunity/{{ opp_id }}"
