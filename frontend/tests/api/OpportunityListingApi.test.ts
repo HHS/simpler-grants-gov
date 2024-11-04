@@ -46,6 +46,7 @@ function getValidMockResponse(): OpportunityApiResponse {
     data: {
       agency: "US-ABC",
       agency_name: "National Aeronautics and Space Administration",
+      attachments: [],
       top_level_agency_name: "National Aeronautics and Space Administration",
       category: "discretionary",
       category_explanation: null,
