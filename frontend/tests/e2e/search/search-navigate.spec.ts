@@ -1,13 +1,7 @@
 import { expect, Page, test } from "@playwright/test";
 import { BrowserContextOptions } from "playwright-core";
 
-import {
-  clickMobileNavMenu,
-  expectCheckboxIDIsChecked,
-  expectURLContainsQueryParam,
-  getMobileMenuButton,
-  hasMobileMenu,
-} from "./searchSpecUtil";
+import { expectCheckboxIDIsChecked } from "./searchSpecUtil";
 
 interface PageProps {
   page: Page;

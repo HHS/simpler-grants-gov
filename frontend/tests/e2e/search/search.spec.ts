@@ -27,20 +27,16 @@ interface PageProps {
 }
 
 test.describe("Search page tests", () => {
-  test.beforeEach(async ({ page }: PageProps) => {
-    // Navigate to the search page with the feature flag set
-    await page.goto("/search");
-  });
-
   test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
+    await page.goto("/search");
+
     // Set all inputs, then refresh the page. Those same inputs should be
     // set from query params.
     const searchTerm = "education";
     const statusCheckboxes = {
-      "status-forecasted": "forecasted",
-      "status-posted": "posted",
+      "status-closed": "closed",
     };
     const fundingInstrumentCheckboxes = {
       "funding-instrument-cooperative_agreement": "cooperative_agreement",
@@ -70,7 +66,12 @@ test.describe("Search page tests", () => {
 
     await fillSearchInputAndSubmit(searchTerm, page);
 
-    await toggleCheckboxes(page, statusCheckboxes, "status");
+    await toggleCheckboxes(
+      page,
+      statusCheckboxes,
+      "status",
+      "forecasted,posted",
+    );
 
     await clickAccordionWithTitle(page, "Funding instrument");
     await toggleCheckboxes(
@@ -120,6 +121,7 @@ test.describe("Search page tests", () => {
   test("resets page back to 1 when choosing a filter", async ({ page }, {
     project,
   }) => {
+    await page.goto("/search");
     await clickPaginationPageNumber(page, 2);
 
     // Verify that page 1 is highlighted
@@ -137,7 +139,12 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
-    await toggleCheckboxes(page, statusCheckboxes, "status");
+    await toggleCheckboxes(
+      page,
+      statusCheckboxes,
+      "status",
+      "forecasted,posted",
+    );
 
     // Wait for the page to reload
     await waitForSearchResultsInitialLoad(page);
@@ -155,6 +162,7 @@ test.describe("Search page tests", () => {
   test("last result becomes first result when flipping sort order", async ({
     page,
   }: PageProps) => {
+    await page.goto("/search");
     await selectSortBy(page, "opportunityTitleDesc");
 
     await clickLastPaginationPage(page);
@@ -173,6 +181,7 @@ test.describe("Search page tests", () => {
   test("number of results is the same with none or all opportunity status checked", async ({
     page,
   }, { project }) => {
+    await page.goto("/search?status=none");
     const initialNumberOfOpportunityResults =
       await getNumberOfOpportunitySearchResults(page);
 
