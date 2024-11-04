@@ -170,7 +170,7 @@ sprint-burndown:
 	@echo "=> Running sprint burndown report for HHS/17"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
-	--issue-file $(DELIVERY_FILE) \
+	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
 	--project 17 \
