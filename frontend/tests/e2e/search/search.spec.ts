@@ -121,7 +121,7 @@ test.describe("Search page tests", () => {
   test("resets page back to 1 when choosing a filter", async ({ page }, {
     project,
   }) => {
-    await page.goto("/search");
+    await page.goto("/search?status=none");
     await clickPaginationPageNumber(page, 2);
 
     // Verify that page 1 is highlighted
@@ -139,12 +139,7 @@ test.describe("Search page tests", () => {
       await toggleMobileSearchFilters(page);
     }
 
-    await toggleCheckboxes(
-      page,
-      statusCheckboxes,
-      "status",
-      "forecasted,posted",
-    );
+    await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
     await waitForSearchResultsInitialLoad(page);
