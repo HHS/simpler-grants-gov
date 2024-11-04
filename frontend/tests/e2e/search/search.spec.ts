@@ -29,7 +29,7 @@ interface PageProps {
 test.describe("Search page tests", () => {
   test.beforeEach(async ({ page }: PageProps) => {
     // Navigate to the search page with the feature flag set
-    await page.goto("/search?_ff=showSearchV0:true");
+    await page.goto("/search");
   });
 
   test("should refresh and retain filters in a new tab", async ({ page }, {
