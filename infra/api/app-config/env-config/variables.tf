@@ -67,6 +67,22 @@ variable "database_min_capacity" {
   type        = number
 }
 
+variable "instance_desired_instance_count" {
+  description = "Number of desired ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
+variable "instance_scaling_max_capacity" {
+  description = "Maximum number of ECS container instances for the service"
+  type        = number
+}
+
+variable "instance_scaling_min_capacity" {
+  description = "Minimum number of ECS container instances for the service"
+  type        = number
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
