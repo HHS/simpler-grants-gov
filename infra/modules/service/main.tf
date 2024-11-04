@@ -134,8 +134,3 @@ resource "aws_ecs_cluster" "cluster" {
     value = "enabled"
   }
 }
-
-# ------------
-# Auto Scaling
-# ------------
-
