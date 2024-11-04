@@ -111,19 +111,19 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 module "service" {
-  source                        = "../../modules/service"
-  service_name                  = local.service_name
-  is_temporary                  = local.is_temporary
-  image_repository_name         = module.app_config.image_repository_name
-  image_tag                     = local.image_tag
-  vpc_id                        = data.aws_vpc.network.id
-  public_subnet_ids             = data.aws_subnets.public.ids
-  private_subnet_ids            = data.aws_subnets.private.ids
-  desired_instance_count        = local.service_config.instance_desired_instance_count
-  instance_scaling_max_capacity = local.service_config.instance_scaling_max_capacity
-  instance_scaling_min_capacity = local.service_config.instance_scaling_min_capacity
-  cpu                           = 1024
-  memory                        = 2048
+  source                 = "../../modules/service"
+  service_name           = local.service_name
+  is_temporary           = local.is_temporary
+  image_repository_name  = module.app_config.image_repository_name
+  image_tag              = local.image_tag
+  vpc_id                 = data.aws_vpc.network.id
+  public_subnet_ids      = data.aws_subnets.public.ids
+  private_subnet_ids     = data.aws_subnets.private.ids
+  desired_instance_count = local.service_config.instance_desired_instance_count
+  max_capacity           = local.service_config.instance_scaling_max_capacity
+  min_capacity           = local.service_config.instance_scaling_min_capacity
+  cpu                    = 1024
+  memory                 = 2048
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 

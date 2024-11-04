@@ -35,16 +35,6 @@ variable "cpu" {
   description = "Number of cpu units used by the task, expessed as an integer value, e.g 512 "
 }
 
-variable "instance_scaling_max_capacity" {
-  description = "Maximum number of ECS container instances for the service"
-  type        = number
-}
-
-variable "instance_scaling_min_capacity" {
-  description = "Minimum number of ECS container instances for the service"
-  type        = number
-}
-
 variable "memory" {
   type        = number
   default     = 512
