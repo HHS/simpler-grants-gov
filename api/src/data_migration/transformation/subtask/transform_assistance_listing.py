@@ -86,12 +86,11 @@ class TransformAssistanceListing(AbstractTransformSubTask):
             )
             source_assistance_listing.transformation_notes = transform_constants.ORPHANED_CFDA
 
+        elif not source_assistance_listing.programtitle or not source_assistance_listing.cfdanumber:
+               self.increment(...)
+               logger.info(...)
+               source_assistance_listing.transformation_notes = "empty_assistance_listing"
         else:
-            # Check if assistance listing has empty required fields
-            if (
-                not source_assistance_listing.programtitle
-                or not source_assistance_listing.cfdanumber
-            ):
                 self.increment(
                     transform_constants.Metrics.TOTAL_RECORDS_SKIPPED,
                     prefix=transform_constants.ASSISTANCE_LISTING,
