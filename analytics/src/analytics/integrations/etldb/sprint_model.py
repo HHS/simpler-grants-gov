@@ -2,6 +2,7 @@
 
 from pandas import Series
 from sqlalchemy import text
+
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -9,7 +10,7 @@ from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 class EtlSprintModel:
     """Encapsulate CRUD operations for sprint entity."""
 
-    def __init__(self, dbh: EtlDb):
+    def __init__(self, dbh: EtlDb) -> None:
         """Instantiate a class instance."""
         self.dbh = dbh
 
