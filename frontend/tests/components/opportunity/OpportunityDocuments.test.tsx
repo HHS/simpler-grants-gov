@@ -1,25 +1,25 @@
 import { render, screen } from "@testing-library/react";
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
-
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
+import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
+
 jest.mock("next-intl", () => ({
-    useTranslations: () => useTranslationsMock(),
+  useTranslations: () => useTranslationsMock(),
 }));
 
 const mockData = [
-    {
-        opportunity_attachment_type: "notice_of_funding_opportunity",
-        file_name: "FundingInformation.pdf",
-        download_path: "https://example.com",
-        updated_at: "2021-10-01T00:00:00Z",
-    },
-    {
-        opportunity_attachment_type: "other",
-        file_name: "File2_ExhibitB.pdf",
-        download_path: "https://example.com",
-        updated_at: "2021-10-01T00:00:00Z",
-    },
+  {
+    opportunity_attachment_type: "notice_of_funding_opportunity",
+    file_name: "FundingInformation.pdf",
+    download_path: "https://example.com",
+    updated_at: "2021-10-01T00:00:00Z",
+  },
+  {
+    opportunity_attachment_type: "other",
+    file_name: "File2_ExhibitB.pdf",
+    download_path: "https://example.com",
+    updated_at: "2021-10-01T00:00:00Z",
+  },
 ];
 
 describe("OpportunityDocuments", () => {
@@ -27,10 +27,10 @@ describe("OpportunityDocuments", () => {
     render(<OpportunityDocuments documents={mockData} />);
 
     const fundLink = screen.getByRole("link", {
-        name: "FundingInformation.pdf",
+      name: "FundingInformation.pdf",
     });
     const otherLink = screen.getByRole("link", {
-        name: "File2_ExhibitB.pdf",
+      name: "File2_ExhibitB.pdf",
     });
 
     expect(fundLink).toBeInTheDocument();

@@ -15,11 +15,11 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
+import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
