@@ -1,6 +1,10 @@
 // splits a string containing markup at a specified character length
 // tracks open tags to ensure that split does not occur until all open tags are closed.
-// will throw on malformed markup, so any callers will need to gracefully handle that error
+// will throw on malformed markup, so any callers will need to gracefully handle that error.
+// Note that:
+// * the character count is zero indexed
+// * the split will happen on the first whitespace AFTER the supplied split point
+// Refer to tests to see how this works in practice
 export const splitMarkup = (
   markupString: string,
   splitAt: number,
@@ -13,7 +17,12 @@ export const splitMarkup = (
   }
   const { preSplit, postSplit } = Array.from(markupString).reduce(
     (tracker, character, index) => {
-      if (!tracker.splitComplete && !tracker.tagOpen && index > splitAt) {
+      if (
+        !tracker.splitComplete &&
+        !tracker.tagOpen &&
+        index > splitAt &&
+        character.match(/\s/)
+      ) {
         tracker.splitComplete = true;
       }
       if (tracker.splitComplete) {
