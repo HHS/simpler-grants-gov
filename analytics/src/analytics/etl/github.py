@@ -306,7 +306,7 @@ def flatten_issue_data(lookup: dict[str, IssueMetadata]) -> list[dict]:
             issue.epic_url = epic.issue_url
 
         # Add the issue to the results
-        result.append(issue.__dict__)
+        result.append(issue.model_dump())
 
     # Return the results
     return result
