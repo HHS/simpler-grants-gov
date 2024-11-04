@@ -169,8 +169,8 @@ A couple of important notes about this command:
 You can also post the results of this metric to a Slack channel:
 
 > [!NOTE] You must have the following environment variables set to post to Slack:
-> - `SLACK_BOT_TOKEN` the OAuth token for a slackbot installed in your workspace
-> - `REPORTING_CHANNEL_ID` the id of the channel you want to post to in Slack.
+> - `ANALYTICS_SLACK_BOT_TOKEN` the OAuth token for a slackbot installed in your workspace
+> - `ANALYTICS_REPORTING_CHANNEL_ID` the id of the channel you want to post to in Slack.
 >
 > For more information about setting up these variables see the [installation guide](development.md#configuring-secrets)
 
