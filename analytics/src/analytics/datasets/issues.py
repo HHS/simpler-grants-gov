@@ -78,6 +78,7 @@ class GitHubIssues(BaseDataset):
         self.sprint_col = "sprint_name"
         self.sprint_start_col = "sprint_start"
         self.sprint_end_col = "sprint_end"
+        self.project_col = "project_number"
         self.date_cols = [
             self.sprint_start_col,
             self.sprint_end_col,

@@ -118,12 +118,20 @@ def calculate_sprint_burndown(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
+    owner: Annotated[str, OWNER_ARG] = "HHS",
+    project: Annotated[int, PROJECT_ARG] = 13,
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
     sprint_data = GitHubIssues.from_json(issue_file)
     # calculate burndown
-    burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
+    burndown = SprintBurndown(
+        sprint_data,
+        sprint=sprint,
+        unit=unit,
+        project=project,
+        owner=owner,
+    )
     show_and_or_post_results(
         metric=burndown,
         show_results=show_results,

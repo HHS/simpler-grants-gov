@@ -186,12 +186,23 @@ issue-data-export:
 gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
 
 sprint-burndown:
-	@echo "=> Running sprint burndown report"
+	@echo "=> Running sprint burndown report for HHS/13"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
 	--issue-file $(DELIVERY_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
+	--project 13 \
+	--unit $(UNIT) \
+	--$(ACTION)
+	@echo "====================================================="
+	@echo "=> Running sprint burndown report for HHS/17"
+	@echo "====================================================="
+	$(POETRY) analytics calculate sprint_burndown \
+	--issue-file $(DELIVERY_FILE) \
+	--output-dir $(OUTPUT_DIR) \
+	--sprint  "$(SPRINT)" \
+	--project 17 \
 	--unit $(UNIT) \
 	--$(ACTION)
 

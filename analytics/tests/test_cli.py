@@ -71,6 +71,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
         ]
         # execution
         result = runner.invoke(app, command)
@@ -92,6 +94,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
             "--show-results",
         ]
         # execution
@@ -116,6 +120,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
             "--unit",
             "issues",
             "--show-results",
