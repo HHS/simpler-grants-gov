@@ -67,12 +67,6 @@ resource "aws_ecs_service" "app" {
       container_port   = var.container_port
     }
   }
-
-  # Allow changes to the desired_count without differences in terraform plan.
-  # This allows autoscaling to manage the desired count for us.
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
 }
 
 resource "aws_ecs_task_definition" "app" {
