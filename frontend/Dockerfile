@@ -1,7 +1,7 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:20-bullseye-slim AS base
+FROM node:22-bullseye-slim AS base
 WORKDIR /frontend
 
 # Install dependencies
@@ -66,10 +66,10 @@ WORKDIR /frontend
 
 # Update system and install security updates
 RUN apt-get update \
-    && apt-get upgrade -y --no-install-recommends \
-    && apt-get install -y --only-upgrade libc-bin libc6 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get upgrade -y --no-install-recommends \
+  && apt-get install -y --only-upgrade libc-bin libc6 \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /frontend/.next/cache/images/
 VOLUME ["/frontend/.next/cache/images/"]
