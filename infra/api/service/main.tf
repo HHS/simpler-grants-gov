@@ -122,6 +122,7 @@ module "service" {
   desired_instance_count = local.service_config.instance_desired_instance_count
   max_capacity           = local.service_config.instance_scaling_max_capacity
   min_capacity           = local.service_config.instance_scaling_min_capacity
+  enable_autoscaling     = true
   cpu                    = 1024
   memory                 = 2048
 
