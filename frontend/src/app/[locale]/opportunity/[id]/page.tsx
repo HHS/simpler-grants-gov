@@ -19,6 +19,7 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
@@ -122,6 +123,7 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
         <div className="grid-row grid-gap">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
             <OpportunityDescription summary={opportunityData.summary} />
+            <OpportunityDocuments documents={opportunityData.attachments} />
             <OpportunityLink opportunityData={opportunityData} />
           </div>
 

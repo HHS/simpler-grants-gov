@@ -17,7 +17,7 @@ const OpportunityLink = ({ opportunityData }: Props) => {
     "--"
   );
   return (
-    <div className="usa-prose margin-top-2">
+    <div className="usa-prose margin-top-6">
       <h3>{t("title")}</h3>
       <p>{link}</p>
     </div>
