@@ -1,7 +1,5 @@
 ## Overview
 
-test trivy pls
-
 - This is a [Next.js](https://nextjs.org/) React web application, written in [TypeScript](https://www.typescriptlang.org/).
 - [U.S. Web Design System](https://designsystem.digital.gov) provides themeable styling and a set of common components.
 - [React-USWDS](https://github.com/trussworks/react-uswds) provides React components already with USWDS theming out of the box. For a reference point starting out, see `react-uswds-hello.tsx` which includes examples of react-uswds component usage.
