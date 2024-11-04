@@ -35,9 +35,13 @@ export function convertSearchParamsToProperTypes(
 // and to reset that status params none if status=none is set
 function paramToSet(param: QuerySetParam, type?: string): Set<string> {
   const defaultedParam =
-    type === "status" && param === SEARCH_NO_STATUS_VALUE
-      ? ""
-      : ("forecasted,posted" as QuerySetParam);
+    type === "status"
+      ? // Reset the status to "" if status=SEARCH_NO_STATUS_VALUE
+        param === SEARCH_NO_STATUS_VALUE
+        ? ""
+        : // Default to forecasted,pasted if status is empty
+          (param ?? ("forecasted,posted" as QuerySetParam))
+      : param;
 
   if (!defaultedParam) return new Set();
   if (Array.isArray(defaultedParam)) {
