@@ -212,6 +212,8 @@ percent-complete:
 	$(POETRY) analytics calculate deliverable_percent_complete \
 	--issue-file $(DELIVERY_FILE) \
 	--output-dir $(OUTPUT_DIR) \
+	--include-status "In Progress" \
+  	--include-status "Planning" \
 	--unit $(UNIT) \
 	--$(ACTION)
 

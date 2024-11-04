@@ -69,7 +69,9 @@ class IssueMetadata(BaseModel):
     epic_url: str | None = Field(default=None)
     epic_title: str | None = Field(default=None)
 
-    @computed_field
+    # See https://docs.pydantic.dev/2.0/usage/computed_fields/
+    @computed_field  # type: ignore[misc]
+    @property
     def issue_state(self) -> str:
         """Whether the issue is open or closed."""
         if self.issue_is_closed:
