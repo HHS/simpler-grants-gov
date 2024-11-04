@@ -8,9 +8,11 @@ from src.db.models.opportunity_models import Opportunity
 from tests.conftest import BaseTestClass
 from tests.src.data_migration.transformation.conftest import (
     get_summary_from_source,
+    setup_agency,
     setup_cfda,
     setup_opportunity,
     setup_synopsis_forecast,
+    validate_agency,
     validate_applicant_type,
     validate_assistance_listing,
     validate_funding_category,
@@ -40,7 +42,12 @@ class TestTransformFullRunTask(BaseTestClass):
 
     def test_all_inserts(self, db_session, transform_oracle_data_task):
         # Test that we're fully capable of processing inserts across an entire opportunity record
-        opportunity = setup_opportunity(create_existing=False)
+        parent_agency = setup_agency("INSERTAGENCY", create_existing=False)
+        subagency = setup_agency("INSERTAGENCY-ABC", create_existing=False)
+
+        opportunity = setup_opportunity(
+            create_existing=False, source_values={"owningagency": "INSERTAGENCY-ABC"}
+        )
 
         cfda1 = setup_cfda(create_existing=False, opportunity=opportunity)
         cfda2 = setup_cfda(create_existing=False, opportunity=opportunity)
@@ -178,9 +185,12 @@ class TestTransformFullRunTask(BaseTestClass):
         )
         validate_summary_and_nested(db_session, synopsis_hist, [], [], [])
 
+        validate_agency(db_session, parent_agency)
+        validate_agency(db_session, subagency)
+
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 37,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 31,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 39,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 33,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 0,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 0,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 3,
@@ -189,8 +199,15 @@ class TestTransformFullRunTask(BaseTestClass):
         }.items() <= transform_oracle_data_task.metrics.items()
 
     def test_mix_of_inserts_updates_deletes(self, db_session, transform_oracle_data_task):
+        parent_agency = setup_agency("UPDATEAGENCY", create_existing=True)
+        subagency = setup_agency(
+            "UPDATEAGENCY-XYZ",
+            create_existing=True,
+            deleted_fields={"AgencyContactEMail2", "ldapGp", "description"},
+        )
+
         existing_opportunity = f.OpportunityFactory(
-            no_current_summary=True, opportunity_assistance_listings=[]
+            no_current_summary=True, opportunity_assistance_listings=[], agency="UPDATEAGENCY"
         )
         opportunity = f.StagingTopportunityFactory(
             opportunity_id=existing_opportunity.opportunity_id, cfdas=[]
@@ -428,11 +445,13 @@ class TestTransformFullRunTask(BaseTestClass):
         )
         validate_summary_and_nested(db_session, synopsis_hist_insert, [], [], [])
 
-        print(transform_oracle_data_task.metrics)
+        validate_agency(db_session, parent_agency)
+        validate_agency(db_session, subagency, deleted_fields={"ldapGp", "description"})
+
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 41,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 43,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 8,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 9,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 11,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 8,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 15,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
@@ -440,11 +459,14 @@ class TestTransformFullRunTask(BaseTestClass):
         }.items() <= transform_oracle_data_task.metrics.items()
 
     def test_delete_opportunity_with_deleted_children(self, db_session, transform_oracle_data_task):
+        agency = setup_agency("AGENCYXYZ", create_existing=True)
+
         # We create an opportunity with a synopsis/forecast record, and various other child values
         # We then delete all of them at once. Deleting the opportunity will recursively delete the others
         # but we'll still have delete events for the others - this verfies how we handle that.
+
         existing_opportunity = f.OpportunityFactory(
-            no_current_summary=True, opportunity_assistance_listings=[]
+            no_current_summary=True, opportunity_assistance_listings=[], agency="AGENCYXYZ"
         )
         opportunity = f.StagingTopportunityFactory(
             opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True
@@ -532,9 +554,11 @@ class TestTransformFullRunTask(BaseTestClass):
         validate_funding_instrument(db_session, forecast_funding_instrument, expect_in_db=False)
         validate_funding_instrument(db_session, synopsis_funding_instrument, expect_in_db=False)
 
+        validate_agency(db_session, agency)
+
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 10,
-            # Despite processing 10 records, only the opportunity is actually deleted directly
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 11,
+            # Despite processing 11 records, only the opportunity is actually deleted directly
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 1,
             f"opportunity.{transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED}": 1,
             transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 9,
