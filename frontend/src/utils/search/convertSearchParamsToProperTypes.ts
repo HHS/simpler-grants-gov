@@ -1,6 +1,7 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import {
   QueryParamData,
+  QuerySetParam,
   SearchFetcherActionType,
   SortOptions,
 } from "src/types/search/searchRequestTypes";
@@ -31,23 +32,18 @@ export function convertSearchParamsToProperTypes(
 }
 
 // Helper function to convert query parameters to set
-function paramToSet(
-  param: string | string[] | undefined,
-  type?: string,
-): Set<string> {
-  if (type === "status") {
-    if (param === SEARCH_NO_STATUS_VALUE) {
-      param = "";
-    } else {
-      param = param ?? "forecasted,posted";
-    }
-  }
+// and to reset that status params none if status=none is set
+function paramToSet(param: QuerySetParam, type?: string): Set<string> {
+  const defaultedParam =
+    type === "status" && param === SEARCH_NO_STATUS_VALUE
+      ? ""
+      : ("forecasted,posted" as QuerySetParam);
 
-  if (!param) return new Set();
-  if (Array.isArray(param)) {
-    return new Set(param);
+  if (!defaultedParam) return new Set();
+  if (Array.isArray(defaultedParam)) {
+    return new Set(defaultedParam);
   }
-  return new Set(param.split(","));
+  return new Set(defaultedParam.split(","));
 }
 
 // Keeps page >= 1.
