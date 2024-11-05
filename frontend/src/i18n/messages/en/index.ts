@@ -516,7 +516,7 @@ export const messages = {
         opportunity_number_desc: "Opportunity number (Ascending)",
         default: "Most relevant (Default)",
       },
-      label: "Sort By",
+      label: "Sort by",
     },
     filterToggleAll: {
       select: "Select All",
