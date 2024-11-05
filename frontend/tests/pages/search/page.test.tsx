@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // test without feature flag functionality
@@ -78,5 +79,49 @@ describe("Search Route", () => {
     );
     expect(archivedCheckbox).toBeInTheDocument();
     expect(archivedCheckbox).not.toBeChecked();
+  });
+
+  it("renders the search page with all opportunities if no status selected", async () => {
+    const mockSearchParams = {
+      status: SEARCH_NO_STATUS_VALUE,
+    };
+    render(<Search searchParams={mockSearchParams} />);
+
+    // None should be checked if the "no status checked" value is present.
+    const statuses = ["forecasted", "posted", "closed", "archived"];
+    for (const status of statuses) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
+    }
+  });
+
+  it("renders the search page two status by default", async () => {
+    const mockSearchParams = {
+      status: undefined,
+    };
+    render(<Search searchParams={mockSearchParams} />);
+
+    // These should be clicked if no status is present.
+    const clicked = ["forecasted", "posted"];
+    for (const status of clicked) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).toBeChecked();
+    }
+
+    // These should not be clicked if no status is present.
+    const noClicked = ["closed", "archived"];
+    for (const status of noClicked) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
+    }
   });
 });

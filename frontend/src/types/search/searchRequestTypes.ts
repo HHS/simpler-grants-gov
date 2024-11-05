@@ -34,6 +34,8 @@ export enum SearchFetcherActionType {
   Update = "update",
 }
 
+export type QuerySetParam = string | string[] | undefined;
+
 export type SortOptions =
   | "relevancy"
   | "postedDateDesc"

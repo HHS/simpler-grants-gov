@@ -100,8 +100,9 @@ export async function toggleCheckboxes(
   page: Page,
   checkboxObject: Record<string, string>,
   queryParamName: string,
+  startingQueryParams?: string,
 ) {
-  let runningQueryParams = "";
+  let runningQueryParams = startingQueryParams ?? "";
   for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
     await toggleCheckbox(page, checkboxID);
     runningQueryParams += runningQueryParams

@@ -14,14 +14,11 @@ interface PageProps {
 }
 
 test.describe("Search page tests", () => {
-  test.beforeEach(async ({ page }: PageProps) => {
-    // Navigate to the search page with the feature flag set
-    await page.goto("/search?_ff=showSearchV0:true");
-  });
-
   test("should return 0 results when searching for obscure term", async ({
     page,
   }: PageProps) => {
+    await page.goto("/search");
+
     const searchTerm = generateRandomString([10]);
 
     await fillSearchInputAndSubmit(searchTerm, page);
