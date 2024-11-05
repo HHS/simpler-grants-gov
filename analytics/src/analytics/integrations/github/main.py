@@ -61,16 +61,19 @@ def export_sprint_data(
     with open(query_path) as f:
         query = f.read()
     # Create the post-pagination transform jq
-    jq = """
+    jq = f"""
 [
     # iterate through each project item
     .[] |
     # reformat each item
-    {
+    {{
+        project_owner: \"{owner}\",
+        project_number: {project},
         issue_title: .content.title,
         issue_url: .content.url,
         issue_parent: .content.parent.url,
         issue_type: .content.issueType.name,
+        issue_status: .status.name,
         issue_is_closed: .content.closed,
         issue_opened_at: .content.createdAt,
         issue_closed_at: .content.closedAt,
@@ -88,7 +91,7 @@ def export_sprint_data(
             )
             end
         ),
-    } |
+    }} |
     # filter for task-level issues
     select(.issue_type != \"Deliverable\")
 ]
@@ -132,16 +135,19 @@ def export_roadmap_data(
     with open(query_path) as f:
         query = f.read()
     # Create the post-pagination transform jq
-    jq = """
+    jq = f"""
 [
     # iterate through each project item
     .[] |
     # reformat each item
-    {
+    {{
+        project_owner: \"{owner}\",
+        project_number: {project},
         issue_title: .content.title,
         issue_url: .content.url,
         issue_parent: .content.parent.url,
         issue_type: .content.issueType.name,
+        issue_status: .status.name,
         issue_is_closed: .content.closed,
         issue_opened_at: .content.createdAt,
         issue_closed_at: .content.closedAt,
@@ -159,7 +165,7 @@ def export_roadmap_data(
             )
             end
         ),
-    }
+    }}
 
 ]
 """

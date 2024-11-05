@@ -6,25 +6,26 @@ import pandas as pd
 import plotly.express as px
 from plotly.graph_objects import Figure
 
-from analytics.datasets.deliverable_tasks import DeliverableTasks
+from analytics.datasets.issues import GitHubIssues
 from analytics.metrics.base import BaseMetric, Statistic, Unit
 
 
-class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
+class DeliverablePercentComplete(BaseMetric[GitHubIssues]):
     """Calculate the percentage of issues or points completed per deliverable."""
 
     def __init__(
         self,
-        dataset: DeliverableTasks,
+        dataset: GitHubIssues,
         unit: Unit,
         statuses_to_include: list[str] | None = None,
     ) -> None:
         """Initialize the DeliverablePercentComplete metric."""
         self.dataset = dataset
         self.deliverable_col = "deliverable_title"
-        self.status_col = "status"
+        self.status_col = "issue_state"
         self.deliverable_status_col = "deliverable_status"
         self.unit = unit
+        self.unit_col = dataset.points_col if unit == Unit.points else unit.value
         self.statuses_to_include = statuses_to_include
         self.deliverable_data = self._isolate_deliverables_by_status()
         super().__init__(dataset)
@@ -80,7 +81,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
         """Calculate stats for this metric."""
         df_src = self.deliverable_data
         # get the total number of issues and the number of issues with points per deliverable
-        is_pointed = df_src[Unit.points.value] >= 1
+        is_pointed = df_src[self.dataset.points_col] >= 1
         issues_total = df_src.value_counts(self.deliverable_col).to_frame()
         issues_pointed = (
             df_src[is_pointed].value_counts(self.deliverable_col).to_frame()
@@ -127,7 +128,7 @@ class DeliverablePercentComplete(BaseMetric[DeliverableTasks]):
         """Get the count of issues (or points) by deliverable and status."""
         # create local copies of the dataset and key column names
         df = self.deliverable_data.copy()
-        unit_col = self.unit.value
+        unit_col = self.unit_col
         key_cols = [self.deliverable_col, unit_col]
         # create a dummy column to sum per row if the unit is issues
         if self.unit == Unit.issues:

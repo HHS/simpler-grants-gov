@@ -1,33 +1,38 @@
 import OpportunityListingAPI from "src/app/api/OpportunityListingAPI";
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 
-jest.mock("src/app/api/BaseApi");
+let opportunityListingAPI: OpportunityListingAPI;
+const mockResponse = getValidMockResponse();
+
+const mockedRequest = jest.fn();
 
 describe("OpportunityListingAPI", () => {
-  const mockedRequest = jest.fn();
-  const opportunityListingAPI = new OpportunityListingAPI();
-
-  beforeAll(() => {
-    opportunityListingAPI.request = mockedRequest;
+  beforeEach(() => {
+    opportunityListingAPI = new OpportunityListingAPI();
+    jest
+      .spyOn(opportunityListingAPI, "request")
+      .mockImplementation(mockedRequest);
   });
 
   afterEach(() => {
-    mockedRequest.mockReset();
+    jest.resetAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("instantiates correctly", () => {
+    expect(opportunityListingAPI.namespace).toEqual("opportunities");
   });
 
   it("should return opportunity data for a valid ID", async () => {
-    const mockResponse = getValidMockResponse();
-
-    mockedRequest.mockResolvedValue(mockResponse);
-
+    mockedRequest.mockImplementation(() => {
+      return Promise.resolve(mockResponse);
+    });
     const result = await opportunityListingAPI.getOpportunityById(12345);
 
-    expect(mockedRequest).toHaveBeenCalledWith(
-      "GET",
-      opportunityListingAPI.basePath,
-      opportunityListingAPI.namespace,
-      "12345",
-    );
+    expect(mockedRequest).toHaveBeenCalledWith("GET", "12345");
     expect(result).toEqual(mockResponse);
   });
 

@@ -40,8 +40,8 @@ def test_file_fixtures(tmp_path: Path) -> MockFiles:
         json_issue_row(issue=2, labels=["deliverable: 30k ft"]),
     ]
     delivery_data = [
-        issue(issue=1).__dict__,
-        issue(issue=2).__dict__,
+        issue(issue=1).model_dump(),
+        issue(issue=2).model_dump(),
     ]
     # write test data to json files
     write_test_data_to_file(issue_data, issue_file)
@@ -71,6 +71,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
         ]
         # execution
         result = runner.invoke(app, command)
@@ -92,6 +94,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
             "--show-results",
         ]
         # execution
@@ -116,6 +120,8 @@ class TestCalculateSprintBurndown:
             str(mock_files.delivery_file),
             "--sprint",
             "Sprint 1",
+            "--project",
+            "1",
             "--unit",
             "issues",
             "--show-results",
@@ -211,10 +217,8 @@ class TestCalculateDeliverablePercentComplete:
         command = [
             "calculate",
             "deliverable_percent_complete",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
         ]
         # execution
         result = runner.invoke(app, command)
@@ -232,10 +236,8 @@ class TestCalculateDeliverablePercentComplete:
         command = [
             "calculate",
             "deliverable_percent_complete",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
             "--show-results",
         ]
         # execution
@@ -256,10 +258,8 @@ class TestCalculateDeliverablePercentComplete:
         command = [
             "calculate",
             "deliverable_percent_complete",
-            "--sprint-file",
-            str(mock_files.sprint_file),
             "--issue-file",
-            str(mock_files.issue_file),
+            str(mock_files.delivery_file),
             "--unit",
             "issues",
             "--show-results",

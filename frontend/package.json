@@ -8,6 +8,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,mdx,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,mdx,ts,tsx,scss,yaml,yml}'",
     "lint": "next lint --dir src --dir stories --dir .storybook --dir tests --dir scripts --dir frontend --dir lib --dir types",

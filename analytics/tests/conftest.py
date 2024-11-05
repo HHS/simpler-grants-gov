@@ -208,6 +208,8 @@ def sprint_row(
 def issue(  # pylint: disable=too-many-locals
     issue: int,
     kind: IssueType = IssueType.TASK,
+    owner: str = "HHS",
+    project: int = 1,
     parent: str | None = None,
     points: int | None = 1,
     quad: str | None = None,
@@ -228,6 +230,10 @@ def issue(  # pylint: disable=too-many-locals
     sprint_duration = pd.Timedelta(days=sprint_length)
     sprint_end_ts = sprint_start_ts + sprint_duration
     return IssueMetadata(
+        # project metadata
+        project_owner=owner,
+        project_number=project,
+        # issue metadata
         issue_title=name,
         issue_type=kind.value,
         issue_url=name,
@@ -236,11 +242,14 @@ def issue(  # pylint: disable=too-many-locals
         issue_closed_at=closed,
         issue_parent=parent,
         issue_points=points,
+        # quad and epic metadata
         quad_name=quad,
         epic_title=epic,
         epic_url=epic,
+        # deliverable metadata
         deliverable_title=deliverable,
         deliverable_url=deliverable,
+        # sprint metadata
         sprint_id=sprint_name,
         sprint_name=sprint_name,
         sprint_start=sprint_start,

@@ -27,6 +27,9 @@ query (
             pillar: fieldValueByName(name: $pillarField) {
               ...singleSelectContent
             }
+            status: fieldValueByName(name: "Status") {
+              ...singleSelectContent
+            }
           }
         }
       }

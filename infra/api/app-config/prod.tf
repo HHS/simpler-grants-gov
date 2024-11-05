@@ -24,5 +24,8 @@ module "prod_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
+    # Set the opportunity search index to have more shards/replicas in prod
+    LOAD_OPP_SEARCH_SHARD_COUNT   = 3
+    LOAD_OPP_SEARCH_REPLICA_COUNT = 2
   }
 }

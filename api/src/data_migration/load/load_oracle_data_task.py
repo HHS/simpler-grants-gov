@@ -37,7 +37,7 @@ TABLES_TO_LOAD = [
     "tfundinstr_forecast_hist",
     "tfundinstr_synopsis",
     "tfundinstr_synopsis_hist",
-    # tgroups,  # Want to hold on this until we have permissions
+    "tgroups",
 ]
 
 
