@@ -8,9 +8,7 @@ from analytics.datasets.etl_dataset import EtlDataset
 class TestEtlDataset:
     """Test EtlDataset methods."""
 
-    TEST_FILE_1 = (
-        str(Path(__file__).resolve().parent.parent.parent) + "/data/test-etl-01.json"
-    )
+    TEST_FILE_1 = "./tests/etldb_test_01.json"
 
     def test_load_from_json_files(self):
         """Class method should return the correctly transformed data."""
