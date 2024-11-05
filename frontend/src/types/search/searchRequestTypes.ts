@@ -64,3 +64,15 @@ export interface QueryParamData {
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }
+
+export interface SearchParamsTypes {
+  agency?: string;
+  category?: string;
+  eligibility?: string;
+  fundingInstrument?: string;
+  page?: string;
+  query?: string;
+  sortby?: string;
+  status?: string;
+  [key: string]: string | undefined;
+}
