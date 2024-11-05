@@ -1,6 +1,5 @@
 """Tests the code in datasets/etl_dataset.py."""
 
-from pathlib import Path
 
 from analytics.datasets.etl_dataset import EtlDataset
 
