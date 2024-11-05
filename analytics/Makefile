@@ -12,12 +12,13 @@ PROJECT_CONFIG_FILE ?= $(CONFIG_DIR)/github-projects.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
 # Names of the points and sprint fields in the GitHub project
-POINTS_FIELD ?= Points
+POINTS_FIELD ?= Story Points
 SPRINT_FIELD ?= Sprint
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
 APP_NAME ?= grants-analytics
+EFFECTIVE_DATE ?= $(shell date +"%Y-%m-%d")
 
 # Required for CI to work properly
 SHELL = /bin/bash -o pipefail
@@ -142,6 +143,20 @@ lint: ## runs code quality checks
 #################
 # Data Commands #
 #################
+
+init-db:
+	@echo "=> Initializing the database schema"
+	@echo "====================================================="
+	$(POETRY) analytics etl initialize_database
+	@echo "====================================================="
+
+gh-transform-and-load:
+	@echo "=> Transforming and loading GitHub data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl transform_and_load \
+	--deliverable-file $(DELIVERY_FILE) \
+	--effective-date $(EFFECTIVE_DATE)
+	@echo "====================================================="
 
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"

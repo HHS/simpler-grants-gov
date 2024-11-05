@@ -1,7 +1,9 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
+
 import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -9,10 +11,11 @@ import typer
 from slack_sdk import WebClient
 from sqlalchemy import text
 
+from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
-from analytics.integrations import db, slack
+from analytics.integrations import db, etldb, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -37,6 +40,8 @@ POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
+DELIVERABLE_FILE_ARG = typer.Option(help="Path to file with exported deliverable data")
+EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -45,10 +50,12 @@ app = typer.Typer()
 export_app = typer.Typer()
 metrics_app = typer.Typer()
 import_app = typer.Typer()
+etl_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
+app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
 
 @app.callback()
@@ -240,3 +247,45 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
     )
     rows = len(issues.to_dict())
     logger.info("Number of rows in table: %s", rows)
+
+
+# ===========================================================
+# Etl commands
+# ===========================================================
+
+
+@etl_app.command(name="initialize_database")
+def initialize_database() -> None:
+    """Initialize etl database."""
+    print("initializing database")
+    etldb.init_db()
+    print("done")
+
+
+@etl_app.command(name="transform_and_load")
+def transform_and_load(
+    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+) -> None:
+    """Transform and load etl data."""
+    # validate effective date arg
+    try:
+        dateformat = "%Y-%m-%d"
+        datestamp = (
+            datetime.strptime(effective_date, dateformat)
+            .astimezone()
+            .strftime(dateformat)
+        )
+        print(f"running transform and load with effective date {datestamp}")
+    except ValueError:
+        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        return
+
+    # hydrate a dataset instance from the input data
+    dataset = EtlDataset.load_from_json_file(file_path=deliverable_file)
+
+    # sync data to db
+    etldb.sync_db(dataset, datestamp)
+
+    # finish
+    print("transform and load is done")
