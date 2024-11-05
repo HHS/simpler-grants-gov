@@ -40,7 +40,6 @@ POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
-DELIVERABLE_FILE_ARG = typer.Option(help="Path to file with exported deliverable data")
 EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
@@ -264,7 +263,7 @@ def initialize_database() -> None:
 
 @etl_app.command(name="transform_and_load")
 def transform_and_load(
-    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
+    issue_file: Annotated[str, ISSUE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
     """Transform and load etl data."""
@@ -282,7 +281,7 @@ def transform_and_load(
         return
 
     # hydrate a dataset instance from the input data
-    dataset = EtlDataset.load_from_json_file(file_path=deliverable_file)
+    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
 
     # sync data to db
     etldb.sync_db(dataset, datestamp)
