@@ -11,7 +11,7 @@ module "prod_config" {
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for 5x the average CPU and Memory
-  # seen over 12 months, as of November 4th 2024 exlucing an outlier range around February 2024.
+  # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
   # The math is: 5 * max(average CPU or average Memory) * 1.3. The 1.3 is for a buffer.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
@@ -20,7 +20,7 @@ module "prod_config" {
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
-  # database_min_capacity is 5x the average api-prod ServerlessDatabaseCapacity seen over 12 months, as of November 4th 2024
+  # database_min_capacity is 5x the average api-prod ServerlessDatabaseCapacity seen over 12 months, as of November 2024
   # The math is: 5 * (ServerlessDatabaseCapacity) * 1.3. The 1.3 is for a buffer.
   database_min_capacity = 20
   # max capacity is as high as it goes

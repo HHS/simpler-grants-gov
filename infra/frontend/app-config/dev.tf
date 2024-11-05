@@ -5,4 +5,13 @@ module "dev_config" {
   environment                     = "dev"
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
+
+  # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
+  # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/frontend-dev/services/frontend-dev/health?region=us-east-1
+  # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
+  # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
+  instance_desired_instance_count = 1
+  instance_scaling_min_capacity   = 1
+  # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
+  instance_scaling_max_capacity = 5
 }
