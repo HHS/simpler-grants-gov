@@ -41,6 +41,11 @@ variable "search_data_volume_size" {
   default = 20
 }
 
+variable "search_availability_zone_count" {
+  type    = number
+  default = 1
+}
+
 variable "has_database" {
   type = bool
 }
