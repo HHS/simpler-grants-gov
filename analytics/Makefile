@@ -154,7 +154,7 @@ gh-transform-and-load:
 	@echo "=> Transforming and loading GitHub data into the database"
 	@echo "====================================================="
 	$(POETRY) analytics etl transform_and_load \
-	--deliverable-file $(DELIVERY_FILE) \
+	--issue-file $(ISSUE_FILE) \
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
 
