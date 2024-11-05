@@ -276,11 +276,12 @@ class TestCalculateDeliverablePercentComplete:
 
 class TestEtlEntryPoint:
     """Test the etl entry point."""
+
     TEST_FILE_1 = "./data/test-etl-01.json"
     EFFECTIVE_DATE = "2024-10-07"
 
     def test_init_db(self):
-        """Test the db initialization command"""
+        """Test the db initialization command."""
         # setup - create command
         command = [
             "etl",
@@ -294,10 +295,8 @@ class TestEtlEntryPoint:
         assert "initializing database" in result.stdout
         assert "done" in result.stdout
 
-
     def test_transform_and_load_with_valid_parameters(self):
-
-        """Test the transform and load command"""
+        """Test the transform and load command."""
         # setup - create command
         command = [
             "etl",
@@ -312,7 +311,10 @@ class TestEtlEntryPoint:
         print(result.stdout)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert f"running transform and load with effective date {self.EFFECTIVE_DATE}" in result.stdout
+        assert (
+            f"running transform and load with effective date {self.EFFECTIVE_DATE}"
+            in result.stdout
+        )
         assert "quad row(s) processed: 1" in result.stdout
         assert "deliverable row(s) processed: 2" in result.stdout
         assert "sprint row(s) processed: 5" in result.stdout
@@ -320,10 +322,8 @@ class TestEtlEntryPoint:
         assert "issue row(s) processed: 22" in result.stdout
         assert "transform and load is done" in result.stdout
 
-
     def test_transform_and_load_with_malformed_effective_date_parameter(self):
-
-        """Test the transform and load command"""
+        """Test the transform and load command."""
         # setup - create command
         command = [
             "etl",
@@ -339,7 +339,3 @@ class TestEtlEntryPoint:
         # validation - check there wasn't an error
         assert result.exit_code == 0
         assert "FATAL ERROR: malformed effective date" in result.stdout
-
-
-
-
