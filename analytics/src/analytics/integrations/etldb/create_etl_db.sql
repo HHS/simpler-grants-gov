@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS gh_deliverable_quad_map (
 	deliverable_id INTEGER NOT NULL,
 	quad_id INTEGER,
 	d_effective DATE NOT NULL,
+	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP,
 	UNIQUE(deliverable_id, d_effective)
 );
@@ -30,6 +31,7 @@ CREATE TABLE IF NOT EXISTS gh_epic_deliverable_map (
 	epic_id INTEGER NOT NULL,
 	deliverable_id INTEGER,
 	d_effective DATE NOT NULL,
+	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP,
 	UNIQUE(epic_id, d_effective)
 );
@@ -56,6 +58,7 @@ CREATE TABLE IF NOT EXISTS gh_issue_history (
 	is_closed INTEGER NOT NULL,
 	points INTEGER NOT NULL DEFAULT 0,
 	d_effective DATE NOT NULL,
+	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
@@ -66,6 +69,7 @@ CREATE TABLE IF NOT EXISTS gh_issue_sprint_map (
 	issue_id INTEGER NOT NULL,
 	sprint_id INTEGER,
 	d_effective DATE NOT NULL,
+	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
