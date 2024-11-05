@@ -277,9 +277,7 @@ class TestCalculateDeliverablePercentComplete:
 class TestEtlEntryPoint:
     """Test the etl entry point."""
 
-    TEST_FILE_1 = (
-        str(Path(__file__).resolve().parent.parent) + "/data/test-etl-01.json"
-    )
+    TEST_FILE_1 = str(Path(__file__).resolve().parent.parent) + "/data/test-etl-01.json"
     EFFECTIVE_DATE = "2024-10-07"
 
     def test_init_db(self):
