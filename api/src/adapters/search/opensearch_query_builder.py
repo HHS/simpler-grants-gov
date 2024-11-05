@@ -94,6 +94,8 @@ class SearchQueryBuilder:
 
         self.sort_values: list[dict[str, dict[str, str]]] = []
 
+        self._track_total_hits: bool = True
+
         self.must: list[dict] = []
         self.filters: list[dict] = []
 
@@ -131,6 +133,15 @@ class SearchQueryBuilder:
 
             self.sort_values.append({field: {"order": sort_direction.short_form()}})
 
+        return self
+
+    def track_total_hits(self, track_total_hits: bool) -> typing.Self:
+        """
+        Whether or not to track the total number of hits in the response accurately.
+
+        By default OpenSearch will stop counting after 10k records are counted.
+        """
+        self._track_total_hits = track_total_hits
         return self
 
     def simple_query(self, query: str, fields: list[str]) -> typing.Self:
@@ -238,6 +249,7 @@ class SearchQueryBuilder:
             # Always include the scores in the response objects
             # even if we're sorting by non-relevancy
             "track_scores": True,
+            "track_total_hits": self._track_total_hits,
         }
 
         # Add sorting if any was provided
