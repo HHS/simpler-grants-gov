@@ -6,7 +6,7 @@ const PROCESS: Breadcrumb = { title: "Process", path: "/process/" };
 const SUBSCRIBE: Breadcrumb = { title: "Subscribe", path: "/subscribe/" };
 const SEARCH: Breadcrumb = {
   title: "Search",
-  path: "/search?status=forecasted,posted",
+  path: "/search",
 };
 export const SUBSCRIBE_CONFIRMATION: Breadcrumb = {
   title: "Confirmation",

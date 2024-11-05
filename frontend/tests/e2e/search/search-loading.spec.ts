@@ -13,7 +13,7 @@ test.describe("Search page tests", () => {
     const browser = await chromium.launch({ slowMo: 100 });
 
     const page = await browser.newPage();
-    await page.goto("/search?_ff=showSearchV0:true");
+    await page.goto("/search");
     const loadingIndicator = page.getByTestId("loading-message");
 
     await fillSearchInputAndSubmit(searchTerm, page);

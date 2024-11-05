@@ -15,7 +15,7 @@ from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
-from analytics.integrations import db, etldb, github, slack
+from analytics.integrations import db, etldb, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -27,18 +27,14 @@ logger = logging.getLogger(__name__)
 # fmt: off
 # Instantiate typer options with help text for the commands below
 CONFIG_FILE_ARG = typer.Option(help="Path to JSON file with configurations for this entrypoint")
-SPRINT_FILE_ARG = typer.Option(help="Path to file with exported sprint data")
 ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
-ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
 OUTPUT_DIR_ARG = typer.Option(help="Path to directory where output files will be saved")
 TMP_DIR_ARG = typer.Option(help="Path to directory where intermediate files will be saved")
-OWNER_ARG = typer.Option(help="GitHub handle of the repo or project owner")
-REPO_ARG = typer.Option(help="Name of the GitHub repo")
-PROJECT_ARG = typer.Option(help="Number of the GitHub project")
-FIELD_ARG = typer.Option(help="Name of the GitHub project field")
 SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating burndown")
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
+OWNER_ARG = typer.Option(help="Name of the GitHub project owner, e.g. HHS")
+PROJECT_ARG = typer.Option(help="Number of the GitHub project, e.g. 13")
 SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
 POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
@@ -70,26 +66,6 @@ def callback() -> None:
 # ===========================================================
 # Export commands
 # ===========================================================
-
-
-@export_app.command(name="gh_project_data")
-def export_github_project_data(
-    owner: Annotated[str, OWNER_ARG],
-    project: Annotated[int, PROJECT_ARG],
-    output_file: Annotated[str, OUTPUT_FILE_ARG],
-) -> None:
-    """Export data about items in a GitHub project and write it to an output file."""
-    github.export_project_data(owner, project, output_file)
-
-
-@export_app.command(name="gh_issue_data")
-def export_github_issue_data(
-    owner: Annotated[str, OWNER_ARG],
-    repo: Annotated[str, REPO_ARG],
-    output_file: Annotated[str, OUTPUT_FILE_ARG],
-) -> None:
-    """Export data about issues a GitHub repo and write it to an output file."""
-    github.export_issue_data(owner, repo, output_file)
 
 
 @export_app.command(name="gh_delivery_data")

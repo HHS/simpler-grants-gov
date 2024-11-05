@@ -34,6 +34,8 @@ export enum SearchFetcherActionType {
   Update = "update",
 }
 
+export type QuerySetParam = string | string[] | undefined;
+
 export type SortOptions =
   | "relevancy"
   | "postedDateDesc"
@@ -63,4 +65,16 @@ export interface QueryParamData {
   sortby: SortOptions | null;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
+}
+
+export interface SearchParamsTypes {
+  agency?: string;
+  category?: string;
+  eligibility?: string;
+  fundingInstrument?: string;
+  page?: string;
+  query?: string;
+  sortby?: string;
+  status?: string;
+  [key: string]: string | undefined;
 }

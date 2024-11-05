@@ -144,6 +144,8 @@ Once you've exported the sprint and issue data from GitHub, you can start calcul
 poetry run analytics calculate sprint_burndown \
   --issue-file data/delivery-data.json \
   --sprint "@current" \
+  --owner HHS \
+  --project 13 \
   --unit points \
   --show-results
 ```
@@ -158,6 +160,7 @@ A couple of important notes about this command:
 
 - `--issue-file data/delivery-data.json` refers to the output of `poetry run export gh_delivery_data` which exports issue and sprint data from GitHub
 - `--sprint @current` In order to calculate burndown, you'll need to specify either `"@current"` for the current sprint or the name of another sprint, e.g. `"Sprint 10"`
+- `--owner HHS` and `--project 13` You can also specify which GitHub project owner and number you want to calculate burndown for, the default is `HHS` and `13` respectively.
 - `--unit points` In order to calculate burndown based on story points, you pass `points` to the `--unit` option. The other option for unit is `issues`
 - `--show-results` In order to the see the output in a browser you'll need to pass this flag.
 
@@ -165,13 +168,19 @@ A couple of important notes about this command:
 
 You can also post the results of this metric to a Slack channel:
 
+> [!NOTE] You must have the following environment variables set to post to Slack:
+> - `ANALYTICS_SLACK_BOT_TOKEN` the OAuth token for a slackbot installed in your workspace
+> - `ANALYTICS_REPORTING_CHANNEL_ID` the id of the channel you want to post to in Slack.
+>
+> For more information about setting up these variables see the [installation guide](development.md#configuring-secrets)
+
 ```bash
-poetry run analytics calculate sprint_burndown --sprint-file data/sprint-data.json --issue-file data/issue-data.json --sprint "Sprint 10" --unit points --post-results
+poetry run analytics calculate sprint_burndown \
+  --issue-file data/delivery-data.json \
+  --sprint "@current" \
+  --unit points \
+  --post-results
 ```
-
-> **NOTE:** This requires you to have the `.secrets.toml` configured according to the directions in step 5 of the [installation section](#installation)
-
-![Screenshot of burndown report in slack](../../analytics/static/screenshot-slack-burndown.png)
 
 ### Calculating deliverable percent complete
 
@@ -181,14 +190,20 @@ You can specify the unit you want to use for percent complete (e.g. points or is
 For example, here we're calculating percentage completion based on the number of tickets under each deliverable.
 
 ```bash
-poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit issues
+poetry run analytics calculate deliverable_percent_complete \
+  --issue-file data/delivery-data.json \
+  --show-results \
+  --unit issues
 ```
 ![Screenshot of deliverable percent complete by issues](../../analytics/static/screenshot-deliverable-pct-complete-tasks.png)
 
 And here we're calculating it based on the total story point value of those tickets.
 
 ```bash
-poetry run analytics calculate deliverable_percent_complete --sprint-file data/sprint-data.json --issue-file data/issue-data.json --show-results --unit points
+poetry run analytics calculate deliverable_percent_complete \
+  --issue-file data/delivery-data.json \
+  --show-results \
+  --unit points
 ```
 
 ![Screenshot of deliverable percent complete by points](../../analytics/static/screenshot-deliverable-pct-complete-points.png)
@@ -196,20 +211,13 @@ poetry run analytics calculate deliverable_percent_complete --sprint-file data/s
 The `deliverable_pct_complete` sub-command also supports the `--post-results` flag if you want to post this data to slack.
 
 
-### Experimental features
-
-We also have some flags that enable experimental features for the deliverables. The currently supported flags for `calculate deliverable_percent_complete` are:
-
-- `--roadmap-file` Accepts a path to a file that loads data exported from the Product roadmap GitHub project. This also uses a different join path to associate issues with their parent deliverables.
-- `--include-status` Accepts the name of a status to include in the report. Can be passed multiple times to include multiple statuses.
+You can also pass the `--include-status` flag to limit the percent complete report to deliverables with specific statuses. It can be passed multiple times to include multiple statuses.
 
 Here's an example of how to use these in practice:
 
 ```bash
 poetry run analytics calculate deliverable_percent_complete \
-  --sprint-file data/sprint-data.json \
-  --issue-file data/issue-data.json \
-  --roadmap-file data/roadmap-data.json \
+  --issue-file data/delivery-data.json \
   --include-status "In Progress" \
   --include-status "Planning" \
   --show-results \

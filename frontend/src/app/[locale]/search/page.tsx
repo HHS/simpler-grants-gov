@@ -1,5 +1,7 @@
 import { Metadata } from "next";
+import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
@@ -7,10 +9,10 @@ import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import SearchAnalytics from "src/components/search/SearchAnalytics";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
-import QueryProvider from "./QueryProvider";
 
 export async function generateMetadata() {
   const t = await getTranslations({ locale: "en" });
@@ -20,22 +22,10 @@ export async function generateMetadata() {
   };
   return meta;
 }
-
-interface searchParamsTypes {
-  agency?: string;
-  category?: string;
-  eligibility?: string;
-  fundingInstrument?: string;
-  page?: string;
-  query?: string;
-  sortby?: string;
-  status?: string;
-  [key: string]: string | undefined;
-}
-
-function Search({ searchParams }: { searchParams: searchParamsTypes }) {
+function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
+
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
@@ -46,6 +36,7 @@ function Search({ searchParams }: { searchParams: searchParamsTypes }) {
 
   return (
     <>
+      <SearchAnalytics params={searchParams} />
       <QueryProvider>
         <div className="grid-container">
           <div className="search-bar">

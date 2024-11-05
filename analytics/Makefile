@@ -9,10 +9,7 @@ ROADMAP_PROJECT ?= 12
 OUTPUT_DIR ?= data
 CONFIG_DIR ?= config
 PROJECT_CONFIG_FILE ?= $(CONFIG_DIR)/github-projects.json
-SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
-ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
-ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
-DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
+ISSUE_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
 # Names of the points and sprint fields in the GitHub project
 POINTS_FIELD ?= Story Points
@@ -161,52 +158,24 @@ gh-transform-and-load:
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
 
-sprint-data-export:
-	@echo "=> Exporting project data from the sprint board"
-	@echo "====================================================="
-	$(POETRY) analytics export gh_project_data \
-	--owner $(ORG) \
-	--project $(SPRINT_PROJECT) \
-	--output-file $(SPRINT_FILE)
-
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"
 	@echo "====================================================="
-	$(POETRY) analytics import db_import --delivery-file $(DELIVERY_FILE)
+	$(POETRY) analytics import db_import --delivery-file $(ISSUE_FILE)
 
-roadmap-data-export:
-	@echo "=> Exporting project data from the product roadmap"
-	@echo "====================================================="
-	$(POETRY) analytics export gh_project_data \
-	--owner $(ORG) \
-	--project $(ROADMAP_PROJECT) \
-	--output-file $(ROADMAP_FILE)
-
-delivery-data-export:
+gh-data-export:
 	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
 	@echo "====================================================="
 	$(POETRY)  analytics export gh_delivery_data \
 	--config-file $(PROJECT_CONFIG_FILE) \
-	--output-file $(DELIVERY_FILE) \
+	--output-file $(ISSUE_FILE) \
 	--temp-dir $(OUTPUT_DIR)
-
-issue-data-export:
-	@echo "=> Exporting issue data from the repository"
-	@echo "====================================================="
-	$(POETRY) analytics export gh_issue_data \
-	--owner $(ORG) \
-	--repo $(REPO) \
-	--output-file $(ISSUE_FILE)
-
-gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
-
-gh-etl: delivery-data-export gh-transform-and-load
 
 sprint-burndown:
 	@echo "=> Running sprint burndown report for HHS/13"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
-	--issue-file $(DELIVERY_FILE) \
+	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
 	--project 13 \
@@ -216,7 +185,7 @@ sprint-burndown:
 	@echo "=> Running sprint burndown report for HHS/17"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
-	--issue-file $(DELIVERY_FILE) \
+	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
 	--project 17 \
@@ -227,7 +196,7 @@ percent-complete:
 	@echo "=> Running percent complete deliverable"
 	@echo "====================================================="
 	$(POETRY) analytics calculate deliverable_percent_complete \
-	--issue-file $(DELIVERY_FILE) \
+	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--include-status "In Progress" \
   	--include-status "Planning" \

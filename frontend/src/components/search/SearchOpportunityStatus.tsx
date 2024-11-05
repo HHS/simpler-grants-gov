@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
@@ -26,6 +27,10 @@ export default function SearchOpportunityStatus({
   const handleCheck = (value: string, isChecked: boolean) => {
     const updated = new Set(query);
     isChecked ? updated.add(value) : updated.delete(value);
+    // Add "status=NO_STATUS_VALUE" if no values are selected.
+    if (updated.size === 0) {
+      updated.add(SEARCH_NO_STATUS_VALUE);
+    }
     updateQueryParams(updated, "status", queryTerm);
   };
 

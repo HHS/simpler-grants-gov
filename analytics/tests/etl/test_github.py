@@ -15,9 +15,15 @@ from analytics.etl.github import (
     RoadmapConfig,
     SprintBoardConfig,
     get_parent_with_type,
+    populate_issue_lookup_table,
 )
+from analytics.integrations import github
 
 from tests.conftest import issue
+
+# ===========================================================
+# Fixtures
+# ===========================================================
 
 
 @pytest.fixture(name="config")
@@ -66,121 +72,161 @@ def mock_roadmap_data_file(config: GitHubProjectConfig) -> str:
     return roadmap_file
 
 
-def test_extract(monkeypatch: pytest.MonkeyPatch, etl: GitHubProjectETL):
-    """Test the extract step by mocking export functions."""
-    mock_export_roadmap_data = MagicMock()
-    mock_export_sprint_data = MagicMock()
-    monkeypatch.setattr(etl, "_export_roadmap_data", mock_export_roadmap_data)
-    monkeypatch.setattr(etl, "_export_sprint_data", mock_export_sprint_data)
-
-    # Run the extract method
-    etl.extract()
-
-    # Assert roadmap export was called with expected arguments
-    roadmap = etl.config.roadmap_project
-    mock_export_roadmap_data.assert_called_once_with(
-        roadmap=roadmap,
-        output_file=str(Path(etl.config.temp_dir) / "roadmap-data.json"),
-    )
-
-    # Assert sprint export was called with expected arguments
-    sprint_board = etl.config.sprint_projects[0]
-    mock_export_sprint_data.assert_called_once_with(
-        sprint_board=sprint_board,
-        output_file=str(
-            Path(etl.config.temp_dir)
-            / f"sprint-data-{sprint_board.project_number}.json",
-        ),
-    )
-
-    # Verify transient files were set correctly
-    assert len(etl._transient_files) == 1
-    assert etl._transient_files[0].roadmap.endswith("roadmap-data.json")
-    assert etl._transient_files[0].sprint.endswith(
-        f"sprint-data-{sprint_board.project_number}.json",
-    )
+# ===========================================================
+# Test ETL class
+# ===========================================================
 
 
-def test_transform(etl: GitHubProjectETL, sprint_file: str, roadmap_file: str):
-    """Test the transform step by mocking GitHubIssues.load_from_json_files."""
-    # Arrange
-    output_data = [
-        issue(
-            issue=1,
-            points=2,
-            parent="Epic3",
-            deliverable="Deliverable5",
-            quad="quad1",
-            epic="Epic3",
-        ),
-        issue(
-            issue=2,
-            points=1,
-            parent="Epic4",
-            deliverable=None,
-            quad=None,
-            epic="Epic4",
-        ),
-    ]
-    wanted = [i.model_dump() for i in output_data]
-    etl._transient_files = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
-    # Act
-    etl.transform()
-    # Assert
-    assert etl.dataset.to_dict() == wanted
+class TestGitHubProjectETL:
+    """Tests the GitHubProjectETL class."""
+
+    def test_extract(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        etl: GitHubProjectETL,
+    ):
+        """Test the extract step by mocking export functions."""
+        mock_export_roadmap_data = MagicMock()
+        mock_export_sprint_data = MagicMock()
+        monkeypatch.setattr(etl, "_export_roadmap_data", mock_export_roadmap_data)
+        monkeypatch.setattr(etl, "_export_sprint_data", mock_export_sprint_data)
+
+        # Run the extract method
+        etl.extract()
+
+        # Assert roadmap export was called with expected arguments
+        roadmap = etl.config.roadmap_project
+        mock_export_roadmap_data.assert_called_once_with(
+            roadmap=roadmap,
+            output_file=str(Path(etl.config.temp_dir) / "roadmap-data.json"),
+        )
+
+        # Assert sprint export was called with expected arguments
+        sprint_board = etl.config.sprint_projects[0]
+        mock_export_sprint_data.assert_called_once_with(
+            sprint_board=sprint_board,
+            output_file=str(
+                Path(etl.config.temp_dir)
+                / f"sprint-data-{sprint_board.project_number}.json",
+            ),
+        )
+
+        # Verify transient files were set correctly
+        assert len(etl._transient_files) == 1
+        assert etl._transient_files[0].roadmap.endswith("roadmap-data.json")
+        assert etl._transient_files[0].sprint.endswith(
+            f"sprint-data-{sprint_board.project_number}.json",
+        )
+
+    def test_transform(
+        self,
+        etl: GitHubProjectETL,
+        sprint_file: str,
+        roadmap_file: str,
+    ):
+        """Test the transform step by mocking GitHubIssues.load_from_json_files."""
+        # Arrange
+        output_data = [
+            issue(
+                issue=1,
+                points=2,
+                parent="Epic3",
+                deliverable="Deliverable5",
+                quad="quad1",
+                epic="Epic3",
+            ),
+            issue(
+                issue=2,
+                points=1,
+                parent="Epic4",
+                deliverable=None,
+                quad=None,
+                epic="Epic4",
+            ),
+        ]
+        wanted = [i.model_dump() for i in output_data]
+        etl._transient_files = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
+        # Act
+        etl.transform()
+        # Assert
+        assert etl.dataset.to_dict() == wanted
+
+    def test_load(self, etl: GitHubProjectETL):
+        """Test the load step by mocking the to_json method."""
+        mock_to_json = MagicMock()
+        etl.dataset = MagicMock()
+        etl.dataset.to_json = mock_to_json
+
+        # Run the load method
+        etl.load()
+
+        # Check if to_json was called with the correct output file
+        mock_to_json.assert_called_once_with(etl.config.output_file)
+
+    def test_run(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        etl: GitHubProjectETL,
+        sprint_file: str,
+        roadmap_file: str,
+    ):
+        """Test the entire ETL pipeline by verifying method calls in run."""
+        # Arrange - Mock the export private methods
+        monkeypatch.setattr(github, "export_roadmap_data", MagicMock())
+        monkeypatch.setattr(github, "export_sprint_data", MagicMock())
+        # Arrange - specify the output wanted
+        output_data = [
+            issue(
+                issue=1,
+                points=2,
+                parent="Epic3",
+                deliverable="Deliverable5",
+                quad="quad1",
+                epic="Epic3",
+            ),
+            issue(
+                issue=2,
+                points=1,
+                parent="Epic4",
+                deliverable=None,
+                quad=None,
+                epic="Epic4",
+            ),
+        ]
+        dataset_wanted = [i.model_dump() for i in output_data]
+        files_wanted = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
+        # Act - run the ETL
+        etl.run()
+        # Assert
+        assert etl._transient_files == files_wanted
+        assert etl.dataset.to_dict() == dataset_wanted
 
 
-def test_load(etl: GitHubProjectETL):
-    """Test the load step by mocking the to_json method."""
-    mock_to_json = MagicMock()
-    etl.dataset = MagicMock()
-    etl.dataset.to_json = mock_to_json
-
-    # Run the load method
-    etl.load()
-
-    # Check if to_json was called with the correct output file
-    mock_to_json.assert_called_once_with(etl.config.output_file)
+# ===========================================================
+# Test ETL helper functions
+# ===========================================================
 
 
-def test_run(
-    monkeypatch: pytest.MonkeyPatch,
-    etl: GitHubProjectETL,
-    sprint_file: str,
-    roadmap_file: str,
-):
-    """Test the entire ETL pipeline by verifying method calls in run."""
-    # Arrange - Mock the export private methods
-    mock_export_roadmap_data = MagicMock()
-    mock_export_sprint_data = MagicMock()
-    monkeypatch.setattr(etl, "_export_roadmap_data", mock_export_roadmap_data)
-    monkeypatch.setattr(etl, "_export_sprint_data", mock_export_sprint_data)
-    # Arrange - specify the output wanted
-    output_data = [
-        issue(
-            issue=1,
-            points=2,
-            parent="Epic3",
-            deliverable="Deliverable5",
-            quad="quad1",
-            epic="Epic3",
-        ),
-        issue(
-            issue=2,
-            points=1,
-            parent="Epic4",
-            deliverable=None,
-            quad=None,
-            epic="Epic4",
-        ),
-    ]
-    dataset_wanted = [i.model_dump() for i in output_data]
-    files_wanted = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
-    # Act - run the ETL
-    etl.run()
-    # Assert
-    assert etl._transient_files == files_wanted
-    assert etl.dataset.to_dict() == dataset_wanted
+class TestPopulateLookupTable:
+    """Test the populate_lookup_table() function."""
+
+    def test_drop_issues_with_validation_errors(self):
+        """Issues with validation errors should be excluded from the lookup table."""
+        # Arrange
+        test_data = [
+            issue(issue=1).model_dump(),
+            issue(issue=2).model_dump(),
+            {
+                "issue_url": "bad_issue",
+                "issue_points": "foo",
+            },  # missing required field and wrong type for points
+        ]
+        wanted = 2
+        # Act
+        got = populate_issue_lookup_table(lookup={}, issues=test_data)
+        # Assert
+        assert len(got) == wanted
+        assert "bad_issue" not in got
 
 
 class TestGetParentWithType:
@@ -282,3 +328,18 @@ class TestGetParentWithType:
         )
         # Assert
         assert got == wanted
+
+    def test_raise_value_error_if_child_url_not_in_lookup(self):
+        """Raise a value error if the child_url isn't found in lookup table."""
+        # Arrange
+        task = "Task1"
+        lookup = {
+            task: issue(issue=1, kind=IssueType.TASK),
+        }
+        # Act
+        with pytest.raises(ValueError, match="Lookup doesn't contain"):
+            get_parent_with_type(
+                child_url="fake",
+                lookup=lookup,
+                type_wanted=IssueType.DELIVERABLE,
+            )
