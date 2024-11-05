@@ -1,3 +1,7 @@
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import timezone from "dayjs/plugin/timezone";
+
 import { useTranslations } from "next-intl";
 import { Link, Table } from "@trussworks/react-uswds";
 
@@ -14,6 +18,9 @@ interface OpportunityDocumentsProps {
 
 const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
   const t = useTranslations("OpportunityListing.documents");
+
+  dayjs.extend(advancedFormat);
+  dayjs.extend(timezone);
 
   return (
     <>
@@ -39,9 +46,8 @@ const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
               </Link>
             </td>
             <td data-label={t("table_col_last_updated")}>
-              {new Date(document.updated_at).toDateString() +
-                " " +
-                new Date(document.updated_at).toTimeString()}
+              {/* https://day.js.org/docs/en/display/format */}
+              {dayjs(document.updated_at).format("MMM D, YYYY hh:mm:ss A z")}
             </td>
           </tr>
         ))}
