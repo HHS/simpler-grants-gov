@@ -52,10 +52,10 @@ const OpportunityDocuments = ({ documents }: OpportunityDocumentsProps) => {
   };
 
   const related_docs = documents.filter(
-    (d) => d.opportunity_attachment_type === "notice_of_funding_opportunity",
+    ({opportunity_attachment_type}) => opportunity_attachment_type === "notice_of_funding_opportunity",
   );
   const forms = documents.filter(
-    (d) => d.opportunity_attachment_type === "other",
+    ({opportunity_attachment_type}) => opportunity_attachment_type === "other",
   );
 
   return (
