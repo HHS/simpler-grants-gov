@@ -18,8 +18,6 @@ jest.mock("next-intl", () => ({
       closed: "Closed: ",
       closing: "Closing: ",
       forecasted: "Forecasted",
-      closing_warn:
-        "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
     };
     return translations[key] || key;
   }),
@@ -37,6 +35,7 @@ const mockOpportunityData: Opportunity = {
   summary: {
     close_date: "2024-12-01",
     archive_date: "2025-01-01",
+    close_date_description: "Electronically submitted applications",
   } as Summary,
 } as Opportunity;
 

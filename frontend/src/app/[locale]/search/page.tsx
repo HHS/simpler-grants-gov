@@ -48,6 +48,7 @@ function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
                 showCallToAction={t("filterDisplayToggle.showFilters")}
                 hideCallToAction={t("filterDisplayToggle.hideFilters")}
                 breakpoint={Breakpoints.TABLET}
+                type="centered"
               >
                 <SearchFilters
                   opportunityStatus={status}
