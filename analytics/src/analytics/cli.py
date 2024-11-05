@@ -11,6 +11,7 @@ import typer
 from slack_sdk import WebClient
 from sqlalchemy import text
 
+from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
