@@ -5,6 +5,7 @@ import { splitMarkup } from "src/utils/generalUtils";
 import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { Button, Icon } from "@trussworks/react-uswds";
 
 type Props = {
   summary: Summary;
@@ -119,6 +120,17 @@ const OpportunityDescription = ({ summary }: Props) => {
     <>
       <div className="usa-prose">
         <h2>{t("title")}</h2>
+        <div>
+          <Button type="button">
+            <span>Download Full Grant Details (NOFO) </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" className="usa-icon usa-icon--size-4" focusable="false" role="img" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+          </Button>
+          <Button
+            type="button"
+            unstyled>
+              Jump to all documents
+          </Button>
+        </div>
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
