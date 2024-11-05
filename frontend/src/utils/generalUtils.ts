@@ -71,3 +71,8 @@ export const splitMarkup = (
     postSplit,
   };
 };
+
+// for a given string, find the first whitespace character following a given index
+// useful for splitting strings of text at word breaks
+export const findFirstWhitespace = (content: string, startAt: number): number =>
+  content.substring(startAt).search(/\s/) + startAt;

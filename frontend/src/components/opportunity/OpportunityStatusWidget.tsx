@@ -1,5 +1,6 @@
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
+import { findFirstWhitespace } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 
@@ -28,8 +29,9 @@ const CloseDateDescriptionDisplay = ({
   }
 
   // close date description should not contain markup so no need to use splitMarkup
-  const preSplit = closeDateDescription.substring(0, 120);
-  const postSplit = closeDateDescription.substring(121);
+  const splitAt = findFirstWhitespace(closeDateDescription, 120);
+  const preSplit = closeDateDescription.substring(0, splitAt);
+  const postSplit = closeDateDescription.substring(splitAt + 1);
 
   return (
     <div className="border radius-md border-base-lighter padding-x-2 margin-top-0">
