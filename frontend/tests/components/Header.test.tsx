@@ -1,6 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "tests/react-utils";
 
+import { ReadonlyURLSearchParams, usePathname } from "next/navigation";
+
 import Header from "src/components/Header";
 
 const props = {
@@ -16,6 +18,20 @@ const props = {
     },
   ],
 };
+
+const mockedPath = "/fakepath";
+
+const getMockedPath = () => mockedPath;
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    searchParams: new ReadonlyURLSearchParams(),
+  }),
+}));
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => getMockedPath(),
+}));
 
 describe("Header", () => {
   it("toggles the mobile nav menu", async () => {

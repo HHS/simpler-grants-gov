@@ -4,6 +4,8 @@ import Search from "src/app/[locale]/search/page";
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
+import { ReadonlyURLSearchParams } from "next/navigation";
+
 // test without feature flag functionality
 jest.mock("src/hoc/search/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),
@@ -16,6 +18,12 @@ jest.mock("next-intl/server", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
+}));
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    searchParams: new ReadonlyURLSearchParams(),
+  }),
 }));
 
 // // currently, with Suspense mocked out below to always show fallback content,
