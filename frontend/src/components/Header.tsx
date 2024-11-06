@@ -5,6 +5,7 @@ import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   GovBanner,
@@ -33,8 +34,12 @@ const Header = ({ logoPath, locale }: Props) => {
 
   const primaryLinksRef = useRef<PrimaryLinks>([]);
   const { featureFlagsManager } = useFeatureFlags();
+  const router = useRouter();
+  const path = usePathname();
+  console.log("&&& path", path);
 
   useEffect(() => {
+    console.log("&&& on search", path.includes("search"));
     primaryLinksRef.current = [
       { i18nKey: t("nav_link_home"), href: "/" },
       { i18nKey: t("nav_link_process"), href: "/process" },
@@ -45,18 +50,28 @@ const Header = ({ logoPath, locale }: Props) => {
       i18nKey: t("nav_link_search"),
       href: "/search",
     };
+
     if (featureFlagsManager.isFeatureEnabled("showSearchV0")) {
       primaryLinksRef.current.splice(1, 0, searchNavLink);
     }
-  }, [featureFlagsManager, t]);
+  }, [featureFlagsManager, t, path]);
 
   const navItems = primaryLinksRef.current.map((link) => (
-    <Link href={link.href} key={link.href}>
+    <Link
+      href={link.href}
+      key={link.href}
+      // onClick={() => {
+      //   if (path.includes("search") && link.href.includes("search")) {
+      //     return router.push("/search?refresh=true").then(() => undefined);
+      //   }
+      // }}
+    >
       {link.i18nKey}
     </Link>
   ));
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
+  console.log("&&& refresh nav items?", navItems);
   return (
     <>
       <div

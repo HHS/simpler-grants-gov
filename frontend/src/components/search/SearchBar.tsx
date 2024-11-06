@@ -4,22 +4,37 @@ import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
-import { useContext } from "react";
+import { useSearchParams } from "next/navigation";
+import { useContext, useEffect } from "react";
 import { Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   query: string | null | undefined;
 }
 
+// what can we look at to determine if there is a page refresh so we can clear the queryTerm
+// let's try making the nav take you to like "search-opportunities?navLink=true" which redirects to '/search" but we've already captured the state to know to reset the form????
 export default function SearchBar({ query }: SearchBarProps) {
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
-  const { updateQueryParams } = useSearchParamUpdater();
+  const { updateQueryParams, searchParams } = useSearchParamUpdater();
+  const t = useTranslations("Search");
 
   const handleSubmit = () => {
     updateQueryParams("", "query", queryTerm, false);
   };
 
-  const t = useTranslations("Search");
+  console.log("!!! search bar render query", query);
+  console.log("!!! search bar render queryTerm", queryTerm);
+
+  // useEffect(() => {
+  //   console.log("CHECKING", searchParams.get("refresh"));
+  //   if (searchParams.get("refresh")) {
+  //     console.log("UPDATDIHNG");
+  //     updateQueryTerm("");
+  //   }
+  // }, [searchParams, updateQueryTerm]);
+
+  // useEffect(() => console.log("***"), []);
 
   return (
     <div className="margin-top-5 margin-bottom-2">

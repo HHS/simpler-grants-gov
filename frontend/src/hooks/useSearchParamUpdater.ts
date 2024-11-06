@@ -49,6 +49,7 @@ export function useSearchParamUpdater() {
   };
 
   return {
+    searchParams,
     updateQueryParams,
   };
 }
