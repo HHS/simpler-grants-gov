@@ -18,7 +18,6 @@ locals {
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
-    { name : "DRAFT_S3_BUCKET_ARN", value : aws_s3_bucket.documents_draft.arn },
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
