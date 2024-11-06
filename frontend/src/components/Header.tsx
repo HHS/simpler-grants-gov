@@ -5,8 +5,8 @@ import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -15,63 +15,84 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-type PrimaryLinks = {
-  i18nKey: string;
-  href: string;
-}[];
+type PrimaryLink = {
+  text?: string;
+  href?: string;
+};
 
 type Props = {
   logoPath?: string;
   locale?: string;
 };
 
+const NavLinks = ({
+  mobileExpanded,
+  onToggleMobileNav,
+}: {
+  mobileExpanded: boolean;
+  onToggleMobileNav: () => unknown;
+}) => {
+  const t = useTranslations("Header");
+  const { featureFlagsManager } = useFeatureFlags();
+  const path = usePathname();
+
+  const getSearchLink = useCallback(
+    (onSearch: boolean, enabled: boolean) => {
+      if (!enabled) {
+        return {};
+      }
+      return {
+        text: t("nav_link_search"),
+        href: onSearch ? "/search?refresh=true" : "/search",
+      };
+    },
+    [t],
+  );
+
+  const navLinkList = useMemo(() => {
+    return [
+      { text: t("nav_link_home"), href: "/" },
+      getSearchLink(
+        path.includes("/search"),
+        featureFlagsManager.isFeatureEnabled("showSearchV0"),
+      ),
+      { text: t("nav_link_process"), href: "/process" },
+      { text: t("nav_link_research"), href: "/research" },
+      { text: t("nav_link_subscribe"), href: "/subscribe" },
+    ];
+  }, [t, path, featureFlagsManager, getSearchLink]);
+
+  const navItems = useMemo(() => {
+    return navLinkList.map((link: PrimaryLink) => {
+      if (!link.text || !link.href) {
+        return <></>;
+      }
+      return (
+        <Link href={link.href} key={link.href}>
+          {link.text}
+        </Link>
+      );
+    });
+  }, [navLinkList]);
+
+  return (
+    <PrimaryNav
+      items={navItems}
+      mobileExpanded={mobileExpanded}
+      onToggleMobileNav={onToggleMobileNav}
+    ></PrimaryNav>
+  );
+};
+
 const Header = ({ logoPath, locale }: Props) => {
   const t = useTranslations("Header");
-  const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
+  const [isMobileNavExpanded, setIsMobileNavExpanded] =
+    useState<boolean>(false);
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
-
-  const primaryLinksRef = useRef<PrimaryLinks>([]);
-  const { featureFlagsManager } = useFeatureFlags();
-  const router = useRouter();
-  const path = usePathname();
-  console.log("&&& path", path);
-
-  useEffect(() => {
-    console.log("&&& on search", path.includes("search"));
-    primaryLinksRef.current = [
-      { i18nKey: t("nav_link_home"), href: "/" },
-      { i18nKey: t("nav_link_process"), href: "/process" },
-      { i18nKey: t("nav_link_research"), href: "/research" },
-      { i18nKey: t("nav_link_subscribe"), href: "/subscribe" },
-    ];
-    const searchNavLink = {
-      i18nKey: t("nav_link_search"),
-      href: "/search",
-    };
-
-    if (featureFlagsManager.isFeatureEnabled("showSearchV0")) {
-      primaryLinksRef.current.splice(1, 0, searchNavLink);
-    }
-  }, [featureFlagsManager, t, path]);
-
-  const navItems = primaryLinksRef.current.map((link) => (
-    <Link
-      href={link.href}
-      key={link.href}
-      // onClick={() => {
-      //   if (path.includes("search") && link.href.includes("search")) {
-      //     return router.push("/search?refresh=true").then(() => undefined);
-      //   }
-      // }}
-    >
-      {link.i18nKey}
-    </Link>
-  ));
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
-  console.log("&&& refresh nav items?", navItems);
   return (
     <>
       <div
@@ -100,11 +121,10 @@ const Header = ({ logoPath, locale }: Props) => {
               label={t("nav_menu_toggle")}
             />
           </div>
-          <PrimaryNav
-            items={navItems}
+          <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
-          ></PrimaryNav>
+          />
         </div>
       </USWDSHeader>
     </>

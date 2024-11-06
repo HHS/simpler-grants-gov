@@ -10,6 +10,7 @@ export function useSearchParamUpdater() {
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
 
+  // note that providing an empty string as `queryParamValue` will remove the param
   const updateQueryParams = (
     // The parameter value that is not the query term. Query term is treated
     // separately because updates to it are captured, ie if a user updates the
@@ -17,7 +18,7 @@ export function useSearchParamUpdater() {
     queryParamValue: string | Set<string>,
     // Key of the parameter.
     key: string,
-    queryTerm: string | null | undefined,
+    queryTerm?: string | null,
     // Determines whether the state update scrolls the user to the top. This
     // is useful for components that are expected to be "under the fold."
     scroll = false,

@@ -4,17 +4,15 @@ import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   query: string | null | undefined;
 }
 
-// what can we look at to determine if there is a page refresh so we can clear the queryTerm
-// let's try making the nav take you to like "search-opportunities?navLink=true" which redirects to '/search" but we've already captured the state to know to reset the form????
 export default function SearchBar({ query }: SearchBarProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
@@ -23,18 +21,18 @@ export default function SearchBar({ query }: SearchBarProps) {
     updateQueryParams("", "query", queryTerm, false);
   };
 
-  console.log("!!! search bar render query", query);
-  console.log("!!! search bar render queryTerm", queryTerm);
+  useEffect(() => {
+    if (searchParams.get("refresh") && inputRef.current) {
+      updateQueryTerm("");
+      inputRef.current.value = "";
+    }
+  }, [searchParams, updateQueryTerm]);
 
-  // useEffect(() => {
-  //   console.log("CHECKING", searchParams.get("refresh"));
-  //   if (searchParams.get("refresh")) {
-  //     console.log("UPDATDIHNG");
-  //     updateQueryTerm("");
-  //   }
-  // }, [searchParams, updateQueryTerm]);
-
-  // useEffect(() => console.log("***"), []);
+  useEffect(() => {
+    if (searchParams.get("refresh") && queryTerm) {
+      updateQueryParams("", "refresh");
+    }
+  }, [queryTerm, searchParams, updateQueryParams]);
 
   return (
     <div className="margin-top-5 margin-bottom-2">
@@ -51,6 +49,7 @@ export default function SearchBar({ query }: SearchBarProps) {
       </label>
       <div className="usa-search usa-search--big" role="search">
         <input
+          ref={inputRef}
           className="usa-input maxw-none"
           id="query"
           type="search"
