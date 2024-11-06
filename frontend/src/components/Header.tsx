@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -33,14 +32,10 @@ const NavLinks = ({
   onToggleMobileNav: () => unknown;
 }) => {
   const t = useTranslations("Header");
-  const { featureFlagsManager } = useFeatureFlags();
   const path = usePathname();
 
   const getSearchLink = useCallback(
-    (onSearch: boolean, enabled: boolean) => {
-      if (!enabled) {
-        return {};
-      }
+    (onSearch: boolean) => {
       return {
         text: t("nav_link_search"),
         href: onSearch ? "/search?refresh=true" : "/search",
@@ -52,15 +47,12 @@ const NavLinks = ({
   const navLinkList = useMemo(() => {
     return [
       { text: t("nav_link_home"), href: "/" },
-      getSearchLink(
-        path.includes("/search"),
-        featureFlagsManager.isFeatureEnabled("showSearchV0"),
-      ),
+      getSearchLink(path.includes("/search")),
       { text: t("nav_link_process"), href: "/process" },
       { text: t("nav_link_research"), href: "/research" },
       { text: t("nav_link_subscribe"), href: "/subscribe" },
     ];
-  }, [t, path, featureFlagsManager, getSearchLink]);
+  }, [t, path, getSearchLink]);
 
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink) => {

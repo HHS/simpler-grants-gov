@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "tests/react-utils";
 
-import { ReadonlyURLSearchParams, usePathname } from "next/navigation";
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 import Header from "src/components/Header";
 
