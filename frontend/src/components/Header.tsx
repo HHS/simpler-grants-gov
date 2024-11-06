@@ -43,7 +43,7 @@ const Header = ({ logoPath, locale }: Props) => {
     ];
     const searchNavLink = {
       i18nKey: t("nav_link_search"),
-      href: "/search?status=forecasted,posted",
+      href: "/search",
     };
     if (featureFlagsManager.isFeatureEnabled("showSearchV0")) {
       primaryLinksRef.current.splice(1, 0, searchNavLink);

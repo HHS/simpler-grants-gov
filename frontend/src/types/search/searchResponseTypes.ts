@@ -1,4 +1,4 @@
-import { PaginationInfo } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchFetcherActionType } from "src/types/search/searchRequestTypes";
 
@@ -55,13 +55,9 @@ export interface Opportunity {
   updated_at: string;
 }
 
-export interface SearchAPIResponse {
+export interface SearchAPIResponse extends APIResponse {
   data: Opportunity[];
-  message: string;
   pagination_info: PaginationInfo;
-  status_code: number;
-  warnings?: unknown[] | null | undefined;
-  errors?: unknown[] | null | undefined;
   actionType?: SearchFetcherActionType;
   fieldChanged?: string;
 }

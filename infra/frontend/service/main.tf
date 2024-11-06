@@ -123,7 +123,7 @@ module "service" {
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
   enable_autoscaling    = module.app_config.enable_autoscaling
-  cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
+  cert_arn              = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
   hostname              = module.app_config.hostname
 
   app_access_policy_arn      = null

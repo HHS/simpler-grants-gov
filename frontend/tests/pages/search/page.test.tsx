@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
-import { MockSearchFetcher } from "src/services/search/searchfetcher/MockSearchFetcher";
+import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // test without feature flag functionality
@@ -18,10 +18,14 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-// mock API interactions
-jest.mock("src/services/search/searchfetcher/SearchFetcherUtil", () => ({
-  getSearchFetcher: () => new MockSearchFetcher(),
-}));
+// // currently, with Suspense mocked out below to always show fallback content,
+// // the components making the fetch calls are never being rendered so we do not need to mock them out
+// // uncomment this if we figure out a way to properly test the underlying async components
+// jest.mock("src/app/api/fetchers", () => ({
+//   get searchOpportunityFetcher() {
+//     return new MockSearchOpportunityAPI();
+//   },
+// }));
 
 jest.mock("next/navigation", () => ({
   ...jest.requireActual<typeof import("next/navigation")>("next/navigation"),
@@ -37,7 +41,7 @@ jest.mock("next/navigation", () => ({
   Suspense to force display of fallback UI.
 
   for more see https://github.com/testing-library/react-testing-library/issues/1209
-*/
+// */
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
@@ -75,5 +79,49 @@ describe("Search Route", () => {
     );
     expect(archivedCheckbox).toBeInTheDocument();
     expect(archivedCheckbox).not.toBeChecked();
+  });
+
+  it("renders the search page with all opportunities if no status selected", async () => {
+    const mockSearchParams = {
+      status: SEARCH_NO_STATUS_VALUE,
+    };
+    render(<Search searchParams={mockSearchParams} />);
+
+    // None should be checked if the "no status checked" value is present.
+    const statuses = ["forecasted", "posted", "closed", "archived"];
+    for (const status of statuses) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
+    }
+  });
+
+  it("renders the search page two status by default", async () => {
+    const mockSearchParams = {
+      status: undefined,
+    };
+    render(<Search searchParams={mockSearchParams} />);
+
+    // These should be clicked if no status is present.
+    const clicked = ["forecasted", "posted"];
+    for (const status of clicked) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).toBeChecked();
+    }
+
+    // These should not be clicked if no status is present.
+    const noClicked = ["closed", "archived"];
+    for (const status of noClicked) {
+      const checkbox = await screen.findByLabelText(
+        `opportunityStatus.label.${status}`,
+      );
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
+    }
   });
 });

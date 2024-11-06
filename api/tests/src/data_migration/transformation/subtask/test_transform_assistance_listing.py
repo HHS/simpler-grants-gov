@@ -155,3 +155,101 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         validate_assistance_listing(db_session, delete_but_current_missing, expect_in_db=False)
         assert delete_but_current_missing.transformed_at is not None
         assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
+
+    def test_process_empty_assistance_listings(self, db_session, transform_assistance_listing):
+        """Test that assistance listings with empty required fields are skipped"""
+        # Create opportunities with empty assistance listings
+        opportunity1 = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+
+        # Empty program title
+        empty_program_title = setup_cfda(
+            create_existing=False,
+            opportunity=opportunity1,
+            source_values={"programtitle": "", "cfdanumber": "12.345"},
+        )
+
+        # Empty assistance listing number
+        empty_listing_number = setup_cfda(
+            create_existing=False,
+            opportunity=opportunity1,
+            source_values={"programtitle": "Test Program", "cfdanumber": ""},
+        )
+
+        # Both empty
+        both_empty = setup_cfda(
+            create_existing=False,
+            opportunity=opportunity1,
+            source_values={"programtitle": "", "cfdanumber": ""},
+        )
+
+        # Control - valid record
+        valid_record = setup_cfda(
+            create_existing=False,
+            opportunity=opportunity1,
+            source_values={"programtitle": "Valid Program", "cfdanumber": "67.890"},
+        )
+
+        transform_assistance_listing.run_subtask()
+
+        # Verify empty records were skipped and marked appropriately
+        for record in [empty_program_title, empty_listing_number, both_empty]:
+            assert record.transformed_at is not None
+            assert record.transformation_notes == "empty_assistance_listing"
+
+            # Verify no record was created in the target table
+            assistance_listing = (
+                db_session.query(OpportunityAssistanceListing)
+                .filter(
+                    OpportunityAssistanceListing.opportunity_assistance_listing_id
+                    == record.opp_cfda_id
+                )
+                .one_or_none()
+            )
+            assert assistance_listing is None
+
+        # Verify valid record was processed
+        validate_assistance_listing(db_session, valid_record)
+
+        # Verify metrics
+        metrics = transform_assistance_listing.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_SKIPPED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 1
+
+    def test_process_empty_assistance_listing_update(
+        self, db_session, transform_assistance_listing
+    ):
+        """Test that empty assistance listings are skipped even for updates"""
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+
+        # Create a record that exists but will be updated with empty values
+        empty_update = setup_cfda(
+            create_existing=True,
+            opportunity=opportunity,
+            source_values={"programtitle": "", "cfdanumber": ""},
+        )
+
+        transform_assistance_listing.run_subtask()
+
+        # Verify record was marked as processed but not updated
+        assert empty_update.transformed_at is not None
+        assert empty_update.transformation_notes == "empty_assistance_listing"
+
+        # Verify original record in target table remains unchanged
+        assistance_listing = (
+            db_session.query(OpportunityAssistanceListing)
+            .filter(
+                OpportunityAssistanceListing.opportunity_assistance_listing_id
+                == empty_update.opp_cfda_id
+            )
+            .one()
+        )
+        assert assistance_listing is not None
+        # Verify the values weren't updated to empty
+        assert assistance_listing.program_title != ""
+        assert assistance_listing.assistance_listing_number != ""
+
+        # Verify metrics
+        metrics = transform_assistance_listing.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_SKIPPED] == 1

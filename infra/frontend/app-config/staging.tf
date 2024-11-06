@@ -5,5 +5,4 @@ module "staging_config" {
   environment                     = "staging"
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
-  domain                          = "beta.grants.gov"
 }

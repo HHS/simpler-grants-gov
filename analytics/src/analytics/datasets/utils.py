@@ -30,11 +30,6 @@ def load_json_data_as_df(
     -------
     pd.DataFrame
         Pandas dataframe with columns renamed to match the values of the column map
-
-    Notes
-    -----
-    TODO(@widal001): 2023-11-06 - Consider replacing column_map and date_cols with a
-        pydantic schema which would also allow us to do type validation and conversions
     """
     # load json data from the local file
     with open(file_path, encoding="utf-8") as f:

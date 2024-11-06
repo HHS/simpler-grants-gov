@@ -1,7 +1,9 @@
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
+
 import logging
 import logging.config
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -9,9 +11,11 @@ import typer
 from slack_sdk import WebClient
 from sqlalchemy import text
 
-from analytics.datasets.deliverable_tasks import DeliverableTasks
+from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
-from analytics.integrations import db, github, slack
+from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
+from analytics.etl.utils import load_config
+from analytics.integrations import db, etldb, slack
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -22,23 +26,21 @@ logger = logging.getLogger(__name__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
-SPRINT_FILE_ARG = typer.Option(help="Path to file with exported sprint data")
+CONFIG_FILE_ARG = typer.Option(help="Path to JSON file with configurations for this entrypoint")
 ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
-ROADMAP_FILE_ARG = typer.Option(help="Path to file with exported roadmap data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
 OUTPUT_DIR_ARG = typer.Option(help="Path to directory where output files will be saved")
 TMP_DIR_ARG = typer.Option(help="Path to directory where intermediate files will be saved")
-OWNER_ARG = typer.Option(help="GitHub handle of the repo or project owner")
-REPO_ARG = typer.Option(help="Name of the GitHub repo")
-PROJECT_ARG = typer.Option(help="Number of the GitHub project")
-FIELD_ARG = typer.Option(help="Name of the GitHub project field")
 SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating burndown")
 UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
+OWNER_ARG = typer.Option(help="Name of the GitHub project owner, e.g. HHS")
+PROJECT_ARG = typer.Option(help="Number of the GitHub project, e.g. 13")
 SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
 POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
+EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
 # instantiate the main CLI entrypoint
@@ -47,10 +49,12 @@ app = typer.Typer()
 export_app = typer.Typer()
 metrics_app = typer.Typer()
 import_app = typer.Typer()
+etl_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
 app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
+app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
 
 @app.callback()
@@ -63,66 +67,22 @@ def callback() -> None:
 # ===========================================================
 
 
-@export_app.command(name="gh_project_data")
-def export_github_project_data(
-    owner: Annotated[str, OWNER_ARG],
-    project: Annotated[int, PROJECT_ARG],
-    output_file: Annotated[str, OUTPUT_FILE_ARG],
-) -> None:
-    """Export data about items in a GitHub project and write it to an output file."""
-    github.export_project_data(owner, project, output_file)
-
-
-@export_app.command(name="gh_issue_data")
-def export_github_issue_data(
-    owner: Annotated[str, OWNER_ARG],
-    repo: Annotated[str, REPO_ARG],
-    output_file: Annotated[str, OUTPUT_FILE_ARG],
-) -> None:
-    """Export data about issues a GitHub repo and write it to an output file."""
-    github.export_issue_data(owner, repo, output_file)
-
-
 @export_app.command(name="gh_delivery_data")
 def export_github_data(
-    owner: Annotated[str, OWNER_ARG],
-    sprint_project: Annotated[int, PROJECT_ARG],
-    roadmap_project: Annotated[int, PROJECT_ARG],
+    config_file: Annotated[str, CONFIG_FILE_ARG],
     output_file: Annotated[str, OUTPUT_FILE_ARG],
-    sprint_field: Annotated[str, FIELD_ARG] = "Sprint",
-    points_field: Annotated[str, FIELD_ARG] = "Points",
-    tmp_dir: Annotated[str, TMP_DIR_ARG] = "data",
+    temp_dir: Annotated[str, TMP_DIR_ARG],
 ) -> None:
     """Export and flatten metadata about GitHub issues used for delivery metrics."""
-    # Specify path to intermediate files
-    sprint_file = Path(tmp_dir) / "sprint-data.json"
-    roadmap_file = Path(tmp_dir) / "roadmap-data.json"
-
-    # # Export sprint and roadmap data
-    logger.info("Exporting roadmap data")
-    github.export_roadmap_data(
-        owner=owner,
-        project=roadmap_project,
-        quad_field="Quad",
-        pillar_field="Pillar",
-        output_file=str(roadmap_file),
-    )
-    logger.info("Exporting sprint data")
-    github.export_sprint_data(
-        owner=owner,
-        project=sprint_project,
-        sprint_field=sprint_field,
-        points_field=points_field,
-        output_file=str(sprint_file),
-    )
-
-    # load and flatten data into GitHubIssues dataset
-    logger.info("Transforming exported data")
-    issues = GitHubIssues.load_from_json_files(
-        sprint_file=str(sprint_file),
-        roadmap_file=str(roadmap_file),
-    )
-    issues.to_json(output_file)
+    # Configure ETL pipeline
+    config_path = Path(config_file)
+    if not config_path.exists():
+        typer.echo(f"Not a path to a valid config file: {config_path}")
+    config = load_config(config_path, GitHubProjectConfig)
+    config.temp_dir = temp_dir
+    config.output_file = output_file
+    # Run ETL pipeline
+    GitHubProjectETL(config).run()
 
 
 # ===========================================================
@@ -139,12 +99,20 @@ def calculate_sprint_burndown(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
+    owner: Annotated[str, OWNER_ARG] = "HHS",
+    project: Annotated[int, PROJECT_ARG] = 13,
 ) -> None:
     """Calculate the burndown for a particular sprint."""
     # load the input data
     sprint_data = GitHubIssues.from_json(issue_file)
     # calculate burndown
-    burndown = SprintBurndown(sprint_data, sprint=sprint, unit=unit)
+    burndown = SprintBurndown(
+        sprint_data,
+        sprint=sprint,
+        unit=unit,
+        project=project,
+        owner=owner,
+    )
     show_and_or_post_results(
         metric=burndown,
         show_results=show_results,
@@ -178,7 +146,6 @@ def calculate_sprint_burnup(
 
 @metrics_app.command(name="deliverable_percent_complete")
 def calculate_deliverable_percent_complete(
-    sprint_file: Annotated[str, SPRINT_FILE_ARG],
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     # Typer uses the Unit enum to validate user inputs from the CLI
     # but the default arg must be a string or the CLI will throw an error
@@ -187,23 +154,10 @@ def calculate_deliverable_percent_complete(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    roadmap_file: Annotated[Optional[str], ROADMAP_FILE_ARG] = None,  # noqa: UP007
     include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
 ) -> None:
     """Calculate percentage completion by deliverable."""
-    if roadmap_file:
-        # load the input data using the new join path with roadmap data
-        task_data = DeliverableTasks.load_from_json_files_with_roadmap_data(
-            sprint_file=sprint_file,
-            issue_file=issue_file,
-            roadmap_file=roadmap_file,
-        )
-    else:
-        # load the input data using the original join path without roadmap data
-        task_data = DeliverableTasks.load_from_json_files(
-            sprint_file=sprint_file,
-            issue_file=issue_file,
-        )
+    task_data = GitHubIssues.from_json(issue_file)
     # calculate percent complete
     metric = DeliverablePercentComplete(
         dataset=task_data,
@@ -292,3 +246,45 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
     )
     rows = len(issues.to_dict())
     logger.info("Number of rows in table: %s", rows)
+
+
+# ===========================================================
+# Etl commands
+# ===========================================================
+
+
+@etl_app.command(name="initialize_database")
+def initialize_database() -> None:
+    """Initialize etl database."""
+    print("initializing database")
+    etldb.init_db()
+    print("done")
+
+
+@etl_app.command(name="transform_and_load")
+def transform_and_load(
+    issue_file: Annotated[str, ISSUE_FILE_ARG],
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+) -> None:
+    """Transform and load etl data."""
+    # validate effective date arg
+    try:
+        dateformat = "%Y-%m-%d"
+        datestamp = (
+            datetime.strptime(effective_date, dateformat)
+            .astimezone()
+            .strftime(dateformat)
+        )
+        print(f"running transform and load with effective date {datestamp}")
+    except ValueError:
+        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        return
+
+    # hydrate a dataset instance from the input data
+    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
+
+    # sync data to db
+    etldb.sync_db(dataset, datestamp)
+
+    # finish
+    print("transform and load is done")

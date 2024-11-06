@@ -86,6 +86,22 @@ class TransformAssistanceListing(AbstractTransformSubTask):
             )
             source_assistance_listing.transformation_notes = transform_constants.ORPHANED_CFDA
 
+        elif not source_assistance_listing.programtitle or not source_assistance_listing.cfdanumber:
+            self.increment(
+                transform_constants.Metrics.TOTAL_RECORDS_SKIPPED,
+                prefix=transform_constants.ASSISTANCE_LISTING,
+            )
+            logger.info(
+                "Skipping assistance listing with empty required fields",
+                extra={
+                    **extra,
+                    "programtitle": source_assistance_listing.programtitle,
+                    "cfdanumber": source_assistance_listing.cfdanumber,
+                },
+            )
+            source_assistance_listing.transformation_notes = "empty_assistance_listing"
+            source_assistance_listing.transformed_at = self.transform_time
+
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming

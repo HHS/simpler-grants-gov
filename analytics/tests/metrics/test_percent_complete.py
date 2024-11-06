@@ -4,9 +4,9 @@ from pathlib import Path  # noqa: I001
 
 import pytest
 
-from analytics.datasets.deliverable_tasks import DeliverableTasks
+from analytics.datasets.issues import GitHubIssues, IssueMetadata, IssueType
 from analytics.metrics.percent_complete import DeliverablePercentComplete, Unit
-from tests.conftest import MockSlackbot
+from tests.conftest import MockSlackbot, DAY_0, DAY_1
 
 
 def task_row(
@@ -17,15 +17,21 @@ def task_row(
     status: str | None = "open",
 ) -> dict:
     """Create a sample row of the DeliverableTasks dataset."""
-    return {
-        "deliverable_number": deliverable,
-        "deliverable_title": f"Deliverable {deliverable}",
-        "deliverable_status": deliverable_status,
-        "issue_number": task,
-        "issue_title": f"Task {task}" if task else None,
-        "points": points,
-        "status": status,
-    }
+    issue = IssueMetadata(
+        project_owner="HHS",
+        project_number=1,
+        issue_title=f"Task {task}",
+        issue_url=f"task{task}",
+        issue_type=IssueType.TASK.value,
+        issue_parent=None,
+        issue_points=points,
+        issue_is_closed=status == "closed",
+        issue_opened_at=DAY_0,
+        issue_closed_at=DAY_1 if status == "closed" else None,
+        deliverable_title=f"Deliverable {deliverable}",
+        deliverable_status=deliverable_status,
+    )
+    return issue.model_dump()
 
 
 @pytest.fixture(name="percent_complete", scope="module")
@@ -37,7 +43,7 @@ def sample_percent_complete() -> DeliverablePercentComplete:
         task_row(deliverable=1, task=2, status="closed"),
         task_row(deliverable=2, task=3, status="open"),
     ]
-    test_data = DeliverableTasks.from_dict(test_rows)
+    test_data = GitHubIssues.from_dict(test_rows)
     # return sprint burndown by points
     return DeliverablePercentComplete(test_data, unit=Unit.points)
 
@@ -53,7 +59,7 @@ class TestDeliverablePercentComplete:
             task_row(deliverable=1, task=2, status="closed"),
             task_row(deliverable=2, task=3, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         df = DeliverablePercentComplete(test_data, unit=Unit.issues).results
         df = df.set_index("deliverable_title")
@@ -80,7 +86,7 @@ class TestDeliverablePercentComplete:
             task_row(deliverable=1, task=2, points=3, status="closed"),
             task_row(deliverable=2, task=3, points=5, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         df = DeliverablePercentComplete(test_data, unit=Unit.points).results
         df = df.set_index("deliverable_title")
@@ -106,7 +112,7 @@ class TestDeliverablePercentComplete:
             task_row(deliverable=1, task=2, status="closed"),
             task_row(deliverable=2, task=None, status=None),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution - use tasks as the unit
         df = DeliverablePercentComplete(test_data, unit=Unit.issues).results
         df = df.set_index("deliverable_title")
@@ -132,7 +138,7 @@ class TestDeliverablePercentComplete:
             task_row(deliverable=1, task=2, points=2, status="closed"),
             task_row(deliverable=2, task=None, points=None, status=None),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution - use points as the unit
         df = DeliverablePercentComplete(test_data, unit=Unit.points).results
         df = df.set_index("deliverable_title")
@@ -164,7 +170,7 @@ class TestFilteringReportByDeliverableStatus:
     def test_filter_out_deliverables_with_excluded_status(self):
         """The results should exclude deliverables with a status that wasn't passed."""
         # setup - create test dataset
-        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        test_data = GitHubIssues.from_dict(self.TEST_ROWS)
         # execution
         df = DeliverablePercentComplete(
             test_data,
@@ -180,7 +186,7 @@ class TestFilteringReportByDeliverableStatus:
     def test_invert_statuses_selected(self):
         """We should filter out the other deliverable if invert statuses selected."""
         # setup - create test dataset
-        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        test_data = GitHubIssues.from_dict(self.TEST_ROWS)
         # execution
         df = DeliverablePercentComplete(
             test_data,
@@ -196,7 +202,7 @@ class TestFilteringReportByDeliverableStatus:
     def test_list_selected_statuses_in_slack_message(self):
         """If we filter on status, those statuses should be listed in the slack message."""
         # setup - create test dataset
-        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        test_data = GitHubIssues.from_dict(self.TEST_ROWS)
         # execution
         metric = DeliverablePercentComplete(
             test_data,
@@ -211,7 +217,7 @@ class TestFilteringReportByDeliverableStatus:
     def test_stats_also_filter_out_deliverables_with_excluded_status(self):
         """Filtered deliverables should also be excluded from get_stats()."""
         # setup - create test dataset
-        test_data = DeliverableTasks.from_dict(self.TEST_ROWS)
+        test_data = GitHubIssues.from_dict(self.TEST_ROWS)
         # execution
         metric = DeliverablePercentComplete(
             test_data,
@@ -236,7 +242,7 @@ class TestGetStats:
             task_row(deliverable=2, task=3, points=3, status="open"),
             task_row(deliverable=2, task=3, points=1, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         # validation
@@ -256,7 +262,7 @@ class TestGetStats:
             task_row(deliverable=2, task=3, points=3, status="open"),
             task_row(deliverable=2, task=3, points=None, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         # validation
@@ -275,7 +281,7 @@ class TestGetStats:
             task_row(deliverable=1, task=2, points=1, status="closed"),
             task_row(deliverable=2, task=None, points=None, status=None),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         # validation
@@ -295,7 +301,7 @@ class TestFormatSlackMessage:
             task_row(deliverable=2, task=2, points=1, status="closed"),
             task_row(deliverable=3, task=3, points=3, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         lines = output.format_slack_message().splitlines()
@@ -309,7 +315,7 @@ class TestFormatSlackMessage:
             task_row(deliverable=1, task=1, points=2, status="open"),
             task_row(deliverable=2, task=2, points=1, status=None),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         title = output.format_slack_message().splitlines()[0]
@@ -323,7 +329,7 @@ class TestFormatSlackMessage:
             task_row(deliverable=1, task=1, points=2, status="open"),
             task_row(deliverable=2, task=2, points=1, status=None),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.points)
         title = output.format_slack_message().splitlines()[0]
@@ -343,7 +349,7 @@ class TestPlotResults:
             task_row(deliverable=2, task=3, points=3, status="open"),
             task_row(deliverable=2, task=3, points=None, status="open"),
         ]
-        test_data = DeliverableTasks.from_dict(test_rows)
+        test_data = GitHubIssues.from_dict(test_rows)
         # execution
         output = DeliverablePercentComplete(test_data, unit=Unit.issues)
         # validation - check that the chart attribute matches output of plot_results()

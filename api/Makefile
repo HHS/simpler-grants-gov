@@ -192,7 +192,7 @@ start-opensearch:
 	./bin/wait-for-local-opensearch.sh
 
 ##################################################
-# Opensearch
+# Localstack
 ##################################################
 
 init-localstack: start-localstack setup-localstack ## Start localstack (local s3) and setup buckets
