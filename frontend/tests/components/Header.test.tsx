@@ -7,19 +7,10 @@ import Header from "src/components/Header";
 
 const props = {
   logoPath: "/img/logo.svg",
-  primaryLinks: [
-    {
-      i18nKey: "nav_link_home",
-      href: "/",
-    },
-    {
-      i18nKey: "nav_link_health",
-      href: "/health",
-    },
-  ],
+  locale: "en",
 };
 
-const mockedPath = "/fakepath";
+let mockedPath = "/fakepath";
 
 const getMockedPath = () => mockedPath;
 
@@ -65,5 +56,22 @@ describe("Header", () => {
     await userEvent.click(govBanner);
 
     expect(govBanner).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("displays a search link without refresh param if not currently on search page", () => {
+    render(<Header />);
+
+    const searchLink = screen.getByRole("link", { name: "Search" });
+    expect(searchLink).toBeInTheDocument();
+    expect(searchLink).toHaveAttribute("href", "/search");
+  });
+
+  it("displays a search link with refresh param if currently on search page", () => {
+    mockedPath = "/search";
+    render(<Header />);
+
+    const searchLink = screen.getByRole("link", { name: "Search" });
+    expect(searchLink).toBeInTheDocument();
+    expect(searchLink).toHaveAttribute("href", "/search?refresh=true");
   });
 });

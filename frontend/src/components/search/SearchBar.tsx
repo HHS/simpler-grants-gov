@@ -21,6 +21,8 @@ export default function SearchBar({ query }: SearchBarProps) {
     updateQueryParams("", "query", queryTerm, false);
   };
 
+  // if we have "refresh=true" query param, clear the input
+  // this supports the expected refresh of the input if the user clicks the search link while on the search page
   useEffect(() => {
     if (searchParams.get("refresh") && inputRef.current) {
       updateQueryTerm("");
@@ -28,11 +30,12 @@ export default function SearchBar({ query }: SearchBarProps) {
     }
   }, [searchParams, updateQueryTerm]);
 
+  // removes the "refresh" param once a user has dirtied the input
   useEffect(() => {
-    if (searchParams.get("refresh") && queryTerm) {
+    if (searchParams.get("refresh") && inputRef.current?.value) {
       updateQueryParams("", "refresh");
     }
-  }, [queryTerm, searchParams, updateQueryParams]);
+  }, [searchParams, updateQueryParams]);
 
   return (
     <div className="margin-top-5 margin-bottom-2">
