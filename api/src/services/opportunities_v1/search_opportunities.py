@@ -143,6 +143,9 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
 def _get_search_request(params: SearchOpportunityParams) -> dict:
     builder = search.SearchQueryBuilder()
 
+    # Make sure total hit count gets counted for more than 10k records
+    builder.track_total_hits(True)
+
     # Pagination
     builder.pagination(
         page_size=params.pagination.page_size, page_number=params.pagination.page_offset
