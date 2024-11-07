@@ -5,16 +5,15 @@ config:
       arrivalRate: 5
       name: "Phase 1"
   processor: "./processor.ts"
-  # processor: "./processor.js"
 
 before:
   flow:
-    - function: 'loadOppIds'
+    - function: "loadOppIds"
 
 scenarios:
   - name: Opportunity Pages
     flow:
       - get:
-          url: '/opportunity/{{ id }}'
-      - function: 'getOppId'
+          url: "/opportunity/{{ id }}"
+      - function: "getOppId"
       - log: "GET /opportunity/{{id}}"

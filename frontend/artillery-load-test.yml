@@ -37,12 +37,12 @@ config:
   apdex:
     threshold: 100
   payload:
-    - path: 'tests/artillery/{{ $environment}}-opportunities.csv'
+    - path: "tests/artillery/{{ $environment}}-opportunities.csv"
       fields:
         - opp_id
       skipHeader: true
       name: opps
-    - path: 'tests/artillery/{{ $environment}}-search.csv'
+    - path: "tests/artillery/{{ $environment}}-search.csv"
       fields:
         - query
         - page
@@ -54,18 +54,18 @@ scenarios:
   - name: opportunities
     flow:
       - loop:
-        - get:
-            url: "/opportunity/{{ opp_id }}"
-        - think: 1
+          - get:
+              url: "/opportunity/{{ opp_id }}"
+          - think: 1
         count: 10
         over: opps
         log: "/opportunity/{{ opp_id }}"
   - name: search
     flow:
       - loop:
-        - get:
-            url: "/search?query={{ query }}&page={{ page }}&status={{ status }}"
-        - think: 1
+          - get:
+              url: "/search?query={{ query }}&page={{ page }}&status={{ status }}"
+          - think: 1
         count: 10
         over: opps
         log: "/opportunity/{{ opp_id }}"
