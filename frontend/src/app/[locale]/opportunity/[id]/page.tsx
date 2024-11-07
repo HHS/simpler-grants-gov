@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
-import { fetchOpportunity } from "src/app/api/Opportunties";
+import { fetchOpportunity } from "src/app/api/Opportunities";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
@@ -96,7 +96,10 @@ export default async function OpportunityListing({
   let opportunityData = {} as Opportunity;
   try {
     const response = await fetchOpportunity(params.id);
+    const secondResponse = await fetchOpportunity(params.id);
     opportunityData = response.data;
+    // eslint-disable-next-line no-console
+    console.log("^^^ second response", secondResponse);
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;

@@ -56,13 +56,13 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
 }: EndpointConfig) {
   return async function (
     subPath: string,
-    queryParamData?: QueryParamData,
-    body?: JSONRequestBody,
     options: {
+      queryParamData?: QueryParamData;
+      body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
     } = {},
   ): Promise<ResponseType> {
-    const { additionalHeaders = {} } = options;
+    const { additionalHeaders = {}, body, queryParamData } = options;
     const url = createRequestUrl(
       method,
       basePath,
