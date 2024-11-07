@@ -161,7 +161,12 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
     def test_query_builder_empty(self, search_client, search_index):
         builder = SearchQueryBuilder()
 
-        assert builder.build() == {"size": 25, "from": 0, "track_scores": True}
+        assert builder.build() == {
+            "size": 25,
+            "from": 0,
+            "track_scores": True,
+            "track_total_hits": True,
+        }
 
         validate_valid_request(search_client, search_index, builder, FULL_DATA)
 
@@ -265,6 +270,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             "size": page_size,
             "from": page_size * (page_number - 1),
             "track_scores": True,
+            "track_total_hits": True,
             "sort": expected_sort,
         }
 
@@ -369,6 +375,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             "size": 25,
             "from": 0,
             "track_scores": True,
+            "track_total_hits": True,
             "query": {"bool": {"filter": expected_terms}},
         }
 
@@ -429,6 +436,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             "size": 25,
             "from": 0,
             "track_scores": True,
+            "track_total_hits": True,
             "query": {"bool": {"filter": [{"range": {"publication_date": expected_ranges}}]}},
         }
 
@@ -474,6 +482,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             "size": 25,
             "from": 0,
             "track_scores": True,
+            "track_total_hits": True,
             "query": {"bool": {"filter": [{"range": {"page_count": expected_ranges}}]}},
         }
 
@@ -633,6 +642,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             "size": 25,
             "from": 0,
             "track_scores": True,
+            "track_total_hits": True,
             "query": {
                 "bool": {
                     "must": [
