@@ -14,5 +14,5 @@ module "dev_config" {
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
-  instance_scaling_max_capacity = 5
+  instance_scaling_max_capacity = 10
 }
