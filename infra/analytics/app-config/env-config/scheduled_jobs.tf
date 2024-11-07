@@ -7,7 +7,7 @@ locals {
 
   scheduled_jobs = {
     sprint-reports = {
-      task_command        = ["make", "gh-data-export", "sprint-reports"]
+      task_command        = ["make", "gh-data-export", "sprint-reports", "gh-transform-and-load"]
       schedule_expression = "rate(1 days)"
       state               = "ENABLED"
     }
