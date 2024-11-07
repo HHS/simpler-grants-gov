@@ -11,5 +11,10 @@ locals {
       schedule_expression = "rate(1 days)"
       state               = "ENABLED"
     }
+    init-etldb = {
+      task_command        = ["make", "init-db"]
+      schedule_expression = "rate(1 days)"
+      state               = "ENABLED"
+    }
   }
 }
