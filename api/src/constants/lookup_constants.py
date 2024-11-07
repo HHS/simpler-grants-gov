@@ -121,3 +121,7 @@ class AgencySubmissionNotificationSetting(StrEnum):
 class OpportunityAttachmentType(StrEnum):
     NOTICE_OF_FUNDING_OPPORTUNITY = "notice_of_funding_opportunity"
     OTHER = "other"
+
+
+class ExternalUserType(StrEnum):
+    LOGIN_GOV = "login_gov"
