@@ -22,7 +22,11 @@ export async function generateMetadata() {
   return meta;
 }
 
-export default function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
+export default function Search({
+  searchParams,
+}: {
+  searchParams: SearchParamsTypes;
+}) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
 
