@@ -13,6 +13,7 @@ export default async function SearchResultsListFetch({
   searchResultsPromise,
 }: ServerPageProps) {
   const searchResults = await searchResultsPromise;
+
   const maxPaginationError = null;
   const t = await getTranslations("Search");
 

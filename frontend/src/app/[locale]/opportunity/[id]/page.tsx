@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
-import fetchers from "src/app/api/Fetchers";
+import { fetchOpportunity } from "src/app/api/Opportunties";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
@@ -24,11 +24,9 @@ export const revalidate = 600; // invalidate ten minutes
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
-  const id = Number(params.id);
   let title = `${t("OpportunityListing.page_title")}`;
   try {
-    const { data: opportunityData } =
-      await fetchers.opportunityFetcher.getOpportunityById(id);
+    const { data: opportunityData } = await fetchOpportunity(params.id);
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
@@ -88,16 +86,16 @@ export default async function OpportunityListing({
 }: {
   params: { id: string };
 }) {
-  const id = Number(params.id);
+  const idForParsing = Number(params.id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
   // Opportunity id needs to be a number greater than 1
-  if (isNaN(id) || id < 1) {
+  if (isNaN(idForParsing) || idForParsing < 1) {
     return <NotFound />;
   }
 
   let opportunityData = {} as Opportunity;
   try {
-    const response = await fetchers.opportunityFetcher.getOpportunityById(id);
+    const response = await fetchOpportunity(params.id);
     opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {

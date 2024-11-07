@@ -1,21 +1,28 @@
-import "server-only";
+// import "server-only";
 
-import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
+// import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 
-import BaseApi from "./BaseApi";
+// import BaseApi from "./BaseApi";
 
-export default class OpportunityListingAPI extends BaseApi {
-  get namespace(): string {
-    return "opportunities";
-  }
+// export default class OpportunityListingAPI extends BaseApi {
+//   // constructor() {
+//   //   console.log("*** init opporutnity api");
+//   //   super();
+//   // }
 
-  async getOpportunityById(
-    opportunityId: number,
-  ): Promise<OpportunityApiResponse> {
-    const response = await this.request<OpportunityApiResponse>(
-      "GET",
-      `${opportunityId}`,
-    );
-    return response;
-  }
-}
+//   get namespace(): string {
+//     return "opportunities";
+//   }
+
+//   async getOpportunityById(
+//     opportunityId: number,
+//   ): Promise<OpportunityApiResponse> {
+//     // eslint-disable-next-line no-console
+//     console.log("!!! opportunity request", opportunityId);
+//     const response = await this.request<OpportunityApiResponse>(
+//       "GET",
+//       `${opportunityId}`,
+//     );
+//     return response;
+//   }
+// }
