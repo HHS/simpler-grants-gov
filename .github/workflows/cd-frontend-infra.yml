@@ -38,6 +38,7 @@ jobs:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         directory: ["service"]
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # deploy prod on releases, otherwise deploy staging and dev
