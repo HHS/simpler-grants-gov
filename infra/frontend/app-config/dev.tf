@@ -10,8 +10,9 @@ module "dev_config" {
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/frontend-dev/services/frontend-dev/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
-  instance_desired_instance_count = 1
-  instance_scaling_min_capacity   = 1
+  # With a minimum of 2, so CPU doesn't spike to infinity on deploys.
+  instance_desired_instance_count = 2
+  instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 5
 }
