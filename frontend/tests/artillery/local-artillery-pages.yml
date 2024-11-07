@@ -1,0 +1,20 @@
+config:
+  target: "http://127.0.0.1:3000"
+  phases:
+    - duration: 2
+      arrivalRate: 5
+      name: "Phase 1"
+  processor: "./processor.ts"
+  # processor: "./processor.js"
+
+before:
+  flow:
+    - function: 'loadOppIds'
+
+scenarios:
+  - name: Opportunity Pages
+    flow:
+      - get:
+          url: '/opportunity/{{ id }}'
+      - function: 'getOppId'
+      - log: "GET /opportunity/{{id}}"
