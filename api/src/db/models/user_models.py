@@ -20,7 +20,7 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
 
     link_external_user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
 
-    external_user_id: Mapped[str]
+    external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
