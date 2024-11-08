@@ -124,8 +124,6 @@ export function createRequestUrl(
   body?: JSONRequestBody,
 ) {
   // Remove leading slash
-  // eslint-disable-next-line no-console
-  console.log("***", basePath, version, namespace, subPath);
   const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
     removeLeadingSlash,
   );

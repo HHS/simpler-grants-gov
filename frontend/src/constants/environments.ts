@@ -29,9 +29,6 @@ const {
   NEXT_PUBLIC_BASE_URL,
 } = process.env;
 
-// eslint-disable-next-line no-console
-console.log("!!! started in ", NODE_ENV);
-
 const CURRENT_ENV = NODE_ENV ?? "development";
 
 export const PUBLIC_ENV = PUBLIC_ENV_VARS_BY_ENV[CURRENT_ENV];

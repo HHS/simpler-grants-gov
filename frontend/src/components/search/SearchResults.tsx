@@ -1,5 +1,5 @@
 import Loading from "src/app/[locale]/search/loading";
-import { requestOpportunitySearch } from "src/app/api/Opportunties";
+import { searchForOpportunities } from "src/app/api/SearchOpportunityAPI";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
@@ -21,7 +21,7 @@ export default function SearchResults({
 }) {
   const { page, sortby } = searchParams;
 
-  const searchResultsPromise = requestOpportunitySearch("", searchParams);
+  const searchResultsPromise = searchForOpportunities(searchParams);
 
   const key = Object.entries(searchParams).join(",");
   const pager1key = Object.entries(searchParams).join("-") + "pager1";

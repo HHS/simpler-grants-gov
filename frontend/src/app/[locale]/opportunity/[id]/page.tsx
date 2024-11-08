@@ -96,10 +96,7 @@ export default async function OpportunityListing({
   let opportunityData = {} as Opportunity;
   try {
     const response = await fetchOpportunity(params.id);
-    const secondResponse = await fetchOpportunity(params.id);
     opportunityData = response.data;
-    // eslint-disable-next-line no-console
-    console.log("^^^ second response", secondResponse);
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
