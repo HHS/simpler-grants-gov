@@ -1,8 +1,8 @@
 """add basic user tables
 
-Revision ID: 9508f27b03df
+Revision ID: da4a63468c59
 Revises: 8b96ade6f6a2
-Create Date: 2024-11-08 14:08:59.539396
+Create Date: 2024-11-08 16:56:23.058595
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "9508f27b03df"
+revision = "da4a63468c59"
 down_revision = "8b96ade6f6a2"
 branch_labels = None
 depends_on = None
@@ -88,6 +88,13 @@ def upgrade():
         schema="api",
     )
     op.create_index(
+        op.f("link_external_user_external_user_id_idx"),
+        "link_external_user",
+        ["external_user_id"],
+        unique=True,
+        schema="api",
+    )
+    op.create_index(
         op.f("link_external_user_external_user_type_id_idx"),
         "link_external_user",
         ["external_user_type_id"],
@@ -111,6 +118,11 @@ def downgrade():
     )
     op.drop_index(
         op.f("link_external_user_external_user_type_id_idx"),
+        table_name="link_external_user",
+        schema="api",
+    )
+    op.drop_index(
+        op.f("link_external_user_external_user_id_idx"),
         table_name="link_external_user",
         schema="api",
     )
