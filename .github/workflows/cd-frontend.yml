@@ -26,9 +26,15 @@ jobs:
     name: Run Frontend Checks
     uses: ./.github/workflows/ci-frontend.yml
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: frontend
+
   deploy:
     name: Deploy
-    needs: frontend-checks
+    needs: [frontend-checks, vulnerability-scans]
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
