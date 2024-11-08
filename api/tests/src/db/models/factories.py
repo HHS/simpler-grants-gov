@@ -1849,7 +1849,7 @@ class LinkExternalUserFactory(BaseFactory):
         model = user_models.LinkExternalUser
 
     link_external_user_id = Generators.UuidObj
-    external_user_id = "test111"
+    external_user_id = Generators.UuidObj
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
