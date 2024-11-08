@@ -31,7 +31,7 @@ config:
         - duration: 1
           arrivalRate: 1
           maxVusers: 1
-          name: Spike phase          
+          name: Spike phase
     prod:
       target: https://simpler.grants.gov
     staging:
