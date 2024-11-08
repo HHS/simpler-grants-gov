@@ -2,4 +2,4 @@ paths:
   # actionlint doesn't know how to handle the json inside of this file
   ci-cron-vulnerability-scans.yml:
     ignore:
-      - Quote this to prevent word splitting
+      - \*Quote this to prevent word splitting\*
