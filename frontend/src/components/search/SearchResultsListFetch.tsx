@@ -13,8 +13,7 @@ interface ServerPageProps {
 export default async function SearchResultsListFetch({
   searchParams,
 }: ServerPageProps) {
-  const searchResults =
-    await fetchers.searchOpportunityFetcher.searchOpportunities(searchParams);
+  const searchResults = await fetchers.searchOpportunityFetcher(searchParams);
   const maxPaginationError = null;
   const t = await getTranslations("Search");
 

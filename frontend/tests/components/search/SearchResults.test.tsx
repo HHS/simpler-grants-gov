@@ -31,6 +31,7 @@ jest.mock("next-intl", () => ({
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+  cache: (fn: unknown) => fn,
 }));
 
 describe("SearchResults", () => {

@@ -14,8 +14,7 @@ export default async function SearchResultsHeaderFetch({
   sortby: string | null;
   queryTerm: string | null | undefined;
 }) {
-  const searchResults =
-    await fetchers.searchOpportunityFetcher.searchOpportunities(searchParams);
+  const searchResults = await fetchers.searchOpportunityFetcher(searchParams);
   const totalResults = searchResults.pagination_info?.total_records;
 
   return (

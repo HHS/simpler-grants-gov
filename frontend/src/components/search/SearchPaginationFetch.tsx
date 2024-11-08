@@ -16,8 +16,7 @@ export default async function SearchPaginationFetch({
   searchParams,
   scroll,
 }: SearchPaginationProps) {
-  const searchResults =
-    await fetchers.searchOpportunityFetcher.searchOpportunities(searchParams);
+  const searchResults = await fetchers.searchOpportunityFetcher(searchParams);
   const totalPages = searchResults.pagination_info?.total_pages;
   const totalResults = searchResults.pagination_info?.total_records;
 
