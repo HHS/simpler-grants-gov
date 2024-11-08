@@ -19,7 +19,7 @@ import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 
-export const revalidate = 600 // invalidate ten minutes
+export const revalidate = 600; // invalidate ten minutes
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
