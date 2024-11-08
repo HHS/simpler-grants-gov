@@ -33,6 +33,12 @@ jest.mock("react", () => ({
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
 }));
 
+jest.mock("src/app/api/Fetchers", () => ({
+  searchOpportunityFetcher: {
+    searchOpportunities: jest.fn(() => Promise.resolve()),
+  },
+}));
+
 describe("SearchResults", () => {
   it("Renders without errors", () => {
     render(
