@@ -23,11 +23,8 @@ def get_db() -> Engine:
     A SQLAlchemy engine object representing the connection to the database.
     """
     db = get_db_settings()
-    if db.password is None:
-        # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
-        token = generate_iam_auth_token(db)
-    else:
-        token = db.password
+    # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
+    token = generate_iam_auth_token(db) if db.password is None else db.password
 
     return create_engine(
         f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}",
