@@ -23,6 +23,7 @@ typer = { extras = ["all"], version = "^0.9.0" }
 sqlalchemy = "^2.0.30"
 psycopg = ">=3.0.7"
 pydantic-settings = "^2.3.4"
+boto3 = "^1.35.56"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
