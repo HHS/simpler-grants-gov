@@ -35,9 +35,3 @@ jobs:
 
       - name: Start tests
         run: make test-coverage
-
-  vulnerability-scans:
-    name: Run API Vulnerability Scans
-    uses: ./.github/workflows/vulnerability-scans.yml
-    with:
-      app_name: "api"
