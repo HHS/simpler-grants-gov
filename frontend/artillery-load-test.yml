@@ -1,4 +1,5 @@
 config:
+  target: "http://127.0.0.1:3000"
   tls:
     rejectUnauthorized: false
   http:
@@ -20,8 +21,17 @@ config:
     local:
       target: http://localhost:3000
       phases:
-        - arrivalCount: 10
-          duration: 30
+        - duration: 2
+          arrivalRate: 5
+          name: Warm up phase
+        - duration: 1
+          arrivalRate: 1
+          maxVusers: 1
+          name: Ramp up load
+        - duration: 1
+          arrivalRate: 1
+          maxVusers: 1
+          name: Spike phase          
     prod:
       target: https://simpler.grants.gov
     staging:
@@ -34,38 +44,28 @@ config:
     ensure: {}
     apdex: {}
     metrics-by-endpoint: {}
-  apdex:
-    threshold: 100
-  payload:
-    - path: "tests/artillery/{{ $environment}}-opportunities.csv"
-      fields:
-        - opp_id
-      skipHeader: true
-      name: opps
-    - path: "tests/artillery/{{ $environment}}-search.csv"
-      fields:
-        - query
-        - page
-        - status
-        - agency
-      skipHeader: true
-      name: opps
+  processor: "./tests/artillery/processor.ts"
+
+before:
+  flow:
+    - function: loadData
+
 scenarios:
-  - name: opportunities
+  - name: Opportunity Pages
+    beforeScenario: getOppId
     flow:
-      - loop:
-          - get:
-              url: "/opportunity/{{ opp_id }}"
-          - think: 1
-        count: 10
-        over: opps
-        log: "/opportunity/{{ opp_id }}"
-  - name: search
+      - get:
+          url: "/opportunity/{{ id }}"
+      - log: "GET /opportunity/{{ id }}"
+  - name: 404 Pages
+    beforeScenario: get404
     flow:
-      - loop:
-          - get:
-              url: "/search?query={{ query }}&page={{ page }}&status={{ status }}"
-          - think: 1
-        count: 10
-        over: opps
-        log: "/opportunity/{{ opp_id }}"
+      - get:
+          url: "/{{ route }}"
+      - log: "GET /{{ route }}"
+  - name: Searches
+    beforeScenario: getSearchQuery
+    flow:
+      - get:
+          url: "/search?{{ query }}"
+      - log: "GET /search?{{ query }}"
