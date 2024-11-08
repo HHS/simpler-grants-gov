@@ -25,15 +25,12 @@ def get_db() -> Engine:
     db = get_db_settings()
     if db.password is None:
         # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
-        assert (
-            db.aws_region is not None
-        ), "AWS region needs to be configured for DB IAM auth"
-        generate_iam_auth_token(db)
+        password = generate_iam_auth_token(db)
     else:
-        pass
+        password = db.password
 
     return create_engine(
-        f"postgresql+psycopg://{db.user}:{db.password}@{db.db_host}:{db.port}",
+        f"postgresql+psycopg://{db.user}:{password}@{db.db_host}:{db.port}",
         pool_pre_ping=True,
         hide_parameters=True,
     )
@@ -41,6 +38,9 @@ def get_db() -> Engine:
 
 def generate_iam_auth_token(settings: DBSettings) -> str:
     """Generate IAM auth token."""
+    if settings.aws_region is None:
+        msg = "AWS region needs to be configured for DB IAM auth"
+        raise ValueError(msg)
     client = boto3.client("rds", region_name=settings.aws_region)
     return client.generate_db_auth_token(
         DBHostname=settings.db_host,
