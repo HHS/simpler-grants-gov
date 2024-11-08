@@ -25,12 +25,12 @@ def get_db() -> Engine:
     db = get_db_settings()
     if db.password is None:
         # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
-        password = generate_iam_auth_token(db)
+        token = generate_iam_auth_token(db)
     else:
-        password = db.password
+        token = db.password
 
     return create_engine(
-        f"postgresql+psycopg://{db.user}:{password}@{db.db_host}:{db.port}",
+        f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}",
         pool_pre_ping=True,
         hide_parameters=True,
     )
