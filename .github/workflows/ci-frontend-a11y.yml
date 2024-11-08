@@ -58,6 +58,12 @@ jobs:
           chmod +x ./bin/wait-for-frontend.sh
           ./bin/wait-for-frontend.sh
 
+      - name: Run curl
+        run: |
+          curl -I http://localhost:3000/opportunity/1
+          curl -I http://localhost:3000/opportunity/1231212
+          curl http://localhost:3000/search | grep "/opportunity/*"
+
       - name: Run pa11y-ci
         run: |
           set -e # Ensure the script fails if any command fails
