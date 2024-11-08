@@ -26,9 +26,15 @@ jobs:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: api
+
   deploy:
     name: Deploy
-    needs: api-checks
+    needs: [api-checks, vulnerability-scans]
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1

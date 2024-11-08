@@ -46,14 +46,14 @@ jobs:
       - run: npm run test -- --testLocationInResults --json --outputFile=coverage/report.json
       - uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-            coverage-file: coverage/report.json
-            test-script: npm test
-            working-directory: ./frontend
-            annotations: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'failed-tests' || 'none' }}
-            package-manager: npm
-            icons: emoji
-            skip-step: none
-            output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
+          coverage-file: coverage/report.json
+          test-script: npm test
+          working-directory: ./frontend
+          annotations: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'failed-tests' || 'none' }}
+          package-manager: npm
+          icons: emoji
+          skip-step: none
+          output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
@@ -97,9 +97,3 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
       - run: npm run storybook-build
-
-  vulnerability-scans:
-    name: Run Frontend Vulnerability Scans
-    uses: ./.github/workflows/vulnerability-scans.yml
-    with:
-      app_name: 'frontend'
