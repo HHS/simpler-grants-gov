@@ -1,5 +1,6 @@
 import "server-only";
 
+import { requestOpportunitySearch } from "src/app/api/Fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -8,8 +9,6 @@ import {
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
-
-import { requestOpportunitySearch } from "./Opportunities";
 
 const orderByFieldLookup = {
   relevancy: "relevancy",
@@ -35,49 +34,7 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
-// export default class SearchOpportunityAPI extends BaseApi {
-//   get namespace(): string {
-//     return "opportunities";
-//   }
-
-//   async searchOpportunities(searchInputs: QueryParamData) {
-//     // eslint-disable-next-line no-console
-//     console.log("!!! search request", searchInputs);
-//     const { query } = searchInputs;
-//     const filters = buildFilters(searchInputs);
-//     const pagination = buildPagination(searchInputs);
-
-//     const requestBody: SearchRequestBody = { pagination };
-
-//     // Only add filters if there are some
-//     if (Object.keys(filters).length > 0) {
-//       requestBody.filters = filters;
-//     }
-
-//     if (query) {
-//       requestBody.query = query;
-//     }
-
-//     const response = await this.request<SearchAPIResponse>(
-//       "POST",
-//       "search",
-//       searchInputs,
-//       requestBody,
-//     );
-
-//     response.actionType = searchInputs.actionType;
-//     response.fieldChanged = searchInputs.fieldChanged;
-
-//     if (!response.data) {
-//       throw new Error("No data returned from Opportunity Search API");
-//     }
-//     return response;
-//   }
-// }
-
 export const searchForOpportunities = async (searchInputs: QueryParamData) => {
-  // eslint-disable-next-line no-console
-  console.log("!!! search request", searchInputs);
   const { query } = searchInputs;
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);

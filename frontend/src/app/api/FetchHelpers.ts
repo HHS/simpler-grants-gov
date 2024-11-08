@@ -26,16 +26,9 @@ export interface HeadersDict {
   [header: string]: string;
 }
 
-export interface EndpointConfig {
-  basePath: string;
-  version: string;
-  namespace: string;
-  method: ApiMethod;
-}
-
 // Configuration of headers to send with all requests
 // Can include feature flags in child classes
-function getDefaultHeaders(): HeadersDict {
+export function getDefaultHeaders(): HeadersDict {
   const headers: HeadersDict = {};
 
   if (environment.API_AUTH_TOKEN) {
@@ -46,54 +39,9 @@ function getDefaultHeaders(): HeadersDict {
 }
 
 /**
- * Send an API request.
- */
-export function requesterForEndpoint<ResponseType extends APIResponse>({
-  method,
-  basePath,
-  version,
-  namespace,
-}: EndpointConfig) {
-  return async function (
-    subPath: string,
-    options: {
-      queryParamData?: QueryParamData;
-      body?: JSONRequestBody;
-      additionalHeaders?: HeadersDict;
-    } = {},
-  ): Promise<ResponseType> {
-    const { additionalHeaders = {}, body, queryParamData } = options;
-    const url = createRequestUrl(
-      method,
-      basePath,
-      version,
-      namespace,
-      subPath,
-      body,
-    );
-    const headers: HeadersDict = {
-      ...getDefaultHeaders(),
-      ...additionalHeaders,
-    };
-
-    const response = await sendRequest<ResponseType>(
-      url,
-      {
-        body: method === "GET" || !body ? null : createRequestBody(body),
-        headers,
-        method,
-      },
-      queryParamData,
-    );
-
-    return response;
-  };
-}
-
-/**
  * Send a request and handle the response
  */
-async function sendRequest<ResponseType extends APIResponse>(
+export async function sendRequest<ResponseType extends APIResponse>(
   url: string,
   fetchOptions: RequestInit,
   queryParamData?: QueryParamData,
@@ -153,7 +101,9 @@ function removeLeadingSlash(path: string) {
 /**
  * Transform the request body into a format that fetch expects
  */
-function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
+export function createRequestBody(
+  payload?: JSONRequestBody,
+): XMLHttpRequestBodyInit {
   if (payload instanceof FormData) {
     return payload;
   }
