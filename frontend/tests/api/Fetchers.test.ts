@@ -1,5 +1,5 @@
-import { EndpointConfig } from "src/app/api/EndpointConfigs";
-import { requesterForEndpoint } from "src/app/api/Fetchers";
+import { EndpointConfig } from "src/app/api/endpointConfigs";
+import { requesterForEndpoint } from "src/app/api/fetchers";
 
 const createRequestUrlMock = jest.fn((..._args) => "fakeurl");
 const sendRequestMock = jest.fn((..._args) => Promise.resolve("done"));
@@ -8,7 +8,7 @@ const getDefaultHeadersMock = jest.fn(() => ({
   "Content-Type": "application/json",
 }));
 
-jest.mock("src/app/api/FetchHelpers", () => ({
+jest.mock("src/app/api/fetcherHelpers", () => ({
   createRequestUrl: (...args: unknown[]) => createRequestUrlMock(...args),
   sendRequest: (...args: unknown[]) => sendRequestMock(...args),
   createRequestBody: (arg: unknown) => createRequestBodyMock(arg),

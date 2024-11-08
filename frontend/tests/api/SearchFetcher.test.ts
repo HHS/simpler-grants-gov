@@ -2,7 +2,7 @@ import {
   buildFilters,
   buildPagination,
   searchForOpportunities,
-} from "src/app/api/SearchFetcher";
+} from "src/app/api/searchFetcher";
 import {
   QueryParamData,
   SearchFetcherActionType,
@@ -29,7 +29,7 @@ jest.mock("react", () => ({
   cache: (fn: unknown) => fn,
 }));
 
-jest.mock("src/app/api/Fetchers", () => ({
+jest.mock("src/app/api/fetchers", () => ({
   requestOpportunitySearch: (_nothing: string, params: QueryParamData) => {
     return mockRequestOpportunitySearch("", params) as SearchAPIResponse;
   },

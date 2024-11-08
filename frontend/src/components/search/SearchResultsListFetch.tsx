@@ -1,3 +1,5 @@
+"use server";
+
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";

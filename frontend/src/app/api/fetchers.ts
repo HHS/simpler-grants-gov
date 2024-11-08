@@ -4,7 +4,7 @@ import {
   EndpointConfig,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
-} from "src/app/api/EndpointConfigs";
+} from "src/app/api/endpointConfigs";
 import {
   createRequestBody,
   createRequestUrl,
@@ -12,7 +12,7 @@ import {
   HeadersDict,
   JSONRequestBody,
   sendRequest,
-} from "src/app/api/FetchHelpers";
+} from "src/app/api/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { OpportunityApiResponse } from "src/types/opportunity/opportunityResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";

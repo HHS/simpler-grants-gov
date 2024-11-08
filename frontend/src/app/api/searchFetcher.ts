@@ -1,6 +1,6 @@
 import "server-only";
 
-import { requestOpportunitySearch } from "src/app/api/Fetchers";
+import { requestOpportunitySearch } from "src/app/api/fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createRequestUrl, sendRequest } from "src/app/api/FetchHelpers";
+import { createRequestUrl, sendRequest } from "src/app/api/fetcherHelpers";
 import { ApiRequestError, NetworkError } from "src/errors";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 

@@ -21,11 +21,6 @@ const nextConfig = {
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
   sassOptions: appSassOptions,
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
 };
 
 module.exports = withNextIntl(nextConfig);

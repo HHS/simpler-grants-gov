@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
-import { fetchOpportunity } from "src/app/api/Fetchers";
+import { fetchOpportunity } from "src/app/api/fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
