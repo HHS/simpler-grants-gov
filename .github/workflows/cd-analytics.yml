@@ -27,9 +27,15 @@ jobs:
     uses: ./.github/workflows/ci-analytics.yml
     secrets: inherit
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: analytics
+
   deploy:
     name: Deploy
-    needs: analytics-checks
+    needs: [analytics-checks, vulnerability-scans]
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1

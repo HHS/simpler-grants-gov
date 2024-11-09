@@ -19,7 +19,7 @@ class DBSettings(PydanticBaseEnvConfig):
      slack_bot_token: str = Field(alias="ANALYTICS_SLACK_BOT_TOKEN")
      reporting_channel_id: str = Field(alias="ANALYTICS_REPORTING_CHANNEL_ID")
      aws_region: Optional[str] = Field(None, alias="AWS_REGION")
-     local_env: bool = True if os.getenv("ENVIRONMENT", "local") == "local" else False 
+     local_env: bool = True if os.getenv("ENVIRONMENT", "local") == "local" else False
 
 def get_db_settings() -> DBSettings:
      return DBSettings()
