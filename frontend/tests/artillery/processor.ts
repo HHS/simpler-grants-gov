@@ -51,30 +51,30 @@ async function getStatic(context: { vars: returnVars }) {
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getSearchQuery(context: { vars: returnVars & dataType }) {
   const { queries, status, agencies, eligibility, category } = context.vars;
-  const qu = `query=${queries[random(queries.length - 1)]}`;
-  const st = `status=${status[random(status.length - 1)]}`;
-  const ag = `agency=${agencies[random(agencies.length - 1)]}`;
-  const cat = `category=${category[random(category.length - 1)]}`;
-  const el = `eligibility=${eligibility[random(eligibility.length - 1)]}`;
-  const pager = `page=${random(5)}`;
+  const queryParam = `query=${queries[random(queries.length - 1)]}`;
+  const statusParam = `status=${status[random(status.length - 1)]}`;
+  const agencyParam = `agency=${agencies[random(agencies.length - 1)]}`;
+  const categoryParam = `category=${category[random(category.length - 1)]}`;
+  const eligibilityParam = `eligibility=${eligibility[random(eligibility.length - 1)]}`;
+  const pagerParam = `page=${random(5)}`;
   // Most search params only include the queries, but smaller percent include
   // filters. This allows configuring that percent for composing the query
   const weights = [
     {
       percent: 50,
-      params: [qu, st, pager],
+      params: [queryParam, statusParam, pagerParam],
     },
     {
       percent: 20,
-      params: [qu, st, ag],
+      params: [queryParam, statusParam, agencyParam],
     },
     {
       percent: 20,
-      params: [qu, st, ag, cat],
+      params: [queryParam, statusParam, agencyParam, categoryParam],
     },
     {
       percent: 10,
-      params: [qu, st, ag, cat, el],
+      params: [queryParam, statusParam, agencyParam, categoryParam, eligibility],
     },
   ];
   // Weight of percents out of 100
