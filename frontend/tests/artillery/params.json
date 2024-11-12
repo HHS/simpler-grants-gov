@@ -15,7 +15,7 @@
     "trauma",
     "veterans"
   ],
-  "statuses": ["posted", "forecasted", "closed", "archived", "none"],
+  "status": ["posted", "forecasted", "closed", "archived", "none"],
   "agencies": [
     "ARPAH",
     "USAID",
