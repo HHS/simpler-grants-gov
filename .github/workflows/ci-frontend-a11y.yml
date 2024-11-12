@@ -36,12 +36,6 @@ jobs:
       - name: Create screenshots directory
         run: mkdir -p screenshots-output
 
-      - name: Build project
-        run: npm run build
-
-      - name: Start server and log output
-        run: npm run start &
-
       - name: Start API Server for search results
         run: |
           cd ../api
@@ -51,6 +45,14 @@ jobs:
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
+
+      - name: Build Site
+        run: |
+          cat .env.development >> .env.local
+          npm run build
+
+      - name: Run Server
+        run:  npm run start &
 
       - name: Wait for frontend to be ready
         run: |
