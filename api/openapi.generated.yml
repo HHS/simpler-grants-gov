@@ -1276,18 +1276,6 @@ components:
           description: Additional information about the types of applicants that are
             eligible
           example: All types of domestic applicants are eligible to apply
-        agency_code:
-          type:
-          - string
-          - 'null'
-          description: The agency who owns the opportunity
-          example: US-ABC
-        agency_name:
-          type:
-          - string
-          - 'null'
-          description: The name of the agency who owns the opportunity
-          example: US Alphabetical Basic Corp
         agency_phone_number:
           type:
           - string
@@ -1409,6 +1397,12 @@ components:
           description: The title of the opportunity
           example: Research into conservation techniques
         agency:
+          type:
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
+          example: US-ABC
+        agency_code:
           type:
           - string
           - 'null'
@@ -1950,6 +1944,10 @@ components:
           type: string
           description: The agency who created the opportunity
           example: US-ABC
+        agency_code:
+          type: string
+          description: The agency who created the opportunity
+          example: US-ABC
         category:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
@@ -2093,6 +2091,12 @@ components:
           description: The title of the opportunity
           example: Research into conservation techniques
         agency:
+          type:
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
+          example: US-ABC
+        agency_code:
           type:
           - string
           - 'null'

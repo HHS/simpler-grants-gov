@@ -114,7 +114,7 @@ def transform_opportunity(
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle
-    target_opportunity.agency = source_opportunity.owningagency
+    target_opportunity.agency_code = source_opportunity.owningagency
     target_opportunity.category = transform_opportunity_category(source_opportunity.oppcategory)
     target_opportunity.category_explanation = source_opportunity.category_explanation
     target_opportunity.revision_number = source_opportunity.revision_number
