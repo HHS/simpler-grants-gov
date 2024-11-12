@@ -1,5 +1,4 @@
 name: Frontend E2E Tests
-
 on:
   workflow_call:
   pull_request:
@@ -25,6 +24,11 @@ jobs:
     name: Run E2E Tests
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        shard: [1, 2, 3]
+        total_shards: [3]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,10 +39,9 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - run: |
+          npm ci
+          npx playwright install --with-deps
 
       - name: Start API Server for e2e tests
         run: |
@@ -50,15 +53,75 @@ jobs:
           ../api/bin/wait-for-api.sh
         shell: bash
 
-      - name: Run E2E Tests
+      - name: Build a prod version of the site
         run: |
-          npm run build
           cat .env.development >> .env.local
-          npm run test:e2e
+          npm run build
 
-      - uses: actions/upload-artifact@v4
+      - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
+        env:
+          CI: true
+          TOTAL_SHARDS: ${{ matrix.total_shards }}
+          CURRENT_SHARD: ${{ matrix.shard }}
+        run: npm run test:e2e
+
+      - name: Verify Blob Report Directory
+        run: |
+          echo "Contents of blob-report directory:"
+          ls -R blob-report || echo "blob-report directory not found"
+
+      - name: Upload Blob Report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: ./frontend/playwright-report/
+          name: blob-report-shard-${{ matrix.shard }}
+          path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
+          retention-days: 1
+
+  create-report:
+    name: Create Merged Test Report
+    if: ${{ !cancelled() }}
+    needs: [e2e-tests]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Download All Blob Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: frontend/all-blob-reports
+          pattern: blob-report-shard-*
+          merge-multiple: true
+
+      - name: Verify Downloaded Artifacts
+        run: |
+          echo "Contents of all-blob-reports after download:"
+          ls -R all-blob-reports*
+
+      - name: Merge Blob Reports into HTML
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Verify Downloaded Artifacts
+        run: |
+          echo "Contents of all-blob-reports after download:"
+          ls -R playwright*
+
+      - name: Upload Merged HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-html-report
+          path: frontend/playwright-report
           retention-days: 30

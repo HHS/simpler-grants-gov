@@ -27,12 +27,19 @@ jobs:
     uses: ./.github/workflows/ci-analytics.yml
     secrets: inherit
 
+  vulnerability-scans:
+    name: Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: analytics
+
   deploy:
     name: Deploy
-    needs: analytics-checks
+    needs: [analytics-checks, vulnerability-scans]
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
+      fail-fast: false
       matrix:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:

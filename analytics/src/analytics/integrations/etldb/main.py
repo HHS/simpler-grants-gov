@@ -26,12 +26,16 @@ def init_db() -> None:
         sql = f.read()
 
     # execute sql
-    db = EtlDb()
-    cursor = db.connection()
-    cursor.execute(
-        text(sql),
-    )
-    db.commit(cursor)
+    try:
+        db = EtlDb()
+        cursor = db.connection()
+        cursor.execute(
+            text(sql),
+        )
+        db.commit(cursor)
+    except RuntimeError as e:
+        message = f"Failed to initialize db: {e}"
+        raise RuntimeError(message) from e
 
 
 def sync_db(dataset: EtlDataset, effective: str) -> None:
@@ -48,28 +52,50 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     db = EtlDb(effective)
 
     # sync quad data to db resulting in row id for each quad
-    ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
-    print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
+    try:
+        ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
+        print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
+    except RuntimeError as e:
+        message = f"Failed to sync quad data: {e}"
+        raise RuntimeError(message) from e
 
     # sync deliverable data to db resulting in row id for each deliverable
-    ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
-        db,
-        dataset,
-        ghid_map,
-    )
-    print(f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}")
+    try:
+        ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
+            db,
+            dataset,
+            ghid_map,
+        )
+        print(
+            f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
+        )
+    except RuntimeError as e:
+        message = f"Failed to sync deliverable data: {e}"
+        raise RuntimeError(message) from e
 
     # sync sprint data to db resulting in row id for each sprint
-    ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
-    print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
+    try:
+        ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
+        print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
+    except RuntimeError as e:
+        message = f"Failed to sync sprint data: {e}"
+        raise RuntimeError(message) from e
 
     # sync epic data to db resulting in row id for each epic
-    ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
-    print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
+    try:
+        ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
+        print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
+    except RuntimeError as e:
+        message = f"Failed to sync epic data: {e}"
+        raise RuntimeError(message) from e
 
     # sync issue data to db resulting in row id for each issue
-    issue_map = sync_issues(db, dataset, ghid_map)
-    print(f"issue row(s) processed: {len(issue_map)}")
+    try:
+        issue_map = sync_issues(db, dataset, ghid_map)
+        print(f"issue row(s) processed: {len(issue_map)}")
+    except RuntimeError as e:
+        message = f"Failed to sync issue data: {e}"
+        raise RuntimeError(message) from e
 
 
 def sync_deliverables(db: EtlDb, dataset: EtlDataset, ghid_map: dict) -> dict:
