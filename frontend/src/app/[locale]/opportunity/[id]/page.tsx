@@ -3,7 +3,6 @@ import NotFound from "src/app/[locale]/not-found";
 import fetchers from "src/app/api/Fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -19,6 +18,8 @@ import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+
+export const revalidate = 600; // invalidate ten minutes
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
@@ -39,6 +40,10 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     description: t("OpportunityListing.meta_description"),
   };
   return meta;
+}
+
+export function generateStaticParams() {
+  return [];
 }
 
 function emptySummary() {
@@ -77,7 +82,11 @@ function emptySummary() {
   };
 }
 
-async function OpportunityListing({ params }: { params: { id: string } }) {
+export default async function OpportunityListing({
+  params,
+}: {
+  params: { id: string };
+}) {
   const id = Number(params.id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
   // Opportunity id needs to be a number greater than 1
@@ -127,5 +136,3 @@ async function OpportunityListing({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-export default withFeatureFlag(OpportunityListing, "showSearchV0");
