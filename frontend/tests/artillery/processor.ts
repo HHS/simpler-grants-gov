@@ -74,7 +74,13 @@ async function getSearchQuery(context: { vars: returnVars & dataType }) {
     },
     {
       percent: 10,
-      params: [queryParam, statusParam, agencyParam, categoryParam, eligibility],
+      params: [
+        queryParam,
+        statusParam,
+        agencyParam,
+        categoryParam,
+        eligibilityParam,
+      ],
     },
   ];
   // Weight of percents out of 100
@@ -94,7 +100,7 @@ async function loadData(context: { vars: dataType & globalVars }) {
   // Dev and stage have the same data.
   const env =
     context.vars.$environment === "stage" ? "dev" : context.vars.$environment;
-  const envs = new Set(["local", "dev", "prod"]);
+  const envs = new Set(["local", "dev", "stage", "prod"]);
   if (!env || !envs.has(env)) {
     throw new Error(`env ${env ?? ""} does not exist in env list`);
   }
