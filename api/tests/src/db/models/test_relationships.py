@@ -37,7 +37,7 @@ def setup_opportunity():
         opportunity_assistance_listings=[],
         opportunity_attachments=[],
         no_current_summary=True,
-        agency=agency.agency_code,
+        agency_code=agency.agency_code,
     )
 
     OpportunityAssistanceListingFactory.create_batch(size=3, opportunity=opportunity)
