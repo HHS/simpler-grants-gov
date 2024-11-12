@@ -4,8 +4,10 @@ import { random } from "lodash";
 type dataType = {
   ids: Array<number>;
   queries: Array<string>;
+  pages: Array<string>;
   status: Array<string>;
   agencies: Array<string>;
+  funding: Array<string>;
   eligibility: Array<string>;
   category: Array<string>;
   $environment?: string;
@@ -29,6 +31,14 @@ async function get404(context: { vars: { route: string } }) {
   } else {
     context.vars.route = randomString(num);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/require-await
+async function getStatic(context: {
+  vars: { route: string; pages: Array<string> };
+}) {
+  context.vars.route =
+    context.vars.pages[random(context.vars.pages.length - 1)];
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -74,14 +84,32 @@ async function getSearchQuery(context: { vars: queryType & dataType }) {
 
 async function loadData(context: { vars: dataType }) {
   const env = context.vars.$environment;
-  const envs = new Set(["local", "dev", "stage", "prod"]);
+  const envs = new Set(["local", "dev", "prod"]);
   if (!env || !envs.has(env)) {
     throw new Error(`env ${env ?? ""} does not exist in env list`);
   }
-  // TODO: add more env data files.
-  const path = "./tests/artillery/local-data.json";
+  const path = "./tests/artillery/params.json";
   const file = await readFile(path, "utf8");
-  context.vars = JSON.parse(file) as dataType;
+  const {
+    ids,
+    pages,
+    queries,
+    agencies,
+    status,
+    eligibility,
+    funding,
+    category,
+  } = JSON.parse(file);
+  context.vars = {
+    ids: ids[env],
+    pages,
+    queries,
+    status,
+    agencies,
+    eligibility,
+    funding,
+    category,
+  };
 }
 
 function randomString(length: number) {
@@ -99,5 +127,6 @@ module.exports = {
   loadData,
   getOppId,
   get404,
+  getStatic,
   getSearchQuery,
 };

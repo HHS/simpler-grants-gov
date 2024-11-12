@@ -62,7 +62,13 @@ scenarios:
     flow:
       - get:
           url: "/{{ route }}"
-      - log: "GET /{{ route }}"
+      - log: "GET 404 page /{{ route }}"
+  - name: Static Pages
+    beforeScenario: getStatic
+    flow:
+      - get:
+          url: "/{{ route }}"
+      - log: "GET static page /{{ route }}"
   - name: Searches
     beforeScenario: getSearchQuery
     flow:

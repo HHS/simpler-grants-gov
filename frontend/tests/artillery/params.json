@@ -1,8 +1,12 @@
 {
-  "ids": [
-    311899, 311889, 311891, 45602, 45603, 45604, 45605, 45662, 311492, 311512,
-    311498
-  ],
+  "ids": {
+    "local": [
+      1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+      22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+    ],
+    "dev": [],
+    "prod": []
+  },
   "queries": [
     "test",
     "grants",
@@ -11,7 +15,7 @@
     "trauma",
     "veterans"
   ],
-  "status": ["posted", "forecasted", "closed", "archived", "none"],
+  "statuses": ["posted", "forecasted", "closed", "archived", "none"],
   "agencies": [
     "ARPAH",
     "USAID",
@@ -159,5 +163,6 @@
     "transportation",
     "affordable_care_act",
     "other"
-  ]
+  ],
+  "pages": ["", "process", "research", "subscribe", "subscribe/confirmation"]
 }
