@@ -1,5 +1,5 @@
 import Loading from "src/app/[locale]/search/loading";
-import { searchForOpportunities } from "src/app/api/SearchOpportunityAPI";
+import { searchForOpportunities } from "src/app/api/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
