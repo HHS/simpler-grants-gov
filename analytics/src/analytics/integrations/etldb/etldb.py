@@ -1,5 +1,6 @@
 """Define EtlDb as an abstraction layer for database connections."""
 
+import contextlib
 from enum import Enum
 
 from sqlalchemy import Connection
@@ -24,7 +25,11 @@ class EtlDb:
     def connection(self) -> Connection:
         """Get a connection object from the db engine."""
         if self._connection is None:
-            self._connection = self._db_engine.connect()
+            try:
+                self._connection = self._db_engine.connect()
+            except RuntimeError as e:
+                message = f"Failed to connect to database: {e}"
+                raise RuntimeError(message) from e
         return self._connection
 
     def commit(self, connection: Connection) -> None:
@@ -33,7 +38,8 @@ class EtlDb:
 
     def disconnect(self) -> None:
         """Dispose of db connection."""
-        self._db_engine.dispose()
+        with contextlib.suppress(Exception):
+            self._db_engine.dispose()
 
 
 class EtlChangeType(Enum):

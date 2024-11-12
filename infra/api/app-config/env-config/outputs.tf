@@ -1,10 +1,11 @@
 output "search_config" {
   value = var.has_search ? {
-    instance_type         = var.search_data_instance_type
-    instance_count        = var.search_data_instance_count
-    dedicated_master_type = var.search_master_instance_type
-    engine_version        = var.search_engine_version
-    volume_size           = var.search_data_volume_size
+    instance_type           = var.search_data_instance_type
+    instance_count          = var.search_data_instance_count
+    dedicated_master_type   = var.search_master_instance_type
+    engine_version          = var.search_engine_version
+    volume_size             = var.search_data_volume_size
+    availability_zone_count = var.search_availability_zone_count
   } : null
 }
 
@@ -27,7 +28,10 @@ output "database_config" {
 
 output "service_config" {
   value = {
-    region = var.default_region
+    region                          = var.default_region
+    instance_desired_instance_count = var.instance_desired_instance_count
+    instance_scaling_max_capacity   = var.instance_scaling_max_capacity
+    instance_scaling_min_capacity   = var.instance_scaling_min_capacity
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
       var.service_override_extra_environment_variables

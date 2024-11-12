@@ -207,7 +207,7 @@ class TestTransformFullRunTask(BaseTestClass):
         )
 
         existing_opportunity = f.OpportunityFactory(
-            no_current_summary=True, opportunity_assistance_listings=[], agency="UPDATEAGENCY"
+            no_current_summary=True, opportunity_assistance_listings=[], agency_code="UPDATEAGENCY"
         )
         opportunity = f.StagingTopportunityFactory(
             opportunity_id=existing_opportunity.opportunity_id, cfdas=[]
@@ -466,7 +466,7 @@ class TestTransformFullRunTask(BaseTestClass):
         # but we'll still have delete events for the others - this verfies how we handle that.
 
         existing_opportunity = f.OpportunityFactory(
-            no_current_summary=True, opportunity_assistance_listings=[], agency="AGENCYXYZ"
+            no_current_summary=True, opportunity_assistance_listings=[], agency_code="AGENCYXYZ"
         )
         opportunity = f.StagingTopportunityFactory(
             opportunity_id=existing_opportunity.opportunity_id, cfdas=[], is_deleted=True

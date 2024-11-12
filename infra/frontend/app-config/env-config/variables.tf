@@ -20,6 +20,21 @@ variable "has_incident_management_service" {
   type = bool
 }
 
+variable "instance_desired_instance_count" {
+  type    = number
+  default = 1
+}
+
+variable "instance_scaling_min_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "instance_scaling_max_capacity" {
+  type    = number
+  default = 5
+}
+
 variable "domain" {
   description = "Public domain for the website, which is managed by HHS ITS."
   type        = string

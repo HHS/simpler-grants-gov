@@ -47,7 +47,23 @@ jest.mock("react", () => ({
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
 }));
 
+const fetchMock = jest.fn().mockResolvedValue({
+  json: jest.fn().mockResolvedValue({ data: [], errors: [], warnings: [] }),
+  ok: true,
+  status: 200,
+});
+
 describe("Search Route", () => {
+  let originalFetch: typeof global.fetch;
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+  beforeEach(() => {
+    global.fetch = fetchMock;
+  });
   it("renders the search page with expected checkboxes checked", async () => {
     const mockSearchParams = {
       status: "forecasted,posted",

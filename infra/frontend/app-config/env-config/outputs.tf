@@ -13,7 +13,10 @@ output "database_config" {
 
 output "service_config" {
   value = {
-    region = var.default_region
+    region                          = var.default_region
+    instance_desired_instance_count = var.instance_desired_instance_count
+    instance_scaling_max_capacity   = var.instance_scaling_max_capacity
+    instance_scaling_min_capacity   = var.instance_scaling_min_capacity
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
       var.service_override_extra_environment_variables

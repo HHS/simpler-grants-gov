@@ -212,6 +212,9 @@ class OpportunityV01Schema(Schema):
     agency = fields.String(
         metadata={"description": "The agency who created the opportunity", "example": "US-ABC"}
     )
+    agency_code = fields.String(
+        metadata={"description": "The agency who created the opportunity", "example": "US-ABC"}
+    )
 
     category = fields.Enum(
         OpportunityCategory,
