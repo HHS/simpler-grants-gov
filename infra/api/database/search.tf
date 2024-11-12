@@ -9,7 +9,7 @@ module "search" {
   source = "../../modules/search"
 
   service_name                  = local.service_name
-  availability_zone_count       = 3
+  availability_zone_count       = local.search_config.availability_zone_count
   zone_awareness_enabled        = var.environment_name == "prod" ? true : false
   multi_az_with_standby_enabled = var.environment_name == "prod" ? true : false
   dedicated_master_enabled      = var.environment_name == "prod" ? true : false

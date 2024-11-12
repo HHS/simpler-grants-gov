@@ -1,5 +1,5 @@
 config:
-  target: http://localhost:3000
+  target: "http://127.0.0.1:3000"
   tls:
     rejectUnauthorized: false
   http:
@@ -18,6 +18,20 @@ config:
       maxVusers: 1000
       name: Spike phase
   environments:
+    local:
+      target: http://localhost:3000
+      phases:
+        - duration: 2
+          arrivalRate: 5
+          name: Warm up phase
+        - duration: 1
+          arrivalRate: 1
+          maxVusers: 1
+          name: Ramp up load
+        - duration: 1
+          arrivalRate: 1
+          maxVusers: 1
+          name: Spike phase
     prod:
       target: https://simpler.grants.gov
     staging:
@@ -30,24 +44,34 @@ config:
     ensure: {}
     apdex: {}
     metrics-by-endpoint: {}
-  apdex:
-    threshold: 100
+  processor: "./tests/artillery/processor.ts"
+
+before:
+  flow:
+    - function: loadData
+
 scenarios:
-  - name: root
+  - name: Opportunity Pages
+    beforeScenario: getOppId
     flow:
       - get:
-          url: "/"
-          expect:
-            - statusCode: 200
-  - name: health
+          url: "/opportunity/{{ id }}"
+      - log: "GET /opportunity/{{ id }}"
+  - name: 404 Pages
+    beforeScenario: get404
     flow:
       - get:
-          url: "/health"
-          expect:
-            - statusCode: 200
-  - name: hello
+          url: "/{{ route }}"
+      - log: "GET 404 page /{{ route }}"
+  - name: Static Pages
+    beforeScenario: getStatic
     flow:
       - get:
-          url: "/api/hello"
-          expect:
-            - statusCode: 200
+          url: "/{{ route }}"
+      - log: "GET static page /{{ route }}"
+  - name: Searches
+    beforeScenario: getSearchQuery
+    flow:
+      - get:
+          url: "/search?{{ query }}"
+      - log: "GET /search?{{ query }}"
