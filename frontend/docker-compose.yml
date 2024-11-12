@@ -35,19 +35,6 @@ services:
     networks:
       - default
 
-  mock-oauth2-server:
-    image: pavitt/mock-oauth2-server:0.3.5
-    ports:
-      - "5000:5000"
-    environment:
-      LOG_LEVEL: "debug"
-      SERVER_PORT: 5000
-      JSON_CONFIG_PATH: /app/config.json
-      ISSUER_ID: http:localhost:5000
-    networks:
-      - default
-      - api_grants_backend
-
 networks:
   api_grants_backend:
     external: true
