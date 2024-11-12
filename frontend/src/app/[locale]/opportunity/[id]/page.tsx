@@ -26,7 +26,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
   let title = `${t("OpportunityListing.page_title")}`;
   try {
-    const { data: opportunityData } = await fetchOpportunity(params.id);
+    const { data: opportunityData } = await fetchOpportunity({
+      subPath: params.id,
+    });
     title = `${t("OpportunityListing.page_title")} - ${opportunityData.opportunity_title}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
@@ -95,7 +97,7 @@ export default async function OpportunityListing({
 
   let opportunityData = {} as Opportunity;
   try {
-    const response = await fetchOpportunity(params.id);
+    const response = await fetchOpportunity({ subPath: params.id });
     opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {

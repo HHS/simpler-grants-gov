@@ -68,7 +68,7 @@ export function createRequestUrl(
   basePath: string,
   version: string,
   namespace: string,
-  subPath: string,
+  subPath = "",
   body?: JSONRequestBody,
 ) {
   // Remove leading slash

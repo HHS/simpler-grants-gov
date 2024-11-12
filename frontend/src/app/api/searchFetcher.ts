@@ -1,6 +1,6 @@
 import "server-only";
 
-import { requestOpportunitySearch } from "src/app/api/fetchers";
+import { fetchOpportunitySearch } from "src/app/api/fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -50,7 +50,7 @@ export const searchForOpportunities = async (searchInputs: QueryParamData) => {
     requestBody.query = query;
   }
 
-  const response = await requestOpportunitySearch("", { body: requestBody });
+  const response = await fetchOpportunitySearch({ body: requestBody });
 
   response.actionType = searchInputs.actionType;
   response.fieldChanged = searchInputs.fieldChanged;

@@ -34,10 +34,8 @@ jest.mock("react", () => ({
   cache: (fn: unknown) => fn,
 }));
 
-jest.mock("src/app/api/Fetchers", () => ({
-  searchOpportunityFetcher: {
-    searchOpportunities: jest.fn(() => Promise.resolve()),
-  },
+jest.mock("src/app/api/searchFetcher", () => ({
+  searchForOpportunities: jest.fn(() => Promise.resolve()),
 }));
 
 describe("SearchResults", () => {

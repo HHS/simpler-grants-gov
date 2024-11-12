@@ -1,7 +1,14 @@
 import { EndpointConfig } from "src/app/api/endpointConfigs";
 import { requesterForEndpoint } from "src/app/api/fetchers";
 
-const createRequestUrlMock = jest.fn((..._args) => "fakeurl");
+const createRequestUrlMock = jest.fn(
+  (_method, _basePath, _version, _namespace, subPath: string, _body) => {
+    if (subPath) {
+      return `fakeurl/${subPath}`;
+    }
+    return "fakeurl";
+  },
+);
 const sendRequestMock = jest.fn((..._args) => Promise.resolve("done"));
 const createRequestBodyMock = jest.fn((obj) => JSON.stringify(obj));
 const getDefaultHeadersMock = jest.fn(() => ({
@@ -9,7 +16,22 @@ const getDefaultHeadersMock = jest.fn(() => ({
 }));
 
 jest.mock("src/app/api/fetcherHelpers", () => ({
-  createRequestUrl: (...args: unknown[]) => createRequestUrlMock(...args),
+  createRequestUrl: (
+    _method: unknown,
+    _basePath: unknown,
+    _version: unknown,
+    _namespace: unknown,
+    subPath: string,
+    _body: unknown,
+  ) =>
+    createRequestUrlMock(
+      _method,
+      _basePath,
+      _version,
+      _namespace,
+      subPath,
+      _body,
+    ),
   sendRequest: (...args: unknown[]) => sendRequestMock(...args),
   createRequestBody: (arg: unknown) => createRequestBodyMock(arg),
   getDefaultHeaders: () => getDefaultHeadersMock(),
@@ -34,7 +56,8 @@ describe("requesterForEndpoint", () => {
 
   it("returns a function that calls `createRequestUrl` andf `sendRequest` with the expected arguments", async () => {
     const requester = requesterForEndpoint(basicEndpoint);
-    await requester("1", {
+    await requester({
+      subPath: "1",
       queryParamData: {
         page: 1,
         status: new Set(),
@@ -56,7 +79,7 @@ describe("requesterForEndpoint", () => {
       { key: "value" },
     );
     expect(sendRequestMock).toHaveBeenCalledWith(
-      "fakeurl",
+      "fakeurl/1",
       {
         body: JSON.stringify({ key: "value" }),
         headers: {

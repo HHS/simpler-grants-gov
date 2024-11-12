@@ -21,6 +21,8 @@ import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 import { cache } from "react";
 
 // returns a function which can be used to make a request to an endpoint defined in the passed config
+// note that subpath is dynamic per request, any static paths at this point would need to be included in the namespace
+// making this more flexible is a future todo
 export function requesterForEndpoint<ResponseType extends APIResponse>({
   method,
   basePath,
@@ -28,14 +30,14 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
   namespace,
 }: EndpointConfig) {
   return async function (
-    subPath: string,
     options: {
+      subPath?: string;
       queryParamData?: QueryParamData;
       body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
     } = {},
   ): Promise<ResponseType> {
-    const { additionalHeaders = {}, body, queryParamData } = options;
+    const { additionalHeaders = {}, body, queryParamData, subPath } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -67,6 +69,6 @@ export const fetchOpportunity = cache(
   requesterForEndpoint<OpportunityApiResponse>(fetchOpportunityEndpoint),
 );
 
-export const requestOpportunitySearch = requesterForEndpoint<SearchAPIResponse>(
+export const fetchOpportunitySearch = requesterForEndpoint<SearchAPIResponse>(
   opportunitySearchEndpoint,
 );

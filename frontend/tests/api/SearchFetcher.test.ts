@@ -22,7 +22,7 @@ const searchProps: QueryParamData = {
   fieldChanged: "baseball",
 };
 
-const mockRequestOpportunitySearch = jest.fn().mockResolvedValue({ data: {} });
+const mockfetchOpportunitySearch = jest.fn().mockResolvedValue({ data: {} });
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -30,8 +30,8 @@ jest.mock("react", () => ({
 }));
 
 jest.mock("src/app/api/fetchers", () => ({
-  requestOpportunitySearch: (_nothing: string, params: QueryParamData) => {
-    return mockRequestOpportunitySearch("", params) as SearchAPIResponse;
+  fetchOpportunitySearch: (params: QueryParamData) => {
+    return mockfetchOpportunitySearch(params) as SearchAPIResponse;
   },
 }));
 
@@ -39,7 +39,7 @@ describe("searchForOpportunities", () => {
   it("calls request function with correct parameters", async () => {
     const result = await searchForOpportunities(searchProps);
 
-    expect(mockRequestOpportunitySearch).toHaveBeenCalledWith("", {
+    expect(mockfetchOpportunitySearch).toHaveBeenCalledWith({
       body: {
         pagination: {
           order_by: "opportunity_number", // This should be the actual value being used in the API method
