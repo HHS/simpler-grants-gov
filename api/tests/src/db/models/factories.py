@@ -1857,5 +1857,3 @@ class LinkExternalUserFactory(BaseFactory):
     external_user_type_id = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
