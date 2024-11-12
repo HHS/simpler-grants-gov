@@ -33,7 +33,3 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     )
 
     email: Mapped[str]
-
-    first_name: Mapped[str]
-
-    last_name: Mapped[str]
