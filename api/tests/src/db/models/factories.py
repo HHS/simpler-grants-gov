@@ -24,11 +24,13 @@ import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
 import src.db.models.transfer.topportunity_models as transfer_topportunity_models
+import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ExternalUserType,
     FundingCategory,
     FundingInstrument,
     OpportunityAttachmentType,
@@ -1833,3 +1835,25 @@ class OpportunitySearchIndexQueueFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+
+class UserFactory(BaseFactory):
+    class Meta:
+        model = user_models.User
+
+    user_id = Generators.UuidObj
+
+
+class LinkExternalUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkExternalUser
+
+    link_external_user_id = Generators.UuidObj
+    external_user_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    external_user_type_id = factory.fuzzy.FuzzyChoice(ExternalUserType)
+
+    email = factory.Faker("email")
