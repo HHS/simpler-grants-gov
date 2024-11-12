@@ -66,7 +66,7 @@ stop:
 ##################################################
 
 load-test-local: # Load test the local environment at localhost:3000
-	artillery run artillery-load-test.yml
+	artillery run -e local artillery-load-test.yml
 
 load-test-dev: # Load test the dev environment in aws
 	artillery run -e dev artillery-load-test.yml

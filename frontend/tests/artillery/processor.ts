@@ -83,10 +83,11 @@ async function getSearchQuery(context: { vars: queryType & dataType }) {
 }
 
 async function loadData(context: { vars: dataType }) {
-  const env = context.vars.$environment;
+  // Dev and stage have the same data.
+  const env = context.vars.$environment === 'stage' ? 'dev' : context.vars.$environment;
   const envs = new Set(["local", "dev", "prod"]);
   if (!env || !envs.has(env)) {
-    throw new Error(`env ${env ?? ""} does not exist in env list`);
+    throw new Error(`env ${env} does not exist in env list`);
   }
   const path = "./tests/artillery/params.json";
   const file = await readFile(path, "utf8");
