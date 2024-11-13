@@ -25,9 +25,10 @@ def get_db() -> Engine:
     db = get_db_settings()
     # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
     token = db.password if db.local_env is True else generate_iam_auth_token(db)
+    url = f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}/{db.name}?sslmode={db.ssl_mode}"
 
     return create_engine(
-        f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}",
+        url,
         pool_pre_ping=True,
         hide_parameters=True,
     )
