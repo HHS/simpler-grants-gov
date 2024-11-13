@@ -1,11 +1,10 @@
 """Define EtlDb as an abstraction layer for database connections."""
 
-import contextlib
 from enum import Enum
 
 from sqlalchemy import Connection
 
-from analytics.integrations import db
+from analytics.integrations.db import PostgresDbClient
 
 
 class EtlDb:
@@ -13,20 +12,21 @@ class EtlDb:
 
     def __init__(self, effective: str | None = None) -> None:
         """Construct instance."""
-        self._db_engine = db.get_db()
+        try:
+            self._db_client = PostgresDbClient()
+        except RuntimeError as e:
+            message = f"Failed to instantiate database engine: {e}"
+            raise RuntimeError(message) from e
+
         self._connection: Connection | None = None
         self.effective_date = effective
         self.dateformat = "%Y-%m-%d"
 
-    def __del__(self) -> None:
-        """Destroy instance."""
-        self.disconnect()
-
     def connection(self) -> Connection:
-        """Get a connection object from the db engine."""
+        """Get a connection object from the database engine."""
         if self._connection is None:
             try:
-                self._connection = self._db_engine.connect()
+                self._connection = self._db_client.connect()
             except RuntimeError as e:
                 message = f"Failed to connect to database: {e}"
                 raise RuntimeError(message) from e
@@ -35,11 +35,6 @@ class EtlDb:
     def commit(self, connection: Connection) -> None:
         """Commit an open transaction."""
         connection.commit()
-
-    def disconnect(self) -> None:
-        """Dispose of db connection."""
-        with contextlib.suppress(Exception):
-            self._db_engine.dispose()
 
 
 class EtlChangeType(Enum):

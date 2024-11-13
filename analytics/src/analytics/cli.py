@@ -15,7 +15,8 @@ from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
-from analytics.integrations import db, etldb, slack
+from analytics.integrations import etldb, slack
+from analytics.integrations.db import PostgresDbClient
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -208,9 +209,8 @@ def show_and_or_post_results(
 @import_app.command(name="test_connection")
 def test_connection() -> None:
     """Test function that ensures the DB connection works."""
-    engine = db.get_db()
-    # connection method from sqlalchemy
-    connection = engine.connect()
+    client = PostgresDbClient()
+    connection = client.connect()
 
     # Test INSERT INTO action
     result = connection.execute(
@@ -234,14 +234,14 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
     logger.info("Beginning import")
 
     # Get the database engine and establish a connection
-    engine = db.get_db()
+    client = PostgresDbClient()
 
     # Load data from the sprint board
     issues = GitHubIssues.from_json(delivery_file)
 
     issues.to_sql(
         output_table="github_project_data",
-        engine=engine,
+        engine=client.engine(),
         replace_table=True,
     )
     rows = len(issues.to_dict())
