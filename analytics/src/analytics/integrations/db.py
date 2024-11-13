@@ -60,6 +60,7 @@ def get_connection_parameters(config: DBSettings) -> dict[str, Any]:
         "port": config.port,
         "connect_timeout": 20,
         "sslmode": config.ssl_mode,
+        "options": f"-c search_path={config.db_schema}",
     }
 
 
