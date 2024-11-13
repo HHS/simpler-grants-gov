@@ -26,8 +26,6 @@ export const messages = {
     },
     documents: {
       title: "Documents",
-      related: "Related documents",
-      forms: "Application forms",
       table_col_category: "Category",
       table_col_file_name: "File name",
       table_col_last_updated: "Last updated",

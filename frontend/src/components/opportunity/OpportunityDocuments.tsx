@@ -61,7 +61,7 @@ const OpportunityDocuments = ({ documents }: OpportunityDocumentsProps) => {
 
   return (
     <>
-      <h2>{t("title")}</h2>
+      <h2 id="opportunity_documents">{t("title")}</h2>
       {documents.length > 0 ? (
         <Table>
           <DocumentTable documents={documents} />
