@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from sqlalchemy import exc, text
+from psycopg.errors import InsufficientPrivilege
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
@@ -33,8 +35,13 @@ def init_db() -> None:
             text(sql),
         )
         db.commit(cursor)
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to initialize db: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to initialize db: {e}"
         raise RuntimeError(message) from e
 
 
@@ -55,8 +62,13 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     try:
         ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
         print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to sync quad data: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to sync quad data: {e}"
         raise RuntimeError(message) from e
 
     # sync deliverable data to db resulting in row id for each deliverable
@@ -69,32 +81,52 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
         print(
             f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
         )
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to sync deliverable data: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to sync deliverable data: {e}"
         raise RuntimeError(message) from e
 
     # sync sprint data to db resulting in row id for each sprint
     try:
         ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
         print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to sync sprint data: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to sync sprint data: {e}"
         raise RuntimeError(message) from e
 
     # sync epic data to db resulting in row id for each epic
     try:
         ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
         print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to sync epic data: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to sync epic data: {e}"
         raise RuntimeError(message) from e
 
     # sync issue data to db resulting in row id for each issue
     try:
         issue_map = sync_issues(db, dataset, ghid_map)
         print(f"issue row(s) processed: {len(issue_map)}")
-    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
-        message = f"Failed to sync issue data: {e}"
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to sync issue data: {e}"
         raise RuntimeError(message) from e
 
 
