@@ -58,7 +58,7 @@ def get_connection_parameters(config: DBSettings) -> dict[str, Any]:
         "user": config.user,
         "password": token,
         "port": config.port,
-        "connect_timeout": 10,
+        "connect_timeout": 20,
         "sslmode": config.ssl_mode,
     }
 
