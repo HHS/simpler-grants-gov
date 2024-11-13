@@ -29,6 +29,17 @@ export const splitMarkup = (
         tracker.postSplit += character;
         return tracker;
       }
+      // handle things like urls within tag params that need to be ignored
+      if (
+        (tracker.openTagIndicator && character === `"`) ||
+        character === `'`
+      ) {
+        tracker.inQuotes = !tracker.inQuotes;
+      }
+      if (tracker.inQuotes) {
+        tracker.preSplit += character;
+        return tracker;
+      }
       if (character === "<") {
         if (tracker.openTagIndicator) {
           throw new Error("Malformed markup: unclosed tag");
@@ -64,6 +75,8 @@ export const splitMarkup = (
       openTagIndicator: false,
       closeTagIndicator: false,
       splitComplete: false,
+      tagCharacters: "",
+      inQuotes: false,
     },
   );
   return {

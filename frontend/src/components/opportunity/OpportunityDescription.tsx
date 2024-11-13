@@ -69,6 +69,18 @@ const SummaryDescriptionDisplay = ({
   const purifiedSummary = DOMPurify.sanitize(summaryDescription);
 
   const { preSplit, postSplit } = splitMarkup(purifiedSummary, 600);
+
+  if (!postSplit) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{
+          __html: summaryDescription
+            ? DOMPurify.sanitize(summaryDescription)
+            : "--",
+        }}
+      />
+    );
+  }
   return (
     <>
       <div
