@@ -5,7 +5,7 @@ output "database_config" {
     access_policy_name          = "${var.app_name}-${var.environment}-db-access"
     app_username                = "app"
     migrator_username           = "migrator"
-    schema_name                 = "app"
+    schema_name                 = var.app_name
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
     instance_count              = var.database_instance_count
