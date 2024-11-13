@@ -16,22 +16,22 @@ type Props = {
   breadcrumbList: BreadcrumbList;
 };
 
-const Breadcrumbs = ({ breadcrumbList }: Props) => {
-  const rdfaMetadata = {
-    ol: {
-      vocab: "http://schema.org/",
-      typeof: "BreadcrumbList",
-    },
-    li: {
-      property: "itemListElement",
-      typeof: "ListItem",
-    },
-    a: {
-      property: "item",
-      typeof: "WebPage",
-    },
-  };
+const rdfaMetadata = {
+  ol: {
+    vocab: "http://schema.org/",
+    typeof: "BreadcrumbList",
+  },
+  li: {
+    property: "itemListElement",
+    typeof: "ListItem",
+  },
+  a: {
+    property: "item",
+    typeof: "WebPage",
+  },
+};
 
+const Breadcrumbs = ({ breadcrumbList }: Props) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
       <Breadcrumb

@@ -1,5 +1,6 @@
 import Loading from "src/app/[locale]/search/loading";
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
+import fetchers from "src/app/api/Fetchers";
+import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
 
@@ -20,19 +21,19 @@ export default function SearchResults({
 }) {
   const { page, sortby } = searchParams;
 
+  const searchResultsPromise =
+    fetchers.searchOpportunityFetcher.searchOpportunities(searchParams);
+
   const key = Object.entries(searchParams).join(",");
   const pager1key = Object.entries(searchParams).join("-") + "pager1";
   const pager2key = Object.entries(searchParams).join("-") + "pager2";
   return (
     <>
-      <Suspense
-        key={key}
-        fallback={<SearchResultsHeader sortby={sortby} loading={false} />}
-      >
+      <Suspense key={key} fallback={<SearchResultsHeader sortby={sortby} />}>
         <SearchResultsHeaderFetch
           sortby={sortby}
           queryTerm={query}
-          searchParams={searchParams}
+          searchResultsPromise={searchResultsPromise}
         />
       </Suspense>
       <div className="usa-prose">
@@ -42,10 +43,15 @@ export default function SearchResults({
             <SearchPagination loading={true} page={page} query={query} />
           }
         >
-          <SearchPaginationFetch searchParams={searchParams} scroll={false} />
+          <SearchPaginationFetch
+            page={page}
+            query={query}
+            searchResultsPromise={searchResultsPromise}
+            scroll={false}
+          />
         </Suspense>
         <Suspense key={key} fallback={<Loading message={loadingMessage} />}>
-          <SearchResultsListFetch searchParams={searchParams} />
+          <SearchResultsListFetch searchResultsPromise={searchResultsPromise} />
         </Suspense>
         <Suspense
           key={pager2key}
@@ -53,7 +59,12 @@ export default function SearchResults({
             <SearchPagination loading={true} page={page} query={query} />
           }
         >
-          <SearchPaginationFetch searchParams={searchParams} scroll={true} />
+          <SearchPaginationFetch
+            page={page}
+            query={query}
+            searchResultsPromise={searchResultsPromise}
+            scroll={true}
+          />
         </Suspense>
       </div>
     </>

@@ -4,13 +4,17 @@ from typing import Iterator, Sequence
 
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySearchIndexQueue,
+)
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
@@ -68,20 +72,69 @@ class LoadOpportunitiesToIndex(Task):
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
 
-        # load the records incrementally
-        # TODO - The point of this incremental load is to support upcoming work
-        #        to load only opportunities that have changes as we'll eventually be indexing
-        #        files which will take longer. However - the structure of the data isn't yet
-        #        known so I want to hold on actually setting up any change-detection logic
-        loaded_opportunity_ids = set()
-        for opp_batch in self.fetch_opportunities():
-            loaded_opportunity_ids.update(self.load_records(opp_batch))
+        # Fetch opportunities that need processing from the queue
+        queued_opportunities = (
+            self.db_session.execute(
+                select(Opportunity)
+                .join(OpportunitySearchIndexQueue)
+                .join(CurrentOpportunitySummary)
+                .where(
+                    Opportunity.is_draft.is_(False),
+                    CurrentOpportunitySummary.opportunity_status.isnot(None),
+                )
+                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+            )
+            .scalars()
+            .all()
+        )
 
-        # Delete
-        opportunity_ids_to_delete = existing_opportunity_ids - loaded_opportunity_ids
+        # Process updates and inserts
+        processed_opportunity_ids = set()
+        opportunities_to_index = []
 
-        if len(opportunity_ids_to_delete) > 0:
+        for opportunity in queued_opportunities:
+            logger.info(
+                "Processing queued opportunity",
+                extra={
+                    "opportunity_id": opportunity.opportunity_id,
+                    "status": (
+                        "update"
+                        if opportunity.opportunity_id in existing_opportunity_ids
+                        else "insert"
+                    ),
+                },
+            )
+
+            # Add to index batch if it's indexable
+            opportunities_to_index.append(opportunity)
+            processed_opportunity_ids.add(opportunity.opportunity_id)
+
+        # Bulk index the opportunities (handles both inserts and updates)
+        if opportunities_to_index:
+            loaded_ids = self.load_records(opportunities_to_index)
+            logger.info(f"Indexed {len(loaded_ids)} opportunities")
+
+        # Handle deletes - opportunities in search but not in our processed set
+        # and not in our database (or are drafts)
+        opportunity_ids_to_delete = existing_opportunity_ids - processed_opportunity_ids
+
+        for opportunity_id in opportunity_ids_to_delete:
+            logger.info(
+                "Deleting opportunity from search",
+                extra={"opportunity_id": opportunity_id, "status": "delete"},
+            )
+
+        if opportunity_ids_to_delete:
             self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete)
+
+        # Clear processed entries from the queue
+        if processed_opportunity_ids:
+            self.db_session.execute(
+                delete(OpportunitySearchIndexQueue).where(
+                    OpportunitySearchIndexQueue.opportunity_id.in_(processed_opportunity_ids)
+                )
+            )
+            self.db_session.commit()
 
     def full_refresh(self) -> None:
         # create the index

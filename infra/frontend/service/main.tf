@@ -114,17 +114,22 @@ output "environment_name" {
   value = var.environment_name
 }
 module "service" {
-  source                = "../../modules/service"
-  service_name          = local.service_name
-  is_temporary          = local.is_temporary
-  image_repository_name = module.app_config.image_repository_name
-  image_tag             = local.image_tag
-  vpc_id                = data.aws_vpc.network.id
-  public_subnet_ids     = data.aws_subnets.public.ids
-  private_subnet_ids    = data.aws_subnets.private.ids
-  enable_autoscaling    = module.app_config.enable_autoscaling
-  cert_arn              = terraform.workspace == "default" ? data.aws_acm_certificate.cert[0].arn : null
-  hostname              = module.app_config.hostname
+  source                 = "../../modules/service"
+  service_name           = local.service_name
+  is_temporary           = local.is_temporary
+  image_repository_name  = module.app_config.image_repository_name
+  image_tag              = local.image_tag
+  vpc_id                 = data.aws_vpc.network.id
+  public_subnet_ids      = data.aws_subnets.public.ids
+  private_subnet_ids     = data.aws_subnets.private.ids
+  cert_arn               = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  hostname               = module.app_config.hostname
+  desired_instance_count = local.service_config.instance_desired_instance_count
+  max_capacity           = local.service_config.instance_scaling_max_capacity
+  min_capacity           = local.service_config.instance_scaling_min_capacity
+  enable_autoscaling     = true
+  cpu                    = 256 // these are probably too small
+  memory                 = 512 // these are probably too small
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null

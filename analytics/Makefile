@@ -7,18 +7,18 @@ REPO ?= simpler-grants-gov
 SPRINT_PROJECT ?= 13
 ROADMAP_PROJECT ?= 12
 OUTPUT_DIR ?= data
-SPRINT_FILE ?= $(OUTPUT_DIR)/sprint-data.json
-ROADMAP_FILE ?= $(OUTPUT_DIR)/roadmap-data.json
-ISSUE_FILE ?= $(OUTPUT_DIR)/issue-data.json
-DELIVERY_FILE ?= $(OUTPUT_DIR)/delivery-data.json
+CONFIG_DIR ?= config
+PROJECT_CONFIG_FILE ?= $(CONFIG_DIR)/github-projects.json
+ISSUE_FILE ?= $(OUTPUT_DIR)/delivery-data.json
 SPRINT ?= @current
 # Names of the points and sprint fields in the GitHub project
-POINTS_FIELD ?= Points
+POINTS_FIELD ?= Story Points
 SPRINT_FIELD ?= Sprint
 UNIT ?= points
 ACTION ?= show-results
 MIN_TEST_COVERAGE ?= 80
 APP_NAME ?= grants-analytics
+EFFECTIVE_DATE ?= $(shell date +"%Y-%m-%d")
 
 # Required for CI to work properly
 SHELL = /bin/bash -o pipefail
@@ -144,56 +144,51 @@ lint: ## runs code quality checks
 # Data Commands #
 #################
 
-sprint-data-export:
-	@echo "=> Exporting project data from the sprint board"
+init-db:
+	@echo "=> Initializing the database schema"
 	@echo "====================================================="
-	$(POETRY) analytics export gh_project_data \
-	--owner $(ORG) \
-	--project $(SPRINT_PROJECT) \
-	--output-file $(SPRINT_FILE)
+	$(POETRY) analytics etl initialize_database
+	@echo "====================================================="
+
+gh-transform-and-load:
+	@echo "=> Transforming and loading GitHub data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl transform_and_load \
+	--issue-file $(ISSUE_FILE) \
+	--effective-date $(EFFECTIVE_DATE)
+	@echo "====================================================="
 
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"
 	@echo "====================================================="
-	$(POETRY) analytics import db_import --delivery-file $(DELIVERY_FILE)
+	$(POETRY) analytics import db_import --delivery-file $(ISSUE_FILE)
 
-roadmap-data-export:
-	@echo "=> Exporting project data from the product roadmap"
-	@echo "====================================================="
-	$(POETRY) analytics export gh_project_data \
-	--owner $(ORG) \
-	--project $(ROADMAP_PROJECT) \
-	--output-file $(ROADMAP_FILE)
-
-delivery-data-export:
+gh-data-export:
 	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
 	@echo "====================================================="
 	$(POETRY)  analytics export gh_delivery_data \
-	--owner $(ORG) \
-	--sprint-project $(SPRINT_PROJECT) \
-	--roadmap-project $(ROADMAP_PROJECT) \
-	--output-file $(DELIVERY_FILE) \
-	--points-field "$(POINTS_FIELD)" \
-	--sprint-field "$(SPRINT_FIELD)"
-
-issue-data-export:
-	@echo "=> Exporting issue data from the repository"
-	@echo "====================================================="
-	$(POETRY) analytics export gh_issue_data \
-	--owner $(ORG) \
-	--repo $(REPO) \
-	--output-file $(ISSUE_FILE)
-
-gh-data-export: sprint-data-export issue-data-export roadmap-data-export delivery-data-export
+	--config-file $(PROJECT_CONFIG_FILE) \
+	--output-file $(ISSUE_FILE) \
+	--temp-dir $(OUTPUT_DIR)
 
 sprint-burndown:
-	@echo "=> Running sprint burndown report"
+	@echo "=> Running sprint burndown report for HHS/13"
 	@echo "====================================================="
 	$(POETRY) analytics calculate sprint_burndown \
-	--sprint-file $(SPRINT_FILE) \
 	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--sprint  "$(SPRINT)" \
+	--project 13 \
+	--unit $(UNIT) \
+	--$(ACTION)
+	@echo "====================================================="
+	@echo "=> Running sprint burndown report for HHS/17"
+	@echo "====================================================="
+	$(POETRY) analytics calculate sprint_burndown \
+	--issue-file $(ISSUE_FILE) \
+	--output-dir $(OUTPUT_DIR) \
+	--sprint  "$(SPRINT)" \
+	--project 17 \
 	--unit $(UNIT) \
 	--$(ACTION)
 
@@ -201,8 +196,6 @@ percent-complete:
 	@echo "=> Running percent complete deliverable"
 	@echo "====================================================="
 	$(POETRY) analytics calculate deliverable_percent_complete \
-	--sprint-file $(SPRINT_FILE) \
-	--roadmap-file $(ROADMAP_FILE) \
 	--issue-file $(ISSUE_FILE) \
 	--output-dir $(OUTPUT_DIR) \
 	--include-status "In Progress" \

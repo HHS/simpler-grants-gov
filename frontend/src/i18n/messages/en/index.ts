@@ -23,6 +23,9 @@ export const messages = {
       description: "Description",
       email: "Email",
       telephone: "Phone",
+      show_summary: "Show full summary",
+      show_description: "Show full description",
+      hide_summary_description: "Hide full description",
     },
     documents: {
       title: "Documents",
@@ -50,6 +53,7 @@ export const messages = {
       category_explanation: "Category Explanation",
     },
     history: {
+      history: "History",
       posted_date: "Posted date",
       closing_date: "Original closing date for applications",
       archive_date: "Archive date",
@@ -63,8 +67,6 @@ export const messages = {
       closed: "Closed: ",
       closing: "Closing: ",
       forecasted: "Forecasted",
-      closing_warn:
-        "Electronically submitted applications must be submitted no later than 5:00 p.m., ET, on the listed application due date.",
     },
     cta: {
       apply_title: "Application process",
@@ -514,18 +516,19 @@ export const messages = {
     },
     sortBy: {
       options: {
-        posted_date_desc: "Posted Date (newest)",
-        posted_date_asc: "Posted Date (oldest)",
-        close_date_desc: "Close Date (newest)",
-        close_date_asc: "Close Date (oldest)",
-        opportunity_title_asc: "Opportunity Title (A to Z)",
-        opportunity_title_desc: "Opportunity Title (Z to A)",
+        posted_date_desc: "Posted date (Newest)",
+        posted_date_asc: "Posted date (Oldest)",
+        close_date_desc: "Close date (Newest)",
+        close_date_asc: "Close date (Oldest)",
+        opportunity_title_asc: "Opportunity title (A to Z)",
+        opportunity_title_desc: "Opportunity title (Z to A)",
         agency_asc: "Agency (A to Z)",
         agency_desc: "Agency (Z to A)",
-        opportunity_number_asc: "Opportunity Number (descending)",
-        opportunity_number_desc: "Opportunity Number (ascending)",
+        opportunity_number_asc: "Opportunity number (Descending)",
+        opportunity_number_desc: "Opportunity number (Ascending)",
+        default: "Most relevant (Default)",
       },
-      label: "Sort By",
+      label: "Sort by",
     },
     filterToggleAll: {
       select: "Select All",

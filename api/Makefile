@@ -105,12 +105,14 @@ init: build init-db init-opensearch init-localstack
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
 
-volume-recreate:  clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
+volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
 
 stop:
 	docker compose down
 
 check: format-check lint db-check-migrations test
+
+remake-backend: volume-recreate db-seed-local populate-search-opportunities ## Completely recreate API services, load data into the DB and search index
 
 ##################################################
 # DB & migrations
@@ -190,10 +192,10 @@ start-opensearch:
 	./bin/wait-for-local-opensearch.sh
 
 ##################################################
-# Opensearch
+# Localstack
 ##################################################
 
-init-localstack: start-localstack setup-localstack
+init-localstack: start-localstack setup-localstack ## Start localstack (local s3) and setup buckets
 
 start-localstack:
 	docker compose up --detach localstack

@@ -2,15 +2,11 @@
 
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { SortOption } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
 import { Select } from "@trussworks/react-uswds";
-
-type SortOption = {
-  label: string;
-  value: string;
-};
 
 interface SearchSortByProps {
   queryTerm: string | null | undefined;
@@ -28,6 +24,10 @@ export default function SearchSortBy({
   const t = useTranslations("Search");
 
   const SORT_OPTIONS: SortOption[] = [
+    {
+      label: t("sortBy.options.default"),
+      value: "relevancy",
+    },
     { label: t("sortBy.options.posted_date_desc"), value: "postedDateDesc" },
     { label: t("sortBy.options.posted_date_asc"), value: "postedDateAsc" },
     { label: t("sortBy.options.close_date_desc"), value: "closeDateDesc" },
@@ -60,7 +60,10 @@ export default function SearchSortBy({
 
   return (
     <div id="search-sort-by">
-      <label htmlFor="search-sort-by-select" className="usa-sr-only">
+      <label
+        htmlFor="search-sort-by-select"
+        className="usa-label tablet:display-inline-block tablet:margin-right-2"
+      >
         {t("sortBy.label")}
       </label>
 
@@ -69,6 +72,7 @@ export default function SearchSortBy({
         name="search-sort-by"
         onChange={handleChange}
         value={sortby || ""}
+        className="tablet:display-inline-block tablet:width-auto"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>

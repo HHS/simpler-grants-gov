@@ -1,21 +1,19 @@
 "use server";
 
-import { QueryParamData } from "src/services/search/searchfetcher/SearchFetcher";
-import { getSearchFetcher } from "src/services/search/searchfetcher/SearchFetcherUtil";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import SearchResultsHeader from "./SearchResultsHeader";
 
 export default async function SearchResultsHeaderFetch({
-  searchParams,
+  searchResultsPromise,
   sortby,
   queryTerm,
 }: {
-  searchParams: QueryParamData;
+  searchResultsPromise: Promise<SearchAPIResponse>;
   sortby: string | null;
   queryTerm: string | null | undefined;
 }) {
-  const searchFetcher = getSearchFetcher();
-  const searchResults = await searchFetcher.fetchOpportunities(searchParams);
+  const searchResults = await searchResultsPromise;
   const totalResults = searchResults.pagination_info?.total_records;
 
   return (

@@ -171,20 +171,6 @@ class OpportunitySummaryV1Schema(Schema):
         },
     )
 
-    agency_code = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The agency who owns the opportunity",
-            "example": "US-ABC",
-        },
-    )
-    agency_name = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The name of the agency who owns the opportunity",
-            "example": "US Alphabetical Basic Corp",
-        },
-    )
     agency_phone_number = fields.String(
         allow_none=True,
         metadata={
@@ -263,7 +249,13 @@ class OpportunityV1Schema(Schema):
             "example": "Research into conservation techniques",
         },
     )
+    # TODO - we'll want to remove this field in the future
+    # but need to make sure the frontend is not using it
     agency = fields.String(
+        allow_none=True,
+        metadata={"description": "DEPRECATED - use: agency_code", "example": "US-ABC"},
+    )
+    agency_code = fields.String(
         allow_none=True,
         metadata={"description": "The agency who created the opportunity", "example": "US-ABC"},
     )
@@ -318,7 +310,7 @@ class OpportunityV1Schema(Schema):
 
 
 class OpportunityAttachmentV1Schema(Schema):
-    file_location = fields.String(
+    download_path = fields.String(
         metadata={
             "description": "The URL to download the attachment",
             "example": "https://...",

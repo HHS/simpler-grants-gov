@@ -41,7 +41,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_applicant_type: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_APPLICANT_TYPE
     enable_funding_category: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_CATEGORY
     enable_funding_instrument: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_INSTRUMENT
-    enable_agency: bool = False  # TRANSFORM_ORACLE_DATA_ENABLE_AGENCY
+    enable_agency: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_AGENCY
 
 
 class TransformOracleDataTask(Task):
