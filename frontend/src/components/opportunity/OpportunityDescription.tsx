@@ -5,7 +5,7 @@ import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
-import { Button, Icon, Link } from "@trussworks/react-uswds";
+import { Button, Link } from "@trussworks/react-uswds";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
