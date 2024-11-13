@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from sqlalchemy import text
+from sqlalchemy import exc, text
 
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
@@ -33,7 +33,7 @@ def init_db() -> None:
             text(sql),
         )
         db.commit(cursor)
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError) as e:
         message = f"Failed to initialize db: {e}"
         raise RuntimeError(message) from e
 
