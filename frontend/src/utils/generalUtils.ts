@@ -29,12 +29,6 @@ export const splitMarkup = (
         tracker.postSplit += character;
         return tracker;
       }
-      if (character === "<") {
-        if (tracker.openTagIndicator) {
-          throw new Error("Malformed markup: unclosed tag");
-        }
-        tracker.openTagIndicator = true;
-      }
       // handle things like urls within tag params that need to be ignored
       if (
         (tracker.openTagIndicator && character === `"`) ||
@@ -42,7 +36,17 @@ export const splitMarkup = (
       ) {
         tracker.inQuotes = !tracker.inQuotes;
       }
-      if (tracker.openTagIndicator && character === "/" && !tracker.inQuotes) {
+      if (tracker.inQuotes) {
+        tracker.preSplit += character;
+        return tracker;
+      }
+      if (character === "<") {
+        if (tracker.openTagIndicator) {
+          throw new Error("Malformed markup: unclosed tag");
+        }
+        tracker.openTagIndicator = true;
+      }
+      if (tracker.openTagIndicator && character === "/") {
         if (tracker.closeTagIndicator) {
           throw new Error("Malformed markup: improperly closed tag");
         }
