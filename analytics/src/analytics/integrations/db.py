@@ -1,6 +1,8 @@
 # pylint: disable=invalid-name, line-too-long
 """Get a connection to the database using a SQLAlchemy engine object."""
 
+import os
+
 import boto3
 from sqlalchemy import Engine, create_engine
 
@@ -25,11 +27,15 @@ def get_db() -> Engine:
     db = get_db_settings()
     # inspired by simpler-grants-gov/blob/main/api/src/adapters/db/clients/postgres_client.py
     token = db.password if db.local_env is True else generate_iam_auth_token(db)
+    url = f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}?sslmode={db.ssl_mode}"
+    print(f"TEMP DEBUG: environment = {os.getenv('ENVIRONMENT', 'local')}")
+    print(f"TEMP DEBUG: db settings = {db}")
+    print(f"TEMP DEBUG: token has non-zero len? {len(str(token)) > 0}")
 
     return create_engine(
-        f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}",
+        url,
         pool_pre_ping=True,
-        hide_parameters=True,
+        hide_parameters=False,
     )
 
 
