@@ -7,7 +7,7 @@ import boto3
 import psycopg
 from sqlalchemy import Connection, Engine, create_engine, pool
 
-from config import DBSettings
+from config import DBSettings, get_db_settings
 
 # The variables used in the connection url are pulled from local.env
 # and configured in the DBSettings class found in config.py
@@ -19,7 +19,7 @@ class PostgresDbClient:
     def __init__(self, config: DBSettings | None = None) -> None:
         """Construct a class instance."""
         if not config:
-            config = DBSettings()
+            config = get_db_settings()
         self._engine = self._configure_engine(config)
 
     def _configure_engine(self, config: DBSettings) -> Engine:
