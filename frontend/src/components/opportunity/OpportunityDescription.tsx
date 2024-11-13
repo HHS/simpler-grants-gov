@@ -1,14 +1,17 @@
+'use client';
+
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
-import { Button, Icon } from "@trussworks/react-uswds";
+import { Button, Icon, Link } from "@trussworks/react-uswds";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
 type Props = {
   summary: Summary;
+  nofoPath: string;
 };
 
 enum ApplicantType {
@@ -92,7 +95,7 @@ const SummaryDescriptionDisplay = ({
   );
 };
 
-const OpportunityDescription = ({ summary }: Props) => {
+const OpportunityDescription = ({ summary, nofoPath }: Props) => {
   const t = useTranslations("OpportunityListing.description");
   const agency_phone_number_stripped = summary?.agency_phone_number
     ? summary.agency_phone_number.replace(/-/g, "")
@@ -116,30 +119,36 @@ const OpportunityDescription = ({ summary }: Props) => {
     "--"
   );
 
+  const downloadNOFO = () => {
+    window.open(nofoPath, '_blank')?.focus();
+  };
+
   return (
     <>
       <div className="usa-prose">
         <h2>{t("title")}</h2>
-        <div className="grid-row flex-justify">
-          <Button type="button">
-            <span>Download Full Grant Details (NOFO) </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1em"
-              height="1em"
-              viewBox="0 0 24 24"
-              className="usa-icon usa-icon--size-4"
-              focusable="false"
-              role="img"
-              aria-hidden="true"
-            >
-              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
-            </svg>
-          </Button>
-          <Button type="button" unstyled>
-            <span>Jump to all documents</span>
-          </Button>
-        </div>
+        {nofoPath.length > 0 ? (
+          <div className="grid-row flex-justify">
+            <Button onClick={downloadNOFO} type="button">
+              <span>Download Full Grant Details (NOFO) </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+                className="usa-icon usa-icon--size-4"
+                focusable="false"
+                role="img"
+                aria-hidden="true"
+              >
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
+              </svg>
+            </Button>
+            <Link className="flex-align-self-center" href={'#opportunity_documents'}>
+              Jump to all documents
+            </Link>
+          </div>
+        ) : null}
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
