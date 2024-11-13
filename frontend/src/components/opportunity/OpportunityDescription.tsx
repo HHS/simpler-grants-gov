@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
@@ -120,7 +120,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
   );
 
   const downloadNOFO = () => {
-    window.open(nofoPath, '_blank')?.focus();
+    window.open(nofoPath, "_blank")?.focus();
   };
 
   return (
@@ -144,7 +144,10 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
               </svg>
             </Button>
-            <Link className="flex-align-self-center" href={'#opportunity_documents'}>
+            <Link
+              className="flex-align-self-center"
+              href={"#opportunity_documents"}
+            >
               Jump to all documents
             </Link>
           </div>
