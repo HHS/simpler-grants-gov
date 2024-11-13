@@ -61,6 +61,8 @@ locals {
     #     -- the "app" database is where the analytics data is stored
     #     GRANT ALL PRIVILEGES ON DATABASE app TO metabaseuser;
     #     GRANT CONNECT ON DATABASE app TO metabaseuser;
+    #     GRANT USAGE ON SCHEMA app TO metabaseuser;
+    #     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO metabaseuser;
     MB_DB_PASS = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
