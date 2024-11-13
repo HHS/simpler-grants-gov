@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name, line-too-long
 """Get a connection to the database using a SQLAlchemy engine object."""
 
-from typing import Any
+from typing import Any, cast
 
 import boto3
 import psycopg
@@ -26,11 +26,11 @@ class PostgresDbClient:
         """Configure db engine to use short-lived IAM tokens for access."""
 
         # inspired by /api/src/adapters/db/clients/postgres_client.py
-        def get_conn() -> Any:
+        def get_conn() -> psycopg.Connection:
             """Get a psycopg connection."""
             return psycopg.connect(**get_connection_parameters(config))
 
-        conn_pool = pool.QueuePool(get_conn, max_overflow=5, pool_size=10)
+        conn_pool = pool.QueuePool(cast(Any, get_conn), max_overflow=5, pool_size=10)
 
         return create_engine(
             "postgresql+psycopg://",
