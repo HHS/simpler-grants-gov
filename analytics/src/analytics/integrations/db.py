@@ -52,6 +52,7 @@ def get_connection_parameters(config: DBSettings) -> dict[str, Any]:
     token = (
         config.password if config.local_env is True else generate_iam_auth_token(config)
     )
+    search_path = "public" if config.local_env is True else "app"
     return {
         "host": config.db_host,
         "dbname": config.name,
@@ -60,6 +61,7 @@ def get_connection_parameters(config: DBSettings) -> dict[str, Any]:
         "port": config.port,
         "connect_timeout": 20,
         "sslmode": config.ssl_mode,
+        "options": f"-c search_path={search_path}",
     }
 
 
