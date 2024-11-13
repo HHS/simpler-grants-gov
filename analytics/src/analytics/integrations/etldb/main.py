@@ -33,7 +33,7 @@ def init_db() -> None:
             text(sql),
         )
         db.commit(cursor)
-    except (RuntimeError, exc.ProgrammingError) as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to initialize db: {e}"
         raise RuntimeError(message) from e
 
@@ -55,7 +55,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     try:
         ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
         print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to sync quad data: {e}"
         raise RuntimeError(message) from e
 
@@ -69,7 +69,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
         print(
             f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
         )
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to sync deliverable data: {e}"
         raise RuntimeError(message) from e
 
@@ -77,7 +77,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     try:
         ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
         print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to sync sprint data: {e}"
         raise RuntimeError(message) from e
 
@@ -85,7 +85,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     try:
         ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
         print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to sync epic data: {e}"
         raise RuntimeError(message) from e
 
@@ -93,7 +93,7 @@ def sync_db(dataset: EtlDataset, effective: str) -> None:
     try:
         issue_map = sync_issues(db, dataset, ghid_map)
         print(f"issue row(s) processed: {len(issue_map)}")
-    except RuntimeError as e:
+    except (RuntimeError, exc.ProgrammingError, exc.OperationalError) as e:
         message = f"Failed to sync issue data: {e}"
         raise RuntimeError(message) from e
 
