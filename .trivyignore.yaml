@@ -1,4 +1,8 @@
+# See: https://aquasecurity.github.io/trivy/v0.56/docs/configuration/filtering/#trivyignore
+# for details on formatting this file.
+#
 # List of vulnerabilities to ignore for the trivy scan
+
 # Please add safelists in the following format to make it easier when checking
 # Package/module name: URL to vulnerability for checking updates
 #  Versions:     URL to the version history
@@ -6,7 +10,13 @@
 #                 Link to the dependencies for ease of checking for updates
 #  Issue:         Why there is a finding and why this is here or not been removed
 #  Last checked:  Date last checked in scans
-#The-CVE-or-vuln-id # Remove comment at start of line
 
+# vulnerabilities:
+#   - id: CVE-1234-5678
 
-jwt-token
+secrets:
+  # PyJWT has an example with a fake JWT that Trivy flags.
+  # see: https://github.com/aquasecurity/trivy/discussions/5772
+  id: jwt-token
+  paths:
+    - "/api/.venv/lib/python3.13/site-packages/PyJWT-2.9.0.dist-info/METADATA"
