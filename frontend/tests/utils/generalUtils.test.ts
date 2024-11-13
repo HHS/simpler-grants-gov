@@ -69,6 +69,17 @@ describe("splitMarkup", () => {
       " <div>that I've been turning over <strong>in</strong> my mind ever since.</div>",
     );
   });
+  it("ignores anything that is within quotes within a tag and allows it to pass through", () => {
+    const exampleMarkup =
+      "<div>In <a href='http://things' fake='<<>>>><<//'>my younger</a> and more <p>vulnerable <strong>years my<ul><li>father</li><li>gave</li></ul>me</strong> some </p>advice</div> <div>that I've been turning over <strong>in</strong> my mind ever since.</div>";
+    const { preSplit, postSplit } = splitMarkup(exampleMarkup, 75);
+    expect(preSplit).toEqual(
+      "<div>In <a href='http://things' fake='<<>>>><<//'>my younger</a> and more <p>vulnerable <strong>years my<ul><li>father</li><li>gave</li></ul>me</strong> some </p>advice</div>",
+    );
+    expect(postSplit).toEqual(
+      " <div>that I've been turning over <strong>in</strong> my mind ever since.</div>",
+    );
+  });
 });
 
 describe("findFirstWhitespace", () => {

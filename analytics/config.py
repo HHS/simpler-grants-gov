@@ -17,6 +17,7 @@ class DBSettings(PydanticBaseEnvConfig):
      user: str = Field (alias="DB_USER")
      password: Optional[str] = Field(None, alias="DB_PASSWORD")
      ssl_mode: str = Field("require", alias="DB_SSL_MODE")
+     db_schema: str = Field ("app", alias="DB_SCHEMA")
      slack_bot_token: str = Field(alias="ANALYTICS_SLACK_BOT_TOKEN")
      reporting_channel_id: str = Field(alias="ANALYTICS_REPORTING_CHANNEL_ID")
      aws_region: Optional[str] = Field(None, alias="AWS_REGION")
