@@ -16,11 +16,11 @@ interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
 }
 
+dayjs.extend(advancedFormat);
+dayjs.extend(timezone);
+
 const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
   const t = useTranslations("OpportunityListing.documents");
-
-  dayjs.extend(advancedFormat);
-  dayjs.extend(timezone);
 
   return (
     <>
@@ -47,7 +47,7 @@ const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
             </td>
             <td data-label={t("table_col_last_updated")}>
               {/* https://day.js.org/docs/en/display/format */}
-              {dayjs(document.updated_at).format("MMM D, YYYY hh:mm:ss A z")}
+              {dayjs(document.updated_at).format("MMM D, YYYY hh:mm A z")}
             </td>
           </tr>
         ))}
@@ -59,30 +59,12 @@ const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
 const OpportunityDocuments = ({ documents }: OpportunityDocumentsProps) => {
   const t = useTranslations("OpportunityListing.documents");
 
-  const relatedDocs = documents.filter(
-    ({ opportunity_attachment_type }) =>
-      opportunity_attachment_type === "notice_of_funding_opportunity",
-  );
-  const forms = documents.filter(
-    ({ opportunity_attachment_type }) =>
-      opportunity_attachment_type === "other",
-  );
-
   return (
     <>
       <h2>{t("title")}</h2>
-      <h3>{t("related")}</h3>
-      {relatedDocs.length > 0 ? (
+      {documents.length > 0 ? (
         <Table>
-          <DocumentTable documents={relatedDocs} />
-        </Table>
-      ) : (
-        <p>--</p>
-      )}
-      <h3 className="margin-top-5">{t("forms")}</h3>
-      {forms.length > 0 ? (
-        <Table>
-          <DocumentTable documents={forms} />
+          <DocumentTable documents={documents} />
         </Table>
       ) : (
         <p>--</p>
