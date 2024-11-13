@@ -12,6 +12,7 @@ class PydanticBaseEnvConfig(BaseSettings):
 
 class DBSettings(PydanticBaseEnvConfig):
      db_host: str = Field(alias="DB_HOST")
+     name: str = Field(alias="DB_NAME")
      port: int = Field(5432,alias="DB_PORT")
      user: str = Field (alias="DB_USER")
      password: Optional[str] = Field(None, alias="DB_PASSWORD")
