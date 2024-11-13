@@ -30,7 +30,7 @@ def get_db() -> Engine:
     url = f"postgresql+psycopg://{db.user}:{token}@{db.db_host}:{db.port}?sslmode={db.ssl_mode}"
     print(f"TEMP DEBUG: environment = {os.getenv('ENVIRONMENT', 'local')}")
     print(f"TEMP DEBUG: db settings = {db}")
-    print(f"TEMP DEBUG: token has non-zero len? {len(token) > 0}")
+    print(f"TEMP DEBUG: token has non-zero len? {len(str(token)) > 0}")
 
     return create_engine(
         url,
