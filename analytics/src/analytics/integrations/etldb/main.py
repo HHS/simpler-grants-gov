@@ -21,7 +21,7 @@ def init_db() -> None:
     """Initialize etl database."""
     # define the path to the sql file
     parent_path = Path(__file__).resolve().parent
-    sql_path = f"{parent_path}/create_etl_db.sql"
+    sql_path = f"{parent_path}/migrations/versions/2024_11_14_create_tables_etldb.sql"
 
     # read sql file
     with open(sql_path) as f:

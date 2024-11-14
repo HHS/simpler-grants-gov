@@ -1,10 +1,17 @@
+CREATE TABLE IF NOT EXISTS gh_schema_version (
+	version INTEGER NOT NULL UNIQUE,
+	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO gh_schema_version (version) values (1);
+
 CREATE TABLE IF NOT EXISTS gh_deliverable (
 	id SERIAL PRIMARY KEY,
 	ghid TEXT UNIQUE NOT NULL,
 	title TEXT NOT NULL,
 	pillar TEXT, 
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP 
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS gh_deliverable_quad_map (
@@ -13,7 +20,7 @@ CREATE TABLE IF NOT EXISTS gh_deliverable_quad_map (
 	quad_id INTEGER,
 	d_effective DATE NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP,
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE(deliverable_id, d_effective)
 );
 CREATE INDEX IF NOT EXISTS gh_dqm_i1 on gh_deliverable_quad_map(quad_id, d_effective);
@@ -23,7 +30,7 @@ CREATE TABLE IF NOT EXISTS gh_epic (
 	ghid TEXT UNIQUE NOT NULL,
 	title TEXT NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP 
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS gh_epic_deliverable_map (
@@ -32,7 +39,7 @@ CREATE TABLE IF NOT EXISTS gh_epic_deliverable_map (
 	deliverable_id INTEGER,
 	d_effective DATE NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP,
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE(epic_id, d_effective)
 );
 CREATE INDEX IF NOT EXISTS gh_edm_i1 on gh_epic_deliverable_map(deliverable_id, d_effective);
@@ -47,7 +54,7 @@ CREATE TABLE IF NOT EXISTS gh_issue (
 	parent_issue_ghid TEXT,
 	epic_id INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP 
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS gh_issue_i1 on gh_issue(epic_id);
 
@@ -59,7 +66,7 @@ CREATE TABLE IF NOT EXISTS gh_issue_history (
 	points INTEGER NOT NULL DEFAULT 0,
 	d_effective DATE NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP,
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
 CREATE INDEX IF NOT EXISTS gh_ih_i1 on gh_issue_history(issue_id, d_effective);
@@ -70,7 +77,7 @@ CREATE TABLE IF NOT EXISTS gh_issue_sprint_map (
 	sprint_id INTEGER,
 	d_effective DATE NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP,
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE(issue_id, d_effective)
 );
 
@@ -83,7 +90,7 @@ CREATE TABLE IF NOT EXISTS gh_sprint (
 	duration INTEGER,
 	quad_id INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP 
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS gh_quad (
@@ -94,7 +101,7 @@ CREATE TABLE IF NOT EXISTS gh_quad (
 	end_date DATE,
 	duration INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP 
+	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS gh_quad_i1 on gh_quad(start_date);
  

@@ -1,0 +1,15 @@
+DROP TABLE IF EXISTS gh_schema_version;
+DROP TABLE IF EXISTS gh_deliverable;
+DROP TABLE IF EXISTS gh_deliverable_quad_map;
+DROP TABLE IF EXISTS gh_epic;
+DROP TABLE IF EXISTS gh_epic_deliverable_map;
+DROP TABLE IF EXISTS gh_issue;
+DROP TABLE IF EXISTS gh_issue_history;
+DROP TABLE IF EXISTS gh_issue_sprint_map;
+DROP TABLE IF EXISTS gh_sprint;
+DROP TABLE IF EXISTS gh_quad;
+DROP INDEX IF EXISTS gh_dqm_i1;
+DROP INDEX IF EXISTS gh_edm_i1;
+DROP INDEX IF EXISTS gh_issue_i1;
+DROP INDEX IF EXISTS gh_ih_i1;
+DROP INDEX IF EXISTS gh_quad_i1;
