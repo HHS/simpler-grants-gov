@@ -62,6 +62,7 @@ locals {
     #     GRANT ALL PRIVILEGES ON DATABASE app TO metabaseuser;
     #     GRANT CONNECT ON DATABASE app TO metabaseuser;
     #     GRANT USAGE ON SCHEMA app TO metabaseuser;
+    #     ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT ON TABLES TO metabaseuser;
     #     GRANT SELECT ON ALL TABLES IN SCHEMA app TO metabaseuser;
     MB_DB_PASS = {
       manage_method     = "manual"
