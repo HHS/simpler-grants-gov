@@ -6,6 +6,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
+    "all-checks": "npm run test && npm run lint && npm run ts:check && npm run build",
     "build": "next build",
     "dev": "next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",

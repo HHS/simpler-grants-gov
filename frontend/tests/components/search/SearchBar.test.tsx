@@ -5,6 +5,7 @@ import { axe } from "jest-axe";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { render, screen } from "tests/react-utils";
 
+import { ReadonlyURLSearchParams } from "next/navigation";
 import React from "react";
 
 import SearchBar from "src/components/search/SearchBar";
@@ -15,6 +16,7 @@ const mockUpdateQueryParams = jest.fn();
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: mockUpdateQueryParams,
+    searchParams: new ReadonlyURLSearchParams(),
   }),
 }));
 
