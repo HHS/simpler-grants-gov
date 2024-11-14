@@ -56,7 +56,7 @@ export type SortOption = {
 
 export interface QueryParamData {
   page: number;
-  query: string | null | undefined;
+  query?: string | null;
   status: Set<string>;
   fundingInstrument: Set<string>;
   eligibility: Set<string>;

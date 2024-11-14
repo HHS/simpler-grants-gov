@@ -27,6 +27,14 @@ describe("subscribeEmailAction", () => {
     json: () => ({}),
   } as Response;
 
+  let originalFetch: typeof global.fetch;
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+
   it("email action returns correct messages", async () => {
     const testFormData = new FormData();
     testFormData.set("name", "Firsty");
