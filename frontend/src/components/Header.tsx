@@ -1,11 +1,12 @@
 "use client";
 
+import clsx from "clsx";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -29,7 +30,7 @@ const NavLinks = ({
   onToggleMobileNav,
 }: {
   mobileExpanded: boolean;
-  onToggleMobileNav: () => unknown;
+  onToggleMobileNav: () => void;
 }) => {
   const t = useTranslations("Header");
   const path = usePathname();
@@ -61,17 +62,26 @@ const NavLinks = ({
       }
       return (
         <Link href={link.href} key={link.href}>
-          {link.text}
+          {" "}
+          <span
+            onClick={() => {
+              if (mobileExpanded) {
+                onToggleMobileNav();
+              }
+            }}
+          >
+            {link.text}
+          </span>
         </Link>
       );
     });
-  }, [navLinkList]);
+  }, [navLinkList, mobileExpanded, onToggleMobileNav]);
 
   return (
     <PrimaryNav
       items={navItems}
       mobileExpanded={mobileExpanded}
-      onToggleMobileNav={onToggleMobileNav}
+      onToggleMobileNav={() => onToggleMobileNav()}
     ></PrimaryNav>
   );
 };
@@ -83,12 +93,38 @@ const Header = ({ logoPath, locale }: Props) => {
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
+
+  const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setIsMobileNavExpanded(false);
+    }
+  }, []);
+
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
+
+  // does this work? if so, need to fix up the typing
+  useEffect(() => {
+    if (isMobileNavExpanded) {
+      document.addEventListener("keyup", closeMenuOnEscape);
+    }
+    return () => {
+      document.removeEventListener("keyup", closeMenuOnEscape);
+    };
+  }, [isMobileNavExpanded, closeMenuOnEscape]);
 
   return (
     <>
       <div
-        className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
+        className={clsx({
+          "usa-overlay": true,
+          "desktop:display-none": true,
+          "is-visible": isMobileNavExpanded,
+        })}
+        onClick={() => {
+          if (isMobileNavExpanded) {
+            setIsMobileNavExpanded(false);
+          }
+        }}
       />
       <GovBanner language={language} />
       <USWDSHeader basic={true}>
