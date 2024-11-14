@@ -21,10 +21,10 @@ root
 
 ### Review automated linters
 
-| Workflow name                                         | Description                                                            | Interval           |
-| ----------------------------------------------------- | ---------------------------------------------------------------------- | ------------------ |
-| [Lint - Close done issues][close-done-issues]         | Close issues that are marked as done in a project but still open.      | Nightly at 12am ET |
-| [Lint - Set points and sprint][set-points-and-sprint] | Sets default points and sprint value (if unset) when issues are closed | On issue close     |
+| Workflow name                                         | Description                                                            | Trigger                        |
+| ----------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------ |
+| [Lint - Set points and sprint][set-points-and-sprint] | Sets default points and sprint value (if unset) when issues are closed | On issue close                 |
+| [Lint - Check wiki links][check-wiki-links]      | Checks that all wiki markdown files are linked in the SUMMARY.md       | Each PR that modifies the wiki |
 
 ### Manually run the linters
 
@@ -43,19 +43,19 @@ root
 1. Create a new linting script in `linters/scripts/`.
    - **Note:** If you're script requires a long graphql query for the GitHub graphql API, pull that query out into its own `.graphql` file stored in `linters/queries/`.
    - **Note:** If you're script changes any resources directly in GitHub, make sure you include a dry run option that skips over any write step if the `--dry-run` flag is passed during execution.
-   - For a reference please see [`linters/scripts/close-issues-in-done-col.sh`][close-done-issues-script] and its associated query [`linters/queries/get-project-items.graphql`][get-project-items-query]
+   - For a reference please see [`linters/scripts/set-points-and-sprint.sh`][set-points-and-sprint-script] and its associated query [`linters/queries/get-project-items.graphql`][get-project-items-query]
 2. Update the permissions on your script so it can be executed: `chmod 744 ./scripts/<path-to-script>`
 3. Test your script locally `./scripts/<path-to-script> --dry-run`
 4. Add your script to the [CI checks for the linters](../workflows/ci-project-linters.yml). Make sure you include any environment variables needed by your script and the `--dry-run` flag in the GitHub action `run` statement.
 5. Create a new GitHub action workflow to run your linter.
-   - **Note:** Make sure the name of the yaml file is prefixed with `lint-`.
+   - **Note:** Make sure the name of the yaml file is prefixed with `lint-` (or `ci-` if run on PRs).
    - **Note:** Make sure the workflow is run from the `linters/` sub-directory.
    - **Note:** Make sure the workflow has a `workflow_dispatch:` trigger option to allow for manual triggers.
-   - For a reference, please see [`.github/workflows/lint-close-done-issues.yml`][close-done-issues]
+   - For a reference, please see [`.github/workflows/lint-set-points-and-sprint.yml`][set-points-and-sprint]
 6. Add your new linter to the table in the ["Review automated linters"](#review-automated-linters) section above
 
 
-[close-done-issues]: ../workflows/lint-close-done-issues.yml
-[close-done-issues-script]: ./scripts/close-issues-in-done-col.sh
-[get-project-items-query]: ./queries/get-project-items.graphql
 [set-points-and-sprint]: ../workflows/lint-set-points-and-sprint.yml
+[set-points-and-sprint-script]: ./scripts/set-points-and-sprint.sh
+[get-project-items-query]: ./queries/getItemMetadata.graphql
+[check-wiki-links]: ../workflows/ci-wiki-links.yml
