@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS gh_schema_version (
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	t_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO gh_schema_version (version) values (1);
+INSERT INTO gh_schema_version (version) values (1) ON CONFLICT (version) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS gh_deliverable (
 	id SERIAL PRIMARY KEY,

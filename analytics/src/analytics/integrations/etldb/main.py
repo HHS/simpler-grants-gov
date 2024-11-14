@@ -17,7 +17,7 @@ from analytics.integrations.etldb.sprint_model import EtlSprintModel
 VERBOSE = False
 
 
-def init_db() -> None:
+def initialize_database() -> None:
     """Initialize etl database."""
     # define the path to the sql file
     parent_path = Path(__file__).resolve().parent
@@ -45,7 +45,7 @@ def init_db() -> None:
         raise RuntimeError(message) from e
 
 
-def sync_db(dataset: EtlDataset, effective: str) -> None:
+def sync_data(dataset: EtlDataset, effective: str) -> None:
     """Write github data to etl database."""
     # initialize a map of github id to db row id
     ghid_map: dict[EtlEntityType, dict[str, int]] = {
