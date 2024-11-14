@@ -90,9 +90,6 @@ const Header = ({ logoPath, locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
-  const handleMobileNavToggle = () => {
-    setIsMobileNavExpanded(!isMobileNavExpanded);
-  };
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -100,9 +97,6 @@ const Header = ({ logoPath, locale }: Props) => {
     }
   }, []);
 
-  const language = locale && locale.match("/^es/") ? "spanish" : "english";
-
-  // does this work? if so, need to fix up the typing
   useEffect(() => {
     if (isMobileNavExpanded) {
       document.addEventListener("keyup", closeMenuOnEscape);
@@ -111,6 +105,12 @@ const Header = ({ logoPath, locale }: Props) => {
       document.removeEventListener("keyup", closeMenuOnEscape);
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
+
+  const language = locale && locale.match("/^es/") ? "spanish" : "english";
+
+  const handleMobileNavToggle = () => {
+    setIsMobileNavExpanded(!isMobileNavExpanded);
+  };
 
   return (
     <>
