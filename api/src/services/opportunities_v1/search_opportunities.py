@@ -34,8 +34,8 @@ REQUEST_FIELD_NAME_MAPPING = {
     "opportunity_title": "opportunity_title.keyword",
     "post_date": "summary.post_date",
     "close_date": "summary.close_date",
-    "agency_code": "agency.keyword",
-    "agency": "agency.keyword",
+    "agency_code": "agency_code.keyword",
+    "agency": "agency_code.keyword",
     "opportunity_status": "opportunity_status.keyword",
     "funding_instrument": "summary.funding_instruments.keyword",
     "funding_category": "summary.funding_categories.keyword",
@@ -142,6 +142,9 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
 
 def _get_search_request(params: SearchOpportunityParams) -> dict:
     builder = search.SearchQueryBuilder()
+
+    # Make sure total hit count gets counted for more than 10k records
+    builder.track_total_hits(True)
 
     # Pagination
     builder.pagination(

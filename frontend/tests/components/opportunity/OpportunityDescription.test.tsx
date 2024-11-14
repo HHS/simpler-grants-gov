@@ -8,6 +8,13 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 
+const splitMarkupMock = jest
+  .fn()
+  .mockImplementation((content: string, index: number) => ({
+    preSplit: content.substring(0, index),
+    postSplit: content.substring(index),
+  }));
+
 jest.mock("isomorphic-dompurify", () => ({
   sanitize: jest.fn((input: string) => input),
 }));
@@ -15,6 +22,15 @@ jest.mock("isomorphic-dompurify", () => ({
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
+
+jest.mock("src/utils/generalUtils", () => ({
+  splitMarkup: (content: string, index: number) =>
+    // eslint-disable-next-line
+    splitMarkupMock(content, index),
+}));
+
+const longDescription =
+  "Its young really risk. College call month identify out east. Defense writer ahead trip smile. Picture data area system manager hour none. Doctor pay visit save test. Again feeling little throughout. Improve drug play remain face word somebody. Baby miss may drive treat letter. Laugh message as car position team. Want build last. Model or base within bag manager brother. How still teacher son fish pay until. Debate doctor visit because success. Message will white risk. Follow sell nearly individual family crime particularly understand. Police street federal six really major owner. Should friend minute team material trade special. Example above government usually deal fill few. Kid middle our sometimes appear. Ready share century nor take let. Water sort choice beat design she sport commercial. Nature if natural feel. Yes door cold realize. Receive trade central good realize number woman them. Actually there common order purpose within. Enough trouble develop station almost read. Who attack include company.";
 
 const mockSummaryData: Summary = {
   summary_description: "<p>Summary Description</p>",
@@ -44,6 +60,44 @@ describe("OpportunityDescription", () => {
     expect(DOMPurify.sanitize).toHaveBeenCalledWith(
       sanitizedSummaryDescription,
     );
+  });
+
+  it("splits opportunity description after 600 characters if description is longer than 750 characters", () => {
+    render(
+      <OpportunityDescription
+        summary={{ ...mockSummaryData, summary_description: longDescription }}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Its young really risk. College call month identify out east. Defense writer ahead trip smile. Picture data area system manager hour none. Doctor pay visit save test. Again feeling little throughout. Improve drug play remain face word somebody. Baby miss may drive treat letter. Laugh message as car position team. Want build last. Model or base within bag manager brother. How still teacher son fish pay until. Debate doctor visit because success. Message will white risk. Follow sell nearly individual family crime particularly understand. Police street federal six really major owner. Should friend...",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryAllByText(
+        " minute team material trade special. Example above government usually deal fill few. Kid middle our sometimes appear. Ready share century nor take let. Water sort choice beat design she sport commercial. Nature if natural feel. Yes door cold realize. Receive trade central good realize number woman them. Actually there common order purpose within. Enough trouble develop station almost read. Who attack include company.",
+      ),
+    ).toHaveLength(0);
+  });
+
+  it("shows all description if parsed mark up comes out with no content to hide", () => {
+    splitMarkupMock.mockImplementation((content: string) => ({
+      preSplit: content,
+      postSplit: "",
+    }));
+
+    render(
+      <OpportunityDescription
+        summary={{ ...mockSummaryData, summary_description: longDescription }}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Its young really risk. College call month identify out east. Defense writer ahead trip smile. Picture data area system manager hour none. Doctor pay visit save test. Again feeling little throughout. Improve drug play remain face word somebody. Baby miss may drive treat letter. Laugh message as car position team. Want build last. Model or base within bag manager brother. How still teacher son fish pay until. Debate doctor visit because success. Message will white risk. Follow sell nearly individual family crime particularly understand. Police street federal six really major owner. Should friend minute team material trade special. Example above government usually deal fill few. Kid middle our sometimes appear. Ready share century nor take let. Water sort choice beat design she sport commercial. Nature if natural feel. Yes door cold realize. Receive trade central good realize number woman them. Actually there common order purpose within. Enough trouble develop station almost read. Who attack include company.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("renders the eligible applicants with mapped values", () => {

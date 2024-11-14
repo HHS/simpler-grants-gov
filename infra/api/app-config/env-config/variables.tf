@@ -41,6 +41,11 @@ variable "search_data_volume_size" {
   default = 20
 }
 
+variable "search_availability_zone_count" {
+  type    = number
+  default = 1
+}
+
 variable "has_database" {
   type = bool
 }
@@ -64,6 +69,22 @@ variable "database_max_capacity" {
 
 variable "database_min_capacity" {
   description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+}
+
+variable "instance_desired_instance_count" {
+  description = "Number of desired ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
+variable "instance_scaling_max_capacity" {
+  description = "Maximum number of ECS container instances for the service"
+  type        = number
+}
+
+variable "instance_scaling_min_capacity" {
+  description = "Minimum number of ECS container instances for the service"
   type        = number
 }
 

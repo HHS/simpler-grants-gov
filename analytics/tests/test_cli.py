@@ -301,7 +301,7 @@ class TestEtlEntryPoint:
         command = [
             "etl",
             "transform_and_load",
-            "--deliverable-file",
+            "--issue-file",
             self.TEST_FILE_1,
             "--effective-date",
             str(self.EFFECTIVE_DATE),
@@ -328,7 +328,7 @@ class TestEtlEntryPoint:
         command = [
             "etl",
             "transform_and_load",
-            "--deliverable-file",
+            "--issue-file",
             self.TEST_FILE_1,
             "--effective-date",
             "2024-Oct-07",

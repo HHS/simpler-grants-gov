@@ -1,5 +1,4 @@
-import fetchers from "src/app/api/Fetchers";
-import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 
@@ -7,14 +6,13 @@ import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ServerPageProps {
-  searchParams: QueryParamData;
+  searchResultsPromise: Promise<SearchAPIResponse>;
 }
 
 export default async function SearchResultsListFetch({
-  searchParams,
+  searchResultsPromise,
 }: ServerPageProps) {
-  const searchResults =
-    await fetchers.searchOpportunityFetcher.searchOpportunities(searchParams);
+  const searchResults = await searchResultsPromise;
   const maxPaginationError = null;
   const t = await getTranslations("Search");
 

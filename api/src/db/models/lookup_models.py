@@ -4,6 +4,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ExternalUserType,
     FundingCategory,
     FundingInstrument,
     OpportunityAttachmentType,
@@ -113,6 +114,8 @@ AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
         LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
     ]
 )
+
+EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 1)])
 
 
 @LookupRegistry.register_lookup(OPPORTUNITY_CATEGORY_CONFIG)
@@ -226,4 +229,18 @@ class LkOpportunityAttachmentType(LookupTable, TimestampMixin):
         return LkOpportunityAttachmentType(
             opportunity_attachment_type_id=lookup.lookup_val,
             description=lookup.get_description(),
+        )
+
+
+@LookupRegistry.register_lookup(EXTERNAL_USER_TYPE_CONFIG)
+class LkExternalUserType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_external_user_type"
+
+    external_user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
+        return LkExternalUserType(
+            external_user_type_id=lookup.lookup_val, description=lookup.get_description()
         )

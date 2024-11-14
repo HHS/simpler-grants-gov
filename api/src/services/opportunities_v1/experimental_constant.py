@@ -1,11 +1,13 @@
 from enum import StrEnum
 
 DEFAULT = [
-    # Note that we do keyword for agency & opportunity number
+    # Note that we do keyword & non-keyword for agency & opportunity number
     # as we don't want to compare to a tokenized value which
-    # may have split on the dashes.
+    # may have split on the dashes, but also still support prefixing (eg. USAID-*)
+    "agency^16",
     "agency.keyword^16",
     "opportunity_title^2",
+    "opportunity_number^12",
     "opportunity_number.keyword^12",
     "summary.summary_description",
     "opportunity_assistance_listings.assistance_listing_number^10",
@@ -13,10 +15,12 @@ DEFAULT = [
 ]
 
 EXPANDED = [
+    "agency",
     "agency.keyword",
     "agency_name",
     "top_level_agency_name",
     "opportunity_title",
+    "opportunity_number",
     "opportunity_number.keyword",
     "category_explanation",
     "summary.summary_description",
@@ -28,6 +32,7 @@ EXPANDED = [
 
 
 AGENCY = [
+    "agency",
     "agency.keyword",
     "agency_name",
     "top_level_agency_name",

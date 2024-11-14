@@ -15,7 +15,8 @@ from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
-from analytics.integrations import db, etldb, slack
+from analytics.integrations import etldb, slack
+from analytics.integrations.db import PostgresDbClient
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
@@ -40,7 +41,6 @@ POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
 STATUS_ARG = typer.Option(
     help="Deliverable status to include in report, can be passed multiple times",
 )
-DELIVERABLE_FILE_ARG = typer.Option(help="Path to file with exported deliverable data")
 EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
@@ -209,9 +209,8 @@ def show_and_or_post_results(
 @import_app.command(name="test_connection")
 def test_connection() -> None:
     """Test function that ensures the DB connection works."""
-    engine = db.get_db()
-    # connection method from sqlalchemy
-    connection = engine.connect()
+    client = PostgresDbClient()
+    connection = client.connect()
 
     # Test INSERT INTO action
     result = connection.execute(
@@ -235,14 +234,14 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
     logger.info("Beginning import")
 
     # Get the database engine and establish a connection
-    engine = db.get_db()
+    client = PostgresDbClient()
 
     # Load data from the sprint board
     issues = GitHubIssues.from_json(delivery_file)
 
     issues.to_sql(
         output_table="github_project_data",
-        engine=engine,
+        engine=client.engine(),
         replace_table=True,
     )
     rows = len(issues.to_dict())
@@ -264,7 +263,7 @@ def initialize_database() -> None:
 
 @etl_app.command(name="transform_and_load")
 def transform_and_load(
-    deliverable_file: Annotated[str, DELIVERABLE_FILE_ARG],
+    issue_file: Annotated[str, ISSUE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
     """Transform and load etl data."""
@@ -282,7 +281,7 @@ def transform_and_load(
         return
 
     # hydrate a dataset instance from the input data
-    dataset = EtlDataset.load_from_json_file(file_path=deliverable_file)
+    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
 
     # sync data to db
     etldb.sync_db(dataset, datestamp)
