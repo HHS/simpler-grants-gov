@@ -19,4 +19,4 @@ secrets:
   # see: https://github.com/aquasecurity/trivy/discussions/5772
   id: jwt-token
   paths:
-    - "/api/.venv/lib/python3.13/site-packages/PyJWT-2.9.0.dist-info/METADATA"
+    - "api/.venv/lib/python3.13/site-packages/PyJWT-2.9.0.dist-info/METADATA"
