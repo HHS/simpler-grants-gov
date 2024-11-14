@@ -26,7 +26,7 @@ SHELL = /bin/bash -o pipefail
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e GH_TOKEN -e ANALYTICS_SLACK_BOT_TOKEN -e ANALYTICS_REPORTING_CHANNEL_ID
 else
- DOCKER_EXEC_ARGS := -e GH_TOKEN
+ DOCKER_EXEC_ARGS := -e GH_TOKEN -e ANALYTICS_SLACK_BOT_TOKEN -e ANALYTICS_REPORTING_CHANNEL_ID
 endif
 
 # By default, all python/poetry commands will run inside of the docker container
@@ -105,7 +105,10 @@ unit-test:
 e2e-test:
 	@echo "=> Running end-to-end tests"
 	@echo "============================="
-	$(POETRY) pytest tests/integrations --cov=src --cov-append
+	$(POETRY) pytest tests/integrations \
+		--slack-token-set \
+		--cov=src \
+		--cov-append
 
 test-audit: unit-test e2e-test
 	@echo "=> Running test coverage report"
