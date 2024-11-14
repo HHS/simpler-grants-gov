@@ -1,6 +1,5 @@
 /* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
-import { PageProps } from "tests/e2e/playwrightUtils";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");

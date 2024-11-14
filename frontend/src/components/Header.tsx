@@ -62,8 +62,7 @@ const NavLinks = ({
       }
       return (
         <Link href={link.href} key={link.href}>
-          {" "}
-          <span
+          <div
             onClick={() => {
               if (mobileExpanded) {
                 onToggleMobileNav();
@@ -71,7 +70,7 @@ const NavLinks = ({
             }}
           >
             {link.text}
-          </span>
+          </div>
         </Link>
       );
     });
@@ -81,7 +80,7 @@ const NavLinks = ({
     <PrimaryNav
       items={navItems}
       mobileExpanded={mobileExpanded}
-      onToggleMobileNav={() => onToggleMobileNav()}
+      onToggleMobileNav={onToggleMobileNav}
     ></PrimaryNav>
   );
 };
