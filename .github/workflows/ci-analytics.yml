@@ -39,12 +39,12 @@ jobs:
       - name: Run linting
         run: make lint
 
+      # The following tasks require github and slack tokens set in env secrets
       - name: Run tests
         run: make test-audit
 
-      # Both of these tasks are looking for github and slack auth
-      # - name: Export GitHub data
-      #   run: make gh-data-export
+      - name: Export GitHub data
+        run: make gh-data-export
 
-      # - name: Run reports
-      #   run: make sprint-reports
+      - name: Run reports
+        run: make sprint-reports
