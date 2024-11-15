@@ -1,5 +1,7 @@
 """Integrate with database to read and write etl data."""
 
+import os
+import re
 from pathlib import Path
 
 from psycopg.errors import InsufficientPrivilege
@@ -15,44 +17,38 @@ from analytics.integrations.etldb.quad_model import EtlQuadModel
 from analytics.integrations.etldb.sprint_model import EtlSprintModel
 
 VERBOSE = False
-MIN_SCHEMA_VERSION = 2
+#MIN_SCHEMA_VERSION = 2
 
 
 def initialize_database() -> None:
     """Initialize etl database."""
     # get connection to database
-    try:
-        db = EtlDb()
-        cursor = db.connection()
-    except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
-        InsufficientPrivilege,
-    ) as e:
-        message = f"FATAL: Failed to initialize database client: {e}"
-        raise RuntimeError(message) from e
+    etldb = EtlDb()
+    current_version = etldb.get_schema_version()
+    print(f"current schema version: {current_version}")
 
-    # execute sql
-    try:
-        for sql_path in get_sql_files():
-            # read sql file
-            with open(sql_path) as f:
-                sql = f.read()
-                # execute sql
-                cursor.execute(
-                    text(sql),
-                )
+    # get all sql file paths and respective version numbers
+    sql_file_path_map = get_sql_file_paths()
+    all_versions = sorted(sql_file_path_map.keys())
+
+    # iterate sql files
+    for next_version in all_versions:
+        if next_version <= current_version:
+            continue
+        # read sql file
+        with open(sql_file_path_map[next_version]) as f:
+            sql = f.read()
+            # execute sql
+            print(f"applying updates for schema version: {next_version}")
+            cursor = etldb.connection()
+            cursor.execute(
+                text(sql),
+            )
             # commit changes
-            db.commit(cursor)
-    except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
-        InsufficientPrivilege,
-    ) as e:
-        message = f"FATAL: Failed to initialize database: {e}"
-        raise RuntimeError(message) from e
+            etldb.commit(cursor)
+            # bump schema version number
+            etldb.set_schema_version(next_version, True)
+            current_version = next_version
 
 
 def sync_data(dataset: EtlDataset, effective: str) -> None:
@@ -69,23 +65,25 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
     db = EtlDb(effective)
 
     # validate schema version
-    schema_version = db.schema_version()
+    """
+    schema_version = db.get_schema_version()
     if schema_version < MIN_SCHEMA_VERSION:
         message = (
             f"FATAL: current schema version ({schema_version}) "
             f"does not meet minimum ({MIN_SCHEMA_VERSION})"
         )
         raise ValueError(message)
+    """
 
     # sync quad data to db resulting in row id for each quad
     try:
         ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
         print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
     except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
         InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
     ) as e:
         message = f"FATAL: Failed to sync quad data: {e}"
         raise RuntimeError(message) from e
@@ -101,10 +99,10 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
             f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
         )
     except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
         InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
     ) as e:
         message = f"FATAL: Failed to sync deliverable data: {e}"
         raise RuntimeError(message) from e
@@ -114,10 +112,10 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
         ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
         print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
     except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
         InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
     ) as e:
         message = f"FATAL: Failed to sync sprint data: {e}"
         raise RuntimeError(message) from e
@@ -127,10 +125,10 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
         ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
         print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
     except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
         InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
     ) as e:
         message = f"FATAL: Failed to sync epic data: {e}"
         raise RuntimeError(message) from e
@@ -140,10 +138,10 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
         issue_map = sync_issues(db, dataset, ghid_map)
         print(f"issue row(s) processed: {len(issue_map)}")
     except (
-        RuntimeError,
-        ProgrammingError,
-        OperationalError,
         InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
     ) as e:
         message = f"FATAL: Failed to sync issue data: {e}"
         raise RuntimeError(message) from e
@@ -211,11 +209,27 @@ def sync_quads(db: EtlDb, dataset: EtlDataset) -> dict:
     return result
 
 
-def get_sql_files() -> list[str]:
+def get_sql_file_paths() -> dict[int:str]:
     """Get all sql files needed for database initialization."""
+    result = {}
+
     # define the path to the sql files
-    parent_path = Path(__file__).resolve().parent
-    return [
-        f"{parent_path}/migrations/versions/2024_11_14_create_tables_etldb.sql",
-        f"{parent_path}/migrations/versions/2024_11_15_update_columns_etldb.sql",
-    ]
+    sql_file_directory = os.path.join(
+        Path(__file__).resolve().parent, "migrations/versions"
+    )
+
+    # get list of sorted filenames
+    filename_list = sorted(os.listdir(sql_file_directory))
+
+    # compile result
+    pattern = re.compile(r"^\d\d\d\d_.+\.sql$")
+    for filename in filename_list:
+        # validate filename format
+        if pattern.match(filename):
+            version = int(filename[:4])
+            result[version] = str(os.path.join(sql_file_directory, filename))
+        else:
+            if VERBOSE:
+                print(f"WARNING: ignoring malformed SQL filename: {filename}")
+
+    return result

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS gh_schema_version;
+DROP TABLE IF EXISTS schema_version;
 DROP TABLE IF EXISTS gh_deliverable;
 DROP TABLE IF EXISTS gh_deliverable_quad_map;
 DROP TABLE IF EXISTS gh_epic;

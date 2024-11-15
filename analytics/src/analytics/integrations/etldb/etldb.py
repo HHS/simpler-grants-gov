@@ -36,28 +36,58 @@ class EtlDb:
         """Commit an open transaction."""
         connection.commit()
 
-    def schema_version(self) -> int:
+    def get_schema_version(self) -> int:
         """Select schema version from etl database."""
-        version = 1
-        cursor = self.connection()
+        version = 0
 
-        result1 = cursor.execute(
-            text(
-                "select table_name from information_schema.tables "
-                "where table_name = 'gh_schema_version'",
-            ),
-        )
-        row1 = result1.fetchone()
-
-        if row1 and row1[0] == "gh_schema_version":
-            result2 = cursor.execute(
-                text("select max(version) from gh_schema_version"),
+        if self.schema_versioning_exists():
+            result = self.connection().execute(
+                text("select version from schema_version"),
             )
-            row2 = result2.fetchone()
-            if row2:
-                version = row2[0]
+            row = result.fetchone()
+            if row:
+                version = row[0]
 
         return version
+
+    def set_schema_version(self, new_value: int, auto_commit: bool = True) -> None:
+        """Set schema version number."""
+        if not self.schema_versioning_exists():
+            return
+
+        # sanity check new version number
+        current_version = self.get_schema_version()
+        if new_value < current_version:
+            message = (
+                "WARNING: cannot bump schema version "
+                f"from {current_version} to {new_value}"
+            )
+            print(message)
+            return
+
+        if new_value > current_version:
+            cursor = self.connection()
+            cursor.execute(
+                text(
+                    "insert into schema_version (version) values (:new_value) "
+                    "on conflict(one_row) do update "
+                    "set version = :new_value"
+                ),
+                {"new_value": new_value},
+            )
+            if auto_commit:
+                self.commit(cursor)
+
+    def schema_versioning_exists(self) -> bool:
+        """Determine whether schema version table exists."""
+        result = self.connection().execute(
+            text(
+                "select table_name from information_schema.tables "
+                "where table_name = 'schema_version'",
+            ),
+        )
+        row = result.fetchone()
+        return True if row and row[0] == "schema_version" else False
 
 
 class EtlChangeType(Enum):
