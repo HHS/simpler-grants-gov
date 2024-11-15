@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, String
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
