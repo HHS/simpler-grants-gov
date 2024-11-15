@@ -50,7 +50,7 @@ class EtlDb:
 
         return version
 
-    def set_schema_version(self, new_value: int, auto_commit: bool = True) -> None:
+    def set_schema_version(self, new_value: int) -> None:
         """Set schema version number."""
         if not self.schema_versioning_exists():
             return
@@ -71,12 +71,11 @@ class EtlDb:
                 text(
                     "insert into schema_version (version) values (:new_value) "
                     "on conflict(one_row) do update "
-                    "set version = :new_value"
+                    "set version = :new_value",
                 ),
                 {"new_value": new_value},
             )
-            if auto_commit:
-                self.commit(cursor)
+            self.commit(cursor)
 
     def schema_versioning_exists(self) -> bool:
         """Determine whether schema version table exists."""
@@ -87,7 +86,7 @@ class EtlDb:
             ),
         )
         row = result.fetchone()
-        return True if row and row[0] == "schema_version" else False
+        return bool(row and row[0] == "schema_version")
 
 
 class EtlChangeType(Enum):

@@ -17,7 +17,6 @@ from analytics.integrations.etldb.quad_model import EtlQuadModel
 from analytics.integrations.etldb.sprint_model import EtlSprintModel
 
 VERBOSE = False
-#MIN_SCHEMA_VERSION = 2
 
 
 def initialize_database() -> None:
@@ -47,7 +46,7 @@ def initialize_database() -> None:
             # commit changes
             etldb.commit(cursor)
             # bump schema version number
-            etldb.set_schema_version(next_version, True)
+            etldb.set_schema_version(next_version)
             current_version = next_version
 
 
@@ -63,17 +62,6 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
 
     # initialize db connection
     db = EtlDb(effective)
-
-    # validate schema version
-    """
-    schema_version = db.get_schema_version()
-    if schema_version < MIN_SCHEMA_VERSION:
-        message = (
-            f"FATAL: current schema version ({schema_version}) "
-            f"does not meet minimum ({MIN_SCHEMA_VERSION})"
-        )
-        raise ValueError(message)
-    """
 
     # sync quad data to db resulting in row id for each quad
     try:
@@ -209,14 +197,12 @@ def sync_quads(db: EtlDb, dataset: EtlDataset) -> dict:
     return result
 
 
-def get_sql_file_paths() -> dict[int:str]:
+def get_sql_file_paths() -> dict[int, str]:
     """Get all sql files needed for database initialization."""
     result = {}
 
     # define the path to the sql files
-    sql_file_directory = os.path.join(
-        Path(__file__).resolve().parent, "migrations/versions"
-    )
+    sql_file_directory = f"{Path(__file__).resolve().parent}/migrations/versions"
 
     # get list of sorted filenames
     filename_list = sorted(os.listdir(sql_file_directory))
@@ -227,9 +213,8 @@ def get_sql_file_paths() -> dict[int:str]:
         # validate filename format
         if pattern.match(filename):
             version = int(filename[:4])
-            result[version] = str(os.path.join(sql_file_directory, filename))
-        else:
-            if VERBOSE:
-                print(f"WARNING: ignoring malformed SQL filename: {filename}")
+            result[version] = f"{sql_file_directory}/{filename}"
+        elif VERBOSE:
+            print(f"WARNING: ignoring malformed SQL filename: {filename}")
 
     return result
