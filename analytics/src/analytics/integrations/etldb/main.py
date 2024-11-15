@@ -31,6 +31,7 @@ def initialize_database() -> None:
     all_versions = sorted(sql_file_path_map.keys())
 
     # iterate sql files
+    migration_count = 0
     for next_version in all_versions:
         if next_version <= current_version:
             continue
@@ -38,7 +39,8 @@ def initialize_database() -> None:
         with open(sql_file_path_map[next_version]) as f:
             sql = f.read()
             # execute sql
-            print(f"applying updates for schema version: {next_version}")
+            print(f"applying migration for schema version: {next_version}")
+            print(f"migration source file: {sql_file_path_map[next_version]}")
             cursor = etldb.connection()
             cursor.execute(
                 text(sql),
@@ -48,6 +50,11 @@ def initialize_database() -> None:
             # bump schema version number
             etldb.set_schema_version(next_version)
             current_version = next_version
+            migration_count += 1
+
+    # summarize results in output
+    print(f"total migrations applied: {migration_count}")
+    print(f"new schema version: {current_version}")
 
 
 def sync_data(dataset: EtlDataset, effective: str) -> None:
