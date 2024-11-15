@@ -18,4 +18,4 @@ class ExtractMetadata(ApiSchemaTable, TimestampMixin):
     )
     file_name: Mapped[str]
     file_path: Mapped[str]
-    file_size_bytes: Mapped[str]
+    file_size_bytes: Mapped[int] = mapped_column(BigInteger)
