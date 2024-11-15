@@ -200,19 +200,3 @@ if jq -e ".sprint == null" $item_data_file > /dev/null; then
 else
     echo "Sprint value already set for issue: ${issue_url}"
 fi
-
-# #######################################################
-# Set the sprint value, if empty
-# #######################################################
-
-comment="Beep boop: Automatically setting the point and sprint values for this issue "
-comment+="in project ${org}/${project} because they were unset when the issue was closed."
-
-# Skip actual posting in dry-run mode
-if [[ $dry_run == "YES" ]]; then
-  echo "Would post comment: ${comment}"
-# otherwise post the comment
-else
-  gh issue comment "${issue_url}" \
-    --body "${comment}"
-fi

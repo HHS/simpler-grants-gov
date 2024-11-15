@@ -6,6 +6,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
+    "all-checks": "npm run test && npm run lint && npm run ts:check && npm run build",
     "build": "next build",
     "dev": "next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
@@ -32,6 +33,7 @@
     "@trussworks/react-uswds": "^9.1.0",
     "@uswds/uswds": "^3.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "focus-trap-react": "^10.2.3",
     "isomorphic-dompurify": "^2.15.0",
     "js-cookie": "^3.0.5",

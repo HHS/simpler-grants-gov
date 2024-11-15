@@ -1,3 +1,5 @@
+"use server";
+
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -13,6 +15,7 @@ export default async function SearchResultsListFetch({
   searchResultsPromise,
 }: ServerPageProps) {
   const searchResults = await searchResultsPromise;
+
   const maxPaginationError = null;
   const t = await getTranslations("Search");
 

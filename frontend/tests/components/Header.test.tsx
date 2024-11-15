@@ -1,21 +1,28 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "tests/react-utils";
 
+import { ReadonlyURLSearchParams } from "next/navigation";
+
 import Header from "src/components/Header";
 
 const props = {
   logoPath: "/img/logo.svg",
-  primaryLinks: [
-    {
-      i18nKey: "nav_link_home",
-      href: "/",
-    },
-    {
-      i18nKey: "nav_link_health",
-      href: "/health",
-    },
-  ],
+  locale: "en",
 };
+
+let mockedPath = "/fakepath";
+
+const getMockedPath = () => mockedPath;
+
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({
+    searchParams: new ReadonlyURLSearchParams(),
+  }),
+}));
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => getMockedPath(),
+}));
 
 describe("Header", () => {
   it("toggles the mobile nav menu", async () => {
@@ -49,5 +56,22 @@ describe("Header", () => {
     await userEvent.click(govBanner);
 
     expect(govBanner).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("displays a search link without refresh param if not currently on search page", () => {
+    render(<Header />);
+
+    const searchLink = screen.getByRole("link", { name: "Search" });
+    expect(searchLink).toBeInTheDocument();
+    expect(searchLink).toHaveAttribute("href", "/search");
+  });
+
+  it("displays a search link with refresh param if currently on search page", () => {
+    mockedPath = "/search";
+    render(<Header />);
+
+    const searchLink = screen.getByRole("link", { name: "Search" });
+    expect(searchLink).toBeInTheDocument();
+    expect(searchLink).toHaveAttribute("href", "/search?refresh=true");
   });
 });
