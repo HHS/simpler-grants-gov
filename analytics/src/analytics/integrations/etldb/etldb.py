@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from sqlalchemy import Connection
+from sqlalchemy import Connection, text
 
 from analytics.integrations.db import PostgresDbClient
 
@@ -35,6 +35,26 @@ class EtlDb:
     def commit(self, connection: Connection) -> None:
         """Commit an open transaction."""
         connection.commit()
+
+    def schema_version(self) -> int:
+        """Select schema version from etl database."""
+        version = 1
+        cursor = self.connection()
+
+        table_name = "gh_schema_version"
+        result1 = cursor.execute(
+            text(f"select table_name from information_schema.tables where table_name = '{table_name}'"),
+        )
+        row1 = result1.fetchone()
+
+        if row1 and row1[0] == table_name:
+            result2 = cursor.execute(
+                text("select max(version) from gh_schema_version"),
+            )
+            row2 = result2.fetchone()
+            version = row2[0]
+
+        return version
 
 
 class EtlChangeType(Enum):

@@ -66,6 +66,7 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
 
     # initialize db connection
     db = EtlDb(effective)
+    print(f"schema version: {db.schema_version()}")
 
     # sync quad data to db resulting in row id for each quad
     try:
