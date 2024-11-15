@@ -4,6 +4,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ExternalUserType,
     ExtractType,
     FundingCategory,
     FundingInstrument,
@@ -250,6 +251,7 @@ class LkExternalUserType(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
         return LkExternalUserType(
             external_user_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
 
 
 @LookupRegistry.register_lookup(EXTRACT_TYPE_CONFIG)
