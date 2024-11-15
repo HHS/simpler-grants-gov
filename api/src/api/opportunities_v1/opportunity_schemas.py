@@ -535,3 +535,39 @@ class OpportunitySearchResponseV1Schema(AbstractResponseSchema, PaginationMixinS
         OpportunityFacetV1Schema(),
         metadata={"description": "Counts of filter/facet values in the full response"},
     )
+
+
+class UserV1Schema(Schema):
+    user_id = fields.String(
+        metadata={
+            "description": "The internal ID of a user",
+            "example": "861a0148-cf2c-432b-b0b3-690016299ab1",
+        }
+    )
+    email = fields.String(
+        metadata={
+            "description": "The email address returned from Oauth2 provider",
+            "example": "js@gmail.com",
+        }
+    )
+    external_user_type = fields.String(
+        metadata={
+            "description": "The Oauth2 provider through which a user was authenticated",
+            "example": "login_gov",
+        }
+    )
+
+
+class OpportunityUserTokenResponseV1Schema(AbstractResponseSchema):
+    token = fields.String(
+        metadata={
+            "description": "Internal token generated for a user",
+        }
+    )
+    user = fields.Nested(UserV1Schema())
+    is_user_new = fields.Boolean(
+        allow_none=False,
+        metadata={
+            "description": "Whether or not the user currently existed in our database",
+        },
+    )
