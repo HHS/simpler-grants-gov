@@ -15,6 +15,7 @@ from analytics.integrations.etldb.quad_model import EtlQuadModel
 from analytics.integrations.etldb.sprint_model import EtlSprintModel
 
 VERBOSE = False
+MIN_SCHEMA_VERSION = 2
 
 
 def initialize_database() -> None:
@@ -66,7 +67,15 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
 
     # initialize db connection
     db = EtlDb(effective)
-    print(f"schema version: {db.schema_version()}")
+
+    # validate schema version
+    schema_version = db.schema_version()
+    if schema_version < MIN_SCHEMA_VERSION:
+        message = (
+            f"FATAL: current schema version ({schema_version}) "
+            f"does not meet minimum ({MIN_SCHEMA_VERSION})"
+        )
+        raise ValueError(message)
 
     # sync quad data to db resulting in row id for each quad
     try:

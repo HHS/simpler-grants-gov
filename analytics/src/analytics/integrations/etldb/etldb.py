@@ -41,18 +41,21 @@ class EtlDb:
         version = 1
         cursor = self.connection()
 
-        table_name = "gh_schema_version"
         result1 = cursor.execute(
-            text(f"select table_name from information_schema.tables where table_name = '{table_name}'"),
+            text(
+                "select table_name from information_schema.tables "
+                "where table_name = 'gh_schema_version'",
+            ),
         )
         row1 = result1.fetchone()
 
-        if row1 and row1[0] == table_name:
+        if row1 and row1[0] == "gh_schema_version":
             result2 = cursor.execute(
                 text("select max(version) from gh_schema_version"),
             )
             row2 = result2.fetchone()
-            version = row2[0]
+            if row2:
+                version = row2[0]
 
         return version
 
