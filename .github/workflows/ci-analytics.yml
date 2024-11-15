@@ -42,7 +42,10 @@ jobs:
       - name: Run tests
         run: make test-audit
 
-      # Both of these tasks are looking for github and slack auth
+      - name: Run database initialization
+        run: make init-db
+
+        # Both of these tasks are looking for github and slack auth
       # - name: Export GitHub data
       #   run: make gh-data-export
 
