@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS gh_deliverable (
 	title TEXT NOT NULL,
 	pillar TEXT, 
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP
+	t_modified TIMESTAMP 
 );
 
 CREATE TABLE IF NOT EXISTS gh_deliverable_quad_map (
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS gh_epic (
 	ghid TEXT UNIQUE NOT NULL,
 	title TEXT NOT NULL,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP
+	t_modified TIMESTAMP 
 );
 
 CREATE TABLE IF NOT EXISTS gh_epic_deliverable_map (
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS gh_issue (
 	parent_issue_ghid TEXT,
 	epic_id INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP
+	t_modified TIMESTAMP 
 );
 CREATE INDEX IF NOT EXISTS gh_issue_i1 on gh_issue(epic_id);
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS gh_sprint (
 	duration INTEGER,
 	quad_id INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP
+	t_modified TIMESTAMP 
 );
 
 CREATE TABLE IF NOT EXISTS gh_quad (
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS gh_quad (
 	end_date DATE,
 	duration INTEGER,
 	t_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	t_modified TIMESTAMP
+	t_modified TIMESTAMP 
 );
 CREATE INDEX IF NOT EXISTS gh_quad_i1 on gh_quad(start_date);
  
