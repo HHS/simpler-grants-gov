@@ -27,6 +27,16 @@ export const messages = {
       show_description: "Show full description",
       hide_summary_description: "Hide full description",
     },
+    documents: {
+      title: "Documents",
+      table_col_category: "Category",
+      table_col_file_name: "File name",
+      table_col_last_updated: "Last updated",
+      type: {
+        funding_details: "Funding Details",
+        other: "Other",
+      },
+    },
     award_info: {
       yes: "Yes",
       no: "No",

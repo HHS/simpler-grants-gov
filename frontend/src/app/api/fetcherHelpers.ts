@@ -26,95 +26,41 @@ export interface HeadersDict {
   [header: string]: string;
 }
 
-export default abstract class BaseApi {
-  // Root path of API resource without leading slash, can be overridden by implementing API classes as necessary
-  get basePath() {
-    return environment.API_URL;
+// Configuration of headers to send with all requests
+// Can include feature flags in child classes
+export function getDefaultHeaders(): HeadersDict {
+  const headers: HeadersDict = {};
+
+  if (environment.API_AUTH_TOKEN) {
+    headers["X-AUTH"] = environment.API_AUTH_TOKEN;
+  }
+  headers["Content-Type"] = "application/json";
+  return headers;
+}
+
+/**
+ * Send a request and handle the response
+ */
+export async function sendRequest<ResponseType extends APIResponse>(
+  url: string,
+  fetchOptions: RequestInit,
+  queryParamData?: QueryParamData,
+): Promise<ResponseType> {
+  let response;
+  let responseBody;
+  try {
+    response = await fetch(url, fetchOptions);
+    responseBody = (await response.json()) as ResponseType;
+  } catch (error) {
+    // API most likely down, but also possibly an error setting up or sending a request
+    // or parsing the response.
+    throw fetchErrorToNetworkError(error, queryParamData);
+  }
+  if (!response.ok) {
+    handleNotOkResponse(responseBody, url, queryParamData);
   }
 
-  // API version, can be overridden by implementing API classes as necessary
-  get version() {
-    return "v1";
-  }
-
-  // Namespace representing the API resource
-  abstract get namespace(): string;
-
-  // Configuration of headers to send with all requests
-  // Can include feature flags in child classes
-  get headers(): HeadersDict {
-    const headers: HeadersDict = {};
-
-    if (environment.API_AUTH_TOKEN) {
-      headers["X-AUTH"] = environment.API_AUTH_TOKEN;
-    }
-    headers["Content-Type"] = "application/json";
-    return headers;
-  }
-
-  /**
-   * Send an API request.
-   */
-  async request<ResponseType extends APIResponse>(
-    method: ApiMethod,
-    subPath: string,
-    queryParamData?: QueryParamData,
-    body?: JSONRequestBody,
-    options: {
-      additionalHeaders?: HeadersDict;
-    } = {},
-  ): Promise<ResponseType> {
-    const { additionalHeaders = {} } = options;
-    const url = createRequestUrl(
-      method,
-      this.basePath,
-      this.version,
-      this.namespace,
-      subPath,
-      body,
-    );
-    const headers: HeadersDict = {
-      ...additionalHeaders,
-      ...this.headers,
-    };
-
-    const response = await this.sendRequest<ResponseType>(
-      url,
-      {
-        body: method === "GET" || !body ? null : createRequestBody(body),
-        headers,
-        method,
-      },
-      queryParamData,
-    );
-
-    return response;
-  }
-
-  /**
-   * Send a request and handle the response
-   */
-  private async sendRequest<ResponseType extends APIResponse>(
-    url: string,
-    fetchOptions: RequestInit,
-    queryParamData?: QueryParamData,
-  ): Promise<ResponseType> {
-    let response;
-    let responseBody;
-    try {
-      response = await fetch(url, fetchOptions);
-      responseBody = (await response.json()) as ResponseType;
-    } catch (error) {
-      // API most likely down, but also possibly an error setting up or sending a request
-      // or parsing the response.
-      throw fetchErrorToNetworkError(error, queryParamData);
-    }
-    if (!response.ok) {
-      handleNotOkResponse(responseBody, url, queryParamData);
-    }
-
-    return responseBody;
-  }
+  return responseBody;
 }
 
 export function createRequestUrl(
@@ -122,7 +68,7 @@ export function createRequestUrl(
   basePath: string,
   version: string,
   namespace: string,
-  subPath: string,
+  subPath = "",
   body?: JSONRequestBody,
 ) {
   // Remove leading slash
@@ -155,7 +101,9 @@ function removeLeadingSlash(path: string) {
 /**
  * Transform the request body into a format that fetch expects
  */
-function createRequestBody(payload?: JSONRequestBody): XMLHttpRequestBodyInit {
+export function createRequestBody(
+  payload?: JSONRequestBody,
+): XMLHttpRequestBodyInit {
   if (payload instanceof FormData) {
     return payload;
   }
