@@ -16,6 +16,6 @@ class ExtractMetadata(ApiSchemaTable, TimestampMixin):
         LookupColumn(LkExtractType),
         ForeignKey(LkExtractType.extract_type_id),
     )
-    file_name = Column(String, nullable=False)
-    file_path = Column(String, nullable=False)
-    file_size_bytes = Column(BigInteger, nullable=False)
+    file_name: Mapped[str]
+    file_path: Mapped[str]
+    file_size_bytes: Mapped[str]
