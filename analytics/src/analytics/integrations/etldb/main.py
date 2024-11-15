@@ -19,29 +19,38 @@ VERBOSE = False
 
 def initialize_database() -> None:
     """Initialize etl database."""
-    # define the path to the sql file
-    parent_path = Path(__file__).resolve().parent
-    sql_path = f"{parent_path}/migrations/versions/2024_11_14_create_tables_etldb.sql"
-
-    # read sql file
-    with open(sql_path) as f:
-        sql = f.read()
-
-    # execute sql
+    # get connection to database
     try:
         db = EtlDb()
         cursor = db.connection()
-        cursor.execute(
-            text(sql),
-        )
-        db.commit(cursor)
     except (
         RuntimeError,
         ProgrammingError,
         OperationalError,
         InsufficientPrivilege,
     ) as e:
-        message = f"FATAL: Failed to initialize db: {e}"
+        message = f"FATAL: Failed to initialize database client: {e}"
+        raise RuntimeError(message) from e
+
+    # execute sql
+    try:
+        for sql_path in get_sql_files():
+            # read sql file
+            with open(sql_path) as f:
+                sql = f.read()
+                # execute sql
+                cursor.execute(
+                    text(sql),
+                )
+            # commit changes
+            db.commit(cursor)
+    except (
+        RuntimeError,
+        ProgrammingError,
+        OperationalError,
+        InsufficientPrivilege,
+    ) as e:
+        message = f"FATAL: Failed to initialize database: {e}"
         raise RuntimeError(message) from e
 
 
@@ -190,3 +199,15 @@ def sync_quads(db: EtlDb, dataset: EtlDataset) -> dict:
                 f"QUAD '{ghid}' title = '{quad_df['quad_name']}', row_id = {result[ghid]}",
             )
     return result
+
+
+def get_sql_files() -> list[str]:
+    """Get all sql files needed for database initialization."""
+    # define the path to the sql files
+    parent_path = Path(__file__).resolve().parent
+    return [
+        f"{parent_path}/migrations/versions/2024_11_14_create_tables_etldb.sql",
+        f"{parent_path}/migrations/versions/2024_11_15_update_columns_etldb.sql",
+    ]
+
+
