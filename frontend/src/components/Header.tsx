@@ -25,6 +25,20 @@ type Props = {
   locale?: string;
 };
 
+const NAV_PATHS = ["/search", "/process", "/research", "/subscribe"];
+const homeRegexp = /^\/(?:e[ns])?$/;
+
+const getCurrentNavItemIndex = (currentPath: string): number => {
+  if (currentPath.match(homeRegexp)) {
+    return 0;
+  }
+  const index = NAV_PATHS.findIndex((navPath) => {
+    return currentPath.match(new RegExp(`^(?:/e[ns])?${navPath}`));
+  });
+  // account for home path
+  return index === -1 ? index : index + 1;
+};
+
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
@@ -34,6 +48,13 @@ const NavLinks = ({
 }) => {
   const t = useTranslations("Header");
   const path = usePathname();
+  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
+    getCurrentNavItemIndex(path),
+  );
+
+  useEffect(() => {
+    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
+  }, [path]);
 
   const getSearchLink = useCallback(
     (onSearch: boolean) => {
@@ -56,12 +77,19 @@ const NavLinks = ({
   }, [t, path, getSearchLink]);
 
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink) => {
+    return navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text || !link.href) {
         return <></>;
       }
       return (
-        <Link href={link.href} key={link.href}>
+        <Link
+          href={link.href}
+          key={link.href}
+          className={clsx({
+            "usa-nav__link": true,
+            "usa-current": currentNavItemIndex === index,
+          })}
+        >
           <div
             onClick={() => {
               if (mobileExpanded) {
@@ -74,7 +102,7 @@ const NavLinks = ({
         </Link>
       );
     });
-  }, [navLinkList, mobileExpanded, onToggleMobileNav]);
+  }, [navLinkList, currentNavItemIndex, mobileExpanded, onToggleMobileNav]);
 
   return (
     <PrimaryNav
