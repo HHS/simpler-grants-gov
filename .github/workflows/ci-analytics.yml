@@ -1,3 +1,5 @@
+# NOTE(2024-11-15): This should be turned off once we fully migrate to Metabase
+# we're only running this temporarily as quality control for the new dashboard
 name: Analytics Checks
 
 on:
