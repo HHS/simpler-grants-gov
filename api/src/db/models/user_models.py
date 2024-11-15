@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -33,3 +34,17 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     )
 
     email: Mapped[str]
+
+class UserTokenSession(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_token_session"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), primary_key=True)
+    user: Mapped[User] = relationship(User)
+
+    token_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+    expires_at: Mapped[datetime]
+
+    # If we ever want to quickly invalidate a token that exists
+    # we can flip this flag and immediately expire the token
+    is_valid: Mapped[bool] = mapped_column(default=True)
