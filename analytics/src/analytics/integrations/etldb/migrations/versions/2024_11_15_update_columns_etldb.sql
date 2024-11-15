@@ -7,20 +7,19 @@ CREATE TABLE IF NOT EXISTS gh_schema_version (
 INSERT INTO gh_schema_version (version) values (2) ON CONFLICT (version) DO NOTHING;
 
 ALTER TABLE gh_deliverable ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_deliverable_quad_map ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_epic ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_epic_deliverable_map ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_issue ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_issue_history ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_issue_sprint_map ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_sprint ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
-
 ALTER TABLE gh_quad ALTER COLUMN t_modified SET DEFAULT CURRENT_TIMESTAMP;
  
+ALTER TABLE gh_deliverable ADD COLUMN IF NOT EXISTS status TEXT;
+
+ALTER TABLE gh_sprint ADD COLUMN IF NOT EXISTS project_owner TEXT;
+ALTER TABLE gh_sprint ADD COLUMN IF NOT EXISTS project_number INTEGER;
+
+CREATE INDEX IF NOT EXISTS gh_sprint_i1 on gh_sprint(project_owner, project_number);
+CREATE INDEX IF NOT EXISTS gh_sprint_i2 on gh_sprint(quad_id);
