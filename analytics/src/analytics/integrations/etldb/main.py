@@ -209,5 +209,3 @@ def get_sql_files() -> list[str]:
         f"{parent_path}/migrations/versions/2024_11_14_create_tables_etldb.sql",
         f"{parent_path}/migrations/versions/2024_11_15_update_columns_etldb.sql",
     ]
-
-
