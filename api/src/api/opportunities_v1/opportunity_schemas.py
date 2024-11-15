@@ -568,6 +568,6 @@ class OpportunityUserTokenResponseV1Schema(AbstractResponseSchema):
     is_user_new = fields.Boolean(
         allow_none=False,
         metadata={
-            "description": "Whether or not the user currently existed in our database",
+            "description": "Whether or not the user existed in our database",
         },
     )
