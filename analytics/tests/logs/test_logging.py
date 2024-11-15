@@ -7,7 +7,7 @@ import re
 import pytest
 from analytics.logs import formatters, init
 
-from tests.lib.assertions import assert_dict_contains
+from tests.assertions import assert_dict_contains
 
 
 @pytest.fixture()

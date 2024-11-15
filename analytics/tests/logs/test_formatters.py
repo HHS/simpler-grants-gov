@@ -10,7 +10,7 @@ from uuid import uuid4
 import pytest
 from analytics.logs import formatters
 
-from tests.lib.assertions import assert_dict_contains
+from tests.assertions import assert_dict_contains
 
 
 def test_json_formatter(capsys: pytest.CaptureFixture):
