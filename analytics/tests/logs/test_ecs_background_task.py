@@ -2,9 +2,9 @@
 
 import logging
 import time
-import pytest
 
-import analytics.logs
+import pytest
+from analytics.logs import init
 from analytics.logs.app_logger import add_extra_data_to_global_logs, init_app
 from analytics.logs.ecs_background_task import ecs_background_task
 
@@ -12,7 +12,7 @@ from analytics.logs.ecs_background_task import ecs_background_task
 @pytest.fixture(scope="module", autouse=True)
 def setup_logging():
     """Fixture to setup logging for the ecs_background_task tests."""
-    with analytics.logs.init("ecs_background_task_tests"):
+    with init("ecs_background_task_tests"):
         yield init_app(logging.root)
 
 

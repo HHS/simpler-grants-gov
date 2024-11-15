@@ -3,10 +3,9 @@
 
 import logging
 import re
-import pytest
 
-import analytics.logs
-from analytics.logs import formatters
+import pytest
+from analytics.logs import formatters, init
 
 from tests.lib.assertions import assert_dict_contains
 
@@ -16,7 +15,7 @@ def init_test_logger(caplog: pytest.LogCaptureFixture, monkeypatch: pytest.Monke
     """Fixture to setup a logger for tests."""
     caplog.set_level(logging.DEBUG)
     monkeypatch.setenv("LOG_FORMAT", "human-readable")
-    with analytics.logs.init("test_logging"):
+    with init("test_logging"):
         yield
 
 
@@ -37,7 +36,7 @@ def test_init(
     caplog.set_level(logging.DEBUG)
     monkeypatch.setenv("LOG_FORMAT", log_format)
 
-    with analytics.logs.init("test_logging"):
+    with init("test_logging"):
         records = caplog.records
         assert len(records) == 2
         assert re.match(
