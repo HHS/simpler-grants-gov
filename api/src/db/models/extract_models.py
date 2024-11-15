@@ -10,7 +10,7 @@ from src.db.models.lookup_models import LkExtractType
 class ExtractMetadata(ApiSchemaTable, TimestampMixin):
     __tablename__ = "extract_metadata"
 
-    extract_metadata_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    extract_metadata_id = mapped_column(BigInteger, primary_key=True)
     extract_type: Mapped[ExtractType] = mapped_column(
         "extract_type_id",
         LookupColumn(LkExtractType),
