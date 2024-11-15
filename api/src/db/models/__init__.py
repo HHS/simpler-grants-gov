@@ -16,4 +16,5 @@ __all__ = [
     "topportunity_models",
     "agency_models",
     "user_models",
+    "extract_models",
 ]

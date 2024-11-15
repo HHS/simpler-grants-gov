@@ -4,7 +4,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
-    ExternalUserType,
+    ExtractType,
     FundingCategory,
     FundingInstrument,
     OpportunityAttachmentType,
@@ -116,6 +116,13 @@ AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
 )
 
 EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 1)])
+
+EXTRACT_TYPE_CONFIG = LookupConfig(
+    [
+        LookupStr(ExtractType.OPPORTUNITIES_XML, 1),
+        LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
+    ]
+)
 
 
 @LookupRegistry.register_lookup(OPPORTUNITY_CATEGORY_CONFIG)
@@ -243,4 +250,17 @@ class LkExternalUserType(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
         return LkExternalUserType(
             external_user_type_id=lookup.lookup_val, description=lookup.get_description()
+
+
+@LookupRegistry.register_lookup(EXTRACT_TYPE_CONFIG)
+class LkExtractType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_extract_type"
+
+    extract_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkExtractType":
+        return LkExtractType(
+            extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
