@@ -47,3 +47,5 @@ Project maintainers or open source contributors are encouraged to contribute to 
 3. [Writing and running tests](../documentation/analytics/testing.md)
 4. [Command line interface (CLI) user guide](../documentation/analytics/usage.md#using-the-command-line-interface)
 5. [Description of existing metrics](../documentation/analytics/metrics/README.md)
+
+# bump CI
