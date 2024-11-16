@@ -214,7 +214,7 @@ def get_sql_file_paths() -> dict[int, str]:
     # get list of sorted filenames
     filename_list = sorted(os.listdir(sql_file_directory))
 
-    # compile result
+    # execute file only if filename follows convention: 0000_summary_of_change.sql
     pattern = re.compile(r"^\d\d\d\d_.+\.sql$")
     for filename in filename_list:
         # validate filename format
