@@ -17,7 +17,7 @@ pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
 pydantic = "^2.0.3"
-python = "~3.12"
+python = "~3.13"
 slack-sdk = "^3.23.0"
 typer = { extras = ["all"], version = "^0.9.0" }
 sqlalchemy = "^2.0.30"
@@ -51,6 +51,7 @@ disable = [
   "R0801", # duplicate-code
   "W0511", # fix-me
   "R0913", # too-many-arguments
+  "R0917", # too-many-positional-arguments
   "R0902", # too-many-instance-attributes
   "R0903", # too-few-public-methods
   "W1514", # unspecified-encoding
