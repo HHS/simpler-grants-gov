@@ -58,7 +58,7 @@ def initialize_database() -> None:
             # commit changes
             etldb.commit(cursor)
             # bump schema version number
-            etldb.set_schema_version(next_version)
+            _ = etldb.set_schema_version(next_version)
             current_version = next_version
             migration_count += 1
 
