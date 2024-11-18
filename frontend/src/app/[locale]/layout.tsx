@@ -75,10 +75,12 @@ export default async function LocaleLayout({ children, params }: Props) {
   }
 
   // see https://github.com/newrelic/newrelic-node-examples/blob/58f760e828c45d90391bda3f66764d4420ba4990/nextjs-app-router/app/layout.js
-  const browserTimingHeader = typedNewRelic.getBrowserTimingHeader({
-    hasToRemoveScriptWrapper: true,
-    allowTransactionlessInjection: true,
-  });
+  const browserTimingHeader = typedNewRelic
+    ? typedNewRelic.getBrowserTimingHeader({
+        hasToRemoveScriptWrapper: true,
+        allowTransactionlessInjection: true,
+      })
+    : "";
 
   return (
     <html lang={locale} suppressHydrationWarning>

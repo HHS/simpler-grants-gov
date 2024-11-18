@@ -7,6 +7,8 @@ locals {
     # WORKER_THREADS_COUNT    = 4
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
+    NEW_RELIC_ENABLED = null
+    NODE_OPTIONS = null
   }
 
   # Configuration for secrets
@@ -47,6 +49,14 @@ locals {
     NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/google-analytics-id"
+    },
+    NEW_RELIC_APP_NAME = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/new-relic-app-name"
+    },
+    NEW_RELIC_LICENSE_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "new-relic-license-key"
     }
   }
 }

@@ -114,3 +114,4 @@ ENV PORT 3000
 EXPOSE 3000
 
 CMD ["node", "server.js"]
+# CMD [[ $NEW_RELIC_ENABLED = true ]] && NODE_OPTIONS= '-r @newrelic/next' || node server.js

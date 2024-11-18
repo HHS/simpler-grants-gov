@@ -30,5 +30,7 @@ module "dev_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
+    NEW_RELIC_ENABLED = "true"
+    NODE_OPTIONS = "-r @newrelic/next"
   }
 }
