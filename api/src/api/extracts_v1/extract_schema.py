@@ -1,4 +1,4 @@
-from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExtractType
 from src.pagination.pagination_schema import generate_pagination_schema
