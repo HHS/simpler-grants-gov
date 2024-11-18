@@ -1,0 +1,92 @@
+from datetime import date
+
+import pytest
+from marshmallow import ValidationError
+
+from api.src.api.extracts_v1.extract_schema import (
+    ExtractMetadataListResponseSchema,
+    ExtractMetadataRequestSchema,
+    ExtractMetadataResponseSchema,
+)
+from src.db.models.extract_models import ExtractMetadata
+
+
+@pytest.fixture
+def sample_extract_metadata():
+    return ExtractMetadata(
+        extract_metadata_id=1,
+        extract_type="opportunities_csv",
+        file_name="test_extract.csv",
+        file_path="/test/path/test_extract.csv",
+        file_size_bytes=2048,
+    )
+
+
+def test_request_schema_validation():
+    schema = ExtractMetadataRequestSchema()
+
+    # Test valid data
+    valid_data = {
+        "extract_type": "opportunities_csv",
+        "start_date": "2023-10-01",
+        "end_date": "2023-10-07",
+    }
+    result = schema.load(valid_data)
+    assert result["extract_type"] == "opportunities_csv"
+    assert result["start_date"] == date(2023, 10, 1)
+    assert result["end_date"] == date(2023, 10, 7)
+
+    # Test invalid extract_type
+    invalid_data = {"extract_type": "invalid_type", "start_date": "2023-10-01"}
+    with pytest.raises(ValidationError):
+        schema.load(invalid_data)
+
+
+def test_response_schema_single(sample_extract_metadata):
+    schema = ExtractMetadataResponseSchema()
+
+    result = schema.dump(sample_extract_metadata)
+
+    assert result["extract_metadata_id"] == 1
+    assert result["extract_type"] == "opportunities_csv"
+    assert result["file_name"] == "test_extract.csv"
+    assert result["file_path"] == "/test/path/test_extract.csv"
+    assert result["file_size_bytes"] == 2048
+
+
+def test_response_schema_list(sample_extract_metadata):
+    schema = ExtractMetadataListResponseSchema()
+
+    # Create a list of two metadata records
+    metadata_list = {
+        "data": [
+            sample_extract_metadata,
+            ExtractMetadata(
+                extract_metadata_id=2,
+                extract_type="opportunities_xml",
+                file_name="test_extract2.xml",
+                file_path="/test/path/test_extract2.xml",
+                file_size_bytes=1024,
+            ),
+        ]
+    }
+
+    result = schema.dump(metadata_list)
+
+    assert len(result["data"]) == 2
+    assert result["data"][0]["extract_metadata_id"] == 1
+    assert result["data"][0]["extract_type"] == "opportunities_csv"
+    assert result["data"][1]["extract_metadata_id"] == 2
+    assert result["data"][1]["extract_type"] == "opportunities_xml"
+
+
+def test_request_schema_null_values():
+    schema = ExtractMetadataRequestSchema()
+
+    # Test with some null values
+    data = {"extract_type": None, "start_date": "2023-10-01", "end_date": None}
+
+    result = schema.load(data)
+    assert result["extract_type"] is None
+    assert result["start_date"] == date(2023, 10, 1)
+    assert result["end_date"] is None
