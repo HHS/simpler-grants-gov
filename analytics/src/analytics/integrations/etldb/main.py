@@ -214,14 +214,26 @@ def get_sql_file_paths() -> dict[int, str]:
     # get list of sorted filenames
     filename_list = sorted(os.listdir(sql_file_directory))
 
-    # execute file only if filename follows convention: 0000_summary_of_change.sql
+    # expected filename format: {4_digit_version_number}_{short_description}.sql
+    # example: 0003_alter_tables_set_default_timestamp.sql
     pattern = re.compile(r"^\d\d\d\d_.+\.sql$")
+
+    # compile dict of results
     for filename in filename_list:
         # validate filename format
-        if pattern.match(filename):
-            version = int(filename[:4])
-            result[version] = f"{sql_file_directory}/{filename}"
-        elif VERBOSE:
-            print(f"WARNING: ignoring malformed SQL filename: {filename}")
+        if not pattern.match(filename):
+            message = f"FATAL: malformed db migration filename: {filename}"
+            raise RuntimeError(message)
+
+        # extrace version number from filename
+        version = int(filename[:4])
+
+        # do not allow duplicate version number
+        if version in result:
+            message = f"FATAL: Duplicate db migration version number: {version} "
+            raise RuntimeError(message)
+
+        # map the version number to the file path
+        result[version] = f"{sql_file_directory}/{filename}"
 
     return result
