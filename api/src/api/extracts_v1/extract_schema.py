@@ -43,9 +43,6 @@ class ExtractMetadataRequestSchema(AbstractResponseSchema):
 
 
 class ExtractMetadataResponseSchema(FileResponseSchema):
-    class Meta:
-        download_path_attribute = "file_path"  # Override for this schema
-
     extract_metadata_id = fields.Integer(
         metadata={"description": "The ID of the extract metadata", "example": 1}
     )
@@ -67,12 +64,6 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
             "example": "2023-10-02T12:00:00",
         }
     )
-
-    def dump(self, obj: Any, **kwargs: Any) -> dict[str, Any]:
-        data = super().dump(obj, **kwargs)
-        # In the future we will update this to use the S3 signed URL
-        data["download_path"] = obj.file_path
-        return data
 
 
 class ExtractMetadataListResponseSchema(AbstractResponseSchema):

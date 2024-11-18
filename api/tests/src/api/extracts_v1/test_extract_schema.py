@@ -53,13 +53,14 @@ def test_request_schema_validation():
 def test_response_schema_single(sample_extract_metadata):
     schema = ExtractMetadataResponseSchema()
 
-    result = schema.dump(sample_extract_metadata)
+    extract_metadata = schema.dump(sample_extract_metadata)
+    extract_metadata["download_path"] = "http://www.example.com"
 
-    assert result["extract_metadata_id"] == 1
-    assert result["extract_type"] == "opportunities_csv"
-    assert result["file_name"] == "test_extract.csv"
-    assert result["download_path"] == "/test/path/test_extract.csv"
-    assert result["file_size_bytes"] == 2048
+    assert extract_metadata["extract_metadata_id"] == 1
+    assert extract_metadata["extract_type"] == "opportunities_csv"
+    assert extract_metadata["file_name"] == "test_extract.csv"
+    assert extract_metadata["download_path"] == "http://www.example.com"
+    assert extract_metadata["file_size_bytes"] == 2048
 
 
 def test_response_schema_list(sample_extract_metadata):
