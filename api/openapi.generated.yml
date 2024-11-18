@@ -43,27 +43,6 @@ paths:
       tags:
       - Health
       summary: Health
-  /v1/user/token:
-    post:
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpportunityUserTokenResponseV1'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-      tags:
-      - Opportunity v1
-      summary: User Token
-      security:
-      - ApiKeyAuth: []
   /v1/opportunities/search:
     post:
       parameters: []
@@ -371,45 +350,6 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
-    UserV1:
-      type: object
-      properties:
-        user_id:
-          type: string
-          description: The internal ID of a user
-          example: 861a0148-cf2c-432b-b0b3-690016299ab1
-        email:
-          type: string
-          description: The email address returned from Oauth2 provider
-          example: js@gmail.com
-        external_user_type:
-          type: string
-          description: The Oauth2 provider through which a user was authenticated
-          example: login_gov
-    OpportunityUserTokenResponseV1:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          description: The REST resource object
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-        token:
-          type: string
-          description: Internal token generated for a user
-        user:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/UserV1'
-        is_user_new:
-          type: boolean
-          description: Whether or not the user existed in our database
     FundingInstrumentFilterV1:
       type: object
       properties:
