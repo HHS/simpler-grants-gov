@@ -35,6 +35,7 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
 
     email: Mapped[str]
 
+
 class UserTokenSession(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_token_session"
 
@@ -45,6 +46,5 @@ class UserTokenSession(ApiSchemaTable, TimestampMixin):
 
     expires_at: Mapped[datetime]
 
-    # If we ever want to quickly invalidate a token that exists
-    # we can flip this flag and immediately expire the token
+    # When a user logs out, we set this flag to False.
     is_valid: Mapped[bool] = mapped_column(default=True)

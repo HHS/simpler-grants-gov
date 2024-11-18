@@ -1,7 +1,7 @@
-
 import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+
 
 def _generate_rsa_key_pair():
     # Rather than define a private/public key, generate one for the tests
