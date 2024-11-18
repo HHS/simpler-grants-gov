@@ -5,13 +5,13 @@ from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ExtractMetadataFilterV1Schema(Schema):
-    extract_type = fields.String(
+    extract_type = fields.Enum(
+        ExtractType,
         allow_none=True,
         metadata={
             "description": "The type of extract to filter by",
-            "example": "opportunity_data_extract",
+            "example": "opportunities_csv",
         },
-        validate=[validators.OneOf([e.value for e in ExtractType])],
     )
     start_date = fields.Date(
         allow_none=True,
