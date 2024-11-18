@@ -3,7 +3,7 @@ from api.src.constants.lookup_constants import ExternalUserType
 from src.api.schemas.extension import Schema, fields
 
 
-class UserV1Schema(Schema):
+class UserSchema(Schema):
     user_id = fields.String(
         metadata={
             "description": "The internal ID of a user",
@@ -31,7 +31,7 @@ class UserTokenSchema(Schema):
             "description": "Internal token generated for a user",
         }
     )
-    user = fields.Nested(UserV1Schema())
+    user = fields.Nested(UserSchema())
     is_user_new = fields.Boolean(
         allow_none=False,
         metadata={
