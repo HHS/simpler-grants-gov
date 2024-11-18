@@ -1,7 +1,6 @@
 """Tests the code in integrations/etldb.py."""
 
-from sqlalchemy import Connection
-
+import sqlalchemy
 from analytics.integrations.etldb.etldb import EtlDb
 
 
@@ -22,7 +21,7 @@ class TestEtlDb:
         etldb = EtlDb()
         connection = etldb.connection()
 
-        assert isinstance(connection, Connection)
+        assert isinstance(connection, sqlalchemy.Connection)
 
     def test_schema_versioning(self):
         """Class methods should return appropriate values."""
