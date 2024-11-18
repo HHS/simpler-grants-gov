@@ -1,7 +1,8 @@
 """Tests the code in integrations/etldb.py."""
 
-from analytics.integrations.etldb.etldb import EtlDb
 from sqlalchemy import Connection
+
+from analytics.integrations.etldb.etldb import EtlDb
 
 
 class TestEtlDb:
