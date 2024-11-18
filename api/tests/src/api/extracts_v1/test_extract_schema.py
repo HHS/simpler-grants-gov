@@ -55,7 +55,6 @@ def test_response_schema_single(sample_extract_metadata):
 
     result = schema.dump(sample_extract_metadata)
 
-    print(result)
     assert result["extract_metadata_id"] == 1
     assert result["extract_type"] == "opportunities_csv"
     assert result["file_name"] == "test_extract.csv"
