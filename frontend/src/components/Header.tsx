@@ -25,19 +25,7 @@ type Props = {
   locale?: string;
 };
 
-const NAV_PATHS = ["/search", "/process", "/research", "/subscribe"];
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-const getCurrentNavItemIndex = (currentPath: string): number => {
-  if (currentPath.match(homeRegexp)) {
-    return 0;
-  }
-  const index = NAV_PATHS.findIndex((navPath) => {
-    return currentPath.match(new RegExp(`^(?:/e[ns])?${navPath}`));
-  });
-  // account for home path
-  return index === -1 ? index : index + 1;
-};
 
 const NavLinks = ({
   mobileExpanded,
@@ -48,14 +36,6 @@ const NavLinks = ({
 }) => {
   const t = useTranslations("Header");
   const path = usePathname();
-  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
-    getCurrentNavItemIndex(path),
-  );
-
-  useEffect(() => {
-    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
-  }, [path]);
-
   const getSearchLink = useCallback(
     (onSearch: boolean) => {
       return {
@@ -75,6 +55,30 @@ const NavLinks = ({
       { text: t("nav_link_subscribe"), href: "/subscribe" },
     ];
   }, [t, path, getSearchLink]);
+
+  const getCurrentNavItemIndex = useCallback(
+    (currentPath: string): number => {
+      // handle base case of home page separately
+      if (currentPath.match(homeRegexp)) {
+        return 0;
+      }
+      const index = navLinkList.slice(1).findIndex(({ href }) => {
+        const baseHref = href.split("?")[0];
+        return currentPath.match(new RegExp(`^(?:/e[ns])?${baseHref}`));
+      });
+      // account for home path
+      return index === -1 ? index : index + 1;
+    },
+    [navLinkList],
+  );
+
+  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
+    getCurrentNavItemIndex(path),
+  );
+
+  useEffect(() => {
+    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
+  }, [path, getCurrentNavItemIndex]);
 
   const navItems = useMemo(() => {
     return navLinkList.map((link: PrimaryLink, index: number) => {

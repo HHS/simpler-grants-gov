@@ -108,6 +108,11 @@ describe("Header", () => {
     const spanishLink = screen.getByRole("link", { name: "Search" });
     expect(spanishLink).toHaveClass("usa-current");
 
+    usePathnameMock.mockReturnValue("/es/search?query=hello");
+    rerender(<Header />);
+    const queryLink = screen.getByRole("link", { name: "Search" });
+    expect(queryLink).toHaveClass("usa-current");
+
     usePathnameMock.mockReturnValue("/opportunity/35");
     rerender(<Header />);
     const allLinks = await screen.findAllByRole("link");
