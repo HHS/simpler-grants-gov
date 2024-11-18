@@ -168,7 +168,7 @@ describe("OpportunityDescription", () => {
           agency_phone_number: null,
           summary_description: null,
         }}
-         nofoPath=""
+        nofoPath=""
       />,
     );
 

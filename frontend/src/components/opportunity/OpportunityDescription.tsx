@@ -142,7 +142,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
         {nofoPath.length > 0 ? (
           <div className="grid-row flex-justify">
             <Button onClick={downloadNOFO} type="button">
-              <span>Download Full Grant Details (NOFO) </span>
+              <span>{t("nofo_download")} </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="1em"
@@ -160,7 +160,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
               className="flex-align-self-center"
               href={"#opportunity_documents"}
             >
-              Jump to all documents
+              {t("jump_to_documents")}
             </Link>
           </div>
         ) : null}
