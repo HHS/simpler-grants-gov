@@ -58,6 +58,10 @@ disable = [
 ]
 
 [tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
 ignore = [
   "ANN101",  # missing type annotation for self
   "ANN102",  # missing type annotation for cls
@@ -70,9 +74,8 @@ ignore = [
   "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
   "TD003",   # missing an issue link on TODO
   "T201",    # use of `print` detected
+  "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
 ]
-line-length = 100
-select = ["ALL"]
 
 [tool.pytest.ini_options]
 filterwarnings = [

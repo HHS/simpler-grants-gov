@@ -61,6 +61,7 @@ class BaseMetric(Generic[Dataset]):
         ----
         By deferring the self.plot_results() method invocation until the chart is
         needed, we decrease the amount of time required to instantiate the class
+
         """
         if not self._chart:
             self._chart = self.plot_results()
