@@ -1,6 +1,6 @@
 import logging
 
-from . import agency_models, base, lookup_models, opportunity_models, user_models
+from . import agency_models, base, extract_models, lookup_models, opportunity_models, user_models
 from .transfer import topportunity_models
 
 logger = logging.getLogger(__name__)
