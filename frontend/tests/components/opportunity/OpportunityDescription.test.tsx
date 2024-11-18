@@ -66,6 +66,7 @@ describe("OpportunityDescription", () => {
     render(
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
+        nofoPath=""
       />,
     );
 
@@ -90,6 +91,7 @@ describe("OpportunityDescription", () => {
     render(
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
+        nofoPath=""
       />,
     );
 
