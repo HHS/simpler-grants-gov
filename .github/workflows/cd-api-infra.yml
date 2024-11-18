@@ -9,6 +9,17 @@ on:
       - "infra/api/**"
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
 
 jobs:
   build-repository:

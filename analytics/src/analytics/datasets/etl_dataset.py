@@ -69,6 +69,7 @@ class EtlDataset(BaseDataset):
         -------
         Self:
             An instance of the EtlDataset dataset class
+
         """
         # load input datasets
         df = load_json_data_as_df(
