@@ -1,6 +1,6 @@
 import "server-only";
 
-import BaseApi from "src/app/api/BaseApi";
+import { fetchOpportunitySearch } from "src/app/api/fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -9,7 +9,6 @@ import {
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
-import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 const orderByFieldLookup = {
   relevancy: "relevancy",
@@ -35,43 +34,32 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
-export default class SearchOpportunityAPI extends BaseApi {
-  get namespace(): string {
-    return "opportunities";
+export const searchForOpportunities = async (searchInputs: QueryParamData) => {
+  const { query } = searchInputs;
+  const filters = buildFilters(searchInputs);
+  const pagination = buildPagination(searchInputs);
+
+  const requestBody: SearchRequestBody = { pagination };
+
+  // Only add filters if there are some
+  if (Object.keys(filters).length > 0) {
+    requestBody.filters = filters;
   }
 
-  async searchOpportunities(searchInputs: QueryParamData) {
-    const { query } = searchInputs;
-    const filters = buildFilters(searchInputs);
-    const pagination = buildPagination(searchInputs);
-
-    const requestBody: SearchRequestBody = { pagination };
-
-    // Only add filters if there are some
-    if (Object.keys(filters).length > 0) {
-      requestBody.filters = filters;
-    }
-
-    if (query) {
-      requestBody.query = query;
-    }
-
-    const response = await this.request<SearchAPIResponse>(
-      "POST",
-      "search",
-      searchInputs,
-      requestBody,
-    );
-
-    response.actionType = searchInputs.actionType;
-    response.fieldChanged = searchInputs.fieldChanged;
-
-    if (!response.data) {
-      throw new Error("No data returned from Opportunity Search API");
-    }
-    return response;
+  if (query) {
+    requestBody.query = query;
   }
-}
+
+  const response = await fetchOpportunitySearch({ body: requestBody });
+
+  response.actionType = searchInputs.actionType;
+  response.fieldChanged = searchInputs.fieldChanged;
+
+  if (!response.data) {
+    throw new Error("No data returned from Opportunity Search API");
+  }
+  return response;
+};
 
 // Translate frontend filter param names to expected backend parameter names, and use one_of syntax
 export const buildFilters = (

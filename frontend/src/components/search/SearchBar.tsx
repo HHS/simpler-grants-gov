@@ -4,7 +4,7 @@ import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
@@ -12,14 +12,30 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ query }: SearchBarProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
-  const { updateQueryParams } = useSearchParamUpdater();
+  const { updateQueryParams, searchParams } = useSearchParamUpdater();
+  const t = useTranslations("Search");
 
   const handleSubmit = () => {
     updateQueryParams("", "query", queryTerm, false);
   };
 
-  const t = useTranslations("Search");
+  // if we have "refresh=true" query param, clear the input
+  // this supports the expected refresh of the input if the user clicks the search link while on the search page
+  useEffect(() => {
+    if (searchParams.get("refresh") && inputRef.current) {
+      updateQueryTerm("");
+      inputRef.current.value = "";
+    }
+  }, [searchParams, updateQueryTerm]);
+
+  // removes the "refresh" param once a user has dirtied the input
+  useEffect(() => {
+    if (searchParams.get("refresh") && inputRef.current?.value) {
+      updateQueryParams("", "refresh");
+    }
+  }, [searchParams, updateQueryParams]);
 
   return (
     <div className="margin-top-5 margin-bottom-2">
@@ -36,6 +52,7 @@ export default function SearchBar({ query }: SearchBarProps) {
       </label>
       <div className="usa-search usa-search--big" role="search">
         <input
+          ref={inputRef}
           className="usa-input maxw-none"
           id="query"
           type="search"

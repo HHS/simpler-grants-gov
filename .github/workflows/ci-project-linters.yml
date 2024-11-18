@@ -23,15 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Dry run - Close open issues marked as "Done" in Sprint Board
-        run: |
-          ./scripts/close-issues-in-done-col.sh \
-            --org HHS \
-            --project 13 \
-            --status Done \
-            --batch 100 \
-            --dry-run
-
       - name: Dry run - Set points and sprint field
         run: |
           ./scripts/set-points-and-sprint.sh \
