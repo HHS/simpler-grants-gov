@@ -47,9 +47,6 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
     extract_type = fields.String(
         metadata={"description": "The type of extract", "example": "opportunity_data_extract"}
     )
-    file_name = fields.String(
-        metadata={"description": "The name of the file", "example": "data_extract.csv"}
-    )
     file_size_bytes = fields.Integer(
         metadata={"description": "The size of the file in bytes", "example": 1024}
     )

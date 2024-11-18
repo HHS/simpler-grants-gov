@@ -60,7 +60,6 @@ def test_response_schema_single(sample_extract_metadata):
 
     assert extract_metadata["extract_metadata_id"] == 1
     assert extract_metadata["extract_type"] == "opportunities_csv"
-    assert extract_metadata["file_name"] == "test_extract.csv"
     assert extract_metadata["download_path"] == "http://www.example.com"
     assert extract_metadata["file_size_bytes"] == 2048
 
