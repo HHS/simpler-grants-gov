@@ -55,6 +55,7 @@ class RoadmapConfig(BaseModel):
         The name of the project field that stores the Quad value for a deliverable.
     pillar_field
         The name of the project field that stores the Pillar value for a deliverable.
+
     """
 
     owner: str
@@ -77,6 +78,7 @@ class SprintBoardConfig(BaseModel):
         The name of the project field that stores story points or estimates.
     sprint_field
         The name of the project field that stores the sprint value.
+
     """
 
     owner: str
@@ -218,7 +220,7 @@ def populate_issue_lookup_table(
     for i, issue in enumerate(issues):
         try:
             entry = IssueMetadata.model_validate(issue)
-        except ValidationError as err:  # noqa: PERF203
+        except ValidationError as err:
             logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
             logger.debug("Error: %s", err)
             continue

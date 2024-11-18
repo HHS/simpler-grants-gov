@@ -120,7 +120,7 @@ format: ## runs code formatting
 	@echo "=> Running code formatting"
 	@echo "============================="
 	$(POETRY) black src tests
-	$(POETRY) ruff --fix src tests
+	$(POETRY) ruff check --fix src tests
 	@echo "============================="
 	@echo "=> Code formatting complete"
 
@@ -128,7 +128,7 @@ format-check: ## runs code formatting checks
 	@echo "=> Running code formatting checks"
 	@echo "============================="
 	$(POETRY) black --check src tests
-	$(POETRY) ruff  --fix --exit-non-zero-on-fix src tests
+	$(POETRY) ruff check src tests
 	@echo "============================="
 	@echo "=> All checks succeeded"
 
