@@ -409,7 +409,7 @@ components:
           - $ref: '#/components/schemas/UserV1'
         is_user_new:
           type: boolean
-          description: Whether or not the user currently existed in our database
+          description: Whether or not the user existed in our database
     FundingInstrumentFilterV1:
       type: object
       properties:
