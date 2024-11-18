@@ -5,7 +5,7 @@ import logging
 import logging.config
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from slack_sdk import WebClient
@@ -17,12 +17,14 @@ from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb, slack
 from analytics.integrations.db import PostgresDbClient
+from analytics.logs import init as init_logging
+from analytics.logs.app_logger import init_app
+from analytics.logs.ecs_background_task import ecs_background_task
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # fmt: off
@@ -58,9 +60,18 @@ app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
 
+def init() -> None:
+    """Shared init function for all scripts."""
+    # Setup logging
+    init_logging(__package__)
+    init_app(logging.root)
+
+
 @app.callback()
 def callback() -> None:
     """Analyze data about the Simpler.Grants.gov project."""
+    # If you override this callback, remember to call init()
+    init()
 
 
 # ===========================================================
@@ -155,7 +166,7 @@ def calculate_deliverable_percent_complete(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
+    include_status: Annotated[list[str] | None, STATUS_ARG] = None,
 ) -> None:
     """Calculate percentage completion by deliverable."""
     task_data = GitHubIssues.from_json(issue_file)
@@ -254,11 +265,12 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 
 
 @etl_app.command(name="initialize_database")
+@ecs_background_task("initialize_database")
 def initialize_database() -> None:
     """Initialize etl database."""
-    print("initializing database")
+    logger.info("initializing database")
     etldb.initialize_database()
-    print("done")
+    logger.info("done")
 
 
 @etl_app.command(name="transform_and_load")

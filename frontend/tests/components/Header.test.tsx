@@ -10,9 +10,7 @@ const props = {
   locale: "en",
 };
 
-let mockedPath = "/fakepath";
-
-const getMockedPath = () => mockedPath;
+const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
@@ -21,7 +19,7 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => getMockedPath(),
+  usePathname: () => usePathnameMock() as string,
 }));
 
 describe("Header", () => {
@@ -67,11 +65,59 @@ describe("Header", () => {
   });
 
   it("displays a search link with refresh param if currently on search page", () => {
-    mockedPath = "/search";
+    usePathnameMock.mockReturnValue("/search");
     render(<Header />);
 
     const searchLink = screen.getByRole("link", { name: "Search" });
     expect(searchLink).toBeInTheDocument();
     expect(searchLink).toHaveAttribute("href", "/search?refresh=true");
+  });
+
+  it("displays a home link if not on home page", () => {
+    usePathnameMock.mockReturnValue("/search");
+    render(<Header />);
+
+    const homeLink = screen.getByRole("link", { name: "Simpler.Grants.gov" });
+    expect(homeLink).toBeInTheDocument();
+    expect(homeLink).toHaveAttribute("href", "/");
+  });
+
+  it("display text without a home link if on home page", () => {
+    usePathnameMock.mockReturnValue("/");
+    render(<Header />);
+
+    const homeText = screen.getByText("Simpler.Grants.gov");
+    expect(homeText).toBeInTheDocument();
+    expect(homeText).not.toHaveAttribute("href", "/");
+  });
+
+  it("shows the correct styling for active nav item", async () => {
+    usePathnameMock.mockReturnValue("/");
+    const { rerender } = render(<Header />);
+
+    const homeLink = screen.getByRole("link", { name: "Home" });
+    expect(homeLink).toHaveClass("usa-current");
+
+    usePathnameMock.mockReturnValue("/search");
+    rerender(<Header />);
+    const searchLink = screen.getByRole("link", { name: "Search" });
+    expect(searchLink).toHaveClass("usa-current");
+
+    usePathnameMock.mockReturnValue("/es/search");
+    rerender(<Header />);
+    const spanishLink = screen.getByRole("link", { name: "Search" });
+    expect(spanishLink).toHaveClass("usa-current");
+
+    usePathnameMock.mockReturnValue("/es/search?query=hello");
+    rerender(<Header />);
+    const queryLink = screen.getByRole("link", { name: "Search" });
+    expect(queryLink).toHaveClass("usa-current");
+
+    usePathnameMock.mockReturnValue("/opportunity/35");
+    rerender(<Header />);
+    const allLinks = await screen.findAllByRole("link");
+    allLinks.forEach((link) => {
+      expect(link).not.toHaveClass("usa-current");
+    });
   });
 });

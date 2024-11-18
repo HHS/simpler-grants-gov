@@ -14,7 +14,9 @@ test.describe("Search page tests", () => {
 
     const page = await browser.newPage();
     await page.goto("/search");
-    const loadingIndicator = page.getByTestId("loading-message");
+    const loadingIndicator = page.locator(
+      'span[data-testid="loading-message"]',
+    );
 
     await fillSearchInputAndSubmit(searchTerm, page);
     await expect(loadingIndicator).toBeVisible();

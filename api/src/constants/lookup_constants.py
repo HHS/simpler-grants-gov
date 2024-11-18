@@ -118,6 +118,11 @@ class AgencySubmissionNotificationSetting(StrEnum):
     ALWAYS = "always"
 
 
+class ExtractType(StrEnum):
+    OPPORTUNITIES_XML = "opportunities_xml"
+    OPPORTUNITIES_CSV = "opportunities_csv"
+
+
 class OpportunityAttachmentType(StrEnum):
     NOTICE_OF_FUNDING_OPPORTUNITY = "notice_of_funding_opportunity"
     OTHER = "other"

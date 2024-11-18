@@ -24,6 +24,7 @@ def load_config(config_path: Path, schema: type[T]) -> T:
     Returns
     -------
     An instance of the schema containing validated config data.
+
     """
     with open(config_path) as f:
         config_data = json.load(f)
