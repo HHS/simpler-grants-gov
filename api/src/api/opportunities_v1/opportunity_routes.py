@@ -1,7 +1,7 @@
 import io
 import logging
 
-from flask import Response, request
+from flask import Response
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -212,28 +212,3 @@ def opportunity_versions_get(db_session: db.Session, opportunity_id: int) -> res
         data = get_opportunity_versions(db_session, opportunity_id)
 
     return response.ApiResponse(message="Success", data=data)
-
-
-@opportunity_blueprint.post("/user/token")
-@opportunity_blueprint.output(opportunity_schemas.OpportunityUserTokenResponseV1Schema)
-@opportunity_blueprint.auth_required(api_key_auth)
-def user_token() -> response.ApiResponse | Response:
-    logger.info("POST /v1/user/token")
-
-    header_token = request.headers.get("X-OAuth-login-gov")
-    if header_token:
-        data = {
-            "token": "the token goes here!",
-            "user": {
-                "user_id": "abc-...",
-                "email": "example@gmail.com",
-                "external_user_type": "login_gov",
-            },
-            "is_user_new": True,
-        }
-        return response.ApiResponse(message="Success", data=data)
-
-    message = "Missing X-OAuth-login-gov header"
-    logger.error(message)
-
-    return response.ApiResponse(message=message, status_code=400)
