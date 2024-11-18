@@ -43,7 +43,7 @@ variable "search_data_volume_size" {
 
 variable "search_availability_zone_count" {
   type    = number
-  default = 1
+  default = 3
 }
 
 variable "has_database" {
