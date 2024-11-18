@@ -20,7 +20,17 @@ VERBOSE = False
 
 
 def initialize_database() -> None:
-    """Initialize etl database."""
+    """
+    Create and/or update an etl database by applying a sequential set of migration scripts.
+
+    It applies the migrations using the following steps:
+    - Check the current schema version listed in the database
+    - Retrieve the list of migration scripts ordered by version
+    - If the current schema version is less than the version of the latest migration script
+      run the remaining migrations in order
+    - Bump the schema version in the database to the latest version
+    - If the current schema version matches the latest script, do nothing
+    """
     # get connection to database
     etldb = EtlDb()
     current_version = etldb.get_schema_version()
