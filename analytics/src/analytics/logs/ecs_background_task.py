@@ -38,7 +38,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
             do_cool_stuff()
 
     IMPORTANT: Do not specify this decorator before the task command.
-               Click effectively rewrites your function to be a main function
+               CLI tooling rewrites your function to be a main function
                and any decorators from before the "task_blueprint.cli.command(...)"
                line are discarded.
                See:
