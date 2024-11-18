@@ -1,19 +1,24 @@
 import logging
+from http.client import responses
 
 from flask import Response, request
 
-from api.src.api import response
-from api.src.api.route_utils import raise_flask_error
-from api.src.api.users import user_schemas
-from api.src.api.users.user_blueprint import user_blueprint
-from api.src.auth import api_key_auth
+from src.api import response
+from src.api.route_utils import raise_flask_error
+from src.api.users import user_schemas
+from src.api.users.user_blueprint import user_blueprint
+from src.auth.api_key_auth import api_key_auth
 
 logger = logging.getLogger(__name__)
 
 
 @user_blueprint.post("/user/token")
-@user_blueprint.output(user_schemas.UserTokenResponseV1Schema)
+@user_blueprint.output(user_schemas.UserTokenResponseSchema)
 @user_blueprint.auth_required(api_key_auth)
+@user_blueprint.doc(
+    description="Test",
+    responses=[200, 400]
+)
 def user_token() -> response.ApiResponse | Response:
     logger.info("POST /v1/users/user/token")
 
@@ -33,4 +38,4 @@ def user_token() -> response.ApiResponse | Response:
     message = "Missing X-OAuth-login-gov header"
     logger.error(message)
 
-    return raise_flask_error(400, message)
+    raise_flask_error(400, message)

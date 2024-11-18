@@ -40,5 +40,5 @@ class UserTokenSchema(Schema):
     )
 
 
-class UserTokenResponseV1Schema(AbstractResponseSchema):
+class UserTokenResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserTokenSchema)
