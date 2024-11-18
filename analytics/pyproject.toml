@@ -79,7 +79,7 @@ ignore = [
   "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
 ]
 
-[tool.ruff.flake8-builtins]
+[tool.ruff.lint.flake8-builtins]
 # Don't complain about shadowing the builtin format function
 # Many builtin classes we extend use format as a function name
 builtins-ignorelist = ["format"]

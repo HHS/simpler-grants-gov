@@ -85,7 +85,7 @@ ALLOW_NO_MASK = {
 }
 
 
-def _mask_pii_for_key(key: str, value: Any | None) -> Any | None:
+def _mask_pii_for_key(key: str, value: Any | None) -> Any | None:  # noqa: ANN401
     """
     Mask the given value if it has the pattern of a tax identifier.
 
@@ -97,7 +97,7 @@ def _mask_pii_for_key(key: str, value: Any | None) -> Any | None:
     return _mask_pii(value)
 
 
-def _mask_pii(value: Any | None) -> Any | None:
+def _mask_pii(value: Any | None) -> Any | None:  # noqa: ANN401
     if TIN_RE.search(str(value)):
         return TIN_RE.sub("*********", str(value))
     return value

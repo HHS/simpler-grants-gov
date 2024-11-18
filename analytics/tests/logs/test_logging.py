@@ -10,7 +10,7 @@ from analytics.logs import formatters, init
 from tests.assertions import assert_dict_contains
 
 
-@pytest.fixture()
+@pytest.fixture
 def init_test_logger(caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch):
     """Fixture to setup a logger for tests."""
     caplog.set_level(logging.DEBUG)

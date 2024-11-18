@@ -1,4 +1,4 @@
-# pylint: disable=consider-using-f-string
+# pylint: disable=consider-using-f-string,line-too-long
 """
 Make JSON logs easier to read when developing or troubleshooting.
 
@@ -70,14 +70,7 @@ def format_line(
     """Format log fields as a coloured string."""
     logger_name_color = color_for_name(logger_name)
     level_color = color_for_level(level)
-    return "{created}  {logger_name} {func_name:<28} {level} {message} {extra}".format(
-        created=format_datetime(created),
-        logger_name=colorize(logger_name.ljust(36), logger_name_color),
-        func_name=func_name,
-        level=colorize(level.ljust(8), level_color),
-        message=colorize(message.ljust(message_width), level_color),
-        extra=colorize(format_extra(extra), BLUE),
-    )
+    return f"{format_datetime(created)}  {colorize(logger_name.ljust(36), logger_name_color)} {func_name:<28} {colorize(level.ljust(8), level_color)} {colorize(message.ljust(message_width), level_color)} {colorize(format_extra(extra), BLUE)}"  # noqa: E501
 
 
 def colorize(text: str, color: str) -> str:

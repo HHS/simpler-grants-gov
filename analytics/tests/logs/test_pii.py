@@ -31,6 +31,6 @@ from analytics.logs import pii
         ({"a": "x", "b": "999000000"}, "{'a': 'x', 'b': '*********'}"),
     ],
 )
-def test_mask_pii(value: Any | None, expected: Any | None):
+def test_mask_pii(value: Any | None, expected: Any | None):  # noqa: ANN401
     """Test mask_pii logic with various input values."""
     assert pii._mask_pii(value) == expected  # noqa: SLF001
