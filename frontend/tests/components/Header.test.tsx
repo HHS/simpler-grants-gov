@@ -74,4 +74,21 @@ describe("Header", () => {
     expect(searchLink).toBeInTheDocument();
     expect(searchLink).toHaveAttribute("href", "/search?refresh=true");
   });
+
+  it("displays a home link if not on home page", () => {
+    render(<Header />);
+
+    const homeLink = screen.getByRole("link", { name: "Simpler.Grants.gov" });
+    expect(homeLink).toBeInTheDocument();
+    expect(homeLink).toHaveAttribute("href", "/");
+  });
+
+  it("display text without a home link if on home page", () => {
+    mockedPath = "/";
+    render(<Header />);
+
+    const homeText = screen.getByText("Simpler.Grants.gov");
+    expect(homeText).toBeInTheDocument();
+    expect(homeText).not.toHaveAttribute("href", "/");
+  });
 });

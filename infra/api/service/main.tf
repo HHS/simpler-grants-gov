@@ -144,7 +144,11 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = merge(local.service_config.extra_environment_variables, { "ENVIRONMENT" : var.environment_name })
+  extra_environment_variables = merge(
+    local.service_config.extra_environment_variables,
+    { "ENVIRONMENT" : var.environment_name },
+    { "DRAFTS_S3_BUCKET_ARN" : aws_s3_bucket.draft_documents.arn }
+  )
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {

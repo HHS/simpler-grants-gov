@@ -5,7 +5,7 @@ import logging
 import logging.config
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from slack_sdk import WebClient
@@ -155,7 +155,7 @@ def calculate_deliverable_percent_complete(
     show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
     post_results: Annotated[bool, POST_RESULTS_ARG] = False,
     output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    include_status: Annotated[Optional[list[str]], STATUS_ARG] = None,  # noqa: UP007
+    include_status: Annotated[list[str] | None, STATUS_ARG] = None,
 ) -> None:
     """Calculate percentage completion by deliverable."""
     task_data = GitHubIssues.from_json(issue_file)

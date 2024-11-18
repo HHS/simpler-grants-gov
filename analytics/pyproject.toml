@@ -17,9 +17,9 @@ pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
 pydantic = "^2.0.3"
-python = "~3.12"
+python = "~3.13"
 slack-sdk = "^3.23.0"
-typer = { extras = ["all"], version = "^0.9.0" }
+typer = { extras = ["all"], version = "^0.13.0" }
 sqlalchemy = "^2.0.30"
 psycopg = ">=3.0.7"
 pydantic-settings = "^2.3.4"
@@ -32,7 +32,7 @@ mypy = "^1.4.1"
 pylint = "^3.0.2"
 pytest = "^8.0.0"
 pytest-cov = "^5.0.0"
-ruff = "^0.0.278"
+ruff = "^0.7.0"
 safety = "^3.0.0"
 
 [build-system]
@@ -51,12 +51,17 @@ disable = [
   "R0801", # duplicate-code
   "W0511", # fix-me
   "R0913", # too-many-arguments
+  "R0917", # too-many-positional-arguments
   "R0902", # too-many-instance-attributes
   "R0903", # too-few-public-methods
   "W1514", # unspecified-encoding
 ]
 
 [tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
 ignore = [
   "ANN101",  # missing type annotation for self
   "ANN102",  # missing type annotation for cls
@@ -69,9 +74,8 @@ ignore = [
   "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
   "TD003",   # missing an issue link on TODO
   "T201",    # use of `print` detected
+  "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
 ]
-line-length = 100
-select = ["ALL"]
 
 [tool.pytest.ini_options]
 filterwarnings = [

@@ -1,6 +1,5 @@
-import { expect, Page, test } from "@playwright/test";
-import { BrowserContextOptions } from "playwright-core";
-
+import { expect, test } from "@playwright/test";
+import { PageProps } from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -18,13 +17,7 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   waitForSearchResultsInitialLoad,
-} from "./searchSpecUtil";
-
-interface PageProps {
-  page: Page;
-  browserName?: string;
-  contextOptions?: BrowserContextOptions;
-}
+} from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
   test("should refresh and retain filters in a new tab", async ({ page }, {
