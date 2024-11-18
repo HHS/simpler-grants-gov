@@ -27,7 +27,31 @@ interface Props {
   };
 }
 
+type NRType = typeof newrelic;
+
+// see https://github.com/newrelic/node-newrelic/blob/40aea36320d15b201800431268be2c3d4c794a7b/api.js#L752
+// types library does not expose a type for the options here, so building from scratch
+interface typedGetBrowserTimingHeaderOptions {
+  nonce?: string;
+  hasToRemoveScriptWrapper?: boolean;
+  allowTransactionlessInjection?: boolean; // tho jsdoc in nr code types this as "options"
+}
+
+interface NewRelicWithCorrectTypes extends NRType {
+  agent: {
+    collector: {
+      isConnected: () => boolean;
+    };
+    on: (event: string, callback: (value: unknown) => void) => void;
+  };
+  getBrowserTimingHeader: (
+    options?: typedGetBrowserTimingHeaderOptions,
+  ) => string;
+}
+
 const locales = ["en", "es"];
+
+const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -43,13 +67,15 @@ export default async function LocaleLayout({ children, params }: Props) {
   // side is the easiest way to get started
   const messages = await getMessages();
 
-  if (newrelic.agent.collector.isConnected() === false) {
+  // see
+  if (typedNewRelic?.agent?.collector?.isConnected() === false) {
     await new Promise((resolve) => {
-      newrelic.agent.on("connected", resolve);
+      typedNewRelic.agent.on("connected", resolve);
     });
   }
 
-  const browserTimingHeader = newrelic.getBrowserTimingHeader({
+  // see https://github.com/newrelic/newrelic-node-examples/blob/58f760e828c45d90391bda3f66764d4420ba4990/nextjs-app-router/app/layout.js
+  const browserTimingHeader = typedNewRelic.getBrowserTimingHeader({
     hasToRemoveScriptWrapper: true,
     allowTransactionlessInjection: true,
   });
