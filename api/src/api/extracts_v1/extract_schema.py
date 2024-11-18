@@ -1,3 +1,5 @@
+from typing import Any
+
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
 from src.constants.lookup_constants import ExtractType
@@ -66,7 +68,7 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
         }
     )
 
-    def dump(self, obj, **kwargs):
+    def dump(self, obj: Any, **kwargs: Any) -> dict[str, Any]:
         data = super().dump(obj, **kwargs)
         # In the future we will update this to use the S3 signed URL
         data["download_path"] = obj.file_path
