@@ -127,6 +127,15 @@
         "api/docker-compose.yml"
       ],
       "matchPackagePatterns": ["postgres"]
+    },
+    {
+      "description": "Don't upgrade Kaleido automatically in analytics code as it has breaking changes in minor versions",
+      "enabled": false,
+      "matchFileNames": [
+        "analytics/pyproject.toml",
+        "analytics/poetry.lock"
+      ],
+      "matchPackagePatterns": ["kaleido"]
     }
   ]
 }

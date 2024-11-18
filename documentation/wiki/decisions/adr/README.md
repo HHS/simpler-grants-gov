@@ -1,4 +1,4 @@
-# Current ADRs
+# ADRs
 
 The following list links to all of the ADRs we've adopted:
 
@@ -44,3 +44,6 @@ The following list links to all of the ADRs we've adopted:
 * [Logging and Monitoring Platform](2024-03-04-logging-monitoring.md)
 * [Dashboard Data Storage](2024-03-19-dashboard-storage.md)
 * [Dashboard Data Tool](2024-04-10-dashboard-tool.md)
+* [Search Engine](2024-10-02-search-engine.md)
+* [Document Storage](2024-10-18-document-storage.md)
+* [Document Sharing](document-sharing.md)
