@@ -111,6 +111,9 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
+  const title =
+    usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
+
   return (
     <>
       <div
@@ -140,7 +143,7 @@ const Header = ({ logoPath, locale }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
             <NavMenuButton
