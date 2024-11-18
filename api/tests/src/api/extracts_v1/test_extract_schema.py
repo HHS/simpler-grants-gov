@@ -55,10 +55,11 @@ def test_response_schema_single(sample_extract_metadata):
 
     result = schema.dump(sample_extract_metadata)
 
+    print(result)
     assert result["extract_metadata_id"] == 1
     assert result["extract_type"] == "opportunities_csv"
     assert result["file_name"] == "test_extract.csv"
-    assert result["file_path"] == "/test/path/test_extract.csv"
+    assert result["download_path"] == "/test/path/test_extract.csv"
     assert result["file_size_bytes"] == 2048
 
 

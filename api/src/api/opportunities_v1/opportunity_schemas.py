@@ -1,7 +1,11 @@
 from enum import StrEnum
 
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
@@ -309,7 +313,7 @@ class OpportunityV1Schema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
-class OpportunityAttachmentV1Schema(Schema):
+class OpportunityAttachmentV1Schema(FileResponseSchema):
     download_path = fields.String(
         metadata={
             "description": "The URL to download the attachment",
