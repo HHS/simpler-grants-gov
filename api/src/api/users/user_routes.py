@@ -10,30 +10,25 @@ from src.auth.api_key_auth import api_key_auth
 
 logger = logging.getLogger(__name__)
 
+# Descriptions in OpenAPI support markdown https://swagger.io/specification/
+SHARED_ALPHA_DESCRIPTION = """
+__ALPHA VERSION__
+
+This endpoint in its current form is primarily for testing and feedback.
+
+Features in this endpoint are still under heavy development, and subject to change. Not for production use.
+
+See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
+"""
 
 @user_blueprint.post("/user/token")
 @user_blueprint.output(user_schemas.UserTokenResponseSchema)
 @user_blueprint.auth_required(api_key_auth)
-@user_blueprint.doc(
-    description="Test",
-    responses=[200, 400],
-    # parameters={
-    #     "name": "X-OAuth-login-gov",
-    #     "in": "header",
-    #     "schema": {"type": "string"},
-    #     "description": "JWT token",
-    # },
+@user_blueprint.doc( #should we include this?
+    description=SHARED_ALPHA_DESCRIPTION,
+    responses=[200, 400]
 )
 def user_token() -> response.ApiResponse | Response:
-    """
-    parameters:
-        - name: X-OAuth-login-gov
-            in: header
-            type: string
-            required: true
-            description: The Oauth2 JWT token
-    """
-
     logger.info("POST /v1/users/user/token")
 
     header_token = request.headers.get("X-OAuth-login-gov")
