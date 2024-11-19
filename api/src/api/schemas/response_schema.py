@@ -66,3 +66,8 @@ class FileResponseSchema(Schema):
             "description": "The file's download path",
         },
     )
+    file_size_bytes = fields.Integer(
+        metadata={"description": "The size of the file in bytes", "example": 1024}
+    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)

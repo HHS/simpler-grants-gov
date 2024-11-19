@@ -53,10 +53,8 @@ def test_request_schema_validation():
 def test_response_schema_single(sample_extract_metadata):
     schema = ExtractMetadataResponseSchema()
 
-    
     sample_extract_metadata.download_path = "http://www.example.com"
     extract_metadata = schema.dump(sample_extract_metadata)
-
 
     assert extract_metadata["download_path"] == "http://www.example.com"
 

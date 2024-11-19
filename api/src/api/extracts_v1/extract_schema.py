@@ -47,18 +47,6 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
     extract_type = fields.String(
         metadata={"description": "The type of extract", "example": "opportunity_data_extract"}
     )
-    file_size_bytes = fields.Integer(
-        metadata={"description": "The size of the file in bytes", "example": 1024}
-    )
-    created_at = fields.DateTime(
-        metadata={"description": "When the extract was created", "example": "2023-10-01T12:00:00"}
-    )
-    updated_at = fields.DateTime(
-        metadata={
-            "description": "When the extract was last updated",
-            "example": "2023-10-02T12:00:00",
-        }
-    )
 
 
 class ExtractMetadataListResponseSchema(AbstractResponseSchema):
