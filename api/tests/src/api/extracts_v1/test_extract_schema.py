@@ -53,10 +53,12 @@ def test_request_schema_validation():
 def test_response_schema_single(sample_extract_metadata):
     schema = ExtractMetadataResponseSchema()
 
+    
+    sample_extract_metadata.download_path = "http://www.example.com"
     extract_metadata = schema.dump(sample_extract_metadata)
 
-    # The backend will set this as a S3 signed URL
-    extract_metadata["download_path"] = "http://www.example.com"
+
+    assert extract_metadata["download_path"] == "http://www.example.com"
 
     assert extract_metadata["extract_metadata_id"] == 1
     assert extract_metadata["extract_type"] == "opportunities_csv"
