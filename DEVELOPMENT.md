@@ -115,8 +115,9 @@ Any changes to features, tools, or workflows should include updates or additions
 To run the load test:
 
 1. Install artillery locally if you haven't done so with `npm install -g artillery@latest`
-2. `$ cd api` or or `$ cd frontend`
-3. `$ make load-test-<env>` where env is either `local`, `dev`, `staging`, or `production`
+2. For the frontend, download the required data from https://drive.google.com/file/d/1zknvVSRqL7xs8VGinztuKelfppYlgRoP and save "params.json" to `frontend/tests/artillery/params.json`
+3. `$ cd api` or or `$ cd frontend`
+4. `$ make load-test-<env>` where env is either `local`, `dev`, `staging`, or `production`
 
 - `make load-test-local`
   - requires running a local container in another console
