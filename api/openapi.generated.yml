@@ -68,8 +68,23 @@ paths:
           description: Bad Request
       tags:
       - User v1
-      summary: 'parameters:'
-      description: Test
+      summary: User Token
+      description: '
+
+        __ALPHA VERSION__
+
+
+        This endpoint in its current form is primarily for testing and feedback.
+
+
+        Features in this endpoint are still under heavy development, and subject to
+        change. Not for production use.
+
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
       security:
       - ApiKeyAuth: []
   /v1/opportunities/search:
