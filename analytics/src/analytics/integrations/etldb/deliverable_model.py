@@ -34,7 +34,7 @@ class EtlDeliverableModel:
 
         # insert facts
         if deliverable_id is not None:
-            self._insert_facts(deliverable_id, deliverable_df, ghid_map)
+            _ = self._insert_facts(deliverable_id, deliverable_df, ghid_map)
 
         return deliverable_id, change_type
 
@@ -69,10 +69,10 @@ class EtlDeliverableModel:
         deliverable_id: int,
         deliverable_df: Series,
         ghid_map: dict,
-    ) -> int | None:
+    ) -> tuple[int | None, int | None]:
         """Write deliverable fact data to etl database."""
         # insert into fact table: deliverable_quad_map
-        new_row_id = None
+        map_id = None
         cursor = self.dbh.connection()
         result = cursor.execute(
             text(
@@ -91,12 +91,31 @@ class EtlDeliverableModel:
         )
         row = result.fetchone()
         if row:
-            new_row_id = row[0]
+            map_id = row[0]
+
+        # insert into fact table: deliverable_history
+        history_id = None
+        result = cursor.execute(
+            text(
+                "insert into gh_deliverable_history(deliverable_id, status, d_effective) "
+                "values (:deliverable_id, :status, :effective) "
+                "on conflict(deliverable_id, d_effective) do update "
+                "set (status, t_modified) = (:status, current_timestamp) returning id",
+            ),
+            {
+                "deliverable_id": deliverable_id,
+                "status": deliverable_df["deliverable_status"],
+                "effective": self.dbh.effective_date,
+            },
+        )
+        row = result.fetchone()
+        if row:
+            history_id = row[0]
 
         # commit
         self.dbh.commit(cursor)
 
-        return new_row_id
+        return history_id, map_id
 
     def _update_dimensions(
         self,

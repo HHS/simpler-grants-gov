@@ -32,6 +32,7 @@ class EtlDataset(BaseDataset):
         "deliverable_url": "deliverable_ghid",
         "deliverable_title": "deliverable_title",
         "deliverable_pillar": "deliverable_pillar",
+        "deliverable_status": "deliverable_status",
         "epic_url": "epic_ghid",
         "epic_title": "epic_title",
         "issue_url": "issue_ghid",
