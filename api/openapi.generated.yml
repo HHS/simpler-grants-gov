@@ -68,7 +68,7 @@ paths:
           description: Bad Request
       tags:
       - User v1
-      summary: User Token
+      summary: 'parameters:'
       description: Test
       security:
       - ApiKeyAuth: []
