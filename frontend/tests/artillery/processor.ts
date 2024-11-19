@@ -29,7 +29,7 @@ type returnVars = {
 
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getOppId(context: { vars: dataType & returnVars & globalVars }) {
-  const env = context.vars.env as string;
+  const env = context.vars.env;
   context.vars.id =
     context.vars.ids[env][random(context.vars.ids[env].length - 1)];
 }
@@ -55,7 +55,7 @@ async function getStatic(context: { vars: returnVars }) {
 async function getSearchQuery(context: {
   vars: returnVars & dataType & globalVars;
 }) {
-  const env = context.vars.env as string;
+  const env = context.vars.env;
   const { queries, status, agencies, eligibility, category } = context.vars;
   const queryParam = `query=${queries[random(queries.length - 1)]}`;
   const statusParam = `status=${status[random(status.length - 1)]}`;
