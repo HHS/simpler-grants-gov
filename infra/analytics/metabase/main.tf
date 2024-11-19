@@ -84,7 +84,7 @@ module "service" {
   source       = "../../modules/service"
   service_name = local.service_name
   # https://hub.docker.com/r/metabase/metabase
-  image_repository_url     = "docker.io/metabase/metabase"
+  image_repository_url     = "docker.io/metabase/metabase-enterprise"
   image_tag                = local.image_tag
   vpc_id                   = data.aws_vpc.network.id
   public_subnet_ids        = data.aws_subnets.public.ids
