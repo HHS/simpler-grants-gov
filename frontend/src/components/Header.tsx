@@ -25,6 +25,8 @@ type Props = {
   locale?: string;
 };
 
+const homeRegexp = /^\/(?:e[ns])?$/;
+
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
@@ -34,7 +36,6 @@ const NavLinks = ({
 }) => {
   const t = useTranslations("Header");
   const path = usePathname();
-
   const getSearchLink = useCallback(
     (onSearch: boolean) => {
       return {
@@ -55,13 +56,44 @@ const NavLinks = ({
     ];
   }, [t, path, getSearchLink]);
 
+  const getCurrentNavItemIndex = useCallback(
+    (currentPath: string): number => {
+      // handle base case of home page separately
+      if (currentPath.match(homeRegexp)) {
+        return 0;
+      }
+      const index = navLinkList.slice(1).findIndex(({ href }) => {
+        const baseHref = href.split("?")[0];
+        return currentPath.match(new RegExp(`^(?:/e[ns])?${baseHref}`));
+      });
+      // account for home path
+      return index === -1 ? index : index + 1;
+    },
+    [navLinkList],
+  );
+
+  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
+    getCurrentNavItemIndex(path),
+  );
+
+  useEffect(() => {
+    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
+  }, [path, getCurrentNavItemIndex]);
+
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink) => {
+    return navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text || !link.href) {
         return <></>;
       }
       return (
-        <Link href={link.href} key={link.href}>
+        <Link
+          href={link.href}
+          key={link.href}
+          className={clsx({
+            "usa-nav__link": true,
+            "usa-current": currentNavItemIndex === index,
+          })}
+        >
           <div
             onClick={() => {
               if (mobileExpanded) {
@@ -74,7 +106,7 @@ const NavLinks = ({
         </Link>
       );
     });
-  }, [navLinkList, mobileExpanded, onToggleMobileNav]);
+  }, [navLinkList, currentNavItemIndex, mobileExpanded, onToggleMobileNav]);
 
   return (
     <PrimaryNav
@@ -111,6 +143,9 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
+  const title =
+    usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
+
   return (
     <>
       <div
@@ -140,7 +175,7 @@ const Header = ({ logoPath, locale }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
             <NavMenuButton
