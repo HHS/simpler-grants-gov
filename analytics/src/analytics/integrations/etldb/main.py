@@ -13,6 +13,7 @@ from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
 from analytics.integrations.etldb.epic_model import EtlEpicModel
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.etldb.issue_model import EtlIssueModel
+from analytics.integrations.etldb.project_model import EtlProjectModel
 from analytics.integrations.etldb.quad_model import EtlQuadModel
 from analytics.integrations.etldb.sprint_model import EtlSprintModel
 
@@ -73,12 +74,26 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
     ghid_map: dict[EtlEntityType, dict[str, int]] = {
         EtlEntityType.DELIVERABLE: {},
         EtlEntityType.EPIC: {},
-        EtlEntityType.SPRINT: {},
+        EtlEntityType.PROJECT: {},
         EtlEntityType.QUAD: {},
+        EtlEntityType.SPRINT: {},
     }
 
     # initialize db connection
     db = EtlDb(effective)
+
+    # sync project data to db resulting in row id for each project
+    try:
+        ghid_map[EtlEntityType.PROJECT] = sync_projects(db, dataset)
+        print(f"project row(s) processed: {len(ghid_map[EtlEntityType.PROJECT])}")
+    except (
+        InsufficientPrivilege,
+        OperationalError,
+        ProgrammingError,
+        RuntimeError,
+    ) as e:
+        message = f"FATAL: Failed to sync project data: {e}"
+        raise RuntimeError(message) from e
 
     # sync quad data to db resulting in row id for each quad
     try:
@@ -185,6 +200,20 @@ def sync_issues(db: EtlDb, dataset: EtlDataset, ghid_map: dict) -> dict:
         result[ghid], _ = model.sync_issue(issue_df, ghid_map)
         if VERBOSE:
             print(f"ISSUE '{ghid}' issue_id = {result[ghid]}")
+    return result
+
+
+def sync_projects(db: EtlDb, dataset: EtlDataset) -> dict:
+    """Insert or update (if necessary) a row for each project and return a map of row ids."""
+    result = {}
+    model = EtlProjectModel(db)
+    for ghid in dataset.get_project_ghids():
+        project_df = dataset.get_project(ghid)
+        result[ghid], _ = model.sync_project(project_df)
+        if VERBOSE:
+            print(
+                f"PROJECT '{ghid}' title = '{project_df['project_name']}', row_id = {result[ghid]}",
+            )
     return result
 
 

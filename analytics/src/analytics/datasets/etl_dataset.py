@@ -21,8 +21,9 @@ class EtlEntityType(Enum):
     DELIVERABLE = "deliverable"
     EPIC = "epic"
     ISSUE = "issue"
-    SPRINT = "sprint"
+    PROJECT = "project"
     QUAD = "quad"
+    SPRINT = "sprint"
 
 
 class EtlDataset(BaseDataset):
@@ -44,6 +45,8 @@ class EtlDataset(BaseDataset):
         "issue_closed_at": "issue_closed_at",
         "issue_points": "issue_points",
         "issue_status": "issue_status",
+        "project_owner": "project_name",
+        "project_number": "project_ghid",
         "sprint_id": "sprint_ghid",
         "sprint_name": "sprint_name",
         "sprint_start": "sprint_start",
@@ -145,3 +148,15 @@ class EtlDataset(BaseDataset):
         """Fetch an array of unique non-null issue ghids."""
         df = self.df[self.df.issue_ghid.notna()]
         return df.issue_ghid.unique()
+
+    # PROJECT getters
+
+    def get_project(self, project_ghid: int) -> pd.Series:
+        """Fetch data about a given project."""
+        query_string = f"project_ghid == {project_ghid}"
+        return self.df.query(query_string).iloc[0]
+
+    def get_project_ghids(self) -> NDArray[Any]:
+        """Fetch an array of unique non-null project ghids."""
+        df = self.df[self.df.project_ghid.notna()]
+        return df.project_ghid.unique()

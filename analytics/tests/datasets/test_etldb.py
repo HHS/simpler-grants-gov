@@ -15,7 +15,7 @@ class TestEtlDataset:
         row_count = dataset.df.shape[0]
         col_count = dataset.df.shape[1]
         assert row_count == 22
-        assert col_count == 25
+        assert col_count == 27
 
     def test_deliverable_fetchers(self):
         """Deliverable fetchers should return expected values."""
@@ -81,3 +81,16 @@ class TestEtlDataset:
 
         quad = dataset.get_quad(ghid)
         assert quad["quad_name"] == "Quad 1.1"
+
+    def test_project_fetchers(self):
+        """Project fetchers should return expected values."""
+        dataset = EtlDataset.load_from_json_file(self.TEST_FILE_1)
+
+        unique_ghids = dataset.get_project_ghids()
+        assert len(unique_ghids) == 2
+
+        ghid = unique_ghids[0]
+        assert ghid == 13
+
+        project = dataset.get_project(ghid)
+        assert project["project_name"] == "HHS"
