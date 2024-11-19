@@ -31,6 +31,6 @@ module "dev_config" {
 
   service_override_extra_environment_variables = {
     NEW_RELIC_ENABLED = "true"
-    NODE_OPTIONS = "-r @newrelic/next"
+    NODE_OPTIONS      = "-r @newrelic/next"
   }
 }

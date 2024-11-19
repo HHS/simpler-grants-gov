@@ -67,14 +67,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   // side is the easiest way to get started
   const messages = await getMessages();
 
-  // see
+  // see https://github.com/newrelic/newrelic-node-examples/blob/58f760e828c45d90391bda3f66764d4420ba4990/nextjs-app-router/app/layout.js
   if (typedNewRelic?.agent?.collector?.isConnected() === false) {
     await new Promise((resolve) => {
       typedNewRelic.agent.on("connected", resolve);
     });
   }
 
-  // see https://github.com/newrelic/newrelic-node-examples/blob/58f760e828c45d90391bda3f66764d4420ba4990/nextjs-app-router/app/layout.js
   const browserTimingHeader = typedNewRelic
     ? typedNewRelic.getBrowserTimingHeader({
         hasToRemoveScriptWrapper: true,
@@ -92,8 +91,6 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Layout locale={locale}>{children}</Layout>
         </NextIntlClientProvider>
         <Script
-          // We have to set an id for inline scripts.
-          // See https://nextjs.org/docs/app/building-your-application/optimizing/scripts#inline-scripts
           id="nr-browser-agent"
           // By setting the strategy to "beforeInteractive" we guarantee that
           // the script will be added to the document's `head` element.
@@ -102,11 +99,6 @@ export default async function LocaleLayout({ children, params }: Props) {
           // Come back to this to see if we can find a solution later on
           // strategy="beforeInteractive"
 
-          // The body of the script element comes from the async evaluation
-          // of `getInitialProps`. We use the special
-          // `dangerouslySetInnerHTML` to provide that element body. Since
-          // it requires an object with an `__html` property, we pass in an
-          // object literal.
           dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
         />
       </body>
