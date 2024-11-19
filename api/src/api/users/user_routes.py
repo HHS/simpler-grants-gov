@@ -1,5 +1,4 @@
 import logging
-from http.client import responses
 
 from flask import Response, request
 
@@ -17,9 +16,24 @@ logger = logging.getLogger(__name__)
 @user_blueprint.auth_required(api_key_auth)
 @user_blueprint.doc(
     description="Test",
-    responses=[200, 400]
+    responses=[200, 400],
+    # parameters={
+    #     "name": "X-OAuth-login-gov",
+    #     "in": "header",
+    #     "schema": {"type": "string"},
+    #     "description": "JWT token",
+    # },
 )
 def user_token() -> response.ApiResponse | Response:
+    """
+    parameters:
+        - name: X-OAuth-login-gov
+            in: header
+            type: string
+            required: true
+            description: The Oauth2 JWT token
+    """
+
     logger.info("POST /v1/users/user/token")
 
     header_token = request.headers.get("X-OAuth-login-gov")
