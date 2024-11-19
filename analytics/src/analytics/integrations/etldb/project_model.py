@@ -1,6 +1,5 @@
 """Defines EtlProjectModel class to encapsulate db CRUD operations."""
 
-from datetime import datetime
 
 from pandas import Series
 from sqlalchemy import text
@@ -89,9 +88,6 @@ class EtlProjectModel:
     def _select(self, ghid: str) -> tuple[
         int | None,
         str | None,
-        datetime | None,
-        datetime | None,
-        int | None,
     ]:
         """Select epic data from etl database."""
         cursor = self.dbh.connection()
