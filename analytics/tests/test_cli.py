@@ -315,6 +315,7 @@ class TestEtlEntryPoint:
             f"running transform and load with effective date {self.EFFECTIVE_DATE}"
             in result.stdout
         )
+        assert "project row(s) processed: 2" in result.stdout
         assert "quad row(s) processed: 1" in result.stdout
         assert "deliverable row(s) processed: 4" in result.stdout
         assert "sprint row(s) processed: 4" in result.stdout
