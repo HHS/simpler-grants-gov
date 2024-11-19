@@ -1,6 +1,5 @@
 """Defines EtlProjectModel class to encapsulate db CRUD operations."""
 
-
 from pandas import Series
 from sqlalchemy import text
 
