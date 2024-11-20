@@ -33,3 +33,8 @@ override.env
 
 # localstack
 /volume
+
+# All pem/pub/secret keys
+*.key
+*.pub
+*.pem

@@ -85,7 +85,7 @@ setup-local:
 	poetry install --no-root --all-extras --with dev
 
 setup-env-override-file:
-	$(PY_RUN_CMD) setup-env-override-file $(args)
+	./bin/setup-env-override-file.sh $(args)
 
 ##################################################
 # API Build & Run
