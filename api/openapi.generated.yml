@@ -392,29 +392,19 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
-    ExtractMetadataRequest:
+    ExtractMetadataFilterV1:
       type: object
       properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          description: The REST resource object
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
         extract_type:
-          type:
-          - string
-          - 'null'
+          description: The type of extract to filter by
+          example: opportunities_csv
           enum:
           - opportunities_xml
           - opportunities_csv
-          - null
-          description: The type of extract to filter by
-          example: opportunity_data_extract
+          type:
+          - string
+          - 'null'
+          - 'null'
         start_date:
           type:
           - string
@@ -429,9 +419,79 @@ components:
           format: date
           description: The end date for filtering extracts
           example: '2023-10-07'
+    ExtractMetadataPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+        page_size:
+          type: integer
+          minimum: 1
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
+    ExtractMetadataRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
+      required:
+      - pagination
     ExtractMetadataResponse:
       type: object
       properties:
+        download_path:
+          type: string
+          description: The file's download path
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
         extract_metadata_id:
           type: integer
           description: The ID of the extract metadata
@@ -440,28 +500,6 @@ components:
           type: string
           description: The type of extract
           example: opportunity_data_extract
-        file_name:
-          type: string
-          description: The name of the file
-          example: data_extract.csv
-        download_path:
-          type: string
-          description: The path to the file
-          example: <s3 signed URL>
-        file_size_bytes:
-          type: integer
-          description: The size of the file in bytes
-          example: 1024
-        created_at:
-          type: string
-          format: date-time
-          description: When the extract was created
-          example: '2023-10-01T12:00:00'
-        updated_at:
-          type: string
-          format: date-time
-          description: When the extract was last updated
-          example: '2023-10-02T12:00:00'
     ExtractMetadataListResponse:
       type: object
       properties:
