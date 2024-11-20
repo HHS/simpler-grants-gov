@@ -132,7 +132,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
   );
 
   const downloadNOFO = () => {
-    window.open(nofoPath, "_blank")?.focus();
+    window.open(nofoPath, "_blank");
   };
 
   return (
