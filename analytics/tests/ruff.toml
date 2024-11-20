@@ -1,5 +1,7 @@
 # Extend the ruff configuration in the pyproject.toml at the root of this package
 extend = "../pyproject.toml"
+
+[lint]
 ignore = [
   "ANN201", # missing return type
   "PLR2004", # magic value used in comparison instead of constant

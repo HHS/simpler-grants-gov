@@ -204,6 +204,15 @@ setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
 
 ##################################################
+# Mock Oauth Server
+##################################################
+
+init-mock-oauth2: start-mock-oauth2
+
+start-mock-oauth2:
+	docker compose up --detach mock-oauth2-server
+
+##################################################
 # Testing
 ##################################################
 

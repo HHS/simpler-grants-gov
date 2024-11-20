@@ -44,6 +44,7 @@ class DeliverablePercentComplete(BaseMetric[GitHubIssues]):
            and a closed count column
         4. Subtract closed count from total count to get open count
         5. Divide closed count by total count to get percent complete
+
         """
         # get total and closed counts per deliverable
         df_total = self._get_count_by_deliverable(status="all")
