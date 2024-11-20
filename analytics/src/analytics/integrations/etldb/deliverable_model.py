@@ -1,7 +1,9 @@
 """Define EtlDeliverableModel class to encapsulate db CRUD operations."""
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
@@ -21,20 +23,30 @@ class EtlDeliverableModel:
     ) -> tuple[int | None, EtlChangeType]:
         """Write deliverable data to etl database."""
         # initialize return value
+        deliverable_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        deliverable_id = self._insert_dimensions(deliverable_df)
-        if deliverable_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            deliverable_id = self._insert_dimensions(deliverable_df)
+            if deliverable_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, select and update
-        if deliverable_id is None:
-            deliverable_id, change_type = self._update_dimensions(deliverable_df)
+            # if insert failed, select and update
+            if deliverable_id is None:
+                deliverable_id, change_type = self._update_dimensions(deliverable_df)
 
-        # insert facts
-        if deliverable_id is not None:
-            _ = self._insert_facts(deliverable_id, deliverable_df, ghid_map)
+            # insert facts
+            if deliverable_id is not None:
+                _ = self._insert_facts(deliverable_id, deliverable_df, ghid_map)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync deliverable data: {e}"
+            raise RuntimeError(message) from e
 
         return deliverable_id, change_type
 

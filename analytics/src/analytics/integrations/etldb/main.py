@@ -4,9 +4,7 @@ import os
 import re
 from pathlib import Path
 
-from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlDataset, EtlEntityType
 from analytics.integrations.etldb.deliverable_model import EtlDeliverableModel
@@ -82,89 +80,42 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
     # initialize db connection
     db = EtlDb(effective)
 
+    # enforce MIN SCHEMA VERSION
+    min_schema_version = 4
+    version = db.get_schema_version()
+    if version < min_schema_version:
+        message = f"FATAL: cannot sync data to schema {version}; expected {min_schema_version}"
+        raise RuntimeError(message)
+
     # sync project data to db resulting in row id for each project
-    try:
-        ghid_map[EtlEntityType.PROJECT] = sync_projects(db, dataset)
-        print(f"project row(s) processed: {len(ghid_map[EtlEntityType.PROJECT])}")
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync project data: {e}"
-        raise RuntimeError(message) from e
+    ghid_map[EtlEntityType.PROJECT] = sync_projects(db, dataset)
+    print(f"project row(s) processed: {len(ghid_map[EtlEntityType.PROJECT])}")
 
     # sync quad data to db resulting in row id for each quad
-    try:
-        ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
-        print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync quad data: {e}"
-        raise RuntimeError(message) from e
+    ghid_map[EtlEntityType.QUAD] = sync_quads(db, dataset)
+    print(f"quad row(s) processed: {len(ghid_map[EtlEntityType.QUAD])}")
 
     # sync deliverable data to db resulting in row id for each deliverable
-    try:
-        ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
-            db,
-            dataset,
-            ghid_map,
-        )
-        print(
-            f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
-        )
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync deliverable data: {e}"
-        raise RuntimeError(message) from e
+    ghid_map[EtlEntityType.DELIVERABLE] = sync_deliverables(
+        db,
+        dataset,
+        ghid_map,
+    )
+    print(
+        f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",
+    )
 
     # sync sprint data to db resulting in row id for each sprint
-    try:
-        ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
-        print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync sprint data: {e}"
-        raise RuntimeError(message) from e
+    ghid_map[EtlEntityType.SPRINT] = sync_sprints(db, dataset, ghid_map)
+    print(f"sprint row(s) processed: {len(ghid_map[EtlEntityType.SPRINT])}")
 
     # sync epic data to db resulting in row id for each epic
-    try:
-        ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
-        print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync epic data: {e}"
-        raise RuntimeError(message) from e
+    ghid_map[EtlEntityType.EPIC] = sync_epics(db, dataset, ghid_map)
+    print(f"epic row(s) processed: {len(ghid_map[EtlEntityType.EPIC])}")
 
     # sync issue data to db resulting in row id for each issue
-    try:
-        issue_map = sync_issues(db, dataset, ghid_map)
-        print(f"issue row(s) processed: {len(issue_map)}")
-    except (
-        InsufficientPrivilege,
-        OperationalError,
-        ProgrammingError,
-        RuntimeError,
-    ) as e:
-        message = f"FATAL: Failed to sync issue data: {e}"
-        raise RuntimeError(message) from e
+    issue_map = sync_issues(db, dataset, ghid_map)
+    print(f"issue row(s) processed: {len(issue_map)}")
 
 
 def sync_deliverables(db: EtlDb, dataset: EtlDataset, ghid_map: dict) -> dict:

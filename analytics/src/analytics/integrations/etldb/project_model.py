@@ -1,7 +1,9 @@
 """Defines EtlProjectModel class to encapsulate db CRUD operations."""
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
 
@@ -16,16 +18,26 @@ class EtlProjectModel:
     def sync_project(self, project_df: Series) -> tuple[int | None, EtlChangeType]:
         """Write project data to etl database."""
         # initialize return value
+        project_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        project_id = self._insert_dimensions(project_df)
-        if project_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            project_id = self._insert_dimensions(project_df)
+            if project_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, then select and update
-        if project_id is None:
-            project_id, change_type = self._update_dimensions(project_df)
+            # if insert failed, then select and update
+            if project_id is None:
+                project_id, change_type = self._update_dimensions(project_df)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync project data: {e}"
+            raise RuntimeError(message) from e
 
         return project_id, change_type
 

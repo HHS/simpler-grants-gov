@@ -3,7 +3,9 @@
 from datetime import datetime
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
@@ -23,20 +25,30 @@ class EtlIssueModel:
     ) -> tuple[int | None, EtlChangeType]:
         """Write issue data to etl database."""
         # initialize return value
+        issue_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        issue_id = self._insert_dimensions(issue_df, ghid_map)
-        if issue_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            issue_id = self._insert_dimensions(issue_df, ghid_map)
+            if issue_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, select and update
-        if issue_id is None:
-            issue_id, change_type = self._update_dimensions(issue_df, ghid_map)
+            # if insert failed, select and update
+            if issue_id is None:
+                issue_id, change_type = self._update_dimensions(issue_df, ghid_map)
 
-        # insert facts
-        if issue_id is not None:
-            self._insert_facts(issue_id, issue_df, ghid_map)
+            # insert facts
+            if issue_id is not None:
+                self._insert_facts(issue_id, issue_df, ghid_map)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync issue data: {e}"
+            raise RuntimeError(message) from e
 
         return issue_id, change_type
 
