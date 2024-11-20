@@ -24,6 +24,7 @@ from src.auth.api_key_auth import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,11 @@ This API is an ALPHA VERSION! Its current form is primarily for testing and feed
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
+
+class authEndpointConfig(PydanticBaseEnvConfig):
+    auth_endpoint: bool = False if os.getenv("ENVIRONMENT", "local") == "local" else True
+
+auth_endpoint = authEndpointConfig()
 
 def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
@@ -119,7 +125,8 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
-    app.register_blueprint(user_blueprint)
+    if auth_endpoint:
+        app.register_blueprint(user_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)
