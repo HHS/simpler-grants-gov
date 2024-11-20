@@ -444,10 +444,10 @@ components:
           type: string
           description: The name of the file
           example: data_extract.csv
-        file_path:
+        download_path:
           type: string
           description: The path to the file
-          example: /path/to/data_extract.csv
+          example: <s3 signed URL>
         file_size_bytes:
           type: integer
           description: The size of the file in bytes
