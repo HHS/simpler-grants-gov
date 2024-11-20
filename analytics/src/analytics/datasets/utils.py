@@ -30,6 +30,7 @@ def load_json_data_as_df(
     -------
     pd.DataFrame
         Pandas dataframe with columns renamed to match the values of the column map
+
     """
     # load json data from the local file
     with open(file_path, encoding="utf-8") as f:

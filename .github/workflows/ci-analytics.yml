@@ -39,11 +39,11 @@ jobs:
       - name: Run linting
         run: make lint
 
+      - name: Run database initialization
+        run: docker compose down --volumes && make init-db
+
       - name: Run tests
         run: make test-audit
-
-      - name: Run database initialization
-        run: make init-db
 
       # Both of these tasks are looking for github and slack auth
       # - name: Export GitHub data

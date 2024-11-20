@@ -1,11 +1,12 @@
 "use client";
 
+import clsx from "clsx";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GovBanner,
   NavMenuButton,
@@ -24,16 +25,17 @@ type Props = {
   locale?: string;
 };
 
+const homeRegexp = /^\/(?:e[ns])?$/;
+
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
 }: {
   mobileExpanded: boolean;
-  onToggleMobileNav: () => unknown;
+  onToggleMobileNav: () => void;
 }) => {
   const t = useTranslations("Header");
   const path = usePathname();
-
   const getSearchLink = useCallback(
     (onSearch: boolean) => {
       return {
@@ -54,18 +56,57 @@ const NavLinks = ({
     ];
   }, [t, path, getSearchLink]);
 
+  const getCurrentNavItemIndex = useCallback(
+    (currentPath: string): number => {
+      // handle base case of home page separately
+      if (currentPath.match(homeRegexp)) {
+        return 0;
+      }
+      const index = navLinkList.slice(1).findIndex(({ href }) => {
+        const baseHref = href.split("?")[0];
+        return currentPath.match(new RegExp(`^(?:/e[ns])?${baseHref}`));
+      });
+      // account for home path
+      return index === -1 ? index : index + 1;
+    },
+    [navLinkList],
+  );
+
+  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
+    getCurrentNavItemIndex(path),
+  );
+
+  useEffect(() => {
+    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
+  }, [path, getCurrentNavItemIndex]);
+
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink) => {
+    return navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text || !link.href) {
         return <></>;
       }
       return (
-        <Link href={link.href} key={link.href}>
-          {link.text}
+        <Link
+          href={link.href}
+          key={link.href}
+          className={clsx({
+            "usa-nav__link": true,
+            "usa-current": currentNavItemIndex === index,
+          })}
+        >
+          <div
+            onClick={() => {
+              if (mobileExpanded) {
+                onToggleMobileNav();
+              }
+            }}
+          >
+            {link.text}
+          </div>
         </Link>
       );
     });
-  }, [navLinkList]);
+  }, [navLinkList, currentNavItemIndex, mobileExpanded, onToggleMobileNav]);
 
   return (
     <PrimaryNav
@@ -80,15 +121,44 @@ const Header = ({ logoPath, locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
+
+  const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setIsMobileNavExpanded(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMobileNavExpanded) {
+      document.addEventListener("keyup", closeMenuOnEscape);
+    }
+    return () => {
+      document.removeEventListener("keyup", closeMenuOnEscape);
+    };
+  }, [isMobileNavExpanded, closeMenuOnEscape]);
+
+  const language = locale && locale.match("/^es/") ? "spanish" : "english";
+
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
-  const language = locale && locale.match("/^es/") ? "spanish" : "english";
+
+  const title =
+    usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
   return (
     <>
       <div
-        className={`usa-overlay ${isMobileNavExpanded ? "is-visible" : ""}`}
+        className={clsx({
+          "usa-overlay": true,
+          "desktop:display-none": true,
+          "is-visible": isMobileNavExpanded,
+        })}
+        onClick={() => {
+          if (isMobileNavExpanded) {
+            setIsMobileNavExpanded(false);
+          }
+        }}
       />
       <GovBanner language={language} />
       <USWDSHeader basic={true}>
@@ -105,7 +175,7 @@ const Header = ({ logoPath, locale }: Props) => {
                     />
                   </span>
                 )}
-                <span className="font-sans-lg flex-fill">{t("title")}</span>
+                <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
             <NavMenuButton

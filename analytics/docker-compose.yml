@@ -18,6 +18,7 @@ services:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-analytics}
     container_name: grants-analytics
+    env_file: ./local.env
     volumes:
       - .:/analytics
       - ~/.ssh:/home/${RUN_USER:-analytics}/.ssh
