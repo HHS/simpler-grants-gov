@@ -251,19 +251,6 @@ class LkExternalUserType(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
         return LkExternalUserType(
             external_user_type_id=lookup.lookup_val, description=lookup.get_description()
-
-
-@LookupRegistry.register_lookup(EXTRACT_TYPE_CONFIG)
-class LkExtractType(LookupTable, TimestampMixin):
-    __tablename__ = "lk_extract_type"
-
-    extract_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkExtractType":
-        return LkExtractType(
-            extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
 
 
