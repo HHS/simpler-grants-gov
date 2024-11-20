@@ -1,6 +1,6 @@
 import logging
 
-from flask import Response, request
+from flask import Response
 
 from src.api import response
 from src.api.route_utils import raise_flask_error
@@ -21,18 +21,20 @@ Features in this endpoint are still under heavy development, and subject to chan
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
+
 @user_blueprint.post("/user/token")
+@user_blueprint.input(
+    user_schemas.UserTokenHeaderSchema, location="headers", arg_name="x_oauth_login_gov"
+)
 @user_blueprint.output(user_schemas.UserTokenResponseSchema)
 @user_blueprint.auth_required(api_key_auth)
-@user_blueprint.doc( #should we include this?
-    description=SHARED_ALPHA_DESCRIPTION,
-    responses=[200, 400]
+@user_blueprint.doc(  # should we include this?
+    description=SHARED_ALPHA_DESCRIPTION, responses=[200, 400]
 )
-def user_token() -> response.ApiResponse | Response:
+def user_token(x_oauth_login_gov: str) -> response.ApiResponse | Response:
     logger.info("POST /v1/users/user/token")
 
-    header_token = request.headers.get("X-OAuth-login-gov")
-    if header_token:
+    if x_oauth_login_gov:
         data = {
             "token": "the token goes here!",
             "user": {
