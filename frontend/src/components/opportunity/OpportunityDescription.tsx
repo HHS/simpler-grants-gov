@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { Button, Link } from "@trussworks/react-uswds";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { USWDSIcon } from "../USWDSIcon";
 
 type Props = {
   summary: Summary;
@@ -143,18 +144,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
           <div className="grid-row flex-justify">
             <Button onClick={downloadNOFO} type="button">
               <span>{t("nofo_download")} </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 24 24"
-                className="usa-icon usa-icon--size-4"
-                focusable="false"
-                role="img"
-                aria-hidden="true"
-              >
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
-              </svg>
+              <USWDSIcon name={'file_download'} className="usa-icon usa-icon--size-4" /> 
             </Button>
             <Link
               className="flex-align-self-center"
