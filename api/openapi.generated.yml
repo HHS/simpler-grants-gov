@@ -22,6 +22,7 @@ info:
 tags:
 - name: Health
 - name: Opportunity v1
+- name: Extract v1
 servers: .
 paths:
   /health:
@@ -43,6 +44,47 @@ paths:
       tags:
       - Health
       summary: Health
+  /v1/extracts:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractMetadataListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Extract v1
+      summary: Extract Metadata Get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractMetadataRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: created_at
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: ascending
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/search:
     post:
       parameters: []
@@ -350,6 +392,95 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
+    ExtractMetadataRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+        extract_type:
+          type:
+          - string
+          - 'null'
+          enum:
+          - opportunities_xml
+          - opportunities_csv
+          - null
+          description: The type of extract to filter by
+          example: opportunity_data_extract
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The start date for filtering extracts
+          example: '2023-10-01'
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The end date for filtering extracts
+          example: '2023-10-07'
+    ExtractMetadataResponse:
+      type: object
+      properties:
+        extract_metadata_id:
+          type: integer
+          description: The ID of the extract metadata
+          example: 1
+        extract_type:
+          type: string
+          description: The type of extract
+          example: opportunity_data_extract
+        file_name:
+          type: string
+          description: The name of the file
+          example: data_extract.csv
+        file_path:
+          type: string
+          description: The path to the file
+          example: /path/to/data_extract.csv
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          description: When the extract was created
+          example: '2023-10-01T12:00:00'
+        updated_at:
+          type: string
+          format: date-time
+          description: When the extract was last updated
+          example: '2023-10-02T12:00:00'
+    ExtractMetadataListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: A list of extract metadata records
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ExtractMetadataResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     FundingInstrumentFilterV1:
       type: object
       properties:

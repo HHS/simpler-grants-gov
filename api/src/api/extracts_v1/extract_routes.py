@@ -1,0 +1,55 @@
+from datetime import datetime, timedelta
+
+from flask import Response
+
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
+import src.api.extracts_v1.extract_schema as extract_schema
+import src.api.response as response
+from src.api.extracts_v1.extract_blueprint import extract_blueprint
+from src.auth.api_key_auth import api_key_auth
+from src.services.extracts_v1.get_extracts import ExtractListParams, get_extracts
+
+examples = {
+    "example1": {
+        "summary": "No filters",
+        "value": {
+            "pagination": {
+                "order_by": "created_at",
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_direction": "ascending",
+            },
+        },
+    },
+}
+
+
+@extract_blueprint.post("/extracts")
+@extract_blueprint.input(
+    extract_schema.ExtractMetadataRequestSchema,
+    arg_name="raw_list_params",
+    examples=examples,
+)
+@extract_blueprint.output(extract_schema.ExtractMetadataListResponseSchema)
+@extract_blueprint.auth_required(api_key_auth)
+@flask_db.with_db_session()
+def extract_metadata_get(
+    db_session: db.Session, raw_list_params: dict
+) -> response.ApiResponse | Response:
+    # Default to last 7 days if no date range is provided
+    if not raw_list_params.get("filters", {}).get("created_on"):
+        raw_list_params.setdefault("filters", {})
+        raw_list_params["filters"]["created_on"] = {
+            "start_date": (datetime.now() - timedelta(days=7)).date(),
+            "end_date": datetime.now().date(),
+        }
+
+    list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)
+
+    # Call service with params to get results
+    with db_session.begin():
+        results = get_extracts(db_session, list_params)
+
+    # Serialize results
+    return response.ApiResponse(message="Success", data=results)

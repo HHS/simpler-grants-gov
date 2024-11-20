@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
@@ -31,6 +32,7 @@ from src.constants.lookup_constants import (
     AgencySubmissionNotificationSetting,
     ApplicantType,
     ExternalUserType,
+    ExtractType,
     FundingCategory,
     FundingInstrument,
     OpportunityAttachmentType,
@@ -1857,3 +1859,13 @@ class LinkExternalUserFactory(BaseFactory):
     external_user_type_id = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
+
+
+class ExtractMetadataFactory(BaseFactory):
+    class Meta:
+        model = extract_models.ExtractMetadata
+
+    extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
+    file_name = factory.Faker("file_name")
+    file_path = factory.Faker("file_path")
+    file_size_bytes = factory.Faker("random_int", min=1, max=1000000)

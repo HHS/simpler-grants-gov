@@ -12,6 +12,7 @@ import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
+from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
 from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
@@ -118,6 +119,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+    app.register_blueprint(extracts_v1_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)

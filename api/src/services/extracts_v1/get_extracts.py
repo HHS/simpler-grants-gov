@@ -1,0 +1,47 @@
+import logging
+
+from pydantic import BaseModel, Field
+from sqlalchemy import select
+
+import src.adapters.db as db
+from src.constants.lookup_constants import ExtractType
+from src.db.models.extract_models import ExtractMetadata
+from src.pagination.pagination_models import PaginationParams
+from src.search.search_models import DateSearchFilter
+
+logger = logging.getLogger(__name__)
+
+
+class ExtractFilters(BaseModel):
+    extract_type: ExtractType | None = None
+    created_at: DateSearchFilter | None = None
+
+
+class ExtractListParams(BaseModel):
+    pagination: PaginationParams
+
+    filters: ExtractFilters | None = Field(default=None)
+
+
+def get_extracts(db_session: db.Session, list_params: ExtractListParams) -> list[ExtractMetadata]:
+    stmt = select(ExtractMetadata)
+
+    if list_params.filters:
+        if list_params.filters.extract_type:
+            stmt = stmt.where(ExtractMetadata.extract_type == list_params.filters.extract_type)
+
+        if list_params.filters.created_at:
+            if list_params.filters.created_at.start_date:
+                stmt = stmt.where(
+                    ExtractMetadata.created_at >= list_params.filters.created_at.start_date
+                )
+            if list_params.filters.created_at.end_date:
+                stmt = stmt.where(
+                    ExtractMetadata.created_at <= list_params.filters.created_at.end_date
+                )
+
+    # Apply pagination
+    offset = list_params.pagination.page_size * (list_params.pagination.page_offset - 1)
+    stmt = stmt.offset(offset).limit(list_params.pagination.page_size)
+
+    return list(db_session.execute(stmt).scalars().all())
