@@ -207,7 +207,6 @@ class CustomProvider(BaseProvider):
         return self.generator.parse(self.MARKUP_STRING)
 
 
-
 fake = faker.Faker()
 fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
