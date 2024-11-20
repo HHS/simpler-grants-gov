@@ -26,7 +26,7 @@ def test_get_extracts_no_filters(
     params = ExtractListParams(
         pagination=PaginationParams(
             page_size=10,
-            page_offset=0,
+            page_offset=1,
             order_by="created_at",
             sort_direction=SortDirection.ASCENDING,
         )
@@ -46,7 +46,7 @@ def test_get_extracts_with_type_filter(
     params = ExtractListParams(
         pagination=PaginationParams(
             page_size=10,
-            page_offset=0,
+            page_offset=1,
             order_by="created_at",
             sort_direction=SortDirection.ASCENDING,
         ),
@@ -65,7 +65,7 @@ def test_get_extracts_with_date_filter(enable_factory_create, db_session):
     params = ExtractListParams(
         pagination=PaginationParams(
             page_size=10,
-            page_offset=0,
+            page_offset=1,
             order_by="created_at",
             sort_direction=SortDirection.ASCENDING,
         ),
@@ -89,7 +89,7 @@ def test_get_extracts_pagination(enable_factory_create, db_session):
     params = ExtractListParams(
         pagination=PaginationParams(
             page_size=2,
-            page_offset=0,
+            page_offset=1,
             order_by="created_at",
             sort_direction=SortDirection.ASCENDING,
         )
