@@ -52,8 +52,11 @@ def create_app() -> APIFlask:
     register_index(app)
     register_search_client(app)
 
-    # TODO - shouldn't do this in envs we don't yet have configured for auth
-    initialize_jwt_auth()
+    # TODO - once we merge the auth changes for setting up the initial route
+    # will reuse the config from it, for now we'll do this a bit hacky
+    # This cannot be removed non-locally until we setup RSA keys for non-local envs
+    if os.getenv("ENVIRONMENT") == "local":
+        initialize_jwt_auth()
 
     return app
 
