@@ -42,7 +42,9 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 class authEndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = False if os.getenv("ENVIRONMENT", "local") == "local" else True
 
+
 auth_endpoint = authEndpointConfig()
+
 
 def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
