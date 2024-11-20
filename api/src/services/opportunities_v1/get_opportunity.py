@@ -5,11 +5,10 @@ from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.util.datetime_util as datetime_util
-from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
-from src.util.file_util import split_s3_url
+from src.util.file_util import pre_sign_file_location
 
 
 def _fetch_opportunity(
@@ -40,24 +39,8 @@ def _fetch_opportunity(
 def pre_sign_opportunity_file_location(
     opp_atts: list,
 ) -> list[OpportunityAttachment]:
-    s3_config = S3Config()
-
-    s3_client = get_s3_client(s3_config, get_boto_session())
     for opp_att in opp_atts:
-        file_loc = opp_att.file_location
-        bucket, key = split_s3_url(file_loc)
-        pre_sign_file_loc = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket, "Key": key},
-            ExpiresIn=s3_config.presigned_s3_duration,
-        )
-        if s3_config.s3_endpoint_url:
-            # Only relevant when local, due to docker path issues
-            pre_sign_file_loc = pre_sign_file_loc.replace(
-                s3_config.s3_endpoint_url, "http://localhost:4566"
-            )
-
-        opp_att.download_path = pre_sign_file_loc
+        opp_att.download_path = pre_sign_file_location(opp_att.file_location)
 
     return opp_atts
 

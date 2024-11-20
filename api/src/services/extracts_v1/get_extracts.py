@@ -8,6 +8,7 @@ from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from src.pagination.pagination_models import PaginationParams
 from src.search.search_models import DateSearchFilter
+from src.util.file_util import pre_sign_file_location
 
 logger = logging.getLogger(__name__)
 
@@ -44,4 +45,10 @@ def get_extracts(db_session: db.Session, list_params: ExtractListParams) -> list
     offset = list_params.pagination.page_size * (list_params.pagination.page_offset - 1)
     stmt = stmt.offset(offset).limit(list_params.pagination.page_size)
 
-    return list(db_session.execute(stmt).scalars().all())
+    extracts = list(db_session.execute(stmt).scalars().all())
+
+    for extract in extracts:
+        file_loc = extract.file_path
+        setattr(extract, "download_path", pre_sign_file_location(file_loc))  # noqa: B010
+
+    return extracts

@@ -1867,5 +1867,5 @@ class ExtractMetadataFactory(BaseFactory):
 
     extract_type = factory.fuzzy.FuzzyChoice(ExtractType)
     file_name = factory.Faker("file_name")
-    file_path = factory.Faker("file_path")
+    file_path = "s3://bucket/key"
     file_size_bytes = factory.Faker("random_int", min=1, max=1000000)

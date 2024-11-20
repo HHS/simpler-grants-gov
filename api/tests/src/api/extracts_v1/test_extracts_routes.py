@@ -70,6 +70,7 @@ def test_extract_metadata_get_with_custom_dates(
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 2
+    assert data[0]["download_path"].startswith("http://localhost:4566/bucket/key")
 
 
 def test_extract_metadata_get_with_type_filter(
