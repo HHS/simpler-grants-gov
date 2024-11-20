@@ -39,11 +39,11 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 """
 
 
-class authEndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = False if os.getenv("ENVIRONMENT", "local") == "local" else True
+class AuthEndpointConfig(PydanticBaseEnvConfig):
+    auth_endpoint: bool = True if os.getenv("ENVIRONMENT", "local") == "local" else False
 
 
-auth_endpoint = authEndpointConfig()
+auth_endpoint_config = AuthEndpointConfig()
 
 
 def create_app() -> APIFlask:
@@ -127,7 +127,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
-    if auth_endpoint:
+    if auth_endpoint_config.auth_endpoint:
         app.register_blueprint(user_blueprint)
 
     # Non-api blueprints
