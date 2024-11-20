@@ -269,7 +269,7 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 def initialize_database() -> None:
     """Initialize etl database."""
     logger.info("initializing database")
-    etldb.init_db()
+    etldb.initialize_database()
     logger.info("done")
 
 
@@ -296,7 +296,7 @@ def transform_and_load(
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
 
     # sync data to db
-    etldb.sync_db(dataset, datestamp)
+    etldb.sync_data(dataset, datestamp)
 
     # finish
     print("transform and load is done")
