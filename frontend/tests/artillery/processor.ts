@@ -8,13 +8,16 @@ type dataType = {
   queries: Array<string>;
   pages: Array<string>;
   status: Array<string>;
-  agencies: Array<string>;
+  agencies: {
+    [key: string]: Array<string>;
+  };
   funding: Array<string>;
   eligibility: Array<string>;
   category: Array<string>;
 };
 type globalVars = {
   $environment?: string;
+  env: string;
 };
 
 type returnVars = {
@@ -26,7 +29,7 @@ type returnVars = {
 
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getOppId(context: { vars: dataType & returnVars & globalVars }) {
-  const env = context.vars.$environment as string;
+  const env = context.vars.env;
   context.vars.id =
     context.vars.ids[env][random(context.vars.ids[env].length - 1)];
 }
@@ -49,11 +52,14 @@ async function getStatic(context: { vars: returnVars }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
-async function getSearchQuery(context: { vars: returnVars & dataType }) {
+async function getSearchQuery(context: {
+  vars: returnVars & dataType & globalVars;
+}) {
+  const env = context.vars.env;
   const { queries, status, agencies, eligibility, category } = context.vars;
   const queryParam = `query=${queries[random(queries.length - 1)]}`;
   const statusParam = `status=${status[random(status.length - 1)]}`;
-  const agencyParam = `agency=${agencies[random(agencies.length - 1)]}`;
+  const agencyParam = `agency=${agencies[env][random(agencies[env].length - 1)]}`;
   const categoryParam = `category=${category[random(category.length - 1)]}`;
   const eligibilityParam = `eligibility=${eligibility[random(eligibility.length - 1)]}`;
   const pagerParam = `page=${random(5)}`;
@@ -100,13 +106,15 @@ async function loadData(context: { vars: dataType & globalVars }) {
   // Dev and stage have the same data.
   const env =
     context.vars.$environment === "stage" ? "dev" : context.vars.$environment;
+
   const envs = new Set(["local", "dev", "stage", "prod"]);
   if (!env || !envs.has(env)) {
     throw new Error(`env ${env ?? ""} does not exist in env list`);
   }
   const path = "./tests/artillery/params.json";
   const file = await readFile(path, "utf8");
-  context.vars = JSON.parse(file) as dataType;
+  context.vars = JSON.parse(file) as dataType & globalVars;
+  context.vars.env = env;
 }
 
 function randomString(length: number) {
