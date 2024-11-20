@@ -1,0 +1,39 @@
+name: Deploy Analytics
+run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "analytics/**"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      image-tag:
+        description: "Metabase enterprise image tag to deploy"
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/deploy.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
+    with:
+      app_name: "analytics"
+      environment: ${{ matrix.envs }}
