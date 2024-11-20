@@ -3,6 +3,15 @@ from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
 
 
+class UserTokenHeaderSchema(Schema):
+    x_oauth_login_gov = fields.String(
+        data_key="X-OAuth-login-gov",
+        metadata={
+            "description": "The login_gov header token",
+        },
+    )
+
+
 class UserSchema(Schema):
     user_id = fields.String(
         metadata={
