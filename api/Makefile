@@ -84,6 +84,9 @@ setup-local:
 	# Install dependencies
 	poetry install --no-root --all-extras --with dev
 
+setup-env-override-file:
+	$(PY_RUN_CMD) setup-env-override-file $(args)
+
 ##################################################
 # API Build & Run
 ##################################################
@@ -100,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: build init-db init-opensearch init-localstack
+init: setup-env-override-file build init-db init-opensearch init-localstack
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes

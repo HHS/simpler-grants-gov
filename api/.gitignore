@@ -19,6 +19,7 @@ coverage.*
 # Environment variables
 .env
 .envrc
+override.env
 
 # mypy
 .mypy_cache

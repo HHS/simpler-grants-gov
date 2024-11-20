@@ -1857,3 +1857,17 @@ class LinkExternalUserFactory(BaseFactory):
     external_user_type_id = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
+
+
+class UserTokenSessionFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserTokenSession
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    token_id = Generators.UuidObj
+
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
+
+    is_valid = True

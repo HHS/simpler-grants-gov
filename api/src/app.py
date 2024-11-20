@@ -19,7 +19,8 @@ from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_b
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.app_config import AppConfig
-from src.auth.api_key_auth import get_app_security_scheme
+from src.auth.api_jwt_auth import initialize_jwt_auth
+from src.auth.auth_utils import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
@@ -50,6 +51,9 @@ def create_app() -> APIFlask:
     register_blueprints(app)
     register_index(app)
     register_search_client(app)
+
+    # TODO - shouldn't do this in envs we don't yet have configured for auth
+    initialize_jwt_auth()
 
     return app
 

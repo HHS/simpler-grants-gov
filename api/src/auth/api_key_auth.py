@@ -1,7 +1,6 @@
 import logging
 import os
 from dataclasses import dataclass
-from typing import Any
 
 import flask
 from apiflask import HTTPTokenAuth
@@ -15,11 +14,7 @@ logger = logging.getLogger(__name__)
 # this needs to be attached to your
 # routes as `your_blueprint.auth_required(api_key_auth)`
 # in order to enable authorization
-api_key_auth = HTTPTokenAuth("ApiKey", header="X-Auth")
-
-
-def get_app_security_scheme() -> dict[str, Any]:
-    return {"ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-Auth"}}
+api_key_auth = HTTPTokenAuth("ApiKey", header="X-Auth", security_scheme_name="ApiKeyAuth")
 
 
 @dataclass
