@@ -46,7 +46,13 @@ paths:
       summary: Health
   /v1/users/user/token:
     post:
-      parameters: []
+      parameters:
+      - in: header
+        name: X-OAuth-login-gov
+        description: The login_gov header token
+        schema:
+          type: string
+        required: false
       responses:
         '200':
           content:
@@ -54,6 +60,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserTokenResponse'
           description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
         '401':
           content:
             application/json:
