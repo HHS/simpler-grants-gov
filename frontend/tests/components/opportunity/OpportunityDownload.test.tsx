@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import OpportunityDownload from "../../../src/components/opportunity/OpportunityDownload";
+import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
