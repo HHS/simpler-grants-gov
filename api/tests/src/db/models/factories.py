@@ -157,6 +157,8 @@ class CustomProvider(BaseProvider):
         "s3://local-opportunities/test_file_5.pdf",
     ]
 
+    MARKUP_STRING = "<div>{{paragraph}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph}}</div><div>{{paragraph}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph}}</div>"
+
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -200,6 +202,10 @@ class CustomProvider(BaseProvider):
 
     def s3_file_location(self) -> str:
         return self.random_element(self.OPPORTUNITY_ATTACHMENT_S3_PATHS)
+
+    def complex_markup_string(self) -> str:
+        return self.generator.parse(self.MARKUP_STRING)
+
 
 
 fake = faker.Faker()
@@ -342,6 +348,10 @@ class OpportunityFactory(BaseFactory):
 
         has_long_descriptions = factory.Trait(
             current_opportunity_summary__has_long_descriptions=True
+        )
+
+        has_markup_descriptions = factory.Trait(
+            current_opportunity_summary__has_markup_descriptions=True
         )
 
         # Set all nullable fields to null
@@ -582,6 +592,10 @@ class OpportunitySummaryFactory(BaseFactory):
             close_date_description=factory.Faker("paragraph", nb_sentences=30),
         )
 
+        has_markup_descriptions = factory.Trait(
+            summary_description=factory.Faker("complex_markup_string"),
+        )
+
 
 class CurrentOpportunitySummaryFactory(BaseFactory):
     class Meta:
@@ -621,6 +635,10 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
 
         has_long_descriptions = factory.Trait(
             opportunity_summary__has_long_descriptions=True,
+        )
+
+        has_markup_descriptions = factory.Trait(
+            opportunity_summary__has_markup_descriptions=True,
         )
 
 
