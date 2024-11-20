@@ -80,13 +80,7 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
     # initialize db connection
     db = EtlDb(effective)
 
-    # enforce MIN SCHEMA VERSION
-    min_schema_version = 4
-    version = db.get_schema_version()
-    if version < min_schema_version:
-        message = f"FATAL: cannot sync data to schema {version}; expected {min_schema_version}"
-        raise RuntimeError(message)
-
+    # note: the following code assumes SCHEMA VERSION >= 4
     # sync project data to db resulting in row id for each project
     ghid_map[EtlEntityType.PROJECT] = sync_projects(db, dataset)
     print(f"project row(s) processed: {len(ghid_map[EtlEntityType.PROJECT])}")
