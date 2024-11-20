@@ -1,14 +1,11 @@
-"use client";
-
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
-import { Button, Link } from "@trussworks/react-uswds";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import OpportunityDownload from "./OpportunityDownload";
 
 type Props = {
   summary: Summary;
@@ -132,31 +129,11 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
     "--"
   );
 
-  const downloadNOFO = () => {
-    window.open(nofoPath, "_blank");
-  };
-
   return (
     <>
       <div className="usa-prose">
         <h2>{t("title")}</h2>
-        {nofoPath.length > 0 ? (
-          <div className="grid-row flex-justify">
-            <Button onClick={downloadNOFO} type="button">
-              <span>{t("nofo_download")} </span>
-              <USWDSIcon
-                name={"file_download"}
-                className="usa-icon usa-icon--size-4"
-              />
-            </Button>
-            <Link
-              className="flex-align-self-center"
-              href={"#opportunity_documents"}
-            >
-              {t("jump_to_documents")}
-            </Link>
-          </div>
-        ) : null}
+        <OpportunityDownload nofoPath={nofoPath} />
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
