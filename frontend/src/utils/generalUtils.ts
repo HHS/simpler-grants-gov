@@ -31,8 +31,8 @@ export const splitMarkup = (
       }
       // handle things like urls within tag params that need to be ignored
       if (
-        (tracker.openTagIndicator && character === `"`) ||
-        character === `'`
+        tracker.openTagIndicator &&
+        (character === `"` || character === `'`)
       ) {
         tracker.inQuotes = !tracker.inQuotes;
       }
