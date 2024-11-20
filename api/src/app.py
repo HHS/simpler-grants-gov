@@ -4,6 +4,7 @@ from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
 from flask_cors import CORS
+from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -40,10 +41,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 
 
 class AuthEndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = True if os.getenv("ENVIRONMENT", "local") == "local" else False
-
-
-auth_endpoint_config = AuthEndpointConfig()
+    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
 
 def create_app() -> APIFlask:
@@ -127,6 +125,8 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+
+    auth_endpoint_config = AuthEndpointConfig()
     if auth_endpoint_config.auth_endpoint:
         app.register_blueprint(user_blueprint)
 
