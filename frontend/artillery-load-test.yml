@@ -5,17 +5,17 @@ config:
   http:
     timeout: 10
   phases:
-    - duration: 600
-      arrivalRate: 1
-      maxVusers: 1000
-      name: Warm up phase
-    - duration: 600
+    - duration: 3000
       arrivalRate: 10
       maxVusers: 5000
-      name: Ramp up load
-    - duration: 600
+      name: Warm up phase
+    - duration: 3000
       arrivalRate: 100
-      maxVusers: 10000
+      maxVusers: 25000
+      name: Ramp up load
+    - duration: 3000
+      arrivalRate: 1000
+      maxVusers: 50000
       name: Spike phase
   environments:
     local:
@@ -34,7 +34,7 @@ config:
           name: Spike phase
     prod:
       target: https://simpler.grants.gov
-    staging:
+    stage:
       target: http://frontend-staging-1506108424.us-east-1.elb.amazonaws.com
     dev:
       target: http://frontend-dev-1739892538.us-east-1.elb.amazonaws.com
