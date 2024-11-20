@@ -1163,8 +1163,19 @@ components:
       properties:
         download_path:
           type: string
-          description: The URL to download the attachment
-          example: https://...
+          description: The file's download path
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
         mime_type:
           type: string
           description: The MIME type of the attachment
@@ -1177,10 +1188,6 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
-        file_size_bytes:
-          type: integer
-          description: The size of the attachment in bytes
-          example: 10012
         opportunity_attachment_type:
           description: The type of attachment
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
@@ -1190,14 +1197,6 @@ components:
           - other
           type:
           - string
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
     OpportunityWithAttachmentsV1:
       type: object
       properties:
