@@ -2,12 +2,6 @@ name: Deploy Metabase
 run-name: Deploy ${{ github.ref_name }} to Metabase ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
 
 on:
-  push:
-    branches:
-      - "mdragon/2938-metabase-workflow"
-    paths:
-      - ".github/workflows/cd-metabase.yml"
-      - "Makefile"
   workflow_dispatch:
     inputs:
       environment:
@@ -34,5 +28,5 @@ jobs:
       matrix:
         envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
-      version: latest
+      version: ${{ inputs.image-tag }}
       environment: ${{ matrix.envs }}

@@ -99,8 +99,8 @@ module "service" {
 
   extra_environment_variables = merge(local.service_config.extra_environment_variables, {
     ENVIRONMENT = var.environment_name
-    MB_DB_PORT = data.aws_rds_cluster.db_cluster.port
-    MB_DB_HOST = data.aws_rds_cluster.db_cluster.endpoint
+    MB_DB_PORT  = data.aws_rds_cluster.db_cluster.port
+    MB_DB_HOST  = data.aws_rds_cluster.db_cluster.endpoint
   })
 
   secrets = concat(
