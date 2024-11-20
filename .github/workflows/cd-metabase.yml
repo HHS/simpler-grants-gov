@@ -1,14 +1,7 @@
-name: Deploy Analytics
-run-name: Deploy ${{ github.ref_name }} to Analytics ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
+name: Deploy Metabase
+run-name: Deploy ${{ github.ref_name }} to Metabase ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod'}}
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - "analytics/**"
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       environment:
