@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from flask import Response
 
 import src.adapters.db as db
@@ -37,14 +35,6 @@ examples = {
 def extract_metadata_get(
     db_session: db.Session, raw_list_params: dict
 ) -> response.ApiResponse | Response:
-    # Default to last 7 days if no date range is provided
-    if not raw_list_params.get("filters", {}).get("created_on"):
-        raw_list_params.setdefault("filters", {})
-        raw_list_params["filters"]["created_on"] = {
-            "start_date": (datetime.now() - timedelta(days=7)).date(),
-            "end_date": datetime.now().date(),
-        }
-
     list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)
 
     # Call service with params to get results

@@ -397,10 +397,10 @@ components:
       properties:
         extract_type:
           description: The type of extract to filter by
-          example: opportunities_csv
+          example: opportunities_json
           enum:
           - opportunities_xml
-          - opportunities_csv
+          - opportunities_json
           type:
           - string
           - 'null'
