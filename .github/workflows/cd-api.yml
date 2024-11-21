@@ -49,4 +49,5 @@ jobs:
 
   send-slack-notification:
     if: failure()
+    needs: [api-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
