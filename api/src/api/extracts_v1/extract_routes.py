@@ -16,7 +16,7 @@ examples = {
                 "order_by": "created_at",
                 "page_offset": 1,
                 "page_size": 25,
-                "sort_direction": "ascending",
+                "sort_direction": "descending",
             },
         },
     },
