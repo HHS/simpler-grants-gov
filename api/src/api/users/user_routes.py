@@ -10,17 +10,6 @@ from src.auth.api_key_auth import api_key_auth
 
 logger = logging.getLogger(__name__)
 
-# Descriptions in OpenAPI support markdown https://swagger.io/specification/
-SHARED_ALPHA_DESCRIPTION = """
-__ALPHA VERSION__
-
-This endpoint in its current form is primarily for testing and feedback.
-
-Features in this endpoint are still under heavy development, and subject to change. Not for production use.
-
-See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
-"""
-
 
 @user_blueprint.post("/token")
 @user_blueprint.input(
@@ -28,7 +17,7 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 )
 @user_blueprint.output(user_schemas.UserTokenResponseSchema)
 @user_blueprint.auth_required(api_key_auth)
-def user_token(x_oauth_login_gov: dict) -> response.ApiResponse | Response:
+def user_token(x_oauth_login_gov: dict) -> response.ApiResponse:
     logger.info("POST /v1/users/token")
 
     if x_oauth_login_gov:
