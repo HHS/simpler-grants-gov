@@ -1,7 +1,5 @@
 import logging
 
-from flask import Response
-
 from src.api import response
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
