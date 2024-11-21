@@ -79,5 +79,6 @@ jobs:
 
   send-slack-notification:
     if: failure()
+    needs: [build-repository, deploy-infra]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
