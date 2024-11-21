@@ -1,5 +1,5 @@
 paths:
   # actionlint doesn't know how to handle the json inside of this file
-  .github/workflows/ci-cron-vulnerability-scans.yml:
+  .github/workflows/send-slack-notification.yml:
     ignore:
       - ".*SC2046.*"
