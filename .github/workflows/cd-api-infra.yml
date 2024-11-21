@@ -76,3 +76,7 @@ jobs:
           ./bin/terraform-init.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
           export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}"
           ./bin/terraform-apply.sh infra/api/${{ matrix.directory }} ${{ matrix.envs }}
+
+  send-slack-notification:
+    if: failure()
+    uses: ./.github/workflows/send-slack-notification.yml

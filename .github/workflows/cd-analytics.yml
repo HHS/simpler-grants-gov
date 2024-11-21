@@ -45,3 +45,7 @@ jobs:
     with:
       app_name: "analytics"
       environment: ${{ matrix.envs }}
+
+  send-slack-notification:
+    if: failure()
+    uses: ./.github/workflows/send-slack-notification.yml
