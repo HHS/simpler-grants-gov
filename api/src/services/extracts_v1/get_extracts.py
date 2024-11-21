@@ -54,7 +54,6 @@ def get_extracts(
                 )
 
     # Apply pagination
-    print(list_params.pagination)
     paginator: Paginator[ExtractMetadata] = Paginator(
         ExtractMetadata, stmt, db_session, page_size=list_params.pagination.page_size
     )
