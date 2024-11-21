@@ -1,9 +1,9 @@
 export const messages = {
   Beta_alert: {
     alert_title:
-      "Attention! Go to <LinkToGrants>www.grants.gov</LinkToGrants> to search and apply for grants.",
+      "This site is a work in progress, with new features and updates based on your feedback.",
     alert:
-      "Simpler.Grants.gov is a work in progress. Thank you for your patience as we build this new website.",
+      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>www.Grants.gov</LinkToGrants>.",
   },
   OpportunityListing: {
     page_title: "Opportunity Listing",
