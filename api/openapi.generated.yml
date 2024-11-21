@@ -22,6 +22,7 @@ info:
 tags:
 - name: Health
 - name: Opportunity v1
+- name: User v1
 servers: .
 paths:
   /health:
@@ -43,6 +44,39 @@ paths:
       tags:
       - Health
       summary: Health
+  /v1/users/token:
+    post:
+      parameters:
+      - in: header
+        name: X-OAuth-login-gov
+        description: The login_gov header token
+        schema:
+          type: string
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - User v1
+      summary: User Token
+      security:
+      - ApiKeyAuth: []
   /v1/opportunities/search:
     post:
       parameters: []
@@ -350,6 +384,55 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: The internal ID of a user
+          example: 861a0148-cf2c-432b-b0b3-690016299ab1
+        email:
+          type: string
+          description: The email address returned from Oauth2 provider
+          example: js@gmail.com
+        external_user_type:
+          description: The Oauth2 provider through which a user was authenticated
+          example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType
+          - login_gov
+          enum:
+          - login_gov
+          type:
+          - string
+    UserToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Internal token generated for a user
+        user:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/User'
+        is_user_new:
+          type: boolean
+          description: Whether or not the user existed in our database
+    UserTokenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/UserToken'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     FundingInstrumentFilterV1:
       type: object
       properties:
@@ -1344,4 +1427,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-
