@@ -1,5 +1,5 @@
 info:
-  description: "
+  description: '
 
     Back end API for simpler.grants.gov.
 
@@ -12,7 +12,7 @@ info:
     See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
     for further details.
 
-    "
+    '
   contact:
     name: Simpler Grants.gov
     url: https://simpler.grants.gov/
@@ -20,61 +20,61 @@ info:
   title: Simpler Grants API
   version: v0
 tags:
-  - name: Health
-  - name: Opportunity v1
-  - name: Extract v1
-  - name: User v1
+- name: Health
+- name: Opportunity v1
+- name: Extract v1
+- name: User v1
 servers: .
 paths:
   /health:
     get:
       parameters: []
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthcheckResponse"
+                $ref: '#/components/schemas/HealthcheckResponse'
           description: Successful response
-        "503":
+        '503':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Service Unavailable
       tags:
-        - Health
+      - Health
       summary: Health
   /v1/extracts:
     post:
       parameters: []
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExtractMetadataListResponse"
+                $ref: '#/components/schemas/ExtractMetadataListResponse'
           description: Successful response
-        "422":
+        '422':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
-        "401":
+        '401':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-        - Extract v1
+      - Extract v1
       summary: Extract Metadata Get
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExtractMetadataRequest"
+              $ref: '#/components/schemas/ExtractMetadataRequest'
             examples:
               example1:
                 summary: No filters
@@ -85,67 +85,67 @@ paths:
                     page_size: 25
                     sort_direction: descending
       security:
-        - ApiKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/token:
     post:
       parameters:
-        - in: header
-          name: X-OAuth-login-gov
-          description: The login_gov header token
-          schema:
-            type: string
-          required: false
+      - in: header
+        name: X-OAuth-login-gov
+        description: The login_gov header token
+        schema:
+          type: string
+        required: false
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserTokenResponse"
+                $ref: '#/components/schemas/UserTokenResponse'
           description: Successful response
-        "422":
+        '422':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
-        "401":
+        '401':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-        - User v1
+      - User v1
       summary: User Token
       security:
-        - ApiKeyAuth: []
+      - ApiKeyAuth: []
   /v1/opportunities/search:
     post:
       parameters: []
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OpportunitySearchResponseV1"
+                $ref: '#/components/schemas/OpportunitySearchResponseV1'
             application/octet-stream: {}
           description: Successful response
-        "422":
+        '422':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
-        "401":
+        '401':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
       tags:
-        - Opportunity v1
+      - Opportunity v1
       summary: Opportunity Search
-      description: "
+      description: '
 
         __ALPHA VERSION__
 
@@ -160,12 +160,12 @@ paths:
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
 
-        "
+        '
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OpportunitySearchRequestV1"
+              $ref: '#/components/schemas/OpportunitySearchRequestV1'
             examples:
               example1:
                 summary: No filters
@@ -182,31 +182,31 @@ paths:
                   filters:
                     agency:
                       one_of:
-                        - USAID
-                        - ARPAH
+                      - USAID
+                      - ARPAH
                     applicant_type:
                       one_of:
-                        - state_governments
-                        - county_governments
-                        - individuals
+                      - state_governments
+                      - county_governments
+                      - individuals
                     funding_category:
                       one_of:
-                        - recovery_act
-                        - arts
-                        - natural_resources
+                      - recovery_act
+                      - arts
+                      - natural_resources
                     funding_instrument:
                       one_of:
-                        - cooperative_agreement
-                        - grant
+                      - cooperative_agreement
+                      - grant
                     opportunity_status:
                       one_of:
-                        - forecasted
-                        - posted
+                      - forecasted
+                      - posted
                     post_date:
-                      start_date: "2024-01-01"
-                      end_date: "2024-02-01"
+                      start_date: '2024-01-01'
+                      end_date: '2024-02-01'
                     close_date:
-                      start_date: "2024-01-01"
+                      start_date: '2024-01-01'
                   pagination:
                     order_by: opportunity_id
                     page_offset: 1
@@ -219,8 +219,8 @@ paths:
                   filters:
                     opportunity_status:
                       one_of:
-                        - forecasted
-                        - posted
+                      - forecasted
+                      - posted
                   pagination:
                     order_by: opportunity_id
                     page_offset: 1
@@ -233,8 +233,8 @@ paths:
                   filters:
                     opportunity_status:
                       one_of:
-                        - forecasted
-                        - posted
+                      - forecasted
+                      - posted
                   pagination:
                     order_by: opportunity_id
                     page_offset: 1
@@ -264,46 +264,46 @@ paths:
                   filters:
                     assistance_listing_number:
                       one_of:
-                        - "43.001"
-                        - "47.049"
+                      - '43.001'
+                      - '47.049'
                   pagination:
                     order_by: opportunity_id
                     page_offset: 1
                     page_size: 25
                     sort_direction: descending
       security:
-        - ApiKeyAuth: []
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
-        - in: path
-          name: opportunity_id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OpportunityGetResponseV1"
+                $ref: '#/components/schemas/OpportunityGetResponseV1'
           description: Successful response
-        "401":
+        '401':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
-        "404":
+        '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-        - Opportunity v1
+      - Opportunity v1
       summary: Opportunity Get
-      description: "
+      description: '
 
         __ALPHA VERSION__
 
@@ -318,40 +318,40 @@ paths:
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
 
-        "
+        '
       security:
-        - ApiKeyAuth: []
+      - ApiKeyAuth: []
   /v1/opportunities/{opportunity_id}/versions:
     get:
       parameters:
-        - in: path
-          name: opportunity_id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OpportunityVersionsGetResponseV1"
+                $ref: '#/components/schemas/OpportunityVersionsGetResponseV1'
           description: Successful response
-        "401":
+        '401':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
-        "404":
+        '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
           description: Not found
       tags:
-        - Opportunity v1
+      - Opportunity v1
       summary: Opportunity Versions Get
-      description: "
+      description: '
 
         __ALPHA VERSION__
 
@@ -366,9 +366,9 @@ paths:
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
 
-        "
+        '
       security:
-        - ApiKeyAuth: []
+      - ApiKeyAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -404,8 +404,7 @@ components:
       type: object
       properties:
         data:
-          description:
-            Additional data that might be useful in resolving an error
+          description: Additional data that might be useful in resolving an error
             (see specific endpoints for details, this is used infrequently)
           example: {}
         message:
@@ -420,9 +419,9 @@ components:
           example: []
           items:
             type:
-              - object
+            - object
             allOf:
-              - $ref: "#/components/schemas/ValidationIssue"
+            - $ref: '#/components/schemas/ValidationIssue'
         internal_request_id:
           type: string
           description: An internal tracking ID
@@ -432,17 +431,17 @@ components:
       properties:
         start_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
         end_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
       required:
-        - end_date
-        - start_date
+      - end_date
+      - start_date
     ExtractMetadataFilterV1:
       type: object
       properties:
@@ -450,32 +449,32 @@ components:
           description: The type of extract to filter by
           example: opportunities_json
           enum:
-            - opportunities_json
-            - opportunities_csv
+          - opportunities_json
+          - opportunities_csv
           type:
-            - string
-            - "null"
-            - "null"
+          - string
+          - 'null'
+          - 'null'
         created_at:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/DateRange"
+          - $ref: '#/components/schemas/DateRange'
     ExtractMetadataPaginationV1:
       type: object
       properties:
         order_by:
           type: string
           enum:
-            - created_at
+          - created_at
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
           enum:
-            - ascending
-            - descending
+          - ascending
+          - descending
           type:
-            - string
+          - string
         page_size:
           type: integer
           minimum: 1
@@ -487,10 +486,10 @@ components:
           description: The page number to fetch, starts counting from 1
           example: 1
       required:
-        - order_by
-        - page_offset
-        - page_size
-        - sort_direction
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
     ExtractMetadataRequest:
       type: object
       properties:
@@ -506,16 +505,16 @@ components:
           example: 200
         filters:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/ExtractMetadataFilterV1"
+          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
         pagination:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/ExtractMetadataPaginationV1"
+          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
       required:
-        - pagination
+      - pagination
     PaginationInfo:
       type: object
       properties:
@@ -542,10 +541,10 @@ components:
         sort_direction:
           description: The direction the records are sorted
           enum:
-            - ascending
-            - descending
+          - ascending
+          - descending
           type:
-            - string
+          - string
     ExtractMetadataResponse:
       type: object
       properties:
@@ -578,9 +577,9 @@ components:
         pagination_info:
           description: The pagination information for paginated endpoints
           type: &id001
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/PaginationInfo"
+          - $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -590,9 +589,9 @@ components:
           description: A list of extract metadata records
           items:
             type:
-              - object
+            - object
             allOf:
-              - $ref: "#/components/schemas/ExtractMetadataResponse"
+            - $ref: '#/components/schemas/ExtractMetadataResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -610,13 +609,12 @@ components:
           example: js@gmail.com
         external_user_type:
           description: The Oauth2 provider through which a user was authenticated
-          example:
-            !!python/object/apply:src.constants.lookup_constants.ExternalUserType
-            - login_gov
+          example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType
+          - login_gov
           enum:
-            - login_gov
+          - login_gov
           type:
-            - string
+          - string
     UserToken:
       type: object
       properties:
@@ -625,9 +623,9 @@ components:
           description: Internal token generated for a user
         user:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/User"
+          - $ref: '#/components/schemas/User'
         is_user_new:
           type: boolean
           description: Whether or not the user existed in our database
@@ -640,9 +638,9 @@ components:
           example: Success
         data:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/UserToken"
+          - $ref: '#/components/schemas/UserToken'
         status_code:
           type: integer
           description: The HTTP status code
@@ -655,12 +653,12 @@ components:
           minItems: 1
           items:
             enum:
-              - cooperative_agreement
-              - grant
-              - procurement_contract
-              - other
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
             type:
-              - string
+            - string
     FundingCategoryFilterV1:
       type: object
       properties:
@@ -669,34 +667,34 @@ components:
           minItems: 1
           items:
             enum:
-              - recovery_act
-              - agriculture
-              - arts
-              - business_and_commerce
-              - community_development
-              - consumer_protection
-              - disaster_prevention_and_relief
-              - education
-              - employment_labor_and_training
-              - energy
-              - environment
-              - food_and_nutrition
-              - health
-              - housing
-              - humanities
-              - infrastructure_investment_and_jobs_act
-              - information_and_statistics
-              - income_security_and_social_services
-              - law_justice_and_legal_services
-              - natural_resources
-              - opportunity_zone_benefits
-              - regional_development
-              - science_technology_and_other_research_and_development
-              - transportation
-              - affordable_care_act
-              - other
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
             type:
-              - string
+            - string
     ApplicantTypeFilterV1:
       type: object
       properties:
@@ -705,25 +703,25 @@ components:
           minItems: 1
           items:
             enum:
-              - state_governments
-              - county_governments
-              - city_or_township_governments
-              - special_district_governments
-              - independent_school_districts
-              - public_and_state_institutions_of_higher_education
-              - private_institutions_of_higher_education
-              - federally_recognized_native_american_tribal_governments
-              - other_native_american_tribal_organizations
-              - public_and_indian_housing_authorities
-              - nonprofits_non_higher_education_with_501c3
-              - nonprofits_non_higher_education_without_501c3
-              - individuals
-              - for_profit_organizations_other_than_small_businesses
-              - small_businesses
-              - other
-              - unrestricted
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
             type:
-              - string
+            - string
     OpportunityStatusFilterV1:
       type: object
       properties:
@@ -732,12 +730,12 @@ components:
           minItems: 1
           items:
             enum:
-              - forecasted
-              - posted
-              - closed
-              - archived
+            - forecasted
+            - posted
+            - closed
+            - archived
             type:
-              - string
+            - string
     AgencyFilterV1:
       type: object
       properties:
@@ -757,14 +755,14 @@ components:
           items:
             type: string
             pattern: ^\d{2}\.\d{2,3}$
-            example: "45.149"
+            example: '45.149'
     IsCostSharingFilterV1:
       type: object
       properties:
         one_of:
           type:
-            - array
-            - "null"
+          - array
+          - 'null'
           items:
             type: boolean
             example: true
@@ -773,14 +771,14 @@ components:
       properties:
         min:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 0
         max:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 25
     AwardFloorFilterV1:
@@ -788,14 +786,14 @@ components:
       properties:
         min:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 0
         max:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 10000
     AwardCeilingFilterV1:
@@ -803,14 +801,14 @@ components:
       properties:
         min:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 0
         max:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 10000000
     EstimatedTotalProgramFundingFilterV1:
@@ -818,14 +816,14 @@ components:
       properties:
         min:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 0
         max:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           minimum: 0
           example: 10000000
     PostDateFilterV1:
@@ -833,130 +831,129 @@ components:
       properties:
         start_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
         end_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
     CloseDateFilterV1:
       type: object
       properties:
         start_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
         end_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
     OpportunitySearchFilterV1:
       type: object
       properties:
         funding_instrument:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/FundingInstrumentFilterV1"
+          - $ref: '#/components/schemas/FundingInstrumentFilterV1'
         funding_category:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/FundingCategoryFilterV1"
+          - $ref: '#/components/schemas/FundingCategoryFilterV1'
         applicant_type:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/ApplicantTypeFilterV1"
+          - $ref: '#/components/schemas/ApplicantTypeFilterV1'
         opportunity_status:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityStatusFilterV1"
+          - $ref: '#/components/schemas/OpportunityStatusFilterV1'
         agency:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/AgencyFilterV1"
+          - $ref: '#/components/schemas/AgencyFilterV1'
         assistance_listing_number:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/AssistanceListingNumberFilterV1"
+          - $ref: '#/components/schemas/AssistanceListingNumberFilterV1'
         is_cost_sharing:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/IsCostSharingFilterV1"
+          - $ref: '#/components/schemas/IsCostSharingFilterV1'
         expected_number_of_awards:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/ExpectedNumberAwardsFilterV1"
+          - $ref: '#/components/schemas/ExpectedNumberAwardsFilterV1'
         award_floor:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/AwardFloorFilterV1"
+          - $ref: '#/components/schemas/AwardFloorFilterV1'
         award_ceiling:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/AwardCeilingFilterV1"
+          - $ref: '#/components/schemas/AwardCeilingFilterV1'
         estimated_total_program_funding:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/EstimatedTotalProgramFundingFilterV1"
+          - $ref: '#/components/schemas/EstimatedTotalProgramFundingFilterV1'
         post_date:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/PostDateFilterV1"
+          - $ref: '#/components/schemas/PostDateFilterV1'
         close_date:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/CloseDateFilterV1"
+          - $ref: '#/components/schemas/CloseDateFilterV1'
     ExperimentalV1:
       type: object
       properties:
         scoring_rule:
-          default:
-            !!python/object/apply:src.services.opportunities_v1.experimental_constant.ScoringRule
-            - default
+          default: !!python/object/apply:src.services.opportunities_v1.experimental_constant.ScoringRule
+          - default
           description: Scoring rule to query against OpenSearch
           enum:
-            - default
-            - expanded
-            - agency
+          - default
+          - expanded
+          - agency
           type:
-            - string
+          - string
     OpportunityPaginationV1:
       type: object
       properties:
         order_by:
           type: string
           enum:
-            - relevancy
-            - opportunity_id
-            - opportunity_number
-            - opportunity_title
-            - post_date
-            - close_date
-            - agency_code
+          - relevancy
+          - opportunity_id
+          - opportunity_number
+          - opportunity_title
+          - post_date
+          - close_date
+          - agency_code
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
           enum:
-            - ascending
-            - descending
+          - ascending
+          - descending
           type:
-            - string
+          - string
         page_size:
           type: integer
           minimum: 1
@@ -968,10 +965,10 @@ components:
           description: The page number to fetch, starts counting from 1
           example: 1
       required:
-        - order_by
-        - page_offset
-        - page_size
-        - sort_direction
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
     OpportunitySearchRequestV1:
       type: object
       properties:
@@ -983,217 +980,204 @@ components:
           example: research
         filters:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunitySearchFilterV1"
+          - $ref: '#/components/schemas/OpportunitySearchFilterV1'
         experimental:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/ExperimentalV1"
+          - $ref: '#/components/schemas/ExperimentalV1'
         pagination:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityPaginationV1"
+          - $ref: '#/components/schemas/OpportunityPaginationV1'
         format:
-          default:
-            !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
-            - json
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchResponseFormat
+          - json
           description: The format of the response
           enum:
-            - json
-            - csv
+          - json
+          - csv
           type:
-            - string
+          - string
       required:
-        - pagination
+      - pagination
     OpportunityAssistanceListingV1:
       type: object
       properties:
         program_title:
           type:
-            - string
-            - "null"
-          description:
-            The name of the program, see https://sam.gov/content/assistance-listings
+          - string
+          - 'null'
+          description: The name of the program, see https://sam.gov/content/assistance-listings
             for more detail
           example: Space Technology
         assistance_listing_number:
           type:
-            - string
-            - "null"
-          description:
-            The assistance listing number, see https://sam.gov/content/assistance-listings
+          - string
+          - 'null'
+          description: The assistance listing number, see https://sam.gov/content/assistance-listings
             for more detail
-          example: "43.012"
+          example: '43.012'
     OpportunitySummaryV1:
       type: object
       properties:
         summary_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The summary of the opportunity
           example: This opportunity aims to unravel the mysteries of the universe.
         is_cost_sharing:
           type:
-            - boolean
-            - "null"
-          description:
-            Whether or not the opportunity has a cost sharing/matching
+          - boolean
+          - 'null'
+          description: Whether or not the opportunity has a cost sharing/matching
             requirement
         is_forecast:
           type: boolean
-          description:
-            Whether the opportunity is forecasted, that is, the information
+          description: Whether the opportunity is forecasted, that is, the information
             is only an estimate and not yet official
           example: false
         close_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
           description: The date that the opportunity will close - only set if is_forecast=False
         close_date_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: Optional details regarding the close date
           example: Proposals are due earlier than usual.
         post_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
           description: The date the opportunity was posted
         archive_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
           description: When the opportunity will be archived
         expected_number_of_awards:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           description: The number of awards the opportunity is expected to award
           example: 10
         estimated_total_program_funding:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           description: The total program funding of the opportunity in US Dollars
           example: 10000000
         award_floor:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           description: The minimum amount an opportunity would award
           example: 10000
         award_ceiling:
           type:
-            - integer
-            - "null"
+          - integer
+          - 'null'
           description: The maximum amount an opportunity would award
           example: 100000
         additional_info_url:
           type:
-            - string
-            - "null"
-          description:
-            A URL to a website that can provide additional information
+          - string
+          - 'null'
+          description: A URL to a website that can provide additional information
             about the opportunity
           example: grants.gov
         additional_info_url_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The text to display for the additional_info_url link
           example: Click me for more info
         forecasted_post_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
-          description:
-            Forecasted opportunity only. The date the opportunity is expected
+          description: Forecasted opportunity only. The date the opportunity is expected
             to be posted, and transition out of being a forecast
         forecasted_close_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
-          description:
-            Forecasted opportunity only. The date the opportunity is expected
+          description: Forecasted opportunity only. The date the opportunity is expected
             to be close once posted.
         forecasted_close_date_description:
           type:
-            - string
-            - "null"
-          description:
-            Forecasted opportunity only. Optional details regarding the
+          - string
+          - 'null'
+          description: Forecasted opportunity only. Optional details regarding the
             forecasted closed date.
           example: Proposals will probably be due on this date
         forecasted_award_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
-          description:
-            Forecasted opportunity only. The date the grantor plans to
+          description: Forecasted opportunity only. The date the grantor plans to
             award the opportunity.
         forecasted_project_start_date:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           format: date
-          description:
-            Forecasted opportunity only. The date the grantor expects the
+          description: Forecasted opportunity only. The date the grantor expects the
             award recipient should start their project
         fiscal_year:
           type:
-            - integer
-            - "null"
-          description:
-            Forecasted opportunity only. The fiscal year the project is
+          - integer
+          - 'null'
+          description: Forecasted opportunity only. The fiscal year the project is
             expected to be funded and launched
         funding_category_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: Additional information about the funding category
           example: Economic Support
         applicant_eligibility_description:
           type:
-            - string
-            - "null"
-          description:
-            Additional information about the types of applicants that are
+          - string
+          - 'null'
+          description: Additional information about the types of applicants that are
             eligible
           example: All types of domestic applicants are eligible to apply
         agency_phone_number:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The phone number of the agency who owns the opportunity
           example: 123-456-7890
         agency_contact_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: Information regarding contacting the agency who owns the opportunity
           example: For more information, reach out to Jane Smith at agency US-ABC
         agency_email_address:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The contact email of the agency who owns the opportunity
           example: fake_email@grants.gov
         agency_email_address_description:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The text for the link to the agency email address
           example: Click me to email the agency
         version_number:
@@ -1204,67 +1188,67 @@ components:
           type: array
           items:
             enum:
-              - cooperative_agreement
-              - grant
-              - procurement_contract
-              - other
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
             type:
-              - string
+            - string
         funding_categories:
           type: array
           items:
             enum:
-              - recovery_act
-              - agriculture
-              - arts
-              - business_and_commerce
-              - community_development
-              - consumer_protection
-              - disaster_prevention_and_relief
-              - education
-              - employment_labor_and_training
-              - energy
-              - environment
-              - food_and_nutrition
-              - health
-              - housing
-              - humanities
-              - infrastructure_investment_and_jobs_act
-              - information_and_statistics
-              - income_security_and_social_services
-              - law_justice_and_legal_services
-              - natural_resources
-              - opportunity_zone_benefits
-              - regional_development
-              - science_technology_and_other_research_and_development
-              - transportation
-              - affordable_care_act
-              - other
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
             type:
-              - string
+            - string
         applicant_types:
           type: array
           items:
             enum:
-              - state_governments
-              - county_governments
-              - city_or_township_governments
-              - special_district_governments
-              - independent_school_districts
-              - public_and_state_institutions_of_higher_education
-              - private_institutions_of_higher_education
-              - federally_recognized_native_american_tribal_governments
-              - other_native_american_tribal_organizations
-              - public_and_indian_housing_authorities
-              - nonprofits_non_higher_education_with_501c3
-              - nonprofits_non_higher_education_without_501c3
-              - individuals
-              - for_profit_organizations_other_than_small_businesses
-              - small_businesses
-              - other
-              - unrestricted
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
             type:
-              - string
+            - string
         created_at:
           type: string
           format: date-time
@@ -1282,85 +1266,83 @@ components:
           example: 12345
         opportunity_number:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The funding opportunity number
           example: ABC-123-XYZ-001
         opportunity_title:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
         agency:
           type:
-            - string
-            - "null"
-          description: "DEPRECATED - use: agency_code"
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
           example: US-ABC
         agency_code:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The agency who created the opportunity
           example: US-ABC
         agency_name:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The name of the agency who created the oppportunity
           example: Department of Examples
         top_level_agency_name:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The name of the top level agency who created the oppportunity
           example: Department of Examples
         category:
           description: The opportunity category
-          example:
-            !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-            - discretionary
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
           enum: &id002
-            - discretionary
-            - mandatory
-            - continuation
-            - earmark
-            - other
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
           type:
-            - string
-            - "null"
-            - "null"
+          - string
+          - 'null'
+          - 'null'
         category_explanation:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: Explanation of the category when the category is 'O' (other)
           example: null
         opportunity_assistance_listings:
           type: array
           items:
             type: &id003
-              - object
+            - object
             allOf:
-              - $ref: "#/components/schemas/OpportunityAssistanceListingV1"
+            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: &id004
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunitySummaryV1"
+          - $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
-          example:
-            !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-            - posted
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
           enum: &id005
-            - forecasted
-            - posted
-            - closed
-            - archived
+          - forecasted
+          - posted
+          - closed
+          - archived
           type: &id006
-            - string
+          - string
         created_at:
           type: string
           format: date-time
@@ -1421,7 +1403,7 @@ components:
           description: The pagination information for paginated endpoints
           type: *id001
           allOf:
-            - $ref: "#/components/schemas/PaginationInfo"
+          - $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -1429,7 +1411,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/OpportunityV1"
+            $ref: '#/components/schemas/OpportunityV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1437,9 +1419,9 @@ components:
         facet_counts:
           description: Counts of filter/facet values in the full response
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityFacetV1"
+          - $ref: '#/components/schemas/OpportunityFacetV1'
     OpportunityAttachmentV1:
       type: object
       properties:
@@ -1472,14 +1454,13 @@ components:
           example: The full announcement NOFO
         opportunity_attachment_type:
           description: The type of attachment
-          example:
-            !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
-            - notice_of_funding_opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
+          - notice_of_funding_opportunity
           enum:
-            - notice_of_funding_opportunity
-            - other
+          - notice_of_funding_opportunity
+          - other
           type:
-            - string
+          - string
     OpportunityWithAttachmentsV1:
       type: object
       properties:
@@ -1489,54 +1470,53 @@ components:
           example: 12345
         opportunity_number:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The funding opportunity number
           example: ABC-123-XYZ-001
         opportunity_title:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The title of the opportunity
           example: Research into conservation techniques
         agency:
           type:
-            - string
-            - "null"
-          description: "DEPRECATED - use: agency_code"
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
           example: US-ABC
         agency_code:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The agency who created the opportunity
           example: US-ABC
         agency_name:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The name of the agency who created the oppportunity
           example: Department of Examples
         top_level_agency_name:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: The name of the top level agency who created the oppportunity
           example: Department of Examples
         category:
           description: The opportunity category
-          example:
-            !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
-            - discretionary
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
           enum: *id002
           type:
-            - string
-            - "null"
-            - "null"
+          - string
+          - 'null'
+          - 'null'
         category_explanation:
           type:
-            - string
-            - "null"
+          - string
+          - 'null'
           description: Explanation of the category when the category is 'O' (other)
           example: null
         opportunity_assistance_listings:
@@ -1544,16 +1524,15 @@ components:
           items:
             type: *id003
             allOf:
-              - $ref: "#/components/schemas/OpportunityAssistanceListingV1"
+            - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
           type: *id004
           allOf:
-            - $ref: "#/components/schemas/OpportunitySummaryV1"
+          - $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
-          example:
-            !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-            - posted
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
           enum: *id005
           type: *id006
         created_at:
@@ -1569,9 +1548,9 @@ components:
           description: List of attachments associated with the opportunity
           items:
             type:
-              - object
+            - object
             allOf:
-              - $ref: "#/components/schemas/OpportunityAttachmentV1"
+            - $ref: '#/components/schemas/OpportunityAttachmentV1'
     OpportunityGetResponseV1:
       type: object
       properties:
@@ -1581,9 +1560,9 @@ components:
           example: Success
         data:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityWithAttachmentsV1"
+          - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1593,17 +1572,17 @@ components:
       properties:
         opportunity:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityV1"
+          - $ref: '#/components/schemas/OpportunityV1'
         forecasts:
           type: array
           items:
-            $ref: "#/components/schemas/OpportunitySummaryV1"
+            $ref: '#/components/schemas/OpportunitySummaryV1'
         non_forecasts:
           type: array
           items:
-            $ref: "#/components/schemas/OpportunitySummaryV1"
+            $ref: '#/components/schemas/OpportunitySummaryV1'
     OpportunityVersionsGetResponseV1:
       type: object
       properties:
@@ -1613,9 +1592,9 @@ components:
           example: Success
         data:
           type:
-            - object
+          - object
           allOf:
-            - $ref: "#/components/schemas/OpportunityVersionV1"
+          - $ref: '#/components/schemas/OpportunityVersionV1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -1629,3 +1608,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
