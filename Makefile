@@ -206,7 +206,7 @@ release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-metabase.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)	
+	./bin/deploy-metabase.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -221,3 +221,6 @@ release-image-tag: ## Prints the image tag of the release image
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+
+# RUN A MIGRATION
