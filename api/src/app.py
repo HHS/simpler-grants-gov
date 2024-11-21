@@ -4,6 +4,7 @@ from typing import Any, Tuple
 
 from apiflask import APIFlask, exceptions
 from flask_cors import CORS
+from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -18,11 +19,14 @@ from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
+from src.api.users.user_blueprint import user_blueprint
 from src.app_config import AppConfig
-from src.auth.api_key_auth import get_app_security_scheme
+from src.auth.api_jwt_auth import initialize_jwt_auth
+from src.auth.auth_utils import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +39,10 @@ This API is an ALPHA VERSION! Its current form is primarily for testing and feed
 
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
+
+
+class AuthEndpointConfig(PydanticBaseEnvConfig):
+    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
 
 def create_app() -> APIFlask:
@@ -50,6 +58,12 @@ def create_app() -> APIFlask:
     register_blueprints(app)
     register_index(app)
     register_search_client(app)
+
+    # TODO - once we merge the auth changes for setting up the initial route
+    # will reuse the config from it, for now we'll do this a bit hacky
+    # This cannot be removed non-locally until we setup RSA keys for non-local envs
+    if os.getenv("ENVIRONMENT") == "local":
+        initialize_jwt_auth()
 
     return app
 
@@ -118,6 +132,10 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_blueprint)
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+
+    auth_endpoint_config = AuthEndpointConfig()
+    if auth_endpoint_config.auth_endpoint:
+        app.register_blueprint(user_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)

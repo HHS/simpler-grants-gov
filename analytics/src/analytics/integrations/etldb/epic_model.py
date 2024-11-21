@@ -1,7 +1,9 @@
 """Defines EtlEpicModel class to encapsulate db CRUD operations."""
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
@@ -21,20 +23,30 @@ class EtlEpicModel:
     ) -> tuple[int | None, EtlChangeType]:
         """Write epic data to etl database."""
         # initialize return value
+        epic_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        epic_id = self._insert_dimensions(epic_df)
-        if epic_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            epic_id = self._insert_dimensions(epic_df)
+            if epic_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, select and update
-        if epic_id is None:
-            epic_id, change_type = self._update_dimensions(epic_df)
+            # if insert failed, select and update
+            if epic_id is None:
+                epic_id, change_type = self._update_dimensions(epic_df)
 
-        # insert facts
-        if epic_id is not None:
-            self._insert_facts(epic_id, epic_df, ghid_map)
+            # insert facts
+            if epic_id is not None:
+                self._insert_facts(epic_id, epic_df, ghid_map)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync epic data: {e}"
+            raise RuntimeError(message) from e
 
         return epic_id, change_type
 

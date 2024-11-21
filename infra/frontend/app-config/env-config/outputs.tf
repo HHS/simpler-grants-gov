@@ -17,6 +17,8 @@ output "service_config" {
     instance_desired_instance_count = var.instance_desired_instance_count
     instance_scaling_max_capacity   = var.instance_scaling_max_capacity
     instance_scaling_min_capacity   = var.instance_scaling_min_capacity
+    instance_cpu                    = var.instance_cpu
+    instance_memory                 = var.instance_memory
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
       var.service_override_extra_environment_variables

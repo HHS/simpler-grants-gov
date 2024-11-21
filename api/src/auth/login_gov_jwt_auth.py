@@ -4,6 +4,7 @@ import logging
 import jwt
 from pydantic import Field
 
+from src.auth.auth_errors import JwtValidationError
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -38,16 +39,6 @@ def get_login_gov_config() -> LoginGovConfig:
 class LoginGovUser:
     user_id: str
     email: str
-
-
-class JwtValidationError(Exception):
-    """
-    Exception we will reraise if there are
-    any issues processing a JWT that should
-    cause the endpoint to raise a 401
-    """
-
-    pass
 
 
 def _refresh_keys(config: LoginGovConfig) -> None:
