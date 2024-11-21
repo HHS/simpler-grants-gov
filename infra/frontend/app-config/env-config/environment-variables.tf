@@ -3,12 +3,10 @@ locals {
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
-    # Example environment variables
-    # WORKER_THREADS_COUNT    = 4
-    # LOG_LEVEL               = "info"
-    # DB_CONNECTION_POOL_SIZE = 5
-    NEW_RELIC_ENABLED = false
-    NODE_OPTIONS      = null
+    # see https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#agent-enabled
+    NEW_RELIC_ENABLED = "true"
+    # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
+    NODE_OPTIONS = "-r newrelic"
   }
 
   # Configuration for secrets
