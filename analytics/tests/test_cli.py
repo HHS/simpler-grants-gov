@@ -285,7 +285,7 @@ class TestEtlEntryPoint:
         # setup - create command
         command = [
             "etl",
-            "initialize_database",
+            "db_migrate",
         ]
         # execution
         result = runner.invoke(app, command)
@@ -311,10 +311,7 @@ class TestEtlEntryPoint:
         print(result.stdout)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert (
-            f"running transform and load with effective date {self.EFFECTIVE_DATE}"
-            in result.stdout
-        )
+        assert f"running transform and load with effective date {self.EFFECTIVE_DATE}" in result.stdout
         assert "project row(s) processed: 2" in result.stdout
         assert "quad row(s) processed: 1" in result.stdout
         assert "deliverable row(s) processed: 4" in result.stdout
