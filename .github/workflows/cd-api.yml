@@ -5,10 +5,8 @@ on:
   push:
     branches:
       - "main"
-      - "kai/alert-on-deploy-fail"
     paths:
       - "api/**"
-      - "Makefile"
   release:
     types: [published]
   workflow_dispatch:
