@@ -64,6 +64,11 @@ locals {
     #     GRANT USAGE ON SCHEMA app TO metabaseuser;
     #     ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT ON TABLES TO metabaseuser;
     #     GRANT SELECT ON ALL TABLES IN SCHEMA app TO metabaseuser;
+    #
+    # Then after you do the above, connect to the "metabase" database and run the following:
+    #
+    #     GRANT USAGE, CREATE ON SCHEMA public TO metabaseuser;
+    #     GRANT USAGE, CREATE ON SCHEMA public TO metabaserole;
     MB_DB_PASS = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/metabase-db-pass"
