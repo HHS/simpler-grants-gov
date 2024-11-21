@@ -285,7 +285,7 @@ class TestEtlEntryPoint:
         # setup - create command
         command = [
             "etl",
-            "initialize_database",
+            "db_migrate",
         ]
         # execution
         result = runner.invoke(app, command)

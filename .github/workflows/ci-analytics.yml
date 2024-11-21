@@ -39,8 +39,8 @@ jobs:
       - name: Run linting
         run: make lint
 
-      - name: Run database initialization
-        run: docker compose down --volumes && make init-db
+      - name: Run database migrations
+        run: docker compose down --volumes && make db-migrate
 
       - name: Run tests
         run: make test-audit

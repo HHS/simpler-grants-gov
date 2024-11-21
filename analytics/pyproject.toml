@@ -8,11 +8,12 @@ version = "0.1.0"
 
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
+db-migrate = "src.analytics.cli:db_migrate"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
 kaleido = "0.2.1"
-notebook = "^7.0.0"                              # Goal is to replace this with another method of presenting charts
+notebook = "^7.0.0"                               # Goal is to replace this with another method of presenting charts
 pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 plotly = "^5.15.0"
