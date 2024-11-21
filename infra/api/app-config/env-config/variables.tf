@@ -72,6 +72,18 @@ variable "database_min_capacity" {
   type        = number
 }
 
+variable "instance_cpu" {
+  description = "CPU units for the ECS container instances"
+  type        = number
+  default     = 1024
+}
+
+variable "instance_memory" {
+  description = "Memory in MiB for the ECS container instances"
+  type        = number
+  default     = 2048
+}
+
 variable "instance_desired_instance_count" {
   description = "Number of desired ECS container instances for the service"
   type        = number

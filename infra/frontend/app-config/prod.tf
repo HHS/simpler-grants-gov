@@ -16,4 +16,7 @@ module "prod_config" {
   instance_scaling_min_capacity   = 4
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 20
+
+  instance_cpu    = 1024
+  instance_memory = 2048
 }

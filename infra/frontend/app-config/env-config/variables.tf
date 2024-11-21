@@ -20,6 +20,18 @@ variable "has_incident_management_service" {
   type = bool
 }
 
+variable "instance_cpu" {
+  description = "CPU units for the ECS container instances"
+  type        = number
+  default     = 256
+}
+
+variable "instance_memory" {
+  description = "Memory in MiB for the ECS container instances"
+  type        = number
+  default     = 512
+}
+
 variable "instance_desired_instance_count" {
   type    = number
   default = 1
