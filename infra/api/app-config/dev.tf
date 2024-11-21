@@ -29,8 +29,5 @@ module "dev_config" {
   # https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
 
-  service_override_extra_environment_variables = {
-    NEW_RELIC_ENABLED = "true"
-    NODE_OPTIONS      = "-r @newrelic/next"
-  }
+  service_override_extra_environment_variables = {}
 }
