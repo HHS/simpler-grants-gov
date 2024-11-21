@@ -9,18 +9,18 @@ type Props = {
   nofoPath: string;
 };
 
+const downloadNOFO = (nofoPath: string) => {
+  window.open(nofoPath, "_blank");
+};
+
 const OpportunityDownload = ({ nofoPath }: Props) => {
   const t = useTranslations("OpportunityListing.description");
-
-  const downloadNOFO = () => {
-    window.open(nofoPath, "_blank");
-  };
 
   return (
     <>
       {nofoPath.length > 0 ? (
         <div className="grid-row flex-justify">
-          <Button onClick={downloadNOFO} type="button">
+          <Button onClick={() => downloadNOFO(nofoPath)} type="button">
             <span>{t("nofo_download")} </span>
             <USWDSIcon
               name={"file_download"}
