@@ -22,17 +22,14 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 """
 
 
-@user_blueprint.post("/user/token")
+@user_blueprint.post("/token")
 @user_blueprint.input(
     user_schemas.UserTokenHeaderSchema, location="headers", arg_name="x_oauth_login_gov"
 )
 @user_blueprint.output(user_schemas.UserTokenResponseSchema)
 @user_blueprint.auth_required(api_key_auth)
-@user_blueprint.doc(  # should we include this?
-    description=SHARED_ALPHA_DESCRIPTION, responses=[200, 400]
-)
-def user_token(x_oauth_login_gov: str) -> response.ApiResponse | Response:
-    logger.info("POST /v1/users/user/token")
+def user_token(x_oauth_login_gov: dict) -> response.ApiResponse | Response:
+    logger.info("POST /v1/users/token")
 
     if x_oauth_login_gov:
         data = {
@@ -47,6 +44,6 @@ def user_token(x_oauth_login_gov: str) -> response.ApiResponse | Response:
         return response.ApiResponse(message="Success", data=data)
 
     message = "Missing X-OAuth-login-gov header"
-    logger.error(message)
+    logger.info(message)
 
     raise_flask_error(400, message)
