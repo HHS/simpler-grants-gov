@@ -50,6 +50,5 @@ def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> respo
     )
     logger.info("Successfully fetched extracts")
 
-    print(pagination_info)
     # Serialize results
     return response.ApiResponse(message="Success", data=results, pagination_info=pagination_info)
