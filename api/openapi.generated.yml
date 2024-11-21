@@ -1427,3 +1427,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
