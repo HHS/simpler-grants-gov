@@ -1,5 +1,3 @@
-from flask import Response
-
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.extracts_v1.extract_schema as extract_schema
@@ -32,9 +30,7 @@ examples = {
 @extract_blueprint.output(extract_schema.ExtractMetadataListResponseSchema)
 @extract_blueprint.auth_required(api_key_auth)
 @flask_db.with_db_session()
-def extract_metadata_get(
-    db_session: db.Session, raw_list_params: dict
-) -> response.ApiResponse | Response:
+def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)
 
     # Call service with params to get results
