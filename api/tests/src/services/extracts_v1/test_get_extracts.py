@@ -41,7 +41,7 @@ def test_get_extracts_with_type_filter(
     db_session,
 ):
     ExtractMetadataFactory.create_batch(3, extract_type=ExtractType.OPPORTUNITIES_CSV)
-    ExtractMetadataFactory.create_batch(3, extract_type=ExtractType.OPPORTUNITIES_XML)
+    ExtractMetadataFactory.create_batch(3, extract_type=ExtractType.OPPORTUNITIES_JSON)
 
     params = ExtractListParams(
         pagination=PaginationParams(
@@ -50,12 +50,12 @@ def test_get_extracts_with_type_filter(
             order_by="created_at",
             sort_direction=SortDirection.ASCENDING,
         ),
-        filters=ExtractFilters(extract_type="opportunities_xml"),
+        filters=ExtractFilters(extract_type="opportunities_json"),
     )
 
     results = get_extracts(db_session, params)
     assert len(results) == 3
-    assert all(r.extract_type == "opportunities_xml" for r in results)
+    assert all(r.extract_type == "opportunities_json" for r in results)
 
 
 def test_get_extracts_with_date_filter(enable_factory_create, db_session):

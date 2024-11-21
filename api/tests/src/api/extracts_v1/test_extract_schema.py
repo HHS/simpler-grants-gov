@@ -73,7 +73,7 @@ def test_response_schema_list(sample_extract_metadata):
             sample_extract_metadata,
             ExtractMetadata(
                 extract_metadata_id=2,
-                extract_type="opportunities_xml",
+                extract_type="opportunities_json",
                 file_name="test_extract2.xml",
                 file_path="/test/path/test_extract2.xml",
                 file_size_bytes=1024,
@@ -87,7 +87,7 @@ def test_response_schema_list(sample_extract_metadata):
     assert result["data"][0]["extract_metadata_id"] == 1
     assert result["data"][0]["extract_type"] == "opportunities_csv"
     assert result["data"][1]["extract_metadata_id"] == 2
-    assert result["data"][1]["extract_type"] == "opportunities_xml"
+    assert result["data"][1]["extract_type"] == "opportunities_json"
 
 
 def test_request_schema_null_values():

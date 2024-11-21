@@ -20,11 +20,11 @@ def test_extract_metadata_get_default_dates(
     """Test that default date range (last 7 days) is applied when no dates provided"""
     ExtractMetadataFactory.create_batch(
         2,
-        extract_type=ExtractType.OPPORTUNITIES_XML,
+        extract_type=ExtractType.OPPORTUNITIES_JSON,
     )
 
     payload = {
-        "filters": {"extract_type": "opportunities_xml"},
+        "filters": {"extract_type": "opportunities_json"},
         "pagination": {
             "page": 1,
             "page_size": 10,
@@ -37,7 +37,7 @@ def test_extract_metadata_get_default_dates(
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 2
-    assert data[0]["extract_type"] == "opportunities_xml"
+    assert data[0]["extract_type"] == "opportunities_json"
 
 
 def test_extract_metadata_get_with_custom_dates(
@@ -77,11 +77,11 @@ def test_extract_metadata_get_with_type_filter(
     client, api_auth_token, enable_factory_create, db_session
 ):
     """Test filtering by extract_type"""
-    ExtractMetadataFactory(extract_type=ExtractType.OPPORTUNITIES_XML)
+    ExtractMetadataFactory(extract_type=ExtractType.OPPORTUNITIES_JSON)
     ExtractMetadataFactory(extract_type=ExtractType.OPPORTUNITIES_CSV)
 
     payload = {
-        "filters": {"extract_type": "opportunities_xml"},
+        "filters": {"extract_type": "opportunities_json"},
         "pagination": {
             "page": 1,
             "page_size": 10,
@@ -96,7 +96,7 @@ def test_extract_metadata_get_with_type_filter(
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 1
-    assert data[0]["extract_type"] == "opportunities_xml"
+    assert data[0]["extract_type"] == "opportunities_json"
 
 
 def test_extract_metadata_get_pagination(client, api_auth_token, enable_factory_create, db_session):
