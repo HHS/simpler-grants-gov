@@ -7,7 +7,7 @@ const PUBLIC_ENV_VARS_BY_ENV = {
     GOOGLE_ANALYTICS_ID: "G-GWJZD3DL8W",
   },
   test: {
-    GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
+    GOOGLE_ANALYTICS_ID: "G-GWJZD3DL8W",
   },
   production: {
     GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
@@ -28,6 +28,9 @@ const {
   API_AUTH_TOKEN = "",
   NEXT_PUBLIC_BASE_URL,
 } = process.env;
+
+// eslint-disable-next-line
+console.log("!!!!!", NODE_ENV);
 
 const CURRENT_ENV = NODE_ENV ?? "development";
 
