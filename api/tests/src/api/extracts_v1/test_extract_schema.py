@@ -112,5 +112,4 @@ def test_request_schema_null_values():
     result = schema.load(data)
     assert result["filters"]["extract_type"] is None
     assert result["filters"]["created_at"]["start_date"] == date(2023, 10, 1)
-    print(result["filters"]["created_at"]["end_date"])
     assert result["filters"]["created_at"]["end_date"] is None
