@@ -23,6 +23,8 @@ Scaling is handled by configuring the following values:
 - instance desired instance count
 - instance scaling minimum capacity
 - instance scaling maximum capacity
+- instance CPU
+- instance memory
 
 Our ECS instances auto scale based on both memory and CPU. You can view the autoscaling configuration
 here: [infra/modules/service/autoscaling.tf](infra/modules/service/autoscaling.tf)

@@ -57,9 +57,7 @@ def mini_app(monkeypatch_module):
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
 def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     user = UserFactory.create()
-
     token, token_session = create_jwt_for_user(user, db_session, jwt_config)
-
     decoded_token = jwt.decode(
         token, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
     )

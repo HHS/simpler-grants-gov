@@ -128,8 +128,8 @@ module "service" {
   max_capacity           = local.service_config.instance_scaling_max_capacity
   min_capacity           = local.service_config.instance_scaling_min_capacity
   enable_autoscaling     = true
-  cpu                    = 256 // these are probably too small
-  memory                 = 512 // these are probably too small
+  cpu                    = local.service_config.instance_cpu
+  memory                 = local.service_config.instance_memory
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null
