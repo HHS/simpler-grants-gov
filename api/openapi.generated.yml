@@ -44,7 +44,7 @@ paths:
       tags:
       - Health
       summary: Health
-  /v1/users/user/token:
+  /v1/users/token:
     post:
       parameters:
       - in: header
@@ -72,31 +72,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Authentication error
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Bad Request
       tags:
       - User v1
       summary: User Token
-      description: '
-
-        __ALPHA VERSION__
-
-
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
-
-        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
-        for further details.
-
-        '
       security:
       - ApiKeyAuth: []
   /v1/opportunities/search:
