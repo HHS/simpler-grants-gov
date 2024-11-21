@@ -21,7 +21,8 @@ from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
 from src.app_config import AppConfig
-from src.auth.api_key_auth import get_app_security_scheme
+from src.auth.api_jwt_auth import initialize_jwt_auth
+from src.auth.auth_utils import get_app_security_scheme
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
@@ -57,6 +58,12 @@ def create_app() -> APIFlask:
     register_blueprints(app)
     register_index(app)
     register_search_client(app)
+
+    # TODO - once we merge the auth changes for setting up the initial route
+    # will reuse the config from it, for now we'll do this a bit hacky
+    # This cannot be removed non-locally until we setup RSA keys for non-local envs
+    if os.getenv("ENVIRONMENT") == "local":
+        initialize_jwt_auth()
 
     return app
 
