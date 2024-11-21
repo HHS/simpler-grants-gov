@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -7,7 +8,8 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
-from src.pagination.pagination_models import PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.paginator import Paginator
 from src.search.search_models import DateSearchFilter
 from src.util import datetime_util
 from src.util.file_util import pre_sign_file_location
@@ -32,7 +34,9 @@ class ExtractListParams(BaseModel):
     filters: ExtractFilters | None = Field(default_factory=ExtractFilters)
 
 
-def get_extracts(db_session: db.Session, list_params: ExtractListParams) -> list[ExtractMetadata]:
+def get_extracts(
+    db_session: db.Session, list_params: ExtractListParams
+) -> Tuple[Sequence[ExtractMetadata], PaginationInfo]:
     stmt = select(ExtractMetadata)
 
     if list_params.filters:
@@ -50,13 +54,16 @@ def get_extracts(db_session: db.Session, list_params: ExtractListParams) -> list
                 )
 
     # Apply pagination
-    offset = list_params.pagination.page_size * (list_params.pagination.page_offset - 1)
-    stmt = stmt.offset(offset).limit(list_params.pagination.page_size)
+    print(list_params.pagination)
+    paginator: Paginator[ExtractMetadata] = Paginator(
+        ExtractMetadata, stmt, db_session, page_size=list_params.pagination.page_size
+    )
 
-    extracts = list(db_session.execute(stmt).scalars().all())
+    extracts = paginator.page_at(page_offset=list_params.pagination.page_offset)
+    pagination_info = PaginationInfo.from_pagination_params(list_params.pagination, paginator)
 
     for extract in extracts:
         file_loc = extract.file_path
         setattr(extract, "download_path", pre_sign_file_location(file_loc))  # noqa: B010
 
-    return extracts
+    return extracts, pagination_info

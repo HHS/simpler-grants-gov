@@ -1,12 +1,22 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from src.constants.lookup_constants import ExtractType
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class DateRangeSchema(Schema):
-    start_date = fields.Date(required=True)
-    end_date = fields.Date(required=True)
+    start_date = fields.Date(
+        required=True,
+        allow_none=True,
+    )
+    end_date = fields.Date(
+        required=True,
+        allow_none=True,
+    )
 
 
 class ExtractMetadataFilterV1Schema(Schema):
@@ -41,7 +51,7 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
     )
 
 
-class ExtractMetadataListResponseSchema(AbstractResponseSchema):
+class ExtractMetadataListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(
         fields.Nested(ExtractMetadataResponseSchema),
         metadata={"description": "A list of extract metadata records"},

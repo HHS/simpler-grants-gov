@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
+import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
 from tests.src.db.models.factories import ExtractMetadataFactory
@@ -125,3 +126,46 @@ def test_extract_metadata_get_pagination(client, api_auth_token, enable_factory_
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 1
+
+
+def test_extract_metadata_get_pagination_info(
+    client, api_auth_token, enable_factory_create, db_session
+):
+    """Test pagination information in response"""
+    # Create 5 extracts to test pagination
+    ExtractMetadataFactory.create_batch(
+        5, extract_type=ExtractType.OPPORTUNITIES_JSON, created_at=datetime_util.utcnow()
+    )
+
+    # Request 2 items per page
+    payload = {
+        "pagination": {
+            "page_size": 2,
+            "page_offset": 1,
+            "order_by": "created_at",
+            "sort_direction": "descending",
+        },
+    }
+
+    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+
+    assert response.status_code == 200
+
+    # Verify data length matches page_size
+    data = response.json["data"]
+    assert len(data) == 2
+
+    # Verify pagination info
+    pagination = response.json["pagination_info"]
+    assert pagination["total_records"] == 5
+    assert pagination["total_pages"] == 3
+    assert pagination["page_size"] == 2
+    # Test last page
+    payload["pagination"]["page_offset"] = 3
+    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    pagination = response.json["pagination_info"]
+
+    assert len(data) == 1  # Last page should have 1 item

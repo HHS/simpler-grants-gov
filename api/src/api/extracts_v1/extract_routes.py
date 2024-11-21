@@ -1,10 +1,15 @@
+import logging
+
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.extracts_v1.extract_schema as extract_schema
 import src.api.response as response
 from src.api.extracts_v1.extract_blueprint import extract_blueprint
 from src.auth.api_key_auth import api_key_auth
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.extracts_v1.get_extracts import ExtractListParams, get_extracts
+
+logger = logging.getLogger(__name__)
 
 examples = {
     "example1": {
@@ -35,7 +40,16 @@ def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> respo
 
     # Call service with params to get results
     with db_session.begin():
-        results = get_extracts(db_session, list_params)
+        results, pagination_info = get_extracts(db_session, list_params)
 
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched extracts")
+
+    print(pagination_info)
     # Serialize results
-    return response.ApiResponse(message="Success", data=results)
+    return response.ApiResponse(message="Success", data=results, pagination_info=pagination_info)
