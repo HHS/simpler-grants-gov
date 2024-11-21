@@ -264,12 +264,12 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 # ===========================================================
 
 
-@etl_app.command(name="initialize_database")
-@ecs_background_task("initialize_database")
-def initialize_database() -> None:
+@etl_app.command(name="db_migrate")
+@ecs_background_task("db_migrate")
+def db_migrate() -> None:
     """Initialize etl database."""
     logger.info("initializing database")
-    etldb.initialize_database()
+    etldb.db_migrate()
     logger.info("done")
 
 
@@ -282,11 +282,7 @@ def transform_and_load(
     # validate effective date arg
     try:
         dateformat = "%Y-%m-%d"
-        datestamp = (
-            datetime.strptime(effective_date, dateformat)
-            .astimezone()
-            .strftime(dateformat)
-        )
+        datestamp = datetime.strptime(effective_date, dateformat).astimezone().strftime(dateformat)
         print(f"running transform and load with effective date {datestamp}")
     except ValueError:
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")

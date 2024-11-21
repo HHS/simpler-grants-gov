@@ -18,7 +18,7 @@ from analytics.integrations.etldb.sprint_model import EtlSprintModel
 VERBOSE = False
 
 
-def initialize_database() -> None:
+def db_migrate() -> None:
     """
     Create and/or update an etl database by applying a sequential set of migration scripts.
 
