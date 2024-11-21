@@ -14,9 +14,9 @@ locals {
       "flask",
       "data-migration",
       "load-transform",
-      "--no-load",
-      "--no-transform",
-      "--no-set-current",
+      "--load",
+      "--transform",
+      "--set-current",
     ],
     staging = [
       "poetry",

@@ -1869,3 +1869,17 @@ class ExtractMetadataFactory(BaseFactory):
     file_name = factory.Faker("file_name")
     file_path = "s3://bucket/key"
     file_size_bytes = factory.Faker("random_int", min=1, max=1000000)
+
+
+class UserTokenSessionFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserTokenSession
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    token_id = Generators.UuidObj
+
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
+
+    is_valid = True

@@ -123,8 +123,8 @@ module "service" {
   max_capacity           = local.service_config.instance_scaling_max_capacity
   min_capacity           = local.service_config.instance_scaling_min_capacity
   enable_autoscaling     = true
-  cpu                    = 1024
-  memory                 = 2048
+  cpu                    = local.service_config.instance_cpu
+  memory                 = local.service_config.instance_memory
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 

@@ -90,7 +90,11 @@ services:
         "--reload",
       ]
     container_name: grants-api
-    env_file: ./local.env
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
     ports:
       - 8080:8080
     volumes:
