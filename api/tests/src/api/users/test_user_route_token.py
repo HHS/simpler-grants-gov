@@ -1,15 +1,15 @@
-import jwt
-from datetime import datetime, timedelta
 import uuid
+from datetime import datetime, timedelta
+
+import jwt
+
 from src.auth.api_jwt_auth import parse_jwt_for_user
 from src.util import datetime_util
-from tests.src.db.models.factories import UserTokenSessionFactory, LinkExternalUserFactory
-
+from tests.src.db.models.factories import LinkExternalUserFactory
 
 ##################
 # POST /token
 ##################
-
 
 
 def create_jwt(
@@ -55,8 +55,11 @@ def create_jwt(
 
     return jwt.encode(payload, private_key, algorithm="RS256")
 
+
 def test_post_user_token_200_new_user(client, db_session, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), email="my_test_mail@test.com", private_key=private_rsa_key)
+    token = create_jwt(
+        user_id=str(uuid.uuid4()), email="my_test_mail@test.com", private_key=private_rsa_key
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -81,7 +84,10 @@ def test_post_user_token_200_new_user(client, db_session, api_auth_token, privat
     assert user_token_session.expires_at > datetime_util.utcnow()
     assert user_token_session.is_valid is True
 
-def test_post_user_token_200_existing_user_no_change(client, db_session, enable_factory_create, api_auth_token, private_rsa_key):
+
+def test_post_user_token_200_existing_user_no_change(
+    client, db_session, enable_factory_create, api_auth_token, private_rsa_key
+):
     login_gov_id = str(uuid.uuid4())
     external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
     token = create_jwt(user_id=login_gov_id, email=external_user.email, private_key=private_rsa_key)
@@ -109,10 +115,15 @@ def test_post_user_token_200_existing_user_no_change(client, db_session, enable_
     assert user_token_session.expires_at > datetime_util.utcnow()
     assert user_token_session.is_valid is True
 
-def test_post_user_token_200_existing_user_new_email(client, db_session, enable_factory_create, api_auth_token, private_rsa_key):
+
+def test_post_user_token_200_existing_user_new_email(
+    client, db_session, enable_factory_create, api_auth_token, private_rsa_key
+):
     login_gov_id = str(uuid.uuid4())
-    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id, email="some_old_email@mail.com")
-    token = create_jwt(user_id=login_gov_id, email="a_new_exciting_email@mail.com", private_key=private_rsa_key)
+    LinkExternalUserFactory.create(external_user_id=login_gov_id, email="some_old_email@mail.com")
+    token = create_jwt(
+        user_id=login_gov_id, email="a_new_exciting_email@mail.com", private_key=private_rsa_key
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -140,13 +151,17 @@ def test_post_user_token_200_existing_user_new_email(client, db_session, enable_
 
 def test_post_user_token_401_bad_token(client, db_session, api_auth_token):
     resp = client.post(
-        "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": "something-that-is-not-a-jwt"}
+        "/v1/users/token",
+        headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": "something-that-is-not-a-jwt"},
     )
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unable to process token"
 
+
 def test_post_user_token_401_invalid_issuer(client, db_session, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, issuer="not-the-right-issuer")
+    token = create_jwt(
+        user_id=str(uuid.uuid4()), private_key=private_rsa_key, issuer="not-the-right-issuer"
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -154,6 +169,7 @@ def test_post_user_token_401_invalid_issuer(client, db_session, api_auth_token, 
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Issuer"
+
 
 def test_post_user_token_401_invalid_audience(client, db_session, api_auth_token, private_rsa_key):
     token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, audience="jeff")
@@ -165,8 +181,13 @@ def test_post_user_token_401_invalid_audience(client, db_session, api_auth_token
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Unknown Audience"
 
+
 def test_post_user_token_401_expired_token(client, db_session, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, expires_at=datetime_util.utcnow() - timedelta(minutes=10))
+    token = create_jwt(
+        user_id=str(uuid.uuid4()),
+        private_key=private_rsa_key,
+        expires_at=datetime_util.utcnow() - timedelta(minutes=10),
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -175,8 +196,13 @@ def test_post_user_token_401_expired_token(client, db_session, api_auth_token, p
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Expired Token"
 
+
 def test_post_user_token_401_issued_future(client, db_session, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, issued_at=datetime_util.utcnow() + timedelta(minutes=10))
+    token = create_jwt(
+        user_id=str(uuid.uuid4()),
+        private_key=private_rsa_key,
+        issued_at=datetime_util.utcnow() + timedelta(minutes=10),
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -184,9 +210,14 @@ def test_post_user_token_401_issued_future(client, db_session, api_auth_token, p
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token not yet valid"
+
 
 def test_post_user_token_401_not_before_future(client, db_session, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, not_before=datetime_util.utcnow() + timedelta(minutes=10))
+    token = create_jwt(
+        user_id=str(uuid.uuid4()),
+        private_key=private_rsa_key,
+        not_before=datetime_util.utcnow() + timedelta(minutes=10),
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": token}
@@ -194,6 +225,7 @@ def test_post_user_token_401_not_before_future(client, db_session, api_auth_toke
 
     assert resp.status_code == 401
     assert resp.get_json()["message"] == "Token not yet valid"
+
 
 def test_post_user_token_401_no_valid_key(client, db_session, api_auth_token, other_rsa_key_pair):
     # Generate the token with a different key so the public key validation fails
@@ -204,24 +236,36 @@ def test_post_user_token_401_no_valid_key(client, db_session, api_auth_token, ot
     )
 
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "Token could not be validated against any public keys from login.gov"
+    assert (
+        resp.get_json()["message"]
+        == "Token could not be validated against any public keys from login.gov"
+    )
+
 
 def test_post_user_token_422_no_token(client, db_session, api_auth_token, private_rsa_key):
-    resp = client.post(
-        "/v1/users/token", headers={"X-Auth": api_auth_token}
-    )
+    resp = client.post("/v1/users/token", headers={"X-Auth": api_auth_token})
 
     assert resp.status_code == 422
     assert resp.get_json()["message"] == "Validation error"
     assert resp.get_json()["errors"] == [
-        {"field": "X-OAuth-login-gov", "message": "Missing data for required field.", "type": "required"}
+        {
+            "field": "X-OAuth-login-gov",
+            "message": "Missing data for required field.",
+            "type": "required",
+        }
     ]
 
+
 def test_post_user_route_token_401_invalid_api_auth_token(client, api_auth_token, private_rsa_key):
-    token = create_jwt(user_id=str(uuid.uuid4()), email="my_test_mail@test.com", private_key=private_rsa_key)
+    token = create_jwt(
+        user_id=str(uuid.uuid4()), email="my_test_mail@test.com", private_key=private_rsa_key
+    )
 
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": "invalid-auth", "X-OAuth-login-gov": token}
     )
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "The server could not verify that you are authorized to access the URL requested"
+    assert (
+        resp.get_json()["message"]
+        == "The server could not verify that you are authorized to access the URL requested"
+    )

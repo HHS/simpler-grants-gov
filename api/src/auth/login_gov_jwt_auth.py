@@ -28,8 +28,10 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     client_id: str = Field(alias="LOGIN_GOV_CLIENT_ID")
 
+
 # Initialize a config at startup
 _config: LoginGovConfig | None = None
+
 
 def initialize_login_gov_config() -> None:
     global _config
@@ -37,14 +39,22 @@ def initialize_login_gov_config() -> None:
         _config = LoginGovConfig()
         _refresh_keys(_config)
 
-        logger.info("Constructed login.gov configuration", extra={"login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint, "login_gov_endpoint": _config.login_gov_endpoint})
+        logger.info(
+            "Constructed login.gov configuration",
+            extra={
+                "login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint,
+                "login_gov_endpoint": _config.login_gov_endpoint,
+            },
+        )
 
 
 def get_config() -> LoginGovConfig:
     global _config
 
     if _config is None:
-        raise Exception("No Login.gov configuration - initialize_login_gov_config() must be run first")
+        raise Exception(
+            "No Login.gov configuration - initialize_login_gov_config() must be run first"
+        )
 
     return _config
 

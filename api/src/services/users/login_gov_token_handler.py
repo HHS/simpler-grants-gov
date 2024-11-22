@@ -1,16 +1,18 @@
-from src.api.route_utils import raise_flask_error
-from src.auth.auth_errors import JwtValidationError
-from src.auth.login_gov_jwt_auth import validate_token
-from src.auth.api_jwt_auth import create_jwt_for_user
-import src.adapters.db as db
-from src.constants.lookup_constants import ExternalUserType
-from src.db.models.user_models import User, LinkExternalUser
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-import uuid
 import logging
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
+from src.auth.api_jwt_auth import create_jwt_for_user
+from src.auth.auth_errors import JwtValidationError
+from src.auth.login_gov_jwt_auth import validate_token
+from src.constants.lookup_constants import ExternalUserType
+from src.db.models.user_models import LinkExternalUser, User
+
 logger = logging.getLogger(__name__)
+
 
 def process_login_gov_token(token: str, db_session: db.Session) -> dict:
 
@@ -43,18 +45,10 @@ def process_login_gov_token(token: str, db_session: db.Session) -> dict:
     # NOTE: This doesn't commit yet - but effectively moves the cache from memory to the DB transaction
     db_session.flush()
 
-    token, session = create_jwt_for_user(external_user.user, db_session)
+    token, _ = create_jwt_for_user(external_user.user, db_session)
 
     # TODO - make a pydantic object? return token + user? Figure it out
-    return {
-        "token": token,
-        "user": {
-            "user_id": external_user.user_id,
-            "email": external_user.email,
-            "external_user_type": ExternalUserType.LOGIN_GOV,
-        },
-        "is_user_new": is_user_new
-    }
+    return _build_response(token, external_user, is_user_new)
 
 
 def _create_login_gov_user(external_user_id: str, db_session: db.Session) -> LinkExternalUser:
@@ -71,6 +65,7 @@ def _create_login_gov_user(external_user_id: str, db_session: db.Session) -> Lin
 
     return external_user
 
+
 def _build_response(token: str, external_user: LinkExternalUser, is_user_new: bool) -> dict:
     return {
         "token": token,
@@ -79,5 +74,5 @@ def _build_response(token: str, external_user: LinkExternalUser, is_user_new: bo
             "email": external_user.email,
             "external_user_type": external_user.external_user_type,
         },
-        "is_user_new": is_user_new
+        "is_user_new": is_user_new,
     }

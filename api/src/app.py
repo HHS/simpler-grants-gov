@@ -64,7 +64,7 @@ def create_app() -> APIFlask:
     # will reuse the config from it, for now we'll do this a bit hacky
     # This cannot be removed non-locally until we setup RSA keys for non-local envs
     if os.getenv("ENVIRONMENT") == "local":
-        #initialize_login_gov_config()
+        initialize_login_gov_config()
         initialize_jwt_auth()
 
     return app

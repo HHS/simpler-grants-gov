@@ -1,10 +1,8 @@
 import logging
+
 import src.adapters.db as db
-
 import src.adapters.db.flask_db as flask_db
-
 from src.api import response
-from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.auth.api_key_auth import api_key_auth

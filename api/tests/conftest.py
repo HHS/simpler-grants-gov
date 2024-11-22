@@ -1,20 +1,21 @@
-import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import logging
 import os
 import pathlib
 import uuid
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+
 import _pytest.monkeypatch
 import boto3
 import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
+import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.constants.schema import Schemas
@@ -218,9 +219,11 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
+
 ####################
 # Auth
 ####################
+
 
 def _generate_rsa_key_pair():
     # Rather than define a private/public key, generate one for the tests
@@ -237,6 +240,7 @@ def _generate_rsa_key_pair():
     )
 
     return private_key, public_key
+
 
 @pytest.fixture(scope="session")
 def rsa_key_pair():
@@ -257,6 +261,7 @@ def public_rsa_key(rsa_key_pair):
 def other_rsa_key_pair():
     return _generate_rsa_key_pair()
 
+
 @pytest.fixture(scope="session")
 def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
     # TODO - describe
@@ -267,6 +272,7 @@ def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
 
     monkeypatch_session.setenv("LOGIN_GOV_ENDPOINT", "http://localhost:3000")
     monkeypatch_session.setenv("LOGIN_GOV_CLIENT_ID", "AUDIENCE_TEST")
+
 
 ####################
 # Test App & Client
