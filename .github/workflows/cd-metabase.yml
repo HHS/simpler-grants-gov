@@ -30,3 +30,9 @@ jobs:
     with:
       version: ${{ inputs.image-tag }}
       environment: ${{ matrix.envs }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [deploy]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
