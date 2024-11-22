@@ -1,11 +1,11 @@
 """Define EtlDb as an abstraction layer for database connections."""
 
+import logging
 from enum import Enum
-
 from sqlalchemy import Connection, text
-
 from analytics.integrations.db import PostgresDbClient
 
+logger = logging.getLogger(__name__)
 
 class EtlDb:
     """Encapsulate etl database connections."""
@@ -62,7 +62,7 @@ class EtlDb:
                 "WARNING: cannot bump schema version "
                 f"from {current_version} to {new_value}"
             )
-            print(message)
+            logger.info(message)
             return False
 
         if new_value > current_version:
@@ -92,7 +92,7 @@ class EtlDb:
                 "WARNING: cannot bump schema version "
                 f"from {current_version} to {new_value}"
             )
-            print(message)
+            logger.info(message)
             return False
 
         cursor = self.connection()
