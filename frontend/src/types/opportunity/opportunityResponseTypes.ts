@@ -41,10 +41,17 @@ export interface Summary {
   version_number: number | null;
 }
 
+interface OpportunityDocument {
+  opportunity_attachment_type: string;
+  file_name: string;
+  download_path: string;
+  updated_at: string;
+}
+
 export interface Opportunity {
   agency: string;
   agency_name: string;
-  attachments: [];
+  attachments: OpportunityDocument[];
   top_level_agency_name: string;
   category: string;
   category_explanation: string | null;
