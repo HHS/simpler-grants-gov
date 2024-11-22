@@ -119,7 +119,7 @@ class AgencySubmissionNotificationSetting(StrEnum):
 
 
 class ExtractType(StrEnum):
-    OPPORTUNITIES_XML = "opportunities_xml"
+    OPPORTUNITIES_JSON = "opportunities_json"
     OPPORTUNITIES_CSV = "opportunities_csv"
 
 

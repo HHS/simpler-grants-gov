@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 import smart_open
 from botocore.config import Config
 
+from src.adapters.aws import S3Config, get_boto_session, get_s3_client
+
 ##################################
 # Path parsing utils
 ##################################
@@ -56,3 +58,21 @@ def open_stream(path: str, mode: str = "r", encoding: str | None = None) -> Any:
         return smart_open.open(path, mode, transport_params=so_transport_params, encoding=encoding)
     else:
         return smart_open.open(path, mode, encoding=encoding)
+
+
+def pre_sign_file_location(file_path: str) -> str:
+    s3_config = S3Config()
+    s3_client = get_s3_client(s3_config, get_boto_session())
+    bucket, key = split_s3_url(file_path)
+    pre_sign_file_loc = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=s3_config.presigned_s3_duration,
+    )
+    if s3_config.s3_endpoint_url:
+        # Only relevant when local, due to docker path issues
+        pre_sign_file_loc = pre_sign_file_loc.replace(
+            s3_config.s3_endpoint_url, "http://localhost:4566"
+        )
+
+    return pre_sign_file_loc

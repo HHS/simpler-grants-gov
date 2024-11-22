@@ -1,7 +1,22 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from src.constants.lookup_constants import ExtractType
 from src.pagination.pagination_schema import generate_pagination_schema
+
+
+class DateRangeSchema(Schema):
+    start_date = fields.Date(
+        required=True,
+        allow_none=True,
+    )
+    end_date = fields.Date(
+        required=True,
+        allow_none=True,
+    )
 
 
 class ExtractMetadataFilterV1Schema(Schema):
@@ -10,23 +25,10 @@ class ExtractMetadataFilterV1Schema(Schema):
         allow_none=True,
         metadata={
             "description": "The type of extract to filter by",
-            "example": "opportunities_csv",
+            "example": "opportunities_json",
         },
     )
-    start_date = fields.Date(
-        allow_none=True,
-        metadata={
-            "description": "The start date for filtering extracts",
-            "example": "2023-10-01",
-        },
-    )
-    end_date = fields.Date(
-        allow_none=True,
-        metadata={
-            "description": "The end date for filtering extracts",
-            "example": "2023-10-07",
-        },
-    )
+    created_at = fields.Nested(DateRangeSchema, required=False)
 
 
 class ExtractMetadataRequestSchema(AbstractResponseSchema):
@@ -49,7 +51,7 @@ class ExtractMetadataResponseSchema(FileResponseSchema):
     )
 
 
-class ExtractMetadataListResponseSchema(AbstractResponseSchema):
+class ExtractMetadataListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(
         fields.Nested(ExtractMetadataResponseSchema),
         metadata={"description": "A list of extract metadata records"},

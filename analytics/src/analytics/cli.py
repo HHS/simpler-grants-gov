@@ -264,12 +264,12 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 # ===========================================================
 
 
-@etl_app.command(name="initialize_database")
-@ecs_background_task("initialize_database")
-def initialize_database() -> None:
+@etl_app.command(name="db_migrate")
+@ecs_background_task("db_migrate")
+def migrate_database() -> None:
     """Initialize etl database."""
     logger.info("initializing database")
-    etldb.initialize_database()
+    etldb.migrate_database()
     logger.info("done")
 
 
