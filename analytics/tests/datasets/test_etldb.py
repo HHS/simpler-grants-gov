@@ -14,7 +14,7 @@ class TestEtlDataset:
 
         row_count = dataset.df.shape[0]
         col_count = dataset.df.shape[1]
-        assert row_count == 22
+        assert row_count == 23
         assert col_count == 27
 
     def test_deliverable_fetchers(self):
@@ -56,6 +56,9 @@ class TestEtlDataset:
         issue = dataset.get_issue(ghid)
         assert issue["issue_opened_at"] == "2024-11-07"
 
+        rows = dataset.get_issues(ghid)
+        assert len(rows) == 2
+
     def test_sprint_fetchers(self):
         """Deliverable fetchers should return expected values."""
         dataset = EtlDataset.load_from_json_file(self.TEST_FILE_1)
@@ -90,7 +93,7 @@ class TestEtlDataset:
         assert len(unique_ghids) == 2
 
         ghid = unique_ghids[0]
-        assert ghid == 13
+        assert ghid == 17
 
         project = dataset.get_project(ghid)
         assert project["project_name"] == "HHS"
