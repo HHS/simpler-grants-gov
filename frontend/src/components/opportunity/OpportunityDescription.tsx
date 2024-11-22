@@ -5,7 +5,7 @@ import { splitMarkup } from "src/utils/generalUtils";
 import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-import OpportunityDownload from "./OpportunityDownload";
+import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 
 type Props = {
   summary: Summary;
