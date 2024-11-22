@@ -5,6 +5,8 @@ import pytest
 
 import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import ExtractType
+from src.db.models.extract_models import ExtractMetadata
 from src.task.opportunities.export_opportunity_data_task import (
     ExportOpportunityDataConfig,
     ExportOpportunityDataTask,
@@ -75,3 +77,25 @@ class TestExportOpportunityDataTask(BaseTestClass):
 
             errors = schema.validate(json_opportunities["opportunities"])
             assert len(errors) == 0
+
+        # Verify ExtractMetadata entries were created
+        metadata_entries = db_session.query(ExtractMetadata).all()
+        assert len(metadata_entries) == 2
+
+        # Verify JSON metadata
+        json_metadata = next(
+            m for m in metadata_entries if m.extract_type == ExtractType.OPPORTUNITIES_JSON
+        )
+        assert json_metadata.file_name.endswith(".json")
+        assert json_metadata.file_name.startswith("opportunity_data-")
+        assert json_metadata.file_path == export_opportunity_data_task.json_file
+        assert json_metadata.file_size_bytes > 0
+
+        # Verify CSV metadata
+        csv_metadata = next(
+            m for m in metadata_entries if m.extract_type == ExtractType.OPPORTUNITIES_CSV
+        )
+        assert csv_metadata.file_name.endswith(".csv")
+        assert csv_metadata.file_name.startswith("opportunity_data-")
+        assert csv_metadata.file_path == export_opportunity_data_task.csv_file
+        assert csv_metadata.file_size_bytes > 0

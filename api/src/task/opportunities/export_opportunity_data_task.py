@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from enum import StrEnum
+from io import StringIO
 from typing import Iterator, Sequence
 
 from pydantic_settings import SettingsConfigDict
@@ -12,6 +13,8 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.constants.lookup_constants import ExtractType
+from src.db.models.extract_models import ExtractMetadata
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.task.ecs_background_task import ecs_background_task
@@ -86,6 +89,29 @@ class ExportOpportunityDataTask(Task):
         self.export_data_to_json(data_to_export)
         self.export_opportunities_to_csv(opportunities)
 
+        # Export data and create metadata entries
+        json_size = self.export_data_to_json(data_to_export)
+        csv_size = self.export_opportunities_to_csv(opportunities)
+
+        # Create metadata entries
+        json_metadata = ExtractMetadata(
+            extract_type=ExtractType.OPPORTUNITIES_JSON,
+            file_name=f"opportunity_data-{self.current_timestamp}.json",
+            file_path=self.json_file,
+            file_size_bytes=json_size,
+        )
+
+        csv_metadata = ExtractMetadata(
+            extract_type=ExtractType.OPPORTUNITIES_CSV,
+            file_name=f"opportunity_data-{self.current_timestamp}.csv",
+            file_path=self.csv_file,
+            file_size_bytes=csv_size,
+        )
+
+        self.db_session.add(json_metadata)
+        self.db_session.add(csv_metadata)
+        self.db_session.commit()
+
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """
         Fetch the opportunities in batches. The iterator returned
@@ -110,7 +136,7 @@ class ExportOpportunityDataTask(Task):
             .partitions()
         )
 
-    def export_data_to_json(self, data_to_export: dict) -> None:
+    def export_data_to_json(self, data_to_export: dict) -> int:
         # create the json file
         logger.info(
             "Creating Opportunity JSON extract", extra={"json_extract_path": self.json_file}
@@ -119,8 +145,18 @@ class ExportOpportunityDataTask(Task):
         with file_util.open_stream(self.json_file, "w") as outfile:
             outfile.write(json_object)
 
-    def export_opportunities_to_csv(self, opportunities: Sequence[dict]) -> None:
+        return len(json_object.encode("utf-8"))
+
+    def export_opportunities_to_csv(self, opportunities: Sequence[dict]) -> int:
         # create the csv file
         logger.info("Creating Opportunity CSV extract", extra={"csv_extract_path": self.csv_file})
+
+        csv_buffer = StringIO()
+        opportunities_to_csv(opportunities, csv_buffer)
+        csv_data = csv_buffer.getvalue()
+        csv_size = len(csv_data.encode("utf-8"))
+
         with file_util.open_stream(self.csv_file, "w") as outfile:
             opportunities_to_csv(opportunities, outfile)
+
+        return csv_size
