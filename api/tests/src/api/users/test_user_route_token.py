@@ -34,12 +34,15 @@ def test_post_user_route_token_logout_200(
     enable_factory_create, client, db_session, api_auth_token
 ):
     user = UserFactory.create()
-    token, _ = create_jwt_for_user(user, db_session)
+    token, user_token_session = create_jwt_for_user(user, db_session)
     db_session.commit()
 
     resp = client.post("v1/users/token/logout", headers={"X-SGG-Token": token})
 
+    db_session.refresh(user_token_session)
+
     assert resp.status_code == 200
+    assert user_token_session.is_valid == False
 
 
 def test_post_user_route_token_logout_invalid(
