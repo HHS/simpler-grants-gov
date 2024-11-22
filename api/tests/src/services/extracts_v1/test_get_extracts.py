@@ -32,8 +32,9 @@ def test_get_extracts_no_filters(
         )
     )
 
-    results = get_extracts(db_session, params)
-    assert len(results) == 3
+    extracts, pagination_info = get_extracts(db_session, params)
+    assert len(extracts) == 3
+    assert pagination_info.total_records == 3
 
 
 def test_get_extracts_with_type_filter(
@@ -53,9 +54,9 @@ def test_get_extracts_with_type_filter(
         filters=ExtractFilters(extract_type="opportunities_json"),
     )
 
-    results = get_extracts(db_session, params)
-    assert len(results) == 3
-    assert all(r.extract_type == "opportunities_json" for r in results)
+    extracts, _ = get_extracts(db_session, params)
+    assert len(extracts) == 3
+    assert all(r.extract_type == "opportunities_json" for r in extracts)
 
 
 def test_get_extracts_with_date_filter(enable_factory_create, db_session):
@@ -78,9 +79,9 @@ def test_get_extracts_with_date_filter(enable_factory_create, db_session):
         ),
     )
 
-    results = get_extracts(db_session, params)
-    assert len(results) == 3
-    assert results[0].created_at == datetime(2024, 1, 15, tzinfo=timezone.utc)
+    extracts, _ = get_extracts(db_session, params)
+    assert len(extracts) == 3
+    assert extracts[0].created_at == datetime(2024, 1, 15, tzinfo=timezone.utc)
 
 
 def test_get_extracts_pagination(enable_factory_create, db_session):
@@ -95,10 +96,12 @@ def test_get_extracts_pagination(enable_factory_create, db_session):
         )
     )
 
-    results = get_extracts(db_session, params)
-    assert len(results) == 2
+    extracts, pagination_info = get_extracts(db_session, params)
+    assert len(extracts) == 2
+    assert pagination_info.total_records == 3
+    assert pagination_info.total_pages == 2
 
     # Test second page
     params.pagination.page_offset = 2
-    results = get_extracts(db_session, params)
-    assert len(results) == 1
+    extracts, pagination_info = get_extracts(db_session, params)
+    assert len(extracts) == 1
