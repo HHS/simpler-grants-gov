@@ -218,6 +218,6 @@ def test_extract_metadata_presigned_url(
     download_url = data[0]["download_path"]
 
     # Try downloading the file using the pre-signed URL
-    download_response = requests.get(download_url)
+    download_response = requests.get(download_url)  # nosec
     assert download_response.status_code == 200
     assert download_response.content == test_content
