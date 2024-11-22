@@ -48,7 +48,7 @@ const mockSummaryData: Summary = {
 
 describe("OpportunityDescription", () => {
   it("renders the opportunity description", () => {
-    render(<OpportunityDescription summary={mockSummaryData} />);
+    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
 
     const descriptionHeading = screen.getByText("description");
     expect(descriptionHeading).toBeInTheDocument();
@@ -66,6 +66,7 @@ describe("OpportunityDescription", () => {
     render(
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
+        nofoPath=""
       />,
     );
 
@@ -90,6 +91,7 @@ describe("OpportunityDescription", () => {
     render(
       <OpportunityDescription
         summary={{ ...mockSummaryData, summary_description: longDescription }}
+        nofoPath=""
       />,
     );
 
@@ -101,7 +103,7 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders the eligible applicants with mapped values", () => {
-    render(<OpportunityDescription summary={mockSummaryData} />);
+    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
 
     const eligibleApplicantsHeading = screen.getByText("eligible_applicants");
     expect(eligibleApplicantsHeading).toBeInTheDocument();
@@ -114,7 +116,7 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders additional information on eligibility", () => {
-    render(<OpportunityDescription summary={mockSummaryData} />);
+    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
 
     const additionalInfoHeading = screen.getByText("additional_info");
     expect(additionalInfoHeading).toBeInTheDocument();
@@ -131,7 +133,7 @@ describe("OpportunityDescription", () => {
   });
 
   it("renders agency contact information", () => {
-    render(<OpportunityDescription summary={mockSummaryData} />);
+    render(<OpportunityDescription summary={mockSummaryData} nofoPath="" />);
 
     const contactInfoHeading = screen.getByText("contact_info");
     expect(contactInfoHeading).toBeInTheDocument();
@@ -166,6 +168,7 @@ describe("OpportunityDescription", () => {
           agency_phone_number: null,
           summary_description: null,
         }}
+        nofoPath=""
       />,
     );
 

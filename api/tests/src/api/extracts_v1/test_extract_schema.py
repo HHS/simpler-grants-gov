@@ -29,8 +29,10 @@ def test_request_schema_validation():
     valid_data = {
         "filters": {
             "extract_type": "opportunities_csv",
-            "start_date": "2023-10-01",
-            "end_date": "2023-10-07",
+            "created_at": {
+                "start_date": "2023-10-01",
+                "end_date": "2023-10-07",
+            },
         },
         "pagination": {
             "order_by": "created_at",
@@ -41,8 +43,8 @@ def test_request_schema_validation():
     }
     result = schema.load(valid_data)
     assert result["filters"]["extract_type"] == "opportunities_csv"
-    assert result["filters"]["start_date"] == date(2023, 10, 1)
-    assert result["filters"]["end_date"] == date(2023, 10, 7)
+    assert result["filters"]["created_at"]["start_date"] == date(2023, 10, 1)
+    assert result["filters"]["created_at"]["end_date"] == date(2023, 10, 7)
 
     # Test invalid extract_type
     invalid_data = {"extract_type": "invalid_type", "start_date": "2023-10-01"}
@@ -73,7 +75,7 @@ def test_response_schema_list(sample_extract_metadata):
             sample_extract_metadata,
             ExtractMetadata(
                 extract_metadata_id=2,
-                extract_type="opportunities_xml",
+                extract_type="opportunities_json",
                 file_name="test_extract2.xml",
                 file_path="/test/path/test_extract2.xml",
                 file_size_bytes=1024,
@@ -87,7 +89,7 @@ def test_response_schema_list(sample_extract_metadata):
     assert result["data"][0]["extract_metadata_id"] == 1
     assert result["data"][0]["extract_type"] == "opportunities_csv"
     assert result["data"][1]["extract_metadata_id"] == 2
-    assert result["data"][1]["extract_type"] == "opportunities_xml"
+    assert result["data"][1]["extract_type"] == "opportunities_json"
 
 
 def test_request_schema_null_values():
@@ -95,7 +97,10 @@ def test_request_schema_null_values():
 
     # Test with some null values
     data = {
-        "filters": {"extract_type": None, "start_date": "2023-10-01", "end_date": None},
+        "filters": {
+            "extract_type": None,
+            "created_at": {"start_date": "2023-10-01", "end_date": None},
+        },
         "pagination": {
             "order_by": "created_at",
             "page_offset": 1,
@@ -106,5 +111,5 @@ def test_request_schema_null_values():
 
     result = schema.load(data)
     assert result["filters"]["extract_type"] is None
-    assert result["filters"]["start_date"] == date(2023, 10, 1)
-    assert result["filters"]["end_date"] is None
+    assert result["filters"]["created_at"]["start_date"] == date(2023, 10, 1)
+    assert result["filters"]["created_at"]["end_date"] is None
