@@ -105,7 +105,7 @@ def sync_data(dataset: EtlDataset, effective: str) -> None:
         dataset,
         ghid_map,
     )
-    m = (f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}",)
+    m = f"deliverable row(s) processed: {len(ghid_map[EtlEntityType.DELIVERABLE])}"
     logger.info(m)
 
     # sync sprint data to db resulting in row id for each sprint
