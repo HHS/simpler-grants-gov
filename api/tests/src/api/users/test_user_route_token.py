@@ -3,6 +3,8 @@
 ##################
 from datetime import datetime
 
+from freezegun import freeze_time
+
 from src.auth.api_jwt_auth import create_jwt_for_user
 from tests.src.db.models.factories import UserFactory
 
@@ -31,12 +33,12 @@ def test_post_user_route_token_400(client, api_auth_token):
     assert resp.get_json()["message"] == "Missing X-OAuth-login-gov header"
 
 
+@freeze_time("2024-11-22 12:00:00", tz_offset=0)
 def test_post_user_route_token_refresh_200(
     enable_factory_create, client, db_session, api_auth_token
 ):
     user = UserFactory.create()
     token, user_token_session = create_jwt_for_user(user, db_session)
-    expiration = user_token_session.expires_at
     db_session.commit()
 
     resp = client.post("v1/users/token/refresh", headers={"X-SGG-Token": token})
@@ -44,7 +46,7 @@ def test_post_user_route_token_refresh_200(
     db_session.refresh(user_token_session)
 
     assert resp.status_code == 200
-    assert user_token_session.expires_at != expiration
+    assert user_token_session.expires_at == datetime.fromisoformat("2024-11-22 12:30:00+00:00")
 
 
 def test_post_user_route_token_refresh_expired(
