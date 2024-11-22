@@ -26,7 +26,7 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
+        envs: ${{ inputs.environment || github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
     with:
       version: ${{ inputs.image-tag }}
       environment: ${{ matrix.envs }}

@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         directory: ["service"]
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
+        envs: ${{ inputs.environment || github.event_name == 'release' && fromJSON('["prod"]') || github.ref_name == 'main' && fromJSON('["dev", "staging"]') || fromJSON('["dev"]') }}
 
     permissions:
       contents: read
