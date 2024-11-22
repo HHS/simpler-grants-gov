@@ -6,6 +6,7 @@ from src.constants.lookup_constants import ExternalUserType
 class UserTokenHeaderSchema(Schema):
     x_oauth_login_gov = fields.String(
         data_key="X-OAuth-login-gov",
+        required=True,
         metadata={
             "description": "The login_gov header token",
         },

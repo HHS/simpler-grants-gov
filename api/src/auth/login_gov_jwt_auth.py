@@ -28,11 +28,25 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     client_id: str = Field(alias="LOGIN_GOV_CLIENT_ID")
 
+# Initialize a config at startup
+_config: LoginGovConfig | None = None
 
-def get_login_gov_config() -> LoginGovConfig:
-    config = LoginGovConfig()
-    _refresh_keys(config)
-    return config
+def initialize_login_gov_config() -> None:
+    global _config
+    if not _config:
+        _config = LoginGovConfig()
+        _refresh_keys(_config)
+
+        logger.info("Constructed login.gov configuration", extra={"login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint, "login_gov_endpoint": _config.login_gov_endpoint})
+
+
+def get_config() -> LoginGovConfig:
+    global _config
+
+    if _config is None:
+        raise Exception("No Login.gov configuration - initialize_login_gov_config() must be run first")
+
+    return _config
 
 
 @dataclasses.dataclass
@@ -65,7 +79,9 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     config.public_keys = list(public_keys)
 
 
-def validate_token(token: str, config: LoginGovConfig) -> LoginGovUser:
+def validate_token(token: str, config: LoginGovConfig | None = None) -> LoginGovUser:
+    if not config:
+        config = get_config()
 
     # TODO - this iteration approach won't be necessary if the JWT we get
     #        from login.gov does actually set the KID in the header

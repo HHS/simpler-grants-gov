@@ -1,8 +1,10 @@
+import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import logging
 import os
 import pathlib
 import uuid
-
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 import _pytest.monkeypatch
 import boto3
 import flask.testing
@@ -216,6 +218,55 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     monkeypatch_session.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
     return alias
 
+####################
+# Auth
+####################
+
+def _generate_rsa_key_pair():
+    # Rather than define a private/public key, generate one for the tests
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    private_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, public_key
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+@pytest.fixture(scope="session")
+def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
+    # TODO - describe
+    def override_method(config):
+        config.public_keys = [public_rsa_key]
+
+    monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
+
+    monkeypatch_session.setenv("LOGIN_GOV_ENDPOINT", "http://localhost:3000")
+    monkeypatch_session.setenv("LOGIN_GOV_CLIENT_ID", "AUDIENCE_TEST")
 
 ####################
 # Test App & Client
@@ -225,7 +276,7 @@ def opportunity_index_alias(search_client, monkeypatch_session):
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client, opportunity_index_alias) -> APIFlask:
+def app(db_client, opportunity_index_alias, setup_login_gov_auth) -> APIFlask:
     return app_entry.create_app()
 
 

@@ -170,7 +170,7 @@ def test_validate_token_invalid_signature(login_gov_config, other_rsa_key_pair, 
         validate_token(token, login_gov_config)
 
 
-def test_something_with_the_refresh(login_gov_config, other_rsa_key_pair, monkeypatch):
+def test_validate_token_key_found_on_refresh(login_gov_config, other_rsa_key_pair, monkeypatch):
     token = create_jwt(
         user_id="abc123",
         email="mail@fake.com",
