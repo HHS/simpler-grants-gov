@@ -5,7 +5,6 @@ from typing import Tuple
 
 import jwt
 from apiflask import HTTPTokenAuth
-from black import datetime
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -208,7 +207,9 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
         raise_flask_error(401, e.message)
 
 
-def refresh_token_expiration(token_session: UserTokenSession, config: ApiJwtConfig | None = None) -> datetime:
+def refresh_token_expiration(
+    token_session: UserTokenSession, config: ApiJwtConfig | None = None
+) -> UserTokenSession:
     if config is None:
         config = get_config()
 

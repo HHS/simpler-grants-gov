@@ -7,7 +7,7 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenRefreshResponseSchema
-from src.auth.api_jwt_auth import api_jwt_auth, set_token_expiration_time
+from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
 from src.db.models.user_models import UserTokenSession
 
@@ -52,7 +52,7 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
     user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
 
     with db_session.begin():
-        user_token_session.expires_at = set_token_expiration_time()
+        refresh_token_expiration(user_token_session)
         db_session.add(user_token_session)
 
     logger.info(
