@@ -5,6 +5,7 @@ from typing import Tuple
 
 import jwt
 from apiflask import HTTPTokenAuth
+from black import datetime
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -205,3 +206,12 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
         # The message is just the value we set when constructing the JwtValidationError
         logger.info("JWT Authentication Failed for provided token", extra={"auth.issue": e.message})
         raise_flask_error(401, e.message)
+
+
+def set_token_expiration_time(config: ApiJwtConfig | None = None) -> datetime:
+    if config is None:
+        config = get_config()
+
+    expiration_time = datetime_util.utcnow() + timedelta(minutes=config.token_expiration_minutes)
+
+    return expiration_time
