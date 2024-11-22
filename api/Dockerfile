@@ -26,6 +26,8 @@ RUN apt-get update \
     && rm -fr /var/lib/apt/lists/* \
     && rm /etc/ssl/private/ssl-cert-snakeoil.key
 
+RUN apt-get autoclean
+
 ARG RUN_UID
 ARG RUN_USER
 
