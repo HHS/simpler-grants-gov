@@ -57,7 +57,8 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
     logger.info(
         "Logged out a user",
         extra={
-            "user_token_session.user_id": str(user_token_session.user_id),
+            "user_token_session.token_id": str(user_token_session.token_id),
+            "user_token_session.user_id": str(user_token_session.token),
         },
     )
 
