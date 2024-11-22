@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
+import boto3
 import pytest
+import requests
 
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import ExtractType
@@ -19,9 +21,13 @@ def test_extract_metadata_get_default_dates(
     client, api_auth_token, enable_factory_create, db_session
 ):
     """Test that default date range (last 7 days) is applied when no dates provided"""
-    ExtractMetadataFactory.create_batch(
-        2,
-        extract_type=ExtractType.OPPORTUNITIES_JSON,
+
+    # These should return in the default date range
+    ExtractMetadataFactory.create_batch(2, extract_type=ExtractType.OPPORTUNITIES_JSON)
+
+    # This should not return because it's outside the default date range
+    ExtractMetadataFactory(
+        created_at=datetime.now() - timedelta(days=15),
     )
 
     payload = {
@@ -169,3 +175,49 @@ def test_extract_metadata_get_pagination_info(
     pagination = response.json["pagination_info"]
 
     assert len(data) == 1  # Last page should have 1 item
+
+
+def test_extract_metadata_presigned_url(
+    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket
+):
+    """Test that pre-signed URLs are generated correctly and can be used to download files"""
+
+    # Create test extract with known file content
+    test_content = b"test file content"
+    test_file_path = f"s3://{mock_s3_bucket}/test/file.csv"
+
+    # Create extract metadata
+    ExtractMetadataFactory(
+        extract_type=ExtractType.OPPORTUNITIES_CSV,
+        file_path=test_file_path,
+        file_size_bytes=len(test_content),
+    )
+
+    # Upload test file to mock S3
+    s3_client = boto3.client("s3")
+    s3_client.put_object(Bucket=mock_s3_bucket, Key="test/file.csv", Body=test_content)
+
+    # Request extract metadata
+    payload = {
+        "filters": {"extract_type": "opportunities_csv"},
+        "pagination": {
+            "page_size": 10,
+            "page_offset": 1,
+            "order_by": "created_at",
+            "sort_direction": "descending",
+        },
+    }
+
+    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 1
+
+    # Verify pre-signed URL format
+    download_url = data[0]["download_path"]
+
+    # Try downloading the file using the pre-signed URL
+    download_response = requests.get(download_url)
+    assert download_response.status_code == 200
+    assert download_response.content == test_content
