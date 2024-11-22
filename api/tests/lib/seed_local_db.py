@@ -102,10 +102,6 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
             size=2, is_posted_summary=True, has_long_descriptions=True
         )
 
-        factories.OpportunityFactory.create_batch(
-            size=3, is_posted_summary=True, has_markup_descriptions=True
-        )
-
         if include_history:
             _add_history(forecasted_opps, add_forecast_hist=True)
             _add_history(
