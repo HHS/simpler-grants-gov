@@ -43,16 +43,6 @@ COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
 
-# Environment variables must be present at build time
-# https://github.com/vercel/next.js/discussions/14030
-# ARG ENV_VARIABLE
-# ENV ENV_VARIABLE=${ENV_VARIABLE}
-# ARG NEXT_PUBLIC_ENV_VARIABLE
-# ENV NEXT_PUBLIC_ENV_VARIABLE=${NEXT_PUBLIC_ENV_VARIABLE}
-
-ARG NEXT_PUBLIC_ENVIRONMENT
-ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
-
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Skip lint because it should have happened in the CI already
