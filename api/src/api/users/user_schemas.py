@@ -53,6 +53,6 @@ class UserTokenResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserTokenSchema)
 
 
-class LogoutResponseSchema(AbstractResponseSchema):
+class UserTokenLogoutResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
