@@ -122,7 +122,7 @@ class EtlIssueModel:
             history_id = row1[0]
 
         # insert into fact table: issue_sprint_map
-        # TODO: deprecate issue_sprint_map after validating changes to issue_history
+        # note: issue_sprint_map will be removed after validating changes to issue_history
         insert_sql2 = text(
             "insert into gh_issue_sprint_map (issue_id, sprint_id, d_effective) "
             "values (:issue_id, :sprint_id, :effective) "
