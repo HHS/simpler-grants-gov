@@ -1,5 +1,7 @@
 The Simpler Grants Next application is deployed and used in a number of environments. Here is how those environments, and the data required by each environment, are managed.
 
+Note that Next applications follow a set heirarchy for evaluating environment variable precedence, as noted [in documentation here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#environment-variable-load-order).
+
 ## Local
 
 Environment variables are gathered from the .env.development file.
@@ -10,7 +12,7 @@ Since the .env.development file is tracked in git, any sensitive environment var
 
 ## Test (and testing)
 
-Unit testing by Jest is always done in the "test" environment by default. See [Jest's docs](https://jestjs.io/docs/environment-variables#node_env).
+Unit testing by Jest is always done in the "test" environment by default. See [Jest's docs](https://jestjs.io/docs/environment-variables#node_env). As a result, all Jest runs will reference the .env.test file.
 
 E2E tests are run against a running Next server, so the environment used there is determined by the environment used on by whatever type of Next server is running. Locally, this should be Development when using `npm run dev` and Production if you're using `npm run build && npm start`.
 
