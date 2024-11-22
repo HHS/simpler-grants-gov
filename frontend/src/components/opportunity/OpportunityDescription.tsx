@@ -5,9 +5,11 @@ import { splitMarkup } from "src/utils/generalUtils";
 import { useTranslations } from "next-intl";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 
 type Props = {
   summary: Summary;
+  nofoPath: string;
 };
 
 enum ApplicantType {
@@ -103,7 +105,7 @@ const SummaryDescriptionDisplay = ({
   );
 };
 
-const OpportunityDescription = ({ summary }: Props) => {
+const OpportunityDescription = ({ summary, nofoPath }: Props) => {
   const t = useTranslations("OpportunityListing.description");
   const agency_phone_number_stripped = summary?.agency_phone_number
     ? summary.agency_phone_number.replace(/-/g, "")
@@ -131,6 +133,7 @@ const OpportunityDescription = ({ summary }: Props) => {
     <>
       <div className="usa-prose">
         <h2>{t("title")}</h2>
+        <OpportunityDownload nofoPath={nofoPath} />
         <h3>{t("summary")}</h3>
         <SummaryDescriptionDisplay
           summaryDescription={summary.summary_description || ""}
