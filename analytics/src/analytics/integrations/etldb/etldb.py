@@ -2,10 +2,13 @@
 
 import logging
 from enum import Enum
+
 from sqlalchemy import Connection, text
+
 from analytics.integrations.db import PostgresDbClient
 
 logger = logging.getLogger(__name__)
+
 
 class EtlDb:
     """Encapsulate etl database connections."""
