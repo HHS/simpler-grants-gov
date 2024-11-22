@@ -144,6 +144,11 @@ class EtlDataset(BaseDataset):
         query_string = f"issue_ghid == '{issue_ghid}'"
         return self.df.query(query_string).iloc[0]
 
+    def get_issues(self, issue_ghid: str) -> pd.DataFrame:
+        """Fetch data about a given issue."""
+        query_string = f"issue_ghid == '{issue_ghid}'"
+        return self.df.query(query_string)
+
     def get_issue_ghids(self) -> NDArray[Any]:
         """Fetch an array of unique non-null issue ghids."""
         df = self.df[self.df.issue_ghid.notna()]

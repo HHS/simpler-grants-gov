@@ -1,7 +1,7 @@
 [
   {
     "project_owner": "HHS",
-    "project_number": 13,
+    "project_number": 17,
     "issue_title": "Draft email content for participants",
     "issue_url": "https://github.com/HHS/simpler-grants-gov/issues/2763",
     "issue_parent": "https://github.com/HHS/simpler-grants-gov/issues/2719",
@@ -658,5 +658,35 @@
     "epic_url": "https://github.com/HHS/simpler-grants-gov/issues/2353",
     "epic_title": "Public dashboard with at least one static chart",
     "issue_state": "open"
+  },
+  {
+    "project_owner": "HHS",
+    "project_number": 13,
+    "issue_title": "Draft email content for participants",
+    "issue_url": "https://github.com/HHS/simpler-grants-gov/issues/2763",
+    "issue_parent": "https://github.com/HHS/simpler-grants-gov/issues/2719",
+    "issue_type": "Task",
+    "issue_is_closed": true,
+    "issue_opened_at": "2024-11-07",
+    "issue_closed_at": "2024-11-12",
+    "issue_points": null,
+    "issue_status": "Done",
+    "sprint_id": null,
+    "sprint_name": null,
+    "sprint_start": null,
+    "sprint_length": null,
+    "sprint_end": null,
+    "quad_id": null,
+    "quad_name": null,
+    "quad_start": null,
+    "quad_length": null,
+    "quad_end": null,
+    "deliverable_pillar": null,
+    "deliverable_url": null,
+    "deliverable_title": null,
+    "deliverable_status": null,
+    "epic_url": null,
+    "epic_title": null,
+    "issue_state": "closed"
   }
 ]
