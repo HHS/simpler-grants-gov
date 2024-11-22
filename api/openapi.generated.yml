@@ -119,6 +119,27 @@ paths:
       summary: User Token
       security:
       - ApiKeyAuth: []
+  /v1/users/token/logout:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTokenLogoutResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - User v1
+      summary: User Token Logout
+      security:
+      - ApiJwtAuth: []
   /v1/opportunities/search:
     post:
       parameters: []
@@ -641,6 +662,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/UserToken'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserTokenLogoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
