@@ -28,6 +28,9 @@ class TestExportOpportunityDataTask(BaseTestClass):
         enable_factory_create,
         export_opportunity_data_task,
     ):
+        db_session.query(ExtractMetadata).delete()
+        db_session.commit()
+
         # Create 25 opportunities we will load
         opportunities = []
         opportunities.extend(OpportunityFactory.create_batch(size=6, is_posted_summary=True))
