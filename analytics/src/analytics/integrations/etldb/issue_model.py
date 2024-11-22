@@ -99,6 +99,7 @@ class EtlIssueModel:
             "points": issue_df["issue_points"],
             "sprint_id": ghid_map[EtlEntityType.SPRINT].get(issue_df["sprint_ghid"]),
             "effective": self.dbh.effective_date,
+            "project_id": ghid_map[EtlEntityType.PROJECT].get(issue_df["project_ghid"]),
         }
         history_id = None
         map_id = None
@@ -106,11 +107,13 @@ class EtlIssueModel:
         # insert into fact table: issue_history
         cursor = self.dbh.connection()
         insert_sql1 = text(
-            "insert into gh_issue_history (issue_id, status, is_closed, points, d_effective) "
-            "values (:issue_id, :status, :is_closed, :points, :effective) "
-            "on conflict (issue_id, d_effective) "
-            "do update set (status, is_closed, points, t_modified) = "
-            "(:status, :is_closed, :points, current_timestamp) "
+            "insert into gh_issue_history "
+            "(issue_id, status, is_closed, points, d_effective, project_id, sprint_id) "
+            "values "
+            "(:issue_id, :status, :is_closed, :points, :effective, :project_id, :sprint_id) "
+            "on conflict (issue_id, project_id, d_effective) "
+            "do update set (status, is_closed, points, t_modified, sprint_id) = "
+            "(:status, :is_closed, :points, current_timestamp, :sprint_id) "
             "returning id",
         )
         result1 = cursor.execute(insert_sql1, insert_values)
@@ -119,6 +122,7 @@ class EtlIssueModel:
             history_id = row1[0]
 
         # insert into fact table: issue_sprint_map
+        # TODO: deprecate issue_sprint_map after validating changes to issue_history
         insert_sql2 = text(
             "insert into gh_issue_sprint_map (issue_id, sprint_id, d_effective) "
             "values (:issue_id, :sprint_id, :effective) "

@@ -141,10 +141,11 @@ def sync_issues(db: EtlDb, dataset: EtlDataset, ghid_map: dict) -> dict:
     result = {}
     model = EtlIssueModel(db)
     for ghid in dataset.get_issue_ghids():
-        issue_df = dataset.get_issue(ghid)
-        result[ghid], _ = model.sync_issue(issue_df, ghid_map)
-        if VERBOSE:
-            print(f"ISSUE '{ghid}' issue_id = {result[ghid]}")
+        all_rows = dataset.get_issues(ghid)
+        for _, issue_df in all_rows.iterrows():
+            result[ghid], _ = model.sync_issue(issue_df, ghid_map)
+            if VERBOSE:
+                print(f"ISSUE '{ghid}' issue_id = {result[ghid]}")
     return result
 
 
