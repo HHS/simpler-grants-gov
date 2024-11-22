@@ -208,10 +208,11 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
         raise_flask_error(401, e.message)
 
 
-def set_token_expiration_time(config: ApiJwtConfig | None = None) -> datetime:
+def refresh_token_expiration(token_session: UserTokenSession, config: ApiJwtConfig | None = None) -> datetime:
     if config is None:
         config = get_config()
 
     expiration_time = datetime_util.utcnow() + timedelta(minutes=config.token_expiration_minutes)
+    token_session.expires_at = expiration_time
 
-    return expiration_time
+    return token_session
