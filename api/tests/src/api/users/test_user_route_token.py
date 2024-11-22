@@ -42,7 +42,7 @@ def test_post_user_route_token_logout_200(
     db_session.refresh(user_token_session)
 
     assert resp.status_code == 200
-    assert user_token_session.is_valid == False
+    assert not user_token_session.is_valid
 
 
 def test_post_user_route_token_logout_invalid(
