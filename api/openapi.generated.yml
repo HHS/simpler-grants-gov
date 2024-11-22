@@ -22,6 +22,7 @@ info:
 tags:
 - name: Health
 - name: Opportunity v1
+- name: Extract v1
 - name: User v1
 servers: .
 paths:
@@ -44,6 +45,47 @@ paths:
       tags:
       - Health
       summary: Health
+  /v1/extracts:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractMetadataListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Extract v1
+      summary: Extract Metadata Get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractMetadataRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: created_at
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+      security:
+      - ApiKeyAuth: []
   /v1/users/token:
     post:
       parameters:
@@ -384,6 +426,176 @@ components:
           type: string
           description: An internal tracking ID
           example: 550e8400-e29b-41d4-a716-446655440000
+    DateRange:
+      type: object
+      properties:
+        start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+        end_date:
+          type:
+          - string
+          - 'null'
+          format: date
+      required:
+      - end_date
+      - start_date
+    ExtractMetadataFilterV1:
+      type: object
+      properties:
+        extract_type:
+          description: The type of extract to filter by
+          example: opportunities_json
+          enum:
+          - opportunities_json
+          - opportunities_csv
+          type:
+          - string
+          - 'null'
+          - 'null'
+        created_at:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/DateRange'
+    ExtractMetadataPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+        page_size:
+          type: integer
+          minimum: 1
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
+    ExtractMetadataRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExtractMetadataFilterV1'
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
+      required:
+      - pagination
+    PaginationInfo:
+      type: object
+      properties:
+        page_offset:
+          type: integer
+          description: The page number that was fetched
+          example: 1
+        page_size:
+          type: integer
+          description: The size of the page fetched
+          example: 25
+        total_records:
+          type: integer
+          description: The total number of records fetchable
+          example: 42
+        total_pages:
+          type: integer
+          description: The total number of pages that can be fetched
+          example: 2
+        order_by:
+          type: string
+          description: The field that the records were sorted by
+          example: id
+        sort_direction:
+          description: The direction the records are sorted
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+    ExtractMetadataResponse:
+      type: object
+      properties:
+        download_path:
+          type: string
+          description: The file's download path
+        file_size_bytes:
+          type: integer
+          description: The size of the file in bytes
+          example: 1024
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        extract_metadata_id:
+          type: integer
+          description: The ID of the extract metadata
+          example: 1
+        extract_type:
+          type: string
+          description: The type of extract
+          example: opportunity_data_extract
+    ExtractMetadataListResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: &id001
+          - object
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: A list of extract metadata records
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/ExtractMetadataResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     User:
       type: object
       properties:
@@ -792,36 +1004,6 @@ components:
           - string
       required:
       - pagination
-    PaginationInfo:
-      type: object
-      properties:
-        page_offset:
-          type: integer
-          description: The page number that was fetched
-          example: 1
-        page_size:
-          type: integer
-          description: The size of the page fetched
-          example: 25
-        total_records:
-          type: integer
-          description: The total number of records fetchable
-          example: 42
-        total_pages:
-          type: integer
-          description: The total number of pages that can be fetched
-          example: 2
-        order_by:
-          type: string
-          description: The field that the records were sorted by
-          example: id
-        sort_direction:
-          description: The direction the records are sorted
-          enum:
-          - ascending
-          - descending
-          type:
-          - string
     OpportunityAssistanceListingV1:
       type: object
       properties:
@@ -1122,7 +1304,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id001
+          enum: &id002
           - discretionary
           - mandatory
           - continuation
@@ -1141,12 +1323,12 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id002
+            type: &id003
             - object
             allOf:
             - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id003
+          type: &id004
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunitySummaryV1'
@@ -1154,12 +1336,12 @@ components:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id004
+          enum: &id005
           - forecasted
           - posted
           - closed
           - archived
-          type: &id005
+          type: &id006
           - string
         created_at:
           type: string
@@ -1219,8 +1401,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type:
-          - object
+          type: *id001
           allOf:
           - $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -1327,7 +1508,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id001
+          enum: *id002
           type:
           - string
           - 'null'
@@ -1341,19 +1522,19 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id002
+            type: *id003
             allOf:
             - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id003
+          type: *id004
           allOf:
           - $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id004
-          type: *id005
+          enum: *id005
+          type: *id006
         created_at:
           type: string
           format: date-time
