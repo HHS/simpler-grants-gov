@@ -8,9 +8,9 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import UserTokenRefreshResponseSchema
-from src.auth import api_jwt_auth
-from src.auth.api_jwt_auth import get_config
+from src.auth.api_jwt_auth import api_jwt_auth, get_config
 from src.auth.api_key_auth import api_key_auth
+from src.db.models.user_models import UserTokenSession
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)

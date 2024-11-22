@@ -44,7 +44,7 @@ def test_post_user_route_token_refresh_200(
     db_session.refresh(user_token_session)
 
     assert resp.status_code == 200
-    assert not user_token_session.expired_at != expiration
+    assert user_token_session.expires_at != expiration
 
 
 def test_post_user_route_token_refresh_expired(
