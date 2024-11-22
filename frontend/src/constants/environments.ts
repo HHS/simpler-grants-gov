@@ -8,6 +8,9 @@ const {
   API_URL,
   API_AUTH_TOKEN = "",
   NEXT_PUBLIC_BASE_URL,
+  // for deployed envs it will come from ECS task def env var
+  // it will not be populated in Jest or E2E tests
+  // if it is needed locally or tests, add it in .env.local or command line
   NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = "",
 } = process.env;
 
