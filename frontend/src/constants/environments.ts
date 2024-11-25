@@ -24,5 +24,5 @@ export const environment: { [key: string]: string } = {
   API_URL: API_URL || "",
   API_AUTH_TOKEN,
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
-  NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "G-6MDCC5EZW2",
+  NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: "GTM-MV57HMHS",
 };
