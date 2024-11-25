@@ -55,3 +55,6 @@ npm-debug.log*
 # pa11y
 screenshots-output/*
 pa11y_output.txt
+
+# Artilery
+tests/artillery/params.json
