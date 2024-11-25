@@ -1,4 +1,6 @@
 import logging
+from uuid import UUID
+
 
 from src.adapters import db
 from src.adapters.db import flask_db
@@ -11,6 +13,7 @@ from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenR
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
 from src.db.models.user_models import UserTokenSession
+from src.services.users.get_user import get_user
 
 logger = logging.getLogger(__name__)
 
@@ -90,16 +93,23 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
 
     return response.ApiResponse(message="Success")
 
-@user_blueprint.post("/<int:user_id>")
+@user_blueprint.get("/<uuid:user_id>")
 @user_blueprint.output(UserGetResponseSchema)
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get(db_session: db.Session, user_id: int) -> response.ApiResponse:
-    logger.info("POST /v1/users/:user_id")
+def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id")
 
-    with db_session.begin():
-        user = get_user(db_session, user_id)
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+
+    if user_id == user_token_session.user_id:
+        with db_session.begin():
+            user = get_user(db_session, user_id)
+
+        return response.ApiResponse(message="Success", data=user)
+
+    raise_flask_error(401, "Unauthorized")
 
 
-    return response.ApiResponse(message="Success", data=user)
+
