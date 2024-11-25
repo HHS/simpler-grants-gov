@@ -6,7 +6,8 @@ from src.api import response
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
-from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenRefreshResponseSchema
+from src.api.users.user_schemas import UserTokenLogoutResponseSchema, UserTokenRefreshResponseSchema, \
+    UserGetResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
 from src.db.models.user_models import UserTokenSession
@@ -41,6 +42,30 @@ def user_token(x_oauth_login_gov: dict) -> response.ApiResponse:
     raise_flask_error(400, message)
 
 
+@user_blueprint.post("/token/logout")
+@user_blueprint.output(UserTokenLogoutResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_token_logout(db_session: db.Session) -> response.ApiResponse:
+    logger.info("POST /v1/users/token/logout")
+
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    with db_session.begin():
+        user_token_session.is_valid = False
+        db_session.add(user_token_session)
+
+    logger.info(
+        "Logged out a user",
+        extra={
+            "user_token_session.token_id": str(user_token_session.token_id),
+            "user_token_session.user_id": str(user_token_session.user_id),
+        },
+    )
+
+    return response.ApiResponse(message="Success")
+
+
 @user_blueprint.post("/token/refresh")
 @user_blueprint.output(UserTokenRefreshResponseSchema)
 @user_blueprint.doc(responses=[200, 401])
@@ -65,26 +90,16 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
 
     return response.ApiResponse(message="Success")
 
-
-@user_blueprint.post("/token/logout")
-@user_blueprint.output(UserTokenLogoutResponseSchema)
+@user_blueprint.post("/<int:user_id>")
+@user_blueprint.output(UserGetResponseSchema)
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_token_logout(db_session: db.Session) -> response.ApiResponse:
-    logger.info("POST /v1/users/token/logout")
+def user_get(db_session: db.Session, user_id: int) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
     with db_session.begin():
-        user_token_session.is_valid = False
-        db_session.add(user_token_session)
+        user = get_user(db_session, user_id)
 
-    logger.info(
-        "Logged out a user",
-        extra={
-            "user_token_session.token_id": str(user_token_session.token_id),
-            "user_token_session.user_id": str(user_token_session.user_id),
-        },
-    )
 
-    return response.ApiResponse(message="Success")
+    return response.ApiResponse(message="Success", data=user)
