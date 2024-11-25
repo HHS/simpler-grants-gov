@@ -42,3 +42,14 @@ See [our CI code](https://github.com/HHS/simpler-grants-gov/blob/1b85220c7369d40
 Note that, as mentioned above, NODE_ENV will be set to "production" here due to use of `npm run build && npm start`.
 
 As a result, environment variables are gathered from the .env.production file.
+
+## Tricky Stuff
+
+Docker and Next combine to create an interesting situation when trying to figure out how to provide environment variables to the deployed application. Here are a few interesting facts:
+
+- environment variables that are available to be passed directly to the client in a Next app need to be prefixed with the `NEXT_PUBLIC_` string. See [Next docs here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser).
+- any `NEXT_PUBLIC_` variables must be initially referenced in the code directly from process.env (`const yrVar = process.env.NEXT_PUBLIC_YR_VAR`), rather than destructured (`const { NEXT_PUBLIC_YR_VAR } = process.env`)), but can be exported from one file to another after definition
+- these variables must be available at build time (ie `next build` rather than `next start`), and can be referenced in any components when exported from a server side file, directly referenced from process.env, or passed as a prop
+- variables defined at Docker runtime are not made available directly to client components via an import or process.env reference
+- however, you can import a runtime variable in a server component then to pass it as a prop to client component child
+- this means that ANY env var can be referenced on the client as long as it is passed down from a server side component further up the tree, but `NEXT_PUBLIC_` vars have more flexibility
