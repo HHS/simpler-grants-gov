@@ -152,3 +152,6 @@ dmypy.json
 
 # Python testing stuff
 *__pycache__*
+
+# Artilery
+frontend/tests/artillery/params.json
