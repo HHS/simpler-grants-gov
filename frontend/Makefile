@@ -69,7 +69,7 @@ load-test-dev: # Load test the dev environment in aws
 	artillery run -e dev artillery-load-test.yml
 
 load-test-staging: # Load test the staging environment in aws
-	artillery run -e staging artillery-load-test.yml
+	artillery run -e stage artillery-load-test.yml
 
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
