@@ -17,12 +17,14 @@ from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb, slack
 from analytics.integrations.db import PostgresDbClient
+from analytics.logs import init as init_logging
+from analytics.logs.app_logger import init_app
+from analytics.logs.ecs_background_task import ecs_background_task
 from analytics.metrics.base import BaseMetric, Unit
 from analytics.metrics.burndown import SprintBurndown
 from analytics.metrics.burnup import SprintBurnup
 from analytics.metrics.percent_complete import DeliverablePercentComplete
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # fmt: off
@@ -58,9 +60,18 @@ app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
 
+def init() -> None:
+    """Shared init function for all scripts."""
+    # Setup logging
+    init_logging(__package__)
+    init_app(logging.root)
+
+
 @app.callback()
 def callback() -> None:
     """Analyze data about the Simpler.Grants.gov project."""
+    # If you override this callback, remember to call init()
+    init()
 
 
 # ===========================================================
@@ -253,12 +264,13 @@ def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> No
 # ===========================================================
 
 
-@etl_app.command(name="initialize_database")
-def initialize_database() -> None:
+@etl_app.command(name="db_migrate")
+@ecs_background_task("db_migrate")
+def migrate_database() -> None:
     """Initialize etl database."""
-    print("initializing database")
-    etldb.init_db()
-    print("done")
+    logger.info("initializing database")
+    etldb.migrate_database()
+    logger.info("done")
 
 
 @etl_app.command(name="transform_and_load")
@@ -284,7 +296,7 @@ def transform_and_load(
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
 
     # sync data to db
-    etldb.sync_db(dataset, datestamp)
+    etldb.sync_data(dataset, datestamp)
 
     # finish
     print("transform and load is done")

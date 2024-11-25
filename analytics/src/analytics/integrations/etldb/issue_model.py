@@ -3,7 +3,9 @@
 from datetime import datetime
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
@@ -23,20 +25,30 @@ class EtlIssueModel:
     ) -> tuple[int | None, EtlChangeType]:
         """Write issue data to etl database."""
         # initialize return value
+        issue_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        issue_id = self._insert_dimensions(issue_df, ghid_map)
-        if issue_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            issue_id = self._insert_dimensions(issue_df, ghid_map)
+            if issue_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, select and update
-        if issue_id is None:
-            issue_id, change_type = self._update_dimensions(issue_df, ghid_map)
+            # if insert failed, select and update
+            if issue_id is None:
+                issue_id, change_type = self._update_dimensions(issue_df, ghid_map)
 
-        # insert facts
-        if issue_id is not None:
-            self._insert_facts(issue_id, issue_df, ghid_map)
+            # insert facts
+            if issue_id is not None:
+                self._insert_facts(issue_id, issue_df, ghid_map)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync issue data: {e}"
+            raise RuntimeError(message) from e
 
         return issue_id, change_type
 
@@ -87,6 +99,7 @@ class EtlIssueModel:
             "points": issue_df["issue_points"],
             "sprint_id": ghid_map[EtlEntityType.SPRINT].get(issue_df["sprint_ghid"]),
             "effective": self.dbh.effective_date,
+            "project_id": ghid_map[EtlEntityType.PROJECT].get(issue_df["project_ghid"]),
         }
         history_id = None
         map_id = None
@@ -94,11 +107,13 @@ class EtlIssueModel:
         # insert into fact table: issue_history
         cursor = self.dbh.connection()
         insert_sql1 = text(
-            "insert into gh_issue_history (issue_id, status, is_closed, points, d_effective) "
-            "values (:issue_id, :status, :is_closed, :points, :effective) "
-            "on conflict (issue_id, d_effective) "
-            "do update set (status, is_closed, points, t_modified) = "
-            "(:status, :is_closed, :points, current_timestamp) "
+            "insert into gh_issue_history "
+            "(issue_id, status, is_closed, points, d_effective, project_id, sprint_id) "
+            "values "
+            "(:issue_id, :status, :is_closed, :points, :effective, :project_id, :sprint_id) "
+            "on conflict (issue_id, project_id, d_effective) "
+            "do update set (status, is_closed, points, t_modified, sprint_id) = "
+            "(:status, :is_closed, :points, current_timestamp, :sprint_id) "
             "returning id",
         )
         result1 = cursor.execute(insert_sql1, insert_values)
@@ -107,6 +122,7 @@ class EtlIssueModel:
             history_id = row1[0]
 
         # insert into fact table: issue_sprint_map
+        # note: issue_sprint_map will be removed after validating changes to issue_history
         insert_sql2 = text(
             "insert into gh_issue_sprint_map (issue_id, sprint_id, d_effective) "
             "values (:issue_id, :sprint_id, :effective) "

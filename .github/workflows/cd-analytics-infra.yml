@@ -9,7 +9,17 @@ on:
       - "infra/analytics/**"
   release:
     types: [published]
-
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
 jobs:
   build-repository:
     name: Build Repository
@@ -42,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         directory: ["database", "service"]
-        envs: ${{ github.event_name == 'release' && fromJSON('["prod"]') || fromJSON('["dev", "staging"]') }} # deploy prod on releases, otherwise deploy staging and dev
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
 
     permissions:
       contents: read
@@ -66,3 +76,9 @@ jobs:
           ./bin/terraform-init.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
           export TF_CLI_ARGS="-input=false -auto-approve -var environment_name=${{ matrix.envs }}"
           ./bin/terraform-apply.sh infra/analytics/${{ matrix.directory }} ${{ matrix.envs }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [build-repository, deploy-infra]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit

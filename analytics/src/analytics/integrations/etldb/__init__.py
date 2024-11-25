@@ -1,11 +1,11 @@
 """Read and write data from/to delivery metrics database."""
 
 __all__ = [
-    "init_db",
-    "sync_db",
+    "migrate_database",
+    "sync_data",
 ]
 
 from analytics.integrations.etldb.main import (
-    init_db,
-    sync_db,
+    migrate_database,
+    sync_data,
 )

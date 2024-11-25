@@ -84,7 +84,7 @@ module "service" {
   source       = "../../modules/service"
   service_name = local.service_name
   # https://hub.docker.com/r/metabase/metabase
-  image_repository_url     = "docker.io/metabase/metabase"
+  image_repository_url     = "docker.io/metabase/metabase-enterprise"
   image_tag                = local.image_tag
   vpc_id                   = data.aws_vpc.network.id
   public_subnet_ids        = data.aws_subnets.public.ids
@@ -96,10 +96,12 @@ module "service" {
   drop_linux_capabilities  = false
   healthcheck_command      = null
   healthcheck_path         = "/"
-  extra_environment_variables = {
-    MB_DB_PORT = data.aws_rds_cluster.db_cluster.port
-    MB_DB_HOST = data.aws_rds_cluster.db_cluster.endpoint
-  }
+
+  extra_environment_variables = merge(local.service_config.extra_environment_variables, {
+    ENVIRONMENT = var.environment_name
+    MB_DB_PORT  = data.aws_rds_cluster.db_cluster.port
+    MB_DB_HOST  = data.aws_rds_cluster.db_cluster.endpoint
+  })
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {

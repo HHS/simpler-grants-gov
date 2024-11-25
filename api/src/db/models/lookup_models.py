@@ -120,7 +120,7 @@ EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 
 
 EXTRACT_TYPE_CONFIG = LookupConfig(
     [
-        LookupStr(ExtractType.OPPORTUNITIES_XML, 1),
+        LookupStr(ExtractType.OPPORTUNITIES_JSON, 1),
         LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
     ]
 )

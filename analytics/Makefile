@@ -144,10 +144,10 @@ lint: ## runs code quality checks
 # Data Commands #
 #################
 
-init-db:
-	@echo "=> Initializing the database schema"
+db-migrate:
+	@echo "=> Migrating the database schema"
 	@echo "====================================================="
-	$(POETRY) analytics etl initialize_database
+	$(POETRY) analytics etl db_migrate
 	@echo "====================================================="
 
 gh-transform-and-load:

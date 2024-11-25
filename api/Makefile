@@ -84,6 +84,9 @@ setup-local:
 	# Install dependencies
 	poetry install --no-root --all-extras --with dev
 
+setup-env-override-file:
+	./bin/setup-env-override-file.sh $(args)
+
 ##################################################
 # API Build & Run
 ##################################################
@@ -100,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: build init-db init-opensearch init-localstack
+init: setup-env-override-file build init-db init-opensearch init-localstack
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -202,6 +205,15 @@ start-localstack:
 
 setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
+
+##################################################
+# Mock Oauth Server
+##################################################
+
+init-mock-oauth2: start-mock-oauth2
+
+start-mock-oauth2:
+	docker compose up --detach mock-oauth2-server
 
 ##################################################
 # Testing

@@ -1,7 +1,9 @@
 """Define EtlSprintModel class to encapsulate db CRUD operations."""
 
 from pandas import Series
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from analytics.datasets.etl_dataset import EtlEntityType
 from analytics.integrations.etldb.etldb import EtlChangeType, EtlDb
@@ -20,16 +22,26 @@ class EtlSprintModel:
     ]:
         """Write sprint data to etl database."""
         # initialize return value
+        sprint_id = None
         change_type = EtlChangeType.NONE
 
-        # insert dimensions
-        sprint_id = self._insert_dimensions(sprint_df, ghid_map)
-        if sprint_id is not None:
-            change_type = EtlChangeType.INSERT
+        try:
+            # insert dimensions
+            sprint_id = self._insert_dimensions(sprint_df, ghid_map)
+            if sprint_id is not None:
+                change_type = EtlChangeType.INSERT
 
-        # if insert failed, select and update
-        if sprint_id is None:
-            sprint_id, change_type = self._update_dimensions(sprint_df, ghid_map)
+            # if insert failed, select and update
+            if sprint_id is None:
+                sprint_id, change_type = self._update_dimensions(sprint_df, ghid_map)
+        except (
+            InsufficientPrivilege,
+            OperationalError,
+            ProgrammingError,
+            RuntimeError,
+        ) as e:
+            message = f"FATAL: Failed to sync sprint data: {e}"
+            raise RuntimeError(message) from e
 
         return sprint_id, change_type
 
@@ -40,8 +52,9 @@ class EtlSprintModel:
         cursor = self.dbh.connection()
         result = cursor.execute(
             text(
-                "insert into gh_sprint(ghid, name, start_date, end_date, duration, quad_id) "
-                "values (:ghid, :name, :start, :end, :duration, :quad_id) "
+                "insert into gh_sprint "
+                "(ghid, name, start_date, end_date, duration, quad_id, project_id) "
+                "values (:ghid, :name, :start, :end, :duration, :quad_id, :project_id) "
                 "on conflict(ghid) do nothing returning id",
             ),
             {
@@ -51,6 +64,9 @@ class EtlSprintModel:
                 "end": sprint_df["sprint_end"],
                 "duration": sprint_df["sprint_length"],
                 "quad_id": ghid_map[EtlEntityType.QUAD].get(sprint_df["quad_ghid"]),
+                "project_id": ghid_map[EtlEntityType.PROJECT].get(
+                    sprint_df["project_ghid"],
+                ),
             },
         )
         row = result.fetchone()
@@ -77,13 +93,14 @@ class EtlSprintModel:
             sprint_df["sprint_end"],
             sprint_df["sprint_length"],
             ghid_map[EtlEntityType.QUAD].get(sprint_df["quad_ghid"]),
+            ghid_map[EtlEntityType.PROJECT].get(sprint_df["project_ghid"]),
         )
 
         # select old values
-        sprint_id, old_name, old_start, old_end, old_duration, old_quad_id = (
+        sprint_id, o_name, o_start, o_end, o_duration, o_quad_id, o_project_id = (
             self._select(sprint_df["sprint_ghid"])
         )
-        old_values = (old_name, old_start, old_end, old_duration, old_quad_id)
+        old_values = (o_name, o_start, o_end, o_duration, o_quad_id, o_project_id)
 
         # compare
         if sprint_id is not None and new_values != old_values:
@@ -93,7 +110,8 @@ class EtlSprintModel:
                 text(
                     "update gh_sprint set name = :new_name, start_date = :new_start, "
                     "end_date = :new_end, duration = :new_duration, quad_id = :quad_id, "
-                    "t_modified = current_timestamp where id = :sprint_id",
+                    "project_id = :project_id, t_modified = current_timestamp "
+                    "where id = :sprint_id",
                 ),
                 {
                     "new_name": new_values[0],
@@ -101,6 +119,7 @@ class EtlSprintModel:
                     "new_end": new_values[2],
                     "new_duration": new_values[3],
                     "quad_id": new_values[4],
+                    "project_id": new_values[5],
                     "sprint_id": sprint_id,
                 },
             )
@@ -115,18 +134,19 @@ class EtlSprintModel:
         str | None,
         int | None,
         int | None,
+        int | None,
     ]:
         """Select epic data from etl database."""
         cursor = self.dbh.connection()
         result = cursor.execute(
             text(
-                "select id, name, start_date, end_date, duration, quad_id "
+                "select id, name, start_date, end_date, duration, quad_id, project_id "
                 "from gh_sprint where ghid = :ghid",
             ),
             {"ghid": ghid},
         )
         row = result.fetchone()
         if row:
-            return row[0], row[1], row[2], row[3], row[4], row[5]
+            return row[0], row[1], row[2], row[3], row[4], row[5], row[6]
 
-        return None, None, None, None, None, None
+        return None, None, None, None, None, None, None

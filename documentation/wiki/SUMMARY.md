@@ -117,6 +117,7 @@
   * [Dashboard Data Tool](decisions/adr/2024-04-10-dashboard-tool.md)
   * [Search Engine](decisions/adr/2024-10-02-search-engine.md)
   * [Document Storage](decisions/adr/2024-10-18-document-storage.md)
+  * [Document Sharing](decisions/adr/document-sharing.md)
 * [Infra](decisions/infra/README.md)
   * [Use markdown architectural decision records](decisions/infra/0000-use-markdown-architectural-decision-records.md)
   * [CI/CD interface](decisions/infra/0001-ci-cd-interface.md)

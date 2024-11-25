@@ -1,7 +1,11 @@
 from enum import StrEnum
 
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    FileResponseSchema,
+    PaginationMixinSchema,
+)
 from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
@@ -309,13 +313,7 @@ class OpportunityV1Schema(Schema):
     updated_at = fields.DateTime(dump_only=True)
 
 
-class OpportunityAttachmentV1Schema(Schema):
-    download_path = fields.String(
-        metadata={
-            "description": "The URL to download the attachment",
-            "example": "https://...",
-        }
-    )
+class OpportunityAttachmentV1Schema(FileResponseSchema):
     mime_type = fields.String(
         metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
     )
@@ -328,9 +326,6 @@ class OpportunityAttachmentV1Schema(Schema):
             "example": "The full announcement NOFO",
         }
     )
-    file_size_bytes = fields.Integer(
-        metadata={"description": "The size of the attachment in bytes", "example": 10012}
-    )
     opportunity_attachment_type = fields.Enum(
         OpportunityAttachmentType,
         metadata={
@@ -338,8 +333,6 @@ class OpportunityAttachmentV1Schema(Schema):
             "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
         },
     )
-    created_at = fields.DateTime(dump_only=True)
-    updated_at = fields.DateTime(dump_only=True)
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
