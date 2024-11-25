@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from enum import StrEnum
-from io import StringIO
 from typing import Iterator, Sequence
 
 from pydantic_settings import SettingsConfigDict
@@ -151,12 +150,8 @@ class ExportOpportunityDataTask(Task):
         # create the csv file
         logger.info("Creating Opportunity CSV extract", extra={"csv_extract_path": self.csv_file})
 
-        csv_buffer = StringIO()
-        opportunities_to_csv(opportunities, csv_buffer)
-        csv_data = csv_buffer.getvalue()
-        csv_size = len(csv_data.encode("utf-8"))
-
         with file_util.open_stream(self.csv_file, "w") as outfile:
             opportunities_to_csv(opportunities, outfile)
 
+        csv_size = file_util.get_file_length_bytes(self.csv_file)
         return csv_size
