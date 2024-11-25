@@ -26,6 +26,8 @@ export const messages = {
       show_summary: "Show full summary",
       show_description: "Show full description",
       hide_summary_description: "Hide full description",
+      nofo_download: "Download Full Announcement (NOFO)",
+      jump_to_documents: "Jump to all documents",
     },
     documents: {
       title: "Documents",

@@ -43,6 +43,10 @@ locals {
     API_AUTH_TOKEN = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
+    },
+    NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/google-analytics-id"
     }
   }
 }

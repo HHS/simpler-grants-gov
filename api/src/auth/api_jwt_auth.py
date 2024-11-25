@@ -205,3 +205,15 @@ def decode_token(db_session: db.Session, token: str) -> UserTokenSession:
         # The message is just the value we set when constructing the JwtValidationError
         logger.info("JWT Authentication Failed for provided token", extra={"auth.issue": e.message})
         raise_flask_error(401, e.message)
+
+
+def refresh_token_expiration(
+    token_session: UserTokenSession, config: ApiJwtConfig | None = None
+) -> UserTokenSession:
+    if config is None:
+        config = get_config()
+
+    expiration_time = datetime_util.utcnow() + timedelta(minutes=config.token_expiration_minutes)
+    token_session.expires_at = expiration_time
+
+    return token_session

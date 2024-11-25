@@ -51,3 +51,13 @@ class UserTokenSchema(Schema):
 
 class UserTokenResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserTokenSchema)
+
+
+class UserTokenRefreshResponseSchema(AbstractResponseSchema):
+    # No data returned
+    data = fields.MixinField(metadata={"example": None})
+
+
+class UserTokenLogoutResponseSchema(AbstractResponseSchema):
+    # No data returned
+    data = fields.MixinField(metadata={"example": None})

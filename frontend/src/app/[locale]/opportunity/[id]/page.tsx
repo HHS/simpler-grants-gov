@@ -114,6 +114,13 @@ export default async function OpportunityListing({
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
+  const nofoPath =
+    opportunityData.attachments.filter(
+      (document) =>
+        document.opportunity_attachment_type ===
+        "notice_of_funding_opportunity",
+    )[0]?.download_path || "";
+
   return (
     <div>
       <BetaAlert />
@@ -122,7 +129,10 @@ export default async function OpportunityListing({
       <GridContainer>
         <div className="grid-row grid-gap">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
-            <OpportunityDescription summary={opportunityData.summary} />
+            <OpportunityDescription
+              summary={opportunityData.summary}
+              nofoPath={nofoPath}
+            />
             <OpportunityDocuments documents={opportunityData.attachments} />
             <OpportunityLink opportunityData={opportunityData} />
           </div>

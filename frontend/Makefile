@@ -22,8 +22,6 @@ endif
 export RUN_USER
 export RUN_UID
 
-ENVIRONMENT ?= dev
-
 ##################################################
 # Release
 ##################################################
@@ -33,7 +31,6 @@ release-build:
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
 		--build-arg RUN_UID=$(RUN_UID) \
-		--build-arg NEXT_PUBLIC_ENVIRONMENT=${ENVIRONMENT} \
 		$(OPTS) \
 		.
 
@@ -72,7 +69,7 @@ load-test-dev: # Load test the dev environment in aws
 	artillery run -e dev artillery-load-test.yml
 
 load-test-staging: # Load test the staging environment in aws
-	artillery run -e staging artillery-load-test.yml
+	artillery run -e stage artillery-load-test.yml
 
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
