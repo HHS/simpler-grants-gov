@@ -134,7 +134,7 @@ class CustomProvider(BaseProvider):
         "{{agency_code}} is looking to further investigate this topic. {{paragraph}}",
         "<p>{{paragraph}}</p><p><br></p><p>{{paragraph}}</p>",
         "The purpose of this Notice of Funding Opportunity (NOFO) is to support research into {{job}} and how we might {{catch_phrase}}.",
-        "<div>{{paragraph:long}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph:long}}</div> <div>{{paragraph:long}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph:long}}</div>"
+        "<div>{{paragraph:long}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph:long}}</div> <div>{{paragraph:long}} <a href='{{relevant_url}}'>{{sentence}}</a> {{paragraph:long}}</div>",
     ]
 
     # In the formatting, ? becomes a random letter, # becomes a random digit
@@ -157,7 +157,6 @@ class CustomProvider(BaseProvider):
         "s3://local-opportunities/test_file_4.pdf",
         "s3://local-opportunities/test_file_5.pdf",
     ]
-
 
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
@@ -191,7 +190,7 @@ class CustomProvider(BaseProvider):
         return self.generator.parse(pattern)
 
     def summary_description(self) -> str:
-        self.generator.set_arguments("long", { "nb_sentences": 25 })
+        self.generator.set_arguments("long", {"nb_sentences": 25})
         pattern = self.random_element(self.SUMMARY_DESCRIPTION_FORMATS)
         return self.generator.parse(pattern)
 
@@ -585,6 +584,7 @@ class OpportunitySummaryFactory(BaseFactory):
             close_date_description=factory.Faker("paragraph", nb_sentences=30),
         )
 
+
 class CurrentOpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.CurrentOpportunitySummary
@@ -624,6 +624,7 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
         has_long_descriptions = factory.Trait(
             opportunity_summary__has_long_descriptions=True,
         )
+
 
 class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
