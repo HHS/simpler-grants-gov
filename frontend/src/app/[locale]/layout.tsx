@@ -4,7 +4,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
  */
 import { Metadata } from "next";
-import { environment, PUBLIC_ENV } from "src/constants/environments";
+import { environment } from "src/constants/environments";
 
 import "src/styles/styles.scss";
 
@@ -43,7 +43,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <GoogleAnalytics gaId={PUBLIC_ENV.GOOGLE_ANALYTICS_ID} />
+        <GoogleAnalytics gaId={environment.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
