@@ -28,7 +28,7 @@ module "staging_config" {
   # Temporarily scale staging to the same numbers as prod for the load test
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
-  instance_scaling_max_capacity   = 10
+  instance_scaling_max_capacity   = 40
   database_min_capacity           = 20
   database_max_capacity           = 128
   database_instance_count         = 2
