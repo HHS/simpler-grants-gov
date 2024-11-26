@@ -13,8 +13,8 @@ FROM python:3.13-slim AS base
 RUN pip install --no-cache-dir poetry==1.5
 
 RUN apt-get update \
-    # Uninstall existing packages before installing their never versions
-    && apt-get uninstall --yes \
+    # Remove existing packages before installing their never versions
+    && apt-get remove --yes \
         build-essential \
         libpq-dev \
         postgresql \
