@@ -34,7 +34,7 @@ test("can view banner and return to top after scrolling to the bottom", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: /Attention! Go to www.grants.gov to search and apply for grants./i,
+      name: /This site is a work in progress, with new features and updates based on your feedback./i,
     }),
   ).toBeVisible();
 
