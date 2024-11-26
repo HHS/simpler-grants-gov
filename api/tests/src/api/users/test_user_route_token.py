@@ -5,11 +5,10 @@ from freezegun import freeze_time
 from src.auth.api_jwt_auth import create_jwt_for_user
 from tests.src.db.models.factories import UserFactory
 
+
 ##################
 # POST /token
 ##################
-
-
 def test_post_user_route_token_200(client, api_auth_token):
     resp = client.post(
         "/v1/users/token", headers={"X-Auth": api_auth_token, "X-OAuth-login-gov": "test"}

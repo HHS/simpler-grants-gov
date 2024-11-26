@@ -76,3 +76,17 @@ def pre_sign_file_location(file_path: str) -> str:
         )
 
     return pre_sign_file_loc
+
+
+def get_file_length_bytes(path: str) -> int:
+    if is_s3_path(path):
+        s3_client = (
+            get_s3_client()
+        )  # from our aws utils - handles some of the weird localstack stuff
+
+        bucket, key = split_s3_url(path)
+        file_metadata = s3_client.head_object(Bucket=bucket, Key=key)
+        return file_metadata["ContentLength"]
+
+    file_stats = os.stat(path)
+    return file_stats.st_size
