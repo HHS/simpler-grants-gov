@@ -7,3 +7,9 @@
 #  Issue:         Why there is a finding and why this is here or not been removed
 #  Last checked:  Date last checked in scans
 #The-CVE-or-vuln-id # Remove comment at start of line
+
+# https://github.com/HHS/simpler-grants-gov/issues/3015
+CVE-2024-10979
+CVE-2024-10978
+CVE-2024-10976
+CVE-2024-10977
