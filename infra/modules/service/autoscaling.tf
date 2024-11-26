@@ -24,7 +24,7 @@ resource "aws_appautoscaling_policy" "ecs_scale_policy_memory" {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
     scale_in_cooldown  = 300
-    scale_out_cooldown = 5
+    scale_out_cooldown = 30
     target_value       = 50
   }
 }
@@ -41,7 +41,7 @@ resource "aws_appautoscaling_policy" "ecs_scale_policy_cpu" {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
     scale_in_cooldown  = 300
-    scale_out_cooldown = 5
+    scale_out_cooldown = 30
     target_value       = 50
   }
 }
