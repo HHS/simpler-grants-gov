@@ -27,6 +27,9 @@ pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 
+[tool.poetry.group.tornado.dependencies]
+tornado = "==6.4.2"
+
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
 mypy = "^1.4.1"
