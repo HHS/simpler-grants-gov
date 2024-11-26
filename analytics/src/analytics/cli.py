@@ -1,3 +1,4 @@
+# ruff: noqa: T201
 # pylint: disable=C0415
 """Expose a series of CLI entrypoints for the analytics package."""
 
