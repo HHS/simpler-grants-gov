@@ -3,10 +3,10 @@ locals {
   # This is a map rather than a list so that variables can be easily
   # overridden per environment using terraform's `merge` function
   default_extra_environment_variables = {
-    # Example environment variables
-    # WORKER_THREADS_COUNT    = 4
-    # LOG_LEVEL               = "info"
-    # DB_CONNECTION_POOL_SIZE = 5
+    # see https://docs.newrelic.com/docs/apm/agents/nodejs-agent/installation-configuration/nodejs-agent-configuration/#agent-enabled
+    NEW_RELIC_ENABLED = "true"
+    # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
+    NODE_OPTIONS = "-r newrelic"
   }
 
   # Configuration for secrets
@@ -47,6 +47,14 @@ locals {
     NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/google-analytics-id"
+    },
+    NEW_RELIC_APP_NAME = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/new-relic-app-name"
+    },
+    NEW_RELIC_LICENSE_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/new-relic-license-key"
     }
   }
 }

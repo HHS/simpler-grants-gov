@@ -20,4 +20,8 @@ module "staging_config" {
   instance_desired_instance_count = 4
   instance_scaling_min_capacity   = 4
   instance_scaling_max_capacity   = 20
+
+  service_override_extra_environment_variables = {
+    NEW_RELIC_ENABLED = "false"
+  }
 }
