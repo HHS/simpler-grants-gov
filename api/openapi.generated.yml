@@ -315,6 +315,38 @@ paths:
                     sort_direction: descending
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get
+      security:
+      - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}:
     get:
       parameters:
@@ -1490,6 +1522,22 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityFacetV1'
+    UserGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/User'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     OpportunityAttachmentV1:
       type: object
       properties:
