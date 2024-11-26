@@ -1,8 +1,8 @@
 # ruff: noqa: T201
 """Integrate with Slack to post messages and get channel information."""
 
-import logging
 import functools
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -12,6 +12,7 @@ from slack_sdk.errors import SlackApiError
 from slack_sdk.web.slack_response import SlackResponse
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class FileMapping:
