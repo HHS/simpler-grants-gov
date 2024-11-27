@@ -1,5 +1,17 @@
-from src.db.models.agency_models import Agency
+import pytest
+
+from src.db.models.agency_models import Agency, LinkAgencyDownloadFileType
 from tests.src.db.models.factories import AgencyFactory
+
+
+@pytest.fixture(autouse=True)
+def cleanup_agencies(db_session):
+    yield
+    # Delete related records first
+    db_session.query(LinkAgencyDownloadFileType).delete()
+    # Then delete agencies
+    db_session.query(Agency).delete()
+    db_session.commit()
 
 
 def test_agencies_get_default_dates(client, api_auth_token, enable_factory_create, db_session):
