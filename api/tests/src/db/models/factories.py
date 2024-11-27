@@ -733,8 +733,6 @@ class AgencyFactory(BaseFactory):
     agency_id = factory.Sequence(lambda n: n)
     agency_name = factory.Faker("agency_name")
 
-    # agency_code = factory.Faker("agency_code")
-
     # Make agency_code unique by including the sequence number
     agency_code = factory.Sequence(lambda n: f"AG-{n:04d}")
 
