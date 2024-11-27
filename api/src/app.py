@@ -14,6 +14,7 @@ import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
+from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
 from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
@@ -134,6 +135,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
+    app.register_blueprint(agencies_v1_blueprint)
 
     auth_endpoint_config = AuthEndpointConfig()
     if auth_endpoint_config.auth_endpoint:
