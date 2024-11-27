@@ -20,10 +20,6 @@ class AgencyFilters(BaseModel):
 
 
 class AgencyListParams(BaseModel):
-    agency_name: str | None = None
-
-
-class AgencyListParams(BaseModel):
     pagination: PaginationParams
 
     filters: AgencyFilters | None = Field(default_factory=AgencyFilters)
