@@ -12,7 +12,7 @@ defaults:
 jobs:
   run-project-linters:
     name: Run set points and sprint values on close
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Prevents duplicate runs of this linter for the same issue
     concurrency:
       group: issue-${{ github.event.issue.number }}
