@@ -23,7 +23,7 @@ on:
 jobs:
   build-repository:
     name: Build Repository
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       id-token: write
@@ -47,7 +47,7 @@ jobs:
 
   deploy-infra:
     name: Deploy Infrastructure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
