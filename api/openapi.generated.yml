@@ -23,6 +23,7 @@ tags:
 - name: Health
 - name: Opportunity v1
 - name: Extract v1
+- name: Agency v1
 - name: User v1
 servers: .
 paths:
@@ -75,6 +76,47 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ExtractMetadataRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: created_at
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+      security:
+      - ApiKeyAuth: []
+  /v1/agencies:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Agency v1
+      summary: Agencies Get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyListRequest'
             examples:
               example1:
                 summary: No filters
@@ -670,6 +712,169 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    AgencyFilterV1:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+    AgencyPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+        page_size:
+          type: integer
+          minimum: 1
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
+    AgencyListRequest:
+      type: object
+      properties:
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyFilterV1'
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyPaginationV1'
+      required:
+      - pagination
+    AgencyContactInfo:
+      type: object
+      properties:
+        contact_name:
+          type: string
+        address_line_1:
+          type: string
+        address_line_2:
+          type:
+          - string
+          - 'null'
+        city:
+          type: string
+        state:
+          type: string
+        zip_code:
+          type: string
+        phone_number:
+          type: string
+        primary_email:
+          type: string
+        secondary_email:
+          type:
+          - string
+          - 'null'
+    AgencyResponse:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+        agency_name:
+          type: string
+        agency_code:
+          type: string
+        sub_agency_code:
+          type:
+          - string
+          - 'null'
+        assistance_listing_number:
+          type: string
+        agency_submission_notification_setting:
+          type: string
+        agency_contact_info:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/AgencyContactInfo'
+          - type: 'null'
+        is_test_agency:
+          type: boolean
+        is_multilevel_agency:
+          type: boolean
+        is_multiproject:
+          type: boolean
+        has_system_to_system_certificate:
+          type: boolean
+        can_view_packages_in_grace_period:
+          type: boolean
+        is_image_workspace_enabled:
+          type: boolean
+        is_validation_workspace_enabled:
+          type: boolean
+        ldap_group:
+          type:
+          - string
+          - 'null'
+        description:
+          type:
+          - string
+          - 'null'
+        label:
+          type:
+          - string
+          - 'null'
+        top_level_agency_id:
+          type:
+          - integer
+          - 'null'
+        agency_download_file_types:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AgencyListResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id001
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: A list of agency records
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/AgencyResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     User:
       type: object
       properties:
@@ -836,7 +1041,7 @@ components:
             - archived
             type:
             - string
-    AgencyFilterV1:
+    AgencyFilterV11:
       type: object
       properties:
         one_of:
@@ -979,7 +1184,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/AgencyFilterV1'
+          - $ref: '#/components/schemas/AgencyFilterV11'
         assistance_listing_number:
           type:
           - object
