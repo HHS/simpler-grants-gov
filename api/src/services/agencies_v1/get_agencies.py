@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
