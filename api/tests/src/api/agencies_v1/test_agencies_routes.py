@@ -1,3 +1,4 @@
+from src.db.models.agency_models import Agency
 from tests.src.db.models.factories import AgencyFactory
 
 
@@ -19,3 +20,7 @@ def test_agencies_get_default_dates(client, api_auth_token, enable_factory_creat
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 10
+
+    # Clean up for subsequent tests?
+    db_session.query(Agency).delete()
+    db_session.commit()
