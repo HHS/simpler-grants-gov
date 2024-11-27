@@ -30,7 +30,7 @@ def convert_value_for_insert(value) -> str:
     if isinstance(value, int):
         return str(value)
     if isinstance(value, str):
-        return f"'{value}'"  # noqa: B907
+        return f"'{value.replace("'", "''")}'"  # noqa: B907
     if isinstance(value, date):
         return f"'{value.isoformat()}'"  # noqa: B907
 

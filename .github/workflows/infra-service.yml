@@ -11,7 +11,7 @@ on:
 jobs:
   infra-test-e2e:
     name: Test service
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read

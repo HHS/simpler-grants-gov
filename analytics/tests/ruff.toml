@@ -6,4 +6,5 @@ ignore = [
   "ANN201", # missing return type
   "PLR2004", # magic value used in comparison instead of constant
   "S101", # Use of `assert` detected
+  "T201",    # use of `print` detected
 ]

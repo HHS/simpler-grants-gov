@@ -2,6 +2,7 @@
 
 const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
 const sassOptions = require("./scripts/sassOptions");
+const nrExternals = require("@newrelic/next/load-externals");
 
 /**
  * Configure the base path for the app. Useful if you're deploying to a subdirectory (like GitHub Pages).
@@ -21,6 +22,13 @@ const nextConfig = {
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
   sassOptions: appSassOptions,
+  experimental: {
+    serverComponentsExternalPackages: ["newrelic"],
+  },
+  webpack: (config) => {
+    nrExternals(config);
+    return config;
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

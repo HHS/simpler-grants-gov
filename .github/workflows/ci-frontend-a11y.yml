@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Pa11y-ci tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./frontend
@@ -52,7 +52,7 @@ jobs:
           npm run build
 
       - name: Run Server
-        run:  npm run start &
+        run: npm run start &
 
       - name: Wait for frontend to be ready
         run: |

@@ -1858,7 +1858,7 @@ class LinkExternalUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
 
-    external_user_type_id = factory.fuzzy.FuzzyChoice(ExternalUserType)
+    external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
 
