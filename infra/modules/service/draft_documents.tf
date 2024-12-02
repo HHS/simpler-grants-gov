@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "draft_documents" {
 
 resource "aws_s3_bucket_public_access_block" "draft_documents" {
   count  = startswith(var.service_name, "api-") ? 1 : 0
-  bucket = aws_s3_bucket.draft_documents.id
+  bucket = one(aws_s3_bucket.draft_documents[*].id)
 
   block_public_acls       = true
   block_public_policy     = true
@@ -23,8 +23,8 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
   statement {
     effect = "Allow"
     resources = [
-      aws_s3_bucket.draft_documents.arn,
-      "${aws_s3_bucket.draft_documents.arn}/*"
+      one(aws_s3_bucket.draft_documents[*].arn),
+      "${one(aws_s3_bucket.draft_documents[*].arn)}/*"
     ]
     actions = ["s3:*"]
 
@@ -38,8 +38,8 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
     resources = [
-      aws_s3_bucket.draft_documents.arn,
-      "${aws_s3_bucket.draft_documents.arn}/*"
+      one(aws_s3_bucket.draft_documents[*].arn),
+      "${one(aws_s3_bucket.draft_documents[*].arn)}/*"
     ]
     actions = ["s3:*"]
     condition {
@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
   count  = startswith(var.service_name, "api-") ? 1 : 0
-  bucket = aws_s3_bucket.draft_documents.id
+  bucket = one(aws_s3_bucket.draft_documents[*].id)
 
   rule {
     id     = "AbortIncompleteUpload"
@@ -73,7 +73,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_encryption" {
   count = startswith(var.service_name, "api-") ? 1 : 0
 
-  bucket = aws_s3_bucket.draft_documents.id
+  bucket = one(aws_s3_bucket.draft_documents[*].id)
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "aws:kms"
@@ -84,6 +84,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_e
 
 resource "aws_s3_bucket_policy" "draft_documents" {
   count  = startswith(var.service_name, "api-") ? 1 : 0
-  bucket = aws_s3_bucket.draft_documents.id
+  bucket = one(aws_s3_bucket.draft_documents[*].id)
   policy = data.aws_iam_policy_document.draft_documents_put_access.json
 }

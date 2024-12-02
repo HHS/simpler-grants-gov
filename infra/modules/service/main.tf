@@ -47,6 +47,7 @@ locals {
   environment_variables = concat(
     local.base_environment_variables,
     local.db_environment_variables,
+    [{ name : "DRAFTS_S3_BUCKET_ARN", value : one(aws_s3_bucket.draft_documents[*].arn) }],
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
