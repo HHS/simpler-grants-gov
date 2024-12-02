@@ -48,6 +48,11 @@ class UserTokenSchema(Schema):
         },
     )
 
+class UserLoginGovCallbackSchema(Schema):
+    code = fields.String()
+    state = fields.String()
+    error = fields.String()
+    error_description = fields.String()
 
 class UserTokenResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserTokenSchema)

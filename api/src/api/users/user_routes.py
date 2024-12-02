@@ -1,5 +1,6 @@
 import logging
 from uuid import UUID
+import flask
 
 from src.adapters import db
 from src.adapters.db import flask_db
@@ -14,11 +15,59 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
+from src.auth.login_gov_jwt_auth import get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
 from src.services.users.get_user import get_user
 
 logger = logging.getLogger(__name__)
 
+@user_blueprint.get("/login")
+@user_blueprint.doc(responses=[302], description="OpenAPI does not handle redirects well, please use [this link](/v1/users/login) for the endpoint")
+def user_login() -> flask.Response:
+    logger.info("GET /v1/users/login")
+
+    return flask.redirect(get_login_gov_redirect_uri())
+
+@user_blueprint.get("/login/callback")
+@user_blueprint.input(user_schemas.UserLoginGovCallbackSchema, location="query")
+@user_blueprint.doc(responses=[302], description="Work-in-progress, but you shouldn't be connecting directly to this, use the login endpoint instead")
+def user_login_callback(query_data: dict) -> flask.Response:
+    logger.info("GET /v1/users/login/callback")
+
+    # TODO: Do not launch with this, just keeping this here for debugging
+    # as we get it built out.
+    # logger.info(query_data)
+
+    # You can test what we do in this endpoint manually by:
+    #
+    # - Go to: http://localhost:8080/v1/users/login
+    # - Enter a username in the box
+    # - This should end with you on the final redirect (google right now)
+    #
+    # You can see the log messages above and grab the code.
+    #
+    # You can use this code to query the final endpoint by doing:
+    # curl -X 'POST' 'http://localhost:5001/issuer1/token' -d 'grant_type=authorization_code&client_id=local_mock_client_id&code=<insert code>'
+    #
+    # The JWT we will process is the id_token returned
+
+    #########################################
+    # TODO - implementation remaining
+    # Process the data coming back from login.gov after the redirect
+    ## Fetch the state UUID from the DB - validate we have it
+
+    # Call the token endpoint with the code
+    ## Need to also account for making a JWT to call login.gov (not needed locally)
+    ## Probably want to make a "client" for easier mocking
+
+    # Process the token response from login.gov + create a token (Existing draft PR for all of this)
+
+    # Redirect with params somewhere
+
+    # Docs - see if there is a way to either describe the "return" values or consider just hiding this route and document it manually.
+
+    # TODO - just for the sake of showing the redirect chain, do a final redirect here.
+    return flask.redirect("https://google.com")
 
 @user_blueprint.post("/token")
 @user_blueprint.input(

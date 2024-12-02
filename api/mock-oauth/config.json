@@ -1,20 +1,19 @@
-{
-    "interactiveLogin": true,
-    "httpServer": "NettyWrapper",
-    "tokenCallbacks": [
         {
-            "issuerId": "issuer1",
-            "tokenExpiry": 120,
-            "requestMappings": [
+            "interactiveLogin": true,
+            "httpServer": "NettyWrapper",
+            "tokenCallbacks": [
                 {
-                    "requestParam": "code",
-                    "match": "*",
-                    "claims": {
-                        "sub": "184c4c61-4a5d-4b5a-b3b9-bb9cfd7fe2ae",
-                        "email": "johns.smith@grant.gov"
-                    }
+                    "issuerId": "issuer1",
+                    "tokenExpiry": 120,
+                    "requestMappings": [
+                        {
+                            "requestParam": "code",
+                            "match": "*",
+                            "claims": {
+                                "email": "fake_mail@mail.com"
+                            }
+                        }
+                    ]
                 }
             ]
         }
-    ]
-}
