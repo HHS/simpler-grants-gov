@@ -18,6 +18,7 @@ from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
+from tests.lib.seed_agencies import _build_agencies
 
 logger = logging.getLogger(__name__)
 
@@ -154,44 +155,6 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
     logger.info("Finished creating records in the transfer_topportunity table")
 
 
-# Agencies we want to create locally - if we want to create significantly more
-# we can consider shoving this into a CSV that we load instead.
-AGENCIES_TO_CREATE = [
-    {
-        "agency_id": 1,
-        "agency_code": "USAID",
-        "agency_name": "Agency for International Development",
-    },
-    {
-        "agency_id": 2,
-        "agency_code": "ARPAH",
-        "agency_name": "Advanced Research Projects Agency for Health",
-    },
-    {
-        "agency_id": 3,
-        "agency_code": "DOC",
-        "agency_name": "Agency for International Development",
-    },
-    {
-        "agency_id": 4,
-        "agency_code": "DOC-EDA",
-        "agency_name": "Economic Development Administration",
-        "top_level_agency_id": 3,  # DOC
-    },
-]
-
-
-def _build_agencies(db_session: db.Session) -> None:
-    # Create a static set of agencies, only if they don't already exist
-    agencies = db_session.query(Agency).all()
-    agency_codes = set([a.agency_code for a in agencies])
-
-    for agency_to_create in AGENCIES_TO_CREATE:
-        if agency_to_create["agency_code"] in agency_codes:
-            continue
-
-        logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
-        factories.AgencyFactory.create(**agency_to_create)
 
 
 @click.command()
