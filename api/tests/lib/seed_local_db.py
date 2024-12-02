@@ -155,8 +155,6 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
     logger.info("Finished creating records in the transfer_topportunity table")
 
 
-
-
 @click.command()
 @click.option(
     "--iterations",

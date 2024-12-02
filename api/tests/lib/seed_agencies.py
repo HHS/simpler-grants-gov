@@ -1,6 +1,9 @@
 # Called by seed_local_db when running `make seed-db-local`
-from src.db.models.agency_models import Agency
 import logging
+
+import src.adapters.db as db
+import tests.src.db.models.factories as factories
+from src.db.models.agency_models import Agency
 
 logger = logging.getLogger(__name__)
 
