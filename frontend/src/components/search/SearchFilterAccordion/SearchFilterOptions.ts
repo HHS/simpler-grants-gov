@@ -53,13 +53,14 @@ export const eligibilityOptions: FilterOption[] = [
   },
   {
     id: "eligibility-nonprofits_non_higher_education_with_501c3",
-    label: "Nonprofits Non Higher Education with 501c3",
+    label:
+      "Nonprofits without 501(c)(3), other than institutions of higher education",
     value: "nonprofits_non_higher_education_with_501c3",
   },
   {
     id: "eligibility-nonprofits_non_higher_education_without_501c3",
     label:
-      "Nonprofits having a 501(c)(3) status with the IRS, other than institutions of higher education",
+      "Nonprofits with 501(c)(3), other than institutions of higher education",
     value: "nonprofits_non_higher_education_without_501c3",
   },
   {
