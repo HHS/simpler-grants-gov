@@ -123,6 +123,8 @@ module "service" {
   public_subnet_ids      = data.aws_subnets.public.ids
   private_subnet_ids     = data.aws_subnets.private.ids
   cert_arn               = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  domain                 = local.domain
+  environment_name       = var.environment_name
   hostname               = module.app_config.hostname
   desired_instance_count = local.service_config.instance_desired_instance_count
   max_capacity           = local.service_config.instance_scaling_max_capacity
@@ -130,6 +132,10 @@ module "service" {
   enable_autoscaling     = true
   cpu                    = local.service_config.instance_cpu
   memory                 = local.service_config.instance_memory
+
+  # Enable the CDN for production and staging environments, disable it for dev.
+  # This allows us to test the impact of the CDN by diffing staging and dev.
+  enable_cdn = contains(["production", "staging"], var.environment_name) ? true : false
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null

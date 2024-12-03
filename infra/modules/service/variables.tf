@@ -162,6 +162,12 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
+variable "domain" {
+  description = "The domain name for the service"
+  type        = string
+  default     = null
+}
+
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
@@ -172,6 +178,17 @@ variable "enable_load_balancer" {
   description = "Whether to enable a load balancer for the service"
   type        = bool
   default     = true
+}
+
+variable "enable_cdn" {
+  description = "Whether to enable a CDN for the service"
+  type        = bool
+  default     = false
+}
+
+variable "environment_name" {
+  description = "The name of the environment"
+  type        = string
 }
 
 variable "healthcheck_command" {
