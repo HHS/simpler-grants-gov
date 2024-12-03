@@ -17,6 +17,8 @@ resource "aws_s3_bucket" "cdn" {
 }
 
 resource "aws_cloudfront_cache_policy" "default" {
+  count = var.enable_cdn ? 1 : 0
+
   name = "default"
 
   # These are the default values
