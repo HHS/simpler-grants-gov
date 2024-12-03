@@ -83,10 +83,11 @@ resource "aws_cloudfront_cache_policy" "default" {
 
   name = "default"
 
-  # These are the default values
-  min_ttl     = 0
+  # Default to caching for 1 hour, with a minimum of 1 minute.
+  # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
+  # There's also a `max_ttl` option, which can be used to override the above headers.
+  min_ttl     = 60
   default_ttl = 3600
-  max_ttl     = 86400
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
