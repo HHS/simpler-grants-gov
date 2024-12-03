@@ -55,7 +55,6 @@ class AgencyResponseSchema(Schema):
     agency_contact_info = fields.Nested(AgencyContactInfoSchema, allow_none=True)
 
     # Boolean flags
-    is_test_agency = fields.Boolean()
     is_multilevel_agency = fields.Boolean()
     is_multiproject = fields.Boolean()
     has_system_to_system_certificate = fields.Boolean()
