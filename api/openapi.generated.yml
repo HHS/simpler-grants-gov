@@ -767,26 +767,35 @@ components:
       properties:
         contact_name:
           type: string
+          description: Full name of the agency contact person
         address_line_1:
           type: string
+          description: Primary street address of the agency
         address_line_2:
           type:
           - string
           - 'null'
+          description: Additional address information (suite, unit, etc.)
         city:
           type: string
+          description: City where the agency is located
         state:
           type: string
+          description: State where the agency is located
         zip_code:
           type: string
+          description: Postal code for the agency address
         phone_number:
           type: string
+          description: Contact phone number for the agency
         primary_email:
           type: string
+          description: Main email address for agency communications
         secondary_email:
           type:
           - string
           - 'null'
+          description: Alternative email address for agency communications
     AgencyResponse:
       type: object
       properties:
@@ -811,8 +820,6 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyContactInfo'
           - type: 'null'
-        is_test_agency:
-          type: boolean
         is_multilevel_agency:
           type: boolean
         is_multiproject:
@@ -825,26 +832,15 @@ components:
           type: boolean
         is_validation_workspace_enabled:
           type: boolean
-        ldap_group:
-          type:
-          - string
-          - 'null'
-        description:
-          type:
-          - string
-          - 'null'
-        label:
-          type:
-          - string
-          - 'null'
-        top_level_agency_id:
-          type:
-          - integer
-          - 'null'
         agency_download_file_types:
           type: array
+          description: List of download file types supported by the agency
           items:
-            type: string
+            enum:
+            - xml
+            - pdf
+            type:
+            - string
         created_at:
           type: string
           format: date-time
