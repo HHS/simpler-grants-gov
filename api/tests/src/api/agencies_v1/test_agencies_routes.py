@@ -7,10 +7,8 @@ from tests.src.db.models.factories import AgencyFactory
 @pytest.fixture(autouse=True)
 def cleanup_agencies(db_session):
     yield
-    # Delete related records first
-    db_session.query(LinkAgencyDownloadFileType).delete()
-    # Then delete agencies
-    db_session.query(Agency).delete()
+    agencies = db_session.query(Agency).all()
+    db_session.delete(agencies)
     db_session.commit()
 
 
