@@ -16,6 +16,68 @@ resource "aws_s3_bucket" "cdn" {
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
 }
 
+resource "aws_s3_bucket_ownership_controls" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  bucket = aws_s3_bucket.cdn[0].id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  bucket = aws_s3_bucket.cdn[0].id
+
+  acl = "log-delivery-write"
+
+  depends_on = [aws_s3_bucket_ownership_controls.cdn[0]]
+}
+
+resource "aws_s3_bucket_public_access_block" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  bucket = aws_s3_bucket.cdn[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+data "aws_iam_policy_document" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  statement {
+    actions = [
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.cdn[0].arn}/*",
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.cdn[0].iam_arn]
+    }
+  }
+}
+
+resource "aws_cloudfront_origin_access_identity" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  comment = "Origin Access Identity for CloudFront to access S3 bucket"
+}
+
+resource "aws_s3_bucket_policy" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  bucket = aws_s3_bucket.cdn[0].id
+  policy = data.aws_iam_policy_document.cdn[0].json
+}
+
 resource "aws_cloudfront_cache_policy" "default" {
   count = var.enable_cdn ? 1 : 0
 
@@ -93,4 +155,10 @@ resource "aws_cloudfront_distribution" "cdn" {
     acm_certificate_arn            = var.cert_arn == null ? null : var.cert_arn
     cloudfront_default_certificate = var.cert_arn == null ? true : false
   }
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.cdn[0],
+    aws_s3_bucket_policy.cdn[0],
+    aws_s3_bucket.cdn[0],
+  ]
 }
