@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD", "OPTIONS"]
     target_origin_id       = local.default_origin_id
-    cache_policy_id        = aws_cloudfront_cache_policy.default.id
+    cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
     viewer_protocol_policy = "allow-all"
 
