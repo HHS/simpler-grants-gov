@@ -1,7 +1,13 @@
-import { getRequestConfig } from "next-intl/server";
+import {
+  defaultLocale,
+  formats,
+  Locale,
+  locales,
+  timeZone,
+} from "src/i18n/config";
+import { getMessagesWithFallbacks } from "src/i18n/getMessagesWithFallbacks";
 
-import { formats, timeZone } from "./config";
-import { getMessagesWithFallbacks } from "./getMessagesWithFallbacks";
+import { getRequestConfig } from "next-intl/server";
 
 /**
  * Make locale messages available to all server components.
@@ -10,10 +16,20 @@ import { getMessagesWithFallbacks } from "./getMessagesWithFallbacks";
  */
 
 // @ts-expect-error TS2345: Argument of type error is expected behavior by next-intl maintainer: https://github.com/amannn/next-intl/issues/991#issuecomment-2050087509
-export default getRequestConfig(async ({ locale }) => {
+export default getRequestConfig(async ({ requestLocale }) => {
+  let locale = (await requestLocale) || defaultLocale;
+  console.log("!!! locale", locale);
+  const isValidLocale = locales.includes(locale as Locale); // https://github.com/microsoft/TypeScript/issues/26255
+  if (!isValidLocale) {
+    console.error(
+      "Unsupported locale was requested. Falling back to the default locale.",
+      { locale, defaultLocale },
+    );
+    locale = defaultLocale;
+  }
   return {
     formats,
-    messages: await getMessagesWithFallbacks(locale),
+    messages: await getMessagesWithFallbacks(locale as Locale),
     timeZone,
   };
 });
