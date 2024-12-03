@@ -138,7 +138,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = var.cert_arn == null ? "http-only" : "redirect-to-https"
+    viewer_protocol_policy = var.cert_arn == null ? "allow-all" : "redirect-to-https"
 
     # Default to caching for 1 hour, with a minimum of 1 minute.
     # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
