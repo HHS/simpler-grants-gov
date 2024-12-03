@@ -177,20 +177,29 @@ Additional guidance on working with the CLI tool can be found in the [usage guid
 
 ### Copying table from grants-db
 
-1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` prefix file name with the next iteration number (ex: `0007`).
+1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` and prefix file name with the next iteration number (ex: `0007`).
 2. Use your database management system(ex: `pg_admin`, `db_beaver`...) and right-click on the table you wish to copy and select `SQL scripts` then `request and copy original DDL` 
 3. Paste the DDL in your new migration file. Fix any formating issues, see previous migration files for reference.
+4. Remove all reference to schema, roles, triggers and the use of `default now()` for timestamp columns.
 
-   Remove any reference to schema.
+    Example: 
+    ``` sql 
+    create table if not exists opi.opportunity
+    ( 
+     ...,
+     created_at              timestamp with time zone default now() not null,
+     ...
+    )
+    ```
+    should be
+    ``` sql 
+    CREATE TABLE IF NOT EXISTS opportunity;
+    ( 
+     ...,
+     created_at              timestamp with time zone not null
+     ...
+    )
+      ```
 
-      Example: 
-      ``` sql 
-      create table if not exists opi.opportunity;
-      ```
-      should be 
-      ``` sql 
-      CREATE TABLE IF NOT EXISTS opportunity;
-      ```
-      Remove any statements altering roles and triggers and `default now()` from timestamp columns.
-4. Run migration via `make db-migrate` command
+5. Run migration via `make db-migrate` command
 
