@@ -2,13 +2,19 @@ CREATE TABLE IF NOT EXISTS lk_opportunity_status
 (
     opportunity_status_id SERIAL
         PRIMARY KEY,
-    description           TEXT                                   NOT NULL,
-    created_at            TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    updated_at            TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+    description           TEXT                       NOT NULL,
+    created_at            TIMESTAMP WITH TIME ZONE   NOT NULL,
+    updated_at            TIMESTAMP WITH TIME ZONE   NOT NULL
 );
 
-ALTER TABLE lk_opportunity_status
-    OWNER TO app;
+CREATE TABLE IF NOT EXISTS lk_opportunity_category
+(
+    opportunity_category_id SERIAL
+        PRIMARY KEY,
+    description             TEXT                                   NOT NULL,
+    created_at              TIMESTAMP WITH TIME ZONE               NOT NULL,
+    updated_at              TIMESTAMP WITH TIME ZONE               NOT NULL
+);
 
 
 CREATE TABLE IF NOT EXISTS opportunity
@@ -18,21 +24,24 @@ CREATE TABLE IF NOT EXISTS opportunity
     opportunity_number      TEXT,
     opportunity_title       TEXT,
     agency_code             TEXT,
+    opportunity_category_id INTEGER
+        CONSTRAINT opportunity_opportunity_category_id_lk_opportunity_cate_c6e9
+            REFERENCES lk_opportunity_category,
     category_explanation    TEXT,
-    is_draft                BOOLEAN,
+    is_draft                BOOLEAN                                NOT NULL,
     revision_number         INTEGER,
     modified_comments       TEXT,
     publisher_user_id       TEXT,
     publisher_profile_id    BIGINT,
-    created_at              TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at              TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at              TIMESTAMP WITH TIME ZONE               NOT NULL,
+    updated_at              TIMESTAMP WITH TIME ZONE               NOT NULL
 );
-
-ALTER TABLE opportunity
-    OWNER TO app;
 
 CREATE INDEX IF NOT EXISTS opportunity_is_draft_idx
     ON opportunity (is_draft);
+
+CREATE INDEX IF NOT EXISTS opportunity_opportunity_category_id_idx
+    ON opportunity (opportunity_category_id);
 
 CREATE INDEX IF NOT EXISTS opportunity_opportunity_title_idx
     ON opportunity (opportunity_title);
@@ -84,19 +93,15 @@ CREATE TABLE IF NOT EXISTS opportunity_summary
     publisher_user_id                 TEXT,
     updated_by                        TEXT,
     created_by                        TEXT,
-    created_at                        TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    updated_at                        TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    created_at                        TIMESTAMP WITH TIME ZONE   NOT NULL,
+    updated_at                        TIMESTAMP WITH TIME ZONE   NOT NULL,
     version_number                    INTEGER,
     CONSTRAINT opportunity_summary_is_forecast_uniq
         UNIQUE (is_forecast, revision_number, opportunity_id)
 );
 
-ALTER TABLE opportunity_summary
-    OWNER TO app;
-
 CREATE INDEX IF NOT EXISTS opportunity_summary_opportunity_id_idx
     ON opportunity_summary (opportunity_id);
-
 
 CREATE TABLE IF NOT EXISTS  current_opportunity_summary
 (
@@ -109,13 +114,10 @@ CREATE TABLE IF NOT EXISTS  current_opportunity_summary
     opportunity_status_id  INTEGER                                NOT NULL
         CONSTRAINT current_opportunity_summary_opportunity_status_id_lk_op_3147
             REFERENCES  lk_opportunity_status,
-    created_at             TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    updated_at             TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    created_at             TIMESTAMP WITH TIME ZONE   NOT NULL,
+    updated_at             TIMESTAMP WITH TIME ZONE   NOT NULL,
     PRIMARY KEY (opportunity_id, opportunity_summary_id)
 );
-
-ALTER TABLE  current_opportunity_summary
-    OWNER TO app;
 
 CREATE INDEX IF NOT EXISTS current_opportunity_summary_opportunity_id_idx
     ON  current_opportunity_summary (opportunity_id);
