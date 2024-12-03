@@ -2,6 +2,7 @@ import dataclasses
 import logging
 import urllib
 import uuid
+
 import flask
 import jwt
 from pydantic import Field
@@ -35,6 +36,10 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
     login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
+
+    # Where we send a user after they have successfully logged in
+    # for now we'll always send them to the same place (a frontend page)
+    login_final_destination: str = Field(alias="LOGIN_FINAL_DESTINATION")
 
 
 # Initialize a config at startup
@@ -97,9 +102,8 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     # This line is possibly an issue for the reasons described above.
     config.public_keys = list(public_keys)
 
-def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
-    initialize_login_gov_config() # TODO - remove to the app
 
+def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
     if config is None:
         config = get_config()
 
@@ -112,20 +116,45 @@ def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
 
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
-    encoded_params = urllib.parse.urlencode({
-        "client_id": config.client_id,
-        "nonce": nonce,
-        "state": state,
-        "redirect_uri": redirect_uri,
-        "acr_values": config.acr_value,
-        "scope": config.scope,
-        # These are statically defined by the spec
-        "prompt": "select_account",
-        "response_type": "code",
-    })
+    encoded_params = urllib.parse.urlencode(
+        {
+            "client_id": config.client_id,
+            "nonce": nonce,
+            "state": state,
+            "redirect_uri": redirect_uri,
+            "acr_values": config.acr_value,
+            "scope": config.scope,
+            # These are statically defined by the spec
+            "prompt": "select_account",
+            "response_type": "code",
+        }
+    )
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
 
+
+def get_final_redirect_uri(
+    message: str,
+    token: str,
+    is_user_new: bool,
+    error_description: str | None = None,
+    config: LoginGovConfig | None = None,
+) -> str:
+    if config is None:
+        config = get_config()
+
+    params = {
+        "token": token,
+        "message": message,
+        "is_user_new": int(is_user_new),  # put booleans in the URL as 0/1
+    }
+
+    if error_description:
+        params["error_description"] = error_description
+
+    encoded_params = urllib.parse.urlencode(params)
+
+    return f"{config.login_final_destination}?{encoded_params}"
 
 
 def validate_token(token: str, config: LoginGovConfig) -> LoginGovUser:

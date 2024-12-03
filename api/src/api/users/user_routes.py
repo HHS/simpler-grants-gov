@@ -1,5 +1,6 @@
 import logging
 from uuid import UUID
+
 import flask
 
 from src.adapters import db
@@ -15,22 +16,33 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
-from src.auth.login_gov_jwt_auth import get_login_gov_redirect_uri
+from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
 from src.services.users.get_user import get_user
 
 logger = logging.getLogger(__name__)
 
+LOGIN_DESCRIPTION = """
+To use this endpoint, click [this link](/v1/users/login) which will redirect
+you to an OAuth provider where you can sign into an account.
+
+Do not try to use the execute option below as OpenAPI will not redirect your browser for you.
+
+The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
+"""
+
+
 @user_blueprint.get("/login")
-@user_blueprint.doc(responses=[302], description="OpenAPI does not handle redirects well, please use [this link](/v1/users/login) for the endpoint")
+@user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
 def user_login() -> flask.Response:
     logger.info("GET /v1/users/login")
 
-    return flask.redirect(get_login_gov_redirect_uri())
+    return response.redirect_response(get_login_gov_redirect_uri())
+
 
 @user_blueprint.get("/login/callback")
 @user_blueprint.input(user_schemas.UserLoginGovCallbackSchema, location="query")
-@user_blueprint.doc(responses=[302], description="Work-in-progress, but you shouldn't be connecting directly to this, use the login endpoint instead")
+@user_blueprint.doc(responses=[302], hide=True)
 def user_login_callback(query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login/callback")
 
@@ -62,12 +74,21 @@ def user_login_callback(query_data: dict) -> flask.Response:
 
     # Process the token response from login.gov + create a token (Existing draft PR for all of this)
 
-    # Redirect with params somewhere
-
     # Docs - see if there is a way to either describe the "return" values or consider just hiding this route and document it manually.
 
-    # TODO - just for the sake of showing the redirect chain, do a final redirect here.
-    return flask.redirect("https://google.com")
+    # Redirect to the final location for the user
+    return response.redirect_response(get_final_redirect_uri("success", "abc123xyz456", False))
+
+
+@user_blueprint.get("/login/result")
+@user_blueprint.doc(hide=True)
+def login_result() -> flask.Response:
+    logger.info("GET /v1/users/login/result")
+    """Dummy endpoint for easily displaying the results of the login flow without the frontend"""
+
+    # Echo back the query args as JSON for some readability
+    return flask.jsonify(flask.request.args)
+
 
 @user_blueprint.post("/token")
 @user_blueprint.input(

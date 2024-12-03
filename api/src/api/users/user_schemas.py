@@ -48,11 +48,27 @@ class UserTokenSchema(Schema):
         },
     )
 
+
 class UserLoginGovCallbackSchema(Schema):
-    code = fields.String()
-    state = fields.String()
-    error = fields.String()
-    error_description = fields.String()
+    # This is defining the inputs we receive on the callback from login.gov's
+    # authorization endpoint and must match:
+    # https://developers.login.gov/oidc/authorization/#authorization-response
+    code = fields.String(
+        metadata={
+            "description": "A unique authorization code that can be passed to the token endpoint"
+        }
+    )
+    state = fields.String(
+        metadata={"description": "The state value originally provided by us when calling login.gov"}
+    )
+    error = fields.String(
+        allow_none=True,
+        metadata={"description": "The error type, either access_denied or invalid_request"},
+    )
+    error_description = fields.String(
+        allow_none=True, metadata={"description": "A description of the error"}
+    )
+
 
 class UserTokenResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserTokenSchema)
