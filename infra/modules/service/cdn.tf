@@ -15,10 +15,10 @@ resource "aws_cloudfront_cache_policy" "default" {
 
   name = "default"
 
-  # Default to caching for 1 hour, with a minimum of 1 minute.
+  # Default to caching for 1 hour.
   # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
   # There's also a `max_ttl` option, which can be used to override the above headers.
-  min_ttl     = 60
+  min_ttl     = 0
   default_ttl = 3600
 
   parameters_in_cache_key_and_forwarded_to_origin {
@@ -77,10 +77,10 @@ resource "aws_cloudfront_distribution" "cdn" {
     compress               = true
     viewer_protocol_policy = var.cert_arn == null ? "allow-all" : "redirect-to-https"
 
-    # Default to caching for 1 hour, with a minimum of 1 minute.
+    # Default to caching for 1 hour.
     # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
     # There's also a `max_ttl` option, which can be used to override the above headers.
-    min_ttl     = 60
+    min_ttl     = 0
     default_ttl = 3600
   }
 
