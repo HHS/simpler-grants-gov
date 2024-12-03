@@ -114,8 +114,8 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_id   = local.default_origin_id
     custom_origin_config {
       http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "https-only"
+      https_port             = var.cert_arn != null ? 443 : 80
+      origin_protocol_policy = "match-viewer"
       # See possible values here:
       # https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_OriginSslProtocols.html
       origin_ssl_protocols = ["TLSv1.2"]
@@ -137,7 +137,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     target_origin_id       = local.default_origin_id
     cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
     compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
 
     # Default to caching for 1 hour, with a minimum of 1 minute.
     # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
@@ -162,4 +162,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket_policy.cdn[0],
     aws_s3_bucket.cdn[0],
   ]
+
+  #checkov:skip=CKV2_AWS_46:We aren't using a S3 origin
 }
