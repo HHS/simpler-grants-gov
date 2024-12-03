@@ -31,7 +31,8 @@ resource "aws_cloudfront_cache_policy" "default" {
       cookie_behavior = "all"
     }
     headers_config {
-      header_behavior = "all"
+      # The only options are "none" and "whitelist", there is no "all" option
+      header_behavior = "none"
     }
     query_strings_config {
       query_string_behavior = "all"
