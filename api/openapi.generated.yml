@@ -86,6 +86,33 @@ paths:
                     sort_direction: descending
       security:
       - ApiKeyAuth: []
+  /v1/users/login:
+    get:
+      parameters: []
+      responses:
+        '302':
+          content:
+            application/json:
+              schema: {}
+          description: Found
+      tags:
+      - User v1
+      summary: User Login
+      description: '
+
+        To use this endpoint, click [this link](/v1/users/login) which will redirect
+
+        you to an OAuth provider where you can sign into an account.
+
+
+        Do not try to use the execute option below as OpenAPI will not redirect your
+        browser for you.
+
+
+        The token you receive can then be set to the X-SGG-Token header for authenticating
+        with endpoints.
+
+        '
   /v1/users/token:
     post:
       parameters:
