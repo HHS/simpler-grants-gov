@@ -6,7 +6,7 @@ import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-  unstable_setRequestLocale: identity,
+  setRequestLocale: identity,
 }));
 
 jest.mock("next-intl", () => ({
@@ -16,7 +16,7 @@ jest.mock("next-intl", () => ({
 
 describe("Home", () => {
   it("renders intro text", () => {
-    render(<Home />);
+    render(Home({ params: { locale: "en" } }));
 
     const content = screen.getByText("goal.paragraph_1");
 
@@ -24,7 +24,7 @@ describe("Home", () => {
   });
 
   it("passes accessibility scan", async () => {
-    const { container } = render(<Home />);
+    const { container } = render(Home({ params: { locale: "en" } }));
     const results = await waitFor(() => axe(container));
 
     expect(results).toHaveNoViolations();
