@@ -124,7 +124,6 @@ module "service" {
   private_subnet_ids     = data.aws_subnets.private.ids
   cert_arn               = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
   domain                 = local.domain
-  environment_name       = var.environment_name
   hostname               = module.app_config.hostname
   desired_instance_count = local.service_config.instance_desired_instance_count
   max_capacity           = local.service_config.instance_scaling_max_capacity

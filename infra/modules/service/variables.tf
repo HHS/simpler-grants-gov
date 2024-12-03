@@ -186,11 +186,6 @@ variable "enable_cdn" {
   default     = false
 }
 
-variable "environment_name" {
-  description = "The name of the environment"
-  type        = string
-}
-
 variable "healthcheck_command" {
   description = "The command to run to check the health of the container, used on the container health check"
   type        = list(string)

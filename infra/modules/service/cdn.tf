@@ -42,7 +42,6 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled         = true
   is_ipv6_enabled = true
   aliases         = var.domain != null ? [var.domain] : []
-  staging         = var.environment_name == "prod" ? true : false
 
   origin {
     domain_name = "http://${aws_lb.alb[0].dns_name}"
