@@ -90,6 +90,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = var.cert_arn
+    acm_certificate_arn            = var.cert_arn == null ? null : var.cert_arn
+    cloudfront_default_certificate = var.cert_arn == null ? true : false
   }
 }
