@@ -132,9 +132,9 @@ module "service" {
   cpu                    = local.service_config.instance_cpu
   memory                 = local.service_config.instance_memory
 
-  # Enable the CDN for production and staging environments, disable it for dev.
+  # Enable the CDN for prod and staging environments, disable it for dev.
   # This allows us to test the impact of the CDN by diffing staging and dev.
-  enable_cdn = contains(["production", "staging"], var.environment_name) ? true : false
+  enable_cdn = contains(["prod", "staging"], var.environment_name) ? true : false
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null
