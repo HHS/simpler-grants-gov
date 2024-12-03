@@ -106,5 +106,6 @@ resource "aws_cloudfront_distribution" "cdn" {
   #checkov:skip=CKV_AWS_310:Configure a failover in future work
   #checkov:skip=CKV_AWS_68:Configure WAF in future work
   #checkov:skip=CKV2_AWS_47:Configure WAF in future work
+  #checkov:skip=CKV2_AWS_32:Configure response headers policy in future work
   #checkov:skip=CKV_AWS_374:Ignore the geo restriction
 }

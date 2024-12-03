@@ -19,6 +19,7 @@ resource "aws_s3_bucket_ownership_controls" "cdn" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
+  # checkov:skip=CKV2_AWS_65:We need ACLs for Cloudfront
 }
 
 resource "aws_s3_bucket_acl" "cdn" {
