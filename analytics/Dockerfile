@@ -13,22 +13,22 @@ RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 RUN apt-get update \
   # Remove existing packages before installing their never versions
   && apt-get remove --yes \
-  build-essential \
-  libc-dev \
-  libpq-dev \
-  postgresql \
-  wget \
-  jq \
+    build-essential \
+    libc-dev \
+    libpq-dev \
+    postgresql \
+    wget \
+    jq \
   # Install security updates
   # https://pythonspeed.com/articles/security-updates-in-docker/
   && apt-get upgrade --yes \
   && apt-get install --no-install-recommends --yes \
-  build-essential \
-  libc-dev \
-  libpq-dev \
-  postgresql \
-  wget \
-  jq \
+    build-essential \
+    libc-dev \
+    libpq-dev \
+    postgresql \
+    wget \
+    jq \
   # Reduce the image size by clear apt cached lists
   # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
   && rm -fr /var/lib/apt/lists/* \
