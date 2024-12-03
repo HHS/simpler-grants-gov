@@ -1,5 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.constants.lookup_constants import AgencyDownloadFileType
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -21,15 +22,23 @@ class AgencyListRequestSchema(Schema):
 class AgencyContactInfoSchema(Schema):
     """Schema for agency contact information"""
 
-    contact_name = fields.String()
-    address_line_1 = fields.String()
-    address_line_2 = fields.String(allow_none=True)
-    city = fields.String()
-    state = fields.String()
-    zip_code = fields.String()
-    phone_number = fields.String()
-    primary_email = fields.String()
-    secondary_email = fields.String(allow_none=True)
+    contact_name = fields.String(metadata={"description": "Full name of the agency contact person"})
+    address_line_1 = fields.String(metadata={"description": "Primary street address of the agency"})
+    address_line_2 = fields.String(
+        allow_none=True,
+        metadata={"description": "Additional address information (suite, unit, etc.)"},
+    )
+    city = fields.String(metadata={"description": "City where the agency is located"})
+    state = fields.String(metadata={"description": "State where the agency is located"})
+    zip_code = fields.String(metadata={"description": "Postal code for the agency address"})
+    phone_number = fields.String(metadata={"description": "Contact phone number for the agency"})
+    primary_email = fields.String(
+        metadata={"description": "Main email address for agency communications"}
+    )
+    secondary_email = fields.String(
+        allow_none=True,
+        metadata={"description": "Alternative email address for agency communications"},
+    )
 
 
 class AgencyResponseSchema(Schema):
@@ -54,16 +63,11 @@ class AgencyResponseSchema(Schema):
     is_image_workspace_enabled = fields.Boolean()
     is_validation_workspace_enabled = fields.Boolean()
 
-    # Optional fields
-    ldap_group = fields.String(allow_none=True)
-    description = fields.String(allow_none=True)
-    label = fields.String(allow_none=True)
-
-    # Related agency info
-    top_level_agency_id = fields.Integer(allow_none=True)
-
     # File types as a list of strings
-    agency_download_file_types = fields.List(fields.String())
+    agency_download_file_types = fields.List(
+        fields.Enum(AgencyDownloadFileType),
+        metadata={"description": "List of download file types supported by the agency"},
+    )
 
     # Add timestamps from TimestampMixin
     created_at = fields.DateTime()

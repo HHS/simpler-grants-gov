@@ -21,7 +21,10 @@ class TestAgenciesRoutes(BaseTestClass):
         self, client, api_auth_token, enable_factory_create, db_session
     ):
         # These should return in the default date range
-        AgencyFactory.create_batch(20)
+        AgencyFactory.create_batch(7)
+
+        # These should be excluded
+        AgencyFactory.create_batch(3, is_test_agency=True)
 
         payload = {
             "filters": {},
@@ -36,4 +39,4 @@ class TestAgenciesRoutes(BaseTestClass):
         response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 10
+        assert len(data) == 7

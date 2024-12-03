@@ -29,6 +29,9 @@ def get_agencies(
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
     stmt = select(Agency).options(joinedload("*"))
 
+    # Exclude test agencies
+    stmt = stmt.where(Agency.is_test_agency != True)  # noqa: E712
+
     if list_params.filters:
         if list_params.filters.agency_name:
             stmt = stmt.where(Agency.agency_name == list_params.filters.agency_name)
