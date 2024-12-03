@@ -8,6 +8,8 @@ resource "aws_s3_bucket" "cdn" {
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
+  # checkov:skip=CKV_AWS_145:Use KMS in future work
+  # checkov:skip=CKV2_AWS_65:We need ACLs for Cloudfront
 }
 
 resource "aws_s3_bucket_ownership_controls" "cdn" {
@@ -64,4 +66,20 @@ resource "aws_s3_bucket_policy" "cdn" {
 
   bucket = aws_s3_bucket.cdn[0].id
   policy = data.aws_iam_policy_document.cdn[0].json
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "cdn" {
+  count = var.enable_cdn ? 1 : 0
+
+  bucket = aws_s3_bucket.cdn[0].id
+
+  rule {
+    id     = "AbortIncompleteUpload"
+    status = "Enabled"
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+
+  # checkov:skip=CKV_AWS_300:There is a known issue where this check brings up false positives
 }

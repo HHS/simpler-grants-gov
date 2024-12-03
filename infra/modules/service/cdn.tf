@@ -36,10 +36,11 @@ resource "aws_cloudfront_cache_policy" "default" {
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
-  count           = var.enable_cdn ? 1 : 0
-  enabled         = true
-  is_ipv6_enabled = true
-  aliases         = var.domain == null ? [] : [var.domain]
+  count = var.enable_cdn ? 1 : 0
+
+  enabled             = var.enable_cdn ? true : false
+  aliases             = var.domain == null ? null : [var.domain]
+  default_root_object = "/"
 
   origin {
     domain_name = aws_lb.alb[0].dns_name
@@ -47,7 +48,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "match-viewer"
+      origin_protocol_policy = var.cert_arn == null ? "http-only" : "https-only"
 
       # See possible values here:
       # https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_OriginSslProtocols.html
@@ -101,4 +102,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   ]
 
   #checkov:skip=CKV2_AWS_46:We aren't using a S3 origin
+  #checkov:skip=CKV_AWS_174:False positive
+  #checkov:skip=CKV_AWS_310:Configure a failover in future work
+  #checkov:skip=CKV_AWS_68:Configure WAF in future work
+  #checkov:skip=CKV2_AWS_47:Configure WAF in future work
+  #checkov:skip=CKV_AWS_374:Ignore the geo restriction
 }
