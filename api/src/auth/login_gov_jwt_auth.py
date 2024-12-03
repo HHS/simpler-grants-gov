@@ -50,7 +50,6 @@ def initialize_login_gov_config() -> None:
     global _config
     if not _config:
         _config = LoginGovConfig()
-        _refresh_keys(_config)
 
         logger.info(
             "Constructed login.gov configuration",
