@@ -39,23 +39,27 @@ resource "aws_cloudfront_distribution" "cdn" {
   count           = var.enable_cdn ? 1 : 0
   enabled         = true
   is_ipv6_enabled = true
-  aliases         = var.domain != null ? [var.domain] : []
+  aliases         = var.domain == null ? [] : [var.domain]
 
   origin {
     domain_name = aws_lb.alb[0].dns_name
     origin_id   = local.default_origin_id
     custom_origin_config {
       http_port              = 80
-      https_port             = var.cert_arn == null ? 80 : 443
+      https_port             = 443
       origin_protocol_policy = "match-viewer"
 
       # See possible values here:
       # https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_OriginSslProtocols.html
       origin_ssl_protocols = ["TLSv1.2"]
     }
-    origin_shield {
-      enabled              = true
-      origin_shield_region = data.aws_region.current.name
+    # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html
+    dynamic "origin_shield" {
+      for_each = var.cert_arn == null ? [1] : []
+      content {
+        enabled              = true
+        origin_shield_region = data.aws_region.current.name
+      }
     }
   }
 
