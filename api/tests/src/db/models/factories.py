@@ -809,8 +809,7 @@ class AgencyFactory(BaseFactory):
     agency_id = factory.Sequence(lambda n: n)
     agency_name = factory.Faker("agency_name")
 
-    # Make agency_code unique by including the sequence number
-    agency_code = factory.Sequence(lambda n: f"AG-{n:04d}")
+    agency_code = factory.Iterator(CustomProvider.AGENCIES)
 
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
