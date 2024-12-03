@@ -1,7 +1,7 @@
 import pytest
 
-from tests.conftest import BaseTestClass
 from src.db.models.agency_models import Agency
+from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import AgencyFactory
 
 
