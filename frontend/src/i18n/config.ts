@@ -11,9 +11,9 @@ type RequestConfig = Awaited<
  * List of languages supported by the application. Other tools (Storybook, tests) reference this.
  * These must be BCP47 language tags: https://en.wikipedia.org/wiki/IETF_language_tag#List_of_common_primary_language_subtags
  */
-export const locales = ["en", "es"] as const;
+export const locales = ["en", "es"];
 export type Locale = (typeof locales)[number];
-export const defaultLocale: Locale = "en";
+export const defaultLocale = "en";
 
 /**
  * Specifying a time zone affects the rendering of dates and times.
