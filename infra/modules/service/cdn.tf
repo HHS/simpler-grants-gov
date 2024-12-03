@@ -47,8 +47,20 @@ resource "aws_cloudfront_distribution" "cdn" {
   aliases         = var.domain != null ? [var.domain] : []
 
   origin {
-    domain_name = "http://${aws_lb.alb[0].dns_name}"
+    domain_name = aws_lb.alb[0].dns_name
     origin_id   = local.default_origin_id
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "match-viewer"
+      # See possible values here:
+      # https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_OriginSslProtocols.html
+      origin_ssl_protocols = ["TLSv1.2"]
+    }
+    origin_shield {
+      enabled              = true
+      origin_shield_region = data.aws_region.current.name
+    }
   }
 
   logging_config {
@@ -69,14 +81,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     # There's also a `max_ttl` option, which can be used to override the above headers.
     min_ttl     = 60
     default_ttl = 3600
-
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "all"
-      }
-    }
   }
 
   restrictions {
