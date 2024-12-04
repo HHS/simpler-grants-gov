@@ -76,7 +76,7 @@ After following the installation steps above, you can use the following commands
 
 You can use the following command to import data to the analytics database.
 
-```bash # does not work need to specify 
+```bash 
 poetry run analytics export gh_delivery_data \
 	--config-file config/github-projects.json \
 	--output-file  data/delivery-data.json \
@@ -230,10 +230,10 @@ Development is underway on new as-is/as-was reporting capabilities, the foundati
 
 Initialize the ETL DB:
 ```bash
-poetry run analytics etl initialize_database #db_migrate
+poetry run analytics etl db_migrate
 ```
 
 Transform and load a json file into the ETL DB:
 ```bash
-poetry run analytics etl transform_and_load --deliverable-file ./data/test-etl-01.json --effective-date 2024-10-28 #issue-file
+poetry run analytics etl transform_and_load --issue-file ./data/test-etl-01.json --effective-date 2024-10-28 
 ```
