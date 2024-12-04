@@ -8,7 +8,7 @@ version = "0.1.0"
 
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
-db-migrate = "src.analytics.cli:migrate_database"
+db-migrate = "analytics.cli:migrate_database"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
