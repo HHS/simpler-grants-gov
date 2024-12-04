@@ -174,3 +174,32 @@ Additional guidance on working with the CLI tool can be found in the [usage guid
 2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/). For example if you want to calculate sprint burndown with the entrypoint `analytics calculate sprint_burndown`, you'd use the decorator: `metrics_app.command(name="sprint_burndown")`
 3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/).
 4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint.
+
+### Copying table from grants-db
+
+1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` and prefix file name with the next iteration number (ex: `0007`).
+2. Use your database management system(ex: `pg_admin`, `db_beaver`...) and right-click on the table you wish to copy and select `SQL scripts` then `request and copy original DDL` 
+3. Paste the DDL in your new migration file. Fix any formating issues, see previous migration files for reference.
+4. Remove all reference to schema, roles, triggers and the use of `default now()` for timestamp columns.
+
+    Example: 
+    ``` sql 
+    create table if not exists opi.opportunity
+    ( 
+     ...,
+     created_at              timestamp with time zone default now() not null,
+     ...
+    )
+    ```
+    should be
+    ``` sql 
+    CREATE TABLE IF NOT EXISTS opportunity;
+    ( 
+     ...,
+     created_at              timestamp with time zone not null
+     ...
+    )
+      ```
+
+5. Run migration via `make db-migrate` command
+
