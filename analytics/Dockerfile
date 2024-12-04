@@ -125,8 +125,3 @@ ENV PATH="/analytics/.venv/bin:$PATH"
 
 
 USER ${RUN_USER}
-
-# The entrypoint for the container that exposes the `analytics` CLI
-# You can call this entry point with `docker run <image> <analytics-sub-command>`
-# For example `docker run <image> etl db_migrate`
-ENTRYPOINT ["analytics"]
