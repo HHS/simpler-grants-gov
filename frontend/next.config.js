@@ -16,6 +16,40 @@ const appSassOptions = sassOptions(basePath);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        // Static pages are 6 hours.
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=21600, stale-while-revalidate",
+          },
+        ],
+      },
+      // Search page is 1 hour.
+      {
+        source: "/search",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=3600, stale-while-revalidate",
+          },
+        ],
+      },
+      // Opportunity pages are 10 minutes.
+      {
+        source: "/opportunity/:id(\\d{1,})",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=600, stale-while-revalidate",
+          },
+        ],
+      },
+    ];
+  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
