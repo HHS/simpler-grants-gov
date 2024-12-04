@@ -21,7 +21,7 @@ If you want to have more control over how the reports are run, you can also run 
 
 ### Export data and run reports
 
-If want to run reports with the most recent data from GitHub, the easiest way to do it is to first create the `data` directory in analytics folder then run with the `make sprint-reports-with-latest-data`.
+If want to run reports with the most recent data from GitHub, the easiest way to do it is to run `make sprint-reports-with-latest-data`.
 
 That should result in something like the following being logged to the command line:
 
