@@ -134,21 +134,23 @@ def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
 
 def get_final_redirect_uri(
     message: str,
-    token: str,
-    is_user_new: bool,
+    token: str | None = None,
+    is_user_new: bool | None = None,
     error_description: str | None = None,
     config: LoginGovConfig | None = None,
 ) -> str:
     if config is None:
         config = get_config()
 
-    params = {
-        "token": token,
-        "message": message,
-        "is_user_new": int(is_user_new),  # put booleans in the URL as 0/1
-    }
+    params: dict = {"message": message}
 
-    if error_description:
+    if token is not None:
+        params["token"] = token
+
+    if is_user_new is not None:
+        params["is_user_new"] = int(is_user_new)  # put booleans in the URL as 0/1
+
+    if error_description is not None:
         params["error_description"] = error_description
 
     encoded_params = urllib.parse.urlencode(params)

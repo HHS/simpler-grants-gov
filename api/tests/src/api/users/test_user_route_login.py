@@ -1,6 +1,7 @@
 import urllib
 
-from src.auth.login_gov_jwt_auth import get_config
+import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
+from src.api.route_utils import raise_flask_error
 
 # To help illustrate what we are testing, here is a diagram
 #
@@ -26,7 +27,7 @@ def test_user_login_flow_302(client):
     """Happy path for a user logging in"""
     # TODO - as we build out the callback logic, a lot more will be checked/tested here
     #        and more tests will be added for various error scenarios
-    login_gov_config = get_config()
+    login_gov_config = login_gov_jwt_auth.get_config()
     resp = client.get("/v1/users/login", follow_redirects=True)
 
     # The final endpoint returns a 200
@@ -76,5 +77,92 @@ def test_user_login_flow_302(client):
     assert third_redirect_params["is_user_new"][0] == "0"
 
 
-def test_thing(app):
-    pass
+def test_user_login_flow_error_in_login_302(client, monkeypatch):
+    """Test that the redirect happens to the final endpoint directly if an error occurs"""
+
+    # Force the api to error by overriding a function call
+    def override(*args, **kwargs):
+        raise Exception("I am an error")
+
+    monkeypatch.setattr("flask.url_for", override)
+
+    resp = client.get("/v1/users/login", follow_redirects=True)
+
+    # The final endpoint returns a 200
+    # and dumps the params it was called with
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # History contains each redirect, we redirected just once
+    assert len(resp.history) == 1
+    redirect = resp.history[0]
+
+    assert redirect.status_code == 302
+    redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
+    assert redirect_url.path == "/v1/users/login/result"
+
+
+def test_user_login_flow_error_in_http_error_302(client, monkeypatch):
+    """Test that the redirect happens to the final endpoint directly if an error occurs
+
+    Only difference from above test is that the error message gets passed through
+    for an HTTPError that we rose
+    """
+
+    # Force the api to error by overriding a function call
+    def override(*args, **kwargs):
+        raise_flask_error(422, "I am an error")
+
+    monkeypatch.setattr("flask.url_for", override)
+
+    resp = client.get("/v1/users/login", follow_redirects=True)
+
+    # The final endpoint returns a 200
+    # and dumps the params it was called with
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "I am an error"
+
+    # History contains each redirect, we redirected just once
+    assert len(resp.history) == 1
+    redirect = resp.history[0]
+
+    assert redirect.status_code == 302
+    redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
+    assert redirect_url.path == "/v1/users/login/result"
+
+
+def test_user_login_flow_error_in_http_error_internal_302(client, monkeypatch):
+    """Test that the redirect happens to the final endpoint directly if an error occurs
+
+    Even if it is raised by raise_flask_error, if it is a 5xx error, we want to not display the message
+    """
+
+    # Force the api to error by overriding a function call
+    def override(*args, **kwargs):
+        raise_flask_error(503, "I am an internal error")
+
+    monkeypatch.setattr("flask.url_for", override)
+
+    resp = client.get("/v1/users/login", follow_redirects=True)
+
+    # The final endpoint returns a 200
+    # and dumps the params it was called with
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # History contains each redirect, we redirected just once
+    assert len(resp.history) == 1
+    redirect = resp.history[0]
+
+    assert redirect.status_code == 302
+    redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
+    assert redirect_url.path == "/v1/users/login/result"
