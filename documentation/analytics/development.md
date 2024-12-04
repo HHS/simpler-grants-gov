@@ -47,14 +47,7 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Run `make build`
-2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
-  - Go to https://github.com/settings/tokens
-  - Generate a new token (classic)
-  - Give it the following scopes:
-    - repo
-    - read:org
-    - admin:public_key
-    - project
+2. Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
   - Add `export GH_TOKEN=...` to your `zshrc` or similar
 3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```

@@ -21,7 +21,7 @@ If you want to have more control over how the reports are run, you can also run 
 
 ### Export data and run reports
 
-If want to run reports with the most recent data from GitHub, the easiest way to do it is with the `make sprint-reports-with-latest-data`.
+If want to run reports with the most recent data from GitHub, the easiest way to do it is to first create the `data` directory in analytics folder then run with the `make sprint-reports-with-latest-data`.
 
 That should result in something like the following being logged to the command line:
 
@@ -126,7 +126,7 @@ When finished, run `docker-compose down` to stop and remove all containers, netw
 
 #### Viewing the data in Metabase
 
-[Metabase](https://www.metabase.com/) is a business intelligence that lets you query, organize and view data with a friendly UX. In order to view data in Metabase, start the containers and then navigate to http://localhost:3100/.
+[Metabase](https://www.metabase.com/) is a business intelligence that lets you query, organize and view data with a friendly UX. In order to view data in Metabase, start the containers via `make build`,  and then navigate to http://localhost:3100/.
 
 The first time you access Metabase you will be guided through a small setup process to sync the database to the platform. See local.env to set database properties.
 
