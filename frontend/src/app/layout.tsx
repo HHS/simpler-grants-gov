@@ -1,9 +1,12 @@
-import { GoogleAnalytics } from "@next/third-parties/google";
-import * as newrelic from "newrelic";
+/* eslint-disable @next/next/no-before-interactive-script-outside-document */
+// the rule mentioned above seems to not take into account changes from the app router
+
 /**
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
  */
+import { GoogleAnalytics } from "@next/third-parties/google";
+import * as newrelic from "newrelic";
 import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { locales } from "src/i18n/config";
@@ -75,9 +78,8 @@ export default async function LocaleLayout({ children, params }: Props) {
           id="nr-browser-agent"
           // By setting the strategy to "beforeInteractive" we guarantee that
           // the script will be added to the document's `head` element.
-          // However, we cannot add this because it needs to be in the Root Layout, outside of the [locale] directory
-          // And we cannot add beneath the local directory because our HTML tag needs to know about the locale
-          // Come back to this to see if we can find a solution later on
+          // It turns out loading this anywhere else causes big problems with
+          // consistency of loading the script.
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
         />
