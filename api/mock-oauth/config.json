@@ -1,19 +1,19 @@
+{
+    "interactiveLogin": true,
+    "httpServer": "NettyWrapper",
+    "tokenCallbacks": [
         {
-            "interactiveLogin": true,
-            "httpServer": "NettyWrapper",
-            "tokenCallbacks": [
+            "issuerId": "issuer1",
+            "tokenExpiry": 120,
+            "requestMappings": [
                 {
-                    "issuerId": "issuer1",
-                    "tokenExpiry": 120,
-                    "requestMappings": [
-                        {
-                            "requestParam": "code",
-                            "match": "*",
-                            "claims": {
-                                "email": "fake_mail@mail.com"
-                            }
-                        }
-                    ]
+                    "requestParam": "code",
+                    "match": "*",
+                    "claims": {
+                        "email": "fake_mail@mail.com"
+                    }
                 }
             ]
         }
+    ]
+}
