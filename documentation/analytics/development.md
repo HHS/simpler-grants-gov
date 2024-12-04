@@ -90,7 +90,7 @@ If you need to be added to the slack workspace or to the list of collaborators f
 
 #### Finding reporting channel ID
 
-1. Go to the `#z_bot-sprint-reporting` channel but use the `#z_bot-analytics-ci-test` channel for testing in the Simpler.Grants.gov Slack workspace.
+1. In the Simpler.Grants.gov Slack workspace navigate to the `#z_bot-sprint-reporting` channel. NB: Use`#z_bot-analytics-ci-test` channel for testing.
 2. Click on the name of the channel in the top left part of the screen.
 3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID` and copy.
 
