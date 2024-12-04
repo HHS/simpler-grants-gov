@@ -3,7 +3,6 @@ import typing
 from datetime import datetime
 
 from pydantic_settings import SettingsConfigDict
-from pydantic import Field
 
 import src.util.datetime_util as datetime_util
 from src.util.env_config import PydanticBaseEnvConfig

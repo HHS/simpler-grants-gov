@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 class HealthcheckMetadataSchema(Schema):
 
     commit_sha = fields.String(
-        metadata={"description": "The github commit sha for the latest deployed commit", "example": "ffaca647223e0b6e54344122eefa73401f5ec131"}
+        metadata={
+            "description": "The github commit sha for the latest deployed commit",
+            "example": "ffaca647223e0b6e54344122eefa73401f5ec131",
+        }
     )
     commit_link = fields.String(
         metadata={
