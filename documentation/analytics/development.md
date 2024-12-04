@@ -93,7 +93,6 @@ If you need to be added to the slack workspace or to the list of collaborators f
 1. Go to the `#z_bot-sprint-reporting` channel but use the `#z_bot-analytics-ci-test` channel for testing in the Simpler.Grants.gov Slack workspace.
 2. Click on the name of the channel in the top left part of the screen.
 3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID` and copy.
-4. Run export ANALYTICS_REPORTING_CHANNEL_ID={Channel ID from step 3} in your shell
 
 <img alt="Screenshot of dialog box with channel ID" src="../../analytics/static/screenshot-channel-id.png" height=500>
 
@@ -103,7 +102,6 @@ If you need to be added to the slack workspace or to the list of collaborators f
 2. Click on `Sprint Reporting Bot` to go to the settings for our analytics slackbot
 3. From the side menu, select `OAuth & Permissions` and scroll down to the "OAuth tokens for your workspace" section
 4. Copy the "Bot user OAuth token" which should start with `xoxb`
-5. Run export ANALYTICS_REPORTING_CHANNEL_ID={Bot user OAuth token from step 4} in your shell
 
 <img alt="Screenshot of slack app settings page with bot user OAuth token" src="../../analytics/static/screenshot-slackbot-token.png" width=750>
 
