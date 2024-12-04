@@ -75,14 +75,7 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
-2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
-  - Go to https://github.com/settings/tokens
-  - Generate a new token (classic)
-  - Give it the following scopes:
-    - repo
-    - read:org
-    - admin:public_key
-    - project
+2. Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
   - Add `export GH_TOKEN=...` to your `zshrc` or similar
 3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```
@@ -104,7 +97,7 @@ If you need to be added to the slack workspace or to the list of collaborators f
 
 #### Finding reporting channel ID
 
-1. Go to the `#z_bot-sprint-reporting` | `#z_bot-analytics-ci-test`(testing) channel in the Simpler.Grants.gov slack workspace.
+1. Go to the `#z_bot-sprint-reporting` channel but use the `#z_bot-analytics-ci-test` channel for testing in the Simpler.Grants.gov Slack workspace.
 2. Click on the name of the channel in the top left part of the screen.
 3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID` and copy.
 4. Run export ANALYTICS_REPORTING_CHANNEL_ID={Channel ID from step 3} in your shell
