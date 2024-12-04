@@ -3,7 +3,6 @@
  * @see https://storybook.js.org/docs/configure#configure-story-rendering
  */
 import { Loader, Preview } from "@storybook/react";
-import { Locale } from "src/i18n/config";
 
 import "src/styles/styles.scss";
 
@@ -42,7 +41,7 @@ const parameters = {
 
 const i18nMessagesLoader: Loader = async (context) => {
   const messages = await getMessagesWithFallbacks(
-    context.globals.locale as Locale,
+    context.globals.locale as string,
   );
   return { messages };
 };

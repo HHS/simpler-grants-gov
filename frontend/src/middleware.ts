@@ -4,11 +4,11 @@
  * modifying the request or response headers, or responding directly.
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
-import { defaultLocale, locales } from "src/i18n/config";
-import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
-
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
+
+import { defaultLocale, locales } from "./i18n/config";
+import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 
 export const config = {
   matcher: [
@@ -36,7 +36,7 @@ const i18nMiddleware = createIntlMiddleware({
   locales,
   defaultLocale,
   // Don't prefix the URL with the locale when the locale is the default locale (i.e. "en-US")
-  // localePrefix: "as-needed",
+  localePrefix: "as-needed",
 });
 
 export default function middleware(request: NextRequest): NextResponse {
