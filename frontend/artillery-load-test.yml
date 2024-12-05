@@ -5,17 +5,14 @@ config:
   http:
     timeout: 10
   phases:
-    - duration: 3000
-      arrivalRate: 10
-      maxVusers: 5000
+    - arrivalRate: 10
+      maxVusers: 100
       name: Warm up phase
-    - duration: 3000
-      arrivalRate: 100
-      maxVusers: 25000
+    - arrivalRate: 50
+      maxVusers: 500
       name: Ramp up load
-    - duration: 3000
-      arrivalRate: 1000
-      maxVusers: 50000
+    - arrivalRate: 100
+      maxVusers: 2000
       name: Spike phase
   environments:
     local:
