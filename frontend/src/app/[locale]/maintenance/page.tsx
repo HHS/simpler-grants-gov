@@ -1,6 +1,18 @@
 import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
+
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  const t = await getTranslations({ locale });
+  return {
+    title: t("Maintenance.pageTitle"),
+    description: t("Maintenance.heading"),
+  };
+}
 
 export default function Maintenance({
   params: { locale },
