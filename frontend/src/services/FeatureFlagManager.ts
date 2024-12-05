@@ -3,6 +3,8 @@
  */
 
 import { CookiesStatic } from "js-cookie";
+import { snakeCase } from "lodash";
+import { environment } from "src/constants/environments";
 import { featureFlags } from "src/constants/featureFlags";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
@@ -119,6 +121,7 @@ export class FeatureFlagsManager {
   get featureFlags(): FeatureFlags {
     return {
       ...this.defaultFeatureFlags,
+      ...this.featureFlagsFromEnvironment,
       ...this.featureFlagsCookie,
     };
   }
@@ -174,7 +177,7 @@ export class FeatureFlagsManager {
    * Load feature flags from query params and set them on the cookie. This allows for
    * feature flags to be set via url query params as well.
    *
-   * Expects a querystring with a param of `FeatureFlagsManager.FEATURE_FLAGS_KEY`.
+   * Expects a query string with a param of `FeatureFlagsManager.FEATURE_FLAGS_KEY`.
    *
    * For example, `example.com?_ff=showSite:true;enableClaimFlow:false`
    * would enable `showSite` and disable `enableClaimFlow`.
@@ -193,10 +196,26 @@ export class FeatureFlagsManager {
       return response;
     }
     Object.entries(featureFlags).forEach(([flagName, flagValue]) => {
-      this.setFeatureFlag(flagName, flagValue);
+      this.setFeatureFlagCookie(flagName, flagValue);
     });
     this.setCookie(JSON.stringify(this.featureFlagsCookie), response.cookies);
     return response;
+  }
+
+  get featureFlagsFromEnvironment() {
+    return Object.keys(this.defaultFeatureFlags).reduce(
+      (featureFlagsFromEnvironment, flagName) => {
+        const envVarName = snakeCase(flagName).toUpperCase();
+        const envVarValue = environment[envVarName];
+        if (envVarValue)
+          // by convention, any feature flag environment variables should use the exact string "true"
+          // when activating the flag. Negative values are more forgiving, but should be non empty strings
+          featureFlagsFromEnvironment[flagName] = envVarValue === "true";
+
+        return featureFlagsFromEnvironment;
+      },
+      {} as FeatureFlags,
+    );
   }
 
   /**
@@ -238,9 +257,9 @@ export class FeatureFlagsManager {
   }
 
   /**
-   * Toggle feature flag
+   * Toggle feature flag on cookie
    */
-  setFeatureFlag(featureName: string, enabled: boolean): void {
+  setFeatureFlagCookie(featureName: string, enabled: boolean): void {
     if (!this.isValidFeatureFlag(featureName)) {
       throw new Error(`\`${featureName}\` is not a valid feature flag`);
     }
