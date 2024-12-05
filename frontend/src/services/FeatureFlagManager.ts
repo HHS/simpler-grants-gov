@@ -3,10 +3,10 @@
  */
 
 import { CookiesStatic } from "js-cookie";
-import { snakeCase } from "lodash";
 import { environment } from "src/constants/environments";
 import { featureFlags } from "src/constants/featureFlags";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+import { camelToSnake } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -205,7 +205,10 @@ export class FeatureFlagsManager {
   get featureFlagsFromEnvironment() {
     return Object.keys(this.defaultFeatureFlags).reduce(
       (featureFlagsFromEnvironment, flagName) => {
-        const envVarName = snakeCase(flagName).toUpperCase();
+        // by convention all feature flag env var names start with "FEATURE"
+        // and all app side feature flag names should be in the camel case version of the env var names (minus FEATURE)
+        // ex "FEAUTURE_SEARCH_OFF" -> "searchOff"
+        const envVarName = `FEATURE_${camelToSnake(flagName).toUpperCase()}`;
         const envVarValue = environment[envVarName];
         if (envVarValue)
           // by convention, any feature flag environment variables should use the exact string "true"

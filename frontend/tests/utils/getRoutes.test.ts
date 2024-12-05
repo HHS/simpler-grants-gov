@@ -28,6 +28,7 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/dev/feature-flags",
       "/health",
+      "/maintenance",
       "/opportunity/1",
       "/",
       "/process",
