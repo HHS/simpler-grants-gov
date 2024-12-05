@@ -3,7 +3,10 @@ import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 import React, { ComponentType } from "react";
 
-export const withFeatureFlagStatic = <P extends ServerSideSearchParams, R>(
+export const withFeatureFlagStatic = <
+  P extends { params: ServerSideSearchParams },
+  R,
+>(
   WrappedComponent: ComponentType<P>,
   featureFlagName: string,
   onEnabled: () => R,
