@@ -28,6 +28,9 @@ output "scheduled_jobs" {
   value = local.scheduled_jobs
 }
 
+output "enable_drafts_bucket" {
+  value = startswith(var.app_name, "api-")
+}
 output "domain" {
   value = var.domain
 }

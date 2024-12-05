@@ -123,5 +123,8 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   }
+
+  enable_drafts_bucket = startswith(local.service_name, "api-")
+
   is_temporary = false
 }
