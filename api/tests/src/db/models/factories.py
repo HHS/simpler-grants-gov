@@ -797,9 +797,20 @@ class AgencyFactory(BaseFactory):
     class Meta:
         model = agency_models.Agency
 
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(agency_models.Agency.agency_id)).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    agency_id = factory.Sequence(lambda n: n)
     agency_name = factory.Faker("agency_name")
 
-    agency_code = factory.Faker("agency_code")
+    agency_code = factory.Iterator(CustomProvider.AGENCIES)
+
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
     assistance_listing_number = factory.Faker("random_int", min=1, max=999)
@@ -831,6 +842,12 @@ class AgencyFactory(BaseFactory):
         length=random.randint(1, 2),
         elements=[a for a in AgencyDownloadFileType],
         unique=True,
+    )
+
+    # Create the contact info first and use its ID
+    agency_contact_info = factory.SubFactory(AgencyContactInfoFactory)
+    agency_contact_info_id = factory.LazyAttribute(
+        lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
     )
 
 
