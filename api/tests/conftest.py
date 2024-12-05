@@ -281,6 +281,19 @@ def mock_jwk_endpoint(app):
         return flask.jsonify(response)
 
 
+def oauth_param_override():
+    """Override endpoint called in the mock authorize endpoint setup below.
+
+    To override you can do the following in your test:
+
+        def override():
+            return {"error": "access_denied"}
+
+        monkeypatch.setattr("tests.conftest.oauth_param_override", override)
+    """
+    return {}
+
+
 def mock_oauth_endpoint(app):
     # Adds a mock oauth endpoint to the app
     # itself for auth purposes
@@ -291,9 +304,11 @@ def mock_oauth_endpoint(app):
         # https://developers.login.gov/oidc/authorization/
         # and needs to return the state value as well as a code.
         query_args = flask.request.args
-        encoded_params = urllib.parse.urlencode(
-            {"state": query_args.get("state"), "code": str(uuid.uuid4())}
-        )
+
+        params = {"state": query_args.get("state"), "code": str(uuid.uuid4())}
+        params.update(oauth_param_override())
+        encoded_params = urllib.parse.urlencode(params)
+
         redirect_uri = f"{query_args['redirect_uri']}?{encoded_params}"
 
         return flask.redirect(redirect_uri)
