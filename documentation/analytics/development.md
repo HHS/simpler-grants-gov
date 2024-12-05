@@ -47,14 +47,24 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Run `make build`
-2. Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
-  - Add `export GH_TOKEN=...` to your `zshrc` or similar
-3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+2. Acquire a GitHub Token using one of the methods below
+  - Via AWS (Project Team)
+    - Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
+  - Create your own in GitHub (Open Source)
+    - Go to https://github.com/settings/tokens
+    - Generate a new token (classic)
+    - Give it the following scopes:
+      - repo
+      - read:org
+      - admin:public_key
+      - project
+3. Add `export GH_TOKEN=...` to your `zshrc` or similar
+4. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```
    export ANALYTICS_SLACK_BOT_TOKEN=...
    export ANALYTICS_REPORTING_CHANNEL_ID=...
    ```
-4. Run `make test-audit` to confirm the application is running correctly.
+5. Run `make test-audit` to confirm the application is running correctly.
 
 #### Running natively
 
@@ -68,14 +78,24 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
-2. Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
-  - Add `export GH_TOKEN=...` to your `zshrc` or similar
-3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+2. Acquire a GitHub Token using one of the methods below
+  - Via AWS (Project Team)
+    - Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
+  - Create your own in GitHub (Open Source)
+    - Go to https://github.com/settings/tokens
+    - Generate a new token (classic)
+    - Give it the following scopes:
+      - repo
+      - read:org
+      - admin:public_key
+      - project
+3. Add `export GH_TOKEN=...` to your `zshrc` or similar
+4. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```
    export ANALYTICS_SLACK_BOT_TOKEN=...
    export ANALYTICS_REPORTING_CHANNEL_ID=...
    ```
-4. Run `make test-audit` to confirm the application is running correctly.
+5. Run `make test-audit` to confirm the application is running correctly.
 
 ### Configuring secrets
 
