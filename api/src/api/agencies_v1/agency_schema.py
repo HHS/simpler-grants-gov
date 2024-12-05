@@ -51,16 +51,10 @@ class AgencyResponseSchema(Schema):
     assistance_listing_number = fields.String()
     agency_submission_notification_setting = fields.String()  # Enum value
 
+    top_level_agency = fields.Nested(lambda: AgencyResponseSchema(exclude=("top_level_agency",)))
+
     # Agency contact info as nested object
     agency_contact_info = fields.Nested(AgencyContactInfoSchema, allow_none=True)
-
-    # Boolean flags
-    is_multilevel_agency = fields.Boolean()
-    is_multiproject = fields.Boolean()
-    has_system_to_system_certificate = fields.Boolean()
-    can_view_packages_in_grace_period = fields.Boolean()
-    is_image_workspace_enabled = fields.Boolean()
-    is_validation_workspace_enabled = fields.Boolean()
 
     # File types as a list of strings
     agency_download_file_types = fields.List(
