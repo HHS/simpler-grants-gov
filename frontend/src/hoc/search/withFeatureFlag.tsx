@@ -2,28 +2,26 @@ import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import React, { ComponentType } from "react";
 
 type WithFeatureFlagProps = {
   searchParams: ServerSideSearchParams;
 };
 
-const withFeatureFlag = <P extends object>(
+const withFeatureFlag = <P extends WithFeatureFlagProps, R>(
   WrappedComponent: ComponentType<P>,
   featureFlagName: string,
+  onEnabled: () => R,
 ) => {
-  const ComponentWithFeatureFlag: React.FC<P & WithFeatureFlagProps> = (
-    props,
-  ) => {
+  const ComponentWithFeatureFlag = (props: P) => {
     const ffManager = new FeatureFlagsManager(cookies());
     const { searchParams } = props;
 
-    if (ffManager.isFeatureDisabled(featureFlagName, searchParams)) {
-      return notFound();
+    if (ffManager.isFeatureEnabled(featureFlagName, searchParams)) {
+      return onEnabled();
     }
 
-    return <WrappedComponent {...(props as P)} />;
+    return <WrappedComponent {...props} />;
   };
 
   return ComponentWithFeatureFlag;
