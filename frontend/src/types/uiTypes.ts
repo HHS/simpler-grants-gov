@@ -1,3 +1,5 @@
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+
 export enum Breakpoints {
   CARD = "card",
   CARD_LG = "card-lg",
@@ -9,3 +11,7 @@ export enum Breakpoints {
   DESKTOP_LG = "desktop-lg",
   WIDESCREEN = "widescreen",
 }
+
+export type WithFeatureFlagProps = {
+  searchParams: ServerSideSearchParams;
+};
