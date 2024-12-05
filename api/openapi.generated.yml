@@ -813,6 +813,11 @@ components:
           type: string
         agency_submission_notification_setting:
           type: string
+        top_level_agency:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyResponse'
         agency_contact_info:
           type:
           - object
@@ -820,18 +825,6 @@ components:
           anyOf:
           - $ref: '#/components/schemas/AgencyContactInfo'
           - type: 'null'
-        is_multilevel_agency:
-          type: boolean
-        is_multiproject:
-          type: boolean
-        has_system_to_system_certificate:
-          type: boolean
-        can_view_packages_in_grace_period:
-          type: boolean
-        is_image_workspace_enabled:
-          type: boolean
-        is_validation_workspace_enabled:
-          type: boolean
         agency_download_file_types:
           type: array
           description: List of download file types supported by the agency
