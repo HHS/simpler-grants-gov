@@ -1,7 +1,13 @@
 import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
 
-export default function Maintenance() {
+export default function Maintenance({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  setRequestLocale(locale);
   const t = useTranslations("Maintenance");
 
   const body = t.rich("body", {
