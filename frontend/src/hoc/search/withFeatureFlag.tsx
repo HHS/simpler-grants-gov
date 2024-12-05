@@ -23,47 +23,4 @@ const withFeatureFlag = <P extends WithFeatureFlagProps, R>(
   return ComponentWithFeatureFlag;
 };
 
-export const withFeatureFlagStatic = <P extends WithFeatureFlagProps, R>(
-  WrappedComponent: ComponentType<P>,
-  featureFlagName: string,
-  onEnabled: () => R,
-) => {
-  const ComponentWithFeatureFlag = (props: P) => {
-    const featureFlagsManager = new FeatureFlagsManager();
-    const { searchParams } = props;
-
-    if (featureFlagsManager.isFeatureEnabled(featureFlagName, searchParams)) {
-      return onEnabled();
-    }
-
-    return <WrappedComponent {...props} />;
-  };
-
-  return ComponentWithFeatureFlag;
-};
-
-// const withFeatureFlag = <P extends WithFeatureFlagProps, R>(
-//   WrappedComponent: ComponentType<P>,
-//   featureFlagName: string,
-//   onEnabled: () => R,
-// ) =>
-//   wrapComponentWithFeatureFlag<P, R>(
-//     WrappedComponent,
-//     featureFlagName,
-//     onEnabled,
-//     new FeatureFlagsManager(cookies()),
-//   );
-
-// export const withStaticFeatureFlag = <P extends WithFeatureFlagProps, R>(
-//   WrappedComponent: ComponentType<P>,
-//   featureFlagName: string,
-//   onEnabled: () => R,
-// ) =>
-//   wrapComponentWithFeatureFlag<P, R>(
-//     WrappedComponent,
-//     featureFlagName,
-//     onEnabled,
-//     new FeatureFlagsManager(),
-//   );
-
 export default withFeatureFlag;
