@@ -1,5 +1,6 @@
 "use server";
 
+import { isEmpty } from "lodash";
 import { environment } from "src/constants/environments";
 import { TFn } from "src/types/intl";
 import { z } from "zod";
@@ -24,7 +25,7 @@ export async function subscribeEmail(
     t,
     formData,
   );
-  if (errorMessage ?? validationErrors) {
+  if (errorMessage || !isEmpty(validationErrors)) {
     return {
       errorMessage,
       validationErrors,
