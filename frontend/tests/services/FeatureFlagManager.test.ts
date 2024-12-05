@@ -337,12 +337,12 @@ describe("FeatureFlagsManager", () => {
     },
   );
 
-  test("`.setFeatureflag` updates the feature flags", () => {
+  test("`.setFeatureflagCookie` updates the feature flags", () => {
     const currentFeatureFlags = featureFlagsManager.featureFlags;
 
     const featureFlagToChangeName = Object.keys(currentFeatureFlags)[0];
     const newFeatureFlagValue = !currentFeatureFlags[featureFlagToChangeName];
-    featureFlagsManager.setFeatureFlag(
+    featureFlagsManager.setFeatureFlagCookie(
       featureFlagToChangeName,
       newFeatureFlagValue,
     );
@@ -357,7 +357,7 @@ describe("FeatureFlagsManager", () => {
     expect(featureFlagsManager.featureFlags).toEqual(expectedNewFeatureFlags);
   });
 
-  test("`.setFeatureflag` throws an error if the feature flag name is invalid", () => {
+  test("`.setFeatureflagCookie` throws an error if the feature flag name is invalid", () => {
     const someInvalidFeatureFlag = "someFakeFeatureFlag-------------------";
     expect(
       Object.keys(featureFlagsManager.featureFlags).includes(
@@ -365,11 +365,11 @@ describe("FeatureFlagsManager", () => {
       ),
     ).toEqual(false);
     expect(() =>
-      featureFlagsManager.setFeatureFlag(someInvalidFeatureFlag, true),
+      featureFlagsManager.setFeatureFlagCookie(someInvalidFeatureFlag, true),
     ).toThrow();
   });
 
-  test("`.setFeatureflag` is resilient against cookie value updating from what is cached", () => {
+  test("`.setFeatureflagCookie` is resilient against cookie value updating from what is cached", () => {
     const currentFeatureFlags = featureFlagsManager.featureFlags;
 
     const featureFlagToSneakilyUpdateName = Object.keys(currentFeatureFlags)[0];
@@ -397,7 +397,7 @@ describe("FeatureFlagsManager", () => {
     expect(featureFlagToChangeName).not.toEqual(
       featureFlagToSneakilyUpdateName,
     );
-    featureFlagsManager.setFeatureFlag(
+    featureFlagsManager.setFeatureFlagCookie(
       featureFlagToChangeName,
       newFeatureFlagToChangeValue,
     );

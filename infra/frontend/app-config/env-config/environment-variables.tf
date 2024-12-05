@@ -51,6 +51,14 @@ locals {
     NEW_RELIC_LICENSE_KEY = {
       manage_method     = "manual"
       secret_store_name = "/new-relic-license-key"
+    },
+    FEATURE_SEARCH_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-off"
+    },
+    FEATURE_OPPORTUNITY_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunity-off"
     }
   }
 }
