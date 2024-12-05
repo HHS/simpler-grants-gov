@@ -5,7 +5,6 @@ import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlagStatic from "src/hoc/search/withFeatureFlagStatic";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -23,8 +22,6 @@ import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 
 type OpportunityListingProps = { params: { id: string } };
-type WrappedOpportunityListingProps = OpportunityListingProps &
-  WithFeatureFlagProps;
 
 export const revalidate = 600; // invalidate ten minutes
 
@@ -90,73 +87,68 @@ function emptySummary() {
 }
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
+  const idForParsing = Number(params.id);
+  const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
+  // Opportunity id needs to be a number greater than 1
+  if (isNaN(idForParsing) || idForParsing < 1) {
+    return <NotFound />;
+  }
+
+  let opportunityData = {} as Opportunity;
   try {
-    const idForParsing = Number(params.id);
-    const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
-    // Opportunity id needs to be a number greater than 1
-    if (isNaN(idForParsing) || idForParsing < 1) {
+    const response = await fetchOpportunity({ subPath: params.id });
+    opportunityData = response.data;
+  } catch (error) {
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
       return <NotFound />;
     }
-
-    let opportunityData = {} as Opportunity;
-    try {
-      const response = await fetchOpportunity({ subPath: params.id });
-      opportunityData = response.data;
-    } catch (error) {
-      if (parseErrorStatus(error as ApiRequestError) === 404) {
-        return <NotFound />;
-      }
-      throw error;
-    }
-    opportunityData.summary = opportunityData?.summary
-      ? opportunityData.summary
-      : emptySummary();
-
-    breadcrumbs.push({
-      title: `${opportunityData.opportunity_title}: ${opportunityData.opportunity_number}`,
-      path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
-    });
-
-    const nofoPath =
-      opportunityData.attachments.filter(
-        (document) =>
-          document.opportunity_attachment_type ===
-          "notice_of_funding_opportunity",
-      )[0]?.download_path || "";
-
-    return (
-      <div>
-        <BetaAlert />
-        <Breadcrumbs breadcrumbList={breadcrumbs} />
-        <OpportunityIntro opportunityData={opportunityData} />
-        <GridContainer>
-          <div className="grid-row grid-gap">
-            <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
-              <OpportunityDescription
-                summary={opportunityData.summary}
-                nofoPath={nofoPath}
-              />
-              <OpportunityDocuments documents={opportunityData.attachments} />
-              <OpportunityLink opportunityData={opportunityData} />
-            </div>
-
-            <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
-              <OpportunityStatusWidget opportunityData={opportunityData} />
-              <OpportunityCTA id={opportunityData.opportunity_id} />
-              <OpportunityAwardInfo opportunityData={opportunityData} />
-              <OpportunityHistory summary={opportunityData.summary} />
-            </div>
-          </div>
-        </GridContainer>
-      </div>
-    );
-  } catch (e) {
-    console.error("^^^ caught the error", e);
-    return <div>e</div>;
+    throw error;
   }
+  opportunityData.summary = opportunityData?.summary
+    ? opportunityData.summary
+    : emptySummary();
+
+  breadcrumbs.push({
+    title: `${opportunityData.opportunity_title}: ${opportunityData.opportunity_number}`,
+    path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
+  });
+
+  const nofoPath =
+    opportunityData.attachments.filter(
+      (document) =>
+        document.opportunity_attachment_type ===
+        "notice_of_funding_opportunity",
+    )[0]?.download_path || "";
+
+  return (
+    <div>
+      <BetaAlert />
+      <Breadcrumbs breadcrumbList={breadcrumbs} />
+      <OpportunityIntro opportunityData={opportunityData} />
+      <GridContainer>
+        <div className="grid-row grid-gap">
+          <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
+            <OpportunityDescription
+              summary={opportunityData.summary}
+              nofoPath={nofoPath}
+            />
+            <OpportunityDocuments documents={opportunityData.attachments} />
+            <OpportunityLink opportunityData={opportunityData} />
+          </div>
+
+          <div className="desktop:grid-col-4 tablet:grid-col-12 tablet:order-0">
+            <OpportunityStatusWidget opportunityData={opportunityData} />
+            <OpportunityCTA id={opportunityData.opportunity_id} />
+            <OpportunityAwardInfo opportunityData={opportunityData} />
+            <OpportunityHistory summary={opportunityData.summary} />
+          </div>
+        </div>
+      </GridContainer>
+    </div>
+  );
 }
 
-export default withFeatureFlagStatic<WrappedOpportunityListingProps, never>(
+export default withFeatureFlagStatic<OpportunityListingProps, never>(
   OpportunityListing,
   "opportunityOff",
   () => redirect("/maintenance"),
