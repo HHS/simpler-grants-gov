@@ -57,7 +57,7 @@ export class FeatureFlagsManager {
   private _cookies;
 
   constructor(
-    cookies:
+    cookies?:
       | NextRequest["cookies"]
       | CookiesStatic
       | NextServerSideCookies
@@ -72,6 +72,7 @@ export class FeatureFlagsManager {
 
   // The SSR function getServerSideProps provides a Record type for cookie, which excludes
   // cookie methods like set or get.
+  // likely should be moved out of this class
   private isCookieARecord(
     cookies?: typeof this._cookies | NextResponse["cookies"],
   ): cookies is NextServerSideCookies {
@@ -85,6 +86,9 @@ export class FeatureFlagsManager {
    * Invalid flag names and flag values are removed.
    */
   get featureFlagsCookie(): FeatureFlags {
+    if (!this._cookies) {
+      return {};
+    }
     let cookieValue;
     let parsedCookie: FeatureFlags;
 
@@ -223,6 +227,7 @@ export class FeatureFlagsManager {
 
   /**
    * Parses feature flags from a query param string
+   * * should be removed from this class
    */
   parseFeatureFlagsFromString(queryParamString: string | null): FeatureFlags {
     if (!queryParamString) {
