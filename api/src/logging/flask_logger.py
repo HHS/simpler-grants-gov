@@ -24,6 +24,8 @@ import uuid
 
 import flask
 
+from src.util.deploy_metadata import get_deploy_metadata_config
+
 logger = logging.getLogger(__name__)
 EXTRA_LOG_DATA_ATTR = "extra_log_data"
 
@@ -66,9 +68,16 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     app.before_request(_log_start_request)
     app.after_request(_log_end_request)
 
+    deploy_metadata = get_deploy_metadata_config()
+
     # Add some metadata to all log messages globally
     add_extra_data_to_global_logs(
-        {"app.name": app.name, "environment": os.environ.get("ENVIRONMENT")}
+        {
+            "app.name": app.name,
+            "environment": os.environ.get("ENVIRONMENT"),
+            "deploy_github_ref": deploy_metadata.deploy_github_ref,
+            "deploy_github_sha": deploy_metadata.deploy_github_sha,
+        }
     )
 
     app_logger.info("initialized flask logger")
