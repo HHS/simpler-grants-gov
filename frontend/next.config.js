@@ -19,32 +19,37 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Static pages are 6 hours.
+        // static pages are stored for 6 hours, refreshed in the background for
+        // up to 10 minutes, and up to 12 hours if there is an error
         source: "/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, s-maxage=21600, stale-while-revalidate",
+            value: "s-maxage=21600, stale-while-revalidate=600, stale-if-error=43200",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Language",
           },
         ],
       },
-      // Search page is 1 hour.
+      // search page is stored 1 hour, stale 1 min, stale if error 5 mins
       {
         source: "/search",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, s-maxage=3600, stale-while-revalidate",
+            value: "s-maxage=3600, stale-while-revalidate=60, stale-if-error=300",
           },
         ],
       },
-      // Opportunity pages are 10 minutes.
+      // opportunity pages are stored 10 mins, stale 1 min, stale if error 5 mins
       {
         source: "/opportunity/:id(\\d{1,})",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, s-maxage=600, stale-while-revalidate",
+            value: "s-maxage=600, stale-while-revalidate=60, stale-if-error=300",
           },
         ],
       },
