@@ -107,4 +107,5 @@ resource "aws_cloudfront_distribution" "cdn" {
   #checkov:skip=CKV2_AWS_47:Configure WAF in future work
   #checkov:skip=CKV2_AWS_32:Configure response headers policy in future work
   #checkov:skip=CKV_AWS_374:Ignore the geo restriction
+  #checkov:skip=CKV_AWS_305:We don't need a default root object... we don't need to redirect / to index.html.
 }
