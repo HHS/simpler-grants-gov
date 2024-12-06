@@ -3,9 +3,8 @@
 
 import functools
 import logging
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError

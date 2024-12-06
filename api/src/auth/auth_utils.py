@@ -51,7 +51,7 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                 # and should encompass our "expected" errors
                 # that aren't a concern, as long as it isn't a 5xx
                 message = e.message
-                logger.info("Login flow failed")
+                logger.info("Login flow failed %s", message)
 
                 # But we still don't expect 5xx errors
                 if e.status_code >= 500:
