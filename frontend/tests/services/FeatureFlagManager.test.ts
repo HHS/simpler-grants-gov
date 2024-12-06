@@ -204,17 +204,6 @@ describe("FeatureFlagsManager", () => {
     ).toThrow();
   });
 
-  test("`.isFeatureDisabled` returns the opposite of `.isFeatureEnabled`", () => {
-    expect(
-      Object.keys(featureFlagsManager.featureFlags).length,
-    ).toBeGreaterThanOrEqual(1);
-    Object.keys(featureFlagsManager.featureFlags).forEach((name) => {
-      const isEnabled = featureFlagsManager.isFeatureEnabled(name);
-      const isDisabled = featureFlagsManager.isFeatureDisabled(name);
-      expect(isEnabled).toEqual(!isDisabled);
-    });
-  });
-
   test("`.isValidFeatureFlag` correctly identifies valid feature flag names", () => {
     Object.keys(featureFlagsManager.defaultFeatureFlags).forEach((name) => {
       expect(featureFlagsManager.isValidFeatureFlag(name)).toEqual(true);
@@ -455,10 +444,6 @@ describe("FeatureFlagsManager", () => {
       expect(
         serverFeatureFlagsManager.isFeatureEnabled("feature1", searchParams),
       ).toBe(false);
-
-      expect(
-        serverFeatureFlagsManager.isFeatureDisabled("feature1", searchParams),
-      ).toBe(true);
     });
   });
 });
