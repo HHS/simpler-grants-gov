@@ -3,6 +3,7 @@ import sys
 from types import TracebackType
 from typing import Any
 
+import flask
 import newrelic.agent
 
 logger = logging.getLogger(__name__)
@@ -12,12 +13,13 @@ EVENT_API_ATTRIBUTE_LIMIT = 255
 
 
 def record_custom_event(event_type: str, params: dict[Any, Any]) -> None:
-    # legacy aliases
-    params["request.uri"] = params.get("request.path")
-    params["request.headers.x-amzn-requestid"] = params.get("request_id")
-
+    params["api.request.path"] = params.get("request.path")
     params["api.request.method"] = params.get("request.method")
-    params["api.request.uri"] = params.get("request.path")
+    params["api.request.url_rule"] = params.get("request.url_rule")
+    params["api.request.id"] = params.get("request.path")
+
+    if flask.has_request_context():
+        params["api.request.internal_id"] = getattr(flask.g, "internal_request_id", None)
 
     # If there are more custom attributes than the limit, the agent will upload
     # a partial payload, dropping keys after hitting its limit
