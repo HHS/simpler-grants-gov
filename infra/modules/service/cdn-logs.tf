@@ -10,6 +10,8 @@ resource "aws_s3_bucket" "cdn" {
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
   # checkov:skip=CKV_AWS_145:Use KMS in future work
   # checkov:skip=CKV2_AWS_65:We need ACLs for Cloudfront
+  # checkov:skip=CKV2_AWS_6:False positive
+  # checkov:skip=CKV2_AWS_61:False positive
 }
 
 resource "aws_s3_bucket_ownership_controls" "cdn" {
