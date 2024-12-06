@@ -123,6 +123,7 @@ module "service" {
   public_subnet_ids      = data.aws_subnets.public.ids
   private_subnet_ids     = data.aws_subnets.private.ids
   cert_arn               = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  domain                 = local.domain
   hostname               = module.app_config.hostname
   desired_instance_count = local.service_config.instance_desired_instance_count
   max_capacity           = local.service_config.instance_scaling_max_capacity
@@ -130,6 +131,7 @@ module "service" {
   enable_autoscaling     = true
   cpu                    = local.service_config.instance_cpu
   memory                 = local.service_config.instance_memory
+  enable_cdn             = true
 
   app_access_policy_arn      = null
   migrator_access_policy_arn = null

@@ -5,9 +5,8 @@ import logging
 import os
 import time
 import uuid
-from collections.abc import Callable, Generator
 from functools import wraps
-from typing import ParamSpec, TypeVar
+from typing import Callable, Generator, ParamSpec, TypeVar  # noqa:  UP035
 
 import requests
 
