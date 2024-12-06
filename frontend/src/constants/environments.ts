@@ -10,6 +10,7 @@ const {
   NEXT_PUBLIC_BASE_URL,
   FEATURE_SEARCH_OFF = "false",
   FEATURE_OPPORTUNITY_OFF = "false",
+  NEXT_BUILD = "false",
 } = process.env;
 
 // home for all interpreted server side environment variables
@@ -29,4 +30,5 @@ export const environment: { [key: string]: string } = {
   GOOGLE_TAG_MANAGER_ID: "GTM-MV57HMHS",
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_SEARCH_OFF,
+  NEXT_BUILD,
 };

@@ -131,18 +131,6 @@ export class FeatureFlagsManager {
   }
 
   /**
-   * Check whether a feature flag is disabled
-   * @param name - Feature flag name
-   * @example isFeatureEnabled("featureFlagName")
-   */
-  isFeatureDisabled(
-    name: string,
-    searchParams?: ServerSideSearchParams,
-  ): boolean {
-    return !this.isFeatureEnabled(name, searchParams);
-  }
-
-  /**
    * Check whether a feature flag is enabled
    * @param name - Feature flag name
    * @example isFeatureEnabled("featureFlagName")
@@ -166,6 +154,9 @@ export class FeatureFlagsManager {
       );
       featureFlagBoolean = featureFlagsObject[name];
     }
+
+    // eslint-disable-next-line
+    console.log("$$$ is feature enabled", name, featureFlagBoolean);
 
     return featureFlagBoolean;
   }

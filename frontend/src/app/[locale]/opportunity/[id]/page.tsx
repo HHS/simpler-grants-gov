@@ -3,8 +3,9 @@ import NotFound from "src/app/[locale]/not-found";
 import { fetchOpportunity } from "src/app/api/fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlagStatic from "src/hoc/search/withFeatureFlagStatic";
+import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -21,7 +22,9 @@ import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 
-type OpportunityListingProps = { params: { id: string } };
+type OpportunityListingProps = {
+  params: { id: string };
+} & WithFeatureFlagProps;
 
 export const revalidate = 600; // invalidate ten minutes
 
@@ -45,6 +48,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
   return meta;
 }
+
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return [];
@@ -148,7 +153,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   );
 }
 
-export default withFeatureFlagStatic<OpportunityListingProps, never>(
+export default withFeatureFlag<OpportunityListingProps, never>(
   OpportunityListing,
   "opportunityOff",
   () => redirect("/maintenance"),

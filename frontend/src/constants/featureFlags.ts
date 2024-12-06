@@ -8,3 +8,5 @@ export const featureFlags: FeatureFlags = {
   searchOff: false,
   opportunityOff: false,
 };
+
+// http://localhost:3000/es/opportunity/33?_ff=opportunityOff%3Afalse
