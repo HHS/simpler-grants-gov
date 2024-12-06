@@ -16,7 +16,7 @@ def record_custom_event(event_type: str, params: dict[Any, Any]) -> None:
     params["api.request.path"] = params.get("request.path")
     params["api.request.method"] = params.get("request.method")
     params["api.request.url_rule"] = params.get("request.url_rule")
-    params["api.request.id"] = params.get("request.path")
+    params["api.request.id"] = params.get("request.id")
 
     if flask.has_request_context():
         params["api.request.internal_id"] = getattr(flask.g, "internal_request_id", None)
