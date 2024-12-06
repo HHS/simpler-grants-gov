@@ -158,8 +158,6 @@ export class FeatureFlagsManager {
     const currentFeatureFlags = this.featureFlags;
     let featureFlagBoolean = currentFeatureFlags[name];
 
-
-
     // Query params take precedent. Override the returned value if we see them
     if (searchParams && searchParams._ff) {
       const featureFlagsObject = this.parseFeatureFlagsFromString(
@@ -167,9 +165,6 @@ export class FeatureFlagsManager {
       );
       featureFlagBoolean = featureFlagsObject[name];
     }
-
-    // eslint-disable-next-line
-    console.log("$$$ is feature enabled", name, featureFlagBoolean);
 
     return featureFlagBoolean;
   }
@@ -215,7 +210,7 @@ export class FeatureFlagsManager {
       (featureFlagsFromEnvironment, flagName) => {
         // by convention all feature flag env var names start with "FEATURE"
         // and all app side feature flag names should be in the camel case version of the env var names (minus FEATURE)
-        // ex "FEAUTURE_SEARCH_OFF" -> "searchOff"
+        // ex "FEATURE_SEARCH_OFF" -> "searchOff"
         const envVarName = `FEATURE_${camelToSnake(flagName).toUpperCase()}`;
         const envVarValue = environment[envVarName];
         if (envVarValue)
@@ -302,8 +297,6 @@ export class FeatureFlagsManager {
       // CookiesStatic
       cookies.set(FeatureFlagsManager.FEATURE_FLAGS_KEY, value, { expires });
     } else {
-      // eslint-disable-next-line
-      console.log('$$$ setting feature flag cookie', value)
       // Next.js cookies API
       cookies?.set({
         name: FeatureFlagsManager.FEATURE_FLAGS_KEY,
