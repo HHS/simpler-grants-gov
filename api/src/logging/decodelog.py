@@ -144,6 +144,8 @@ EXCLUDE_EXTRA = {
     "threadName",
     "trace.id",
     "traceId",
+    "deploy_github_ref",
+    "deploy_github_sha",
 }
 
 

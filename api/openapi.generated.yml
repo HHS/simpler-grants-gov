@@ -23,6 +23,7 @@ tags:
 - name: Health
 - name: Opportunity v1
 - name: Extract v1
+- name: Agency v1
 - name: User v1
 servers: .
 paths:
@@ -75,6 +76,47 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ExtractMetadataRequest'
+            examples:
+              example1:
+                summary: No filters
+                value:
+                  pagination:
+                    order_by: created_at
+                    page_offset: 1
+                    page_size: 25
+                    sort_direction: descending
+      security:
+      - ApiKeyAuth: []
+  /v1/agencies:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Agency v1
+      summary: Agencies Get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyListRequest'
             examples:
               example1:
                 summary: No filters
@@ -473,6 +515,26 @@ paths:
 openapi: 3.1.0
 components:
   schemas:
+    HealthcheckMetadata:
+      type: object
+      properties:
+        commit_sha:
+          type: string
+          description: The github commit sha for the latest deployed commit
+          example: ffaca647223e0b6e54344122eefa73401f5ec131
+        commit_link:
+          type: string
+          description: A github link to the latest deployed commit
+          example: https://github.com/HHS/simpler-grants-gov/commit/main
+        release_notes_link:
+          type: string
+          description: A github link to the release notes - direct if the latest deploy
+            was a release
+          example: https://github.com/HHS/simpler-grants-gov/releases
+        last_deploy_time:
+          type: string
+          format: date-time
+          description: Latest deploy time in US/Eastern timezone
     HealthcheckResponse:
       type: object
       properties:
@@ -481,7 +543,10 @@ components:
           description: The message to return
           example: Success
         data:
-          example: null
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/HealthcheckMetadata'
         status_code:
           type: integer
           description: The HTTP status code
@@ -697,6 +762,158 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    AgencyFilterV1:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+    AgencyPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+        page_size:
+          type: integer
+          minimum: 1
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - order_by
+      - page_offset
+      - page_size
+      - sort_direction
+    AgencyListRequest:
+      type: object
+      properties:
+        filters:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyFilterV1'
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyPaginationV1'
+      required:
+      - pagination
+    AgencyContactInfo:
+      type: object
+      properties:
+        contact_name:
+          type: string
+          description: Full name of the agency contact person
+        address_line_1:
+          type: string
+          description: Primary street address of the agency
+        address_line_2:
+          type:
+          - string
+          - 'null'
+          description: Additional address information (suite, unit, etc.)
+        city:
+          type: string
+          description: City where the agency is located
+        state:
+          type: string
+          description: State where the agency is located
+        zip_code:
+          type: string
+          description: Postal code for the agency address
+        phone_number:
+          type: string
+          description: Contact phone number for the agency
+        primary_email:
+          type: string
+          description: Main email address for agency communications
+        secondary_email:
+          type:
+          - string
+          - 'null'
+          description: Alternative email address for agency communications
+    AgencyResponse:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+        agency_name:
+          type: string
+        agency_code:
+          type: string
+        sub_agency_code:
+          type:
+          - string
+          - 'null'
+        assistance_listing_number:
+          type: string
+        agency_submission_notification_setting:
+          type: string
+        top_level_agency:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/AgencyResponse'
+        agency_contact_info:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/AgencyContactInfo'
+          - type: 'null'
+        agency_download_file_types:
+          type: array
+          description: List of download file types supported by the agency
+          items:
+            enum:
+            - xml
+            - pdf
+            type:
+            - string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AgencyListResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id001
+          allOf:
+          - $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: A list of agency records
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/AgencyResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     User:
       type: object
       properties:
@@ -863,7 +1080,7 @@ components:
             - archived
             type:
             - string
-    AgencyFilterV1:
+    AgencyFilterV11:
       type: object
       properties:
         one_of:
@@ -1006,7 +1223,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/AgencyFilterV1'
+          - $ref: '#/components/schemas/AgencyFilterV11'
         assistance_listing_number:
           type:
           - object
@@ -1751,4 +1968,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-

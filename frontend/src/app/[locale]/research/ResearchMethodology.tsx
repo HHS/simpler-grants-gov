@@ -1,9 +1,7 @@
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { Button, Grid } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 const ResearchMethodology = () => {
   const t = useTranslations("Research");
@@ -38,18 +36,22 @@ const ResearchMethodology = () => {
           ),
           li: (chunks) => <li>{chunks}</li>,
         })}
-        <p className="font-sans-md line-height-sans-4 desktop-lg:line-height-sans-6">
+        <h3 className="tablet-lg:font-sans-lg tablet-lg:margin-bottom-05">
           {t("methodology.title_3")}
-        </p>
-        <Link href="/subscribe" passHref>
-          <Button className="margin-bottom-4" type="button" outline>
-            <span className="margin-right-4">{t("methodology.cta")}</span>
-            <USWDSIcon
-              className="usa-icon usa-icon--size-3 text-middle margin-left-neg-3"
-              name="arrow_forward"
-            />
+        </h3>
+        <a
+          href="https://ethn.io/screeners/113856/edit?step=design"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button
+            className="margin-bottom-4 margin-top-2 padding-3"
+            type="button"
+            size="big"
+          >
+            {t("methodology.cta")}
           </Button>
-        </Link>
+        </a>
       </Grid>
     </ContentLayout>
   );
