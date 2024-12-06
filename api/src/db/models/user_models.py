@@ -48,3 +48,14 @@ class UserTokenSession(ApiSchemaTable, TimestampMixin):
 
     # When a user logs out, we set this flag to False.
     is_valid: Mapped[bool] = mapped_column(default=True)
+
+
+class LoginGovState(ApiSchemaTable, TimestampMixin):
+    """Table used to store temporary state during the OAuth login flow"""
+
+    __tablename__ = "login_gov_state"
+
+    login_gov_state_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+    # https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes
+    nonce: Mapped[uuid.UUID]

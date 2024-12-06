@@ -7,7 +7,9 @@ import flask
 import jwt
 from pydantic import Field
 
+from src.adapters import db
 from src.auth.auth_errors import JwtValidationError
+from src.db.models.user_models import LoginGovState
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -102,7 +104,7 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     config.public_keys = list(public_keys)
 
 
-def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
+def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
     if config is None:
         config = get_config()
 
@@ -128,6 +130,9 @@ def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
             "response_type": "code",
         }
     )
+
+    # Add the state to the DB
+    db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
 
