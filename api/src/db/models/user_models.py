@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from src.constants.lookup_constants import ExternalUserType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
 
@@ -13,25 +14,25 @@ from src.db.models.lookup_models import LkExternalUserType
 class User(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
 
 class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_external_user"
 
-    link_external_user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
     external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
 
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
-    user: Mapped[User] = relationship(User)
-
-    external_user_type: Mapped[int] = mapped_column(
+    external_user_type: Mapped[ExternalUserType] = mapped_column(
         "external_user_type_id",
         LookupColumn(LkExternalUserType),
         ForeignKey(LkExternalUserType.external_user_type_id),
         index=True,
     )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User)
 
     email: Mapped[str]
 
@@ -39,10 +40,10 @@ class LinkExternalUser(ApiSchemaTable, TimestampMixin):
 class UserTokenSession(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_token_session"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
     user: Mapped[User] = relationship(User)
 
-    token_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    token_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
     expires_at: Mapped[datetime]
 

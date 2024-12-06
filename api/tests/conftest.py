@@ -15,6 +15,7 @@ from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
+import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
@@ -258,21 +259,36 @@ def other_rsa_key_pair():
     return _generate_rsa_key_pair()
 
 
-####################
-# Test App & Client
-####################
-
-
 @pytest.fixture(scope="session")
 def mock_oauth_client():
     return MockLoginGovOauthClient()
+
+
+@pytest.fixture(scope="session")
+def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
+    """Setup login.gov JWK endpoint to be stubbed out"""
+
+    def override_method(config):
+        config.public_keys = [public_rsa_key]
+
+    monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
+
+
+####################
+# Test App & Client
+####################
 
 
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
 def app(
-    db_client, opportunity_index_alias, monkeypatch_session, private_rsa_key, mock_oauth_client
+    db_client,
+    opportunity_index_alias,
+    monkeypatch_session,
+    private_rsa_key,
+    mock_oauth_client,
+    setup_login_gov_auth,
 ) -> APIFlask:
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(

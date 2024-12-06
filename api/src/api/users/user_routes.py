@@ -15,7 +15,6 @@ from src.api.users.user_schemas import (
     UserTokenRefreshResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
-from src.auth.api_key_auth import api_key_auth
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
@@ -54,28 +53,13 @@ def user_login(db_session: db.Session) -> flask.Response:
 def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login/callback")
 
-    # TODO: Do not launch with this, just keeping this here for debugging
-    # as we get it built out.
-    # logger.info(query_data)
-
-    # You can test what we do in this endpoint manually by:
-    #
-    # - Go to: http://localhost:8080/v1/users/login
-    # - Enter a username in the box
-    # - This should end with you on the final redirect (google right now)
-    #
-    # You can see the log messages above and grab the code.
-    #
-    # You can use this code to query the final endpoint by doing:
-    # curl -X 'POST' 'http://localhost:5001/issuer1/token' -d 'grant_type=authorization_code&client_id=local_mock_client_id&code=<insert code>'
-    #
-    # The JWT we will process is the id_token returned
-
     with db_session.begin():
-        handle_login_gov_callback(query_data, db_session)
+        result = handle_login_gov_callback(query_data, db_session)
 
     # Redirect to the final location for the user
-    return response.redirect_response(get_final_redirect_uri("success", "abc123xyz456", False))
+    return response.redirect_response(
+        get_final_redirect_uri("success", result.token, result.is_user_new)
+    )
 
 
 @user_blueprint.get("/login/result")
@@ -86,33 +70,6 @@ def login_result() -> flask.Response:
 
     # Echo back the query args as JSON for some readability
     return flask.jsonify(flask.request.args)
-
-
-@user_blueprint.post("/token")
-@user_blueprint.input(
-    user_schemas.UserTokenHeaderSchema, location="headers", arg_name="x_oauth_login_gov"
-)
-@user_blueprint.output(user_schemas.UserTokenResponseSchema)
-@user_blueprint.auth_required(api_key_auth)
-def user_token(x_oauth_login_gov: dict) -> response.ApiResponse:
-    logger.info("POST /v1/users/token")
-
-    if x_oauth_login_gov:
-        data = {
-            "token": "the token goes here!",
-            "user": {
-                "user_id": "abc-...",
-                "email": "example@gmail.com",
-                "external_user_type": "login_gov",
-            },
-            "is_user_new": True,
-        }
-        return response.ApiResponse(message="Success", data=data)
-
-    message = "Missing X-OAuth-login-gov header"
-    logger.info(message)
-
-    raise_flask_error(400, message)
 
 
 @user_blueprint.post("/token/logout")
