@@ -21,7 +21,7 @@ If you want to have more control over how the reports are run, you can also run 
 
 ### Export data and run reports
 
-If want to run reports with the most recent data from GitHub, the easiest way to do it is with the `make sprint-reports-with-latest-data`.
+If want to run reports with the most recent data from GitHub, the easiest way to do it is to run `make sprint-reports-with-latest-data`.
 
 That should result in something like the following being logged to the command line:
 
@@ -76,7 +76,7 @@ After following the installation steps above, you can use the following commands
 
 You can use the following command to import data to the analytics database.
 
-```bash
+```bash 
 poetry run analytics export gh_delivery_data \
 	--config-file config/github-projects.json \
 	--output-file  data/delivery-data.json \
@@ -86,7 +86,7 @@ poetry run analytics export gh_delivery_data \
 or the simpler
 
 ```bash
-make gh-delivery-data-export
+make gh-data-export
 ```
 
 A couple of notes about this command:
@@ -126,12 +126,12 @@ When finished, run `docker-compose down` to stop and remove all containers, netw
 
 #### Viewing the data in Metabase
 
-[Metabase](https://www.metabase.com/) is a buisness intelligence that lets you query, organize and view data with a friendly UX. In order to view data in Metabase, start the containers and then navigate to http://localhost:3100/.
+[Metabase](https://www.metabase.com/) is a business intelligence that lets you query, organize and view data with a friendly UX. In order to view data in Metabase, start the containers via `make build`,  and then navigate to http://localhost:3100/.
 
-The first time you access Metabase you will be guided through a small setup process to sync the database to the platform.
+The first time you access Metabase you will be guided through a small setup process to sync the database to the platform. See local.env to set database properties.
 
 ![Screenshot of the landing page in Metabase](../../analytics/static/screenshot-metabase-page.png)
-
+![Screenshot of the analytics db configuration](../../analytics/static/screenshot-metabase-db-config.png)
 ![Screenshot of a row of test data](../../analytics/static/screenshot-metabase-row-data.png)
 
 ### Calculating metrics
@@ -230,10 +230,10 @@ Development is underway on new as-is/as-was reporting capabilities, the foundati
 
 Initialize the ETL DB:
 ```bash
-poetry run analytics etl initialize_database
+poetry run analytics etl db_migrate
 ```
 
 Transform and load a json file into the ETL DB:
 ```bash
-poetry run analytics etl transform_and_load --deliverable-file ./data/test-etl-01.json --effective-date 2024-10-28
+poetry run analytics etl transform_and_load --issue-file ./data/test-etl-01.json --effective-date 2024-10-28 
 ```

@@ -19,7 +19,7 @@ jobs:
     # Lint github actions files using https://github.com/rhysd/actionlint
     # This job configuration is largely copied from https://github.com/rhysd/actionlint/blob/main/docs/usage.md#use-actionlint-on-github-actions
     name: Lint GitHub Actions workflows
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Download actionlint
@@ -31,14 +31,14 @@ jobs:
         shell: bash
   lint-scripts:
     name: Lint scripts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Shellcheck
         run: make infra-lint-scripts
   check-terraform-format:
     name: Check Terraform format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -51,7 +51,7 @@ jobs:
           make infra-lint-terraform
   validate-terraform:
     name: Validate Terraform modules
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -62,7 +62,7 @@ jobs:
         run: make infra-validate-modules
   check-compliance-with-checkov:
     name: Check compliance with checkov
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -81,7 +81,7 @@ jobs:
           quiet: true # only displays failed checks
   check-compliance-with-tfsec:
     name: Check compliance with tfsec
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read

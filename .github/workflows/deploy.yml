@@ -33,7 +33,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [database-migrations]
     permissions:
       contents: read
@@ -52,4 +52,8 @@ jobs:
           environment: ${{ inputs.environment }}
 
       - name: Deploy release
-        run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }}
+        run: make release-deploy \
+          APP_NAME=${{ inputs.app_name }} \
+          ENVIRONMENT=${{ inputs.environment }} \
+          DEPLOY_GITHUB_REF=${{ github.ref_name }} \
+          DEPLOY_GITHUB_SHA=${{ github.sha }}

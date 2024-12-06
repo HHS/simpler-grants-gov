@@ -11,15 +11,24 @@ FROM python:3.13-slim AS base
 RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 
 RUN apt-get update \
+  # Remove existing packages before installing their never versions
+  && apt-get remove --yes \
+    build-essential \
+    libc-dev \
+    libpq-dev \
+    postgresql \
+    wget \
+    jq \
   # Install security updates
   # https://pythonspeed.com/articles/security-updates-in-docker/
   && apt-get upgrade --yes \
   && apt-get install --no-install-recommends --yes \
-  build-essential \
-  libpq-dev \
-  postgresql \
-  wget \
-  jq \
+    build-essential \
+    libc-dev \
+    libpq-dev \
+    postgresql \
+    wget \
+    jq \
   # Reduce the image size by clear apt cached lists
   # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
   && rm -fr /var/lib/apt/lists/* \
@@ -106,10 +115,9 @@ RUN poetry install --no-root --only main
 
 # Build the application binary (python wheel) defined in pyproject.toml
 # Note that this will only copy over python files, and files stated in the
-# include section in pyproject.toml. Also note that if you change the name or
-# version section in pyproject.toml, you will need to change the dist/... to match
-# or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl'
+# include section in pyproject.toml.
+RUN poetry build --format wheel && \
+  poetry run pip install --no-cache-dir dist/*.whl
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defiend in pyproject.toml

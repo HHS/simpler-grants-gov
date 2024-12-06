@@ -147,6 +147,9 @@ module "service" {
   extra_environment_variables = merge(
     local.service_config.extra_environment_variables,
     { "ENVIRONMENT" : var.environment_name },
+    { "DEPLOY_TIMESTAMP" : timestamp() },
+    var.deploy_github_sha != null ? { "DEPLOY_GITHUB_SHA" : var.deploy_github_sha } : {},
+    var.deploy_github_ref != null ? { "DEPLOY_GITHUB_REF" : var.deploy_github_ref } : {}
   )
 
   secrets = concat(

@@ -23,7 +23,7 @@ concurrency:
 jobs:
   tests:
     name: FE Lint, Type Check, Format & Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
   # Confirms the front end still builds successfully
   check-frontend-builds:
     name: FE Build Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
   # Confirms Storybook still builds successfully
   check-storybook-builds:
     name: FE Storybook Build Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
