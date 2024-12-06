@@ -79,8 +79,8 @@ function Search({ searchParams }: SearchPageProps) {
 
 // Exports page behind feature flags
 export default withFeatureFlag<SearchPageProps, never>(
-  // withFeatureFlag(Search, "hideSearchV0", notFound),
-  Search,
+  withFeatureFlag(Search, "hideSearchV0", notFound),
+  // Search,
   "searchOff",
   () => redirect("/maintenance"),
 );

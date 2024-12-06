@@ -122,6 +122,7 @@ export class FeatureFlagsManager {
     );
   }
 
+  // how do we honor both the cookie and the env var?
   get featureFlags(): FeatureFlags {
     return {
       ...this.defaultFeatureFlags,
@@ -146,6 +147,8 @@ export class FeatureFlagsManager {
     // Start with the default feature flag setting
     const currentFeatureFlags = this.featureFlags;
     let featureFlagBoolean = currentFeatureFlags[name];
+
+
 
     // Query params take precedent. Override the returned value if we see them
     if (searchParams && searchParams._ff) {
@@ -263,7 +266,7 @@ export class FeatureFlagsManager {
       throw new Error(`\`${featureName}\` is not a valid feature flag`);
     }
     const featureFlags = {
-      ...this.featureFlags,
+      ...this.featureFlagsCookie,
       [featureName]: enabled,
     };
 
@@ -289,6 +292,8 @@ export class FeatureFlagsManager {
       // CookiesStatic
       cookies.set(FeatureFlagsManager.FEATURE_FLAGS_KEY, value, { expires });
     } else {
+      // eslint-disable-next-line
+      console.log('$$$ setting feature flag cookie', value)
       // Next.js cookies API
       cookies?.set({
         name: FeatureFlagsManager.FEATURE_FLAGS_KEY,
