@@ -1,7 +1,7 @@
 import logging
 import sys
 from types import TracebackType
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any
 
 import newrelic.agent
 
@@ -11,15 +11,13 @@ AGENT_ATTRIBUTE_LIMIT = 128
 EVENT_API_ATTRIBUTE_LIMIT = 255
 
 
-def record_custom_event(event_type: str, params: Dict[Any, Any]) -> None:
+def record_custom_event(event_type: str, params: dict[Any, Any]) -> None:
     # legacy aliases
     params["request.uri"] = params.get("request.path")
     params["request.headers.x-amzn-requestid"] = params.get("request_id")
 
-    # legacy FineosError attribute aliases
     params["api.request.method"] = params.get("request.method")
     params["api.request.uri"] = params.get("request.path")
-    params["api.request.headers.x-amzn-requestid"] = params.get("request_id")
 
     # If there are more custom attributes than the limit, the agent will upload
     # a partial payload, dropping keys after hitting its limit
@@ -41,9 +39,7 @@ def record_custom_event(event_type: str, params: Dict[Any, Any]) -> None:
     )
 
 
-def log_and_capture_exception(
-    msg: str, extra: Optional[Dict] = None, only_warn: bool = False
-) -> None:
+def log_and_capture_exception(msg: str, extra: dict | None = None, only_warn: bool = False) -> None:
     """
     Sometimes we want to record custom messages that do not match an exception message. For example, when a ValidationError contains
     multiple issues, we want to log and record each one individually in New Relic. Injecting a new exception with a
@@ -53,9 +49,7 @@ def log_and_capture_exception(
     """
 
     info = sys.exc_info()
-    info_with_readable_msg: Union[
-        BaseException, Tuple[type, BaseException, Optional[TracebackType]]
-    ]
+    info_with_readable_msg: BaseException | tuple[type, BaseException, TracebackType | None]
 
     if info[0] is None:
         exc = Exception(msg)
