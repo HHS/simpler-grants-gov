@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   return meta;
 }
 
-export const dynamic = "force-static";
+// export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return [];
