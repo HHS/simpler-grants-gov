@@ -28,7 +28,12 @@ const OpportunityCTA = ({ id }: { id: number }) => {
   const content = (
     <>
       <span>{t("apply_content")}</span>
-      <a href={legacyOpportunityURL} target="_blank" rel="noopener noreferrer">
+      <a
+        href={legacyOpportunityURL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="display-block"
+      >
         <Button type="button" outline={true} className="margin-top-2">
           <span>{t("button_content")}</span>
           <USWDSIcon
