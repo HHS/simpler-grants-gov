@@ -23,10 +23,10 @@ RUN apt-get update \
     # https://pythonspeed.com/articles/security-updates-in-docker/
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
-    build-essential \
-    libpq-dev \
-    postgresql \
-    wget \
+        build-essential \
+        libpq-dev \
+        postgresql \
+        wget \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -fr /var/lib/apt/lists/* \
