@@ -31,30 +31,35 @@ const withFeatureFlag = <P, R>(
   if (environment.NEXT_BUILD === "true") {
     return WrappedComponent;
   }
+  // // eslint-disable-next-line
+  // console.log("____", featureFlagName, onEnabled);
 
   // the problem is not that this returns a function
   // i guess it wants the function it returns to return an element
 
   // top level component to grab search params from the top level page props
-  // return (props: P & WithFeatureFlagProps) => {
-  //   const searchParams = props.searchParams || {};
-  //   // wrap the flagged component to close over search params and accept other props as normal
-  //   const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
-  //     const searchParams = props.searchParams || {};
-  //     const featureFlagsManager = new FeatureFlagsManager(cookies());
+  return (props: P & WithFeatureFlagProps) => {
+    const searchParams = props.searchParams || {};
+    // wrap the flagged component to close over search params and accept other props as normal
+    const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
+      const searchParams = props.searchParams || {};
+      const featureFlagsManager = new FeatureFlagsManager(cookies());
 
-  //     if (featureFlagsManager.isFeatureEnabled(featureFlagName, searchParams)) {
-  //       return onEnabled();
-  //     }
+      if (featureFlagsManager.isFeatureEnabled(featureFlagName, searchParams)) {
+        return onEnabled();
+      }
 
-  //     return <WrappedComponent {...props} />;
-  //   };
-  //   return <ComponentWithFeatureFlag {...props} searchParams={searchParams} />;
-  // };
-
-  return (props) => {
-    return <div>hi</div>;
+      return <WrappedComponent {...props} />;
+    };
+    return <ComponentWithFeatureFlag {...props} searchParams={searchParams} />;
   };
+
+  // const Dumb = (props: P & WithFeatureFlagProps) => {
+  //   // eslint-disable-next-line
+  //   console.log("+++", props.searchParams);
+  //   return <div>hi</div>;
+  // };
+  // return Dumb;
 };
 
 export default withFeatureFlag;
