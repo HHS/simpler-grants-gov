@@ -75,6 +75,11 @@ def callback() -> None:
     init()
 
 
+# Initialize the logger for db-migrate which is exposed directly
+# by the db-migrate entrypoint
+init()
+
+
 # ===========================================================
 # Export commands
 # ===========================================================
