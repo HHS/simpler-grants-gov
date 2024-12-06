@@ -1956,6 +1956,14 @@ class LinkExternalUserFactory(BaseFactory):
     email = factory.Faker("email")
 
 
+class LoginGovStateFactory(BaseFactory):
+    class Meta:
+        model = user_models.LoginGovState
+
+    login_gov_state_id = Generators.UuidObj
+    nonce = Generators.UuidObj
+
+
 class ExtractMetadataFactory(BaseFactory):
     class Meta:
         model = extract_models.ExtractMetadata

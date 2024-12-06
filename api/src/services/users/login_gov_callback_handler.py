@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 import src.adapters.db as db
+from src.adapters.oauth.login_gov.login_gov_oauth_client import LoginGovOauthClient
+from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import LoginGovState
 from src.util.string_utils import is_valid_uuid
@@ -23,6 +25,11 @@ class CallbackParams(BaseModel):
 class LoginGovCallbackResponse:
     token: str
     is_user_new: bool
+
+
+def get_login_gov_client() -> LoginGovOauthClient:
+    """Get the login.gov client, in a method to be overridable in tests"""
+    return LoginGovOauthClient()
 
 
 def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> LoginGovCallbackResponse:
@@ -63,11 +70,17 @@ def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> Login
     if login_gov_state is None:
         raise_flask_error(404, "OAuth state not found")
 
-    # TODO: Call the token endpoint (make a client)
+    # call the token endpoint (make a client)
     # https://developers.login.gov/oidc/token/
-    # * Request building/call
-    # * Creating a JWT with the key we gave login.gov
-    # * Handling the response
+    # TODO: Creating a JWT with the key we gave login.gov
+    client = get_login_gov_client()
+    response = client.get_token(OauthTokenRequest(code=callback_params.code))
+
+    # If this request failed, we'll assume we're the issue and 500
+    # TODO - need to test with actual login.gov if there could be other scenarios
+    #        the mock always returns something as long as the request is well-formatted
+    if response.is_error_response():
+        raise_flask_error(500, response.error_description)
 
     # TODO: Process the token response from login.gov
     # Note that a lot of this is already in https://github.com/HHS/simpler-grants-gov/pull/3004
