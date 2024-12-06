@@ -115,10 +115,9 @@ RUN poetry install --no-root --only main
 
 # Build the application binary (python wheel) defined in pyproject.toml
 # Note that this will only copy over python files, and files stated in the
-# include section in pyproject.toml. Also note that if you change the name or
-# version section in pyproject.toml, you will need to change the dist/... to match
-# or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl'
+# include section in pyproject.toml.
+RUN poetry build --format wheel && \
+  poetry run pip install --no-cache-dir dist/*.whl
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defiend in pyproject.toml
