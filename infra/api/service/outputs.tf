@@ -22,3 +22,7 @@ output "application_log_stream_prefix" {
 output "migrator_role_arn" {
   value = module.service.migrator_role_arn
 }
+
+output "enable_drafts_bucket" {
+  value = module.service.enable_drafts_bucket
+}
