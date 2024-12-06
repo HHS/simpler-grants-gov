@@ -52,5 +52,11 @@ locals {
       schedule_expression = "cron(30 * * * ? *)"
       state               = "ENABLED"
     }
+    export-opportunity-data = {
+      task_command = ["poetry", "run", "flask", "task", "export-opportunity-data"]
+      # Every day at 4am Eastern Time (9am UTC to ensure it runs at 4am ET even during DST)
+      schedule_expression = "cron(0 9 * * ? *)"
+      state               = "ENABLED"
+    }
   }
 }
