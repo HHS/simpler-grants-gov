@@ -13,7 +13,7 @@ resource "aws_cloudfront_origin_access_identity" "cdn" {
 resource "aws_cloudfront_cache_policy" "default" {
   count = var.enable_cdn ? 1 : 0
 
-  name = "default"
+  name = var.service_name
 
   # Default to caching for 1 hour.
   # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
