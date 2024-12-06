@@ -29,6 +29,7 @@ from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.newrelic import init_newrelic
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,8 @@ def create_app() -> APIFlask:
     # This cannot be removed non-locally until we setup RSA keys for non-local envs
     if os.getenv("ENVIRONMENT") == "local":
         initialize_jwt_auth()
+
+    init_newrelic()
 
     return app
 
