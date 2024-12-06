@@ -38,9 +38,8 @@ resource "aws_cloudfront_cache_policy" "default" {
 resource "aws_cloudfront_distribution" "cdn" {
   count = var.enable_cdn ? 1 : 0
 
-  enabled             = var.enable_cdn ? true : false
-  aliases             = var.domain == null ? null : [var.domain]
-  default_root_object = "/"
+  enabled = var.enable_cdn ? true : false
+  aliases = var.domain == null ? null : [var.domain]
 
   origin {
     domain_name = aws_lb.alb[0].dns_name
