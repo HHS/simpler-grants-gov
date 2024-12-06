@@ -16,6 +16,7 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.api_key_auth import api_key_auth
+from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
 from src.services.users.get_user import get_user
@@ -34,6 +35,7 @@ The token you receive can then be set to the X-SGG-Token header for authenticati
 
 @user_blueprint.get("/login")
 @user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
+@with_login_redirect_error_handler()
 def user_login() -> flask.Response:
     logger.info("GET /v1/users/login")
 
@@ -43,6 +45,7 @@ def user_login() -> flask.Response:
 @user_blueprint.get("/login/callback")
 @user_blueprint.input(user_schemas.UserLoginGovCallbackSchema, location="query")
 @user_blueprint.doc(responses=[302], hide=True)
+@with_login_redirect_error_handler()
 def user_login_callback(query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login/callback")
 
