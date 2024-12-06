@@ -47,21 +47,24 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Run `make build`
-2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
-  - Go to https://github.com/settings/tokens
-  - Generate a new token (classic)
-  - Give it the following scopes:
-    - repo
-    - read:org
-    - admin:public_key
-    - project
-  - Add `export GH_TOKEN=...` to your `zshrc` or similar
-3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+2. Acquire a GitHub Token using one of the methods below
+  - Via AWS (Project Team)
+    - Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
+  - Create your own in GitHub (Open Source)
+    - Go to https://github.com/settings/tokens
+    - Generate a new token (classic)
+    - Give it the following scopes:
+      - repo
+      - read:org
+      - admin:public_key
+      - project
+3. Add `export GH_TOKEN=...` to your `zshrc` or similar
+4. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```
    export ANALYTICS_SLACK_BOT_TOKEN=...
    export ANALYTICS_REPORTING_CHANNEL_ID=...
    ```
-4. Run `make test-audit` to confirm the application is running correctly.
+5. Run `make test-audit` to confirm the application is running correctly.
 
 #### Running natively
 
@@ -75,21 +78,24 @@ After choosing your approach, following the corresponding setup instructions:
 **Steps**
 
 1. Set up the project: `make setup` -- This will install the required packages and prompt you to authenticate with GitHub
-2. Set a GitHub Token in your terminal, via `export GH_TOKEN=...`. Acquiring the token is a multi-step process:
-  - Go to https://github.com/settings/tokens
-  - Generate a new token (classic)
-  - Give it the following scopes:
-    - repo
-    - read:org
-    - admin:public_key
-    - project
-  - Add `export GH_TOKEN=...` to your `zshrc` or similar
-3. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
+2. Acquire a GitHub Token using one of the methods below
+  - Via AWS (Project Team)
+    - Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
+  - Create your own in GitHub (Open Source)
+    - Go to https://github.com/settings/tokens
+    - Generate a new token (classic)
+    - Give it the following scopes:
+      - repo
+      - read:org
+      - admin:public_key
+      - project
+3. Add `export GH_TOKEN=...` to your `zshrc` or similar
+4. Set the slackbot token and the channel ID for Slack after following the instructions in [configuring secrets](#configuring-secrets). **Note:** replace the `...` with the value of these secrets:
    ```
    export ANALYTICS_SLACK_BOT_TOKEN=...
    export ANALYTICS_REPORTING_CHANNEL_ID=...
    ```
-4. Run `make test-audit` to confirm the application is running correctly.
+5. Run `make test-audit` to confirm the application is running correctly.
 
 ### Configuring secrets
 
@@ -104,10 +110,9 @@ If you need to be added to the slack workspace or to the list of collaborators f
 
 #### Finding reporting channel ID
 
-1. Go to the `#z_bot-sprint-reporting` channel in the Simpler.Grants.gov slack workspace.
+1. In the Simpler.Grants.gov Slack workspace navigate to the `#z_bot-sprint-reporting` channel. NB: Use`#z_bot-analytics-ci-test` channel for testing.
 2. Click on the name of the channel in the top left part of the screen.
-3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID`.
-4. Copy and paste that ID into your `.secrets.toml` file under the `reporting_channel_id` variable.
+3. Scroll down to the bottom of the resulting dialog box until you see where it says `Channel ID` and copy.
 
 <img alt="Screenshot of dialog box with channel ID" src="../../analytics/static/screenshot-channel-id.png" height=500>
 
@@ -116,7 +121,7 @@ If you need to be added to the slack workspace or to the list of collaborators f
 1. Go to [the dashboard](https://api.slack.com/apps) that displays the slack apps for which you have collaborator access
 2. Click on `Sprint Reporting Bot` to go to the settings for our analytics slackbot
 3. From the side menu, select `OAuth & Permissions` and scroll down to the "OAuth tokens for your workspace" section
-4. Copy the "Bot user OAuth token" which should start with `xoxb` and paste it into your `.secrets.toml` file under the `slack_bot_token` variable.
+4. Copy the "Bot user OAuth token" which should start with `xoxb`
 
 <img alt="Screenshot of slack app settings page with bot user OAuth token" src="../../analytics/static/screenshot-slackbot-token.png" width=750>
 
