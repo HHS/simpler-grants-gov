@@ -5,7 +5,7 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { cookies } from "next/headers";
 import React, { ComponentType } from "react";
 
-// since this relies on search params coming in as a prop, this can only be used on a top level page component
+// since this relies on search params coming in as a prop, it can only be used reliably on a top level page component
 // for other components we'll need a different implementation
 const withFeatureFlag = <P, R>(
   WrappedComponent: ComponentType<P>,
@@ -21,12 +21,10 @@ const withFeatureFlag = <P, R>(
   // top level component to grab search params from the top level page props
   return (props: P & WithFeatureFlagProps) => {
     const searchParams = props.searchParams || {};
-    // wrap the flagged component to close over search params and accept other props as normal
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
-      const searchParams = props.searchParams || {};
       const featureFlagsManager = new FeatureFlagsManager(cookies());
 
-      if (featureFlagsManager.isFeatureEnabled(featureFlagName, searchParams)) {
+      if (featureFlagsManager.isFeatureEnabled(featureFlagName, props.searchParams)) {
         return onEnabled();
       }
 
