@@ -9,4 +9,3 @@ export const featureFlags: FeatureFlags = {
   searchOff: false,
   opportunityOff: false,
 };
-
