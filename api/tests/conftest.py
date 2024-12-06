@@ -1,7 +1,6 @@
 import logging
 import os
 import pathlib
-import urllib
 import uuid
 
 import _pytest.monkeypatch
@@ -18,6 +17,7 @@ import src.adapters.db as db
 import src.app as app_entry
 import tests.src.db.models.factories as factories
 from src.adapters import search
+from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.foreign import metadata as foreign_metadata
@@ -26,6 +26,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
+from tests.lib.auth_test_utils import mock_oauth_endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -262,72 +263,25 @@ def other_rsa_key_pair():
 ####################
 
 
-def mock_jwk_endpoint(app):
-    @app.get("/test-endpoint/jwk")
-    def jwk_endpoint():
-        response = {
-            "keys": [
-                {
-                    "alg": "RS256",
-                    "use": "sig",
-                    "kty": "RSA",
-                    "n": "test_abc123",
-                    "e": "AQAB",
-                    "kid": "xyz123",
-                }
-            ]
-        }
-
-        return flask.jsonify(response)
-
-
-def oauth_param_override():
-    """Override endpoint called in the mock authorize endpoint setup below.
-
-    To override you can do the following in your test:
-
-        def override():
-            return {"error": "access_denied"}
-
-        monkeypatch.setattr("tests.conftest.oauth_param_override", override)
-    """
-    return {}
-
-
-def mock_oauth_endpoint(app):
-    # Adds a mock oauth endpoint to the app
-    # itself for auth purposes
-
-    @app.get("/test-endpoint/oauth-authorize")
-    def oauth_authorize():
-        # This endpoint represents a mocked version of
-        # https://developers.login.gov/oidc/authorization/
-        # and needs to return the state value as well as a code.
-        query_args = flask.request.args
-
-        params = {"state": query_args.get("state"), "code": str(uuid.uuid4())}
-        params.update(oauth_param_override())
-        encoded_params = urllib.parse.urlencode(params)
-
-        redirect_uri = f"{query_args['redirect_uri']}?{encoded_params}"
-
-        return flask.redirect(redirect_uri)
+@pytest.fixture(scope="session")
+def mock_oauth_client():
+    return MockLoginGovOauthClient()
 
 
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client, opportunity_index_alias, monkeypatch_session, public_rsa_key) -> APIFlask:
+def app(
+    db_client, opportunity_index_alias, monkeypatch_session, private_rsa_key, mock_oauth_client
+) -> APIFlask:
     # Override the OAuth endpoint path before creating the app which loads the config at startup
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
     )
-
-    # Create the app
     app = app_entry.create_app()
 
-    # Add the endpoint to the app
-    mock_oauth_endpoint(app)
+    # Add endpoints and mocks for handling the external OAuth logic
+    mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
 
     return app
 
