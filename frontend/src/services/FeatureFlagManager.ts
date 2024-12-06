@@ -122,7 +122,17 @@ export class FeatureFlagsManager {
     );
   }
 
-  // how do we honor both the cookie and the env var?
+  /*
+
+    - Flags set by environment variables are the first override to default values
+    - Flags set in the /dev/feature-flags admin view will be set in the cookie
+    - Flags set in query params will result in the flag value being stored in the cookie
+    - As query param values are set in middleware on each request, query params have the highest precedence
+    - Values set in cookies will be persistent per browser session unless explicitly overwritten
+    - This means that simply removing a query param from a url will not revert the feature flag value to
+    the value specified in environment variable or default, you'll need to clear cookies or open a new private browser
+
+  */
   get featureFlags(): FeatureFlags {
     return {
       ...this.defaultFeatureFlags,
