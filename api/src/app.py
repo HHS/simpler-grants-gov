@@ -13,6 +13,7 @@ import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
+from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
@@ -32,6 +33,8 @@ from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+init_newrelic()
 
 TITLE = "Simpler Grants API"
 API_OVERALL_VERSION = "v0"
