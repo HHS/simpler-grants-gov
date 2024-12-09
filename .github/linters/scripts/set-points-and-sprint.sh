@@ -113,61 +113,67 @@ pr_author=$(
 )
 
 # #######################################################
-# Abort update if issue wasn't closed by a PR
+# Assign PR author to issue, or abort update
 # #######################################################
 
+# If the issue doesn't have a linked PR, print a message and exit
 if [[ $pr_author == 'null' ]]; then
-  echo "Issue '$issue_url' wasn't closed by a PR. Skipping further updates."
+  echo "Issue '$issue_url' wasn't closed by a PR. Skipping further action."
   exit 0
+
+# If the output file for issue data is empty, print a message and exit
+elif [[ ! -s $item_data_file ]]; then
+  echo "Sprint and story points don't need to be updated. Skipping further action."
+  exit 0
+
+# Otherwise add the PR author to the list of assignees and proceed with other updates
+else
+  if [[ $dry_run == "YES" ]]; then
+    echo "Would assign issue ${issue_url} to $pr_author"
+  else
+    echo "Assigning issue ${issue_url} to $pr_author"
+    gh issue edit $issue_url --add-assignee $pr_author
+  fi
 fi
 
 # #######################################################
 # Fetch project metadata
 # #######################################################
 
-# If the output file contains a record
-if [[ -s $item_data_file ]]; then
+# If issue is a Task, Bug, or Enhancement, fetch the project metadata
+case "${issue_type}" in
+"Task"|"Bug"|"Enhancement")
+    gh api graphql \
+    --field org="${org}" \
+    --field project="${project}" \
+    --field sprintField="${sprint_field}" \
+    --field pointsField="${points_field}" \
+    -f query="${field_query}" \
+    --jq ".data.organization.projectV2 |
 
-    # If issue is a Task, Bug, or Enhancement, fetch the project metadata
-    case "${issue_type}" in
-    "Task"|"Bug"|"Enhancement")
-        gh api graphql \
-        --field org="${org}" \
-        --field project="${project}" \
-        --field sprintField="${sprint_field}" \
-        --field pointsField="${points_field}" \
-        -f query="${field_query}" \
-        --jq ".data.organization.projectV2 |
+    # reformat the field metadata
+    {
+      points,
+      sprint: {
+        fieldId: .sprint.fieldId,
+        iterationId: .sprint.configuration.iterations[0].id,
+      }
+    }" > $field_data_file  # write output to a file
+;;
 
-        # reformat the field metadata
-        {
-          points,
-          sprint: {
-            fieldId: .sprint.fieldId,
-            iterationId: .sprint.configuration.iterations[0].id,
-          }
-        }" > $field_data_file  # write output to a file
-    ;;
-
-    # If it's some other type, print a message and exit
-    *)
-        echo "Not updating because issue has type: ${issue_type}"
-        exit 0
-    ;;
-    esac
-
-    # get the itemId and the projectId
-    item_id=$(jq -r '.itemId' "$item_data_file")
-    project_id=$(jq -r '.projectId' "$item_data_file")
-
-# otherwise print a success message and exit
-else
-    echo "Both sprint and points are set for issue: ${issue_url}"
+# If it's some other type, print a message and exit
+*)
+    echo "Not updating because issue has type: ${issue_type}"
     exit 0
-fi
+;;
+esac
+
+# get the itemId and the projectId
+item_id=$(jq -r '.itemId' "$item_data_file")
+project_id=$(jq -r '.projectId' "$item_data_file")
 
 # #######################################################
-# Set the sprint value, if empty
+# Set the points value, if empty
 # #######################################################
 
 if jq -e ".points == null or .points == 0" $item_data_file > /dev/null; then
