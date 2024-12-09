@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import urllib
 import uuid
 
 import _pytest.monkeypatch
@@ -9,6 +10,8 @@ import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import text
 
 import src.adapters.db as db
@@ -217,16 +220,101 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     return alias
 
 
+def _generate_rsa_key_pair():
+    # Rather than define a private/public key, generate one for the tests
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    private_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, public_key
+
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
 ####################
 # Test App & Client
 ####################
 
 
+def mock_jwk_endpoint(app):
+    @app.get("/test-endpoint/jwk")
+    def jwk_endpoint():
+        response = {
+            "keys": [
+                {
+                    "alg": "RS256",
+                    "use": "sig",
+                    "kty": "RSA",
+                    "n": "test_abc123",
+                    "e": "AQAB",
+                    "kid": "xyz123",
+                }
+            ]
+        }
+
+        return flask.jsonify(response)
+
+
+def mock_oauth_endpoint(app):
+    # Adds a mock oauth endpoint to the app
+    # itself for auth purposes
+
+    @app.get("/test-endpoint/oauth-authorize")
+    def oauth_authorize():
+        # This endpoint represents a mocked version of
+        # https://developers.login.gov/oidc/authorization/
+        # and needs to return the state value as well as a code.
+        query_args = flask.request.args
+        encoded_params = urllib.parse.urlencode(
+            {"state": query_args.get("state"), "code": str(uuid.uuid4())}
+        )
+        redirect_uri = f"{query_args['redirect_uri']}?{encoded_params}"
+
+        return flask.redirect(redirect_uri)
+
+
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client, opportunity_index_alias) -> APIFlask:
-    return app_entry.create_app()
+def app(db_client, opportunity_index_alias, monkeypatch_session, public_rsa_key) -> APIFlask:
+    # Override the OAuth endpoint path before creating the app which loads the config at startup
+    monkeypatch_session.setenv(
+        "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
+    )
+
+    # Create the app
+    app = app_entry.create_app()
+
+    # Add the endpoint to the app
+    mock_oauth_endpoint(app)
+
+    return app
 
 
 @pytest.fixture

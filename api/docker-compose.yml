@@ -103,6 +103,7 @@ services:
       - grants-db
       - opensearch-node
       - localstack
+      - mock-oauth2-server
     networks:
       - grants_backend
       - default
@@ -114,7 +115,7 @@ services:
     environment:
       LOG_LEVEL: "debug"
       SERVER_PORT: 5001
-      CLIENT_ID: "api"
+      JSON_CONFIG_PATH: /app/config.json
     networks:
       - grants_backend
       - default

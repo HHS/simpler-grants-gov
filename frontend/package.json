@@ -6,9 +6,9 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "all-checks": "npm run test && npm run lint && npm run ts:check && npm run build",
+    "all-checks": "npm run lint && npm run ts:check && npm run test && npm run build",
     "build": "next build",
-    "dev": "next dev",
+    "dev": "NEW_RELIC_ENABLED=false next dev",
     "dev:nr": "NODE_OPTIONS='-r @newrelic/next' next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",

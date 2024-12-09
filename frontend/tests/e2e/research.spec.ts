@@ -13,11 +13,13 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Research | Simpler.Grants.gov");
 });
 
-test("can navigate to /subscribe", async ({ page }) => {
+test("can navigate to ethnio in new tab", async ({ page, context }) => {
+  const newTabPromise = context.waitForEvent("page");
   await page
-    .getByRole("link", { name: /sign up for project updates/i })
+    .getByRole("link", { name: /Sign up to join a usability study/i })
     .getByTestId("button")
     .click();
 
-  await expect(page).toHaveURL(/subscribe/);
+  const newPage = await newTabPromise;
+  await expect(newPage).toHaveURL(/ethn\.io/g);
 });

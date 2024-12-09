@@ -13,6 +13,7 @@ import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
+from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
@@ -24,6 +25,7 @@ from src.api.users.user_blueprint import user_blueprint
 from src.app_config import AppConfig
 from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
+from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
@@ -64,6 +66,7 @@ def create_app() -> APIFlask:
     # will reuse the config from it, for now we'll do this a bit hacky
     # This cannot be removed non-locally until we setup RSA keys for non-local envs
     if os.getenv("ENVIRONMENT") == "local":
+        initialize_login_gov_config()
         initialize_jwt_auth()
 
     return app
@@ -134,6 +137,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
+    app.register_blueprint(agencies_v1_blueprint)
 
     auth_endpoint_config = AuthEndpointConfig()
     if auth_endpoint_config.auth_endpoint:

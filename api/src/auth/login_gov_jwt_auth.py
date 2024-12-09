@@ -1,6 +1,9 @@
 import dataclasses
 import logging
+import urllib
+import uuid
 
+import flask
 import jwt
 from pydantic import Field
 
@@ -21,18 +24,52 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     # Public keys likely won't ever be set by an env var, so it defaults
     # to an empty list and gets overriden by any call to _refresh_keys
     public_keys: list[jwt.PyJWK | str] = Field(alias="LOGIN_GOV_PUBLIC_KEYS", default_factory=list)
-    login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
 
     encryption_algorithm: str = Field(alias="LOGIN_GOV_ENCRYPTION_ALGORITHM", default="RS256")
 
-    login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     client_id: str = Field(alias="LOGIN_GOV_CLIENT_ID")
+    acr_value: str = Field(alias="LOGIN_GOV_ACR_VALUE", default="urn:acr.login.gov:auth-only")
+    scope: str = Field(alias="LOGIN_GOV_SCOPE", default="openid email")
+
+    # While all of these endpoints are under the same root, we define the full
+    # path each time because the local mock uses a different naming convention
+    login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
+    login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
+    login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
+
+    # Where we send a user after they have successfully logged in
+    # for now we'll always send them to the same place (a frontend page)
+    login_final_destination: str = Field(alias="LOGIN_FINAL_DESTINATION")
 
 
-def get_login_gov_config() -> LoginGovConfig:
-    config = LoginGovConfig()
-    _refresh_keys(config)
-    return config
+# Initialize a config at startup
+_config: LoginGovConfig | None = None
+
+
+def initialize_login_gov_config() -> None:
+    global _config
+    if not _config:
+        _config = LoginGovConfig()
+
+        logger.info(
+            "Constructed login.gov configuration",
+            extra={
+                "login_gov_endpoint": _config.login_gov_endpoint,
+                "login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint,
+                "login_gov_auth_endpoint": _config.login_gov_auth_endpoint,
+            },
+        )
+
+
+def get_config() -> LoginGovConfig:
+    global _config
+
+    if _config is None:
+        raise Exception(
+            "No Login.gov configuration - initialize_login_gov_config() must be run first"
+        )
+
+    return _config
 
 
 @dataclasses.dataclass
@@ -63,6 +100,62 @@ def _refresh_keys(config: LoginGovConfig) -> None:
 
     # This line is possibly an issue for the reasons described above.
     config.public_keys = list(public_keys)
+
+
+def get_login_gov_redirect_uri(config: LoginGovConfig | None = None) -> str:
+    if config is None:
+        config = get_config()
+
+    nonce = uuid.uuid4()
+    state = uuid.uuid4()
+
+    # Ask Flask for its own URI - specifying we want the callback route
+    # .user_login_callback points to the function itself defined in user_routes.py
+    redirect_uri = flask.url_for(".user_login_callback", _external=True)
+
+    # We want to redirect to the authorization endpoint of login.gov
+    # See: https://developers.login.gov/oidc/authorization/
+    encoded_params = urllib.parse.urlencode(
+        {
+            "client_id": config.client_id,
+            "nonce": nonce,
+            "state": state,
+            "redirect_uri": redirect_uri,
+            "acr_values": config.acr_value,
+            "scope": config.scope,
+            # These are statically defined by the spec
+            "prompt": "select_account",
+            "response_type": "code",
+        }
+    )
+
+    return f"{config.login_gov_auth_endpoint}?{encoded_params}"
+
+
+def get_final_redirect_uri(
+    message: str,
+    token: str | None = None,
+    is_user_new: bool | None = None,
+    error_description: str | None = None,
+    config: LoginGovConfig | None = None,
+) -> str:
+    if config is None:
+        config = get_config()
+
+    params: dict = {"message": message}
+
+    if token is not None:
+        params["token"] = token
+
+    if is_user_new is not None:
+        params["is_user_new"] = int(is_user_new)  # put booleans in the URL as 0/1
+
+    if error_description is not None:
+        params["error_description"] = error_description
+
+    encoded_params = urllib.parse.urlencode(params)
+
+    return f"{config.login_final_destination}?{encoded_params}"
 
 
 def validate_token(token: str, config: LoginGovConfig) -> LoginGovUser:
