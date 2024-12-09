@@ -6,15 +6,15 @@ data "aws_ecr_repository" "app" {
 }
 
 data "external" "whoami" {
-  program = ["whoami"]
+  program = ["sh", "-c", "whoami | jq -R -c '{\"result\": .}'"]
 }
 
 data "external" "deploy_github_ref" {
-  program = ["git branch --show-current"]
+  program = ["sh", "-c", "git branch --show-current | jq -R -c '{\"result\": .}'"]
 }
 
 data "external" "deploy_github_sha" {
-  program = ["git rev-parse HEAD"]
+  program = ["sh", "-c", "git rev-parse HEAD | jq -R -c '{\"result\": .}'"]
 }
 
 locals {
