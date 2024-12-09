@@ -145,6 +145,8 @@ module "service" {
     }
   } : null
 
+  enable_drafts_bucket = true
+
   extra_environment_variables = merge(local.service_config.extra_environment_variables)
 
   secrets = concat(
