@@ -30,11 +30,11 @@ locals {
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
-    { "ENVIRONMENT" : var.environment_name },
-    { "DEPLOY_TIMESTAMP" : timestamp() },
-    { "DEPLOY_GITHUB_SHA" : data.external.deploy_github_sha.result },
-    { "DEPLOY_GITHUB_REF" : data.external.deploy_github_ref.result },
-    { "DEPLOY_WHOAMI" : data.external.whoami.result }
+    { name : "ENVIRONMENT", value : var.environment_name },
+    { name : "DEPLOY_TIMESTAMP", value : timestamp() },
+    { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result },
+    { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result },
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result }
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
