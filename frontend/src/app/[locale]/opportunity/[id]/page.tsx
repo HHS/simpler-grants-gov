@@ -3,10 +3,12 @@ import NotFound from "src/app/[locale]/not-found";
 import { fetchOpportunity } from "src/app/api/fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import withFeatureFlag from "src/hoc/search/withFeatureFlag";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
@@ -20,7 +22,12 @@ import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 
+type OpportunityListingProps = {
+  params: { id: string };
+} & WithFeatureFlagProps;
+
 export const revalidate = 600; // invalidate ten minutes
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const t = await getTranslations({ locale: "en" });
@@ -83,11 +90,7 @@ function emptySummary() {
   };
 }
 
-export default async function OpportunityListing({
-  params,
-}: {
-  params: { id: string };
-}) {
+async function OpportunityListing({ params }: OpportunityListingProps) {
   const idForParsing = Number(params.id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
   // Opportunity id needs to be a number greater than 1
@@ -148,3 +151,9 @@ export default async function OpportunityListing({
     </div>
   );
 }
+
+export default withFeatureFlag<OpportunityListingProps, never>(
+  OpportunityListing,
+  "opportunityOff",
+  () => redirect("/maintenance"),
+);

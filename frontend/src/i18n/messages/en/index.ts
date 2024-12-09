@@ -542,4 +542,10 @@ export const messages = {
     },
     generic_error_cta: "Please try your search again.",
   },
+  Maintenance: {
+    heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
+    body: "Our team is working to improve the site, and we’ll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
+    signOff: "Thank you for your patience.",
+    pageTitle: "Simpler.Grants.gov - Maintenance",
+  },
 };
