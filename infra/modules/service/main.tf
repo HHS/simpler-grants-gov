@@ -5,6 +5,18 @@ data "aws_ecr_repository" "app" {
   name  = var.image_repository_name
 }
 
+data "external" "whoami" {
+  program = ["whoami"]
+}
+
+data "external" "deploy_github_ref" {
+  program = ["git branch --show-current"]
+}
+
+data "external" "deploy_github_sha" {
+  program = ["git rev-parse HEAD"]
+}
+
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -18,6 +30,11 @@ locals {
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
+    { "ENVIRONMENT" : var.environment_name },
+    { "DEPLOY_TIMESTAMP" : timestamp() },
+    { "DEPLOY_GITHUB_SHA" : data.external.deploy_github_sha.result },
+    { "DEPLOY_GITHUB_REF" : data.external.deploy_github_ref.result },
+    { "DEPLOY_WHOAMI" : data.external.whoami.result }
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
