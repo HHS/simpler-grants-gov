@@ -106,6 +106,21 @@ jq ".data.resource.projectItems.nodes[] |
 # Get issue type
 issue_type=$(jq -r ".data.resource.issueType.name" $raw_data_file)
 
+# Get PR author (if PR is linked to issue)
+pr_author=$(
+  jq -r '.data.resource.pullRequests.nodes |
+  if length > 0 then .[0].author.login else null end' $raw_data_file
+)
+
+# #######################################################
+# Abort update if issue wasn't closed by a PR
+# #######################################################
+
+if [[ $pr_author == 'null' ]]; then
+  echo "Issue '$issue_url' wasn't closed by a PR. Skipping further updates."
+  exit 0
+fi
+
 # #######################################################
 # Fetch project metadata
 # #######################################################
