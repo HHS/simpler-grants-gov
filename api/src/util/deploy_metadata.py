@@ -28,27 +28,36 @@ RELEASE_NOTE_REGEX = re.compile(
 class DeployMetadataConfig(PydanticBaseEnvConfig):
     model_config = SettingsConfigDict(extra="allow")
 
-    deploy_github_ref: str  # DEPLOY_GITHUB_REF
-    deploy_github_sha: str  # DEPLOY_GITHUB_SHA
-    deploy_timestamp: datetime  # DEPLOY_TIMESTAMP
+    # We don't want these values being None to break
+    # any of our system, so allow them to be None
+    deploy_github_ref: str | None = None  # DEPLOY_GITHUB_REF
+    deploy_github_sha: str | None = None  # DEPLOY_GITHUB_SHA
+    deploy_timestamp: datetime | None = None  # DEPLOY_TIMESTAMP
 
     def model_post_init(self, _context: typing.Any) -> None:
         """Run after __init__ sets above values from env vars"""
 
-        if RELEASE_NOTE_REGEX.match(self.deploy_github_ref):
+        if self.deploy_github_ref and RELEASE_NOTE_REGEX.match(self.deploy_github_ref):
             self.release_notes = (
                 f"https://github.com/HHS/simpler-grants-gov/releases/tag/{self.deploy_github_ref}"
             )
         else:
             self.release_notes = "https://github.com/HHS/simpler-grants-gov/releases"
 
-        self.deploy_commit = (
-            f"https://github.com/HHS/simpler-grants-gov/commit/{self.deploy_github_sha}"
-        )
+        if self.deploy_github_sha:
+            self.deploy_commit = (
+                f"https://github.com/HHS/simpler-grants-gov/commit/{self.deploy_github_sha}"
+            )
+        else:
+            self.deploy_commit = "https://github.com/HHS/simpler-grants-gov"
 
-        self.deploy_datetime_est = datetime_util.adjust_timezone(
-            self.deploy_timestamp, "US/Eastern"
-        )
+        if self.deploy_timestamp:
+            self.deploy_datetime_est = datetime_util.adjust_timezone(
+                self.deploy_timestamp, "US/Eastern"
+            )
+        else:
+            # Just put when the API started up as a fallback
+            self.deploy_datetime_est = datetime_util.get_now_us_eastern_datetime()
 
 
 _deploy_metadata_config: DeployMetadataConfig | None = None
