@@ -1,0 +1,3 @@
+//    <UserProvider>
+//      <Component {...pageProps} />
+//    </UserProvider>
