@@ -1,40 +1,24 @@
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    restart: always
+    ports:
+      - 8888:8080
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
   nextjs:
     container_name: next-dev
     platform: linux/amd64
     build:
       context: .
-      target: dev
+      target: release
     env_file:
-      - ./.env.development
+      - ./.env.local
     volumes:
       - ./src:/frontend/src
       - ./public:/frontend/public
     restart: always
     ports:
       - 3000:3000
-    networks:
-      - default
-      - api_grants_backend
-
-  storybook:
-    container_name: storybook
-    platform: linux/amd64
-    build:
-      context: .
-      target: dev
-    command: npm run storybook
-    volumes:
-      - ./src:/frontend/src
-      - ./public:/frontend/public
-      - ./.storybook:/frontend/.storybook
-      - ./stories:/frontend/stories
-    restart: always
-    ports:
-      - 6006:6006
-    networks:
-      - default
-
-networks:
-  api_grants_backend:
-    external: true
