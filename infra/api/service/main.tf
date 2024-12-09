@@ -145,7 +145,7 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = merge({})
+  extra_environment_variables = merge(local.service_config.extra_environment_variables)
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
