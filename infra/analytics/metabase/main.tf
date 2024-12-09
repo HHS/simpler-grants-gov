@@ -124,7 +124,5 @@ module "service" {
     }
   }
 
-  enable_drafts_bucket = startswith(local.service_name, "api-")
-
   is_temporary = false
 }
