@@ -14,15 +14,3 @@ variable "domain" {
   description = "DNS domain of the website managed by HHS"
   default     = null
 }
-
-variable "deploy_github_ref" {
-  type        = string
-  description = "github ref to deploy"
-  default     = null
-}
-
-variable "deploy_github_sha" {
-  type        = string
-  description = "github sha to deploy"
-  default     = null
-}

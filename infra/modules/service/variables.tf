@@ -48,6 +48,12 @@ variable "container_port" {
   default     = 8000
 }
 
+variable "environment_name" {
+  type        = string
+  description = "The name of the environment"
+  default     = ""
+}
+
 variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"
