@@ -33,8 +33,6 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
-init_newrelic()
-
 TITLE = "Simpler Grants API"
 API_OVERALL_VERSION = "v0"
 API_DESCRIPTION = """
@@ -54,6 +52,7 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    init_newrelic()
     register_db_client(app)
 
     feature_flag_config.initialize()
