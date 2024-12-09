@@ -1,16 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
-export async function exampleAction() {
-  const cookieStore = await cookies()
-
-  // Get cookie
-  cookieStore.get('name')?.value
-
-  // Set cookie
-  cookieStore.set('name', 'Delba')
-
-  // Delete cookie
-  cookieStore.delete('name')
-}
+// 1. validate token validateToken()
+// 2. set cookie
