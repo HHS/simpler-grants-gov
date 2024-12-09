@@ -6,15 +6,15 @@ data "aws_ecr_repository" "app" {
 }
 
 data "external" "whoami" {
-  program = ["sh", "-c", "whoami | xargs -I {} echo '{\"result\": \"{}\"}'"]
+  program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
 data "external" "deploy_github_ref" {
-  program = ["sh", "-c", "git branch --show-current | xargs -I {} echo '{\"result\": \"{}\"}'"]
+  program = ["sh", "-c", "git branch --show-current | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
 data "external" "deploy_github_sha" {
-  program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"result\": \"{}\"}'"]
+  program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
 
 locals {
@@ -32,9 +32,9 @@ locals {
     { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
     { name : "ENVIRONMENT", value : var.environment_name },
     { name : "DEPLOY_TIMESTAMP", value : timestamp() },
-    { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result },
-    { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result },
-    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result }
+    { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
+    { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
