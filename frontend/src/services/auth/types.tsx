@@ -35,7 +35,7 @@ import { ReactElement } from "react";
  * @category Client
  */
 export type UserProviderProps = React.PropsWithChildren<
-  { user?: UserProfile; userEndpoint?: string; fetcher?: UserFetcher }
+  { user?: SessionPayload; userEndpoint?: string; fetcher?: UserFetcher }
 >;
 
 /**
@@ -52,6 +52,7 @@ export type UserProvider = (props: UserProviderProps) => ReactElement<UserContex
  */
 export interface UserProfile {
   name?: string | null;
+  token?: string | null;
 }
 
 /**
@@ -60,7 +61,7 @@ export interface UserProfile {
  * @category Client
  */
 export type UserContextType = {
-  user?: UserProfile;
+  user?: Session;
   error?: Error;
   isLoading: boolean;
   checkSession: () => Promise<void>;
@@ -70,7 +71,7 @@ export type UserContextType = {
  * @ignore
  */
 export type UserProviderState = {
-    user?: UserProfile;
+    user?: Session;
     error?: Error;
     isLoading: boolean;
   };
@@ -79,6 +80,11 @@ export type SessionPayload = {
   token: string;
   expiresAt: Date;
 };
+
+export type Session = {
+  token: string;
+  expiresAt?: Date;
+} | null;
 
 /**
  * Fetches the user from the profile API route to fill the {@link useUser} hook with the
@@ -89,4 +95,4 @@ export type SessionPayload = {
  *
  * @throws {@link RequestError}
  */
-export type UserFetcher = (url: string) => Promise<UserProfile | undefined>;
+export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;

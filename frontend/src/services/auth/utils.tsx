@@ -19,7 +19,3 @@ export class RequestError extends Error {
       Object.setPrototypeOf(this, RequestError.prototype);
     }
 }
-
-export async function validateToken(token: string): Promise<boolean> {
-    return true;
-}

@@ -24,6 +24,27 @@ flowchart TD
     cookieExists{Cookie Exists?}
     useUser/UserProvider --> checkCookie
     cookieValid{Cookie is Valid}
+    redirectToLogin[redirect to login]
+
+    checkCookie --> cookieExists
+    cookieExists --> |Yes| cookieValid
+    cookieExists --> |No| redirectToLogin
+    cookieValid --> |Yes| d[Return User Data]
+    cookieValid --> |No| redirectToLogin
+
+```
+
+
+
+## Next step
+
+
+```mermaid
+flowchart TD
+    checkCookie[Check cookie]
+    cookieExists{Cookie Exists?}
+    useUser/UserProvider --> checkCookie
+    cookieValid{Cookie is Valid}
     cookieIsCurrent{Cookie is Current}
     redirectToLogin[redirect to login]
 

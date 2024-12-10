@@ -1,36 +1,48 @@
 import 'server-only'
 
-import { SignJWT, jwtVerify } from 'jose';
-import { SessionPayload } from './types';
+import { JWTPayload, SignJWT, jwtVerify } from 'jose';
+import { SessionPayload, Session } from './types';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { cache } from 'react';
+import { date, number, unknown } from 'zod';
+import { isEmpty } from 'lodash';
 
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: SessionPayload):Promise<string> {
-  return new SignJWT(payload)
+  const {token, expiresAt} = payload;
+  return new SignJWT({token})
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(expiresAt)
     .sign(encodedKey)
 }
 
-export async function decrypt(session: string | undefined = '') {
+export async function decrypt(session: string | undefined = ''):Promise<JWTPayload | null>  {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ['HS256'],
     })
-    return payload
+    return payload;
   } catch (error) {
-    console.log('Failed to verify session')
+    console.debug('Failed to decrypt session', error);
+    return null
   }
 }
 
-export async function checkCookie(session: string | undefined = '') {
-    const payload = await decrypt(session);
-    // check payload?
-    return true;
-}
+export const getSession = cache(async ():Promise<Session> => {
+    const cookie = (await cookies()).get('session')?.value;
+    if (!cookie) return null;
+    const session = await decrypt(cookie);
+    if (!session) return null;
+    const token = session.token instanceof unknown ? null : session.token as string;
+    if (!token) return null;
+    return {
+        token
+    }
+});
 
 export async function createSession(token: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -41,15 +53,11 @@ export async function createSession(token: string) {
       {
         httpOnly: true,
         secure: true,
-        expires: expiresAt,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         sameSite: 'lax',
         path: '/',
       }
-    )
-}
-
-export async function checkApi() {
-
+    );
 }
 
 export async function updateSession() {

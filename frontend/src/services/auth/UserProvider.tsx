@@ -1,21 +1,17 @@
-//    <UserProvider>
-//      <Component {...pageProps} />
-//    </UserProvider>
 'use client';
 import React, { ReactElement, useState, useEffect, useCallback, useContext, createContext, useMemo } from 'react';
 import { UserContext } from './useUser';
 import { RequestError } from "./utils";
-import { UserFetcher, UserProfile, UserContextType, UserProviderProps, UserProviderState } from "./types";
+import { Session, UserFetcher, UserContextType, UserProviderProps, UserProviderState } from "./types";
 
 /**
  * @ignore
  */
 const userFetcher: UserFetcher = async (url) => {
-  // TODO:
-
   let response;
   try {
     response = await fetch(url);
+    console.log(response);
   } catch {
     throw new RequestError(0); // Network error
   }
@@ -26,21 +22,17 @@ const userFetcher: UserFetcher = async (url) => {
 
 export default ({
   children,
-  user: initialUser,
-  userEndpoint = process.env.API_URL || '/user',
-  fetcher = userFetcher
+  user: Session,
 }: UserProviderProps): ReactElement<UserContextType> => {
-  const [state, setState] = useState<UserProviderState>({ user: initialUser, isLoading: !initialUser });
-
+  const [state, setState] = useState<UserProviderState>({ user: Session, isLoading: !Session });
   const checkSession = useCallback(async (): Promise<void> => {
-    // TODO:
     try {
-      const user = await fetcher(userEndpoint);
-      setState((previous) => ({ ...previous, user, error: undefined }));
+      const user = await userFetcher('/api/auth/session') as Session;
+      setState((previous) => ({ ...previous, user, isLoading: false, error: undefined }));
     } catch (error) {
       setState((previous) => ({ ...previous, error: error as Error }));
     }
-  }, [userEndpoint]);
+  },[children]);
 
   useEffect((): void => {
     if (state.user) return;
@@ -52,7 +44,7 @@ export default ({
 
   const { user, error, isLoading } = state;
   const value = useMemo(() => ({ user, error, isLoading, checkSession }), [user, error, isLoading, checkSession]);
-
+  console.log(value);
   return (
     <UserContext.Provider value={value}>{children}</UserContext.Provider>
   );
