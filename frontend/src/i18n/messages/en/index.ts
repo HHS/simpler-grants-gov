@@ -548,4 +548,7 @@ export const messages = {
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
+  User: {
+    heading: "User",
+  },
 };
