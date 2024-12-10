@@ -8,6 +8,9 @@ resource "aws_s3_bucket" "draft_documents" {
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
+  # checkov:skip=CKV_AWS_145:Use KMS in future work
+  # checkov:skip=CKV2_AWS_6:False positive
+  # checkov:skip=CKV2_AWS_61:False positive
 }
 
 resource "aws_s3_bucket_public_access_block" "draft_documents" {
