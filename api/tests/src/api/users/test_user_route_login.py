@@ -1,4 +1,5 @@
 import urllib
+import uuid
 
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 from src.api.route_utils import raise_flask_error
@@ -166,3 +167,55 @@ def test_user_login_flow_error_in_http_error_internal_302(client, monkeypatch):
     assert redirect.status_code == 302
     redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
     assert redirect_url.path == "/v1/users/login/result"
+
+
+def test_user_login_flow_error_in_auth_response_302(client, monkeypatch):
+    """Test behavior when we get a redirect back from login.gov with an error"""
+
+    def override():
+        return {"error": "access_denied", "error_description": "user does not have access"}
+
+    monkeypatch.setattr("tests.conftest.oauth_param_override", override)
+
+    resp = client.get("/v1/users/login", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    # Because it was a 5xx error, the errors are intentionally vague
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # We still redirected through every endpoint
+    assert len(resp.history) == 3
+
+
+def test_user_callback_unknown_state_302(client, monkeypatch):
+    """Test behavior when we get a redirect back from login.gov with an unknown state value"""
+
+    # We can just call the callback directly with the state that doesn't exist
+    resp = client.get(
+        f"/v1/users/login/callback?state={uuid.uuid4()}&code=xyz456", follow_redirects=True
+    )
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "OAuth state not found"
+
+
+def test_user_callback_invalid_state_302(client, monkeypatch):
+    """Test behavior when we get a redirect back from login.gov with an invalid state value"""
+
+    # We can just call the callback directly with the state that isn't a uuid
+    resp = client.get("/v1/users/login/callback?state=abc123&code=xyz456", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Invalid OAuth state value"

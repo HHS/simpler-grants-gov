@@ -1,3 +1,4 @@
+import uuid
 from typing import Optional
 
 
@@ -12,3 +13,11 @@ def join_list(joining_list: Optional[list], join_txt: str = "\n") -> str:
         return ""
 
     return join_txt.join(joining_list)
+
+
+def is_valid_uuid(value: str) -> bool:
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
