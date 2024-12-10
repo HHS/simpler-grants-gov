@@ -52,7 +52,6 @@ export type UserProvider = (props: UserProviderProps) => ReactElement<UserContex
  */
 export interface UserProfile {
   name?: string | null;
-  token?: string | null;
 }
 
 /**
