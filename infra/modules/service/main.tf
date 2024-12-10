@@ -29,7 +29,8 @@ locals {
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
-    { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
+    { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
+    { name : "DRAFTS_S3_BUCKET_URL", value : aws_s3_bucket.draft_documents.bucket_regional_domain_name },
     { name : "ENVIRONMENT", value : var.environment_name },
     { name : "DEPLOY_TIMESTAMP", value : timestamp() },
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
@@ -46,7 +47,6 @@ locals {
   environment_variables = concat(
     local.base_environment_variables,
     local.db_environment_variables,
-    [{ name : "DRAFTS_S3_BUCKET_ARN", value : aws_s3_bucket.draft_documents.arn }],
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
