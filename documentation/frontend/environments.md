@@ -42,3 +42,21 @@ See [our CI code](https://github.com/HHS/simpler-grants-gov/blob/1b85220c7369d40
 Note that, as mentioned above, NODE_ENV will be set to "production" here due to use of `npm run build && npm start`.
 
 As a result, environment variables are gathered from the .env.production file.
+
+## Deployment
+
+[Check out this diagram](https://lucid.app/lucidchart/107dcf47-46e7-4088-a90a-1ef3b0ca3744/edit?viewport_loc=42%2C439%2C2295%2C1182%2C0_0&invitationId=inv_3559eb81-f735-4b22-9365-49920268e061). This should explain most of what the next section explains, and more but in visual form.
+
+Will add image directly to document later.
+
+### Tricky Stuff
+
+Docker and Next (and ECS) combine to create an interesting situation when trying to figure out how to provide environment variables to the deployed application. Here are a few interesting facts:
+
+- any environment variables that we want to be directly available in client code in a Next app need to be prefixed with the `NEXT_PUBLIC_` string. See [Next docs here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser).
+- any `NEXT_PUBLIC_` variables must be initially referenced in the code directly from process.env (`const yrVar = process.env.NEXT_PUBLIC_YR_VAR`), rather than destructured (`const { NEXT_PUBLIC_YR_VAR } = process.env`)), but can be exported from one file to another after definition
+- these variables must be available at build time (ie `next build` rather than `next start`), and can be referenced in any components when exported from a server side file, directly referenced from process.env, or passed as a prop
+- however, currently, all environment variables are passed from the ECS task definition to the application at Docker run time. This means that the `NEXT_PUBLIC_` prefix and usage as described above is not effective in our application
+- since variables defined at Docker runtime cannot be not made available directly to client components via an import or process.env reference, to make any environment variables available to client components, we will need to
+  - import the variable into a server component
+  - pass it as a prop to client component child, or implement it within a context provider

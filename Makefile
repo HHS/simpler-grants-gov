@@ -113,7 +113,7 @@ infra-update-app-service: ## Create or update $APP_NAME's web service module
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
-	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)" -var="deploy_github_ref=$(DEPLOY_GITHUB_REF)" -var="deploy_github_sha=$(DEPLOY_GITHUB_SHA)"
+	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-update-metabase-service: ## Create or update $APP_NAME's web service module
 	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
@@ -201,7 +201,7 @@ release-run-database-migrations: ## Run $APP_NAME's database migrations in $ENVI
 release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT) $(DEPLOY_GITHUB_REF) $(DEPLOY_GITHUB_SHA)
+	./bin/deploy-release.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

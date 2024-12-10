@@ -54,6 +54,4 @@ jobs:
       - name: Deploy release
         run: make release-deploy \
           APP_NAME=${{ inputs.app_name }} \
-          ENVIRONMENT=${{ inputs.environment }} \
-          DEPLOY_GITHUB_REF=${{ github.ref_name }} \
-          DEPLOY_GITHUB_SHA=${{ github.sha }}
+          ENVIRONMENT=${{ inputs.environment }}

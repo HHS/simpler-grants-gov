@@ -84,7 +84,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <GoogleAnalytics gaId={environment.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
+        <GoogleAnalytics gaId={environment.GOOGLE_TAG_MANAGER_ID} />
+        <meta
+          name="google-site-verification"
+          content="jFShzxCTiLzv8gvEW4ft7fCaQkluH229-B-tJKteYJY"
+        />
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
