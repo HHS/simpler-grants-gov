@@ -1,6 +1,7 @@
 "use client";
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
 
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
@@ -10,12 +11,15 @@ import { Button, Table } from "@trussworks/react-uswds";
  */
 export default function FeatureFlagsTable() {
   const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags();
+  const { user, isLoading, error } = useUser();
 
   if (!mounted) {
     return null;
   }
 
   return (
+    <>
+    <h2>User with token {user?.token} can see this</h2>
     <Table>
       <thead>
         <tr>
@@ -58,5 +62,6 @@ export default function FeatureFlagsTable() {
         )}
       </tbody>
     </Table>
+    </>
   );
 }
