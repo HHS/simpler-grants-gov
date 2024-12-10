@@ -1,4 +1,6 @@
 resource "aws_s3_bucket" "draft_documents" {
+  count = var.enable_drafts_bucket ? 1 : 0
+
   bucket_prefix = "${var.service_name}-documents-draft"
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket especially due to likely use of lifecycle rules
@@ -6,10 +8,15 @@ resource "aws_s3_bucket" "draft_documents" {
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
+  # checkov:skip=CKV_AWS_145:Use KMS in future work
+  # checkov:skip=CKV2_AWS_6:False positive
+  # checkov:skip=CKV2_AWS_61:False positive
 }
 
 resource "aws_s3_bucket_public_access_block" "draft_documents" {
-  bucket = aws_s3_bucket.draft_documents.id
+  count = var.enable_drafts_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.draft_documents[0].id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -21,8 +28,8 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
   statement {
     effect = "Allow"
     resources = [
-      aws_s3_bucket.draft_documents.arn,
-      "${aws_s3_bucket.draft_documents.arn}/*"
+      aws_s3_bucket.draft_documents[0].arn,
+      "${aws_s3_bucket.draft_documents[0].arn}/*"
     ]
     actions = ["s3:*"]
 
@@ -36,8 +43,8 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
     resources = [
-      aws_s3_bucket.draft_documents.arn,
-      "${aws_s3_bucket.draft_documents.arn}/*"
+      aws_s3_bucket.draft_documents[0].arn,
+      "${aws_s3_bucket.draft_documents[0].arn}/*"
     ]
     actions = ["s3:*"]
     condition {
@@ -53,8 +60,9 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
-  bucket = aws_s3_bucket.draft_documents.id
+  count = var.enable_drafts_bucket ? 1 : 0
 
+  bucket = aws_s3_bucket.draft_documents[0].id
   rule {
     id     = "AbortIncompleteUpload"
     status = "Enabled"
@@ -68,7 +76,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
 
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_encryption" {
-  bucket = aws_s3_bucket.draft_documents.id
+  count = var.enable_drafts_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.draft_documents[0].id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "aws:kms"
@@ -78,6 +88,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_e
 }
 
 resource "aws_s3_bucket_policy" "draft_documents" {
-  bucket = aws_s3_bucket.draft_documents.id
+  count  = var.enable_drafts_bucket ? 1 : 0
+  bucket = aws_s3_bucket.draft_documents[0].id
   policy = data.aws_iam_policy_document.draft_documents_put_access.json
 }
