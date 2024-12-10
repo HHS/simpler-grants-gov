@@ -30,7 +30,7 @@ locals {
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
-    { name : "DRAFTS_S3_BUCKET_URL", value : aws_s3_bucket.draft_documents.bucket_regional_domain_name },
+    { name : "DRAFTS_S3_BUCKET_URL", value : aws_s3_bucket.draft_documents[0].bucket_regional_domain_name },
     { name : "ENVIRONMENT", value : var.environment_name },
     { name : "DEPLOY_TIMESTAMP", value : timestamp() },
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
