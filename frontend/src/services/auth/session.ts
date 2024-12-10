@@ -1,86 +1,72 @@
-import 'server-only'
+import "server-only";
 
-import { JWTPayload, SignJWT, jwtVerify } from 'jose';
-import { SessionPayload, Session } from './types';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { cache } from 'react';
-import { date, number, unknown } from 'zod';
-import { isEmpty } from 'lodash';
+import { JWTPayload, jwtVerify, SignJWT } from "jose";
 
-const secretKey = process.env.SESSION_SECRET
-const encodedKey = new TextEncoder().encode(secretKey)
+// note that cookies will be async in Next 15
+import { cookies } from "next/headers";
+import { cache } from "react";
 
-export async function encrypt(payload: SessionPayload):Promise<string> {
-  const {token, expiresAt} = payload;
-  return new SignJWT({token})
-    .setProtectedHeader({ alg: 'HS256' })
+import { SessionPayload, UserSession } from "./types";
+
+const secretKey = process.env.SESSION_SECRET;
+const encodedKey = new TextEncoder().encode(secretKey);
+
+// returns a new date 1 week from time of function call
+const newExpirationDate = () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+export async function encrypt({
+  token,
+  expiresAt,
+}: SessionPayload): Promise<string> {
+  const jwt = await new SignJWT({ token })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expiresAt)
-    .sign(encodedKey)
+    .sign(encodedKey);
+  return jwt;
 }
 
-export async function decrypt(session: string | undefined = ''):Promise<JWTPayload | null>  {
+export async function decrypt(
+  sessionCookie: string | undefined = "",
+): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ['HS256'],
-    })
+    const { payload } = await jwtVerify(sessionCookie, encodedKey, {
+      algorithms: ["HS256"],
+    });
     return payload;
   } catch (error) {
-    console.debug('Failed to decrypt session', error);
-    return null
+    console.error("Failed to decrypt session cookie", error);
+    return null;
   }
 }
 
-export const getSession = cache(async ():Promise<Session> => {
-    const cookie = (await cookies()).get('session')?.value;
-    if (!cookie) return null;
-    const session = await decrypt(cookie);
-    if (!session) return null;
-    const token = session.token instanceof unknown ? null : session.token as string;
-    if (!token) return null;
-    return {
-        token
-    }
+// returns token decrypted from session cookie or null
+export const getSession = cache(async (): Promise<UserSession> => {
+  const cookie = cookies().get("session")?.value;
+  if (!cookie) return null;
+  const decryptedSession = await decrypt(cookie);
+  if (!decryptedSession) return null;
+  const token = (decryptedSession.token as string) ?? null;
+  if (!token) return null;
+  return {
+    token,
+  };
 });
 
 export async function createSession(token: string) {
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = await encrypt({ token, expiresAt });
-    cookies().set(
-      'session',
-      session,
-      {
-        httpOnly: true,
-        secure: true,
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        sameSite: 'lax',
-        path: '/',
-      }
-    );
+  const expiresAt = newExpirationDate();
+  const session = await encrypt({ token, expiresAt });
+  cookies().set("session", session, {
+    httpOnly: true,
+    secure: true,
+    expires: expiresAt,
+    sameSite: "lax",
+    path: "/",
+  });
 }
 
-export async function updateSession() {
-    const session = (cookies()).get('session')?.value
-    const payload = await decrypt(session)
-
-    if (!session || !payload) {
-      return null
-    }
-
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-    const cookieStore = cookies()
-    cookieStore.set('session', session, {
-      httpOnly: true,
-      secure: true,
-      expires: expires,
-      sameSite: 'lax',
-      path: '/',
-    })
-  }
-
-  export async function deleteSession() {
-    const cookieStore = cookies()
-    cookieStore.delete('session')
-  }
+// currently unused, will be used in the future for logout
+export function deleteSession() {
+  const cookieStore = cookies();
+  cookieStore.delete("session");
+}

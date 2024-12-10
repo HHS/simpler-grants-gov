@@ -542,4 +542,7 @@ export const messages = {
     },
     generic_error_cta: "Please try your search again.",
   },
+  User: {
+    heading: "User",
+  },
 };

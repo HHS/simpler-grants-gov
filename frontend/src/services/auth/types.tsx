@@ -34,16 +34,20 @@ import { ReactElement } from "react";
  *
  * @category Client
  */
-export type UserProviderProps = React.PropsWithChildren<
-  { user?: SessionPayload; userEndpoint?: string; fetcher?: UserFetcher }
->;
+export type UserProviderProps = React.PropsWithChildren<{
+  user?: SessionPayload;
+  userEndpoint?: string;
+  fetcher?: UserFetcher;
+}>;
 
 /**
  * To use the {@link useUser} hook, you must wrap your application in a `<UserProvider>` component.
  *
  * @category Client
  */
-export type UserProvider = (props: UserProviderProps) => ReactElement<UserContextType>;
+export type UserProvider = (
+  props: UserProviderProps,
+) => ReactElement<UserContextType>;
 
 /**
  * The user claims returned from the {@link useUser} hook.
@@ -66,24 +70,24 @@ export type UserContextType = {
   checkSession: () => Promise<void>;
 };
 
+export type UserSession = {
+  token: string;
+  expiresAt?: Date;
+} | null;
+
 /**
  * @ignore
  */
 export type UserProviderState = {
-    user?: Session;
-    error?: Error;
-    isLoading: boolean;
-  };
+  user?: UserSession;
+  error?: Error;
+  isLoading: boolean;
+};
 
 export type SessionPayload = {
   token: string;
   expiresAt: Date;
 };
-
-export type Session = {
-  token: string;
-  expiresAt?: Date;
-} | null;
 
 /**
  * Fetches the user from the profile API route to fill the {@link useUser} hook with the
