@@ -1,39 +1,39 @@
-locals {
-  # We have the option to route the CDN to multiple origins based on the origin id.
-  # We do not currently do this, though.
-  default_origin_id = "default"
-}
+# locals {
+#   # We have the option to route the CDN to multiple origins based on the origin id.
+#   # We do not currently do this, though.
+#   default_origin_id = "default"
+# }
 
-resource "aws_cloudfront_origin_access_identity" "cdn" {
-  count = var.enable_cdn ? 1 : 0
+# resource "aws_cloudfront_origin_access_identity" "cdn" {
+#   count = var.enable_cdn ? 1 : 0
 
-  comment = "Origin Access Identity for CloudFront to access S3 bucket"
-}
+#   comment = "Origin Access Identity for CloudFront to access S3 bucket"
+# }
 
-resource "aws_cloudfront_cache_policy" "default" {
-  count = var.enable_cdn ? 1 : 0
+# resource "aws_cloudfront_cache_policy" "default" {
+#   count = var.enable_cdn ? 1 : 0
 
-  name = var.service_name
+#   name = var.service_name
 
-  # Default to caching for 1 hour.
-  # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
-  # There's also a `max_ttl` option, which can be used to override the above headers.
-  min_ttl     = 0
-  default_ttl = 3600
+#   # Default to caching for 1 hour.
+#   # The default TTL can be overriden by the `Cache-Control max-age` or `Expires` headers
+#   # There's also a `max_ttl` option, which can be used to override the above headers.
+#   min_ttl     = 0
+#   default_ttl = 3600
 
-  parameters_in_cache_key_and_forwarded_to_origin {
-    cookies_config {
-      cookie_behavior = "all"
-    }
-    headers_config {
-      # The only options are "none" and "whitelist", there is no "all" option
-      header_behavior = "none"
-    }
-    query_strings_config {
-      query_string_behavior = "all"
-    }
-  }
-}
+#   parameters_in_cache_key_and_forwarded_to_origin {
+#     cookies_config {
+#       cookie_behavior = "all"
+#     }
+#     headers_config {
+#       # The only options are "none" and "whitelist", there is no "all" option
+#       header_behavior = "none"
+#     }
+#     query_strings_config {
+#       query_string_behavior = "all"
+#     }
+#   }
+# }
 
 # resource "aws_cloudfront_distribution" "cdn" {
 #   count = var.enable_cdn ? 1 : 0
