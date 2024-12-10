@@ -25,6 +25,8 @@ resource "aws_s3_bucket_public_access_block" "draft_documents" {
 }
 
 data "aws_iam_policy_document" "draft_documents_put_access" {
+  count = var.enable_drafts_bucket ? 1 : 0
+
   statement {
     effect = "Allow"
     resources = [
@@ -90,5 +92,5 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_e
 resource "aws_s3_bucket_policy" "draft_documents" {
   count  = var.enable_drafts_bucket ? 1 : 0
   bucket = aws_s3_bucket.draft_documents[0].id
-  policy = data.aws_iam_policy_document.draft_documents_put_access.json
+  policy = data.aws_iam_policy_document.draft_documents_put_access[0].json
 }
