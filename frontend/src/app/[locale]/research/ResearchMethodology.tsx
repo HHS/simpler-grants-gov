@@ -40,7 +40,7 @@ const ResearchMethodology = () => {
           {t("methodology.title_3")}
         </h3>
         <a
-          href="https://ethn.io/screeners/113856/edit?step=design"
+          href="https://ethn.io/91822"
           target="_blank"
           rel="noopener noreferrer"
         >
