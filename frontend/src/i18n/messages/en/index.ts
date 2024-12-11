@@ -6,7 +6,7 @@ export const messages = {
       "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>www.Grants.gov</LinkToGrants>.",
   },
   OpportunityListing: {
-    page_title: "Opportunity Listing",
+    page_title: "Opportunity Listing | Simpler.Grants.Gov",
     meta_description: "Summary details for the specific opportunity listing.",
     intro: {
       agency: "Agency: ",
@@ -550,5 +550,7 @@ export const messages = {
   },
   User: {
     heading: "User",
+    pageTitle: "User | Simpler.Grants.Gov",
+    errorHeading: "Error",
   },
 };

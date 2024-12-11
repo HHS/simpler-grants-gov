@@ -1,15 +1,33 @@
-"use client";
+import { Metadata } from "next";
+import { getSession } from "src/services/auth/session";
+import { LocalizedPageProps } from "src/types/intl";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
 
-export default function UserDisplay({
+export async function generateMetadata({
+  params: { locale },
+}: LocalizedPageProps) {
+  const t = await getTranslations({ locale });
+  const meta: Metadata = {
+    title: t("User.pageTitle"),
+    description: t("Index.meta_description"),
+  };
+  return meta;
+}
+
+export default async function UserDisplay({
   searchParams,
-}: {
-  searchParams: { message?: string };
-}) {
+  params: { locale },
+}: LocalizedPageProps & { searchParams: { message?: string } }) {
   const { message } = searchParams;
-  const t = useTranslations("User");
+  // redirect to error page if there is no session cookie
+  // in the future we may want to try and validate the cookie as well
+  // we also would probably want to redirect users into the login flow in some cases here
+  if (!(await getSession())) {
+    throw new Error(message || "not logged in");
+  }
+  const t = await getTranslations({ locale, namespace: "User" });
   return (
     <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15 measure-2">
       <h1>{t("heading")}</h1>
