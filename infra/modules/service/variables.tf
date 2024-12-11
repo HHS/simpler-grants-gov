@@ -91,6 +91,12 @@ variable "scheduled_jobs" {
   default = {}
 }
 
+variable "enable_drafts_bucket" {
+  description = "does the service need a private S3 bucket for draft document storage"
+  type        = bool
+  default     = false
+}
+
 variable "secrets" {
   type = set(object({
     name      = string
