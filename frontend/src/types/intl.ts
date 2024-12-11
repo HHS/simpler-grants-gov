@@ -4,3 +4,5 @@ import type { getTranslations } from "next-intl/server";
 export type TFn =
   | ReturnType<typeof useTranslations<never>>
   | Awaited<ReturnType<typeof getTranslations<never>>>;
+
+export type LocalizedPageProps = { params: { locale: string } };

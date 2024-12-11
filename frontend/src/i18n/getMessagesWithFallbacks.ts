@@ -1,5 +1,5 @@
 import { merge } from "lodash";
-import { defaultLocale, Locale, locales } from "src/i18n/config";
+import { defaultLocale, Locale } from "src/i18n/config";
 
 interface LocaleFile {
   messages: Messages;
@@ -15,21 +15,11 @@ async function importMessages(locale: Locale) {
  * from the current locale, the missing key will fallback to the default locale
  */
 export async function getMessagesWithFallbacks(
-  requestedLocale: string = defaultLocale,
+  requestedLocale: Locale = defaultLocale,
 ) {
-  const isValidLocale = locales.includes(requestedLocale as Locale); // https://github.com/microsoft/TypeScript/issues/26255
-  if (!isValidLocale) {
-    console.error(
-      "Unsupported locale was requested. Falling back to the default locale.",
-      { locale: requestedLocale, defaultLocale },
-    );
-    requestedLocale = defaultLocale;
-  }
+  let messages = await importMessages(requestedLocale);
 
-  const targetLocale = requestedLocale as Locale;
-  let messages = await importMessages(targetLocale);
-
-  if (targetLocale !== defaultLocale) {
+  if (requestedLocale !== defaultLocale) {
     const fallbackMessages = await importMessages(defaultLocale);
     messages = merge({}, fallbackMessages, messages);
   }
