@@ -8,7 +8,6 @@ locals {
     # WORKER_THREADS_COUNT    = 4
     # LOG_LEVEL               = "info"
     # DB_CONNECTION_POOL_SIZE = 5
-    EXPORT_OPP_DATA_FILE_PATH = "/public-extracts/"
   }
 
   # Configuration for secrets

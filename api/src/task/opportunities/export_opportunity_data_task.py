@@ -60,30 +60,12 @@ class ExportOpportunityDataTask(Task):
 
         self.current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
 
-        # Get base path (either local or S3)
-        base_path = os.getenv("GENERAL_S3_BUCKET_URL", "").rstrip("/")
-
-        # Parse the path to determine if it's S3 or local
-        parsed_url = urlparse(base_path)
-        self.is_s3 = parsed_url.scheme == "s3"
-
-        # Construct file paths
-        if self.is_s3:
-            # For S3, join paths with forward slashes
-            self.json_file = (
-                f"{base_path}{config.file_path}/opportunity_data-{self.current_timestamp}.json"
-            )
-            self.csv_file = (
-                f"{base_path}{config.file_path}/opportunity_data-{self.current_timestamp}.csv"
-            )
-        else:
-            # For local filesystem, use os.path.join
-            self.json_file = os.path.join(
-                config.file_path, f"opportunity_data-{self.current_timestamp}.json"
-            )
-            self.csv_file = os.path.join(
-                config.file_path, f"opportunity_data-{self.current_timestamp}.csv"
-            )
+        self.json_file = os.path.join(
+            config.file_path, f"opportunity_data-{self.current_timestamp}.json"
+        )
+        self.csv_file = os.path.join(
+            config.file_path, f"opportunity_data-{self.current_timestamp}.csv"
+        )
 
         self.set_metrics({"csv_file": self.csv_file, "json_file": self.json_file})
 

@@ -36,6 +36,7 @@ locals {
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
     { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
+    { name : "EXPORT_OPP_DATA_FILE_PATH", value : "${aws_s3_bucket.general_purpose.bucket_regional_domain_name}/public-extracts/" }
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
