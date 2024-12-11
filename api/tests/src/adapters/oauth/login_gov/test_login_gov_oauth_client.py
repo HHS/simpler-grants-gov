@@ -25,7 +25,7 @@ def test_get_token(monkeypatch):
     )
 
     client = LoginGovOauthClient(LoginGovConfig())
-    resp = client.get_token(OauthTokenRequest(code="abc123"))
+    resp = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
 
     assert resp.id_token == "abc123"
     assert resp.access_token == "xyz456"
@@ -43,7 +43,7 @@ def test_get_token_error(monkeypatch):
     )
 
     client = LoginGovOauthClient(LoginGovConfig())
-    resp = client.get_token(OauthTokenRequest(code="abc123"))
+    resp = client.get_token(OauthTokenRequest(code="abc123", client_assertion="fake_token"))
 
     assert resp.id_token == ""
     assert resp.access_token == ""

@@ -40,9 +40,8 @@ class LoginGovOauthClient(BaseOauthClient):
         body = {
             "code": request.code,
             "grant_type": request.grant_type,
-            # TODO https://github.com/HHS/simpler-grants-gov/issues/3103
-            # when we support client assertion, we need to not add the client_id
-            "client_id": self.config.client_id,
+            "client_assertion": request.client_assertion,
+            "client_assertion_type": request.client_assertion_type,
         }
 
         response = self._request("POST", self.config.login_gov_token_endpoint, data=body)

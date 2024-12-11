@@ -11,7 +11,7 @@ from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.auth_errors import JwtValidationError
-from src.auth.login_gov_jwt_auth import validate_token
+from src.auth.login_gov_jwt_auth import get_login_gov_client_assertion, validate_token
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, LoginGovState, User
 from src.util.string_utils import is_valid_uuid
@@ -77,9 +77,12 @@ def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> Login
 
     # call the token endpoint (make a client)
     # https://developers.login.gov/oidc/token/
-    # TODO: Creating a JWT with the key we gave login.gov
     client = get_login_gov_client()
-    response = client.get_token(OauthTokenRequest(code=callback_params.code))
+    response = client.get_token(
+        OauthTokenRequest(
+            code=callback_params.code, client_assertion=get_login_gov_client_assertion()
+        )
+    )
 
     # If this request failed, we'll assume we're the issue and 500
     # TODO - need to test with actual login.gov if there could be other scenarios
