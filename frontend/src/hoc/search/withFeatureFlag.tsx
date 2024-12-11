@@ -1,32 +1,48 @@
+import { environment } from "src/constants/environments";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
-import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import React, { ComponentType } from "react";
 
-type WithFeatureFlagProps = {
-  searchParams: ServerSideSearchParams;
-};
-
-const withFeatureFlag = <P extends object>(
+// since this relies on search params coming in as a prop, it can only be used reliably on a top level page component
+// for other components we'll need a different implementation, likely one that delivers particular props to the wrapped component
+// that method is not easily implemented with top level page components, as their props are laregely dictated by the Next system
+const withFeatureFlag = <P, R>(
   WrappedComponent: ComponentType<P>,
   featureFlagName: string,
+  onEnabled: () => R,
 ) => {
-  const ComponentWithFeatureFlag: React.FC<P & WithFeatureFlagProps> = (
-    props,
+  // if we're in the middle of a build, that means this is an ssg rendering pass.
+  // in that case we can skip this whole feature flag business and move on with our lives
+  if (environment.NEXT_BUILD === "true") {
+    return WrappedComponent;
+  }
+
+  // top level component to grab search params from the top level page props
+  const ComponentWithFeatureFlagAndSearchParams = (
+    props: P & WithFeatureFlagProps,
   ) => {
-    const ffManager = new FeatureFlagsManager(cookies());
-    const { searchParams } = props;
+    const searchParams = props.searchParams || {};
+    const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
+      const featureFlagsManager = new FeatureFlagsManager(cookies());
 
-    if (ffManager.isFeatureDisabled(featureFlagName, searchParams)) {
-      return notFound();
-    }
+      if (
+        featureFlagsManager.isFeatureEnabled(
+          featureFlagName,
+          props.searchParams,
+        )
+      ) {
+        onEnabled();
+        return;
+      }
 
-    return <WrappedComponent {...(props as P)} />;
+      return <WrappedComponent {...props} />;
+    };
+    return <ComponentWithFeatureFlag {...props} searchParams={searchParams} />;
   };
 
-  return ComponentWithFeatureFlag;
+  return ComponentWithFeatureFlagAndSearchParams;
 };
 
 export default withFeatureFlag;

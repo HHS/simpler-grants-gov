@@ -4,7 +4,6 @@
 
 import Cookies from "js-cookie";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
-import { mockProcessEnv } from "src/utils/testing/commonTestUtils";
 import {
   mockDefaultFeatureFlags,
   mockFeatureFlagsCookie,
@@ -12,25 +11,37 @@ import {
 
 import { NextRequest, NextResponse } from "next/server";
 
-describe("FeatureFlagsManager", () => {
-  const COOKIE_VALUE = { feature1: true };
-  const DEFAULT_FEATURE_FLAGS = {
-    feature1: true,
-    feature2: false,
-    feature3: true,
-  };
+jest.mock("src/constants/environments", () => ({
+  environment: {
+    FEATURE_FAKE_ONE: "true",
+    FEATURE_FAKE_TWO: "false",
+    NOT_A_FEATURE_FLAG: "true",
+    FEATURE_NON_BOOL: "sure",
+  },
+}));
 
-  const MockServerCookiesModule = {
+const DEFAULT_FEATURE_FLAGS = {
+  feature1: true,
+  feature2: false,
+  feature3: true,
+};
+
+const COOKIE_VALUE: { [key: string]: boolean } = { feature1: true };
+
+function MockServerCookiesModule(cookieValue = COOKIE_VALUE) {
+  return {
     get: (name: string) => {
       if (name === FeatureFlagsManager.FEATURE_FLAGS_KEY) {
         return {
-          value: JSON.stringify(COOKIE_VALUE),
+          value: JSON.stringify(cookieValue),
         };
       }
     },
     set: jest.fn(),
   } as object as NextRequest["cookies"];
+}
 
+describe("FeatureFlagsManager", () => {
   let featureFlagsManager: FeatureFlagsManager;
 
   beforeEach(() => {
@@ -48,7 +59,7 @@ describe("FeatureFlagsManager", () => {
 
   test('`.featureFlagsCookie` getter loads feature flags with server-side NextRequest["cookies"]', () => {
     const serverFeatureFlagsManager = new FeatureFlagsManager(
-      MockServerCookiesModule,
+      MockServerCookiesModule(),
     );
     expect(serverFeatureFlagsManager.featureFlagsCookie).toEqual(COOKIE_VALUE);
   });
@@ -122,7 +133,7 @@ describe("FeatureFlagsManager", () => {
     undefined,
     "",
   ])(
-    "`.featureFlagsCookie` does not include feature flags if the value is not a boolean",
+    "`.featureFlagsCookie` does not include feature flags if the value is not a boolean like %p",
     (featureFlagValue) => {
       const featureName = "feature1";
       expect(featureFlagsManager.isValidFeatureFlag(featureName)).toBe(true);
@@ -204,17 +215,6 @@ describe("FeatureFlagsManager", () => {
     ).toThrow();
   });
 
-  test("`.isFeatureDisabled` returns the opposite of `.isFeatureEnabled`", () => {
-    expect(
-      Object.keys(featureFlagsManager.featureFlags).length,
-    ).toBeGreaterThanOrEqual(1);
-    Object.keys(featureFlagsManager.featureFlags).forEach((name) => {
-      const isEnabled = featureFlagsManager.isFeatureEnabled(name);
-      const isDisabled = featureFlagsManager.isFeatureDisabled(name);
-      expect(isEnabled).toEqual(!isDisabled);
-    });
-  });
-
   test("`.isValidFeatureFlag` correctly identifies valid feature flag names", () => {
     Object.keys(featureFlagsManager.defaultFeatureFlags).forEach((name) => {
       expect(featureFlagsManager.isValidFeatureFlag(name)).toEqual(true);
@@ -230,7 +230,6 @@ describe("FeatureFlagsManager", () => {
     const newValue = false;
     expect(DEFAULT_FEATURE_FLAGS[featureFlagName]).not.toEqual(newValue);
     const expectedFeatureFlagsCookie = {
-      ...DEFAULT_FEATURE_FLAGS,
       [featureFlagName]: newValue,
     };
     const queryParamString = `${featureFlagName}:${newValue.toString()}`;
@@ -248,24 +247,11 @@ describe("FeatureFlagsManager", () => {
     });
   });
 
-  test("`.middleware` does not set cookies if production", async () => {
-    const url = "http://localhost/feature-flags";
-    const request = new NextRequest(new Request(url), {});
-    const mockSet = jest.fn();
-    jest
-      .spyOn(NextResponse.prototype, "cookies", "get")
-      .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
-    await mockProcessEnv({ NEXT_PUBLIC_APP_ENV: "production" }, () => {
-      featureFlagsManager.middleware(request, NextResponse.next());
-      expect(mockSet).not.toHaveBeenCalled();
-    });
-  });
-
   /**
    * This test is important because there is a race condition between middleware vs frontend cookie
    * setting.
    */
-  test("`.middleware` does not set cookies if no valid feature flags are specified in params", async () => {
+  test("`.middleware` does not set cookies if no valid feature flags are specified in params", () => {
     const paramValue = "fakeFeature:true;anotherFakeFeature:false";
     const parsedFeatureFlags =
       featureFlagsManager.parseFeatureFlagsFromString(paramValue);
@@ -276,10 +262,8 @@ describe("FeatureFlagsManager", () => {
     jest
       .spyOn(NextResponse.prototype, "cookies", "get")
       .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
-    await mockProcessEnv({ NEXT_PUBLIC_APP_ENV: "production" }, () => {
-      featureFlagsManager.middleware(request, NextResponse.next());
-      expect(mockSet).not.toHaveBeenCalled();
-    });
+    featureFlagsManager.middleware(request, NextResponse.next());
+    expect(mockSet).not.toHaveBeenCalled();
   });
 
   test("`.parseFeatureFlagsFromString` correctly parses a valid query param string", () => {
@@ -315,7 +299,7 @@ describe("FeatureFlagsManager", () => {
     "true=false",
     "!@#$%^&*(){}[]:\";|'<.,./?\\`~",
   ])(
-    "`.parseFeatureFlagsFromString` gracefully handles garbled values",
+    "`.parseFeatureFlagsFromString` gracefully handles garbled values like %s",
     (queryParamString) => {
       const featureFlags =
         featureFlagsManager.parseFeatureFlagsFromString(queryParamString);
@@ -328,7 +312,7 @@ describe("FeatureFlagsManager", () => {
     ["invalidFeatureFlag", "true", false],
     ["feature1", "invalidFlagValue", false],
   ])(
-    "`.parseFeatureFlagsFromString` omits invalid flag names and values",
+    "`.parseFeatureFlagsFromString` omits invalid flag names and values (case %#)",
     (flagName, flagValue, isValid) => {
       const queryParamString = `${flagName}:${flagValue}`;
       const featureFlags =
@@ -337,12 +321,12 @@ describe("FeatureFlagsManager", () => {
     },
   );
 
-  test("`.setFeatureflag` updates the feature flags", () => {
+  test("`.setFeatureflagCookie` updates the feature flags", () => {
     const currentFeatureFlags = featureFlagsManager.featureFlags;
 
     const featureFlagToChangeName = Object.keys(currentFeatureFlags)[0];
     const newFeatureFlagValue = !currentFeatureFlags[featureFlagToChangeName];
-    featureFlagsManager.setFeatureFlag(
+    featureFlagsManager.setFeatureFlagCookie(
       featureFlagToChangeName,
       newFeatureFlagValue,
     );
@@ -351,13 +335,17 @@ describe("FeatureFlagsManager", () => {
       ...currentFeatureFlags,
       [featureFlagToChangeName]: newFeatureFlagValue,
     };
+
+    const expectedFeatureFlagsCookie = {
+      [featureFlagToChangeName]: newFeatureFlagValue,
+    };
     expect(featureFlagsManager.featureFlagsCookie).toEqual(
-      expectedNewFeatureFlags,
+      expectedFeatureFlagsCookie,
     );
     expect(featureFlagsManager.featureFlags).toEqual(expectedNewFeatureFlags);
   });
 
-  test("`.setFeatureflag` throws an error if the feature flag name is invalid", () => {
+  test("`.setFeatureflagCookie` throws an error if the feature flag name is invalid", () => {
     const someInvalidFeatureFlag = "someFakeFeatureFlag-------------------";
     expect(
       Object.keys(featureFlagsManager.featureFlags).includes(
@@ -365,11 +353,11 @@ describe("FeatureFlagsManager", () => {
       ),
     ).toEqual(false);
     expect(() =>
-      featureFlagsManager.setFeatureFlag(someInvalidFeatureFlag, true),
+      featureFlagsManager.setFeatureFlagCookie(someInvalidFeatureFlag, true),
     ).toThrow();
   });
 
-  test("`.setFeatureflag` is resilient against cookie value updating from what is cached", () => {
+  test("`.setFeatureflagCookie` is resilient against cookie value updating from what is cached", () => {
     const currentFeatureFlags = featureFlagsManager.featureFlags;
 
     const featureFlagToSneakilyUpdateName = Object.keys(currentFeatureFlags)[0];
@@ -397,7 +385,7 @@ describe("FeatureFlagsManager", () => {
     expect(featureFlagToChangeName).not.toEqual(
       featureFlagToSneakilyUpdateName,
     );
-    featureFlagsManager.setFeatureFlag(
+    featureFlagsManager.setFeatureFlagCookie(
       featureFlagToChangeName,
       newFeatureFlagToChangeValue,
     );
@@ -438,13 +426,67 @@ describe("FeatureFlagsManager", () => {
         featureFlagsManager.isFeatureEnabled("invalidFeature"),
       ).toThrow();
     });
+    describe("featureFlagsFromEnvironment", () => {
+      // notice the interaction between the values in the test and the values in the
+      // mocked environment at the top of the file
+      it("sets any env vars fitting `FEATURE_<varname>` pattern into snake case", () => {
+        mockDefaultFeatureFlags({
+          fakeOne: false,
+          fakeTwo: true,
+          nonBool: true,
+        });
+
+        const featureFlagsManager = new FeatureFlagsManager(Cookies);
+        expect(featureFlagsManager.featureFlagsFromEnvironment).toEqual({
+          fakeOne: true,
+          fakeTwo: false,
+          nonBool: false,
+        });
+      });
+    });
+  });
+  describe("feature flag precedence", () => {
+    it("overrides defaults with env vars", () => {
+      mockDefaultFeatureFlags({
+        fakeOne: false,
+        fakeTwo: true,
+      });
+      // Set a different state in cookies to test precedence
+      const modifiedCookieValue = {};
+      mockFeatureFlagsCookie(modifiedCookieValue);
+      const serverFeatureFlagsManager = new FeatureFlagsManager(
+        MockServerCookiesModule(),
+      );
+
+      expect(serverFeatureFlagsManager.isFeatureEnabled("fakeOne")).toBe(true);
+      expect(serverFeatureFlagsManager.isFeatureEnabled("fakeTwo")).toBe(false);
+    });
+
+    it("overrides env vars with cookies", () => {
+      mockDefaultFeatureFlags({
+        fakeOne: false,
+        fakeTwo: true,
+      });
+      // Set a different state in cookies to test precedence
+      const modifiedCookieValue = {
+        fakeOne: false,
+        fakeTwo: true,
+      };
+      mockFeatureFlagsCookie(modifiedCookieValue);
+      const serverFeatureFlagsManager = new FeatureFlagsManager(
+        MockServerCookiesModule(modifiedCookieValue),
+      );
+
+      expect(serverFeatureFlagsManager.isFeatureEnabled("fakeOne")).toBe(false);
+      expect(serverFeatureFlagsManager.isFeatureEnabled("fakeTwo")).toBe(true);
+    });
 
     test("`searchParams` override takes precedence over default and cookie-based feature flags", () => {
       // Set a different state in cookies to test precedence
       const modifiedCookieValue = { feature1: true };
       mockFeatureFlagsCookie(modifiedCookieValue);
       const serverFeatureFlagsManager = new FeatureFlagsManager(
-        MockServerCookiesModule,
+        MockServerCookiesModule(),
       );
 
       // Now provide searchParams with a conflicting setup
@@ -455,10 +497,6 @@ describe("FeatureFlagsManager", () => {
       expect(
         serverFeatureFlagsManager.isFeatureEnabled("feature1", searchParams),
       ).toBe(false);
-
-      expect(
-        serverFeatureFlagsManager.isFeatureDisabled("feature1", searchParams),
-      ).toBe(true);
     });
   });
 });

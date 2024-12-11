@@ -45,6 +45,9 @@ COPY src ./src
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# let the application know that it is being built
+ENV NEXT_BUILD true
+
 # Skip lint because it should have happened in the CI already
 RUN npm run build -- --no-lint
 
@@ -110,6 +113,7 @@ ENV SENDY_LIST_ID=${SENDY_LIST_ID}
 
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV PORT 3000
+ENV NEXT_BUILD false
 
 EXPOSE 3000
 
