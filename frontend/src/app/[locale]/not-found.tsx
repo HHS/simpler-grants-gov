@@ -1,14 +1,14 @@
 import { Metadata } from "next";
 
 import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 
 export async function generateMetadata() {
-  const t = await getTranslations({ locale: "en" });
+  const t = await getTranslations();
   const meta: Metadata = {
     title: t("ErrorPages.page_not_found.title"),
     description: t("Index.meta_description"),
@@ -16,8 +16,8 @@ export async function generateMetadata() {
   return meta;
 }
 
+// note that NotFound pages do not take props so cannot be translated
 export default function NotFound() {
-  unstable_setRequestLocale("en");
   const t = useTranslations("ErrorPages.page_not_found");
 
   return (

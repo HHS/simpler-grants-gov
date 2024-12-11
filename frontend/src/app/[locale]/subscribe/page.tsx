@@ -1,21 +1,19 @@
-import pick from "lodash/pick";
 import { Metadata } from "next";
 import { SUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
+import { LocalizedPageProps } from "src/types/intl";
 
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { useTranslations } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
 
-export async function generateMetadata() {
-  const t = await getTranslations({ locale: "en" });
+export async function generateMetadata({
+  params: { locale },
+}: LocalizedPageProps) {
+  const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
@@ -24,10 +22,9 @@ export async function generateMetadata() {
   return meta;
 }
 
-export default function Subscribe() {
-  unstable_setRequestLocale("en");
+export default function Subscribe({ params: { locale } }: LocalizedPageProps) {
+  setRequestLocale(locale);
   const t = useTranslations("Subscribe");
-  const messages = useMessages();
 
   return (
     <>
@@ -54,12 +51,7 @@ export default function Subscribe() {
             })}
           </Grid>
           <Grid tabletLg={{ col: 6 }}>
-            <NextIntlClientProvider
-              locale="en"
-              messages={pick(messages, "Subscribe")}
-            >
-              <SubscriptionForm />
-            </NextIntlClientProvider>
+            <SubscriptionForm />
           </Grid>
         </Grid>
       </GridContainer>

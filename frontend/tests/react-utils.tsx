@@ -13,6 +13,9 @@ import { NextIntlClientProvider } from "next-intl";
 /**
  * Wrapper component that provides global context to all tests. Notably,
  * it allows our tests to render content when using i18n translation methods.
+ *
+ * Note that this functionality does not work when testing page components, use original
+ * testing methods in that case.
  */
 const GlobalProviders = ({ children }: { children: React.ReactNode }) => {
   return (

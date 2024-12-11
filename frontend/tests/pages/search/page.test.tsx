@@ -13,7 +13,7 @@ jest.mock("src/hoc/search/withFeatureFlag", () =>
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-  unstable_setRequestLocale: identity,
+  setRequestLocale: identity,
 }));
 
 jest.mock("next-intl", () => ({
@@ -78,7 +78,9 @@ describe("Search Route", () => {
       status: "forecasted,posted",
     };
 
-    render(<Search searchParams={mockSearchParams} />);
+    render(
+      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+    );
 
     // translation service is mocked, so the expected label here is the translation key rather than the label text
     const forecastedCheckbox = await screen.findByLabelText(
@@ -110,7 +112,9 @@ describe("Search Route", () => {
     const mockSearchParams = {
       status: SEARCH_NO_STATUS_VALUE,
     };
-    render(<Search searchParams={mockSearchParams} />);
+    render(
+      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+    );
 
     // None should be checked if the "no status checked" value is present.
     const statuses = ["forecasted", "posted", "closed", "archived"];
@@ -127,7 +131,9 @@ describe("Search Route", () => {
     const mockSearchParams = {
       status: undefined,
     };
-    render(<Search searchParams={mockSearchParams} />);
+    render(
+      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+    );
 
     // These should be clicked if no status is present.
     const clicked = ["forecasted", "posted"];

@@ -5,7 +5,7 @@ import {
   useMessages,
   useTranslations,
 } from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function Layout({ children, locale }: Props) {
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   const t = useTranslations();
   const messages = useMessages();

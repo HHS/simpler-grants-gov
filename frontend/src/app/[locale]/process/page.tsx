@@ -3,14 +3,17 @@ import ProcessIntro from "src/app/[locale]/process/ProcessIntro";
 import ProcessInvolved from "src/app/[locale]/process/ProcessInvolved";
 import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
 import { PROCESS_CRUMBS } from "src/constants/breadcrumbs";
+import { LocalizedPageProps } from "src/types/intl";
 
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
-export async function generateMetadata() {
-  const t = await getTranslations({ locale: "en" });
+export async function generateMetadata({
+  params: { locale },
+}: LocalizedPageProps) {
+  const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Process.page_title"),
     description: t("Process.meta_description"),
@@ -18,8 +21,8 @@ export async function generateMetadata() {
   return meta;
 }
 
-export default function Process() {
-  unstable_setRequestLocale("en");
+export default function Process({ params: { locale } }: LocalizedPageProps) {
+  setRequestLocale(locale);
   return (
     <>
       <BetaAlert />
