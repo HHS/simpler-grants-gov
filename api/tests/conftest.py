@@ -55,6 +55,12 @@ def env_vars():
     load_local_env_vars()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def set_logging_defaults(monkeypatch_session):
+    # Some loggers are noisy/buggy in our tests, so adjust them
+    monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
+
+
 ### Uploads test files
 @pytest.fixture
 def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
