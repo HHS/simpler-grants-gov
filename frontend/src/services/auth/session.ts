@@ -1,15 +1,14 @@
 import "server-only";
 
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
+import { environment } from "src/constants/environments";
+import { SessionPayload, UserSession } from "src/services/auth/types";
 
 // note that cookies will be async in Next 15
 import { cookies } from "next/headers";
 import { cache } from "react";
 
-import { SessionPayload, UserSession } from "./types";
-
-const secretKey = process.env.SESSION_SECRET;
-const encodedKey = new TextEncoder().encode(secretKey);
+const encodedKey = new TextEncoder().encode(environment.SESSION_SECRET);
 
 // returns a new date 1 week from time of function call
 const newExpirationDate = () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -40,18 +39,25 @@ export async function decrypt(
   }
 }
 
+// is this cache doing anything? let's make sure
+const getTokenFromCookie = cache(
+  async (cookie: string): Promise<UserSession> => {
+    const decryptedSession = await decrypt(cookie);
+    if (!decryptedSession) return null;
+    const token = (decryptedSession.token as string) ?? null;
+    if (!token) return null;
+    return {
+      token,
+    };
+  },
+);
+
 // returns token decrypted from session cookie or null
-export const getSession = cache(async (): Promise<UserSession> => {
+export const getSession = async (): Promise<UserSession> => {
   const cookie = cookies().get("session")?.value;
   if (!cookie) return null;
-  const decryptedSession = await decrypt(cookie);
-  if (!decryptedSession) return null;
-  const token = (decryptedSession.token as string) ?? null;
-  if (!token) return null;
-  return {
-    token,
-  };
-});
+  return getTokenFromCookie(cookie);
+};
 
 export async function createSession(token: string) {
   const expiresAt = newExpirationDate();

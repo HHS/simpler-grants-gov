@@ -27,13 +27,13 @@ const createSessionAndSetStatus = async (
 
     TODOS:
 
-    - translating messages
+    - translating messages?
     - ...
 */
 export async function GET(request: NextRequest) {
   const currentSession = await getSession();
   let status = "";
-  if (currentSession) {
+  if (currentSession && currentSession.token) {
     status = await createSessionAndSetStatus(
       currentSession.token,
       "already logged in",
@@ -45,6 +45,6 @@ export async function GET(request: NextRequest) {
     status = "no token provided";
     return redirect(`/user?message=${status}`);
   }
-  status = await createSessionAndSetStatus(token || "", "created session");
+  status = await createSessionAndSetStatus(token, "created session");
   return redirect(`/user?message=${status}`);
 }
