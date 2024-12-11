@@ -19,6 +19,7 @@ def test_get_healthcheck_200(client, monkeypatch):
         "https://github.com/HHS/simpler-grants-gov/releases"
     )
     assert datetime.fromisoformat(resp_json["data"]["last_deploy_time"]) is not None
+    assert resp_json["data"]["deploy_whoami"] == "local-developer"
 
 
 def test_get_healthcheck_503_db_bad_state(client, monkeypatch):
