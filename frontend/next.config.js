@@ -56,6 +56,16 @@ const nextConfig = {
           },
         ],
       },
+      // don't cache the form
+      {
+        source: "/subscribe/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
     ];
   },
   basePath,
