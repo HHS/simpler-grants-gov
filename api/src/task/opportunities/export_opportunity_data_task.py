@@ -3,7 +3,6 @@ import logging
 import os
 from enum import StrEnum
 from typing import Iterator, Sequence
-from urllib.parse import urlparse
 
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy import select
