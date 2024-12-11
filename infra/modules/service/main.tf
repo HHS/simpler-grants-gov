@@ -37,7 +37,7 @@ locals {
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
-    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value },
     { name : "EXPORT_OPP_DATA_FILE_PATH", value : "${aws_s3_bucket.general_purpose.bucket_regional_domain_name}/public-extracts/" }
   ], local.hostname, local.drafts_s3_bucket_url)
   db_environment_variables = var.db_vars == null ? [] : [
