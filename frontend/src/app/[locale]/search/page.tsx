@@ -7,6 +7,7 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearch
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
@@ -22,7 +23,10 @@ export async function generateMetadata() {
   };
   return meta;
 }
-function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
+
+type SearchPageProps = { searchParams: SearchParamsTypes };
+
+function Search({ searchParams }: SearchPageProps) {
   unstable_setRequestLocale("en");
   const t = useTranslations("Search");
 
@@ -73,5 +77,9 @@ function Search({ searchParams }: { searchParams: SearchParamsTypes }) {
   );
 }
 
-// Exports page behind a feature flag
-export default withFeatureFlag(Search, "showSearchV0");
+// Exports page behind both feature flags
+export default withFeatureFlag<SearchPageProps, never>(
+  Search,
+  "searchOff",
+  () => redirect("/maintenance"),
+);

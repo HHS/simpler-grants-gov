@@ -3,8 +3,10 @@
  */
 
 import { CookiesStatic } from "js-cookie";
+import { environment } from "src/constants/environments";
 import { featureFlags } from "src/constants/featureFlags";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
+import { camelToSnake } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -55,7 +57,7 @@ export class FeatureFlagsManager {
   private _cookies;
 
   constructor(
-    cookies:
+    cookies?:
       | NextRequest["cookies"]
       | CookiesStatic
       | NextServerSideCookies
@@ -70,6 +72,7 @@ export class FeatureFlagsManager {
 
   // The SSR function getServerSideProps provides a Record type for cookie, which excludes
   // cookie methods like set or get.
+  // likely should be moved out of this class
   private isCookieARecord(
     cookies?: typeof this._cookies | NextResponse["cookies"],
   ): cookies is NextServerSideCookies {
@@ -83,6 +86,9 @@ export class FeatureFlagsManager {
    * Invalid flag names and flag values are removed.
    */
   get featureFlagsCookie(): FeatureFlags {
+    if (!this._cookies) {
+      return {};
+    }
     let cookieValue;
     let parsedCookie: FeatureFlags;
 
@@ -116,23 +122,23 @@ export class FeatureFlagsManager {
     );
   }
 
+  /*
+
+    - Flags set by environment variables are the first override to default values
+    - Flags set in the /dev/feature-flags admin view will be set in the cookie
+    - Flags set in query params will result in the flag value being stored in the cookie
+    - As query param values are set in middleware on each request, query params have the highest precedence
+    - Values set in cookies will be persistent per browser session unless explicitly overwritten
+    - This means that simply removing a query param from a url will not revert the feature flag value to
+    the value specified in environment variable or default, you'll need to clear cookies or open a new private browser
+
+  */
   get featureFlags(): FeatureFlags {
     return {
       ...this.defaultFeatureFlags,
+      ...this.featureFlagsFromEnvironment,
       ...this.featureFlagsCookie,
     };
-  }
-
-  /**
-   * Check whether a feature flag is disabled
-   * @param name - Feature flag name
-   * @example isFeatureEnabled("featureFlagName")
-   */
-  isFeatureDisabled(
-    name: string,
-    searchParams?: ServerSideSearchParams,
-  ): boolean {
-    return !this.isFeatureEnabled(name, searchParams);
   }
 
   /**
@@ -174,7 +180,7 @@ export class FeatureFlagsManager {
    * Load feature flags from query params and set them on the cookie. This allows for
    * feature flags to be set via url query params as well.
    *
-   * Expects a querystring with a param of `FeatureFlagsManager.FEATURE_FLAGS_KEY`.
+   * Expects a query string with a param of `FeatureFlagsManager.FEATURE_FLAGS_KEY`.
    *
    * For example, `example.com?_ff=showSite:true;enableClaimFlow:false`
    * would enable `showSite` and disable `enableClaimFlow`.
@@ -193,14 +199,34 @@ export class FeatureFlagsManager {
       return response;
     }
     Object.entries(featureFlags).forEach(([flagName, flagValue]) => {
-      this.setFeatureFlag(flagName, flagValue);
+      this.setFeatureFlagCookie(flagName, flagValue);
     });
     this.setCookie(JSON.stringify(this.featureFlagsCookie), response.cookies);
     return response;
   }
 
+  get featureFlagsFromEnvironment() {
+    return Object.keys(this.defaultFeatureFlags).reduce(
+      (featureFlagsFromEnvironment, flagName) => {
+        // by convention all feature flag env var names start with "FEATURE"
+        // and all app side feature flag names should be in the camel case version of the env var names (minus FEATURE)
+        // ex "FEATURE_SEARCH_OFF" -> "searchOff"
+        const envVarName = `FEATURE_${camelToSnake(flagName).toUpperCase()}`;
+        const envVarValue = environment[envVarName];
+        if (envVarValue)
+          // by convention, any feature flag environment variables should use the exact string "true"
+          // when activating the flag. Negative values are more forgiving, but should be non empty strings
+          featureFlagsFromEnvironment[flagName] = envVarValue === "true";
+
+        return featureFlagsFromEnvironment;
+      },
+      {} as FeatureFlags,
+    );
+  }
+
   /**
    * Parses feature flags from a query param string
+   * * should be removed from this class
    */
   parseFeatureFlagsFromString(queryParamString: string | null): FeatureFlags {
     if (!queryParamString) {
@@ -238,14 +264,14 @@ export class FeatureFlagsManager {
   }
 
   /**
-   * Toggle feature flag
+   * Toggle feature flag on cookie
    */
-  setFeatureFlag(featureName: string, enabled: boolean): void {
+  setFeatureFlagCookie(featureName: string, enabled: boolean): void {
     if (!this.isValidFeatureFlag(featureName)) {
       throw new Error(`\`${featureName}\` is not a valid feature flag`);
     }
     const featureFlags = {
-      ...this.featureFlags,
+      ...this.featureFlagsCookie,
       [featureName]: enabled,
     };
 

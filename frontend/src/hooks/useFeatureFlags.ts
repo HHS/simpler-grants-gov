@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  *   const {
  *     featureFlagsManager,  // An instance of FeatureFlagsManager
  *     mounted,  // Useful for hydration
- *     setFeatureFlag,  // Proxy for featureFlagsManager.setFeatureFlag that handles updating state
+ *     setFeatureFlag,  // Proxy for featureFlagsManager.setFeatureFlagCookie that handles updating state
  *   } = useFeatureFlags()
  *
  *   if (featureFlagsManager.isFeatureEnabled("someFeatureFlag")) {
@@ -40,7 +40,7 @@ export function useFeatureFlags() {
   }, []);
 
   function setFeatureFlag(name: string, value: boolean) {
-    featureFlagsManager.setFeatureFlag(name, value);
+    featureFlagsManager.setFeatureFlagCookie(name, value);
     setFeatureFlagsManager(new FeatureFlagsManager(Cookies));
   }
 
