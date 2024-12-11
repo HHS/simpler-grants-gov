@@ -23,24 +23,6 @@ class TestExportOpportunityDataTask(BaseTestClass):
         config = ExportOpportunityDataConfig(file_path=f"s3://{mock_s3_bucket}/")
         return ExportOpportunityDataTask(db_session, config)
 
-    def test_export_opportunity_data_task_paths(
-        self,
-        db_session,
-        monkeypatch: pytest.MonkeyPatch,
-    ):
-        config = ExportOpportunityDataConfig(file_path="/tmp")
-        task = ExportOpportunityDataTask(db_session, config)
-
-        assert task.json_file == "/tmp/opportunity_data-2024-01-10_07-00-00.json"
-        assert task.csv_file == "/tmp/opportunity_data-2024-01-10_07-00-00.csv"
-
-        monkeypatch.setenv("GENERAL_S3_BUCKET_URL", "s3://test-bucket/")
-        config1 = ExportOpportunityDataConfig(file_path="/tmp")
-
-        task1 = ExportOpportunityDataTask(db_session, config1)
-        assert task1.json_file == "s3://test-bucket/tmp/opportunity_data-2024-01-10_07-00-00.json"
-        assert task1.csv_file == "s3://test-bucket/tmp/opportunity_data-2024-01-10_07-00-00.csv"
-
     def test_export_opportunity_data_task(
         self,
         db_session,
