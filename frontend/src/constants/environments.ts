@@ -8,6 +8,7 @@ const {
   API_URL,
   API_AUTH_TOKEN = "",
   NEXT_PUBLIC_BASE_URL,
+  SESSION_SECRET = "",
 } = process.env;
 
 // home for all interpreted server side environment variables
@@ -25,4 +26,5 @@ export const environment: { [key: string]: string } = {
   API_AUTH_TOKEN,
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   GOOGLE_TAG_MANAGER_ID: "GTM-MV57HMHS",
+  SESSION_SECRET,
 };
