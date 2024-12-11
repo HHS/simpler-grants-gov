@@ -2,7 +2,6 @@ import csv
 import json
 
 import pytest
-from freezegun import freeze_time
 
 import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
@@ -16,7 +15,6 @@ from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import OpportunityFactory
 
 
-@freeze_time("2024-01-10 12:00:00")
 class TestExportOpportunityDataTask(BaseTestClass):
     @pytest.fixture
     def export_opportunity_data_task(self, db_session, mock_s3_bucket):
