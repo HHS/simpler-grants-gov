@@ -77,6 +77,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
             "environment": os.environ.get("ENVIRONMENT"),
             "deploy_github_ref": deploy_metadata.deploy_github_ref,
             "deploy_github_sha": deploy_metadata.deploy_github_sha,
+            "deploy_whoami": deploy_metadata.deploy_whoami,
         }
     )
 
