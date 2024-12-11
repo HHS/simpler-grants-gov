@@ -7,7 +7,7 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearch
 
 import { useTranslations } from "next-intl";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
@@ -79,7 +79,7 @@ function Search({ searchParams }: SearchPageProps) {
 
 // Exports page behind both feature flags
 export default withFeatureFlag<SearchPageProps, never>(
-  withFeatureFlag<SearchPageProps, never>(Search, "hideSearchV0", notFound),
+  Search,
   "searchOff",
   () => redirect("/maintenance"),
 );
