@@ -41,6 +41,10 @@ class HealthcheckMetadataSchema(Schema):
         metadata={"description": "Latest deploy time in US/Eastern timezone"}
     )
 
+    deploy_whoami = fields.String(
+        metadata={"description": "The latest user to deploy the application", "example": "runner"}
+    )
+
 
 class HealthcheckResponseSchema(AbstractResponseSchema):
     # We don't have any data to return with the healthcheck endpoint
@@ -71,6 +75,7 @@ def health(db_session: db.Session) -> response.ApiResponse:
         "commit_link": metadata_config.deploy_commit,
         "release_notes_link": metadata_config.release_notes,
         "last_deploy_time": metadata_config.deploy_datetime_est,
+        "deploy_whoami": metadata_config.deploy_whoami,
     }
 
     return response.ApiResponse(message="Service healthy", data=data)

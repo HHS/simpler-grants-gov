@@ -33,6 +33,7 @@ class DeployMetadataConfig(PydanticBaseEnvConfig):
     deploy_github_ref: str | None = None  # DEPLOY_GITHUB_REF
     deploy_github_sha: str | None = None  # DEPLOY_GITHUB_SHA
     deploy_timestamp: datetime | None = None  # DEPLOY_TIMESTAMP
+    deploy_whoami: str | None = None  # DEPLOY_WHOAMI
 
     def model_post_init(self, _context: typing.Any) -> None:
         """Run after __init__ sets above values from env vars"""

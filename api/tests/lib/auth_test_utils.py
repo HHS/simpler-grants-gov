@@ -33,7 +33,6 @@ def create_jwt(
         issued_at = datetime.now() - timedelta(days=365)
     if not_before is None:
         not_before = datetime.now() - timedelta(days=365)
-
     if issuer is None:
         issuer = get_config().login_gov_endpoint
     if audience is None:
