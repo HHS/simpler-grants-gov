@@ -304,6 +304,6 @@ def transform_and_load(
     print("transform and load is done")
 
 
-@etl_app.command(name="ingest_opportunity_data")
-def ingest_opp_data() ->  None:
+@etl_app.command(name="opportunity-load")
+def ingest_opportunity_data() ->  None:
     ingest_opportunity_data()

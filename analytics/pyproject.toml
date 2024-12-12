@@ -9,7 +9,7 @@ version = "0.1.0"
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
 db-migrate = "analytics.cli:migrate_database"
-ingest-opportunity-data = "analytics.cli:ingest_opp_data"
+opportunity-load = "analytics.cli:ingest_opportunity_data"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"

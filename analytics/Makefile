@@ -150,8 +150,10 @@ db-migrate:
 	$(POETRY) analytics etl db_migrate
 	@echo "====================================================="
 
-ingest-opportunity-data:
-	$(POETRY) analytics etl ingest_opportunity_data
+opportunity-load:
+	@echo "=> Ingesting opportunity data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl opportunity-load
 	@echo "====================================================="
 
 gh-transform-and-load:
