@@ -281,9 +281,6 @@ openapi-spec: init-db ## Generate OpenAPI spec
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
 
-copy-grants-data-to-analytics:
-	$(FLASK_CMD) data-migration copy-data-from-grants-db-to-analytics-db
-
 setup-foreign-tables:
 	$(FLASK_CMD) data-migration setup-foreign-tables
 
