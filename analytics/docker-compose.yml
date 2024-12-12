@@ -6,7 +6,7 @@ services:
     command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
     env_file: ./local.env
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - grantsanalyticsdbdata:/var/lib/postgresql/data
 
