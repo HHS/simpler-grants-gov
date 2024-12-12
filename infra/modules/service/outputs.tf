@@ -3,10 +3,10 @@ output "public_endpoint" {
   value       = var.enable_load_balancer ? "http://${aws_lb.alb[0].dns_name}" : null
 }
 
-output "cdn_endpoint" {
-  description = "The CDN endpoint for the service."
-  value       = var.enable_cdn ? aws_cloudfront_distribution.cdn[0].domain_name : null
-}
+# output "cdn_endpoint" {
+#   description = "The CDN endpoint for the service."
+#   value       = var.enable_cdn ? aws_cloudfront_distribution.cdn[0].domain_name : null
+# }
 
 output "cluster_name" {
   value = aws_ecs_cluster.cluster.name

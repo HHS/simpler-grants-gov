@@ -502,6 +502,10 @@ components:
           type: string
           format: date-time
           description: Latest deploy time in US/Eastern timezone
+        deploy_whoami:
+          type: string
+          description: The latest user to deploy the application
+          example: runner
     HealthcheckResponse:
       type: object
       properties:
@@ -998,7 +1002,7 @@ components:
             - archived
             type:
             - string
-    AgencyFilterV11:
+    AgencySearchFilterV1:
       type: object
       properties:
         one_of:
@@ -1141,7 +1145,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/AgencyFilterV11'
+          - $ref: '#/components/schemas/AgencySearchFilterV1'
         assistance_listing_number:
           type:
           - object
@@ -1905,4 +1909,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-

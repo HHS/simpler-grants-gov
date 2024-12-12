@@ -80,7 +80,6 @@ def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> Login
     # TODO: Creating a JWT with the key we gave login.gov
     client = get_login_gov_client()
     response = client.get_token(OauthTokenRequest(code=callback_params.code))
-
     # If this request failed, we'll assume we're the issue and 500
     # TODO - need to test with actual login.gov if there could be other scenarios
     #        the mock always returns something as long as the request is well-formatted

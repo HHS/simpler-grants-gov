@@ -50,6 +50,8 @@ def test_user_login_flow_happy_path_302(client, db_session):
     login_gov_config = login_gov_jwt_auth.get_config()
     resp = client.get("/v1/users/login", follow_redirects=True)
 
+    print(resp.history)
+
     # The final endpoint returns a 200
     # and dumps the params it was called with
     assert resp.status_code == 200

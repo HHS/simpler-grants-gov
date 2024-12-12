@@ -123,5 +123,6 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   }
+
   is_temporary = false
 }

@@ -365,7 +365,7 @@ class OpportunitySearchFilterV1Schema(Schema):
         .build()
     )
     agency = fields.Nested(
-        StrSearchSchemaBuilder("AgencyFilterV1Schema")
+        StrSearchSchemaBuilder("AgencySearchFilterV1Schema")
         .with_one_of(example="USAID", minimum_length=2)
         .build()
     )
