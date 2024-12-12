@@ -5,4 +5,3 @@ class Schemas(StrEnum):
     API = "api"
     LEGACY = "legacy"
     STAGING = "staging"
-    PUBLIC = "public"
