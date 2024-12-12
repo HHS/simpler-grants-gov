@@ -62,6 +62,10 @@ const fetchMock = jest.fn().mockResolvedValue({
   status: 200,
 });
 
+// working around the complexities of exporting the component wrapped in a feature flag
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const TypedSearchPageComponent = Search as (props: any) => React.JSX.Element;
+
 describe("Search Route", () => {
   let originalFetch: typeof global.fetch;
   beforeAll(() => {
@@ -79,7 +83,10 @@ describe("Search Route", () => {
     };
 
     render(
-      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+      TypedSearchPageComponent({
+        searchParams: mockSearchParams,
+        params: { locale: "en" },
+      }),
     );
 
     // translation service is mocked, so the expected label here is the translation key rather than the label text
@@ -113,7 +120,10 @@ describe("Search Route", () => {
       status: SEARCH_NO_STATUS_VALUE,
     };
     render(
-      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+      TypedSearchPageComponent({
+        searchParams: mockSearchParams,
+        params: { locale: "en" },
+      }),
     );
 
     // None should be checked if the "no status checked" value is present.
@@ -132,7 +142,10 @@ describe("Search Route", () => {
       status: undefined,
     };
     render(
-      Search({ searchParams: mockSearchParams, params: { locale: "en" } }),
+      TypedSearchPageComponent({
+        searchParams: mockSearchParams,
+        params: { locale: "en" },
+      }),
     );
 
     // These should be clicked if no status is present.
