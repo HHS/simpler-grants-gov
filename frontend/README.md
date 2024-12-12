@@ -1,11 +1,11 @@
-## Overview
+# Overview
 
 - This is a [Next.js](https://nextjs.org/) React web application, written in [TypeScript](https://www.typescriptlang.org/).
 - [U.S. Web Design System](https://designsystem.digital.gov) provides themeable styling and a set of common components.
 - [React-USWDS](https://github.com/trussworks/react-uswds) provides React components already with USWDS theming out of the box. For a reference point starting out, see `react-uswds-hello.tsx` which includes examples of react-uswds component usage.
 - [Storybook](https://storybook.js.org/) is included as a frontend workshop.
 
-### Directory structure
+## Directory structure
 
 ```
 ├── .storybook        # Storybook configuration
@@ -20,19 +20,19 @@
 └── tests
 ```
 
-## 💻 Development
+# 💻 Development
 
 [Next.js](https://nextjs.org/docs) provides the React framework for building the web application. Pages are defined in the `app/` directory. Pages are automatically routed based on the file name. For example, `pages/[locale]/page.tsx` is the home page.
 
 [**Learn more about developing Next.js applications** ↗️](https://nextjs.org/docs)
 
-### Getting started
+## Getting started
 
 The application can be run natively or in a Docker container.
 
-#### Native
+### Running the app locally
 
-There are several secret environment variables necessary to submit the form related to email subscription. Duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, which will not be checked into github. Fill in the three variables related to Sendy. Ask another engineer on the team for those values if you don't have them.
+Before running the server, duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, in order to avoid checking in any sensitive data to Github.
 
 From the `frontend/` directory:
 
@@ -50,16 +50,25 @@ From the `frontend/` directory:
    ```
 1. Navigate to [localhost:3000](http://localhost:3000) to view the application
 
-##### Other scripts
+#### Secrets
+
+Some functionality will not work locally without supplying the application environment variables containing secrets.
+
+- New Relic
+- Email subscription form (Sendy)
+
+If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
+
+#### Other scripts
 
 - `npm run build` - Builds the production Next.js bundle
 - `npm start` - Runs the Next.js server, after building the production bundle
 
-#### Docker
+### Running the app in Docker
 
 Alternatively, you can run the application in a Docker container.
 
-From the `frontend/` directory:
+From the `/frontend` directory:
 
 1. Run the local development server
    ```bash
@@ -71,7 +80,7 @@ From the `frontend/` directory:
 
 **Note:** To run the fully integrated app, uncomment the correct environment variable for the API_URL in your .env.development file, and run `make start` in the API directory before starting your local frontend container.
 
-##### Testing Release Target Locally
+#### Testing Release Target Locally
 
 To test the release target locally, run:
 
@@ -80,7 +89,7 @@ To test the release target locally, run:
 
 to build a local image. To view the site at `localhost:3000`, run: `docker run -e "HOSTNAME=0.0.0.0" -p 3000:3000 [IMAGE_NAME]`.
 
-## 🖼️ Storybook
+# 🖼️ Storybook
 
 Storybook is a [frontend workshop](https://bradfrost.com/blog/post/a-frontend-workshop-environment/) for developing and documenting pages and components in isolation. It allows you to render the same React components and files in the `src/` directory in a browser, without the need for a server or database. This allows you to develop and manually test components without having to run the entire Next.js application.
 
@@ -88,18 +97,18 @@ See the [Storybook Next.js documentation](https://github.com/storybookjs/storybo
 
 Similar to the Next.js application, Storybook can be ran natively or in a Docker container.
 
-#### Native
+## Native
 
 From the `frontend/` directory:
 
 1. `npm run storybook`
 2. Navigate to [localhost:6006](http://localhost:6006) to view
 
-##### Other scripts
+### Other scripts
 
 - `npm run storybook-build` - Exports a static site to `storybook-static/`
 
-#### Docker
+## Docker
 
 Alternatively, you can run Storybook in a Docker container.
 
@@ -108,7 +117,7 @@ From the `frontend/` directory:
 1. `make storybook`
 2. Navigate to [localhost:6006](http://localhost:6006) to view
 
-## 🐛 Testing
+# 🐛 Testing
 
 [Jest](https://jestjs.io/docs/getting-started) is used as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) provides React testing utilities.
 
@@ -126,7 +135,7 @@ A subset of tests can be ran by passing a pattern to the script. For example, to
 npm run test-watch -- pages
 ```
 
-## 🚦 End-to-end (E2E) testing
+# 🚦 End-to-end (E2E) testing
 
 [Playwright](https://playwright.dev/) is a framework for web testing and its test runner is called [Playwright Test](https://playwright.dev/docs/api/class-test), which can be used to run E2E or integration tests across chromium, firefox, and webkit browsers.
 
@@ -148,7 +157,7 @@ Playwright E2E tests run "local-to-local", requiring both the frontend and the A
 
 In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
 
-## 🤖 Type checking, linting, and formatting
+# 🤖 Type checking, linting, and formatting
 
 - [TypeScript](https://www.typescriptlang.org/) is used for type checking.
   - `npm run ts:check` - Type checks all files
@@ -185,7 +194,7 @@ It's recommended that developers configure their code editor to auto run these t
 
 </details>
 
-## Debugging the Next App in VSCode
+# Debugging the Next App in VSCode
 
 - See the debug config: `./.vscode/launch.json`
   - There are several debug config targets defined there depending on if you want to debug just client components (client-side), just server components (server-side), or both (with the Full Stack option). You can also debug the built server (launched from `npm start` instead of `npm run dev`).
@@ -195,7 +204,7 @@ It's recommended that developers configure their code editor to auto run these t
 
 \*\* Note that debugging the server-side or full-stack here doesn't debug the API. See the API
 
-## Testing the newsletter subscription form
+# Testing the newsletter subscription form
 
 The project uses [Sendy](https://sendy.co/api) to manage the newsletter. To the `/subscribe` form locally, Sendy test environment variables need to be added to the `.env.local` file or exported as environment variables:
 
@@ -207,7 +216,7 @@ SENDY_LIST_ID=
 
 These are stored as parameters in AWS System Manager and can be obtained there or from another developer on the team. They are not available for outside contributors.
 
-## Other topics
+# Other topics
 
 - [Internationalization](../documentation/frontend/internationalization.md)
 - [Feature Flags](../documentation/frontend/featureFlags.md)
