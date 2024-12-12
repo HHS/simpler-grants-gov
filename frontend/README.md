@@ -17,7 +17,7 @@
 │   │   └── api       # API routes (optional)
 │   └── styles        # Sass & design system settings
 ├── stories           # Storybook pages
-└── tests
+└── tests             # Unit and E2E tests
 ```
 
 # 💻 Development
@@ -34,11 +34,11 @@ The application can be run natively or in a Docker container.
 
 Before running the server, duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, in order to avoid checking in any sensitive data to Github.
 
-From the `frontend/` directory:
+From the `/frontend` directory:
 
 1. Install dependencies
    ```bash
-   npm install
+   npm ci
    ```
 1. Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
    ```bash
@@ -55,7 +55,12 @@ From the `frontend/` directory:
 Some functionality will not work locally without supplying the application environment variables containing secrets.
 
 - New Relic
+  - `NEW_RELIC_APP_NAME`
+  - `NEW_RELIC_LICENSE_KEY`
 - Email subscription form (Sendy)
+  - `SENDY_API_KEY`
+  - `SENDY_API_URL`
+  - `SENDY_LIST_ID`
 
 If you need to access this functionality locally, contact an engineer on the team to get access to the necessary secrets.
 
@@ -78,7 +83,7 @@ From the `/frontend` directory:
 
 - If installing new packages locally with npm and using `make dev` with docker to run locally, you may need to run `make build` first to bring the new packages into the container
 
-**Note:** To run the fully integrated app, uncomment the correct environment variable for the API_URL in your .env.development file, and run `make start` in the API directory before starting your local frontend container.
+**Note:** To run the fully integrated app, with the Next JS app connecting to the API, uncomment the correct environment variable for the API_URL in your .env.development or .env.local file, and run `make start` in the API directory before starting your local frontend container.
 
 #### Testing Release Target Locally
 
@@ -117,7 +122,9 @@ From the `frontend/` directory:
 1. `make storybook`
 2. Navigate to [localhost:6006](http://localhost:6006) to view
 
-# 🐛 Testing
+# Testing
+
+## 🐛 Unit Testing
 
 [Jest](https://jestjs.io/docs/getting-started) is used as the test runner and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) provides React testing utilities.
 
@@ -135,7 +142,7 @@ A subset of tests can be ran by passing a pattern to the script. For example, to
 npm run test-watch -- pages
 ```
 
-# 🚦 End-to-end (E2E) testing
+## 🚦 End-to-end (E2E) testing
 
 [Playwright](https://playwright.dev/) is a framework for web testing and its test runner is called [Playwright Test](https://playwright.dev/docs/api/class-test), which can be used to run E2E or integration tests across chromium, firefox, and webkit browsers.
 
@@ -157,16 +164,13 @@ Playwright E2E tests run "local-to-local", requiring both the frontend and the A
 
 In CI, the "Front-end Checks" workflow (`.github/workflows/ci-frontend-e2e.yml`) summary will include an "Artifacts" section where there is an attached "playwright-report". [Playwright docs](https://playwright.dev/docs/ci-intro#html-report) describe how to view HTML Report in more detail.
 
-# 🤖 Type checking, linting, and formatting
+## 🤖 Type checking, linting, and formatting
+
+### Tools
 
 - [TypeScript](https://www.typescriptlang.org/) is used for type checking.
-  - `npm run ts:check` - Type checks all files
 - [ESLint](https://eslint.org/) is used for linting. This helps catch common mistakes and encourage best practices.
-  - `npm run lint` - Lints all files and reports any errors
-  - `npm run lint-fix` - Lints all files and fixes any auto-fixable errors
-- [Prettier](https://prettier.io/) is used for code formatting. This reduces the need for manual formatting or nitpicking and enforces a consistent style.
-  - `npm run format`: Formats all files
-  - `npm run format-check`: Check files for formatting violations without fixing them.
+- [Prettier](https://prettier.io/) is used for code formatting. This reduces the need for manual formatting or nitpicking and enforces a consistent style.PRs in Github Actions, other than e2e tests
 
 It's recommended that developers configure their code editor to auto run these tools on file save. Most code editors have plugins for these tools or provide native support.
 
@@ -194,6 +198,15 @@ It's recommended that developers configure their code editor to auto run these t
 
 </details>
 
+### NPM Scripts for type checking, linting, and formatting
+
+- `npm run ts:check` - Type checks all files
+- `npm run lint` - Lints all files and reports any errors
+- `npm run lint-fix` - Lints all files and fixes any auto-fixable errors
+- `npm run format`: Formats all files based on prettier rules
+- `npm run format-check`: Check files for prettier formatting violations without fixing them
+- `npm run all-checks`: Runs linting, typescript check, unit testing, and creates a build - simulating locally tests that are run on PRs in Github Actions, other than e2e tests
+
 # Debugging the Next App in VSCode
 
 - See the debug config: `./.vscode/launch.json`
@@ -202,19 +215,7 @@ It's recommended that developers configure their code editor to auto run these t
 - Place breakpoints in VSCode
 - Visit the relevant routes in the browser and confirm you can hit these breakpoints
 
-\*\* Note that debugging the server-side or full-stack here doesn't debug the API. See the API
-
-# Testing the newsletter subscription form
-
-The project uses [Sendy](https://sendy.co/api) to manage the newsletter. To the `/subscribe` form locally, Sendy test environment variables need to be added to the `.env.local` file or exported as environment variables:
-
-```
-SENDY_API_KEY=
-SENDY_API_URL=
-SENDY_LIST_ID=
-```
-
-These are stored as parameters in AWS System Manager and can be obtained there or from another developer on the team. They are not available for outside contributors.
+**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../documentation/api/development.md)
 
 # Other topics
 
