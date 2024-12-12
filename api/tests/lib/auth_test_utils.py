@@ -8,6 +8,7 @@ import flask
 import jwt
 
 from src.adapters.oauth.oauth_client_models import OauthTokenResponse
+from src.auth.login_gov_jwt_auth import get_config
 
 
 def create_jwt(
@@ -20,8 +21,8 @@ def create_jwt(
     not_before: datetime | None = None,
     # Note that these values need to match what we set
     # in conftest.py::setup_login_gov_auth
-    issuer: str = "http://localhost:3000",
-    audience: str = "AUDIENCE_TEST",
+    issuer: str | None = None,
+    audience: str | None = None,
 ):
     """Create a JWT in roughly the format login.gov will give us"""
 
@@ -32,6 +33,10 @@ def create_jwt(
         issued_at = datetime.now() - timedelta(days=365)
     if not_before is None:
         not_before = datetime.now() - timedelta(days=365)
+    if issuer is None:
+        issuer = get_config().login_gov_endpoint
+    if audience is None:
+        audience = get_config().client_id
 
     payload = {
         "sub": user_id,

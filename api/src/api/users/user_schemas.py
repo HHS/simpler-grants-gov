@@ -34,21 +34,6 @@ class UserSchema(Schema):
     )
 
 
-class UserTokenSchema(Schema):
-    token = fields.String(
-        metadata={
-            "description": "Internal token generated for a user",
-        }
-    )
-    user = fields.Nested(UserSchema())
-    is_user_new = fields.Boolean(
-        allow_none=False,
-        metadata={
-            "description": "Whether or not the user existed in our database",
-        },
-    )
-
-
 class UserLoginGovCallbackSchema(Schema):
     # This is defining the inputs we receive on the callback from login.gov's
     # authorization endpoint and must match:
@@ -68,10 +53,6 @@ class UserLoginGovCallbackSchema(Schema):
     error_description = fields.String(
         allow_none=True, metadata={"description": "A description of the error"}
     )
-
-
-class UserTokenResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(UserTokenSchema)
 
 
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):

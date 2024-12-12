@@ -1,9 +1,17 @@
 import urllib
 import uuid
+from datetime import timedelta
+
+import pytest
 
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
+from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.api.route_utils import raise_flask_error
-from tests.src.db.models.factories import LoginGovStateFactory
+from src.auth.api_jwt_auth import parse_jwt_for_user
+from src.db.models.user_models import LinkExternalUser
+from src.util import datetime_util
+from tests.lib.auth_test_utils import create_jwt
+from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
 
 # To help illustrate what we are testing, here is a diagram
 #
@@ -32,11 +40,13 @@ from tests.src.db.models.factories import LoginGovStateFactory
 # and sets up a few basic pieces of information on the Oauth side that later
 # can be picked up in the token endpoint.
 
+##########################################
+# Full login flow tests
+##########################################
 
-def test_user_login_flow_302(client):
-    """Happy path for a user logging in"""
-    # TODO - as we build out the callback logic, a lot more will be checked/tested here
-    #        and more tests will be added for various error scenarios
+
+def test_user_login_flow_happy_path_302(client, db_session):
+    """Happy path for a user logging in through the whole flow"""
     login_gov_config = login_gov_jwt_auth.get_config()
     resp = client.get("/v1/users/login", follow_redirects=True)
 
@@ -46,9 +56,14 @@ def test_user_login_flow_302(client):
     # and dumps the params it was called with
     assert resp.status_code == 200
     resp_json = resp.get_json()
-    # These are static at the moment, will test more when logic built out
-    assert resp_json["is_user_new"] == "0"
+    assert resp_json["is_user_new"] == "1"
     assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+    # Verify the token we generated works with our later parsing logic
+    user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
+    assert user_token_session.expires_at > datetime_util.utcnow()
+    assert user_token_session.is_valid is True
 
     # History contains each redirect, we redirected 3 times
     assert len(resp.history) == 3
@@ -86,7 +101,8 @@ def test_user_login_flow_302(client):
 
     third_redirect_params = urllib.parse.parse_qs(third_redirect_url.query)
     assert third_redirect_params["message"][0] == "success"
-    assert third_redirect_params["is_user_new"][0] == "0"
+    assert third_redirect_params["is_user_new"][0] == "1"
+    assert third_redirect_params["token"][0] == resp_json["token"]
 
 
 def test_user_login_flow_error_in_login_302(client, monkeypatch):
@@ -202,6 +218,96 @@ def test_user_login_flow_error_in_auth_response_302(client, monkeypatch):
     assert len(resp.history) == 3
 
 
+##########################################
+# Callback endpoint direct tests
+##########################################
+
+
+def test_user_callback_new_user_302(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="bob-xyz",
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["is_user_new"] == "1"
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+    user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
+    assert user_token_session.expires_at > datetime_util.utcnow()
+    assert user_token_session.is_valid is True
+
+    # Make sure the external user record is created with expected IDs
+    external_user = (
+        db_session.query(LinkExternalUser)
+        .filter(
+            LinkExternalUser.user_id == user_token_session.user_id,
+            LinkExternalUser.external_user_id == "bob-xyz",
+        )
+        .one_or_none()
+    )
+    assert external_user is not None
+
+
+def test_user_callback_existing_user_302(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(
+        external_user_id=login_gov_id, email="some_old_email@mail.com"
+    )
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["is_user_new"] == "0"
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+    user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
+    assert user_token_session.expires_at > datetime_util.utcnow()
+    assert user_token_session.is_valid is True
+    assert user_token_session.user_id == external_user.user_id
+
+
 def test_user_callback_unknown_state_302(client, monkeypatch):
     """Test behavior when we get a redirect back from login.gov with an unknown state value"""
 
@@ -254,4 +360,99 @@ def test_user_callback_error_in_token_302(client, enable_factory_create, caplog)
     assert (
         "Unexpected error occurred in login flow via raise_flask_error: default mock error description"
         in caplog.messages
+    )
+
+
+@pytest.mark.parametrize(
+    "jwt_params,error_description",
+    [
+        ({"issuer": "not-the-right-issuer"}, "Unknown Issuer"),
+        ({"audience": "jeff"}, "Unknown Audience"),
+        ({"expires_at": datetime_util.utcnow() - timedelta(days=1)}, "Expired Token"),
+        ({"issued_at": datetime_util.utcnow() + timedelta(days=1)}, "Token not yet valid"),
+        ({"not_before": datetime_util.utcnow() + timedelta(days=1)}, "Token not yet valid"),
+    ],
+)
+def test_user_callback_token_fails_validation_302(
+    client, enable_factory_create, mock_oauth_client, private_rsa_key, jwt_params, error_description
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, **jwt_params)
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == error_description
+
+
+def test_user_callback_token_fails_validation_bad_token_302(
+    client, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token="bad-token", access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Unable to process token"
+
+
+def test_user_callback_token_fails_validation_no_valid_key_302(
+    client, enable_factory_create, mock_oauth_client, other_rsa_key_pair
+):
+    """Create the token with a different key than we check against"""
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=str(uuid.uuid4()),
+        private_key=other_rsa_key_pair[0],
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "error"
+    assert (
+        resp_json["error_description"]
+        == "Token could not be validated against any public keys from login.gov"
     )

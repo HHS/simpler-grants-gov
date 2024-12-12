@@ -164,7 +164,9 @@ def get_final_redirect_uri(
     return f"{config.login_final_destination}?{encoded_params}"
 
 
-def validate_token(token: str, config: LoginGovConfig) -> LoginGovUser:
+def validate_token(token: str, config: LoginGovConfig | None = None) -> LoginGovUser:
+    if not config:
+        config = get_config()
 
     # TODO - this iteration approach won't be necessary if the JWT we get
     #        from login.gov does actually set the KID in the header
