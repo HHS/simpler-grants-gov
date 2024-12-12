@@ -3,6 +3,7 @@ import uuid
 
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 from src.api.route_utils import raise_flask_error
+from tests.src.db.models.factories import LoginGovStateFactory
 
 # To help illustrate what we are testing, here is a diagram
 #
@@ -17,11 +18,19 @@ from src.api.route_utils import raise_flask_error
 #                redirects to     /
 #          |----------------------
 # .________V________.               .____________________.
-# |                 | redirects to  |                    |
-# | /login/callback | ------------->|   /login/result    |
+# |                 |     calls     |                    |
+# | /login/callback | ------------->|       /token       |
 # |_________________|               |____________________|
+#          |
+#          |
+#          |                        .____________________.
+#          |     redirects to       |                    |
+#          -----------------------> |   /login/result    |
+#                                   |____________________|
 #
-# TODO - this'll be more complex when I add the calls to the token endpoint
+# For testing, we create an oauth-authorize endpoint that redirects back
+# and sets up a few basic pieces of information on the Oauth side that later
+# can be picked up in the token endpoint.
 
 
 def test_user_login_flow_302(client):
@@ -30,6 +39,8 @@ def test_user_login_flow_302(client):
     #        and more tests will be added for various error scenarios
     login_gov_config = login_gov_jwt_auth.get_config()
     resp = client.get("/v1/users/login", follow_redirects=True)
+
+    print(resp.history)
 
     # The final endpoint returns a 200
     # and dumps the params it was called with
@@ -175,7 +186,7 @@ def test_user_login_flow_error_in_auth_response_302(client, monkeypatch):
     def override():
         return {"error": "access_denied", "error_description": "user does not have access"}
 
-    monkeypatch.setattr("tests.conftest.oauth_param_override", override)
+    monkeypatch.setattr("tests.lib.auth_test_utils.oauth_param_override", override)
 
     resp = client.get("/v1/users/login", follow_redirects=True)
 
@@ -219,3 +230,28 @@ def test_user_callback_invalid_state_302(client, monkeypatch):
 
     assert resp_json["message"] == "error"
     assert resp_json["error_description"] == "Invalid OAuth state value"
+
+
+def test_user_callback_error_in_token_302(client, enable_factory_create, caplog):
+    """Test behavior when we call the callback endpoint, but the oauth token endpoint has nothing"""
+
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code=xyz456",
+        follow_redirects=True,
+    )
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # Verify it errored because of the response from token Oauth
+    assert (
+        "Unexpected error occurred in login flow via raise_flask_error: default mock error description"
+        in caplog.messages
+    )
