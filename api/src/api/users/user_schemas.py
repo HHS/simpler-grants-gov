@@ -22,7 +22,7 @@ class UserSchema(Schema):
     email = fields.String(
         metadata={
             "description": "The email address returned from Oauth2 provider",
-            "example": "js@gmail.com",
+            "example": "user@example.com",
         }
     )
     external_user_type = fields.Enum(
