@@ -18,6 +18,7 @@ from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb, slack
 from analytics.integrations.db import PostgresDbClient
+from analytics.integrations.extracts.read_opp_data import ingest_opportunity_data
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
@@ -301,3 +302,8 @@ def transform_and_load(
 
     # finish
     print("transform and load is done")
+
+
+@etl_app.command(name="ingest_opportunity_data")
+def ingest_opp_data() ->  None:
+    ingest_opportunity_data()
