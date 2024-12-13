@@ -5,13 +5,19 @@ Configure pytest settings and create reusable fixtures and functions.
 Visit pytest docs for more info:
 https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
-
 import json
+import logging
 from pathlib import Path
 
 import pandas as pd
 import pytest
 from analytics.datasets.issues import IssueMetadata, IssueType
+import moto
+import boto3
+
+
+logger = logging.getLogger(__name__)
+
 
 # skips the integration tests in tests/integrations/
 # to run the integration tests, invoke them directly: pytest tests/integrations/
@@ -255,3 +261,38 @@ def issue(  # pylint: disable=too-many-locals
         sprint_start=sprint_start,
         sprint_end=sprint_end_ts.strftime("%Y-%m-%d"),
     )
+
+
+####################
+# AWS Mock Fixtures
+####################
+
+@pytest.fixture
+def reset_aws_env_vars(monkeypatch):
+    # Reset the env vars so you can't accidentally connect
+    # to a real AWS account if you were doing some local testing
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+
+@pytest.fixture
+def mock_s3(reset_aws_env_vars):
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
+        yield boto3.resource("s3")
+
+
+@pytest.fixture
+def mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("test_bucket")
+    bucket.create()
+    yield bucket
+
+
+@pytest.fixture
+def mock_s3_bucket(mock_s3_bucket_resource):
+    yield mock_s3_bucket_resource.name
+
