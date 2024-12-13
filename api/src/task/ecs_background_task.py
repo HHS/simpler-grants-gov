@@ -9,7 +9,6 @@ from typing import Callable, Generator, ParamSpec, TypeVar
 import newrelic.agent
 import requests
 
-from src.adapters.newrelic import init_newrelic
 from src.logging.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
