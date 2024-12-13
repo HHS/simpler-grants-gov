@@ -1,6 +1,7 @@
 "use client";
 
 import { noop } from "lodash";
+import { ApiRequestError } from "src/errors";
 import {
   UserContextType,
   UserFetcher,
@@ -8,7 +9,6 @@ import {
   UserSession,
 } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
-import { RequestError } from "src/services/auth/utils";
 import { isSessionExpired } from "src/utils/authUtil";
 
 import React, {
@@ -25,12 +25,11 @@ const userFetcher: UserFetcher = async (url) => {
     response = await fetch(url);
   } catch (e) {
     console.error("User session fetch network error", e);
-    // not sure we need this error type
-    throw new RequestError(0); // Network error
+    throw new ApiRequestError(0); // Network error
   }
   if (response.status === 204) return undefined;
   if (response.ok) return (await response.json()) as UserSession;
-  throw new RequestError(response.status);
+  throw new ApiRequestError(response.status);
 };
 
 export default function UserProvider({

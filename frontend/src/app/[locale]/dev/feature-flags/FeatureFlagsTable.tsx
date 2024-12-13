@@ -6,6 +6,8 @@ import { useUser } from "src/services/auth/useUser";
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
 
+import Loading from "src/components/Loading";
+
 /**
  * View for managing feature flags
  */
@@ -13,12 +15,22 @@ export default function FeatureFlagsTable() {
   const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags();
   const { user, isLoading, error } = useUser();
 
-  console.log("~~~ user ~~~", user);
-  console.log("~~~ error ~~~", error);
-  console.log("~~~ isLoading ~~~", isLoading);
-
   if (!mounted) {
     return null;
+  }
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    // there's no error page within this tree, should we make a top level error?
+    return (
+      <>
+        <h1>Error</h1>
+        {error.message}
+      </>
+    );
   }
 
   return (
