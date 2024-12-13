@@ -7,7 +7,12 @@ from src.logging.flask_logger import add_extra_data_to_global_logs
 from src.task.ecs_background_task import ecs_background_task
 
 
-def test_ecs_background_task(app, caplog):
+def test_ecs_background_task(app, caplog, monkeypatch_session):
+    monkeypatch_session.setenv(
+        "LOG_LEVEL_OVERRIDES",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+    )
+
     # We pull in the app so its initialized
     # Global logging params like the task name are stored on the app
     caplog.set_level(logging.INFO)
@@ -23,11 +28,15 @@ def test_ecs_background_task(app, caplog):
     # Verify the function works uneventfully
     assert my_test_func(1, 2) == 3
 
-    for record in caplog.records:
+    # Filter out newrelic-related logs
+    relevant_records = [
+        record for record in caplog.records if "newrelic" not in record.name.lower()
+    ]
+    for record in relevant_records:
         extra = record.__dict__
         assert extra["task_name"] == "my_test_task_name"
 
-    last_record = caplog.records[-1].__dict__
+    last_record = relevant_records[-1].__dict__
     # Make sure the ECS task duration was tracked
     allowed_error = 0.1
     assert last_record["ecs_task_duration_sec"] == pytest.approx(0.2, abs=allowed_error)
@@ -36,7 +45,12 @@ def test_ecs_background_task(app, caplog):
     assert last_record["message"] == "Completed ECS task my_test_task_name"
 
 
-def test_ecs_background_task_when_erroring(app, caplog):
+def test_ecs_background_task_when_erroring(app, caplog, monkeypatch_session):
+    monkeypatch_session.setenv(
+        "LOG_LEVEL_OVERRIDES",
+        "newrelic.core.agent=ERROR,newrelic.core.agent_protocol=ERROR,src.adapters.newrelic=ERROR",
+    )
+
     caplog.set_level(logging.INFO)
 
     @ecs_background_task(task_name="my_error_test_task_name")
@@ -48,11 +62,15 @@ def test_ecs_background_task_when_erroring(app, caplog):
     with pytest.raises(ValueError, match="I am an error"):
         my_test_error_func()
 
-    for record in caplog.records:
+    # Filter out newrelic-related logs
+    relevant_records = [
+        record for record in caplog.records if "newrelic" not in record.name.lower()
+    ]
+    for record in relevant_records:
         extra = record.__dict__
         assert extra["task_name"] == "my_error_test_task_name"
 
-    last_record = caplog.records[-1].__dict__
+    last_record = relevant_records[-1].__dict__
 
     assert last_record["another_param"] == "hello"
     assert last_record["levelname"] == "ERROR"
