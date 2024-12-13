@@ -19,7 +19,10 @@ from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
 from src.services.users.get_user import get_user
-from src.services.users.login_gov_callback_handler import handle_login_gov_callback
+from src.services.users.login_gov_callback_handler import (
+    handle_login_gov_callback_request,
+    handle_login_gov_token,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +56,13 @@ def user_login(db_session: db.Session) -> flask.Response:
 def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login/callback")
 
+    # We process this in two separate DB transactions
+    # as we delete state at the end of the first handler
+    # even if it were to later error to avoid replay attacks
     with db_session.begin():
-        result = handle_login_gov_callback(query_data, db_session)
+        data = handle_login_gov_callback_request(query_data, db_session)
+    with db_session.begin():
+        result = handle_login_gov_token(db_session, data)
 
     # Redirect to the final location for the user
     return response.redirect_response(
