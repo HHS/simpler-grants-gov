@@ -11,7 +11,8 @@ import { cookies } from "next/headers";
 const encodedKey = encodeText(environment.SESSION_SECRET);
 
 // returns a new date 1 week from time of function call
-const newExpirationDate = () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+export const newExpirationDate = () =>
+  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
 export async function encrypt({
   token,
@@ -39,7 +40,7 @@ export async function decrypt(
   }
 }
 
-// is this cache doing anything? let's make sure
+// could try memoizing this function if it is a performance risk
 export const getTokenFromCookie = async (
   cookie: string,
 ): Promise<UserSession> => {
@@ -73,6 +74,5 @@ export async function createSession(token: string) {
 
 // currently unused, will be used in the future for logout
 export function deleteSession() {
-  const cookieStore = cookies();
-  cookieStore.delete("session");
+  cookies().delete("session");
 }

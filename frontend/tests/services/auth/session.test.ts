@@ -1,4 +1,3 @@
-import { identity } from "lodash";
 import {
   createSession,
   decrypt,
@@ -22,7 +21,8 @@ const setExpirationTimeMock = jest.fn(() => fakeJWTInstance());
 const signMock = jest.fn();
 const jwtVerifyMock = jest.fn();
 
-// close over the token.
+// close over the token
+// all of this rigmarole means that the mocked signing functionality will output the token passed into it
 const setJWTMocksWithToken = (token: string) => {
   signMock.mockImplementation(() => token);
 };
@@ -34,18 +34,13 @@ const fakeJWTInstance = (): RecursiveObject => ({
   sign: signMock,
 });
 
-const cookiesMock = jest.fn(() => ({
-  get: getCookiesMock,
-  set: setCookiesMock,
-  delete: deleteCookiesMock,
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  ...jest.requireActual<typeof import("src/services/auth/session")>(
-    "src/services/auth/session",
-  ),
-  newExpirationDate: () => new Date(0),
-}));
+const cookiesMock = () => {
+  return {
+    get: getCookiesMock,
+    set: setCookiesMock,
+    delete: deleteCookiesMock,
+  };
+};
 
 jest.mock("next/headers", () => ({
   cookies: () => cookiesMock(),
@@ -82,9 +77,7 @@ jest.mock("src/utils/generalUtils", () => ({
 }));
 
 describe("encrypt", () => {
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
   it("calls all the JWT functions with expected values and returns expected value", async () => {
     const token = "fakeToken";
     const expiresAt = new Date();
@@ -109,12 +102,10 @@ describe("encrypt", () => {
 });
 
 describe("decrypt", () => {
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
   it("calls JWT verification with expected values and returns payload", async () => {
-    jwtVerifyMock.mockImplementation((...args) => ({ payload: args }));
     const cookie = "fakeCookie";
+    jwtVerifyMock.mockImplementation((...args) => ({ payload: args }));
     const decrypted = await decrypt(cookie);
 
     expect(jwtVerifyMock).toHaveBeenCalledTimes(1);
@@ -130,12 +121,64 @@ describe("decrypt", () => {
   });
 
   it("returns null on error", async () => {
+    jwtVerifyMock.mockImplementation(() => {
+      throw new Error();
+    });
     const cookie = "fakeCookie";
     const decrypted = await decrypt(cookie);
     expect(decrypted).toEqual(null);
   });
 });
 
+describe("createSession", () => {
+  afterEach(() => jest.clearAllMocks());
+  it("calls cookie.set with expected values", async () => {
+    await createSession("nothingSpecial");
+    expect(setCookiesMock).toHaveBeenCalledTimes(1);
+    expect(setCookiesMock).toHaveBeenCalledWith("session", "nothingSpecial", {
+      httpOnly: true,
+      secure: true,
+      expires: expect.any(Date),
+      sameSite: "lax",
+      path: "/",
+    });
+  });
+});
+
+describe("deleteSession", () => {
+  afterEach(() => jest.clearAllMocks());
+  it("calls cookie.delete with expected values", () => {
+    deleteSession();
+    expect(deleteCookiesMock).toHaveBeenCalledTimes(1);
+    expect(deleteCookiesMock).toHaveBeenCalledWith("session");
+  });
+});
+
 describe("getTokenFromCookie", () => {
-  it();
+  afterEach(() => jest.clearAllMocks());
+  it("returns null if decrypt returns no session", async () => {
+    jwtVerifyMock.mockImplementation(() => null);
+    const result = await getTokenFromCookie("invalidEncryptedCookie");
+    expect(result).toEqual(null);
+  });
+
+  it("returns null if decrypt returns session with no token", async () => {
+    jwtVerifyMock.mockImplementation(() => ({}));
+    const result = await getTokenFromCookie("invalidEncryptedCookie");
+    expect(result).toEqual(null);
+  });
+
+  it("returns token returned from decryp", async () => {
+    jwtVerifyMock.mockImplementation((arg) => ({ payload: { token: arg } }));
+    const result = await getTokenFromCookie("invalidEncryptedCookie");
+    expect(result).toEqual({ token: "invalidEncryptedCookie" });
+  });
+});
+
+describe("getSession", () => {
+  afterEach(() => jest.clearAllMocks());
+  it("returns null if there is no session cookie", async () => {
+    const result = await getSession();
+    expect(result).toEqual(null);
+  });
 });
