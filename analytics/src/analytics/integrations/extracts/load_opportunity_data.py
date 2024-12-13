@@ -10,17 +10,21 @@ from analytics.integrations.extracts.constants import (
     MAP_TABLES_TO_COLS,
     OpportunityTables,
 )
+from analytics.integrations.extracts.s3_config import get_s3_client, S3Config
 
 logger = logging.getLogger(__name__)
 
 
-def get_s3_bucket(path):
+def get_s3_bucket(path): #if not in env ?
     return urlparse(path).hostname
 
 
-def _fetch_data(bucket, object_key):
-    s3_client = boto3.client("s3")
-    response = s3_client.get_object(Bucket=bucket, Key=object_key)
+def _fetch_data(table):
+    s3_config = S3Config()
+    s3_client = get_s3_client(s3_config)
+    object_key = f"{s3_config.s3_opportunity_file_path_prefix}/{table}.csv"
+    response = s3_client.get_object(Bucket=s3_config.s3_opportunity_bucket, Key=object_key)
+    
     logger.info("Retrieved data from S3")
     return response["Body"].read()
 
@@ -46,12 +50,11 @@ def extract_copy_opportunity_data():
         for table in OpportunityTables:
             logger.info(f"Copying data for table: {table}")
 
-            key_prefix=os.getenv("S3_OPPORTUNITY_FILE_PATH")
-            bucket = os.getenv("S3_OPPORTUNITY_BUCKET")
-            object_key = f"{key_prefix}/{table}.csv"
-            data = _fetch_data(bucket, object_key)
+            data = _fetch_data(table)
 
             _insert_data(
                 conn, table, MAP_TABLES_TO_COLS.get(table, []), data
             )
+
+    logger.info(f"Extract opportunity data completed successfully")
 
