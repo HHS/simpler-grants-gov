@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { getSession } from "src/services/auth/session";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -16,17 +15,18 @@ export async function generateMetadata({
   return meta;
 }
 
+// this is a placeholder page used as temporary landing page for login redirects.
+// Note that this page only functions to display the message passed down in query params from
+// the /api/auth/callback route, and it does not handle errors.
+// How to handle errors or failures from the callback route in the UI will need to be revisited
+// later on, but note that throwing to an error page won't be an option, as that produces a 500
+// response in the client.
 export default async function UserDisplay({
   searchParams,
   params: { locale },
 }: LocalizedPageProps & { searchParams: { message?: string } }) {
   const { message } = searchParams;
-  // redirect to error page if there is no session cookie
-  // in the future we may want to try and validate the cookie as well
-  // we also would probably want to redirect users into the login flow in some cases here
-  if (!(await getSession())) {
-    throw new Error(message || "not logged in");
-  }
+
   const t = await getTranslations({ locale, namespace: "User" });
   return (
     <GridContainer>
