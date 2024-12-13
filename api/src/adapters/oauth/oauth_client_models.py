@@ -8,11 +8,10 @@ class OauthTokenRequest:
     """https://developers.login.gov/oidc/token/#request-parameters"""
 
     code: str
-    grant_type: str = "authorization_code"
+    client_assertion: str
 
-    # TODO: https://github.com/HHS/simpler-grants-gov/issues/3103
-    # client_assertion: str | None = None
-    # client_assertion_type: str = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    grant_type: str = "authorization_code"
+    client_assertion_type: str = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
 
 
 class OauthTokenResponse(BaseModel):

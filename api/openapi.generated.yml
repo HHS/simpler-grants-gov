@@ -1698,7 +1698,7 @@ components:
         email:
           type: string
           description: The email address returned from Oauth2 provider
-          example: js@gmail.com
+          example: user@example.com
         external_user_type:
           description: The Oauth2 provider through which a user was authenticated
           example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType

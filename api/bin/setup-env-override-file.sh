@@ -87,6 +87,10 @@ main() {
 API_JWT_PRIVATE_KEY="$PRIVATE_KEY"
 
 API_JWT_PUBLIC_KEY="$PUBLIC_KEY"
+
+# The local mock doesn't check the key used
+# for token auth so just re-use the other private key
+LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY="$PRIVATE_KEY"
 EOF
 
 

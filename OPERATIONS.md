@@ -51,3 +51,33 @@ out the instance count. Effectively using the instance count scaling might requi
 When scaling openSearch, consider which attribute changes will trigger blue/green deploys, versus which attributes
 can be edited in place. [You can find that information here](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-configuration-changes.html). Requiring blue/green changes for the average configuration change is a
 notable constraint of OpenSearch, relative to ECS and the Database.
+
+# Yearly Rotations
+
+We manage several secret values that need to be rotated yearly.
+
+## Login.gov Certificates
+
+*These certificates were last updated in December 2024*
+
+We need to manage a public certificate with login.gov for [private_jwt_auth](https://developers.login.gov/oidc/token/#client_assertion) in each of our environments.
+
+To generate a certificate run:
+```shell
+openssl req -nodes -x509 -days 365 -newkey rsa:2048 -keyout private.pem -out public.crt -subj "/C=US/ST=Washington DC/L=Washington DC/O=Nava PBC/OU=Engineering/CN=Simpler Grants.gov/emailAddress=grantsteam@navapbc.com"
+```
+
+Navigate to the [login.gov service provider page](https://dashboard.int.identitysandbox.gov/service_providers)
+and for each application edit it, and upload the public.crt file. Leave any prior cert files alone until we have
+switched the API to using the new one.
+
+Go to SSM parameter store and change the value that maps to the `LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY` value
+for the given environment to be the value from the `private.pem` key you generated.
+
+After the next deployment in an environment, we should be using the new keys, and can cleanup the old certificate.
+
+### Prod Login.gov
+
+Prod login.gov does not update immediately, and you must [request a deployment](https://developers.login.gov/production/#changes-to-production-applications) to get a certificate rotated.
+
+For Prod, assume it will take at least two weeks from creating the certificate, before it is available for the API, and until it is, do not change the API's configured key.
