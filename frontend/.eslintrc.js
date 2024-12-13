@@ -14,6 +14,7 @@ module.exports = {
     // dependencies to work in standalone mode. It may be overkill for most projects at
     // Nava which aren't image heavy.
     "@next/next/no-img-element": "off",
+    "jest/no-conditional-expect": "warn",
     "no-restricted-imports": [
       "error",
       {

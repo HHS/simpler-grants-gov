@@ -47,7 +47,7 @@ jest.mock("next/headers", () => ({
 }));
 
 jest.mock("jose", () => ({
-  jwtVerify: (...args: unknown[]) => jwtVerifyMock(...args),
+  jwtVerify: (...args: unknown[]): unknown => jwtVerifyMock(...args),
   SignJWT: function SignJWTMock(
     this: {
       setProtectedHeader: typeof jest.fn;
@@ -138,7 +138,7 @@ describe("createSession", () => {
     expect(setCookiesMock).toHaveBeenCalledWith("session", "nothingSpecial", {
       httpOnly: true,
       secure: true,
-      expires: expect.any(Date),
+      expires: expect.any(Date) as Date,
       sameSite: "lax",
       path: "/",
     });
@@ -169,7 +169,9 @@ describe("getTokenFromCookie", () => {
   });
 
   it("returns token returned from decryp", async () => {
-    jwtVerifyMock.mockImplementation((arg) => ({ payload: { token: arg } }));
+    jwtVerifyMock.mockImplementation((token: string) => ({
+      payload: { token },
+    }));
     const result = await getTokenFromCookie("invalidEncryptedCookie");
     expect(result).toEqual({ token: "invalidEncryptedCookie" });
   });

@@ -1,11 +1,9 @@
-import { ReactElement } from "react";
-
 /**
- * Configure the {@link UserProvider} component.
+ * Configure the UserProvider component.
  *
  * If you have any server-side rendered pages (using `getServerSideProps` or Server Components), you should get the
  * user from the server-side session and pass it to the `<UserProvider>` component via the `user`
- * prop. This will prefill the {@link useUser} hook with the {@link UserProfile} object.
+ * prop. This will prefill the useUser hook with the UserProfile object.
  * For example:
  *
  * import { UserProvider } from 'src/services/auth/UserProvider';
@@ -27,30 +25,16 @@ import { ReactElement } from "react";
  * }
  * ```
  *
- * In client-side rendered pages, the {@link useUser} hook uses a {@link UserFetcher} to fetch the
+ * In client-side rendered pages, the useUser hook uses a UserFetcher to fetch the
  * user from the profile API route. If needed, you can specify a custom fetcher here in the
  * `fetcher` option.
  *
  *
  * @category Client
  */
-export type UserProviderProps = React.PropsWithChildren<{
-  user?: SessionPayload;
-  userEndpoint?: string;
-  fetcher?: UserFetcher;
-}>;
 
 /**
- * To use the {@link useUser} hook, you must wrap your application in a `<UserProvider>` component.
- *
- * @category Client
- */
-export type UserProvider = (
-  props: UserProviderProps,
-) => ReactElement<UserContextType>;
-
-/**
- * The user claims returned from the {@link useUser} hook.
+ * The user claims returned from the useUser hook.
  *
  * @category Client
  */
@@ -58,22 +42,26 @@ export interface UserProfile {
   name?: string | null;
 }
 
-/**
- * The user context returned from the {@link useUser} hook.
- *
- * @category Client
- */
-export type UserContextType = {
-  user?: Session;
-  error?: Error;
-  isLoading: boolean;
-  checkSession: () => Promise<void>;
-};
-
 export type UserSession = {
   token: string;
   expiresAt?: Date;
 } | null;
+
+export type SessionPayload = {
+  token: string;
+  expiresAt: Date;
+};
+
+/**
+ * Fetches the user from the profile API route to fill the useUser hook with the
+ * UserProfile object.
+ *
+ * If needed, you can pass a custom fetcher to the UserProvider component via the
+ * UserProviderProps.fetcher prop.
+ *
+ * @throws {@link RequestError}
+ */
+export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;
 
 /**
  * @ignore
@@ -83,19 +71,3 @@ export type UserProviderState = {
   error?: Error;
   isLoading: boolean;
 };
-
-export type SessionPayload = {
-  token: string;
-  expiresAt: Date;
-};
-
-/**
- * Fetches the user from the profile API route to fill the {@link useUser} hook with the
- * {@link UserProfile} object.
- *
- * If needed, you can pass a custom fetcher to the {@link UserProvider} component via the
- * {@link UserProviderProps.fetcher} prop.
- *
- * @throws {@link RequestError}
- */
-export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;
