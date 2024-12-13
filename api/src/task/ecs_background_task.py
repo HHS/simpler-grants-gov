@@ -49,9 +49,6 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            # Initialize New Relic at the start of any task
-            init_newrelic()
-
             with _ecs_background_task_impl(task_name):
                 # Finally execute the function with New Relic instrumentation
                 return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(
