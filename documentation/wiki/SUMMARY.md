@@ -30,7 +30,14 @@
     * [Grants protocol](product/deliverables/specifications/grants-protocol.md)
     * [Co-Design Group kickoff](product/deliverables/specifications/co-design-group-kickoff.md)
 * [Design](product/design.md)
-* [📖 Voice and Tone Guide](product/voice-and-tone-guide.md)
+* [Brand Guidelines](product/brand-guidelines/README.md)
+  * [Logo](product/brand-guidelines/logo.md)
+  * [Colors](product/brand-guidelines/colors.md)
+  * [Grid & Composition](product/brand-guidelines/grid-and-composition.md)
+  * [Typography](product/brand-guidelines/typography.md)
+  * [Iconography](product/brand-guidelines/iconography.md)
+  * [Photos & Illustrations](product/brand-guidelines/photos-and-illustrations.md)
+  * [Voice & Tone](product/brand-guidelines/voice-and-tone-guide.md)
 
 ## Collaborating
 
