@@ -2,11 +2,11 @@
 description: Guidance for writing content and communications in the Grants.gov brand voice
 ---
 
-# 📖 Voice and Tone Guide
+# Voice & Tone
 
 ## I. Introduction and Definitions
 
-The purpose of this voice and tone guide is to help you write for Grants.gov, so that we sound like the same organization everywhere people encounter our content. Consider these definitions to understand the difference between voice and tone:
+The purpose of this voice and tone guide is to help you write for Grants.gov so that we sound like the same organization everywhere people encounter our content. Consider these definitions to understand the difference between voice and tone:
 
 * Our **voice** is our unique personality. It’s grounded in our brand identity, particularly our brand characters. It should be a consistent thread through everything we write and say.
 * Our **tone** adapts to the situation. For example, we may adjust our tone for the audience or the context in which our audiences need our information.
@@ -69,7 +69,7 @@ For grants you can apply for using Grants.gov, you’ll be able to track when it
 * We anticipate what our audiences want or need to know and pull out the information that impacts them most.
 
 {% hint style="warning" %}
-_In this example from the Grants.Gov Release Notes page, a user has to open a PDF to understand the changes and whether they affect them._ <img src="../.gitbook/assets/Grants.gov Release Notes Example (1).png" alt="Screenshot of a release notes table entry that includes the release number, a short description of the release, the release date, and a link to the full release details." data-size="original">
+_In this example from the Grants.Gov Release Notes page, a user has to open a PDF to understand the changes and whether they affect them._ <img src="../../.gitbook/assets/Grants.gov Release Notes Example (1).png" alt="Screenshot of a release notes table entry that includes the release number, a short description of the release, the release date, and a link to the full release details." data-size="original">
 {% endhint %}
 
 {% hint style="success" %}
@@ -111,7 +111,7 @@ Organizations who are eligible to apply for federal grants tend to fall into one
 Some grants are also open to individuals (like fellowships) and foreign organizations. Be sure to read the eligibility requirements carefully to make sure you’re eligible before you apply.
 {% endhint %}
 
-* We write like people talk and use plain language. For example we use the second-person you, embrace contractions, avoid jargon, and choose the simplest, most precise words.
+* We write like people talk and use plain language. For example, we use the second-person you, embrace contractions, avoid jargon, and choose the simplest, most precise words.
 
 {% hint style="warning" %}
 **How many grantors can register under an agency?**
@@ -127,7 +127,7 @@ You can register as many grantors as you need to manage your agency’s grants.
 
 ### Purposeful
 
-We constantly seek new opportunities to bring value to our users and the people we serve.
+We constantly seek new opportunities to bring value to our users and those we serve.
 
 #### **How we achieve this:**&#x20;
 
