@@ -10,7 +10,7 @@ test.afterEach(async ({ context }) => {
 });
 
 test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle(/^Opportunity Listing -  */);
+  await expect(page).toHaveTitle(/^Opportunity Listing - */);
 });
 
 test("has page attributes", async ({ page }) => {
