@@ -54,7 +54,9 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 
             with _ecs_background_task_impl(task_name):
                 # Finally execute the function with New Relic instrumentation
-                return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(*args, **kwargs)
+                return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(
+                    *args, **kwargs
+                )
 
         return wrapper
 
