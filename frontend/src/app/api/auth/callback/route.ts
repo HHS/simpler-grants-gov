@@ -32,9 +32,8 @@ const createSessionAndSetStatus = async (
 */
 export async function GET(request: NextRequest) {
   const currentSession = await getSession();
-  let status = "";
   if (currentSession && currentSession.token) {
-    status = await createSessionAndSetStatus(
+    const status = await createSessionAndSetStatus(
       currentSession.token,
       "already logged in",
     );
@@ -42,9 +41,8 @@ export async function GET(request: NextRequest) {
   }
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
-    status = "no token provided";
-    return redirect(`/user?message=${status}`);
+    return redirect("/user?message=no token provided");
   }
-  status = await createSessionAndSetStatus(token, "created session");
+  const status = await createSessionAndSetStatus(token, "created session");
   return redirect(`/user?message=${status}`);
 }
