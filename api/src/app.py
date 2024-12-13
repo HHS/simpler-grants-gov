@@ -13,6 +13,7 @@ import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
 import src.logging
 import src.logging.flask_logger as flask_logger
+from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
@@ -52,6 +53,7 @@ def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
     setup_logging(app)
+    init_newrelic()
     register_db_client(app)
 
     feature_flag_config.initialize()
