@@ -1,35 +1,15 @@
-'use client';
-import React, { ReactElement, useState, useEffect, useCallback, useContext, createContext, useMemo } from 'react';
+"use client";
 
-import { UserContextType } from './types';
+import { UserContextType } from "src/services/auth/types";
 
-/**
- * @ignore
- */
-const missingUserProvider = 'You forgot to wrap your app in <UserProvider>';
+import { createContext, useContext } from "react";
+
+export const UserContext = createContext({} as UserContextType);
 
 /**
  * @ignore
  */
-export const UserContext = createContext<UserContextType>({
-  get user(): never {
-    throw new Error(missingUserProvider);
-  },
-  get error(): never {
-    throw new Error(missingUserProvider);
-  },
-  get isLoading(): never {
-    throw new Error(missingUserProvider);
-  },
-  checkSession: (): never => {
-    throw new Error(missingUserProvider);
-  }
-});
-
-/**
- * @ignore
- */
-export type UseUser = () => UserContextType;
+export type UserContextHook = () => UserContextType;
 
 /**
  * The `useUser` hook, which will get you the {@link UserProfile} object from the server-side session by fetching it
@@ -51,4 +31,5 @@ export type UseUser = () => UserContextType;
  *
  * @category Client
  */
-export const useUser: UseUser = () => useContext<UserContextType>(UserContext);
+export const useUser: UserContextHook = () =>
+  useContext<UserContextType>(UserContext);
