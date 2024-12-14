@@ -14,7 +14,9 @@ import pytest
 from analytics.datasets.issues import IssueMetadata, IssueType
 import moto
 import boto3
+from sqlalchemy import text
 
+from analytics.integrations.etldb.etldb import EtlDb
 
 logger = logging.getLogger(__name__)
 
@@ -296,3 +298,62 @@ def mock_s3_bucket_resource(mock_s3):
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
 
+@pytest.fixture
+def create_test_db(monkeypatch):
+    monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
+    monkeypatch.setenv("DB_HOST", "localhost")
+
+    db_conn = EtlDb()
+
+    schema="test_schema"
+
+    with db_conn.connection() as conn:
+        try:
+            _create_schema(conn, schema)
+
+            # create opportunity tables
+            _create_opportunity_table(conn, schema)
+            yield db_conn
+        finally:
+            _drop_schema(conn, schema)
+
+def _create_schema(conn, schema: str):
+    """Create a database schema."""
+    db_test_user = "app"
+
+    with conn.begin():
+        cursor = conn.connection.cursor()
+        cursor.execute(
+            f"CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {db_test_user};"
+        )
+        logger.info("Created schema %s", schema)
+
+
+def _drop_schema(conn, schema: str):
+    """Drop a database schema."""
+    with conn.begin():
+        conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
+
+    logger.info("Dropped schema %s", schema)
+
+
+def _create_opportunity_table(conn, schema):
+    """Create opportunity tables"""
+    with conn.begin():
+        conn.execute(
+            text(f"SET search_path TO {schema};")
+        )
+
+        #Get the path of the current file (test file)
+        test_file_path = Path(__file__).resolve()
+
+        # Construct the path to the SQL file
+        sql_file_path = test_file_path.parent.parent / 'src' / 'analytics' / 'integrations' / 'etldb' / 'migrations' / 'versions' / '0006_add_opportunity_tables.sql'
+
+        with open(sql_file_path, 'r') as file:
+            create_table_commands = file.read()
+            conn.execute(
+                text(create_table_commands)
+            )
+
+        logger.info("Created opportunity tables")
