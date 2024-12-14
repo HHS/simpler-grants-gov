@@ -58,6 +58,15 @@ in the form $setting: value,
   ),
 
   // Typography settings
+  $theme-font-type-sans: "public-sans",
+  $theme-typeface-tokens: (
+    newsreader: (
+      display-name: "Newsreader",
+      cap-height: 364px,
+      stack: "Georgia, serif",
+    )
+  ),
+  $theme-font-type-serif: "newsreader",
   $theme-global-link-styles: true,
   $theme-body-font-size: "md",
   $theme-type-scale-3xs: 2,
