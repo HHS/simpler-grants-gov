@@ -177,11 +177,11 @@ in the form $setting: value,
   // $theme-color-emergency-dark: "red-warm-80",
 
   // Body colors
-  // $theme-body-background-color: "white" !default;
+  // $theme-body-background-color: "white",
 
   // Text
-  // $theme-text-color: "ink" !default;
-  // $theme-text-reverse-color: "white" !default;
+  // $theme-text-color: "ink",
+  // $theme-text-reverse-color: "white",
 
   // Links
   $theme-link-color: "mint-50",
@@ -190,5 +190,12 @@ in the form $setting: value,
   $theme-link-active-color: "mint-70",
   $theme-link-reverse-color: "mint-5",
   $theme-link-reverse-hover-color: "mint-10",
-  $theme-link-reverse-active-color: "white"
+  $theme-link-reverse-active-color: "white", 
+
+  // Button
+  $theme-button-border-radius: 2px,
+  // $theme-button-font-family: "ui",
+  // $theme-button-icon-gap: 1,
+  // $theme-button-small-width: 6,
+  // $theme-button-stroke-width: 2px,
 );
