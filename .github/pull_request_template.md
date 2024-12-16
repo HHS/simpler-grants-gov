@@ -14,4 +14,4 @@ Fixes #{ISSUE}
 
 ## Documentation
 
-Any documentation added follows our documentation rules in [DOCUMENTATION.md](DOCUMENTATION.md)
+Any documentation added needs to follow our documentation rules in [DOCUMENTATION.md](DOCUMENTATION.md)
