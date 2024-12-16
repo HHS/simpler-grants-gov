@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 
 from src.db.models.opportunity_models import OpportunitySearchIndexQueue
@@ -7,7 +9,11 @@ from src.search.backend.load_opportunities_to_index import (
 )
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import OpportunityFactory, OpportunitySearchIndexQueueFactory
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    OpportunityFactory,
+    OpportunitySearchIndexQueueFactory,
+)
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
@@ -42,6 +48,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
 
+        AgencyFactory.create(agency_code="MY-TEST-AGENCY", is_test_agency=True)
+        OpportunityFactory.create_batch(size=3, agency_code="MY-TEST-AGENCY")
+
         for opportunity in opportunities:
             OpportunitySearchIndexQueueFactory.create(
                 opportunity=opportunity,
@@ -74,6 +83,16 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         assert set([opp.opportunity_id for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
+        )
+
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.RECORDS_LOADED
+        ] == len(opportunities)
+        assert (
+            load_opportunities_to_index.metrics[
+                load_opportunities_to_index.Metrics.TEST_RECORDS_SKIPPED
+            ]
+            == 3
         )
 
         # Rerunning but first add a few more opportunities to show up
@@ -129,7 +148,10 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             OpportunityFactory.create_batch(size=6, is_archived_forecast_summary=True)
         )
 
-        for opportunity in opportunities:
+        AgencyFactory.create(agency_code="MY-TEST-AGENCY-123", is_test_agency=True)
+        test_opps = OpportunityFactory.create_batch(size=2, agency_code="MY-TEST-AGENCY-123")
+
+        for opportunity in itertools.chain(opportunities, test_opps):
             OpportunitySearchIndexQueueFactory.create(
                 opportunity=opportunity,
             )
@@ -139,6 +161,13 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         resp = search_client.search(opportunity_index_alias, {"size": 100})
         assert resp.total_records == len(opportunities)
 
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.RECORDS_LOADED
+        ] == len(opportunities)
+        assert load_opportunities_to_index.metrics[
+            load_opportunities_to_index.Metrics.TEST_RECORDS_SKIPPED
+        ] == len(test_opps)
+
         # Add a few more opportunities that will be created
         opportunities.extend(OpportunityFactory.create_batch(size=3, is_posted_summary=True))
 
@@ -146,6 +175,11 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         opportunities_to_delete = [opportunities.pop(), opportunities.pop(), opportunities.pop()]
         for opportunity in opportunities_to_delete:
             db_session.delete(opportunity)
+
+        # Change the agency on a few to a test agency to delete them
+        opportunities_now_with_test_agency = [opportunities.pop(), opportunities.pop()]
+        for opportunity in opportunities_now_with_test_agency:
+            opportunity.agency_code = "MY-TEST-AGENCY-123"
 
         for opportunity in opportunities:
             OpportunitySearchIndexQueueFactory.create(

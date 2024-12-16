@@ -10,6 +10,7 @@ from sqlalchemy.orm import noload, selectinload
 import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -37,6 +38,7 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
 class LoadOpportunitiesToIndex(Task):
     class Metrics(StrEnum):
         RECORDS_LOADED = "records_loaded"
+        TEST_RECORDS_SKIPPED = "test_records_skipped"
 
     def __init__(
         self,
@@ -88,11 +90,22 @@ class LoadOpportunitiesToIndex(Task):
             .all()
         )
 
-        # Process updates and inserts
+        # Process updates and inserts, and skip test records
         processed_opportunity_ids = set()
         opportunities_to_index = []
+        test_opportunity_ids = set()
 
         for opportunity in queued_opportunities:
+            # Skip opportunities that are test records, we will delete these if they exist already
+            if opportunity.agency_record and opportunity.agency_record.is_test_agency:
+                test_opportunity_ids.add(opportunity.opportunity_id)
+                logger.info(
+                    "Skipping test opportunity",
+                    extra={"opportunity_id": opportunity.opportunity_id, "status": "skipped"},
+                )
+                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                continue
+
             logger.info(
                 "Processing queued opportunity",
                 extra={
@@ -105,7 +118,7 @@ class LoadOpportunitiesToIndex(Task):
                 },
             )
 
-            # Add to index batch if it's indexable
+            # Add to index batch if it's not associated with a test agency
             opportunities_to_index.append(opportunity)
             processed_opportunity_ids.add(opportunity.opportunity_id)
 
@@ -115,7 +128,7 @@ class LoadOpportunitiesToIndex(Task):
             logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
         # Handle deletes - opportunities in search but not in our processed set
-        # and not in our database (or are drafts)
+        # and not in our database (or are drafts / test records)
         opportunity_ids_to_delete = existing_opportunity_ids - processed_opportunity_ids
 
         for opportunity_id in opportunity_ids_to_delete:
@@ -127,14 +140,14 @@ class LoadOpportunitiesToIndex(Task):
         if opportunity_ids_to_delete:
             self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete)
 
-        # Clear processed entries from the queue
-        if processed_opportunity_ids:
-            self.db_session.execute(
-                delete(OpportunitySearchIndexQueue).where(
-                    OpportunitySearchIndexQueue.opportunity_id.in_(processed_opportunity_ids)
+        # Clear processed / skipped entries from the queue
+        self.db_session.execute(
+            delete(OpportunitySearchIndexQueue).where(
+                OpportunitySearchIndexQueue.opportunity_id.in_(
+                    processed_opportunity_ids | test_opportunity_ids
                 )
             )
-            self.db_session.commit()
+        )
 
     def full_refresh(self) -> None:
         # create the index
@@ -171,6 +184,13 @@ class LoadOpportunitiesToIndex(Task):
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                 )
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+                # Top level agency won't be automatically fetched up front unless we add this
+                # due to the odd nature of the relationship we have setup for the agency table
+                # Adding it here improves performance when serializing to JSON as we won't need to
+                # call out to the DB repeatedly.
+                .options(
+                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency)
+                )
                 .execution_options(yield_per=1000)
             )
             .scalars()
@@ -204,13 +224,21 @@ class LoadOpportunitiesToIndex(Task):
         loaded_opportunity_ids = set()
 
         for record in records:
-            logger.info(
-                "Preparing opportunity for upload to search index",
-                extra={
-                    "opportunity_id": record.opportunity_id,
-                    "opportunity_status": record.opportunity_status,
-                },
-            )
+            log_extra = {
+                "opportunity_id": record.opportunity_id,
+                "opportunity_status": record.opportunity_status,
+            }
+            logger.info("Preparing opportunity for upload to search index", extra=log_extra)
+
+            # If the opportunity has a test agency, skip uploading it to the index
+            if record.agency_record and record.agency_record.is_test_agency:
+                logger.info(
+                    "Skipping upload of opportunity as agency is a test agency",
+                    extra=log_extra | {"agency": record.agency_code},
+                )
+                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
+                continue
+
             json_records.append(schema.dump(record))
             self.increment(self.Metrics.RECORDS_LOADED)
 
