@@ -1,11 +1,11 @@
-# We are limiting this to a few engineers and choosing not to select "Require review from Code Owners."
-* @acouch @chouinar @mdragon 
+# Alphabetize the folder names, alphabetize codeowner names.
+# Keep this document in sync with MAINTAINERS.md.
 
-/documentation/ @widal001 @andycochran @mdragon
-/frontend/ @andycochran @acouch @doug-s-nava 
-/api/ @chouinar @mdragon
-/analytics/ @coilysiren @widal001 @acouch 
-
-/infra/ @coilysiren @acouch @mdragon 
-/bin/ @coilysiren @acouch
-/.github/ @coilysiren @acouch
+*                @mdragon # project lead
+/.github/        @acouch @coilysiren @mdragon # same as infra
+/analytics/      @acouch @coilysiren @widal001 
+/api/            @chouinar @mdragon
+/bin/            @coilysiren @acouch @mdragon # same as infra
+/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @mdragon @widal001 # everyone
+/frontend/       @acouch @andycochran @btabaska @doug-s-nava
+/infra/          @acouch @coilysiren @mdragon 
