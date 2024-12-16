@@ -212,11 +212,6 @@ export const categoryOptions: FilterOption[] = [
 
 export const agencyOptions: FilterOption[] = [
   {
-    id: "CNCS",
-    label: "Corporation for National and Community Service",
-    value: "CNCS",
-  },
-  {
     id: "DHS",
     label: "Department of Homeland Security",
     value: "DHS",
@@ -312,11 +307,6 @@ export const agencyOptions: FilterOption[] = [
     id: "AC",
     label: "AmeriCorps",
     value: "AC",
-  },
-  {
-    id: "ARPAH",
-    label: "Advanced Research Projects Agency for Health",
-    value: "ARPAH",
   },
   {
     id: "DOC",
@@ -2178,46 +2168,14 @@ export const agencyOptions: FilterOption[] = [
     value: "ED",
   },
   {
-    id: "ECP",
-    label: "Energy Cluster Program",
-    value: "ECP",
-  },
-  {
     id: "EPA",
     label: "Environmental Protection Agency",
     value: "EPA",
   },
   {
-    id: "FMCS",
-    label: "Federal Mediation and Conciliation Service",
-    value: "FMCS",
-  },
-  {
     id: "FCC",
     label: "Federal Communications Commission",
     value: "FCC",
-  },
-  {
-    id: "GDIT",
-    label: "General Dynamics Information Technology",
-    value: "GDIT",
-    children: [
-      {
-        id: "GDIT-02072010",
-        label: "KVkv",
-        value: "GDIT-02072010",
-      },
-      {
-        id: "GDIT-08",
-        label: "08092011-kj-test",
-        value: "GDIT-08",
-      },
-      {
-        id: "GDIT-KV03262009",
-        label: "03162009-KV",
-        value: "GDIT-KV03262009",
-      },
-    ],
   },
   {
     id: "GSA",
@@ -2527,19 +2485,9 @@ export const agencyOptions: FilterOption[] = [
     value: "IMLS",
   },
   {
-    id: "IVV",
-    label: "IV&V Test Agency",
-    value: "IVV",
-  },
-  {
     id: "IAF",
     label: "Inter-American Foundation",
     value: "IAF",
-  },
-  {
-    id: "MCC",
-    label: "Millennium Challenge Corporation",
-    value: "MCC",
   },
   {
     id: "LOC",
@@ -3713,15 +3661,5 @@ export const agencyOptions: FilterOption[] = [
         value: "VA-SSVF",
       },
     ],
-  },
-  {
-    id: "USEAC",
-    label: "Election Assistance Commission",
-    value: "USEAC",
-  },
-  {
-    id: "WWC",
-    label: "Woodrow Wilson Center",
-    value: "WWC",
   },
 ];
