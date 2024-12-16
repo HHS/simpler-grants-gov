@@ -90,6 +90,7 @@ def create_jwt_for_user(
         "iat": current_time,
         "aud": config.audience,
         "iss": config.issuer,
+        "user_id": str(user.user_id),
     }
 
     logger.info(
