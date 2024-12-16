@@ -64,10 +64,8 @@ def create_app() -> APIFlask:
     register_index(app)
     register_search_client(app)
 
-    # TODO - once we merge the auth changes for setting up the initial route
-    # will reuse the config from it, for now we'll do this a bit hacky
-    # This cannot be removed non-locally until we setup RSA keys for non-local envs
-    if os.getenv("ENVIRONMENT") == "local":
+    auth_endpoint_config = AuthEndpointConfig()
+    if auth_endpoint_config.auth_endpoint:
         initialize_login_gov_config()
         initialize_jwt_auth()
 
