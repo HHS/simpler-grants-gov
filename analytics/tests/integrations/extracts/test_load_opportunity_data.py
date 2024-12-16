@@ -55,12 +55,29 @@ def test_extract_copy_opportunity_data(
 
     # Verify that the data was inserted into the database
     with conn.begin():
-
-        result = conn.execute(
-            text("SELECT opportunity_id FROM test_schema.opportunity ;"),
+        lk_opp_sts_result = conn.execute(
+            text("SELECT COUNT(*) FROM test_schema.lk_opportunity_status ;"),
         )
-        rows = result.fetchall()
+        lk_opp_ctgry_result = conn.execute(
+            text("SELECT COUNT(*) FROM test_schema.lk_opportunity_category ;"),
+        )
+        opp_result = conn.execute(
+            text("SELECT COUNT(*) FROM test_schema.opportunity ;"),
+        )
+        opp_smry_result = conn.execute(
+            text("SELECT COUNT(*) FROM test_schema.opportunity_summary ;"),
+        )
 
+        curr_opp_smry_result = conn.execute(
+            text("SELECT COUNT(*) FROM test_schema.current_opportunity_summary ;"),
+        )
 
+        # test all test_files were upload to mocks3 bucket
         assert upload_opportunity_tables_s3 == 5
-        assert len(rows) == 37
+
+        # test table records were inserted for each table
+        assert lk_opp_sts_result.fetchone()[0] == 4
+        assert lk_opp_ctgry_result.fetchone()[0] == 5
+        assert opp_result.fetchone()[0] == 37
+        assert opp_smry_result.fetchone()[0] == 32
+        assert curr_opp_smry_result.fetchone()[0] == 32
