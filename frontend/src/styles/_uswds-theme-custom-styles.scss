@@ -30,3 +30,196 @@ i.e.
     @include u-shadow(4);
   }
 }
+
+// Button
+.usa-button {
+  &,
+  &:visited {
+    background-color: color("mint-50");
+    color: white;
+    border-bottom: 5px solid color("mint-cool-40v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("mint-60");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("mint-70");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    color: color("gray-60");
+    background-color: color("gray-20");
+    border-bottom: 5px solid color("gray-10");
+  }
+}
+
+// Button: Base
+.usa-button--base {
+  &,
+  &:visited {
+    background-color: color("gray-warm-50");
+    color: white;
+    border-bottom: 5px solid color("gray-warm-30");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("gray-warm-60");
+    border-bottom: 5px solid color("gray-warm-40");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("gray-warm-70");
+    border-bottom: 5px solid color("gray-warm-50");
+  }
+}
+
+// Button: Secondary
+.usa-button--secondary {
+  &,
+  &:visited {
+    background-color: color("mint-5");
+    color: color("mint-60");
+    border-bottom: 5px solid color("mint-cool-40v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("mint-10");
+    color: color("mint-70");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("mint-20");
+    color: color("mint-80");
+    border-bottom: 5px solid color("mint-cool-60v");
+  }
+}
+
+// Button: Accent Cool
+.usa-button--accent-cool {
+  &,
+  &:visited {
+    background-color: color("violet-30");
+    color: color("violet-80");
+    border-bottom: 5px solid color("violet-40");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("violet-20");
+    color: color("violet-70");
+    border-bottom: 5px solid color("violet-30");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("violet-10");
+    color: color("violet-60");
+    border-bottom: 5px solid color("violet-20");
+  }
+}
+
+// Button: Accent Warm
+.usa-button--accent-warm {
+  &,
+  &:visited {
+    background-color: color("yellow-20v");
+    color: color("gray-warm-80");
+    border-bottom: 5px solid color("orange-30v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("yellow-10v");
+    border-bottom: 5px solid color("gold-20v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("yellow-5v");
+    border-bottom: 5px solid color("yellow-20v");
+  }
+}
+
+// Button: Outline
+.usa-button--outline {
+  &,
+  &:visited {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-50");
+    color: color("mint-50");
+    border-bottom: 5px solid color("mint-50");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-60");
+    color: color("mint-60");
+    border-bottom-color: color("mint-60");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-70");
+    color: color("mint-70");
+    border-bottom-color: color("mint-70");
+  }
+
+  &.usa-button--inverse {
+    &,
+    &:visited {
+      box-shadow: inset 0 0 0 2px color("mint-10");
+      color: color("mint-10");
+      border-bottom-color: color("mint-10");
+    }
+
+    &:hover,
+    &.usa-button--hover {
+      box-shadow: inset 0 0 0 2px color("mint-5");
+      color: color("mint-5");
+      border-bottom-color: color("mint-5");
+    }
+
+    &:active,
+    &.usa-button--active {
+      box-shadow: inset 0 0 0 2px white;
+      color: white;
+      border-bottom-color: white;
+    }
+  }
+}
+
+// Button: Outline Disabled
+.usa-button--outline:disabled,
+.usa-button--outline[aria-disabled="true"],
+.usa-button--outline-inverse:disabled,
+.usa-button--outline-inverse[aria-disabled="true"] {
+  &,
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("gray-20");
+    color: color("gray-60");
+    border-bottom: 5px solid color("gray-20");
+  }
+}
+
+// Button: Unstyled
+.usa-button--unstyled {
+  @include button-unstyled;
+  border-bottom: 0 !important;
+}
