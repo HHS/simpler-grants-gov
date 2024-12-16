@@ -324,7 +324,6 @@ def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
-    monkeypatch_session.setenv("DB_HOST", "localhost")
 
     etldb_conn = EtlDb()
 
