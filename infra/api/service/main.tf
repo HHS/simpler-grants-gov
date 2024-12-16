@@ -125,6 +125,7 @@ module "service" {
   enable_autoscaling     = true
   cpu                    = local.service_config.instance_cpu
   memory                 = local.service_config.instance_memory
+  environment_name       = var.environment_name
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
@@ -144,13 +145,9 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = merge(
-    local.service_config.extra_environment_variables,
-    { "ENVIRONMENT" : var.environment_name },
-    { "DEPLOY_TIMESTAMP" : timestamp() },
-    var.deploy_github_sha != null ? { "DEPLOY_GITHUB_SHA" : var.deploy_github_sha } : {},
-    var.deploy_github_ref != null ? { "DEPLOY_GITHUB_REF" : var.deploy_github_ref } : {}
-  )
+  enable_drafts_bucket = true
+
+  extra_environment_variables = merge(local.service_config.extra_environment_variables)
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {

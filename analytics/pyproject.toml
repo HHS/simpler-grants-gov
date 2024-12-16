@@ -21,7 +21,7 @@ plotly = "^5.15.0"
 pydantic = "^2.0.3"
 python = "~3.13"
 slack-sdk = "^3.23.0"
-typer = { extras = ["all"], version = "^0.14.0" }
+typer = { extras = ["all"], version = "^0.15.0" }
 sqlalchemy = "^2.0.30"
 pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"

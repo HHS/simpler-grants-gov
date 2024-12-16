@@ -143,9 +143,8 @@ export const messages = {
       title_2: "Research objectives:",
       paragraph_2:
         "<ul><li>Examine existing user journeys and behaviors, identifying how Grants.gov fits into their overall approach</li><li>Learn from user experiences, roles, challenges</li><li>Identify barriers and how a simpler Grants.gov can create a more intuitive user experience, especially for new users</li></ul>",
-      title_3:
-        "Want to be notified when there are upcoming user research efforts?",
-      cta: "Sign up for project updates",
+      title_3: "Want to participate in user research?",
+      cta: "Sign up to join a usability study",
     },
     archetypes: {
       title: "Applicant archetypes",
@@ -542,5 +541,11 @@ export const messages = {
       hideFilters: "Hide Filters",
     },
     generic_error_cta: "Please try your search again.",
+  },
+  Maintenance: {
+    heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
+    body: "Our team is working to improve the site, and we’ll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
+    signOff: "Thank you for your patience.",
+    pageTitle: "Simpler.Grants.gov - Maintenance",
   },
 };

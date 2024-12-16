@@ -29,6 +29,9 @@ class LoggingConfig(PydanticBaseEnvConfig):
     enable_audit: bool = False
     human_readable_formatter: HumanReadableFormatterConfig = HumanReadableFormatterConfig()
 
+    # Specify logging_level_overrides formatted as "<logger>=<level>" like "newrelic=INFO,something.else=ERROR"
+    level_overrides: str | None = None
+
 
 class LoggingContext(ContextManager[None]):
     """
@@ -104,6 +107,13 @@ class LoggingContext(ContextManager[None]):
         logging.getLogger("werkzeug").setLevel(logging.WARN)
         logging.getLogger("sqlalchemy.pool").setLevel(logging.INFO)
         logging.getLogger("sqlalchemy.dialects.postgresql").setLevel(logging.INFO)
+
+        # Allow an env var to override logging config, mostly for development purposes
+        # Parsing string formatted like "logger1=INFO,logger2=ERROR"
+        if config.level_overrides is not None:
+            for override in config.level_overrides.split(","):
+                logger_override, level_override = override.split("=")
+                logging.getLogger(logger_override).setLevel(level_override)
 
 
 def get_formatter(config: LoggingConfig) -> logging.Formatter:

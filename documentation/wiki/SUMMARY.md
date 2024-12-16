@@ -30,7 +30,14 @@
     * [Grants protocol](product/deliverables/specifications/grants-protocol.md)
     * [Co-Design Group kickoff](product/deliverables/specifications/co-design-group-kickoff.md)
 * [Design](product/design.md)
-* [📖 Voice and Tone Guide](product/voice-and-tone-guide.md)
+* [Brand Guidelines](product/brand-guidelines/README.md)
+  * [Logo](product/brand-guidelines/logo.md)
+  * [Colors](product/brand-guidelines/colors.md)
+  * [Grid & Composition](product/brand-guidelines/grid-and-composition.md)
+  * [Typography](product/brand-guidelines/typography.md)
+  * [Iconography](product/brand-guidelines/iconography.md)
+  * [Photos & Illustrations](product/brand-guidelines/photos-and-illustrations.md)
+  * [Voice & Tone](product/brand-guidelines/voice-and-tone-guide.md)
 
 ## Collaborating
 
@@ -119,6 +126,8 @@
   * [Document Storage](decisions/adr/2024-10-18-document-storage.md)
   * [Document Sharing](decisions/adr/2024-11-14-document-sharing.md)
   * [Internal Wiki ADR](decisions/adr/2024-11-20-internal-wiki.md)
+  * [Shared Team Calendar Platform](decisions/adr/2024-12-05-shared-team-calendar-platform.md)
+  * [Cross-Program Team Health Survey Tool](decisions/adr/2024-12-06-team-health-survey-tool.md)
 * [Infra](decisions/infra/README.md)
   * [Use markdown architectural decision records](decisions/infra/0000-use-markdown-architectural-decision-records.md)
   * [CI/CD interface](decisions/infra/0001-ci-cd-interface.md)

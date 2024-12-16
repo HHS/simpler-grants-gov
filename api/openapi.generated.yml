@@ -128,39 +128,33 @@ paths:
                     sort_direction: descending
       security:
       - ApiKeyAuth: []
-  /v1/users/token:
-    post:
-      parameters:
-      - in: header
-        name: X-OAuth-login-gov
-        description: The login_gov header token
-        schema:
-          type: string
-        required: false
+  /v1/users/login:
+    get:
+      parameters: []
       responses:
-        '200':
+        '302':
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/UserTokenResponse'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
+              schema: {}
+          description: Found
       tags:
       - User v1
-      summary: User Token
-      security:
-      - ApiKeyAuth: []
+      summary: User Login
+      description: '
+
+        To use this endpoint, click [this link](/v1/users/login) which will redirect
+
+        you to an OAuth provider where you can sign into an account.
+
+
+        Do not try to use the execute option below as OpenAPI will not redirect your
+        browser for you.
+
+
+        The token you receive can then be set to the X-SGG-Token header for authenticating
+        with endpoints.
+
+        '
   /v1/users/token/logout:
     post:
       parameters: []
@@ -508,6 +502,10 @@ components:
           type: string
           format: date-time
           description: Latest deploy time in US/Eastern timezone
+        deploy_whoami:
+          type: string
+          description: The latest user to deploy the application
+          example: runner
     HealthcheckResponse:
       type: object
       properties:
@@ -887,55 +885,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    User:
-      type: object
-      properties:
-        user_id:
-          type: string
-          description: The internal ID of a user
-          example: 861a0148-cf2c-432b-b0b3-690016299ab1
-        email:
-          type: string
-          description: The email address returned from Oauth2 provider
-          example: js@gmail.com
-        external_user_type:
-          description: The Oauth2 provider through which a user was authenticated
-          example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType
-          - login_gov
-          enum:
-          - login_gov
-          type:
-          - string
-    UserToken:
-      type: object
-      properties:
-        token:
-          type: string
-          description: Internal token generated for a user
-        user:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/User'
-        is_user_new:
-          type: boolean
-          description: Whether or not the user existed in our database
-    UserTokenResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/UserToken'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
     UserTokenLogoutResponse:
       type: object
       properties:
@@ -1053,7 +1002,7 @@ components:
             - archived
             type:
             - string
-    AgencyFilterV11:
+    AgencySearchFilterV1:
       type: object
       properties:
         one_of:
@@ -1196,7 +1145,7 @@ components:
           type:
           - object
           allOf:
-          - $ref: '#/components/schemas/AgencyFilterV11'
+          - $ref: '#/components/schemas/AgencySearchFilterV1'
         assistance_listing_number:
           type:
           - object
@@ -1739,6 +1688,25 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityFacetV1'
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: The internal ID of a user
+          example: 861a0148-cf2c-432b-b0b3-690016299ab1
+        email:
+          type: string
+          description: The email address returned from Oauth2 provider
+          example: user@example.com
+        external_user_type:
+          description: The Oauth2 provider through which a user was authenticated
+          example: !!python/object/apply:src.constants.lookup_constants.ExternalUserType
+          - login_gov
+          enum:
+          - login_gov
+          type:
+          - string
     UserGetResponse:
       type: object
       properties:

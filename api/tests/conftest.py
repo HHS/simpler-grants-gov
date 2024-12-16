@@ -9,12 +9,16 @@ import flask.testing
 import moto
 import pytest
 from apiflask import APIFlask
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import text
 
 import src.adapters.db as db
 import src.app as app_entry
+import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
+from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.foreign import metadata as foreign_metadata
@@ -23,6 +27,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
+from tests.lib.auth_test_utils import mock_oauth_endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +55,12 @@ def env_vars():
     scope levels.
     """
     load_local_env_vars()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_logging_defaults(monkeypatch_session):
+    # Some loggers are noisy/buggy in our tests, so adjust them
+    monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
 
 
 ### Uploads test files
@@ -217,6 +228,58 @@ def opportunity_index_alias(search_client, monkeypatch_session):
     return alias
 
 
+def _generate_rsa_key_pair():
+    # Rather than define a private/public key, generate one for the tests
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    private_key = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    public_key = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, public_key
+
+
+@pytest.fixture(scope="session")
+def rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def private_rsa_key(rsa_key_pair):
+    return rsa_key_pair[0]
+
+
+@pytest.fixture(scope="session")
+def public_rsa_key(rsa_key_pair):
+    return rsa_key_pair[1]
+
+
+@pytest.fixture(scope="session")
+def other_rsa_key_pair():
+    return _generate_rsa_key_pair()
+
+
+@pytest.fixture(scope="session")
+def mock_oauth_client():
+    return MockLoginGovOauthClient()
+
+
+@pytest.fixture(scope="session")
+def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
+    """Setup login.gov JWK endpoint to be stubbed out"""
+
+    def override_method(config):
+        config.public_keys = [public_rsa_key]
+
+    monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
+
+
 ####################
 # Test App & Client
 ####################
@@ -225,8 +288,24 @@ def opportunity_index_alias(search_client, monkeypatch_session):
 # Make app session scoped so the database connection pool is only created once
 # for the test session. This speeds up the tests.
 @pytest.fixture(scope="session")
-def app(db_client, opportunity_index_alias) -> APIFlask:
-    return app_entry.create_app()
+def app(
+    db_client,
+    opportunity_index_alias,
+    monkeypatch_session,
+    private_rsa_key,
+    mock_oauth_client,
+    setup_login_gov_auth,
+) -> APIFlask:
+    # Override the OAuth endpoint path before creating the app which loads the config at startup
+    monkeypatch_session.setenv(
+        "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
+    )
+    app = app_entry.create_app()
+
+    # Add endpoints and mocks for handling the external OAuth logic
+    mock_oauth_endpoint(app, monkeypatch_session, private_rsa_key, mock_oauth_client)
+
+    return app
 
 
 @pytest.fixture

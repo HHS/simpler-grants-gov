@@ -1,5 +1,7 @@
+from calendar import timegm
 from datetime import datetime, timedelta, timezone
 
+import freezegun
 import jwt
 import pytest
 
@@ -11,7 +13,7 @@ DEFAULT_ISSUER = "http://localhost:3000"
 
 
 @pytest.fixture
-def login_gov_config(public_rsa_key):
+def login_gov_config(public_rsa_key, private_rsa_key):
     # Note this isn't session scoped so it gets remade
     # for every test in the event of changes to it
     return LoginGovConfig(
@@ -19,6 +21,7 @@ def login_gov_config(public_rsa_key):
         LOGIN_GOV_JWK_ENDPOINT="not_used",
         LOGIN_GOV_ENDPOINT=DEFAULT_ISSUER,
         LOGIN_GOV_CLIENT_ID=DEFAULT_CLIENT_ID,
+        LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY=private_rsa_key,
     )
 
 
@@ -186,3 +189,27 @@ def test_something_with_the_refresh(login_gov_config, other_rsa_key_pair, monkey
     monkeypatch.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
 
     validate_token(token, login_gov_config)
+
+
+@freezegun.freeze_time("2024-11-14 12:00:00", tz_offset=0)
+def test_get_login_gov_client_assertion(login_gov_config, public_rsa_key):
+    client_assertion = login_gov_jwt_auth.get_login_gov_client_assertion(login_gov_config)
+
+    # Turn the jwt back into a dict
+    # Validate with the public key
+    decoded_jwt = jwt.decode(
+        client_assertion,
+        key=public_rsa_key,
+        algorithms=["RS256"],
+        issuer=login_gov_config.client_id,
+        audience=login_gov_config.login_gov_token_endpoint,
+    )
+
+    assert decoded_jwt["iss"] == login_gov_config.client_id
+    assert decoded_jwt["sub"] == login_gov_config.client_id
+    assert decoded_jwt["aud"] == login_gov_config.login_gov_token_endpoint
+    assert decoded_jwt["jti"] is not None
+    # exp is 5 minutes from "now"
+    assert decoded_jwt["exp"] == timegm(
+        datetime.fromisoformat("2024-11-14 12:05:00+00:00").utctimetuple()
+    )

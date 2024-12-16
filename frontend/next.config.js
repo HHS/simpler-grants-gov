@@ -16,6 +16,58 @@ const appSassOptions = sassOptions(basePath);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        // static pages are stored for 6 hours, refreshed in the background for
+        // up to 10 minutes, and up to 12 hours if there is an error
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "s-maxage=21600, stale-while-revalidate=600, stale-if-error=43200",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Language",
+          },
+        ],
+      },
+      // search page is stored 1 hour, stale 1 min, stale if error 5 mins
+      {
+        source: "/search",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "s-maxage=3600, stale-while-revalidate=60, stale-if-error=300",
+          },
+        ],
+      },
+      // opportunity pages are stored 10 mins, stale 1 min, stale if error 5 mins
+      {
+        source: "/opportunity/:id(\\d{1,})",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "s-maxage=600, stale-while-revalidate=60, stale-if-error=300",
+          },
+        ],
+      },
+      // don't cache the form
+      {
+        source: "/subscribe/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules

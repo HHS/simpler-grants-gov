@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, cast
 
 import apiflask
 import flask
@@ -47,6 +47,11 @@ class ApiResponse:
 
     pagination_info: PaginationInfo | None = None
     facet_counts: dict | None = None
+
+
+def redirect_response(location: str, code: int = 302) -> flask.Response:
+    """Wrapper around Flask redirects to handle typing issues"""
+    return cast(flask.Response, flask.redirect(location, code))
 
 
 def process_marshmallow_issues(marshmallow_issues: dict) -> list[ValidationErrorDetail]:

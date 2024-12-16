@@ -48,6 +48,12 @@ variable "container_port" {
   default     = 8000
 }
 
+variable "environment_name" {
+  type        = string
+  description = "The name of the environment"
+  default     = ""
+}
+
 variable "hostname" {
   type        = string
   description = "The hostname to override the default AWS configuration"
@@ -83,6 +89,12 @@ variable "scheduled_jobs" {
     state               = string
   }))
   default = {}
+}
+
+variable "enable_drafts_bucket" {
+  description = "does the service need a private S3 bucket for draft document storage"
+  type        = bool
+  default     = false
 }
 
 variable "secrets" {
@@ -162,6 +174,12 @@ variable "readonly_root_filesystem" {
   default     = true
 }
 
+variable "domain" {
+  description = "The domain name for the service"
+  type        = string
+  default     = null
+}
+
 variable "drop_linux_capabilities" {
   description = "Whether to drop linux parameters"
   type        = bool
@@ -172,6 +190,12 @@ variable "enable_load_balancer" {
   description = "Whether to enable a load balancer for the service"
   type        = bool
   default     = true
+}
+
+variable "enable_cdn" {
+  description = "Whether to enable a CDN for the service"
+  type        = bool
+  default     = false
 }
 
 variable "healthcheck_command" {

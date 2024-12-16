@@ -6,6 +6,7 @@ import uuid
 from functools import wraps
 from typing import Callable, Generator, ParamSpec, TypeVar
 
+import newrelic.agent
 import requests
 
 from src.logging.flask_logger import add_extra_data_to_global_logs
@@ -48,7 +49,10 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             with _ecs_background_task_impl(task_name):
-                return f(*args, **kwargs)
+                # Finally execute the function with New Relic instrumentation
+                return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(
+                    *args, **kwargs
+                )
 
         return wrapper
 
@@ -59,11 +63,8 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
     # The actual implementation, see the docs on the
     # decorator method above for details on usage
-
     start = time.perf_counter()
     _add_log_metadata(task_name)
-
-    # initialize new relic here when we add that
 
     logger.info("Starting ECS task %s", task_name)
 

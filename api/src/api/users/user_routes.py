@@ -1,6 +1,8 @@
 import logging
 from uuid import UUID
 
+import flask
+
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api import response
@@ -13,38 +15,61 @@ from src.api.users.user_schemas import (
     UserTokenRefreshResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
-from src.auth.api_key_auth import api_key_auth
+from src.auth.auth_utils import with_login_redirect_error_handler
+from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserTokenSession
 from src.services.users.get_user import get_user
+from src.services.users.login_gov_callback_handler import handle_login_gov_callback
 
 logger = logging.getLogger(__name__)
 
+LOGIN_DESCRIPTION = """
+To use this endpoint, click [this link](/v1/users/login) which will redirect
+you to an OAuth provider where you can sign into an account.
 
-@user_blueprint.post("/token")
-@user_blueprint.input(
-    user_schemas.UserTokenHeaderSchema, location="headers", arg_name="x_oauth_login_gov"
-)
-@user_blueprint.output(user_schemas.UserTokenResponseSchema)
-@user_blueprint.auth_required(api_key_auth)
-def user_token(x_oauth_login_gov: dict) -> response.ApiResponse:
-    logger.info("POST /v1/users/token")
+Do not try to use the execute option below as OpenAPI will not redirect your browser for you.
 
-    if x_oauth_login_gov:
-        data = {
-            "token": "the token goes here!",
-            "user": {
-                "user_id": "abc-...",
-                "email": "example@gmail.com",
-                "external_user_type": "login_gov",
-            },
-            "is_user_new": True,
-        }
-        return response.ApiResponse(message="Success", data=data)
+The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
+"""
 
-    message = "Missing X-OAuth-login-gov header"
-    logger.info(message)
 
-    raise_flask_error(400, message)
+@user_blueprint.get("/login")
+@user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
+@with_login_redirect_error_handler()
+@flask_db.with_db_session()
+def user_login(db_session: db.Session) -> flask.Response:
+    logger.info("GET /v1/users/login")
+    with db_session.begin():
+        redirect_uri = get_login_gov_redirect_uri(db_session)
+
+    return response.redirect_response(redirect_uri)
+
+
+@user_blueprint.get("/login/callback")
+@user_blueprint.input(user_schemas.UserLoginGovCallbackSchema, location="query")
+@user_blueprint.doc(responses=[302], hide=True)
+@with_login_redirect_error_handler()
+@flask_db.with_db_session()
+def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Response:
+    logger.info("GET /v1/users/login/callback")
+
+    with db_session.begin():
+        result = handle_login_gov_callback(query_data, db_session)
+
+    # Redirect to the final location for the user
+    return response.redirect_response(
+        get_final_redirect_uri("success", result.token, result.is_user_new)
+    )
+
+
+@user_blueprint.get("/login/result")
+@user_blueprint.doc(hide=True)
+def login_result() -> flask.Response:
+    logger.info("GET /v1/users/login/result")
+    """Dummy endpoint for easily displaying the results of the login flow without the frontend"""
+
+    # Echo back the query args as JSON for some readability
+    return flask.jsonify(flask.request.args)
 
 
 @user_blueprint.post("/token/logout")
