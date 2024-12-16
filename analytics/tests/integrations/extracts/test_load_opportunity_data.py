@@ -52,19 +52,17 @@ def test_extract_copy_opportunity_data(
 
     # Verify that the data was inserted into the database
     with conn.begin():
-        conn.execute(text(f"SET search_path TO {test_schema};"))
-
         lk_opp_sts_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM {test_schema}.lk_opportunity_status ;"),
+            text(f"SELECT COUNT(*) FROM lk_opportunity_status ;"),
         )
         lk_opp_ctgry_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM {test_schema}.lk_opportunity_category ;"),
+            text(f"SELECT COUNT(*) FROM lk_opportunity_category ;"),
         )
         opp_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM {test_schema}.opportunity ;"),
+            text(f"SELECT COUNT(*) FROM opportunity ;"),
         )
         opp_smry_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM {test_schema}.opportunity_summary ;"),
+            text(f"SELECT COUNT(*) FROM opportunity_summary ;"),
         )
 
         curr_opp_smry_result = conn.execute(
