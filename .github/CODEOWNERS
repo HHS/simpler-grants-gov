@@ -1,11 +1,7 @@
-# We are limiting this to a few engineers and choosing not to select "Require review from Code Owners."
-* @acouch @chouinar @mdragon 
-
-/documentation/ @widal001 @andycochran @mdragon
-/frontend/ @andycochran @acouch @doug-s-nava 
-/api/ @chouinar @mdragon
-/analytics/ @coilysiren @widal001 @acouch 
-
-/infra/ @coilysiren @acouch @mdragon 
-/bin/ @coilysiren @acouch
-/.github/ @coilysiren @acouch
+/.github/        @coilysiren @acouch @mdragon 
+/analytics/      @coilysiren @widal001 @acouch 
+/api/            @chouinar @mdragon
+/bin/            @coilysiren @acouch @mdragon 
+/documentation/ *
+/frontend/       @andycochran @acouch @doug-s-nava 
+/infra/          @coilysiren @acouch @mdragon 
