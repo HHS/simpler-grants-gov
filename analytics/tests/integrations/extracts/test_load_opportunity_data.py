@@ -22,7 +22,6 @@ def upload_opportunity_tables_s3(monkeypatch_session,mock_s3_bucket, mock_s3_buc
 
     monkeypatch_session.setenv("S3_OPPORTUNITY_BUCKET", mock_s3_bucket)
 
-
     for root, _, files in os.walk(test_folder_path):
         root_path = pathlib.Path(root)
         for file in files:

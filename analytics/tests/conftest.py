@@ -7,7 +7,6 @@ https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
 import json
 import logging
-import random
 import uuid
 from pathlib import Path
 
