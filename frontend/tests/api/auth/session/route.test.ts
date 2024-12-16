@@ -2,11 +2,10 @@
  * @jest-environment node
  */
 
-import { identity } from "lodash";
 import { GET } from "src/app/api/auth/session/route";
 
 const getSessionMock = jest.fn();
-const responseJsonMock = jest.fn(identity);
+const responseJsonMock = jest.fn((something: unknown) => something);
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),

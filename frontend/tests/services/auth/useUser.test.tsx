@@ -1,14 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import identity from "lodash/identity";
 import UserProvider from "src/services/auth/UserProvider";
 import { useUser } from "src/services/auth/useUser";
 
 const userFetcherMock = jest.fn();
 
 jest.mock("src/app/api/userFetcher", () => ({
-  userFetcher: () => userFetcherMock(),
+  userFetcher: () => userFetcherMock() as unknown,
 }));
 
-jest.mock("lodash/debounce", () => (fn) => fn);
+jest.mock("lodash/debounce", () => identity);
 
 const UseUserConsumer = () => {
   const { error, isLoading, user } = useUser();
