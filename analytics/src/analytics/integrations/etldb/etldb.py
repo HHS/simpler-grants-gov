@@ -3,6 +3,7 @@
 import logging
 from enum import Enum
 from functools import wraps
+from typing import Callable, Any
 
 from sqlalchemy import Connection, text
 
@@ -131,16 +132,16 @@ class EtlChangeType(Enum):
     UPDATE = 2
 
 
-def etl_db_connection(func):
-    """
-    Decorator to inject etlb connection into a wrapped function.
-    """
+def etl_db_connection(func) -> Callable:
+    """Decorator to inject etlb connection into a wrapped function."""
+
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any):
         etldb_conn = kwargs.get("etldb_conn")
         if not etldb_conn:
             etldb_conn = EtlDb()
+            kwargs.update({"etldb_conn": etldb_conn})
 
-            return func(*args, **kwargs, etldb_conn=etldb_conn)
+        return func(*args, **kwargs)
 
     return wrapper

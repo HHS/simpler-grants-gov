@@ -9,14 +9,14 @@ import json
 import logging
 from pathlib import Path
 
+import _pytest.monkeypatch
+import boto3
+import moto
 import pandas as pd
 import pytest
 from analytics.datasets.issues import IssueMetadata, IssueType
-import moto
-import boto3
-from sqlalchemy import text
-
 from analytics.integrations.etldb.etldb import EtlDb
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
@@ -269,6 +269,7 @@ def issue(  # pylint: disable=too-many-locals
 # AWS Mock Fixtures
 ####################
 
+
 @pytest.fixture
 def reset_aws_env_vars(monkeypatch):
     # Reset the env vars so you can't accidentally connect
@@ -291,45 +292,60 @@ def mock_s3(reset_aws_env_vars):
 def mock_s3_bucket_resource(mock_s3):
     bucket = mock_s3.Bucket("test_bucket")
     bucket.create()
-    yield bucket
+    return bucket
 
 
-@pytest.fixture
-def mock_s3_bucket(mock_s3_bucket_resource):
-    yield mock_s3_bucket_resource.name
+# From https://github.com/pytest-dev/pytest/issues/363
+@pytest.fixture(scope="session")
+def monkeypatch_session():
+    """
+    Create a monkeypatch instance that can be used to
+    monkeypatch global environment, objects, and attributes
+    for the duration the test session.
+    """
+    mpatch = _pytest.monkeypatch.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
 
-@pytest.fixture
-def create_test_db(monkeypatch):
-    monkeypatch.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
-    monkeypatch.setenv("DB_HOST", "localhost")
 
-    db_conn = EtlDb()
+@pytest.fixture(scope="session")
+def create_test_db(monkeypatch_session) -> EtlDb:
+    """
+    Creates a temporary PostgreSQL schema and creates a database engine
+    that connects to that schema. Drops the schema after the context manager
+    exits.
+    """
+    monkeypatch_session.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
+    monkeypatch_session.setenv("DB_HOST", "localhost")
 
-    schema="test_schema"
+    etldb_conn = EtlDb()
 
-    with db_conn.connection() as conn:
+    schema = "test_schema"
+
+    with etldb_conn.connection() as conn:
+
+        _create_schema(conn, schema)
+
+        _create_opportunity_table(conn, schema)
         try:
-            _create_schema(conn, schema)
+            yield etldb_conn
 
-            # create opportunity tables
-            _create_opportunity_table(conn, schema)
-            yield db_conn
         finally:
             _drop_schema(conn, schema)
 
-def _create_schema(conn, schema: str):
+
+def _create_schema(conn: EtlDb.connection, schema: str):
     """Create a database schema."""
     db_test_user = "app"
 
     with conn.begin():
-        cursor = conn.connection.cursor()
-        cursor.execute(
-            f"CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {db_test_user};"
+        conn.execute(
+            text(f"CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {db_test_user};"),
         )
-        logger.info("Created schema %s", schema)
+    logger.info("Created schema %s", schema)
 
 
-def _drop_schema(conn, schema: str):
+def _drop_schema(conn: EtlDb.connection, schema: str):
     """Drop a database schema."""
     with conn.begin():
         conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
@@ -337,23 +353,28 @@ def _drop_schema(conn, schema: str):
     logger.info("Dropped schema %s", schema)
 
 
-def _create_opportunity_table(conn, schema):
-    """Create opportunity tables"""
+def _create_opportunity_table(conn: EtlDb.connection, schema: str):
+    """Create opportunity tables."""
     with conn.begin():
-        conn.execute(
-            text(f"SET search_path TO {schema};")
-        )
+        conn.execute(text(f"SET search_path TO {schema};"))
 
-        #Get the path of the current file (test file)
+        # Get the path of the current file (test file)
         test_file_path = Path(__file__).resolve()
 
         # Construct the path to the SQL file
-        sql_file_path = test_file_path.parent.parent / 'src' / 'analytics' / 'integrations' / 'etldb' / 'migrations' / 'versions' / '0006_add_opportunity_tables.sql'
+        sql_file_path = (
+            test_file_path.parent.parent
+            / "src"
+            / "analytics"
+            / "integrations"
+            / "etldb"
+            / "migrations"
+            / "versions"
+            / "0006_add_opportunity_tables.sql"
+        )
 
-        with open(sql_file_path, 'r') as file:
+        with open(sql_file_path) as file:
             create_table_commands = file.read()
-            conn.execute(
-                text(create_table_commands)
-            )
+            conn.execute(text(create_table_commands))
 
-        logger.info("Created opportunity tables")
+    logger.info("Created opportunity tables")

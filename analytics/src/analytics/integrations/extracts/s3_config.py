@@ -1,12 +1,17 @@
 import boto3
 import botocore
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
 class S3Config(BaseSettings):
     """Configuration for S3"""
-    s3_opportunity_bucket: str | None = None
-    s3_opportunity_file_path_prefix: str | None = None
+
+    s3_opportunity_bucket: str | None = Field(None, env="S3_OPPORTUNITY_BUCKET")
+    s3_opportunity_file_path_prefix: str | None = Field(
+        None,
+        env="S3_OPPORTUNITY_FILE_PATH_PREFIX",
+    )
 
 
 def get_s3_client(

@@ -1,5 +1,6 @@
+"""Holds all constant values."""
+
 from enum import StrEnum
-from typing import Dict, List
 
 
 class OpportunityTables(StrEnum):
@@ -89,7 +90,7 @@ CURRENT_OPPORTUNITY_SUMMARY_COLS = (
     "UPDATED_AT",
 )
 
-MAP_TABLES_TO_COLS: Dict[OpportunityTables, List[str]] = {
+MAP_TABLES_TO_COLS: dict[OpportunityTables, list[str]] = {
     OpportunityTables.LK_OPPORTUNITY_STATUS: LK_OPPORTUNITY_STATUS_COLS,
     OpportunityTables.LK_OPPORTUNITY_CATEGORY: LK_OPPORTUNITY_CATEGORY_COLS,
     OpportunityTables.OPPORTUNITY: OPPORTUNITY_COLS,
