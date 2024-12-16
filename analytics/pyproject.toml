@@ -9,7 +9,6 @@ version = "0.1.0"
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
 db-migrate = "analytics.cli:migrate_database"
-opportunity-load = "analytics.cli:ingest_opportunity_data"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
@@ -27,6 +26,7 @@ pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 psycopg = "^3.2.3"
+smart-open = "^7.0.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
