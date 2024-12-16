@@ -99,7 +99,7 @@ class LoadOpportunitiesToIndex(Task):
             .all()
         )
 
-        # Process updates and inserts, and skip test records
+        # Process updates and inserts
         processed_opportunity_ids = set()
         opportunities_to_index = []
 
@@ -116,7 +116,7 @@ class LoadOpportunitiesToIndex(Task):
                 },
             )
 
-            # Add to index batch if it's not associated with a test agency
+            # Add to index batch if it's indexable
             opportunities_to_index.append(opportunity)
             processed_opportunity_ids.add(opportunity.opportunity_id)
 
