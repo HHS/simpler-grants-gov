@@ -1,29 +1,14 @@
 "use client";
 
-import { debounce, noop } from "lodash";
-import { ApiRequestError } from "src/errors";
-import {
-  SessionPayload,
-  UserFetcher,
-  UserSession,
-} from "src/services/auth/types";
+// note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
+import debounce from "lodash/debounce";
+import noop from "lodash/noop";
+import { userFetcher } from "src/app/api/userFetcher";
+import { UserSession } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
 import { isSessionExpired } from "src/utils/authUtil";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-
-const userFetcher: UserFetcher = async (url) => {
-  let response;
-  try {
-    response = await fetch(url);
-  } catch (e) {
-    console.error("User session fetch network error", e);
-    throw new ApiRequestError(0); // Network error
-  }
-  if (response.status === 204) return undefined;
-  if (response.ok) return (await response.json()) as SessionPayload;
-  throw new ApiRequestError(response.status);
-};
 
 // if we don't debounce this call we get multiple requests going out on page load
 const debouncedUserFetcher = debounce(
