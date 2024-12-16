@@ -27,6 +27,14 @@ class CallbackParams(BaseModel):
 
 
 @dataclass
+class LoginGovDataContainer:
+    """Holds various login gov related fields we want to pass around"""
+
+    code: str
+    nonce: str
+
+
+@dataclass
 class LoginGovCallbackResponse:
     token: str
     is_user_new: bool
@@ -37,13 +45,14 @@ def get_login_gov_client() -> LoginGovOauthClient:
     return LoginGovOauthClient()
 
 
-def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> LoginGovCallbackResponse:
+def handle_login_gov_callback_request(
+    query_data: dict, db_session: db.Session
+) -> LoginGovDataContainer:
     """Handle the callback from login.gov after calling the authenticate endpoint
 
     NOTE: Any errors thrown here will actually lead to a redirect due to the
           with_login_redirect_error_handler handler we have attached to the route
     """
-
     # Process the data coming back from login.gov via the redirect query params
     # see: https://developers.login.gov/oidc/authorization/#authorization-response
     callback_params = CallbackParams.model_validate(query_data)
@@ -75,29 +84,44 @@ def handle_login_gov_callback(query_data: dict, db_session: db.Session) -> Login
     if login_gov_state is None:
         raise_flask_error(404, "OAuth state not found")
 
+    # We do not want the login_gov_state to be reusable - so delete it
+    # even if we later error to avoid any replay attacks.
+    db_session.delete(login_gov_state)
+
+    return LoginGovDataContainer(code=callback_params.code, nonce=str(login_gov_state.nonce))
+
+
+def handle_login_gov_token(
+    db_session: db.Session, login_gov_data: LoginGovDataContainer
+) -> LoginGovCallbackResponse:
+    """Fetch user info from login gov, and handle user creation
+
+    NOTE: Any errors thrown here will actually lead to a redirect due to the
+          with_login_redirect_error_handler handler we have attached to the route
+    """
+
     # call the token endpoint (make a client)
     # https://developers.login.gov/oidc/token/
     client = get_login_gov_client()
     response = client.get_token(
         OauthTokenRequest(
-            code=callback_params.code, client_assertion=get_login_gov_client_assertion()
+            code=login_gov_data.code, client_assertion=get_login_gov_client_assertion()
         )
     )
 
     # If this request failed, we'll assume we're the issue and 500
-    # TODO - need to test with actual login.gov if there could be other scenarios
-    #        the mock always returns something as long as the request is well-formatted
     if response.is_error_response():
         raise_flask_error(500, response.error_description)
 
     # Process the token response from login.gov
-    return _process_token(db_session, response.id_token)
+    # which will create/update a user in the DB
+    return _process_token(db_session, response.id_token, login_gov_data.nonce)
 
 
-def _process_token(db_session: db.Session, token: str) -> LoginGovCallbackResponse:
+def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCallbackResponse:
     """Process the token from login.gov and generate our own token for auth"""
     try:
-        login_gov_user = validate_token(token)
+        login_gov_user = validate_token(token, nonce)
     except JwtValidationError as e:
         logger.info("Login.gov token validation failed", extra={"auth.issue": e.message})
         raise_flask_error(401, e.message)
