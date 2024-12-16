@@ -1,6 +1,7 @@
 # Alphabetize the folder names, alphabetize codeowner names.
 # Keep this document in sync with MAINTAINERS.md.
 
+*                @mdragon # project lead
 /.github/        @acouch @coilysiren @mdragon # same as infra
 /analytics/      @acouch @coilysiren @widal001 
 /api/            @chouinar @mdragon
