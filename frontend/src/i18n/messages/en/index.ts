@@ -423,6 +423,7 @@ export const messages = {
     title: "We're building a simpler Grants.gov!",
     content:
       "This new website will be your go‑to resource to follow our progress as we improve and modernize the Grants.gov experience, making it easier to find, share, and apply for grants.",
+    search_link: "Search for grants",
     github_link: "Follow on GitHub",
   },
   Footer: {
