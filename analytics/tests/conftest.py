@@ -288,13 +288,6 @@ def mock_s3(reset_aws_env_vars):
         yield boto3.resource("s3")
 
 
-@pytest.fixture
-def mock_s3_bucket_resource(mock_s3):
-    bucket = mock_s3.Bucket("test_bucket")
-    bucket.create()
-    return bucket
-
-
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
 def monkeypatch_session():

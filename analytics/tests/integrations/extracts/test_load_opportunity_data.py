@@ -48,7 +48,7 @@ def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
     upload_opportunity_tables_s3,
 ):
-    """Should upload all test files to mock s3 and have all records inserted into test database schema"""
+    """Should upload all test files to mock s3 and have all records inserted into test database schema."""
 
     extract_copy_opportunity_data(etldb_conn=create_test_db, schema="test_schema")
     conn = create_test_db.connection()
