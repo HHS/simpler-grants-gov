@@ -50,7 +50,7 @@ locals {
   service_config                                 = local.environment_config.service_config
   database_config                                = local.environment_config.database_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  domain                                         = "simpler.grants.gov"
+  domain                                         = local.environment_config.domain
 }
 
 terraform {
