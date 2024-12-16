@@ -2,7 +2,7 @@
 
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
-import { Breakpoints } from "src/types/uiTypes";
+import { Breakpoints, ErrorProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
@@ -12,12 +12,6 @@ import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-
-interface ErrorProps {
-  // Next's error boundary also includes a reset function as a prop for retries,
-  // but it was not needed as users can retry with new inputs in the normal page flow.
-  error: Error & { digest?: string };
-}
 
 export interface ParsedError {
   message: string;
@@ -54,7 +48,7 @@ function createBlankParsedError(): ParsedError {
   };
 }
 
-export default function Error({ error }: ErrorProps) {
+export default function SearchError({ error }: ErrorProps) {
   const t = useTranslations("Search");
 
   // The error message is passed as an object that's been stringified.
