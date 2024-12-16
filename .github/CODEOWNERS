@@ -1,7 +1,10 @@
-/.github/        @coilysiren @acouch @mdragon 
-/analytics/      @coilysiren @widal001 @acouch 
+# Alphabetize the folder names, alphabetize codeowner names.
+# Keep this document in sync with MAINTAINERS.md.
+
+/.github/        @acouch @coilysiren @mdragon # same as infra
+/analytics/      @acouch @coilysiren @widal001 
 /api/            @chouinar @mdragon
-/bin/            @coilysiren @acouch @mdragon 
-/documentation/ *
-/frontend/       @andycochran @acouch @doug-s-nava 
-/infra/          @coilysiren @acouch @mdragon 
+/bin/            @coilysiren @acouch @mdragon # same as infra
+/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @mdragon @widal001 # everyone
+/frontend/       @acouch @andycochran @btabaska @doug-s-nava
+/infra/          @acouch @coilysiren @mdragon 
