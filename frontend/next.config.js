@@ -1,6 +1,6 @@
 // @ts-check
 
-const withNextIntl = require("next-intl/plugin")("./src/i18n/server.ts");
+const withNextIntl = require("next-intl/plugin")();
 const sassOptions = require("./scripts/sassOptions");
 const nrExternals = require("@newrelic/next/load-externals");
 

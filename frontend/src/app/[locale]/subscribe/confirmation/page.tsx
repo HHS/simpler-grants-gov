@@ -1,16 +1,19 @@
 import { Metadata } from "next";
 import { SUBSCRIBE_CONFIRMATION_CRUMBS } from "src/constants/breadcrumbs";
+import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
-export async function generateMetadata() {
-  const t = await getTranslations({ locale: "en" });
+export async function generateMetadata({
+  params: { locale },
+}: LocalizedPageProps) {
+  const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Subscribe.page_title"),
     description: t("Index.meta_description"),
@@ -19,8 +22,10 @@ export async function generateMetadata() {
   return meta;
 }
 
-export default function SubscriptionConfirmation() {
-  unstable_setRequestLocale("en");
+export default function SubscriptionConfirmation({
+  params: { locale },
+}: LocalizedPageProps) {
+  setRequestLocale(locale);
   const t = useTranslations("Subscription_confirmation");
 
   return (

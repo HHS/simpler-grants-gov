@@ -1,12 +1,13 @@
 import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import { LocalizedPageProps } from "src/types/intl";
 import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { Breakpoints } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
@@ -15,19 +16,23 @@ import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import SearchResults from "src/components/search/SearchResults";
 
-export async function generateMetadata() {
-  const t = await getTranslations({ locale: "en" });
+export async function generateMetadata({
+  params: { locale },
+}: LocalizedPageProps) {
+  const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Search.title"),
     description: t("Index.meta_description"),
   };
   return meta;
 }
+type SearchPageProps = {
+  searchParams: SearchParamsTypes;
+  params: { locale: string };
+};
 
-type SearchPageProps = { searchParams: SearchParamsTypes };
-
-function Search({ searchParams }: SearchPageProps) {
-  unstable_setRequestLocale("en");
+function Search({ searchParams, params: { locale } }: SearchPageProps) {
+  setRequestLocale(locale);
   const t = useTranslations("Search");
 
   const convertedSearchParams = convertSearchParamsToProperTypes(searchParams);
