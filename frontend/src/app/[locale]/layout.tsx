@@ -12,7 +12,7 @@ import Script from "next/script";
 import "src/styles/styles.scss";
 
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, unstable_setRequestLocale } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 
 import Layout from "src/components/Layout";
 
@@ -61,7 +61,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = params;
 
   // Enable static rendering
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   // Providing all messages to the client
   // side is the easiest way to get started

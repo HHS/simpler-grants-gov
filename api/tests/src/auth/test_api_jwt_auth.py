@@ -67,6 +67,7 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert decoded_token["iat"] == timegm(
         datetime.fromisoformat("2024-11-14 12:00:00+00:00").utctimetuple()
     )
+    assert decoded_token["user_id"] == str(user.user_id)
     assert decoded_token["iss"] == jwt_config.issuer
     assert decoded_token["aud"] == jwt_config.audience
 

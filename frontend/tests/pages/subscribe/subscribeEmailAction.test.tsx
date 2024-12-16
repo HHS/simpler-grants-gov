@@ -12,7 +12,7 @@ afterEach(() => {
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-  unstable_setRequestLocale: identity,
+  setRequestLocale: identity,
 }));
 
 jest.mock("next-intl", () => ({

@@ -195,7 +195,7 @@ def get_final_redirect_uri(
     return f"{config.login_final_destination}?{encoded_params}"
 
 
-def validate_token(token: str, config: LoginGovConfig | None = None) -> LoginGovUser:
+def validate_token(token: str, nonce: str, config: LoginGovConfig | None = None) -> LoginGovUser:
     if not config:
         config = get_config()
 
@@ -205,14 +205,14 @@ def validate_token(token: str, config: LoginGovConfig | None = None) -> LoginGov
     # Iterate over the public keys we have and check each
     # to determine if we have a valid key.
     for public_key in config.public_keys:
-        user = _validate_token_with_key(token, public_key, config)
+        user = _validate_token_with_key(token, nonce, public_key, config)
         if user is not None:
             return user
 
     _refresh_keys(config)
 
     for public_key in config.public_keys:
-        user = _validate_token_with_key(token, public_key, config)
+        user = _validate_token_with_key(token, nonce, public_key, config)
         if user is not None:
             return user
 
@@ -220,7 +220,7 @@ def validate_token(token: str, config: LoginGovConfig | None = None) -> LoginGov
 
 
 def _validate_token_with_key(
-    token: str, public_key: jwt.PyJWK | str, config: LoginGovConfig
+    token: str, nonce: str, public_key: jwt.PyJWK | str, config: LoginGovConfig
 ) -> LoginGovUser | None:
     # We are processing the id_token as described on:
     # https://developers.login.gov/oidc/token/#token-response
@@ -243,6 +243,10 @@ def _validate_token_with_key(
             },
         )
         payload = data.get("payload", {})
+
+        payload_nonce = payload.get("nonce", None)
+        if payload_nonce != nonce:
+            raise JwtValidationError("Nonce does not match expected")
 
         user_id = payload["sub"]
         email = payload["email"]

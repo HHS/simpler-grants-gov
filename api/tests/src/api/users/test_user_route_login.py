@@ -8,7 +8,7 @@ import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 from src.adapters.oauth.oauth_client_models import OauthTokenResponse
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import parse_jwt_for_user
-from src.db.models.user_models import LinkExternalUser
+from src.db.models.user_models import LinkExternalUser, LoginGovState
 from src.util import datetime_util
 from tests.lib.auth_test_utils import create_jwt
 from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
@@ -232,6 +232,7 @@ def test_user_callback_new_user_302(
     code = str(uuid.uuid4())
     id_token = create_jwt(
         user_id="bob-xyz",
+        nonce=str(login_gov_state.nonce),
         private_key=private_rsa_key,
     )
     mock_oauth_client.add_token_response(
@@ -267,6 +268,14 @@ def test_user_callback_new_user_302(
     )
     assert external_user is not None
 
+    # Make sure the login gov state was deleted
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
+
 
 def test_user_callback_existing_user_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
@@ -282,6 +291,7 @@ def test_user_callback_existing_user_302(
     code = str(uuid.uuid4())
     id_token = create_jwt(
         user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
         private_key=private_rsa_key,
     )
     mock_oauth_client.add_token_response(
@@ -306,6 +316,14 @@ def test_user_callback_existing_user_302(
     assert user_token_session.expires_at > datetime_util.utcnow()
     assert user_token_session.is_valid is True
     assert user_token_session.user_id == external_user.user_id
+
+    # Make sure the login gov state was deleted
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
 
 
 def test_user_callback_unknown_state_302(client, monkeypatch):
@@ -374,13 +392,24 @@ def test_user_callback_error_in_token_302(client, enable_factory_create, caplog)
     ],
 )
 def test_user_callback_token_fails_validation_302(
-    client, enable_factory_create, mock_oauth_client, private_rsa_key, jwt_params, error_description
+    client,
+    db_session,
+    enable_factory_create,
+    mock_oauth_client,
+    private_rsa_key,
+    jwt_params,
+    error_description,
 ):
     # Create state so the callback gets past the check
     login_gov_state = LoginGovStateFactory.create()
 
     code = str(uuid.uuid4())
-    id_token = create_jwt(user_id=str(uuid.uuid4()), private_key=private_rsa_key, **jwt_params)
+    id_token = create_jwt(
+        user_id=str(uuid.uuid4()),
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        **jwt_params,
+    )
     mock_oauth_client.add_token_response(
         code,
         OauthTokenResponse(
@@ -398,9 +427,17 @@ def test_user_callback_token_fails_validation_302(
     assert resp_json["message"] == "error"
     assert resp_json["error_description"] == error_description
 
+    # Make sure the login gov state was deleted even though it errored
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
+
 
 def test_user_callback_token_fails_validation_bad_token_302(
-    client, enable_factory_create, mock_oauth_client, private_rsa_key
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
     # Create state so the callback gets past the check
     login_gov_state = LoginGovStateFactory.create()
@@ -424,9 +461,17 @@ def test_user_callback_token_fails_validation_bad_token_302(
     assert resp_json["message"] == "error"
     assert resp_json["error_description"] == "Unable to process token"
 
+    # Make sure the login gov state was deleted even though it errored
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
+
 
 def test_user_callback_token_fails_validation_no_valid_key_302(
-    client, enable_factory_create, mock_oauth_client, other_rsa_key_pair
+    client, db_session, enable_factory_create, mock_oauth_client, other_rsa_key_pair
 ):
     """Create the token with a different key than we check against"""
     # Create state so the callback gets past the check
@@ -435,6 +480,7 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
     code = str(uuid.uuid4())
     id_token = create_jwt(
         user_id=str(uuid.uuid4()),
+        nonce=str(login_gov_state.nonce),
         private_key=other_rsa_key_pair[0],
     )
     mock_oauth_client.add_token_response(
@@ -456,3 +502,11 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
         resp_json["error_description"]
         == "Token could not be validated against any public keys from login.gov"
     )
+
+    # Make sure the login gov state was deleted even though it errored
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
