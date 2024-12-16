@@ -6,7 +6,7 @@ This document describes our rules for documenting things
 2. All engineering documentation in its final state must live in GitHub.
 3. Draft / WIP engineering documentation can live in Google Drive if desired
 4. Code documenation of 3 paragraphs or longer must go into a `.md` file in the same location as the code. You must be able to find every engineering `.md` file via "walking down" links from the root README.md of the repository. Which is to say, add a link from `DEVELOPEMENT.md` or `OPERATIONS.md` or `README.md` (any of them, there are several) into your new `.md` file.
-6. Code comments of 1 paragraph of longer, [or otherwise sufficiently complex](https://github.com/HHS/simpler-grants-gov/blob/02d99c055734edb3d705044de669f7856c0a8fe7/api/tests/src/api/users/test_user_route_login.py#L16-L41), must be linked to from a `.md` file, any `.md` file, pick whichever one makes the most sense.
+6. Code comments of 1 paragraph of longer, or otherwise sufficiently complex, must be linked to from a `.md` file, any `.md` file, pick whichever one makes the most sense.
 7. When documentation in AWS, the written and screenshot documentation must have all sensitive / unique / secrets information redacted, including but not limited to:
 
   - secrets
