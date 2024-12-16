@@ -41,7 +41,7 @@ test.describe("Search page tests", () => {
       "eligibility-county_governments": "county_governments",
     };
     const agencyCheckboxes = {
-      DOC: "DOC",
+      EPA: "EPA",
       AC: "AC",
     };
     const categoryCheckboxes = {
