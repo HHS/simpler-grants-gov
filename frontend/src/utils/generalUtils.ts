@@ -94,3 +94,6 @@ export const findFirstWhitespace = (content: string, startAt: number): number =>
 // is used by Next middleware throws a compilation error, so let's roll our own
 export const camelToSnake = (camel: string) =>
   camel.replace(/[A-Z]/g, (letter) => `_${letter}`);
+
+export const encodeText = (valueToEncode: string) =>
+  new TextEncoder().encode(valueToEncode);

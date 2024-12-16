@@ -61,6 +61,10 @@ locals {
     FEATURE_OPPORTUNITY_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunity-off"
+    },
+    SESSION_SECRET = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}/${var.environment}/session-secret"
     }
   }
 }

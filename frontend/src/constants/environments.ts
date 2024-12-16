@@ -11,6 +11,7 @@ const {
   FEATURE_OPPORTUNITY_OFF = "false",
   NEXT_BUILD = "false",
   ENVIRONMENT = "dev",
+  SESSION_SECRET = "",
 } = process.env;
 
 // home for all interpreted server side environment variables
@@ -30,4 +31,5 @@ export const environment: { [key: string]: string } = {
   FEATURE_SEARCH_OFF,
   NEXT_BUILD,
   ENVIRONMENT,
+  SESSION_SECRET,
 };
