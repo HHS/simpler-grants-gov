@@ -37,6 +37,7 @@ describe("getNextRoutes", () => {
       "/subscribe/confirmation",
       "/subscribe",
       "/subscribe/unsubscribe",
+      "/user",
     ]);
   });
 });
