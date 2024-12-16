@@ -48,7 +48,7 @@ examples = {
         "value": {
             "query": "research",
             "filters": {
-                "agency": {"one_of": ["USAID", "ARPAH"]},
+                "agency": {"one_of": ["USAID", "DOC"]},
                 "applicant_type": {
                     "one_of": ["state_governments", "county_governments", "individuals"]
                 },

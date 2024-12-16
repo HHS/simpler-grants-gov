@@ -454,7 +454,7 @@ class OpportunityFacetV1Schema(Schema):
         values=fields.Integer(),
         metadata={
             "description": "The counts of agency values in the full response",
-            "example": {"USAID": 4, "ARPAH": 3},
+            "example": {"USAID": 4, "DOC": 3},
         },
     )
 
