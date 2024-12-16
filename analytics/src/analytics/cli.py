@@ -308,5 +308,5 @@ def transform_and_load(
 
 @etl_app.command(name="opportunity-load")
 def load_opportunity_data() -> None:
-    """Grabs data from s3 bucket and loads it into opportunity tables"""
+    """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()

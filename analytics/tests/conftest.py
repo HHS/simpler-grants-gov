@@ -273,8 +273,10 @@ def issue(  # pylint: disable=too-many-locals
 
 @pytest.fixture
 def reset_aws_env_vars(monkeypatch):
-    # Reset the env vars so you can't accidentally connect
-    # to a real AWS account if you were doing some local testing
+    """
+    Reset the aws env vars so you can't accidentally connect
+    to a real AWS account if you were doing some local testing.
+    """
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
@@ -283,26 +285,32 @@ def reset_aws_env_vars(monkeypatch):
 
 
 @pytest.fixture
-def mock_s3(reset_aws_env_vars):
+def mock_s3(reset_aws_env_vars: monkeypatch) -> boto3.resource:
+    """Instantiate an S3 bucket resource."""
     # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
     with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
         yield boto3.resource("s3")
 
+
 @pytest.fixture
-def mock_s3_bucket_resource(mock_s3):
+def mock_s3_bucket_resource(
+    mock_s3: boto3.resource,
+) -> boto3.resources.factory.s3.Bucket:
+    """Create and return a mock S3 bucket resource."""
     bucket = mock_s3.Bucket("test_bucket")
     bucket.create()
-    yield bucket
+    return bucket
+
 
 @pytest.fixture
-def mock_s3_bucket(mock_s3_bucket_resource):
-    yield mock_s3_bucket_resource.name
-
+def mock_s3_bucket(mock_s3_bucket_resource: boto3.resources.factory.s3.Bucket) -> str:
+    """Returns name of mock S3 bucket."""
+    return mock_s3_bucket_resource.name
 
 
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
-def monkeypatch_session():
+def monkeypatch_session() -> monkeypatch:
     """
     Create a monkeypatch instance that can be used to
     monkeypatch global environment, objects, and attributes
@@ -312,19 +320,20 @@ def monkeypatch_session():
     yield mpatch
     mpatch.undo()
 
+
 @pytest.fixture(scope="session")
-def test_schema():
+def test_schema() -> str:
+    """Create a unique test schema."""
     return f"test_schema_{uuid.uuid4().int}"
 
 
 @pytest.fixture(scope="session")
 def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
     """
-    Creates a temporary PostgreSQL schema and creates a database engine
+    Create a temporary PostgreSQL schema and create a database engine
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
-
     etldb_conn = EtlDb()
 
     with etldb_conn.connection() as conn:
@@ -337,6 +346,7 @@ def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
 
         finally:
             _drop_schema(conn, test_schema)
+
 
 def _create_schema(conn: EtlDb.connection, schema: str):
     """Create a database schema."""

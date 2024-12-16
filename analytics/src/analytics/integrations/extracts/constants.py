@@ -4,6 +4,8 @@ from enum import StrEnum
 
 
 class OpportunityTables(StrEnum):
+    """Opportunity tables that are copied over to analytics database."""
+
     LK_OPPORTUNITY_STATUS = "lk_opportunity_status"
     LK_OPPORTUNITY_CATEGORY = "lk_opportunity_category"
     OPPORTUNITY = "opportunity"

@@ -10,7 +10,6 @@ from analytics.integrations.extracts.load_opportunity_data import (
 )
 from sqlalchemy import text
 
-
 test_folder_path = (
     pathlib.Path(__file__).parent.resolve() / "opportunity_tables_test_files"
 )
@@ -18,7 +17,11 @@ test_folder_path = (
 
 ### Uploads test files
 @pytest.fixture
-def upload_opportunity_tables_s3(monkeypatch_session,mock_s3_bucket, mock_s3_bucket_resource):
+def upload_opportunity_tables_s3(
+    monkeypatch_session,
+    mock_s3_bucket,
+    mock_s3_bucket_resource,
+):
 
     monkeypatch_session.setenv("S3_OPPORTUNITY_BUCKET", mock_s3_bucket)
 
@@ -34,16 +37,16 @@ def upload_opportunity_tables_s3(monkeypatch_session,mock_s3_bucket, mock_s3_buc
                 mock_s3_bucket_resource.upload_fileobj(data, object_key)
 
     s3_files = list(mock_s3_bucket_resource.objects.all())
-    yield len(s3_files)
+    return len(s3_files)
+
 
 def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
     upload_opportunity_tables_s3,
     monkeypatch_session,
-    test_schema
+    test_schema,
 ):
     """Should upload all test files to mock s3 and have all records inserted into test database schema."""
-
     monkeypatch_session.setenv("DB_SCHEMA", test_schema)
 
     extract_copy_opportunity_data()
@@ -52,16 +55,16 @@ def test_extract_copy_opportunity_data(
     # Verify that the data was inserted into the database
     with conn.begin():
         lk_opp_sts_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM lk_opportunity_status ;"),
+            text("SELECT COUNT(*) FROM lk_opportunity_status ;"),
         )
         lk_opp_ctgry_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM lk_opportunity_category ;"),
+            text("SELECT COUNT(*) FROM lk_opportunity_category ;"),
         )
         opp_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM opportunity ;"),
+            text("SELECT COUNT(*) FROM opportunity ;"),
         )
         opp_smry_result = conn.execute(
-            text(f"SELECT COUNT(*) FROM opportunity_summary ;"),
+            text("SELECT COUNT(*) FROM opportunity_summary ;"),
         )
 
         curr_opp_smry_result = conn.execute(

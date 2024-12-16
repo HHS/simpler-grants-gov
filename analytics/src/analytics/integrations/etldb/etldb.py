@@ -2,8 +2,6 @@
 
 import logging
 from enum import Enum
-from functools import wraps
-from typing import Callable, Any
 
 from sqlalchemy import Connection, text
 
