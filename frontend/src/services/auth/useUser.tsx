@@ -1,15 +1,15 @@
 "use client";
 
-import { UserContextType } from "src/services/auth/types";
+import { UserProviderState } from "src/services/auth/types";
 
 import { createContext, useContext } from "react";
 
-export const UserContext = createContext({} as UserContextType);
+export const UserContext = createContext({} as UserProviderState);
 
 /**
  * @ignore
  */
-export type UserContextHook = () => UserContextType;
+export type UserContextHook = () => UserProviderState;
 
 /**
  * The `useUser` hook, which will get you the {@link UserProfile} object from the server-side session by fetching it
@@ -32,4 +32,4 @@ export type UserContextHook = () => UserContextType;
  * @category Client
  */
 export const useUser: UserContextHook = () =>
-  useContext<UserContextType>(UserContext);
+  useContext<UserProviderState>(UserContext);

@@ -1,23 +1,16 @@
 "use client";
 
-import { noop } from "lodash";
+import { debounce, noop } from "lodash";
 import { ApiRequestError } from "src/errors";
 import {
-  UserContextType,
+  SessionPayload,
   UserFetcher,
-  UserProviderProps,
   UserSession,
 } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
 import { isSessionExpired } from "src/utils/authUtil";
 
-import React, {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const userFetcher: UserFetcher = async (url) => {
   let response;
@@ -28,21 +21,33 @@ const userFetcher: UserFetcher = async (url) => {
     throw new ApiRequestError(0); // Network error
   }
   if (response.status === 204) return undefined;
-  if (response.ok) return (await response.json()) as UserSession;
+  if (response.ok) return (await response.json()) as SessionPayload;
   throw new ApiRequestError(response.status);
 };
 
+// if we don't debounce this call we get multiple requests going out on page load
+const debouncedUserFetcher = debounce(
+  () => userFetcher("/api/auth/session"),
+  500,
+  {
+    leading: true,
+    trailing: false,
+  },
+);
+
 export default function UserProvider({
   children,
-}: UserProviderProps): ReactElement<UserContextType> {
+}: {
+  children: React.ReactNode;
+}) {
   const [localUser, setLocalUser] = useState<UserSession>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(!localUser);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userFetchError, setUserFetchError] = useState<Error | undefined>();
 
   const getUserSession = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
-      const fetchedUser = await userFetcher("/api/auth/session");
+      const fetchedUser = await debouncedUserFetcher();
       if (fetchedUser) {
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
