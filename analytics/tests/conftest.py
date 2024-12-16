@@ -7,6 +7,8 @@ https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
 import json
 import logging
+import random
+import uuid
 from pathlib import Path
 
 import _pytest.monkeypatch
@@ -287,6 +289,17 @@ def mock_s3(reset_aws_env_vars):
     with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
         yield boto3.resource("s3")
 
+@pytest.fixture
+def mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("test_bucket")
+    bucket.create()
+    yield bucket
+
+@pytest.fixture
+def mock_s3_bucket(mock_s3_bucket_resource):
+    yield mock_s3_bucket_resource.name
+
+
 
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
@@ -300,32 +313,32 @@ def monkeypatch_session():
     yield mpatch
     mpatch.undo()
 
+@pytest.fixture(scope="session")
+def test_schema():
+    return f"test_schema_{uuid.uuid4().int}"
+
 
 @pytest.fixture(scope="session")
-def create_test_db(monkeypatch_session) -> EtlDb:
+def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
     """
     Creates a temporary PostgreSQL schema and creates a database engine
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
-    monkeypatch_session.setenv("DB_CHECK_CONNECTION_ON_INIT", "False")
     monkeypatch_session.setenv("DB_HOST", "localhost")
 
     etldb_conn = EtlDb()
 
-    schema = "test_schema"
-
     with etldb_conn.connection() as conn:
 
-        _create_schema(conn, schema)
+        _create_schema(conn, test_schema)
 
-        _create_opportunity_table(conn, schema)
+        _create_opportunity_table(conn, test_schema)
         try:
             yield etldb_conn
 
         finally:
-            _drop_schema(conn, schema)
-
+            _drop_schema(conn, test_schema)
 
 def _create_schema(conn: EtlDb.connection, schema: str):
     """Create a database schema."""
@@ -350,7 +363,6 @@ def _create_opportunity_table(conn: EtlDb.connection, schema: str):
     """Create opportunity tables."""
     with conn.begin():
         conn.execute(text(f"SET search_path TO {schema};"))
-
         # Get the path of the current file (test file)
         test_file_path = Path(__file__).resolve()
 
@@ -363,7 +375,7 @@ def _create_opportunity_table(conn: EtlDb.connection, schema: str):
             / "etldb"
             / "migrations"
             / "versions"
-            / "0006_add_opportunity_tables.sql"
+            / "0007_add_opportunity_tables.sql"
         )
 
         with open(sql_file_path) as file:

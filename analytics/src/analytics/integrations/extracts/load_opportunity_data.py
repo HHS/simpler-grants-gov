@@ -1,4 +1,5 @@
 import logging
+import os
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -10,10 +11,6 @@ from analytics.integrations.extracts.constants import (
 from analytics.integrations.extracts.s3_config import S3Config, get_s3_client
 
 logger = logging.getLogger(__name__)
-
-
-def get_s3_bucket(path):  # if not in env ?
-    return urlparse(path).hostname
 
 
 def _fetch_data(table: str) -> bytes:
@@ -29,14 +26,13 @@ def _fetch_data(table: str) -> bytes:
     return response["Body"].read()
 
 
-def _insert_data(cursor, schema: str, table: str, columns: list, data: bytes) -> None:
-    if schema:
-        table = f"{schema}.{table}"
+def _insert_data(cursor,  table: str, columns: list, data: bytes) -> None:
     with BytesIO(data) as f:
         query = f"""
-                    COPY {table} ({', '.join(columns)})
+                    COPY {f"{os.getenv("DB_SCHEMA")}.{table} ({', '.join(columns)})"}
                     FROM STDIN WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER)
                 """
+
         with cursor.copy(query) as copy:
             while data := f.read():
                 copy.write(data)
@@ -45,7 +41,7 @@ def _insert_data(cursor, schema: str, table: str, columns: list, data: bytes) ->
 
 
 @etl_db_connection
-def extract_copy_opportunity_data(etldb_conn=None, schema=None) -> None:
+def extract_copy_opportunity_data(etldb_conn=None) -> None:
     """Extracts opportunity tables from S3 and insert into corresponding tables in the database"""
     conn = etldb_conn.connection()
     with conn.begin():
@@ -53,6 +49,6 @@ def extract_copy_opportunity_data(etldb_conn=None, schema=None) -> None:
         for table in OpportunityTables:
             logger.info(f"Copying data for table: {table}")
             data = _fetch_data(table)
-            _insert_data(cursor, schema, table, MAP_TABLES_TO_COLS.get(table, []), data)
+            _insert_data(cursor, table, MAP_TABLES_TO_COLS.get(table, []), data)
 
     logger.info("Extract opportunity data completed successfully")
