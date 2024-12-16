@@ -74,6 +74,15 @@ class LoadOpportunitiesToIndex(Task):
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
 
+        # Handle updates/inserts
+        self._handle_incremental_upserts(existing_opportunity_ids)
+
+        # Handle deletes
+        self._handle_incremental_delete(existing_opportunity_ids)
+
+    def _handle_incremental_upserts(self, existing_opportunity_ids: set[int]) -> None:
+        """Handle updates/inserts of opportunities into the search index when running incrementally"""
+
         # Fetch opportunities that need processing from the queue
         queued_opportunities = (
             self.db_session.execute(
@@ -93,19 +102,8 @@ class LoadOpportunitiesToIndex(Task):
         # Process updates and inserts, and skip test records
         processed_opportunity_ids = set()
         opportunities_to_index = []
-        test_opportunity_ids = set()
 
         for opportunity in queued_opportunities:
-            # Skip opportunities that are test records, we will delete these if they exist already
-            if opportunity.agency_record and opportunity.agency_record.is_test_agency:
-                test_opportunity_ids.add(opportunity.opportunity_id)
-                logger.info(
-                    "Skipping test opportunity",
-                    extra={"opportunity_id": opportunity.opportunity_id, "status": "skipped"},
-                )
-                self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
-                continue
-
             logger.info(
                 "Processing queued opportunity",
                 extra={
@@ -127,9 +125,42 @@ class LoadOpportunitiesToIndex(Task):
             loaded_ids = self.load_records(opportunities_to_index)
             logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
-        # Handle deletes - opportunities in search but not in our processed set
-        # and not in our database (or are drafts / test records)
-        opportunity_ids_to_delete = existing_opportunity_ids - processed_opportunity_ids
+        # Clear processed / skipped entries from the queue
+        self.db_session.execute(
+            delete(OpportunitySearchIndexQueue).where(
+                OpportunitySearchIndexQueue.opportunity_id.in_(processed_opportunity_ids)
+            )
+        )
+
+    def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
+        """Handle deletion of opportunities when running incrementally
+
+        Scenarios in which we delete an opportunity from the index:
+        * An opportunity is no longer in our database
+        * An opportunity is a draft (unlikely to ever happen, would require published->draft)
+        * An opportunity loses its opportunity status
+        * An opportunity has a test agency
+        """
+
+        # Fetch the opportunity IDs of opportunities we would expect to be in the index
+        opportunity_ids_we_want_in_search: set[int] = set(
+            self.db_session.execute(
+                select(Opportunity.opportunity_id)
+                .join(CurrentOpportunitySummary)
+                .join(Agency, Opportunity.agency_code == Agency.agency_code, isouter=True)
+                .where(
+                    Opportunity.is_draft.is_(False),
+                    CurrentOpportunitySummary.opportunity_status.isnot(None),
+                    # We treat a null agency as fine
+                    # We only want to filter out if is_test_agency=True specifically
+                    Agency.is_test_agency.isnot(True),
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        opportunity_ids_to_delete = existing_opportunity_ids - opportunity_ids_we_want_in_search
 
         for opportunity_id in opportunity_ids_to_delete:
             logger.info(
@@ -139,15 +170,6 @@ class LoadOpportunitiesToIndex(Task):
 
         if opportunity_ids_to_delete:
             self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete)
-
-        # Clear processed / skipped entries from the queue
-        self.db_session.execute(
-            delete(OpportunitySearchIndexQueue).where(
-                OpportunitySearchIndexQueue.opportunity_id.in_(
-                    processed_opportunity_ids | test_opportunity_ids
-                )
-            )
-        )
 
     def full_refresh(self) -> None:
         # create the index

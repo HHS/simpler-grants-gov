@@ -32,16 +32,25 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         opportunity_index_alias,
         load_opportunities_to_index,
     ):
+        # Create an agency that some records will be connected to
+        agency = AgencyFactory.create(agency_code="FUN-AGENCY", is_test_agency=False)
+
         # Create 25 opportunities we will load into the search index
         opportunities = []
-        opportunities.extend(OpportunityFactory.create_batch(size=6, is_posted_summary=True))
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=6, is_posted_summary=True, agency_code=agency.agency_code
+            )
+        )
         opportunities.extend(OpportunityFactory.create_batch(size=3, is_forecasted_summary=True))
         opportunities.extend(OpportunityFactory.create_batch(size=2, is_closed_summary=True))
         opportunities.extend(
             OpportunityFactory.create_batch(size=8, is_archived_non_forecast_summary=True)
         )
         opportunities.extend(
-            OpportunityFactory.create_batch(size=6, is_archived_forecast_summary=True)
+            OpportunityFactory.create_batch(
+                size=6, is_archived_forecast_summary=True, agency_code=agency.agency_code
+            )
         )
 
         # Create some opportunities that won't get fetched / loaded into search
@@ -177,7 +186,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             db_session.delete(opportunity)
 
         # Change the agency on a few to a test agency to delete them
-        opportunities_now_with_test_agency = [opportunities.pop(), opportunities.pop()]
+        opportunities_now_with_test_agency = opportunities[0:3]
         for opportunity in opportunities_now_with_test_agency:
             opportunity.agency_code = "MY-TEST-AGENCY-123"
 
@@ -186,10 +195,17 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
                 opportunity=opportunity,
             )
 
+        db_session.commit()
+        db_session.expunge_all()
         load_opportunities_to_index.run()
 
         resp = search_client.search(opportunity_index_alias, {"size": 100})
-        assert resp.total_records == len(opportunities)
+        assert resp.total_records == len(opportunities) - 3  # test agency opportunities excluded
+
+        # Running one last time without any changes should be fine as well
+        load_opportunities_to_index.run()
+        resp = search_client.search(opportunity_index_alias, {"size": 100})
+        assert resp.total_records == len(opportunities) - 3
 
     def test_load_opportunities_to_index_index_does_not_exist(self, db_session, search_client):
         config = LoadOpportunitiesToIndexConfig(
