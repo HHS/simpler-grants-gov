@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import smart_open
 
 
-from analytics.integrations.etldb.etldb import etl_db_connection, EtlDb
+from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.constants import (
     MAP_TABLES_TO_COLS,
     OpportunityTables,
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_copy_opportunity_data() -> None:
-    """Instantiate Etldb class and calls fetch_and_copy_opportunity_data with database connection object """
+    """Instantiate Etldb class and calls _fetch_insert_opportunity_data with database connection object """
     etldb_conn = EtlDb()
     _fetch_insert_opportunity_data(etldb_conn.connection())
 
