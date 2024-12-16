@@ -3,6 +3,7 @@
 import os
 import pathlib
 
+import boto3
 import pytest
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.load_opportunity_data import (
@@ -18,11 +19,11 @@ test_folder_path = (
 ### Uploads test files
 @pytest.fixture
 def upload_opportunity_tables_s3(
-    monkeypatch_session,
-    mock_s3_bucket,
-    mock_s3_bucket_resource,
-):
-
+    monkeypatch_session: pytest.monkeypatch,
+    mock_s3_bucket: str,
+    mock_s3_bucket_resource: boto3.resources.factory.s3.Bucket,
+) -> int:
+    """Upload test files to mockS3."""
     monkeypatch_session.setenv("S3_OPPORTUNITY_BUCKET", mock_s3_bucket)
 
     for root, _, files in os.walk(test_folder_path):
@@ -42,11 +43,11 @@ def upload_opportunity_tables_s3(
 
 def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
-    upload_opportunity_tables_s3,
-    monkeypatch_session,
-    test_schema,
+    upload_opportunity_tables_s3: str,
+    monkeypatch_session: pytest.monkeypatch,
+    test_schema: str,
 ):
-    """Should upload all test files to mock s3 and have all records inserted into test database schema."""
+    """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch_session.setenv("DB_SCHEMA", test_schema)
 
     extract_copy_opportunity_data()

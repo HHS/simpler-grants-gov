@@ -18,10 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_copy_opportunity_data() -> None:
-    """
-    Instantiate Etldb class and
-    calls _fetch_insert_opportunity_data with database connection object.
-    """
+    """Instantiate Etldb class and pass the etldb.connection()."""
     etldb_conn = EtlDb()
     _fetch_insert_opportunity_data(etldb_conn.connection())
 
@@ -29,10 +26,7 @@ def extract_copy_opportunity_data() -> None:
 
 
 def _fetch_insert_opportunity_data(conn: EtlDb.connection) -> None:
-    """
-    Streamlines opportunity tables from S3 and
-    insert into corresponding tables in the database.
-    """
+    """Streamlines opportunity tables from S3 and insert into the database."""
     s3_config = S3Config()
 
     with conn.begin():

@@ -271,10 +271,12 @@ def issue(  # pylint: disable=too-many-locals
 ####################
 
 
-@pytest.fixture
-def reset_aws_env_vars(monkeypatch):
+@pytest.fixture(autouse=True)
+def reset_aws_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     """
-    Reset the aws env vars so you can't accidentally connect
+    Reset the aws env vars.
+
+    This will prevent you from accidentally connecting
     to a real AWS account if you were doing some local testing.
     """
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
@@ -285,7 +287,7 @@ def reset_aws_env_vars(monkeypatch):
 
 
 @pytest.fixture
-def mock_s3(reset_aws_env_vars: monkeypatch) -> boto3.resource:
+def mock_s3() -> boto3.resource:
     """Instantiate an S3 bucket resource."""
     # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
     with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
@@ -304,16 +306,17 @@ def mock_s3_bucket_resource(
 
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource: boto3.resources.factory.s3.Bucket) -> str:
-    """Returns name of mock S3 bucket."""
+    """Return name of mock S3 bucket."""
     return mock_s3_bucket_resource.name
 
 
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
-def monkeypatch_session() -> monkeypatch:
+def monkeypatch_session() -> pytest.MonkeyPatch:
     """
-    Create a monkeypatch instance that can be used to
-    monkeypatch global environment, objects, and attributes
+    Create a monkeypatch instance.
+
+    This can be used to monkeypatch global environment, objects, and attributes
     for the duration the test session.
     """
     mpatch = _pytest.monkeypatch.MonkeyPatch()
@@ -328,9 +331,11 @@ def test_schema() -> str:
 
 
 @pytest.fixture(scope="session")
-def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
+def create_test_db(test_schema: str) -> EtlDb:
     """
-    Create a temporary PostgreSQL schema and create a database engine
+    Create a temporary PostgreSQL schema.
+
+    This function creates schema and a database engine
     that connects to that schema. Drops the schema after the context manager
     exits.
     """
@@ -348,7 +353,7 @@ def create_test_db(monkeypatch_session, test_schema) -> EtlDb:
             _drop_schema(conn, test_schema)
 
 
-def _create_schema(conn: EtlDb.connection, schema: str):
+def _create_schema(conn: EtlDb.connection, schema: str) -> None:
     """Create a database schema."""
     db_test_user = "app"
 
@@ -359,7 +364,7 @@ def _create_schema(conn: EtlDb.connection, schema: str):
     logger.info("Created schema %s", schema)
 
 
-def _drop_schema(conn: EtlDb.connection, schema: str):
+def _drop_schema(conn: EtlDb.connection, schema: str) -> None:
     """Drop a database schema."""
     with conn.begin():
         conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
@@ -367,7 +372,7 @@ def _drop_schema(conn: EtlDb.connection, schema: str):
     logger.info("Dropped schema %s", schema)
 
 
-def _create_opportunity_table(conn: EtlDb.connection, schema: str):
+def _create_opportunity_table(conn: EtlDb.connection, schema: str) -> None:
     """Create opportunity tables."""
     with conn.begin():
         conn.execute(text(f"SET search_path TO {schema};"))
