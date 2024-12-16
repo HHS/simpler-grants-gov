@@ -130,18 +130,3 @@ class EtlChangeType(Enum):
     NONE = 0
     INSERT = 1
     UPDATE = 2
-
-
-def etl_db_connection(func) -> Callable:
-    """Decorator to inject etlb connection into a wrapped function."""
-
-    @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any):
-        etldb_conn = kwargs.get("etldb_conn")
-        if not etldb_conn:
-            etldb_conn = EtlDb()
-            kwargs.update({"etldb_conn": etldb_conn})
-
-        return func(*args, **kwargs)
-
-    return wrapper

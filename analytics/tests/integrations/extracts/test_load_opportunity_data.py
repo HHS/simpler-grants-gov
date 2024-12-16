@@ -47,7 +47,7 @@ def test_extract_copy_opportunity_data(
 
     monkeypatch_session.setenv("DB_SCHEMA", test_schema)
 
-    extract_copy_opportunity_data(etldb_conn=create_test_db)
+    extract_copy_opportunity_data()
     conn = create_test_db.connection()
 
     # Verify that the data was inserted into the database
