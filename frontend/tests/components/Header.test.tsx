@@ -10,7 +10,7 @@ const props = {
   locale: "en",
 };
 
-process.env.auth_login_url = '/login-url';
+process.env.auth_login_url = "/login-url";
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 

@@ -2,9 +2,9 @@
 
 import clsx from "clsx";
 import { assetPath } from "src/utils/assetPath";
+
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { USWDSIcon } from "./USWDSIcon";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -14,6 +14,8 @@ import {
   Title,
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
+
+import { USWDSIcon } from "./USWDSIcon";
 
 type PrimaryLink = {
   text?: string;
@@ -55,7 +57,12 @@ const NavLinks = ({
       { text: t("nav_link_process"), href: "/process" },
       { text: t("nav_link_research"), href: "/research" },
       { text: t("nav_link_subscribe"), href: "/subscribe" },
-      { text: t("nav_link_login"), href: process.env.auth_login_url as string, icon: "login", textPrimary: true},
+      {
+        text: t("nav_link_login"),
+        href: process.env.auth_login_url as string,
+        icon: "login",
+        textPrimary: true,
+      },
     ];
   }, [t, path, getSearchLink]);
 
@@ -88,7 +95,12 @@ const NavLinks = ({
       if (!link.text || !link.href) {
         return <></>;
       }
-      const icon = link.icon ? <USWDSIcon className="usa-icon margin-right-05 margin-left-neg-05" name={link.icon ?? ""}/> : null
+      const icon = link.icon ? (
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name={link.icon ?? ""}
+        />
+      ) : null;
       return (
         <Link
           href={link.href}

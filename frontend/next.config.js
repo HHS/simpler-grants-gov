@@ -69,7 +69,7 @@ const nextConfig = {
     ];
   },
   env: {
-    auth_login_url: process.env.AUTH_LOGIN_URL
+    auth_login_url: process.env.AUTH_LOGIN_URL,
   },
   basePath,
   reactStrictMode: true,
