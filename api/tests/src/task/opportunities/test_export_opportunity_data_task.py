@@ -17,11 +17,10 @@ from tests.src.db.models.factories import OpportunityFactory
 
 class TestExportOpportunityDataTask(BaseTestClass):
     @pytest.fixture
-    def export_opportunity_data_task(self, db_session, mock_s3_bucket, monkeypatch_session):
-        monkeypatch_session.setenv(
-            "PUBLIC_FILES_OPPORTUNITY_DATA_EXTRACTS_PATH", f"s3://{mock_s3_bucket}/"
+    def export_opportunity_data_task(self, db_session, mock_s3_bucket):
+        config = ExportOpportunityDataConfig(
+            PUBLIC_FILES_OPPORTUNITY_DATA_EXTRACTS_PATH=f"s3://{mock_s3_bucket}/"
         )
-        config = ExportOpportunityDataConfig()
         return ExportOpportunityDataTask(db_session, config)
 
     def test_export_opportunity_data_task(
