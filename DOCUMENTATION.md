@@ -26,5 +26,5 @@ This document describes our rules for documenting things
 12. Meta documents (such as this one) must also follow these rules.
 13. These rules only apply to engineering documentation. 
 14. These rules should be actively enforced. Which is to say: request changes inside of PRs that don't follow these rules.
-15. This document has no about about when something should be documentation, only how and where it should be documented.
+15. This document has no opinion about when something should be documentation, only how and where it should be documented.
 16. This is a lot of rules so don't be rude if someone forgets some of them.
