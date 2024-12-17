@@ -133,6 +133,7 @@ module "service" {
   migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
 
   scheduled_jobs = local.environment_config.scheduled_jobs
+  jobs_buckets   = local.environment_config.jobs_buckets
 
   db_vars = module.app_config.has_database ? {
     security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids

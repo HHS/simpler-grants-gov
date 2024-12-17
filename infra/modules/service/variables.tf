@@ -91,6 +91,16 @@ variable "scheduled_jobs" {
   default = {}
 }
 
+variable "jobs_buckets" {
+  description = "Variable for configuration of the S3 buckets for the scheduled jobs"
+  type = map(object({
+    bucket_name = string
+    env_var     = string
+    public      = bool
+  }))
+  default = {}
+}
+
 variable "enable_drafts_bucket" {
   description = "does the service need a private S3 bucket for draft document storage"
   type        = bool

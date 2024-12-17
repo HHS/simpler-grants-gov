@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "draft_documents" {
-  count = var.enable_drafts_bucket ? 1 : 0
+  count    = var.enable_drafts_bucket ? 1 : 0
+  for_each = var.jobs_buckets
 
   bucket_prefix = "${var.service_name}-documents-draft"
   force_destroy = false
