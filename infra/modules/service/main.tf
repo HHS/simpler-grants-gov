@@ -54,8 +54,16 @@ locals {
     ],
     [
       for name, value in var.s3_buckets :
-      { name : name, value : value.env_var }
+      { name : value.env_var, value : "s3://${aws_s3_bucket.s3_buckets[name].bucket_regional_domain_name}" }
     ],
+    flatten([
+      for name, s3_bucket in var.s3_buckets : [
+        for paths in s3_bucket.paths : {
+          name  = paths.env_var,
+          value = "s3://${aws_s3_bucket.s3_buckets[name].bucket_regional_domain_name}/${paths.path}"
+        }
+      ]
+    ])
   )
 }
 

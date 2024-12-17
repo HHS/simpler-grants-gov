@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "s3_buckets" {
   for_each = var.s3_buckets
 
-  bucket_prefix = "${var.service_name}-${each.key}"
+  bucket_prefix = "${var.service_name}-${each.key}-"
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket especially due to likely use of lifecycle rules
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
