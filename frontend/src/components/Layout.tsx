@@ -34,7 +34,9 @@ export default function Layout({ children, locale }: Props) {
       >
         <Header locale={locale} />
       </NextIntlClientProvider>
-      <main id="main-content">{children}</main>
+      <main id="main-content" className="border-top-0">
+        {children}
+      </main>
       <Footer />
       <GrantsIdentifier />
     </div>

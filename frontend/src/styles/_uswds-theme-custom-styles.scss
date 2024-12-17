@@ -232,9 +232,15 @@ i.e.
   border-bottom: 0 !important;
 }
 
+// Button: Small
 .usa-button--small {
   font-size: font-size($theme-button-font-family, "sm");
   padding: units(1) units(2);
+}
+
+// There is no config for setting the current nav item border color
+.usa-header--basic .usa-nav__primary-item > .usa-current::after {
+  background-color: color("mint-40");
 }
 
 // Hero

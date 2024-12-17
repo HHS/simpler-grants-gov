@@ -9,10 +9,7 @@ const BetaAlert = () => {
   });
 
   return (
-    <div
-      data-testid="beta-alert"
-      className="desktop:position-sticky top-0 z-200"
-    >
+    <div data-testid="beta-alert">
       <FullWidthAlert type="info" heading={t("alert_title")}>
         {alert}
       </FullWidthAlert>
