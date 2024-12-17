@@ -2,12 +2,12 @@
 
 # pylint: disable=W0613,W0621
 
+import logging
 import os
 import pathlib
 
 import boto3
 import pytest
-import logging
 
 from sqlalchemy import text  # isort: skip
 from analytics.integrations.etldb.etldb import EtlDb
@@ -21,28 +21,28 @@ test_folder_path = (
     pathlib.Path(__file__).parent.resolve() / "opportunity_tables_test_files"
 )
 
+
 @pytest.fixture(autouse=True)
-def delete_opportunity_table_records(create_test_db, test_schema) -> None:
+def delete_opportunity_table_records(create_test_db: EtlDb, test_schema: str) -> None:
     """Delete opportunity table records from all opportunity tables."""
     conn = create_test_db.connection()
 
     with conn.begin():
-        query = f"""
+        query = """
         SELECT table_name
         FROM information_schema.tables
-        WHERE table_schema = '{test_schema}'
+        WHERE table_schema = :schema
         """
-        truncate_stmts=[]
-        table_names = conn.execute(text(query)).fetchall()
+        truncate_stmts = []
+        table_names = conn.execute(text(query), {"schema": test_schema}).fetchall()
         for table in table_names:
             table_name = table[0]
-            truncate_stmts.append(
-            f"TRUNCATE TABLE {test_schema}.{table_name} CASCADE"
-            )
+            truncate_stmts.append(f"TRUNCATE TABLE {test_schema}.{table_name} CASCADE")
         for stmt in truncate_stmts:
             conn.execute(text(stmt))
 
     logger.info("Truncated all records from all tables")
+
 
 @pytest.fixture
 def upload_opportunity_tables_s3(
@@ -70,7 +70,7 @@ def test_extract_copy_opportunity_data(
     upload_opportunity_tables_s3: int,
     monkeypatch: pytest.MonkeyPatch,
     monkeypatch_session: pytest.MonkeyPatch,
-    mock_s3_bucket: str
+    mock_s3_bucket: str,
 ):
     """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch.setenv("DB_SCHEMA", test_schema)
