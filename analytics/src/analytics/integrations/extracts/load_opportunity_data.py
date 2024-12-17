@@ -6,6 +6,8 @@ import os
 from contextlib import ExitStack
 
 import smart_open  # type: ignore[import]
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from sqlalchemy import Connection
 
 from analytics.integrations.etldb.etldb import EtlDb
@@ -13,9 +15,16 @@ from analytics.integrations.extracts.constants import (
     MAP_TABLES_TO_COLS,
     OpportunityTables,
 )
-from analytics.integrations.extracts.s3_config import S3Config
 
 logger = logging.getLogger(__name__)
+
+
+class LoadOpportunityDataFileConfig(BaseSettings):
+    """Configure S3 properties for opportunity data."""
+
+    load_opportunity_data_file_path: str | None = Field(
+        default=None, alias="LOAD_OPPORTUNITY_DATA_FILE_PATH",
+    )
 
 
 def extract_copy_opportunity_data() -> None:
@@ -28,7 +37,7 @@ def extract_copy_opportunity_data() -> None:
 
 def _fetch_insert_opportunity_data(conn: Connection) -> None:
     """Streamlines opportunity tables from S3 and insert into the database."""
-    s3_config = S3Config()
+    s3_config = LoadOpportunityDataFileConfig()
 
     with conn.begin():
         cursor = conn.connection.cursor()
@@ -36,14 +45,18 @@ def _fetch_insert_opportunity_data(conn: Connection) -> None:
             logger.info("Copying data for table: %s", table)
 
             columns = MAP_TABLES_TO_COLS.get(table, ())
-            s3_uri = f"s3://{s3_config.s3_opportunity_bucket}/{s3_config.s3_opportunity_file_path_prefix}/{table}.csv"
             query = f"""
                            COPY {f"{os.getenv("DB_SCHEMA")}.{table} ({', '.join(columns)})"}
                            FROM STDIN WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER)
                         """
 
             with ExitStack() as stack:
-                file = stack.enter_context(smart_open.open(s3_uri, "r"))
+                file = stack.enter_context(
+                    smart_open.open(
+                        f"{s3_config.load_opportunity_data_file_path}/{table}.csv",
+                        "r",
+                    ),
+                )
                 copy = stack.enter_context(cursor.copy(query))
 
                 while data := file.read():
