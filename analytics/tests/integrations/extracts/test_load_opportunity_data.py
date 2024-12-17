@@ -14,7 +14,6 @@ from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
 )
-import _pytest.monkeypatch
 
 test_folder_path = (
     pathlib.Path(__file__).parent.resolve() / "opportunity_tables_test_files"
@@ -50,7 +49,7 @@ def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
     test_schema: str,
     upload_opportunity_tables_s3: int,
-    monkeypatch: pytest.MonkeyPatch
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch.setenv("DB_SCHEMA", test_schema)
