@@ -23,7 +23,8 @@ class LoadOpportunityDataFileConfig(BaseSettings):
     """Configure S3 properties for opportunity data."""
 
     load_opportunity_data_file_path: str | None = Field(
-        default=None, alias="LOAD_OPPORTUNITY_DATA_FILE_PATH",
+        default=None,
+        alias="LOAD_OPPORTUNITY_DATA_FILE_PATH",
     )
 
 
