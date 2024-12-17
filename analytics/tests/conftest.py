@@ -15,9 +15,11 @@ import boto3
 import moto
 import pandas as pd
 import pytest
+
+from sqlalchemy import text
+
 from analytics.datasets.issues import IssueMetadata, IssueType
 from analytics.integrations.etldb.etldb import EtlDb
-from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
@@ -296,8 +298,8 @@ def mock_s3() -> boto3.resource:
 
 @pytest.fixture
 def mock_s3_bucket_resource(
-    mock_s3: boto3.resource,
-) -> boto3.resources.factory.s3.Bucket:
+    mock_s3: boto3.resource("s3").Bucket,
+) -> boto3.resource:
     """Create and return a mock S3 bucket resource."""
     bucket = mock_s3.Bucket("test_bucket")
     bucket.create()
@@ -305,7 +307,7 @@ def mock_s3_bucket_resource(
 
 
 @pytest.fixture
-def mock_s3_bucket(mock_s3_bucket_resource: boto3.resources.factory.s3.Bucket) -> str:
+def mock_s3_bucket(mock_s3_bucket_resource: boto3.resource("s3").Bucket) -> str:
     """Return name of mock S3 bucket."""
     return mock_s3_bucket_resource.name
 

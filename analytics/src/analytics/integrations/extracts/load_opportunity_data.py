@@ -5,7 +5,8 @@ import logging
 import os
 from contextlib import ExitStack
 
-import smart_open
+import smart_open  # type: ignore[import]
+from sqlalchemy import Connection
 
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.constants import (
@@ -25,7 +26,7 @@ def extract_copy_opportunity_data() -> None:
     logger.info("Extract opportunity data completed successfully")
 
 
-def _fetch_insert_opportunity_data(conn: EtlDb.connection) -> None:
+def _fetch_insert_opportunity_data(conn: Connection) -> None:
     """Streamlines opportunity tables from S3 and insert into the database."""
     s3_config = S3Config()
 
@@ -34,7 +35,7 @@ def _fetch_insert_opportunity_data(conn: EtlDb.connection) -> None:
         for table in OpportunityTables:
             logger.info("Copying data for table: %s", table)
 
-            columns = MAP_TABLES_TO_COLS.get(table, [])
+            columns = MAP_TABLES_TO_COLS.get(table, ())
             s3_uri = f"s3://{s3_config.s3_opportunity_bucket}/{s3_config.s3_opportunity_file_path_prefix}/{table}.csv"
             query = f"""
                            COPY {f"{os.getenv("DB_SCHEMA")}.{table} ({', '.join(columns)})"}
@@ -48,4 +49,4 @@ def _fetch_insert_opportunity_data(conn: EtlDb.connection) -> None:
                 while data := file.read():
                     copy.write(data)
 
-            logger.info("Successfully loaded data for table: %S", table)
+            logger.info("Successfully loaded data for table: %s", table)

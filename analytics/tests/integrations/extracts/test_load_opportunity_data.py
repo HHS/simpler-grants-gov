@@ -5,23 +5,24 @@ import pathlib
 
 import boto3
 import pytest
+from sqlalchemy import text
+
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
 )
-from sqlalchemy import text
+
 
 test_folder_path = (
     pathlib.Path(__file__).parent.resolve() / "opportunity_tables_test_files"
 )
 
 
-### Uploads test files
 @pytest.fixture
 def upload_opportunity_tables_s3(
-    monkeypatch_session: pytest.monkeypatch,
+    monkeypatch_session: pytest.MonkeyPatch,
     mock_s3_bucket: str,
-    mock_s3_bucket_resource: boto3.resources.factory.s3.Bucket,
+    mock_s3_bucket_resource: boto3.resource("s3").Bucket,
 ) -> int:
     """Upload test files to mockS3."""
     monkeypatch_session.setenv("S3_OPPORTUNITY_BUCKET", mock_s3_bucket)
@@ -43,8 +44,8 @@ def upload_opportunity_tables_s3(
 
 def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
-    upload_opportunity_tables_s3: str,
-    monkeypatch_session: pytest.monkeypatch,
+    upload_opportunity_tables_s3r: int,
+    monkeypatch_session: pytest.MonkeyPatch,
     test_schema: str,
 ):
     """Test files are uploaded to mocks3 and all records are in test schema."""
@@ -73,7 +74,7 @@ def test_extract_copy_opportunity_data(
         )
 
         # test all test_files were upload to mocks3 bucket
-        assert upload_opportunity_tables_s3 == 5
+        assert upload_opportunity_tables_s3r == 5
 
         # test table records were inserted for each table
         assert lk_opp_sts_result.fetchone()[0] == 4

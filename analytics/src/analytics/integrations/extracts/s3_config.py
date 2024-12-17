@@ -9,10 +9,13 @@ from pydantic_settings import BaseSettings
 class S3Config(BaseSettings):
     """Configure S3 properties."""
 
-    s3_opportunity_bucket: str | None = Field(None, env="S3_OPPORTUNITY_BUCKET")
+    s3_opportunity_bucket: str | None = Field(
+        default=None,
+        alias="S3_OPPORTUNITY_BUCKET",
+    )
     s3_opportunity_file_path_prefix: str | None = Field(
-        None,
-        env="S3_OPPORTUNITY_FILE_PATH_PREFIX",
+        default=None,
+        alias="S3_OPPORTUNITY_FILE_PATH_PREFIX",
     )
 
 
