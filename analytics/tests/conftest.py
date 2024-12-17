@@ -16,8 +16,7 @@ import moto
 import pandas as pd
 import pytest
 
-from sqlalchemy import text
-
+from sqlalchemy import text  # isort: skip
 from analytics.datasets.issues import IssueMetadata, IssueType
 from analytics.integrations.etldb.etldb import EtlDb
 
@@ -298,8 +297,8 @@ def mock_s3() -> boto3.resource:
 
 @pytest.fixture
 def mock_s3_bucket_resource(
-    mock_s3: boto3.resource("s3").Bucket,
-) -> boto3.resource:
+    mock_s3: boto3.resource,
+) -> boto3.resource("s3").Bucket:
     """Create and return a mock S3 bucket resource."""
     bucket = mock_s3.Bucket("test_bucket")
     bucket.create()

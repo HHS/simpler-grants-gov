@@ -1,17 +1,19 @@
 """Tests the code in extracts/load_opportunity_data."""
 
+# pylint: disable=W0613,W0621
+
 import os
 import pathlib
 
 import boto3
 import pytest
-from sqlalchemy import text
+
+from sqlalchemy import text  # isort: skip
 
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
 )
-
 
 test_folder_path = (
     pathlib.Path(__file__).parent.resolve() / "opportunity_tables_test_files"
@@ -39,14 +41,15 @@ def upload_opportunity_tables_s3(
                 mock_s3_bucket_resource.upload_fileobj(data, object_key)
 
     s3_files = list(mock_s3_bucket_resource.objects.all())
+
     return len(s3_files)
 
 
 def test_extract_copy_opportunity_data(
     create_test_db: EtlDb,
-    upload_opportunity_tables_s3r: int,
     monkeypatch_session: pytest.MonkeyPatch,
     test_schema: str,
+    upload_opportunity_tables_s3: int,
 ):
     """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch_session.setenv("DB_SCHEMA", test_schema)
@@ -74,7 +77,7 @@ def test_extract_copy_opportunity_data(
         )
 
         # test all test_files were upload to mocks3 bucket
-        assert upload_opportunity_tables_s3r == 5
+        assert upload_opportunity_tables_s3 == 5
 
         # test table records were inserted for each table
         assert lk_opp_sts_result.fetchone()[0] == 4
