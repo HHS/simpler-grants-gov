@@ -2,9 +2,9 @@
 
 import clsx from "clsx";
 import { assetPath } from "src/utils/assetPath";
-
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { USWDSIcon } from "./USWDSIcon";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -18,6 +18,8 @@ import {
 type PrimaryLink = {
   text?: string;
   href?: string;
+  icon?: string;
+  textPrimary?: boolean;
 };
 
 type Props = {
@@ -53,6 +55,7 @@ const NavLinks = ({
       { text: t("nav_link_process"), href: "/process" },
       { text: t("nav_link_research"), href: "/research" },
       { text: t("nav_link_subscribe"), href: "/subscribe" },
+      { text: t("nav_link_login"), href: process.env.auth_login_url as string, icon: "login", textPrimary: true},
     ];
   }, [t, path, getSearchLink]);
 
@@ -85,6 +88,7 @@ const NavLinks = ({
       if (!link.text || !link.href) {
         return <></>;
       }
+      const icon = link.icon ? <USWDSIcon className="usa-icon margin-right-05 margin-left-neg-05" name={link.icon ?? ""}/> : null
       return (
         <Link
           href={link.href}
@@ -92,8 +96,10 @@ const NavLinks = ({
           className={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
+            "text-primary": link.textPrimary ?? false,
           })}
         >
+          {icon}
           <div
             onClick={() => {
               if (mobileExpanded) {
