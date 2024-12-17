@@ -1,15 +1,18 @@
 locals {
+  # Renaming anything in here will make terraform try re-create the buckets
+  # so just assuming you can't ever rename anything in here!!!
+  # (except the environment variables eg. `env_var`)
   s3_buckets = {
     # s3_buckets[key].env_var must:
-    #  - start with the same prefix as the object key
-    #  - end with BUCKET
+    #  - Start with the same prefix as the object key
+    #  - End with BUCKET
     public-files = {
       env_var = "PUBLIC_FILES_BUCKET"
-      public  = true # handle with care!!! this makes your bucket public
+      public  = true # Handle with care!!! this makes your bucket public
       # paths[index].env_var must:
-      #  - start with the same prefix as it's parent bucket, minus the "BUCKET" suffix
-      #  - include the name of the path in some way, doesn't have to be verbatim
-      #  - end with PATH
+      #  - Start with the same prefix as it's parent bucket, minus the "BUCKET" suffix
+      #  - Include the name of the path in some way, doesn't have to be verbatim
+      #  - End with PATH
       #
       # path must start with a forward slash
       paths = [

@@ -22,6 +22,11 @@ resource "aws_s3_bucket_public_access_block" "s3_buckets" {
   block_public_policy     = !each.value.public
   ignore_public_acls      = !each.value.public
   restrict_public_buckets = !each.value.public
+
+  #checkov:skip=CKV_AWS_56:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_55:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_54:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_53:Some buckets are public on purpose
 }
 
 data "aws_iam_policy_document" "s3_buckets_put_access" {
