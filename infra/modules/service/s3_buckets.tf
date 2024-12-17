@@ -1,7 +1,7 @@
-resource "aws_s3_bucket" "draft_documents" {
-  count = var.enable_drafts_bucket ? 1 : 0
+resource "aws_s3_bucket" "s3_buckets" {
+  for_each = var.s3_buckets
 
-  bucket_prefix = "${var.service_name}-documents-draft"
+  bucket_prefix = "${var.service_name}-${each.key}-"
   force_destroy = false
   # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket especially due to likely use of lifecycle rules
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
@@ -13,25 +13,30 @@ resource "aws_s3_bucket" "draft_documents" {
   # checkov:skip=CKV2_AWS_61:False positive
 }
 
-resource "aws_s3_bucket_public_access_block" "draft_documents" {
-  count = var.enable_drafts_bucket ? 1 : 0
+resource "aws_s3_bucket_public_access_block" "s3_buckets" {
+  for_each = var.s3_buckets
 
-  bucket = aws_s3_bucket.draft_documents[0].id
+  bucket = aws_s3_bucket.s3_buckets[each.key].id
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = !each.value.public
+  block_public_policy     = !each.value.public
+  ignore_public_acls      = !each.value.public
+  restrict_public_buckets = !each.value.public
+
+  #checkov:skip=CKV_AWS_56:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_55:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_54:Some buckets are public on purpose
+  #checkov:skip=CKV_AWS_53:Some buckets are public on purpose
 }
 
-data "aws_iam_policy_document" "draft_documents_put_access" {
-  count = var.enable_drafts_bucket ? 1 : 0
+data "aws_iam_policy_document" "s3_buckets_put_access" {
+  for_each = var.s3_buckets
 
   statement {
     effect = "Allow"
     resources = [
-      aws_s3_bucket.draft_documents[0].arn,
-      "${aws_s3_bucket.draft_documents[0].arn}/*"
+      aws_s3_bucket.s3_buckets[each.key].arn,
+      "${aws_s3_bucket.s3_buckets[each.key].arn}/*"
     ]
     actions = ["s3:*"]
 
@@ -45,8 +50,8 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
     sid    = "AllowSSLRequestsOnly"
     effect = "Deny"
     resources = [
-      aws_s3_bucket.draft_documents[0].arn,
-      "${aws_s3_bucket.draft_documents[0].arn}/*"
+      aws_s3_bucket.s3_buckets[each.key].arn,
+      "${aws_s3_bucket.s3_buckets[each.key].arn}/*"
     ]
     actions = ["s3:*"]
     condition {
@@ -61,10 +66,10 @@ data "aws_iam_policy_document" "draft_documents_put_access" {
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
-  count = var.enable_drafts_bucket ? 1 : 0
+resource "aws_s3_bucket_lifecycle_configuration" "s3_buckets" {
+  for_each = var.s3_buckets
 
-  bucket = aws_s3_bucket.draft_documents[0].id
+  bucket = aws_s3_bucket.s3_buckets[each.key].id
   rule {
     id     = "AbortIncompleteUpload"
     status = "Enabled"
@@ -77,10 +82,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "draft_documents" {
 }
 
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_encryption" {
-  count = var.enable_drafts_bucket ? 1 : 0
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_buckets" {
+  for_each = var.s3_buckets
 
-  bucket = aws_s3_bucket.draft_documents[0].id
+  bucket = aws_s3_bucket.s3_buckets[each.key].id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "aws:kms"
@@ -89,8 +94,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "draft_documents_e
   }
 }
 
-resource "aws_s3_bucket_policy" "draft_documents" {
-  count  = var.enable_drafts_bucket ? 1 : 0
-  bucket = aws_s3_bucket.draft_documents[0].id
-  policy = data.aws_iam_policy_document.draft_documents_put_access[0].json
+resource "aws_s3_bucket_policy" "s3_buckets" {
+  for_each = var.s3_buckets
+  bucket   = aws_s3_bucket.s3_buckets[each.key].id
+  policy   = data.aws_iam_policy_document.s3_buckets_put_access[each.key].json
 }

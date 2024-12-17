@@ -47,6 +47,10 @@ output "scheduled_jobs" {
   value = local.scheduled_jobs
 }
 
+output "s3_buckets" {
+  value = local.s3_buckets
+}
+
 output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
