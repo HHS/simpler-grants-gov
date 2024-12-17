@@ -137,7 +137,7 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms("applicant_type", _adjust_field_name("applicant_type"))
     builder.aggregation_terms("funding_instrument", _adjust_field_name("funding_instrument"))
     builder.aggregation_terms("funding_category", _adjust_field_name("funding_category"))
-    builder.aggregation_terms("agency", _adjust_field_name("agency_code"))
+    builder.aggregation_terms("agency", _adjust_field_name("agency_code"), size=1000)
 
 
 def _get_search_request(params: SearchOpportunityParams) -> dict:
