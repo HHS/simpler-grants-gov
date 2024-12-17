@@ -5,7 +5,7 @@ import { useUser } from "src/services/auth/useUser";
 
 const userFetcherMock = jest.fn();
 
-jest.mock("src/app/api/userFetcher", () => ({
+jest.mock("src/app/api/clientUserFetcher", () => ({
   userFetcher: () => userFetcherMock() as unknown,
 }));
 
