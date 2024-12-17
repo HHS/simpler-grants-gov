@@ -91,12 +91,10 @@ variable "scheduled_jobs" {
   default = {}
 }
 
-variable "jobs_buckets" {
-  description = "Variable for configuration of the S3 buckets for the scheduled jobs"
+variable "s3_buckets" {
   type = map(object({
-    bucket_name = string
-    env_var     = string
-    public      = bool
+    env_var = string
+    public  = bool
   }))
   default = {}
 }

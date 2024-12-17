@@ -26,7 +26,6 @@ locals {
   task_executor_role_name = "${var.service_name}-task-executor"
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
-  drafts_s3_bucket_url    = var.enable_drafts_bucket != null && length(aws_s3_bucket.draft_documents) > 0 ? [{ name : "DRAFTS_S3_BUCKET_URL", value : aws_s3_bucket.draft_documents[0].bucket_regional_domain_name }] : []
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
@@ -38,7 +37,7 @@ locals {
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
     { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
-  ], local.hostname, local.drafts_s3_bucket_url)
+  ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
     { name : "DB_PORT", value : var.db_vars.connection_info.port },
@@ -52,6 +51,10 @@ locals {
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
+    ],
+    [
+      for name, value in var.s3_buckets :
+      { name : name, value : value.env_var }
     ],
   )
 }

@@ -47,8 +47,8 @@ output "scheduled_jobs" {
   value = local.scheduled_jobs
 }
 
-output "jobs_buckets" {
-  value = local.jobs_buckets
+output "s3_buckets" {
+  value = local.s3_buckets
 }
 
 output "incident_management_service_integration" {
