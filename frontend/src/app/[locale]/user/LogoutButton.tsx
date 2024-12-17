@@ -8,10 +8,11 @@ Delete this file when we build an actual Users page
 import { useRouter } from "next/navigation";
 import { Button } from "@trussworks/react-uswds";
 
-const makeLogoutRequest = async (push) => {
+const makeLogoutRequest = async (push: (location: string) => void) => {
   const response = await fetch("/api/auth/logout", { method: "POST" });
   if (response.status === 200) {
-    return push("/user?message=logged out");
+    push("/user?message=logged out");
+    return;
   }
   push("/user?message=log out error");
 };
@@ -19,6 +20,7 @@ const makeLogoutRequest = async (push) => {
 export const LogoutButton = () => {
   const router = useRouter();
   return (
+    // eslint-disable-next-line
     <Button type="button" onClick={() => makeLogoutRequest(router.push)}>
       Logout
     </Button>

@@ -3,7 +3,6 @@
  */
 
 import { POST } from "src/app/api/auth/logout/route";
-import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const getSessionMock = jest.fn();
 const deleteSessionMock = jest.fn();
@@ -15,7 +14,7 @@ jest.mock("src/services/auth/session", () => ({
 }));
 
 jest.mock("src/app/api/userFetcher", () => ({
-  postLogout: (token: string) => postLogoutMock(token),
+  postLogout: (token: string): unknown => postLogoutMock(token),
 }));
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
@@ -30,7 +29,7 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(postLogoutMock).toHaveBeenCalledTimes(0);
     expect(response.status).toEqual(500);
-    const json = await response.json();
+    const json = (await response.json()) as { message: string };
     expect(json.message).toEqual(
       "Error logging out: No active session to logout",
     );
@@ -56,7 +55,7 @@ describe("/api/auth/logout POST handler", () => {
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
     expect(response.status).toEqual(500);
-    const json = await response.json();
+    const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("Error logging out: the API threw this error");
   });
 
@@ -70,7 +69,7 @@ describe("/api/auth/logout POST handler", () => {
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
     expect(response.status).toEqual(500);
-    const json = await response.json();
+    const json = (await response.json()) as { message: string };
     expect(json.message).toEqual(
       "Error logging out: No logout response from API",
     );
@@ -92,7 +91,7 @@ describe("/api/auth/logout POST handler", () => {
     const response = await POST();
 
     expect(response.status).toEqual(200);
-    const json = await response.json();
+    const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("logout success");
   });
 });

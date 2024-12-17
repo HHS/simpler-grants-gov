@@ -1,4 +1,4 @@
-dimport { environment } from "src/constants/environments";
+import { environment } from "src/constants/environments";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
