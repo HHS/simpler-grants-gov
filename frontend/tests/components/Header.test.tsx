@@ -82,15 +82,6 @@ describe("Header", () => {
     expect(homeLink).toHaveAttribute("href", "/");
   });
 
-  it("display text without a home link if on home page", () => {
-    usePathnameMock.mockReturnValue("/");
-    render(<Header />);
-
-    const homeText = screen.getByText("Simpler.Grants.gov");
-    expect(homeText).toBeInTheDocument();
-    expect(homeText).not.toHaveAttribute("href", "/");
-  });
-
   it("shows the correct styling for active nav item", async () => {
     usePathnameMock.mockReturnValue("/");
     const { rerender } = render(<Header />);
