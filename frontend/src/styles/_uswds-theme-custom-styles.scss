@@ -33,6 +33,12 @@ i.e.
   }
 }
 
+// Typography
+// prevent orphaned words in short blocks of text
+.text-balance {
+  text-wrap: balance;
+}
+
 // Button
 .usa-button {
   &,
@@ -224,4 +230,52 @@ i.e.
 .usa-button--unstyled {
   @include button-unstyled;
   border-bottom: 0 !important;
+}
+
+.usa-button--small {
+  font-size: font-size($theme-button-font-family, "sm");
+  padding: units(1) units(2);
+}
+
+// Hero
+.hero {
+  .hero--container {
+    position: relative;
+
+    &::after {
+      @include at-media("tablet-lg") {
+        $size: 0.5;
+        content: "";
+        background: url("/img/grants-star-symbol.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: absolute;
+        width: calc(832px * $size);
+        height: calc(815px * $size);
+        right: 0;
+        bottom: 0;
+        margin-right: calc(-78px * $size);
+        margin-bottom: calc(-206px * $size);
+        opacity: 50%;
+        z-index: 0;
+      }
+
+      @include at-media("desktop-lg") {
+        $size: 0.6;
+        width: calc(832px * $size);
+        height: calc(815px * $size);
+        margin-right: calc(-78px * $size);
+        margin-bottom: calc(-206px * $size);
+      }
+    }
+  }
+
+  .hero--text {
+    @include at-media("tablet-lg") {
+      max-width: 34rem;
+    }
+    @include at-media("desktop") {
+      max-width: 42rem;
+    }
+  }
 }
