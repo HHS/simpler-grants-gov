@@ -9,7 +9,6 @@ import boto3
 import pytest
 
 from sqlalchemy import text  # isort: skip
-
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
@@ -22,20 +21,15 @@ test_folder_path = (
 
 @pytest.fixture
 def upload_opportunity_tables_s3(
-    monkeypatch_session: pytest.MonkeyPatch,
-    mock_s3_bucket: str,
     mock_s3_bucket_resource: boto3.resource("s3").Bucket,
 ) -> int:
     """Upload test files to mockS3."""
-    monkeypatch_session.setenv("S3_OPPORTUNITY_BUCKET", mock_s3_bucket)
-
     for root, _, files in os.walk(test_folder_path):
         root_path = pathlib.Path(root)
         for file in files:
             file_path = root_path / file
             object_key = (
-                f"{os.getenv("S3_OPPORTUNITY_FILE_PATH_PREFIX")}"
-                f"/{os.path.relpath(file_path, test_folder_path)}"
+                f"public-extracts/{os.path.relpath(file_path, test_folder_path)}"
             )
             with open(file_path, "rb") as data:
                 mock_s3_bucket_resource.upload_fileobj(data, object_key)
@@ -50,9 +44,15 @@ def test_extract_copy_opportunity_data(
     test_schema: str,
     upload_opportunity_tables_s3: int,
     monkeypatch: pytest.MonkeyPatch,
+    monkeypatch_session: pytest.MonkeyPatch,
+    mock_s3_bucket: str,
 ):
     """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch.setenv("DB_SCHEMA", test_schema)
+    monkeypatch_session.setenv(
+        "LOAD_OPPORTUNITY_DATA_FILE_PATH",
+        f"S3://{mock_s3_bucket}/public-extracts",
+    )
 
     extract_copy_opportunity_data()
     conn = create_test_db.connection()
