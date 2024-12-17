@@ -1,7 +1,7 @@
 import { postLogout } from "src/app/api/userFetcher";
 import { deleteSession, getSession } from "src/services/auth/session";
 
-export async function GET() {
+export async function POST() {
   try {
     // logout on API via /v1/users/token/logout
     const session = await getSession();
@@ -17,6 +17,9 @@ export async function GET() {
     return Response.json({ message: "logout success" });
   } catch (e) {
     const error = e as Error;
-    return new Response(`Error logging out: ${error.message}`, { status: 500 });
+    return Response.json(
+      { message: `Error logging out: ${error.message}` },
+      { status: 500 },
+    );
   }
 }
