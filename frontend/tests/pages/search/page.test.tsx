@@ -7,7 +7,7 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { ReadonlyURLSearchParams } from "next/navigation";
 
 // test without feature flag functionality
-jest.mock("src/hoc/search/withFeatureFlag", () =>
+jest.mock("src/hoc/withFeatureFlag", () =>
   jest.fn((Component: React.Component) => Component),
 );
 
