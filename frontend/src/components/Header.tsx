@@ -20,7 +20,6 @@ import { USWDSIcon } from "./USWDSIcon";
 type PrimaryLink = {
   text?: string;
   href?: string;
-  icon?: string;
   textPrimary?: boolean;
 };
 
@@ -118,7 +117,6 @@ const NavLinks = ({
       items={navItems}
       mobileExpanded={mobileExpanded}
       onToggleMobileNav={onToggleMobileNav}
-      className="simpler-header__nav"
     ></PrimaryNav>
   );
 };
@@ -162,7 +160,7 @@ const Header = ({ logoPath, locale }: Props) => {
           "text-primary": true,
           "font-sans-2xs": true,
           "display-flex": true,
-          "text-bold": true,
+          "text-normal": true,
         })}
       >
         <USWDSIcon
@@ -189,7 +187,7 @@ const Header = ({ logoPath, locale }: Props) => {
         }}
       />
       <GovBanner language={language} />
-      <USWDSHeader className="simpler-header" basic={true}>
+      <USWDSHeader basic={true}>
         <div className="usa-nav-container display-flex flex-align-end">
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
@@ -212,7 +210,7 @@ const Header = ({ logoPath, locale }: Props) => {
             label={t("nav_menu_toggle")}
             className="order-last usa-menu-btn"
           />
-          <div className="usa-nav__primary margin-top-0 margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto simpler-header__login">
+          <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
             <div className="usa-nav__primary-item border-0">
               <LoginLink />
             </div>
