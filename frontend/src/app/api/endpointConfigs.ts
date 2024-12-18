@@ -21,3 +21,10 @@ export const fetchOpportunityEndpoint = {
   namespace: "opportunities",
   method: "GET" as ApiMethod,
 };
+
+export const userLogoutEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "users/token/logout",
+  method: "POST" as ApiMethod,
+};

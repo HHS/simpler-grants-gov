@@ -4,6 +4,7 @@ import {
   EndpointConfig,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
+  userLogoutEndpoint,
 } from "src/app/api/endpointConfigs";
 import {
   createRequestBody,
@@ -72,3 +73,6 @@ export const fetchOpportunity = cache(
 export const fetchOpportunitySearch = requesterForEndpoint<SearchAPIResponse>(
   opportunitySearchEndpoint,
 );
+
+export const postUserLogout =
+  requesterForEndpoint<APIResponse>(userLogoutEndpoint);

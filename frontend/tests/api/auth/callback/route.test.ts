@@ -17,7 +17,7 @@ jest.mock("src/services/auth/session", () => ({
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
 // is to throw an error
-describe("GET request", () => {
+describe("/api/auth/callback GET handler", () => {
   afterEach(() => jest.clearAllMocks());
   it("calls createSession with token set in header", async () => {
     getSessionMock.mockImplementation(() => ({
