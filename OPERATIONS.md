@@ -8,11 +8,12 @@ Terraform state locks happen when multiple terraform deployments try to roll out
 
 You can fix them by:
 
-1. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
-2. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
-3. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`) and cd into the folder identified above
-4. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
-5. Run `terraform force-unlock -force <LOCK_ID` where `<LOCK_ID>` is the value of `ID` in your state lock message.
+1. Finding the job (via Github Action or otherwise) where the deployment failed. If you aren't sure, then it was probably in a Github Action. You can find a list of failing actions here: https://github.com/HHS/simpler-grants-gov/actions
+2. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
+3. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
+4. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`) and cd into the folder identified above
+5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
+6. Run `terraform force-unlock -force <LOCK_ID` where `<LOCK_ID>` is the value of `ID` in your state lock message.
 
 ## Scaling
 
