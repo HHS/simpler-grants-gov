@@ -205,11 +205,13 @@ const Header = ({ logoPath, locale }: Props) => {
               </div>
             </Title>
           </div>
-          <NavMenuButton
-            onClick={handleMobileNavToggle}
-            label={t("nav_menu_toggle")}
-            className="order-last usa-menu-btn"
-          />
+          <div className="usa-navbar order-last">
+            <NavMenuButton
+              onClick={handleMobileNavToggle}
+              label={t("nav_menu_toggle")}
+              className="usa-menu-btn"
+            />
+          </div>
           <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
             <div className="usa-nav__primary-item border-0">
               <LoginLink />
