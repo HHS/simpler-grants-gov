@@ -261,7 +261,7 @@ paths:
                     agency:
                       one_of:
                       - USAID
-                      - ARPAH
+                      - DOC
                     applicant_type:
                       one_of:
                       - state_governments
@@ -1659,7 +1659,7 @@ components:
           description: The counts of agency values in the full response
           example:
             USAID: 4
-            ARPAH: 3
+            DOC: 3
           additionalProperties:
             type: integer
     OpportunitySearchResponseV1:

@@ -4,7 +4,7 @@ import os
 from enum import StrEnum
 from typing import Iterator, Sequence
 
-from pydantic_settings import SettingsConfigDict
+from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import noload, selectinload
 
@@ -36,10 +36,7 @@ def export_opportunity_data(db_session: db.Session) -> None:
 
 
 class ExportOpportunityDataConfig(PydanticBaseEnvConfig):
-    model_config = SettingsConfigDict(env_prefix="EXPORT_OPP_DATA_")
-
-    # EXPORT_OPP_DATA_FILE_PATH
-    file_path: str
+    file_path: str = Field(..., alias="PUBLIC_FILES_OPPORTUNITY_DATA_EXTRACTS_PATH")
 
 
 class ExportOpportunityDataTask(Task):

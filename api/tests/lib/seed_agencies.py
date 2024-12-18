@@ -11,11 +11,6 @@ logger = logging.getLogger(__name__)
 # Agencies we want to create locally - note that these are a subset of popular
 # agencies from production
 AGENCIES_TO_CREATE = [
-    {
-        "agency_id": 2,
-        "agency_code": "ARPAH",
-        "agency_name": "Advanced Research Projects Agency for Health",
-    },
     {"agency_id": 3, "agency_code": "DOC", "agency_name": "Department of Commerce"},
     {"agency_id": 53, "agency_code": "DOD", "agency_name": "Department of Defense"},
     {"agency_id": 140, "agency_code": "DOE", "agency_name": "Department of Energy"},
