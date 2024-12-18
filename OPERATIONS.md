@@ -4,13 +4,15 @@
 
 ### Updating to our Terraform Version
 
-TODO
+1. Install `tfenv`
+2. Get the terraform version to install from `terraform_version` this file: https://github.com/HHS/simpler-grants-gov/blob/main/.github/workflows/deploy.yml
+3. Follow `tfenv` instructions to instsall and utilize the given terraform version
 
 ### Terraform State Locks
 
 Terraform state locks happen when multiple terraform deployments try to roll out simultaneously.
 
-You can fix them by:
+You can fix them on CLI by:
 
 1. Finding the job (via Github Action or otherwise) where the deployment failed. If you aren't sure, then it was probably in a Github Action. You can find a list of failing actions here: https://github.com/HHS/simpler-grants-gov/actions
 2. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
@@ -18,6 +20,23 @@ You can fix them by:
 4. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`) and cd into the folder identified above
 5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
 6. Run `terraform force-unlock -force <LOCK_ID` where `<LOCK_ID>` is the value of `ID` in your state lock message.
+7. Re-run your deploy job
+
+Sometimes CLI unlock won't work, that will look like (for example) the following error message:
+
+> terraform force-unlock -force <LOCK_ID>
+> Failed to unlock state: failed to retrieve lock info for lock ID "<LOCK_ID>: unexpected end of JSON input
+
+When that happens, you need to unlock via DynamoDB in the AWS console.
+
+1. Login to AWS
+2. [Open the DynamoDB console](https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1)
+3. [Open the tables tab](https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#tables)
+4. Click on the state locks table. There should only be one.
+5. Click the `Explore Table Items` button
+6. Find the item that corresponds to the currently locked state, you can get that by again looking that `Path` attribute in your locked job.
+7. Remove the `Digest` key, `Save and close`
+8. Re-run your deploy job
 
 ## Scaling
 
