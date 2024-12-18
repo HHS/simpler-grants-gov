@@ -2,6 +2,10 @@
 
 ## Deployment
 
+### Updating to our Terraform Version
+
+TODO
+
 ### Terraform State Locks
 
 Terraform state locks happen when multiple terraform deployments try to roll out simultaneously.
