@@ -143,7 +143,7 @@ export function SearchFilterAccordion({
       title: getAccordionTitle(),
       content: getAccordionContent(),
       expanded: isExpanded,
-      id: `funding-instrument-filter-${queryParamKey}`,
+      id: `opportunity-filter-${queryParamKey}`,
       headingLevel: "h2",
     },
   ];

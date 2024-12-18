@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { camelCase } from "lodash";
+import { toDashCase } from "src/utils/generalUtils";
 import { PageProps } from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
@@ -6,7 +8,7 @@ import {
   clickPaginationPageNumber,
   expectCheckboxIDIsChecked,
   expectSortBy,
-  expectURLContainsQueryParam,
+  expectURLContainsQueryParamValue,
   fillSearchInputAndSubmit,
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
@@ -17,6 +19,8 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   waitForSearchResultsInitialLoad,
+  waitForUrl,
+  waitForURLContainsQueryParam,
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
@@ -144,7 +148,7 @@ test.describe("Search page tests", () => {
     await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
 
     // It should not have a page query param set
-    expectURLContainsQueryParam(page, "page", "1", false);
+    expectURLContainsQueryParamValue(page, "page", "1", false);
   });
 
   test("last result becomes first result when flipping sort order", async ({
@@ -193,5 +197,102 @@ test.describe("Search page tests", () => {
     expect(initialNumberOfOpportunityResults).toBe(
       updatedNumberOfOpportunityResults,
     );
+  });
+  test.describe("selecting and clearing filters", () => {
+    const filterTypes = [
+      "Funding instrument",
+      "Eligibility",
+      "Category",
+      "Agency",
+    ];
+
+    filterTypes.forEach((filterType) => {
+      test.only(`correctly clears and selects all for ${filterType} filters`, async ({
+        page,
+      }, { project }) => {
+        const camelCaseFilterType = camelCase(filterType);
+        // load search page
+        await page.goto("/search");
+
+        const initialNumberOfOpportunityResults =
+          await getNumberOfOpportunitySearchResults(page);
+
+        // open accordion for filter type
+        if (project.name.match(/[Mm]obile/)) {
+          await toggleMobileSearchFilters(page);
+        }
+
+        await clickAccordionWithTitle(page, filterType);
+
+        // gather number of (top level) filter options for filter type
+
+        const numberOfFilterOptions = await page
+          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .count();
+
+        // click select all for filter type
+        const selectAllButton = page.locator(
+          `#opportunity-filter-${camelCaseFilterType} button:has-text("Select All")`,
+        );
+        await selectAllButton.click();
+
+        // validate that url is updated
+        await waitForURLContainsQueryParam(page, camelCaseFilterType);
+
+        // validate that new search results are returned
+        let updatedNumberOfOpportunityResults =
+          await getNumberOfOpportunitySearchResults(page);
+        expect(initialNumberOfOpportunityResults).not.toBe(
+          updatedNumberOfOpportunityResults,
+        );
+
+        // validate that checkboxes are checked
+        let checkboxes = await page
+          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .all();
+
+        await Promise.all(
+          checkboxes.map((checkbox) => expect(checkbox).toBeChecked()),
+        );
+
+        // validate that the correct number of filter options is displayed
+        const accordionButton = page.locator(
+          `button[data-testid="accordionButton_opportunity-filter-${camelCaseFilterType}"]`,
+        );
+
+        await expect(accordionButton).toHaveText(
+          `${filterType}${numberOfFilterOptions}`,
+        );
+
+        // click clear all
+        await page
+          .locator(
+            `#opportunity-filter-${camelCaseFilterType} button:has-text("Clear All")`,
+          )
+          .click();
+
+        // validate that url is updated
+        await waitForUrl(page, "http://127.0.0.1:3000/search");
+
+        // validate that new search results are returned
+        updatedNumberOfOpportunityResults =
+          await getNumberOfOpportunitySearchResults(page);
+        expect(initialNumberOfOpportunityResults).toBe(
+          updatedNumberOfOpportunityResults,
+        );
+
+        // validate that checkboxes are not checked
+        checkboxes = await page
+          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .all();
+
+        await Promise.all(
+          checkboxes.map((checkbox) => expect(checkbox).not.toBeChecked()),
+        );
+
+        // validate that the correct number of filter options is displayed
+        await expect(accordionButton).toHaveText(filterType);
+      });
+    });
   });
 });

@@ -34,7 +34,7 @@ export const generateRandomString = (desiredPattern: number[]) => {
   }, "");
 };
 
-export function expectURLContainsQueryParam(
+export function expectURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
@@ -50,7 +50,15 @@ export function expectURLContainsQueryParam(
   }
 }
 
-export async function waitForURLContainsQueryParam(
+export function expectURLContainsQueryParam(
+  page: Page,
+  queryParamName: string,
+) {
+  const currentURL = page.url();
+  expect(currentURL).toContain(queryParamName);
+}
+
+export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
@@ -72,6 +80,48 @@ export async function waitForURLContainsQueryParam(
 
   throw new Error(
     `URL did not contain query parameter ${queryParamName}=${queryParamValue} within ${timeout}ms`,
+  );
+}
+
+export async function waitForUrl(
+  page: Page,
+  url: string,
+  timeout = 30000, // query params get set after a debounce period
+) {
+  const endTime = Date.now() + timeout;
+
+  while (Date.now() < endTime) {
+    if (page.url() === url) {
+      return;
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error(`URL did not match ${url} within ${timeout}ms`);
+}
+
+export async function waitForURLContainsQueryParam(
+  page: Page,
+  queryParamName: string,
+  timeout = 30000, // query params get set after a debounce period
+) {
+  const endTime = Date.now() + timeout;
+
+  while (Date.now() < endTime) {
+    const url = new URL(page.url());
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+
+    if (actualValue) {
+      return;
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error(
+    `URL did not contain query parameter ${queryParamName} within ${timeout}ms`,
   );
 }
 
@@ -108,7 +158,7 @@ export async function toggleCheckboxes(
     runningQueryParams += runningQueryParams
       ? `,${queryParamValue}`
       : queryParamValue;
-    await waitForURLContainsQueryParam(
+    await waitForURLContainsQueryParamValue(
       page,
       queryParamName,
       runningQueryParams,
