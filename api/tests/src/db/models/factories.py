@@ -76,7 +76,6 @@ class CustomProvider(BaseProvider):
         "USAID",
         "USAID-SAF",
         "USAID-ETH",
-        "ARPAH",
         "DOC",
         "DOC-EDA",
         "DOC-NIST",
