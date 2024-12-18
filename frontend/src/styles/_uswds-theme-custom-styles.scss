@@ -279,3 +279,61 @@ i.e.
     }
   }
 }
+
+// Footer
+.usa-footer__primary-section {
+  background-color: color("mint-5");
+  border-top: 6px solid color("mint-50");
+  box-shadow: inset 0 6px 0 0 color("mint-20");
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  @include at-media("tablet") {
+    padding-top: calc(1rem + 3vw);
+    padding-bottom: calc(1rem + 3vw);
+  }
+}
+
+.usa-footer__secondary-section {
+  background-color: color("mint-5");
+}
+
+.footer-logo-container {
+  max-width: 16rem;
+  margin: 2rem 0;
+}
+
+.usa-social-link {
+  &,
+  &:visited {
+    background-color: color("transparent");
+    color: color("gray-warm-90");
+  }
+
+  &:hover {
+    background-color: color("transparent");
+    color: color("mint-70");
+  }
+}
+
+.usa-footer__contact-heading {
+  text-align: left;
+
+  @include at-media("tablet") {
+    text-align: right;
+  }
+}
+
+.usa-footer__social-links,
+.usa-footer__contact-info {
+  justify-content: left;
+
+  @include at-media("tablet") {
+    justify-content: flex-end;
+  }
+}
+
+.usa-identifier {
+  padding-top: calc(1rem + 3vw);
+  padding-bottom: calc(1rem + 3vw);
+}
