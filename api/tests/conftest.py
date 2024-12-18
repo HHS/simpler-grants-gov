@@ -275,7 +275,7 @@ def setup_login_gov_auth(monkeypatch_session, public_rsa_key):
     """Setup login.gov JWK endpoint to be stubbed out"""
 
     def override_method(config):
-        config.public_keys = [public_rsa_key]
+        config.public_key_map = {"test-key-id": public_rsa_key}
 
     monkeypatch_session.setattr(login_gov_jwt_auth, "_refresh_keys", override_method)
 
