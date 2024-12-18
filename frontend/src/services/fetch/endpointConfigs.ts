@@ -1,5 +1,5 @@
-import { ApiMethod } from "src/app/api/fetcherHelpers";
 import { environment } from "src/constants/environments";
+import { ApiMethod } from "src/services/fetch/fetcherHelpers";
 
 export interface EndpointConfig {
   basePath: string;

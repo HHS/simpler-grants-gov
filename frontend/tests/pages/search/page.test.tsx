@@ -29,7 +29,7 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 // // currently, with Suspense mocked out below to always show fallback content,
 // // the components making the fetch calls are never being rendered so we do not need to mock them out
 // // uncomment this if we figure out a way to properly test the underlying async components
-// jest.mock("src/app/api/fetchers", () => ({
+// jest.mock("src/services/fetch/fetchers", () => ({
 //   get searchOpportunityFetcher() {
 //     return new MockSearchOpportunityAPI();
 //   },
