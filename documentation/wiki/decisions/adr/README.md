@@ -47,3 +47,4 @@ The following list links to all of the ADRs we've adopted:
 * [Search Engine](2024-10-02-search-engine.md)
 * [Document Storage](2024-10-18-document-storage.md)
 * [Document Sharing](2024-11-14-document-sharing.md)
+* [Adding Slack Users to SimplerGrants Slack Workspace](2024-12-17-adding-slack-users.md)
