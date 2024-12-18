@@ -3,7 +3,7 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
-import { userFetcher } from "src/app/api/userFetcher";
+import { userFetcher } from "src/app/api/clientUserFetcher";
 import { UserSession } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
 import { isSessionExpired } from "src/utils/authUtil";
