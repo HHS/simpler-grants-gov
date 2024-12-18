@@ -34,7 +34,7 @@ When that happens, you need to unlock it via DynamoDB in the AWS console.
 3. [Open the tables tab](https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#tables)
 4. Click on the state locks table. There should only be one.
 5. Click the `Explore Table Items` button
-6. Find the item that corresponds to the currently locked state, you can get that by again looking that `Path` attribute in your locked job.
+6. Find the item that corresponds to the currently locked state, you can get that by again looking at the `Path` attribute in your locked job.
 7. Remove the `Digest` key, `Save and close`
 8. Re-run your deploy job
 
