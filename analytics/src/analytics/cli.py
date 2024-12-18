@@ -18,6 +18,9 @@ from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb, slack
 from analytics.integrations.db import PostgresDbClient
+from analytics.integrations.extracts.load_opportunity_data import (
+    extract_copy_opportunity_data,
+)
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
@@ -301,3 +304,9 @@ def transform_and_load(
 
     # finish
     print("transform and load is done")
+
+
+@etl_app.command(name="opportunity-load")
+def load_opportunity_data() -> None:
+    """Grabs data from s3 bucket and loads it into opportunity tables."""
+    extract_copy_opportunity_data()

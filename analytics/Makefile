@@ -150,6 +150,12 @@ db-migrate:
 	$(POETRY) analytics etl db_migrate
 	@echo "====================================================="
 
+opportunity-load:
+	@echo "=> Ingesting opportunity data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl opportunity-load
+	@echo "====================================================="
+
 gh-transform-and-load:
 	@echo "=> Transforming and loading GitHub data into the database"
 	@echo "====================================================="
