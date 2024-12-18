@@ -25,7 +25,7 @@ export default function Process({ params: { locale } }: LocalizedPageProps) {
   setRequestLocale(locale);
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessIntro />
       <div className="padding-top-4 bg-gray-5">
