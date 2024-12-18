@@ -15,9 +15,13 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "./USWDSIcon";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
+  icon?: string;
+  textPrimary?: boolean;
 };
 
 type Props = {
@@ -92,6 +96,7 @@ const NavLinks = ({
           className={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
+            "text-primary": link.textPrimary ?? false,
           })}
         >
           <div
@@ -113,6 +118,7 @@ const NavLinks = ({
       items={navItems}
       mobileExpanded={mobileExpanded}
       onToggleMobileNav={onToggleMobileNav}
+      className="simpler-header__nav"
     ></PrimaryNav>
   );
 };
@@ -146,6 +152,28 @@ const Header = ({ logoPath, locale }: Props) => {
   const title =
     usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
+  const LoginLink = () => {
+    return (
+      <Link
+        href={process.env.auth_login_url as string}
+        key={process.env.auth_login_url as string}
+        className={clsx({
+          "usa-nav__link": true,
+          "text-primary": true,
+          "font-sans-2xs": true,
+          "display-flex": true,
+          "text-bold": true,
+        })}
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name="login"
+        />
+        {t("nav_link_login")}
+      </Link>
+    );
+  };
+
   return (
     <>
       <div
@@ -161,8 +189,8 @@ const Header = ({ logoPath, locale }: Props) => {
         }}
       />
       <GovBanner language={language} />
-      <USWDSHeader basic={true}>
-        <div className="usa-nav-container">
+      <USWDSHeader className="simpler-header" basic={true}>
+        <div className="usa-nav-container display-flex flex-align-end">
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
@@ -178,10 +206,16 @@ const Header = ({ logoPath, locale }: Props) => {
                 <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
-            <NavMenuButton
-              onClick={handleMobileNavToggle}
-              label={t("nav_menu_toggle")}
-            />
+          </div>
+          <NavMenuButton
+            onClick={handleMobileNavToggle}
+            label={t("nav_menu_toggle")}
+            className="order-last usa-menu-btn"
+          />
+          <div className="usa-nav__primary margin-top-0 margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto simpler-header__login">
+            <div className="usa-nav__primary-item border-0">
+              <LoginLink />
+            </div>
           </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
