@@ -19,7 +19,7 @@ You can fix them on CLI by:
 3. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
 4. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`) and cd into the folder identified above
 5. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
-6. Run `terraform force-unlock -force <LOCK_ID` where `<LOCK_ID>` is the value of `ID` in your state lock message.
+6. Run `terraform force-unlock -force <LOCK_ID>` where `<LOCK_ID>` is the value of `ID` in your state lock message.
 7. Re-run your deploy job
 
 Sometimes CLI unlock won't work, that will look like (for example) the following error message:
