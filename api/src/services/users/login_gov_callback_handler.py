@@ -149,7 +149,9 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
     # NOTE: This doesn't commit yet - but effectively moves the cache from memory to the DB transaction
     db_session.flush()
 
-    token, user_token_session = create_jwt_for_user(external_user.user, db_session)
+    token, user_token_session = create_jwt_for_user(
+        external_user.user, db_session, email=external_user.email
+    )
 
     logger.info(
         "Generated token for user",
