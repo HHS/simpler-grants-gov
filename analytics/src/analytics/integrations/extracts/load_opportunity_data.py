@@ -29,38 +29,51 @@ class LoadOpportunityDataFileConfig(BaseSettings):
 
 
 def extract_copy_opportunity_data() -> None:
-    """Instantiate Etldb class and pass the etldb.connection()."""
+    """Instantiate Etldb class and call helper funcs to truncate and insert data in one txn."""
     etldb_conn = EtlDb()
-    _fetch_insert_opportunity_data(etldb_conn.connection())
+
+    with etldb_conn.connection() as conn, conn.begin():
+        _trancate_opportunity_table_records(conn)
+
+        _fetch_insert_opportunity_data(conn)
 
     logger.info("Extract opportunity data completed successfully")
+
+
+def _trancate_opportunity_table_records(conn: Connection) -> None:
+    """Truncate existing records from all tables."""
+    cursor = conn.connection.cursor()
+    schema = os.environ["DB_SCHEMA"]
+    for table in OpportunityTables:
+        stmt_trct = f"TRUNCATE TABLE {schema}.{table} CASCADE"
+        cursor.execute(stmt_trct)
+    logger.info("Truncated all records from all tables")
 
 
 def _fetch_insert_opportunity_data(conn: Connection) -> None:
     """Streamlines opportunity tables from S3 and insert into the database."""
     s3_config = LoadOpportunityDataFileConfig()
 
-    with conn.begin():
-        cursor = conn.connection.cursor()
-        for table in OpportunityTables:
-            logger.info("Copying data for table: %s", table)
+    cursor = conn.connection.cursor()
+    for table in OpportunityTables:
+        logger.info("Copying data for table: %s", table)
 
-            columns = MAP_TABLES_TO_COLS.get(table, ())
-            query = f"""
-                           COPY {f"{os.getenv("DB_SCHEMA")}.{table} ({', '.join(columns)})"}
-                           FROM STDIN WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER)
-                        """
+        columns = MAP_TABLES_TO_COLS.get(table, ())
+        query = f"""
+                       COPY {f"{os.getenv("DB_SCHEMA")}.{table} ({', '.join(columns)})"}
+                       FROM STDIN WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER)
+                    """
 
-            with ExitStack() as stack:
-                file = stack.enter_context(
-                    smart_open.open(
-                        f"{s3_config.load_opportunity_data_file_path}/{table}.csv",
-                        "r",
-                    ),
-                )
-                copy = stack.enter_context(cursor.copy(query))
+        with ExitStack() as stack:
+            file = stack.enter_context(
+                smart_open.open(
+                    f"{s3_config.load_opportunity_data_file_path}/{table}.csv",
+                    "r",
+                ),
+            )
+            copy = stack.enter_context(cursor.copy(query))
 
-                while data := file.read():
-                    copy.write(data)
+            while data := file.read():
+                copy.write(data)
 
-            logger.info("Successfully loaded data for table: %s", table)
+        logger.info("Successfully loaded data for table: %s", table)
