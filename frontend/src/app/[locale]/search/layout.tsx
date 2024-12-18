@@ -18,7 +18,7 @@ export default function SearchLayout({
   setRequestLocale(locale);
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={SEARCH_CRUMBS} />
       <SearchCallToAction />
       {children}
