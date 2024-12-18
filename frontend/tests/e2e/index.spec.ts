@@ -57,7 +57,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
   if (project.name.match(/[Mm]obile/)) {
     // confirm that nav items are not visible by default with menu closed
     const primaryNavItems = page.locator(".usa-nav__primary-item");
-    await expect(primaryNavItems).toHaveCount(5);
+    await expect(primaryNavItems).toHaveCount(6);
     const allNavItems = await page.locator(".usa-nav__primary-item").all();
     await Promise.all(
       allNavItems.map((item) => {
