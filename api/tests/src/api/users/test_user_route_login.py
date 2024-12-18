@@ -13,33 +13,6 @@ from src.util import datetime_util
 from tests.lib.auth_test_utils import create_jwt
 from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
 
-# To help illustrate what we are testing, here is a diagram
-#
-#   Our endpoints                    Fake/test endpoints
-#   =============                    ===================
-#
-# ._________________.               .____________________.
-# |                 | redirects to  |                    |
-# |     /login      | ------------->|  /oauth-authorize  |
-# |_________________|               |____________________|
-#                                  /
-#                redirects to     /
-#          |----------------------
-# .________V________.               .____________________.
-# |                 |     calls     |                    |
-# | /login/callback | ------------->|       /token       |
-# |_________________|               |____________________|
-#          |
-#          |
-#          |                        .____________________.
-#          |     redirects to       |                    |
-#          -----------------------> |   /login/result    |
-#                                   |____________________|
-#
-# For testing, we create an oauth-authorize endpoint that redirects back
-# and sets up a few basic pieces of information on the Oauth side that later
-# can be picked up in the token endpoint.
-
 ##########################################
 # Full login flow tests
 ##########################################
