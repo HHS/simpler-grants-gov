@@ -1,4 +1,4 @@
-import { searchForOpportunities } from "src/app/api/searchFetcher";
+import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";

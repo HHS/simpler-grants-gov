@@ -1,5 +1,5 @@
-import { postLogout } from "src/app/api/userFetcher";
 import { deleteSession, getSession } from "src/services/auth/session";
+import { postLogout } from "src/services/fetch/fetchers/userFetcher";
 
 export async function POST() {
   try {
