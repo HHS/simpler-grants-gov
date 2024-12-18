@@ -1,5 +1,19 @@
 # Maintenances and Operation of Runtime System
 
+## Deployment
+
+### Terraform State Locks
+
+Terraform state locks happen when multiple terraform deployments try to roll out simultaneously.
+
+You can fix them by:
+
+1. Wait for the deployment that caused the state lock to finish. If you can't find it, just wait 30 minutes.
+2. Identify the folder in which the state lock is happening. The `Path` attribute on the `Lock Info` block will identify this.
+3. Open up your terminal, setup AWS (eg. `export AWS_PROFILE=grants-bla-bla-bla` && `aws sso login`) and cd into the folder identified above
+4. Run `terraform init -backend-config=<ENVIRONMENT>.s3.tfbackend`, where `<ENVIRONMENT>` can be identified by the `Path` above.
+5. Run `terraform force-unlock -force <LOCK_ID` where `<LOCK_ID>` is the value of `ID` in your state lock message.
+
 ## Scaling
 
 All scaling options can be found in the following files:
@@ -52,11 +66,11 @@ When scaling openSearch, consider which attribute changes will trigger blue/gree
 can be edited in place. [You can find that information here](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-configuration-changes.html). Requiring blue/green changes for the average configuration change is a
 notable constraint of OpenSearch, relative to ECS and the Database.
 
-# Yearly Rotations
+## Yearly Rotations
 
 We manage several secret values that need to be rotated yearly.
 
-## Login.gov Certificates
+### Login.gov Certificates
 
 *These certificates were last updated in December 2024*
 
@@ -76,7 +90,7 @@ for the given environment to be the value from the `private.pem` key you generat
 
 After the next deployment in an environment, we should be using the new keys, and can cleanup the old certificate.
 
-### Prod Login.gov
+#### Prod Login.gov
 
 Prod login.gov does not update immediately, and you must [request a deployment](https://developers.login.gov/production/#changes-to-production-applications) to get a certificate rotated.
 
