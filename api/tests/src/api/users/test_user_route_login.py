@@ -50,8 +50,6 @@ def test_user_login_flow_happy_path_302(client, db_session):
     login_gov_config = login_gov_jwt_auth.get_config()
     resp = client.get("/v1/users/login", follow_redirects=True)
 
-    print(resp.history)
-
     # The final endpoint returns a 200
     # and dumps the params it was called with
     assert resp.status_code == 200
@@ -459,7 +457,7 @@ def test_user_callback_token_fails_validation_bad_token_302(
     assert resp.status_code == 200
     resp_json = resp.get_json()
     assert resp_json["message"] == "error"
-    assert resp_json["error_description"] == "Unable to process token"
+    assert resp_json["error_description"] == "Unable to parse token - invalid format"
 
     # Make sure the login gov state was deleted even though it errored
     db_state = (
@@ -498,10 +496,7 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
     assert resp.status_code == 200
     resp_json = resp.get_json()
     assert resp_json["message"] == "error"
-    assert (
-        resp_json["error_description"]
-        == "Token could not be validated against any public keys from login.gov"
-    )
+    assert resp_json["error_description"] == "Invalid Signature"
 
     # Make sure the login gov state was deleted even though it errored
     db_state = (
