@@ -225,9 +225,10 @@ test.describe("Search page tests", () => {
         await clickAccordionWithTitle(page, filterType);
 
         // gather number of (top level) filter options for filter type
-
         const numberOfFilterOptions = await page
-          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .locator(
+            `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
+          )
           .count();
 
         // click select all for filter type
@@ -248,7 +249,9 @@ test.describe("Search page tests", () => {
 
         // validate that checkboxes are checked
         let checkboxes = await page
-          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .locator(
+            `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
+          )
           .all();
 
         await Promise.all(
@@ -283,7 +286,9 @@ test.describe("Search page tests", () => {
 
         // validate that checkboxes are not checked
         checkboxes = await page
-          .locator(`#opportunity-filter-${camelCaseFilterType} input`)
+          .locator(
+            `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
+          )
           .all();
 
         await Promise.all(
