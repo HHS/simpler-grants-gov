@@ -3,4 +3,4 @@ from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
 
 class TsynopsisAttachment(StagingBase, synopsis_mixin.TsynopsisAttachmentMixin, StagingParamMixin):
-    __tablename__ = "tsynopsis_attachment"
+    __tablename__ = "tsynopsisattachment"
