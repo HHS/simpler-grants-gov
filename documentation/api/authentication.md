@@ -107,15 +107,15 @@ block that handles catching errors and doing this redirect to the final destinat
 
 Most errors fall into two categories:
 * Misconfiguration in the API
-* Someone is probably calling the callback URL directly with random data
+* Someone is calling the callback URL directly with random data
 
 Because we need to protect ourselves against both of these, many error scenarios
-documented here are actually not something we would ever expect a user to hit.
+are actually not something we would ever expect a user to hit.
 
 ## Logout
 The logout endpoint will log out the session associated with the passed-in token.
 
-It does this by setting the `is_valid` token in the `user_token_session
+It does this by setting the `is_valid` boolean to False.
 
 ## Refresh
 The refresh endpoint will extend how long the token is valid for of the passed-in token.
@@ -133,6 +133,8 @@ and finding which endpoints can consume the `X-SGG-Token` header.
 When an API endpoint that is configured to use JWT auth receives a token, it parses and validates the fields.
 We use the public key we generated to verify that we were the ones who originally generated the token which
 is largely where the security comes from.
+
+If a token doesn't exist, is no longer valid, or has expired, we reject the request with a 401.
 
 ### Example
 To enable this auth for a given endpoint, add `api_jwt_auth` to the auth required parameter
