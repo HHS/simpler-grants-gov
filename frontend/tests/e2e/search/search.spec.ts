@@ -14,9 +14,12 @@ import {
   getNumberOfOpportunitySearchResults,
   getSearchInput,
   refreshPageWithCurrentURL,
+  selectAllTopLevelFilterOptions,
   selectSortBy,
   toggleCheckboxes,
   toggleMobileSearchFilters,
+  validateTopLevelAndNestedSelectedFilterCounts,
+  waitForAnyURLChange,
   waitForSearchResultsInitialLoad,
   waitForUrl,
   waitForURLContainsQueryParam,
@@ -173,7 +176,7 @@ test.describe("Search page tests", () => {
     page,
   }, { project }) => {
     await page.goto("/search?status=none");
-    const initialNumberOfOpportunityResults =
+    const initialSearchResultsCount =
       await getNumberOfOpportunitySearchResults(page);
 
     // check all 4 boxes
@@ -190,12 +193,10 @@ test.describe("Search page tests", () => {
 
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
-    const updatedNumberOfOpportunityResults =
+    const updatedSearchResultsCount =
       await getNumberOfOpportunitySearchResults(page);
 
-    expect(initialNumberOfOpportunityResults).toBe(
-      updatedNumberOfOpportunityResults,
-    );
+    expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
   });
   test.describe("selecting and clearing filters", () => {
     const filterTypes = [
@@ -206,14 +207,14 @@ test.describe("Search page tests", () => {
     ];
 
     filterTypes.forEach((filterType) => {
-      test.only(`correctly clears and selects all for ${filterType} filters`, async ({
+      test(`correctly clears and selects all for ${filterType} filters`, async ({
         page,
       }, { project }) => {
         const camelCaseFilterType = camelCase(filterType);
         // load search page
         await page.goto("/search");
 
-        const initialNumberOfOpportunityResults =
+        const initialSearchResultsCount =
           await getNumberOfOpportunitySearchResults(page);
 
         // open accordion for filter type
@@ -223,28 +224,15 @@ test.describe("Search page tests", () => {
 
         await clickAccordionWithTitle(page, filterType);
 
-        // gather number of (top level) filter options for filter type
-        const numberOfFilterOptions = await page
-          .locator(
-            `#opportunity-filter-${camelCaseFilterType} > ul > li > div > input`,
-          )
-          .count();
-
-        // click select all for filter type
-        const selectAllButton = page.locator(
-          `#opportunity-filter-${camelCaseFilterType} button:has-text("Select All")`,
+        const numberOfFilterOptions = await selectAllTopLevelFilterOptions(
+          page,
+          camelCaseFilterType,
         );
-        await selectAllButton.click();
-
-        // validate that url is updated
-        await waitForURLContainsQueryParam(page, camelCaseFilterType);
 
         // validate that new search results are returned
-        let updatedNumberOfOpportunityResults =
+        let updatedSearchResultsCount =
           await getNumberOfOpportunitySearchResults(page);
-        expect(initialNumberOfOpportunityResults).not.toBe(
-          updatedNumberOfOpportunityResults,
-        );
+        expect(initialSearchResultsCount).not.toBe(updatedSearchResultsCount);
 
         // validate that checkboxes are checked
         let checkboxes = await page
@@ -271,17 +259,16 @@ test.describe("Search page tests", () => {
           .locator(
             `#opportunity-filter-${camelCaseFilterType} button:has-text("Clear All")`,
           )
+          .first()
           .click();
 
         // validate that url is updated
         await waitForUrl(page, "http://127.0.0.1:3000/search");
 
         // validate that new search results are returned
-        updatedNumberOfOpportunityResults =
+        updatedSearchResultsCount =
           await getNumberOfOpportunitySearchResults(page);
-        expect(initialNumberOfOpportunityResults).toBe(
-          updatedNumberOfOpportunityResults,
-        );
+        expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
 
         // validate that checkboxes are not checked
         checkboxes = await page
@@ -297,6 +284,197 @@ test.describe("Search page tests", () => {
         // validate that the correct number of filter options is displayed
         await expect(accordionButton).toHaveText(filterType);
       });
+    });
+
+    /*
+      Scenarios
+
+      - click select all agencies -> click select all nested agency
+      - click clear all
+      - click select all nested agency -> click select all agencies
+      - click clear all nested agency
+    */
+    test("selects and clears nested agency filters", async ({ page }, {
+      project,
+    }) => {
+      const nestedFilterCheckboxesSelector =
+        "#opportunity-filter-agency > ul > li:first-child > div > div input";
+
+      await page.goto("/search");
+
+      const initialSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+
+      // open accordion for filter type
+      if (project.name.match(/[Mm]obile/)) {
+        await toggleMobileSearchFilters(page);
+      }
+
+      await clickAccordionWithTitle(page, "Agency");
+
+      // gather number of (top level) filter options
+      // and select all top level filter options
+      const numberOfTopLevelFilterOptions =
+        await selectAllTopLevelFilterOptions(page, "agency");
+
+      const topLevelSelectedNumberOfSearchResults =
+        await getNumberOfOpportunitySearchResults(page);
+
+      // open first nested agency and get number of nested options
+      const firstExpander = page
+        .locator('#opportunity-filter-agency svg[aria-label="Expand section"]')
+        .first();
+      await firstExpander.click();
+
+      const numberOfNestedFilterOptions = await page
+        .locator(nestedFilterCheckboxesSelector)
+        .count();
+
+      let urlBeforeInteraction = page.url();
+
+      // click first nested select all
+      const selectAllNestedButton = page
+        .locator('#opportunity-filter-agency button:has-text("Select All")')
+        .nth(1);
+      await selectAllNestedButton.click();
+
+      await waitForAnyURLChange(page, urlBeforeInteraction);
+
+      // validate that new search results are returned
+      const topLevelAndNestedSelectedNumberOfSearchResults =
+        await getNumberOfOpportunitySearchResults(page);
+
+      expect(
+        topLevelAndNestedSelectedNumberOfSearchResults,
+      ).toBeLessThanOrEqual(topLevelSelectedNumberOfSearchResults);
+
+      // validate that nested checkboxes are checked
+      let checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();
+
+      await Promise.all(
+        checkboxes.map((checkbox) => expect(checkbox).toBeChecked()),
+      );
+
+      // validate that the correct number of filter options is displayed
+      const accordionButton = page.locator(
+        'button[data-testid="accordionButton_opportunity-filter-agency"]',
+      );
+
+      await expect(accordionButton).toHaveText(
+        `Agency${numberOfTopLevelFilterOptions + numberOfNestedFilterOptions}`,
+      );
+
+      const expanderButton = page.locator(
+        "#opportunity-filter-agency > ul > li:first-child > div > button",
+      );
+
+      await expect(expanderButton).toContainText(
+        `${numberOfNestedFilterOptions}`,
+      );
+
+      await validateTopLevelAndNestedSelectedFilterCounts(
+        page,
+        "Agency",
+        numberOfTopLevelFilterOptions,
+        numberOfNestedFilterOptions,
+      );
+
+      // click clear all
+      await page
+        .locator(`#opportunity-filter-agency button:has-text("Clear All")`)
+        .first()
+        .click();
+
+      // validate that url is updated
+      await waitForUrl(page, "http://127.0.0.1:3000/search");
+
+      // validate that new search results are returned
+      const fullyClearedSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+      expect(initialSearchResultsCount).toBe(fullyClearedSearchResultsCount);
+
+      // validate that nested checkboxes are not checked
+      checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();
+
+      await Promise.all(
+        checkboxes.map((checkbox) => expect(checkbox).not.toBeChecked()),
+      );
+
+      // validate that the correct number of filter options is displayed
+      await expect(accordionButton).toHaveText("Agency");
+
+      // select all nested
+      await selectAllNestedButton.click();
+
+      await waitForURLContainsQueryParam(page, "agency");
+
+      // validate that new search results are returned, and correct counts displayed
+      const nestedSelectedNumberOfSearchResults =
+        await getNumberOfOpportunitySearchResults(page);
+
+      expect(nestedSelectedNumberOfSearchResults).toBeGreaterThanOrEqual(
+        topLevelAndNestedSelectedNumberOfSearchResults,
+      );
+
+      await validateTopLevelAndNestedSelectedFilterCounts(
+        page,
+        "Agency",
+        0,
+        numberOfNestedFilterOptions,
+      );
+
+      // select all top level
+      urlBeforeInteraction = page.url();
+      await selectAllTopLevelFilterOptions(page, "agency");
+
+      await waitForAnyURLChange(page, urlBeforeInteraction);
+
+      const newTopLevelAndNestedSelectedNumberOfSearchResults =
+        await getNumberOfOpportunitySearchResults(page);
+
+      expect(newTopLevelAndNestedSelectedNumberOfSearchResults).toEqual(
+        topLevelAndNestedSelectedNumberOfSearchResults,
+      );
+
+      await validateTopLevelAndNestedSelectedFilterCounts(
+        page,
+        "Agency",
+        numberOfTopLevelFilterOptions,
+        numberOfNestedFilterOptions,
+      );
+
+      urlBeforeInteraction = page.url();
+      // clear nested
+      await page
+        .locator(`#opportunity-filter-agency button:has-text("Clear All")`)
+        .nth(1)
+        .click();
+
+      // validate that url is updated
+
+      await waitForAnyURLChange(page, urlBeforeInteraction);
+
+      // validate that new search results are returned
+      const partiallyClearedSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+      expect(partiallyClearedSearchResultsCount).toBeGreaterThanOrEqual(
+        topLevelAndNestedSelectedNumberOfSearchResults,
+      );
+
+      // validate that checkboxes are not checked
+      checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();
+
+      await Promise.all(
+        checkboxes.map((checkbox) => expect(checkbox).not.toBeChecked()),
+      );
+
+      // validate that the correct number of filter options is displayed
+      await validateTopLevelAndNestedSelectedFilterCounts(
+        page,
+        "Agency",
+        numberOfTopLevelFilterOptions,
+        0,
+      );
     });
   });
 });

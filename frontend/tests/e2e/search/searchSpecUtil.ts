@@ -3,6 +3,7 @@
 // =========================
 
 import { expect, Locator, Page } from "@playwright/test";
+import { camelCase } from "lodash";
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");
@@ -58,29 +59,39 @@ export function expectURLContainsQueryParam(
   expect(currentURL).toContain(queryParamName);
 }
 
-export async function waitForURLContainsQueryParamValue(
+export async function waitForURLChange(
   page: Page,
-  queryParamName: string,
-  queryParamValue: string,
-  timeout = 30000, // query params get set after a debounce period
+  changeCheck: (url: string) => boolean,
+  timeout = 30000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
 
   while (Date.now() < endTime) {
-    const url = new URL(page.url());
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
-
-    if (actualValue === queryParamValue) {
+    const changeComplete = changeCheck(page.url());
+    if (changeComplete) {
       return;
     }
 
     await page.waitForTimeout(500);
   }
 
-  throw new Error(
-    `URL did not contain query parameter ${queryParamName}=${queryParamValue} within ${timeout}ms`,
-  );
+  throw new Error(`URL did not update as expected within ${timeout}ms`);
+}
+
+export async function waitForURLContainsQueryParamValue(
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+  timeout = 30000, // query params get set after a debounce period
+) {
+  const changeCheck = (pageUrl: string): boolean => {
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+
+    return actualValue === queryParamValue;
+  };
+  await waitForURLChange(page, changeCheck, timeout);
 }
 
 export async function waitForUrl(
@@ -88,17 +99,10 @@ export async function waitForUrl(
   url: string,
   timeout = 30000, // query params get set after a debounce period
 ) {
-  const endTime = Date.now() + timeout;
-
-  while (Date.now() < endTime) {
-    if (page.url() === url) {
-      return;
-    }
-
-    await page.waitForTimeout(500);
-  }
-
-  throw new Error(`URL did not match ${url} within ${timeout}ms`);
+  const changeCheck = (pageUrl: string): boolean => {
+    return pageUrl === url;
+  };
+  await waitForURLChange(page, changeCheck, timeout);
 }
 
 export async function waitForURLContainsQueryParam(
@@ -106,23 +110,25 @@ export async function waitForURLContainsQueryParam(
   queryParamName: string,
   timeout = 30000, // query params get set after a debounce period
 ) {
-  const endTime = Date.now() + timeout;
-
-  while (Date.now() < endTime) {
-    const url = new URL(page.url());
+  const changeCheck = (pageUrl: string): boolean => {
+    const url = new URL(pageUrl);
     const params = new URLSearchParams(url.search);
     const actualValue = params.get(queryParamName);
 
-    if (actualValue) {
-      return;
-    }
+    return !!actualValue;
+  };
+  await waitForURLChange(page, changeCheck, timeout);
+}
 
-    await page.waitForTimeout(500);
-  }
-
-  throw new Error(
-    `URL did not contain query parameter ${queryParamName} within ${timeout}ms`,
-  );
+export async function waitForAnyURLChange(
+  page: Page,
+  initialUrl: string,
+  timeout = 30000, // query params get set after a debounce period
+) {
+  const changeCheck = (pageUrl: string): boolean => {
+    return pageUrl !== initialUrl;
+  };
+  await waitForURLChange(page, changeCheck, timeout);
 }
 
 export function getMobileMenuButton(page: Page) {
@@ -284,3 +290,48 @@ export async function toggleMobileSearchFilters(page: Page) {
   );
   await toggleButton.click();
 }
+// returns the number of options available to be selected
+export const selectAllTopLevelFilterOptions = async (
+  page: Page,
+  filterType: string,
+): Promise<number> => {
+  // gather number of (top level) filter options for filter type
+  const numberOfFilterOptions = await page
+    .locator(`#opportunity-filter-${filterType} > ul > li > div > input`)
+    .count();
+
+  // click select all for filter type
+  const selectAllButton = page
+    .locator(`#opportunity-filter-${filterType} button:has-text("Select All")`)
+    .first();
+  await selectAllButton.click();
+
+  // validate that url is updated
+  await waitForURLContainsQueryParam(page, filterType);
+
+  return numberOfFilterOptions;
+};
+
+export const validateTopLevelAndNestedSelectedFilterCounts = async (
+  page: Page,
+  filterName: string,
+  expectedTopLevelCount: number,
+  expectedNestedCount: number,
+) => {
+  // validate that the correct number of filter options is displayed
+  const accordionButton = page.locator(
+    `button[data-testid="accordionButton_opportunity-filter-${camelCase(filterName)}"]`,
+  );
+
+  await expect(accordionButton).toHaveText(
+    `${filterName}${expectedTopLevelCount + expectedNestedCount}`,
+  );
+
+  const expanderButton = page.locator(
+    `#opportunity-filter-${camelCase(filterName)} > ul > li:first-child > div > button`,
+  );
+
+  if (expectedNestedCount) {
+    await expect(expanderButton).toContainText(`${expectedNestedCount}`);
+  }
+};
