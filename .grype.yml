@@ -19,7 +19,7 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # https://github.com/HHS/simpler-grants-gov/issues/2582
-  - vulnerability: CVE-2024-34158
-  - vulnerability: CVE-2024-34156
-  - vulnerability: CVE-2024-34155
+  # Issue due to crypto package pulled in by GitHub CLI
+  # Will be fixed in next GitHub CLI release
+  # Last Checked: Dec 19th, 2024
+  - vulnerability: GHSA-v778-237x-gjrc
