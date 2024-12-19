@@ -66,7 +66,7 @@ export function SearchFilterAccordion({
 }: SearchFilterAccordionProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
-  console.log("###", title, searchParams);
+
   const totalCheckedCount = query.size;
   // all top level selectable filter options
   const allOptionValues = filterOptions.reduce((values: string[], option) => {
@@ -91,28 +91,23 @@ export function SearchFilterAccordion({
     </>
   );
 
-  const toggleSelectAll = (all: boolean, allSelected: Set<string>): void => {
-    if (all) {
-      updateQueryParams(allSelected, queryParamKey, queryTerm);
-    } else {
-      const noneSelected = new Set<string>();
-      updateQueryParams(noneSelected, queryParamKey, queryTerm);
-    }
-  };
-
   // need to add any existing relevant search params to the passed in set
-  const toggleSelectAllSection = (
-    all: boolean,
-    allSelected: Set<string>,
-  ): void => {
-    // get existing current selected options for this accordion from url
-    const currentSelected = new Set(
-      searchParams.get(camelCase(title))?.split(","),
-    );
-
-    // add existing to newly selected section
-    const sectionPlusCurrent = new Set([...currentSelected, ...allSelected]);
-    toggleSelectAll(all, sectionPlusCurrent);
+  const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
+    if (all && newSelections) {
+      // get existing current selected options for this accordion from url
+      const currentSelections = new Set(
+        searchParams.get(camelCase(title))?.split(","),
+      );
+      // add existing to newly selected section
+      const sectionPlusCurrent = new Set([
+        ...currentSelections,
+        ...newSelections,
+      ]);
+      updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
+    } else {
+      const clearedSelections = newSelections || new Set<string>();
+      updateQueryParams(clearedSelections, queryParamKey, queryTerm);
+    }
   };
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
@@ -128,7 +123,7 @@ export function SearchFilterAccordion({
     <>
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true, allSelected)}
-        onClearAll={() => toggleSelectAll(false, allSelected)}
+        onClearAll={() => toggleSelectAll(false)}
         isAllSelected={isSectionAllSelected(allSelected, query)}
         isNoneSelected={isSectionNoneSelected(query)}
       />
@@ -144,7 +139,7 @@ export function SearchFilterAccordion({
                 value={option.value}
                 query={query}
                 updateCheckedOption={toggleOptionChecked}
-                toggleSelectAll={toggleSelectAllSection}
+                toggleSelectAll={toggleSelectAll}
                 accordionTitle={title}
                 isSectionAllSelected={isSectionAllSelected}
                 isSectionNoneSelected={isSectionNoneSelected}

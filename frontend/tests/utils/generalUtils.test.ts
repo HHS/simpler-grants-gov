@@ -1,8 +1,4 @@
-import {
-  findFirstWhitespace,
-  splitMarkup,
-  toDashCase,
-} from "src/utils/generalUtils";
+import { findFirstWhitespace, splitMarkup } from "src/utils/generalUtils";
 
 describe("splitMarkup", () => {
   it("handles case where markdown string is shorter than split point", () => {

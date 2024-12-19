@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { camelCase } from "lodash";
-import { toDashCase } from "src/utils/generalUtils";
 import { PageProps } from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
