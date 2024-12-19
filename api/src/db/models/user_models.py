@@ -60,3 +60,12 @@ class LoginGovState(ApiSchemaTable, TimestampMixin):
 
     # https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes
     nonce: Mapped[uuid.UUID]
+
+
+class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_saved_opportunity"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
+
+    user: Mapped[User] = relationship(User)
