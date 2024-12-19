@@ -1,5 +1,6 @@
 "use client";
 
+import { camelCase } from "lodash";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryParamKey } from "src/types/search/searchResponseTypes";
@@ -43,6 +44,20 @@ export interface FilterOptionWithChildren {
   children: FilterOption[];
 }
 
+const isSectionAllSelected = (
+  allSelected: Set<string>,
+  query: Set<string>,
+): boolean => {
+  return areSetsEqual(allSelected, query);
+};
+
+const isSectionNoneSelected = (query: Set<string>): boolean => {
+  return query.size === 0;
+};
+
+const areSetsEqual = (a: Set<string>, b: Set<string>) =>
+  a.size === b.size && [...a].every((value) => b.has(value));
+
 export function SearchFilterAccordion({
   filterOptions,
   title,
@@ -50,13 +65,21 @@ export function SearchFilterAccordion({
   query,
 }: SearchFilterAccordionProps) {
   const { queryTerm } = useContext(QueryContext);
-  const { updateQueryParams } = useSearchParamUpdater();
+  const { updateQueryParams, searchParams } = useSearchParamUpdater();
+
   const totalCheckedCount = query.size;
-  // These are all of the available selectedable options.
-  const allOptionValues = filterOptions.map((options) => options.value);
-  // This is the setting if all are selected.
+  // all top level selectable filter options
+  const allOptionValues = filterOptions.reduce((values: string[], option) => {
+    if (option.children) {
+      return values;
+    }
+    values.push(option.value);
+    return values;
+  }, []);
+
   const allSelected = new Set(allOptionValues);
 
+  // SPLIT ME INTO MY OWN COMPONENT
   const getAccordionTitle = () => (
     <>
       {title}
@@ -68,28 +91,24 @@ export function SearchFilterAccordion({
     </>
   );
 
-  const toggleSelectAll = (all: boolean, allSelected: Set<string>): void => {
-    if (all) {
-      updateQueryParams(allSelected, queryParamKey, queryTerm);
+  // need to add any existing relevant search params to the passed in set
+  const toggleSelectAll = (all: boolean, newSelections?: Set<string>): void => {
+    if (all && newSelections) {
+      // get existing current selected options for this accordion from url
+      const currentSelections = new Set(
+        searchParams.get(camelCase(title))?.split(","),
+      );
+      // add existing to newly selected section
+      const sectionPlusCurrent = new Set([
+        ...currentSelections,
+        ...newSelections,
+      ]);
+      updateQueryParams(sectionPlusCurrent, queryParamKey, queryTerm);
     } else {
-      const noneSelected = new Set<string>();
-      updateQueryParams(noneSelected, queryParamKey, queryTerm);
+      const clearedSelections = newSelections || new Set<string>();
+      updateQueryParams(clearedSelections, queryParamKey, queryTerm);
     }
   };
-
-  const isSectionAllSelected = (
-    allSelected: Set<string>,
-    query: Set<string>,
-  ): boolean => {
-    return areSetsEqual(allSelected, query);
-  };
-
-  const isSectionNoneSelected = (query: Set<string>): boolean => {
-    return query.size === 0;
-  };
-
-  const areSetsEqual = (a: Set<string>, b: Set<string>) =>
-    a.size === b.size && [...a].every((value) => b.has(value));
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const updated = new Set(query);
@@ -99,11 +118,12 @@ export function SearchFilterAccordion({
 
   const isExpanded = !!query.size;
 
+  // SPLIT ME INTO MY OWN COMPONENT
   const getAccordionContent = () => (
     <>
       <SearchFilterToggleAll
         onSelectAll={() => toggleSelectAll(true, allSelected)}
-        onClearAll={() => toggleSelectAll(false, allSelected)}
+        onClearAll={() => toggleSelectAll(false)}
         isAllSelected={isSectionAllSelected(allSelected, query)}
         isNoneSelected={isSectionNoneSelected(query)}
       />
@@ -138,12 +158,13 @@ export function SearchFilterAccordion({
     </>
   );
 
+  // MEMOIZE ME
   const accordionOptions: AccordionItemProps[] = [
     {
       title: getAccordionTitle(),
       content: getAccordionContent(),
       expanded: isExpanded,
-      id: `funding-instrument-filter-${queryParamKey}`,
+      id: `opportunity-filter-${queryParamKey}`,
       headingLevel: "h2",
     },
   ];

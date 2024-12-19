@@ -12,10 +12,10 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   await searchInput.fill(term);
   await page.click(".usa-search >> button[type='submit']");
-  expectURLContainsQueryParam(page, "query", term);
+  expectURLContainsQueryParamValue(page, "query", term);
 }
 
-export function expectURLContainsQueryParam(
+export function expectURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
@@ -24,7 +24,7 @@ export function expectURLContainsQueryParam(
   expect(currentURL).toContain(`${queryParamName}=${queryParamValue}`);
 }
 
-export async function waitForURLContainsQueryParam(
+export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
@@ -85,7 +85,7 @@ export async function toggleCheckboxes(
     runningQueryParams += runningQueryParams
       ? `,${queryParamValue}`
       : queryParamValue;
-    await waitForURLContainsQueryParam(
+    await waitForURLContainsQueryParamValue(
       page,
       queryParamName,
       runningQueryParams,

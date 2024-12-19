@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { camelCase } from "lodash";
+
+import { useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 
 import { FilterOptionWithChildren } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
@@ -11,7 +14,7 @@ import SearchFilterToggleAll from "src/components/search/SearchFilterAccordion/S
 interface SearchFilterSectionProps {
   option: FilterOptionWithChildren;
   updateCheckedOption: (optionId: string, isChecked: boolean) => void;
-  toggleSelectAll: (all: boolean, allSelected: Set<string>) => void;
+  toggleSelectAll: (all: boolean, allSelected?: Set<string>) => void;
   accordionTitle: string;
   isSectionAllSelected: (
     allSelected: Set<string>,
@@ -33,6 +36,7 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
   value,
 }) => {
   const [childrenVisible, setChildrenVisible] = useState<boolean>(false);
+  const searchParams = useSearchParams();
 
   const sectionQuery = new Set<string>();
   query.forEach((queryValue) => {
@@ -42,15 +46,25 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
       sectionQuery.add(queryValue);
     }
   });
-  const allSectionOptionValues = option.children.map(
-    (options) => options.value,
+  const allSectionOptions = useMemo(
+    () => new Set(option.children.map((options) => options.value)),
+    [option],
   );
-  const sectionAllSelected = new Set(allSectionOptionValues);
 
   const sectionCount = sectionQuery.size;
 
   const getHiddenName = (name: string) =>
     accordionTitle === "Agency" ? `agency-${name}` : name;
+
+  const clearSection = useCallback(() => {
+    const currentSelections = new Set(
+      searchParams.get(camelCase(accordionTitle))?.split(","),
+    );
+    allSectionOptions.forEach((option) => {
+      currentSelections.delete(option);
+    });
+    toggleSelectAll(false, currentSelections);
+  }, [toggleSelectAll, accordionTitle, searchParams, allSectionOptions]);
 
   return (
     <div>
@@ -69,10 +83,10 @@ const SearchFilterSection: React.FC<SearchFilterSectionProps> = ({
       {childrenVisible ? (
         <div className="padding-y-1">
           <SearchFilterToggleAll
-            onSelectAll={() => toggleSelectAll(true, sectionAllSelected)}
-            onClearAll={() => toggleSelectAll(false, sectionAllSelected)}
+            onSelectAll={() => toggleSelectAll(true, allSectionOptions)}
+            onClearAll={() => clearSection()}
             isAllSelected={isSectionAllSelected(
-              sectionAllSelected,
+              allSectionOptions,
               sectionQuery,
             )}
             isNoneSelected={isSectionNoneSelected(sectionQuery)}
