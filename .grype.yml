@@ -27,3 +27,4 @@ ignore:
   # Will be fixed in next GitHub CLI release
   # Last Checked: Dec 19th, 2024
   - vulnerability: GHSA-v778-237x-gjrc
+  - vulnerability: GHSA-w32m-9786-jp63
