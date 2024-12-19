@@ -57,7 +57,7 @@ def create_jwt(
         "acr": "urn:acr.login.gov:auth-only",
     }
 
-    return jwt.encode(payload, private_key, algorithm="RS256")
+    return jwt.encode(payload, private_key, algorithm="RS256", headers={"kid": "test-key-id"})
 
 
 def oauth_param_override():
