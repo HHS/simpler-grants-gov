@@ -26,8 +26,10 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     """
 
     # Public keys likely won't ever be set by an env var, so it defaults
-    # to an empty list and gets overriden by any call to _refresh_keys
-    public_keys: list[jwt.PyJWK | str] = Field(alias="LOGIN_GOV_PUBLIC_KEYS", default_factory=list)
+    # to an empty dict and gets overriden by any call to _refresh_keys
+    public_key_map: dict[str, jwt.PyJWK | str] = Field(
+        alias="LOGIN_GOV_PUBLIC_KEY_MAP", default_factory=dict
+    )
 
     encryption_algorithm: str = Field(alias="LOGIN_GOV_ENCRYPTION_ALGORITHM", default="RS256")
 
@@ -107,10 +109,17 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     """
     logger.info("Refreshing login.gov JWKs")
     jwk_client = jwt.PyJWKClient(config.login_gov_jwk_endpoint)
-    public_keys = jwk_client.get_jwk_set().keys
+    public_keys = jwk_client.get_jwk_set()
+
+    public_key_map: dict[str, jwt.PyJWK | str] = {
+        key.key_id: key for key in public_keys.keys if key.key_id is not None
+    }
+
+    if public_key_map.keys() != config.public_key_map.keys():
+        logger.info("Found login.gov JWKs %s", public_key_map.keys())
 
     # This line is possibly an issue for the reasons described above.
-    config.public_keys = list(public_keys)
+    config.public_key_map = public_key_map
 
 
 def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
@@ -199,29 +208,40 @@ def validate_token(token: str, nonce: str, config: LoginGovConfig | None = None)
     if not config:
         config = get_config()
 
-    # TODO - this iteration approach won't be necessary if the JWT we get
-    #        from login.gov does actually set the KID in the header
-    #        TODO - turns out login.gov DOES return a KID, can adjust this.
-    # Iterate over the public keys we have and check each
-    # to determine if we have a valid key.
-    for public_key in config.public_keys:
-        user = _validate_token_with_key(token, nonce, public_key, config)
-        if user is not None:
-            return user
+    try:
+        # To get the KID, we need parse the jwt
+        unverified_token = jwt.api_jwt.decode_complete(token, options={"verify_signature": False})
+    except jwt.DecodeError as e:
+        # This would mean the token was malformed - likely not a jwt at all
+        raise JwtValidationError("Unable to parse token - invalid format") from e
 
-    _refresh_keys(config)
+    # Get the KID (key ID)
+    kid: str | None = unverified_token.get("header", {}).get("kid", None)
+    if kid is None:
+        raise JwtValidationError("Auth token missing KID")
 
-    for public_key in config.public_keys:
-        user = _validate_token_with_key(token, nonce, public_key, config)
-        if user is not None:
-            return user
+    public_key = _get_key_for_kid(kid, config)
 
-    raise JwtValidationError("Token could not be validated against any public keys from login.gov")
+    return _validate_token_with_key(token, nonce, public_key, config)
+
+
+def _get_key_for_kid(kid: str, config: LoginGovConfig, refresh: bool = True) -> jwt.PyJWK | str:
+    """Get the public key for the given KID (Key ID)"""
+    key = config.public_key_map.get(kid, None)
+    if key is not None:
+        return key
+
+    # Fetch the latest keys from login.gov and try again
+    if refresh:
+        _refresh_keys(config)
+        return _get_key_for_kid(kid, config, refresh=False)
+
+    raise JwtValidationError("No public key could be found for token")
 
 
 def _validate_token_with_key(
     token: str, nonce: str, public_key: jwt.PyJWK | str, config: LoginGovConfig
-) -> LoginGovUser | None:
+) -> LoginGovUser:
     # We are processing the id_token as described on:
     # https://developers.login.gov/oidc/token/#token-response
     try:
@@ -267,10 +287,7 @@ def _validate_token_with_key(
         raise JwtValidationError("Unknown Issuer") from e
     except jwt.InvalidAudienceError as e:
         raise JwtValidationError("Unknown Audience") from e
-    except jwt.InvalidSignatureError:
-        # This occurs if the validation fails for the key.
-        # Since we might be checking against the wrong key (unless we get a KID)
-        # we don't want to error necessarily
-        return None
+    except jwt.InvalidSignatureError as e:  # Token signature does not match
+        raise JwtValidationError("Invalid Signature") from e
     except jwt.PyJWTError as e:  # Every other type of JWT error not caught above
         raise JwtValidationError("Unable to process token") from e
