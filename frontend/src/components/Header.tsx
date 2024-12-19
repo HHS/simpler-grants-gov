@@ -15,7 +15,7 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "./USWDSIcon";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type PrimaryLink = {
   text?: string;
@@ -95,7 +95,6 @@ const NavLinks = ({
           className={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
-            "text-primary": link.textPrimary ?? false,
           })}
         >
           <div
@@ -155,13 +154,7 @@ const Header = ({ logoPath, locale }: Props) => {
       <Link
         href={process.env.auth_login_url as string}
         key={process.env.auth_login_url as string}
-        className={clsx({
-          "usa-nav__link": true,
-          "text-primary": true,
-          "font-sans-2xs": true,
-          "display-flex": true,
-          "text-normal": true,
-        })}
+        className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
       >
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
@@ -205,7 +198,7 @@ const Header = ({ logoPath, locale }: Props) => {
               </div>
             </Title>
           </div>
-          <div className="usa-navbar order-last">
+          <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
