@@ -15,9 +15,12 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
+  textPrimary?: boolean;
 };
 
 type Props = {
@@ -146,6 +149,22 @@ const Header = ({ logoPath, locale }: Props) => {
   const title =
     usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
+  const LoginLink = () => {
+    return (
+      <Link
+        href={process.env.auth_login_url as string}
+        key={process.env.auth_login_url as string}
+        className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
+      >
+        <USWDSIcon
+          className="usa-icon margin-right-05 margin-left-neg-05"
+          name="login"
+        />
+        {t("nav_link_login")}
+      </Link>
+    );
+  };
+
   return (
     <>
       <div
@@ -162,7 +181,7 @@ const Header = ({ logoPath, locale }: Props) => {
       />
       <GovBanner language={language} />
       <USWDSHeader basic={true}>
-        <div className="usa-nav-container">
+        <div className="usa-nav-container display-flex flex-align-end">
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
@@ -178,10 +197,18 @@ const Header = ({ logoPath, locale }: Props) => {
                 <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
+          </div>
+          <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
+              className="usa-menu-btn"
             />
+          </div>
+          <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+            <div className="usa-nav__primary-item border-0">
+              <LoginLink />
+            </div>
           </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
