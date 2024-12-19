@@ -11,4 +11,4 @@ from . import foreignbase
 
 
 class tsynopsisattachment(foreignbase.ForeignBase, synopsis_mixin.TsynopsisAttachmentMixin):
-    __tablename__ = "tsynopsisattachment"
+    __tablename__ = "topportunityattachment"
