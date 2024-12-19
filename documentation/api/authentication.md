@@ -66,7 +66,7 @@ the potential for [replay attacks](https://en.wikipedia.org/wiki/Replay_attack).
 ### Getting the Login.gov Token
 Using the code we received back from login.gov, we call their [token endpoint](https://developers.login.gov/oidc/token/).
 To call the endpoint we also need a [client_assertion jwt](https://developers.login.gov/oidc/token/#client_assertion)
-which is created from a private key that only Login.gov has the public key certificate to verify it.
+which is created from a private key we generated, and gave Login.gov the public key certificate.
 
 If there is any error with [the response](https://developers.login.gov/oidc/token/#token-response) from login.gov, error.
 
