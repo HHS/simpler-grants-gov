@@ -159,6 +159,7 @@ class TfundinstrSynopsisHistMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
 
+
 class TsynopsisAttachmentMixin:
     syn_att_id: Mapped[int] = mapped_column(primary_key=True)
     opportunity_id: Mapped[int]
@@ -176,6 +177,3 @@ class TsynopsisAttachmentMixin:
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
     syn_att_folder_id: Mapped[int | None]
-
-
-

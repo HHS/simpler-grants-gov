@@ -9,5 +9,6 @@ from src.db.models.legacy_mixin import synopsis_mixin
 
 from . import foreignbase
 
+
 class TsynopsisAttachment(foreignbase.ForeignBase, synopsis_mixin.TsynopsisAttachmentMixin):
     __tablename__ = "tsynopsis_attachment"
