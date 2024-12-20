@@ -1,11 +1,19 @@
 import uuid
+import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
 from tests.src.db.models.factories import OpportunityFactory, UserFactory
 
 
-def test_user_save_opportunity_post_unauthorized_user(app, enable_factory_create, db_session):
+@pytest.fixture(autouse=True)
+def clear_opportunities(db_session):
+    db_session.query(UserSavedOpportunity).delete()
+    db_session.commit()
+    yield
+
+
+def test_user_save_opportunity_post_unauthorized_user(client, enable_factory_create, db_session):
     # Create a user and get their token
     user = UserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
@@ -30,7 +38,7 @@ def test_user_save_opportunity_post_unauthorized_user(app, enable_factory_create
     assert len(saved_opportunities) == 0
 
 
-def test_user_save_opportunity_post_no_auth(app, enable_factory_create, db_session):
+def test_user_save_opportunity_post_no_auth(client, enable_factory_create, db_session):
     # Create a user but don't get a token
     user = UserFactory.create()
     db_session.commit()
@@ -39,7 +47,7 @@ def test_user_save_opportunity_post_no_auth(app, enable_factory_create, db_sessi
     opportunity = OpportunityFactory.create()
 
     # Try to save an opportunity without authentication
-    response = app.test_client().post(
+    response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities",
         json={"opportunity_id": opportunity.opportunity_id},
     )
@@ -52,14 +60,14 @@ def test_user_save_opportunity_post_no_auth(app, enable_factory_create, db_sessi
     assert len(saved_opportunities) == 0
 
 
-def test_user_save_opportunity_post_invalid_request(app, enable_factory_create, db_session):
+def test_user_save_opportunity_post_invalid_request(client, enable_factory_create, db_session):
     # Create a user and get their token
     user = UserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()
 
     # Make request with missing opportunity_id
-    response = app.test_client().post(
+    response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities",
         headers={"X-SGG-Token": token},
         json={},
@@ -72,7 +80,7 @@ def test_user_save_opportunity_post_invalid_request(app, enable_factory_create, 
     assert len(saved_opportunities) == 0
 
 
-def test_user_save_opportunity_post(app, enable_factory_create, db_session):
+def test_user_save_opportunity_post(client, enable_factory_create, db_session):
     # Create a user and get their token
     user = UserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
@@ -82,7 +90,7 @@ def test_user_save_opportunity_post(app, enable_factory_create, db_session):
     opportunity = OpportunityFactory.create()
 
     # Make the request to save an opportunity
-    response = app.test_client().post(
+    response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities",
         headers={"X-SGG-Token": token},
         json={"opportunity_id": opportunity.opportunity_id},
