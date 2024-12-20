@@ -85,13 +85,13 @@ export const messages = {
     goal: {
       title: "The goal",
       paragraph_1:
-        "We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone.",
-      title_2: "For applicants",
+        "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
+      title_2: "Grant seekers & applicants",
       paragraph_2:
-        "We’re improving the way you search for and discover funding opportunities, making it easier to find and apply.",
-      title_3: "For grantmakers",
+        "We’re improving the way you search for and discover relevant opportunities, making it easier to access the funding you need.",
+      title_3: "Federal grantmaking agencies",
       paragraph_3:
-        "If you work for a federal grantmaking agency, we’re making it easier for your communities to find the funding they need.",
+        "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
       cta: "Sign up for project updates",
     },
     process_and_research: {
@@ -100,9 +100,9 @@ export const messages = {
       paragraph_1:
         "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
       paragraph_2:
-        "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
+        "We've conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. And you can sign up to participate in future research. Ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
       cta_1: "Learn about what’s happening",
-      cta_2: "Read the research findings",
+      cta_2: "Learn more and sign up to participate",
     },
     fo_title: "Improvements to funding opportunity announcements",
     fo_paragraph_1:
@@ -422,7 +422,7 @@ export const messages = {
   Hero: {
     title: "We're building a simpler Grants.gov!",
     content:
-      "This new website will be your go‑to resource to follow our progress as we improve and modernize the Grants.gov experience, making it easier to find, share, and apply for grants.",
+      "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
     github_link: "Follow on GitHub",
   },
   Footer: {
