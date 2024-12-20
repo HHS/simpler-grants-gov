@@ -1,4 +1,5 @@
 from datetime import date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -23,6 +24,9 @@ from src.db.models.lookup_models import (
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
+
+if TYPE_CHECKING:
+    from src.db.models.user_models import UserSavedOpportunity
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -75,6 +79,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     all_opportunity_summaries: Mapped[list["OpportunitySummary"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
+    saved_opportunities_by_users: Mapped[list["UserSavedOpportunity"]] = relationship(
+        "UserSavedOpportunity",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     agency_record: Mapped[Agency | None] = relationship(
