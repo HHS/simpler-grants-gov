@@ -1,7 +1,10 @@
 import "server-only";
 
-import { createRequestUrl, sendRequest } from "src/app/api/fetcherHelpers";
 import { ApiRequestError, NetworkError } from "src/errors";
+import {
+  createRequestUrl,
+  sendRequest,
+} from "src/services/fetch/fetcherHelpers";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 const searchInputs: QueryParamData = {
