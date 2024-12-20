@@ -478,9 +478,7 @@ export const messages = {
       button: "Search",
     },
     callToAction: {
-      title: "Search funding opportunities",
-      description:
-        "We’re incrementally improving this experimental search page. How can we make it easier to discover grants that are right for you? Let us know at <mail>simpler@grants.gov</mail>.",
+      title: "Search funding opportunities"
     },
     opportunityStatus: {
       title: "Opportunity status",
