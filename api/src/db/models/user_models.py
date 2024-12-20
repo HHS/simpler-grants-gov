@@ -67,8 +67,8 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_saved_opportunity"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    opportunity_id: Mapped[BigInteger] = mapped_column(
-        ForeignKey(Opportunity.opportunity_id), primary_key=True
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
 
     user: Mapped[User] = relationship(User)
