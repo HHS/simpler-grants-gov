@@ -17,6 +17,13 @@ class User(ApiSchemaTable, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
+    saved_opportunities: Mapped[list["UserSavedOpportunity"]] = relationship(
+        "UserSavedOpportunity",
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
 
 class LinkExternalUser(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_external_user"
@@ -71,4 +78,7 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
 
-    user: Mapped[User] = relationship(User)
+    user: Mapped[User] = relationship(User, back_populates="saved_opportunities")
+    opportunity: Mapped[Opportunity] = relationship(
+        "Opportunity", back_populates="saved_opportunities_by_users"
+    )
