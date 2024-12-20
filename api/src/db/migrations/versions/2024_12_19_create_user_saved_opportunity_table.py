@@ -37,6 +37,11 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["user_id"], ["api.user.user_id"], name=op.f("user_saved_opportunity_user_id_user_fkey")
         ),
+        sa.ForeignKeyConstraint(
+            ["opportunity_id"],
+            ["api.opportunity.opportunity_id"],
+            name=op.f("user_saved_opportunity_opportunity_id_opportunity_fkey"),
+        ),
         sa.PrimaryKeyConstraint(
             "user_id", "opportunity_id", name=op.f("user_saved_opportunity_pkey")
         ),

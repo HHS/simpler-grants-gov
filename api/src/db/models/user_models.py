@@ -9,6 +9,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
+from src.db.models.opportunity_models import Opportunity
 
 
 class User(ApiSchemaTable, TimestampMixin):
@@ -66,6 +67,8 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_saved_opportunity"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(
+        ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
 
     user: Mapped[User] = relationship(User)
