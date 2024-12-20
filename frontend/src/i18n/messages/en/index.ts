@@ -3,7 +3,7 @@ export const messages = {
     alert_title:
       "This site is a work in progress, with new features and updates based on your feedback.",
     alert:
-      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>www.Grants.gov</LinkToGrants>.",
+      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
   },
   OpportunityListing: {
     page_title: "Opportunity Listing",
@@ -478,7 +478,7 @@ export const messages = {
       button: "Search",
     },
     callToAction: {
-      title: "Search funding opportunities"
+      title: "Search funding opportunities",
     },
     opportunityStatus: {
       title: "Opportunity status",
