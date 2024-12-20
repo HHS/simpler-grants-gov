@@ -21,7 +21,7 @@ def upgrade():
     op.create_table(
         "user_saved_opportunity",
         sa.Column("user_id", sa.UUID(), nullable=False),
-        sa.Column("opportunity_id", sa.Integer(), nullable=False),
+        sa.Column("opportunity_id", sa.BigInteger(), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
