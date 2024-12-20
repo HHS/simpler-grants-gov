@@ -10,6 +10,8 @@ const props = {
   locale: "en",
 };
 
+process.env.auth_login_url = "/login-url";
+
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -35,6 +37,11 @@ describe("Header", () => {
     expect(screen.getByRole("link", { name: /process/i })).toHaveAttribute(
       "href",
       "/process",
+    );
+
+    expect(screen.getByRole("link", { name: /Sign in/i })).toHaveAttribute(
+      "href",
+      "/login-url",
     );
 
     await userEvent.click(menuButton);

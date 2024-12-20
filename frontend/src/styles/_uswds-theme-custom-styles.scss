@@ -30,3 +30,8 @@ i.e.
     @include u-shadow(4);
   }
 }
+@include at-media("desktop") {
+  .desktop\:margin-bottom-5px {
+    margin-bottom: 5px !important;
+  }
+}
