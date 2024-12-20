@@ -796,16 +796,6 @@ class AgencyFactory(BaseFactory):
     class Meta:
         model = agency_models.Agency
 
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(func.max(agency_models.Agency.agency_id)).scalar()
-            if value is not None:
-                return value + 1
-
-        return 1
-
-    agency_id = factory.Sequence(lambda n: n)
     agency_name = factory.Faker("agency_name")
 
     agency_code = factory.Iterator(CustomProvider.AGENCIES)
