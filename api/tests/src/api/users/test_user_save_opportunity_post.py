@@ -16,7 +16,7 @@ def test_user_save_opportunity_post_unauthorized_user(app, enable_factory_create
 
     # Try to save an opportunity for a different user ID
     different_user_id = uuid.uuid4()
-    response = app.test_client().post(
+    response = client.post(
         f"/v1/users/{different_user_id}/saved-opportunities",
         headers={"X-SGG-Token": token},
         json={"opportunity_id": opportunity.opportunity_id},
