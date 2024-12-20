@@ -11,13 +11,15 @@ from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserGetResponseSchema,
+    UserSaveOpportunityRequestSchema,
+    UserSaveOpportunityResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
-from src.db.models.user_models import UserTokenSession
+from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
 from src.services.users.get_user import get_user
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
@@ -146,3 +148,39 @@ def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
         return response.ApiResponse(message="Success", data=user)
 
     raise_flask_error(401, "Unauthorized user")
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-opportunities")
+@user_blueprint.input(UserSaveOpportunityRequestSchema, location="json")
+@user_blueprint.output(UserSaveOpportunityResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_save_opportunity(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/saved-opportunities")
+
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    # Create the saved opportunity record
+    saved_opportunity = UserSavedOpportunity(
+        user_id=user_id, opportunity_id=json_data["opportunity_id"]
+    )
+
+    with db_session.begin():
+        db_session.add(saved_opportunity)
+
+    logger.info(
+        "Saved opportunity for user",
+        extra={
+            "user.id": str(user_id),
+            "opportunity.id": json_data["opportunity_id"],
+        },
+    )
+
+    return response.ApiResponse(message="Success")

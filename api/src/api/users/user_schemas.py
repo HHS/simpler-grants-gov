@@ -67,3 +67,11 @@ class UserTokenLogoutResponseSchema(AbstractResponseSchema):
 
 class UserGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserSchema)
+
+
+class UserSaveOpportunityRequestSchema(Schema):
+    opportunity_id = fields.Integer(required=True)
+
+
+class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
