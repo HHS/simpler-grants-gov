@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -9,12 +9,20 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
+from src.db.models.opportunity_models import Opportunity
 
 
 class User(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    saved_opportunities: Mapped[list["UserSavedOpportunity"]] = relationship(
+        "UserSavedOpportunity",
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
 
 
 class LinkExternalUser(ApiSchemaTable, TimestampMixin):
@@ -60,3 +68,17 @@ class LoginGovState(ApiSchemaTable, TimestampMixin):
 
     # https://openid.net/specs/openid-connect-core-1_0.html#NonceNotes
     nonce: Mapped[uuid.UUID]
+
+
+class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_saved_opportunity"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+
+    user: Mapped[User] = relationship(User, back_populates="saved_opportunities")
+    opportunity: Mapped[Opportunity] = relationship(
+        "Opportunity", back_populates="saved_opportunities_by_users"
+    )
