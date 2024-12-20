@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -67,7 +67,7 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_saved_opportunity"
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
-    opportunity_id: Mapped[int] = mapped_column(
+    opportunity_id: Mapped[BigInteger] = mapped_column(
         ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
 
