@@ -1650,6 +1650,48 @@ class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
 
+class ForeignTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
+    class Meta:
+        model = foreign.opportunity.TsynopsisAttachment
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            att_revision_number=None,
+            att_type=None,
+            file_lob=None,
+            creator_id=None,
+            last_upd_id=None,
+            syn_att_folder_id=None,
+        )
+
+    syn_att_id: factory.Sequence(lambda n: n)
+    opportunity_id: int = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    mime_type = factory.Faker("mime_type")
+    link_url = factory.Faker("link_url")
+    file_name = factory.Faker("file_name")
+    file_desc = factory.Faker("sentence")
+    file_lob_size = factory.Faker("random_int", min=1000, max=10000000)
+
+    create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    created_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    last_upd_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    creator_id = factory.Faker("creator_id")
+    last_upd_id = factory.Faker("last_upd_id")
+
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, extracted):
+        if extracted:
+            self.my_attachment = extracted
+        else:
+            self.my_attachment = b'Test attachment'
+
 ##
 # Pseudo-factories
 ##
