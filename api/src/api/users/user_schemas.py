@@ -75,3 +75,7 @@ class UserSaveOpportunityRequestSchema(Schema):
 
 class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
