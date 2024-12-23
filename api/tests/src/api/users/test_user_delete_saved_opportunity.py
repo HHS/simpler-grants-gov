@@ -55,3 +55,32 @@ def test_user_delete_saved_opportunity(
 
     assert response.status_code == 404
     assert response.json["message"] == "Saved opportunity not found"
+
+
+def test_user_delete_other_users_saved_opportunity(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that a user cannot delete another user's saved opportunity"""
+    # Create another user and save an opportunity for them
+    other_user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+    saved = UserSavedOpportunity(
+        user_id=other_user.user_id, opportunity_id=opportunity.opportunity_id
+    )
+    db_session.add(saved)
+    db_session.commit()
+
+    # Try to delete the other user's saved opportunity
+    response = client.delete(
+        f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert response.json["message"] == "Saved opportunity not found"
+
+    # Verify the saved opportunity still exists
+    saved_opportunity = db_session.query(UserSavedOpportunity).first()
+    assert saved_opportunity is not None
+    assert saved_opportunity.user_id == other_user.user_id
+    assert saved_opportunity.opportunity_id == opportunity.opportunity_id
