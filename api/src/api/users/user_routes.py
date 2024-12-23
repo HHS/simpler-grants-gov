@@ -6,11 +6,16 @@ import flask
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api import response
+from src.api.opportunities_v1.opportunity_schemas import (
+    SavedOpportunityResponseV1Schema,
+    SavedOpportunitySummaryV1Schema,
+)
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserGetResponseSchema,
+    UserSavedOpportunitiesResponseSchema,
     UserSaveOpportunityRequestSchema,
     UserSaveOpportunityResponseSchema,
     UserTokenLogoutResponseSchema,
@@ -20,6 +25,7 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
+from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_user import get_user
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
@@ -184,3 +190,50 @@ def user_save_opportunity(
     )
 
     return response.ApiResponse(message="Success")
+
+
+@user_blueprint.get("/<uuid:user_id>/saved-opportunities")
+@user_blueprint.output(UserSavedOpportunitiesResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> dict:
+    logger.info("GET /v1/users/:user_id/saved-opportunities")
+
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    # Get all saved opportunities for the user with their related opportunity data
+    saved_opportunities = get_saved_opportunities(db_session, user_id)
+
+    # Format the response data
+    opportunities_data = []
+    for saved in saved_opportunities:
+        opp = saved.opportunity
+        summary = opp.summary
+
+        # Create the summary dict if summary exists
+        summary_data = None
+        if summary:
+            summary_data = {
+                "post_date": summary.post_date,
+                "close_date": summary.close_date,
+                "is_forecast": summary.is_forecast,
+            }
+
+        # Add the opportunity data
+        opportunities_data.append(
+            {
+                "opportunity_id": opp.opportunity_id,
+                "opportunity_title": opp.opportunity_title,
+                "opportunity_status": (
+                    opp.opportunity_status.value if opp.opportunity_status else None
+                ),
+                "summary": summary_data,
+            }
+        )
+
+    return {"message": "Success", "data": opportunities_data}
