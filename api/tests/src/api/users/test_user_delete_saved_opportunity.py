@@ -1,8 +1,8 @@
 import pytest
 
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
 from tests.src.db.models.factories import OpportunityFactory, UserFactory
-from src.auth.api_jwt_auth import create_jwt_for_user
 
 
 @pytest.fixture

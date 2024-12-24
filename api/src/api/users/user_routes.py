@@ -21,8 +21,8 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
-from src.services.users.get_user import get_user
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
+from src.services.users.get_user import get_user
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
