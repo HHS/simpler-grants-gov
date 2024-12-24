@@ -1,5 +1,3 @@
-import uuid
-
 import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user

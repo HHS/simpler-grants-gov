@@ -6,10 +6,6 @@ import flask
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api import response
-from src.api.opportunities_v1.opportunity_schemas import (
-    SavedOpportunityResponseV1Schema,
-    SavedOpportunitySummaryV1Schema,
-)
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
