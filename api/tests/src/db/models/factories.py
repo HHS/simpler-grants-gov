@@ -342,14 +342,6 @@ class OpportunityAttachmentFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
 
-    # Set non-model fields after creation
-    @factory.post_generation
-    def my_attachments(self, extracted):
-        if extracted:
-            self.my_attachment= extracted
-        else:
-            self.my_attachment = b'Test attachment'
-
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
@@ -443,6 +435,12 @@ class OpportunityFactory(BaseFactory):
             created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
             updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
         )
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
 
 
 class OpportunitySummaryFactory(BaseFactory):
@@ -1171,6 +1169,14 @@ class StagingTopportunityFactory(TopportunityFactory, AbstractStagingFactory):
             category_explanation=None,
         )
 
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
+        else:
+            self.my_attachment = b'Test attachment'
+
 
 class StagingTopportunityCfdaFactory(TopportunityCfdaFactory, AbstractStagingFactory):
     class Meta:
@@ -1380,7 +1386,7 @@ class StagingTgroupsFactory(AbstractStagingFactory):
 
 class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
     class Meta:
-        model = staging.opportunity.TsynopsisAttachment
+        model = staging.attachment.TsynopsisAttachment
 
     class Params:
         # Trait to set all nullable fields to None
@@ -1417,8 +1423,6 @@ class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingF
     def my_attachment(self, extracted):
         if extracted:
             self.my_attachment = extracted
-        else:
-            self.my_attachment = b'Test attachment'
 
 ####################################
 # Transfer Table Factories
@@ -1483,6 +1487,12 @@ class ForeignTopportunityFactory(TopportunityFactory):
         factory_related_name="opportunity",
         size=lambda: random.randint(1, 3),
     )
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
 
 
 class ForeignTopportunityCfdaFactory(TopportunityCfdaFactory):
@@ -1652,7 +1662,7 @@ class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
 
 class ForeignTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
     class Meta:
-        model = foreign.opportunity.TsynopsisAttachment
+        model = foreign.attachment.tsynopsisattachment
 
     class Params:
         # Trait to set all nullable fields to None
@@ -1682,15 +1692,6 @@ class ForeignTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingF
     )
     creator_id = factory.Faker("creator_id")
     last_upd_id = factory.Faker("last_upd_id")
-
-
-    # Set non-model fields after creation
-    @factory.post_generation
-    def my_attachment(self, extracted):
-        if extracted:
-            self.my_attachment = extracted
-        else:
-            self.my_attachment = b'Test attachment'
 
 ##
 # Pseudo-factories
