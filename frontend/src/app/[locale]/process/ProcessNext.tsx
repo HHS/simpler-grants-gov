@@ -37,22 +37,38 @@ const ProcessNext = () => {
                   </p>
                 ),
                 linkGithub3045: (chunks) => (
-                  <Link href={`${ExternalRoutes.GITHUB_REPO}/issues/3045`}>
+                  <Link
+                    target="_blank"
+                    className="usa-link--external"
+                    href={`${ExternalRoutes.GITHUB_REPO}/issues/3045`}
+                  >
                     {chunks}
                   </Link>
                 ),
                 linkGithub2875: (chunks) => (
-                  <Link href={`${ExternalRoutes.GITHUB_REPO}/issues/2875`}>
+                  <Link
+                    target="_blank"
+                    className="usa-link--external"
+                    href={`${ExternalRoutes.GITHUB_REPO}/issues/2875`}
+                  >
                     {chunks}
                   </Link>
                 ),
                 linkGithub2640: (chunks) => (
-                  <Link href={`${ExternalRoutes.GITHUB_REPO}/issues/2640`}>
+                  <Link
+                    target="_blank"
+                    className="usa-link--external"
+                    href={`${ExternalRoutes.GITHUB_REPO}/issues/2640`}
+                  >
                     {chunks}
                   </Link>
                 ),
                 linkGithub3348: (chunks) => (
-                  <Link href={`${ExternalRoutes.GITHUB_REPO}/issues/3348`}>
+                  <Link
+                    target="_blank"
+                    className="usa-link--external"
+                    href={`${ExternalRoutes.GITHUB_REPO}/issues/3348`}
+                  >
                     {chunks}
                   </Link>
                 ),
@@ -80,6 +96,15 @@ const ProcessNext = () => {
               );
             })}
           </IconList>
+          <p>
+            <Link
+              target="_blank"
+              className="usa-link--external"
+              href={`${ExternalRoutes.GITHUB_REPO}/issues?q=is%3Aissue%20type%3ADeliverable%20`}
+            >
+              {t("link")}
+            </Link>
+          </p>
         </Grid>
       </Grid>
     </GridContainer>

@@ -38,6 +38,8 @@ const ProcessProgress = () => {
                 ),
                 linkWikiInvolved: (chunks) => (
                   <Link
+                    target="_blank"
+                    className="usa-link--external"
                     href={`${ExternalRoutes.WIKI}/collaborating/get-involved`}
                   >
                     {chunks}

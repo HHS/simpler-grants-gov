@@ -20,16 +20,16 @@ export const mockMessages = {
       list: [
         {
           title: "test title",
-          content: "test content"
-        }
+          content: "test content",
+        },
       ],
     },
     next: {
       list: [
         {
           title: "test title",
-          content: "test content"
-        }
+          content: "test content",
+        },
       ],
     },
   },

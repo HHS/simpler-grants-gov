@@ -203,7 +203,7 @@ export const messages = {
       title_2:
         "Are there challenges you’ve experienced that aren’t captured here?",
       paragraph_3:
-        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates <arrowUpRightFromSquare></arrowUpRightFromSquare></subscribe></strong> to be notified of upcoming user research efforts.",
+        "If you would like to share your experiences and challenges as either an applicant or grantmaker, reach out to us at <strong><email>simpler@grants.gov</email></strong> or <strong><subscribe>sign up for project updates</subscribe></strong> to be notified of upcoming user research efforts.",
       boxes: [
         {
           title: "Digital connectivity",
@@ -332,6 +332,7 @@ export const messages = {
     },
     next: {
       title: "What's happening next",
+      link: "View all of our deliverables on GitHub",
       list: [
         {
           title: "Authenticate via Login.gov",
