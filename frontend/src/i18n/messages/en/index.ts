@@ -294,6 +294,68 @@ export const messages = {
         },
       ],
     },
+    progress: {
+      title: "Our progress so far",
+      list: [
+        {
+          title: "RESTful API",
+          content:
+            "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+        },
+        {
+          title: "Code Challenge pilot",
+          content:
+            "We’re excited to announce the successful pilot of the Collaborative Code & Design Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.<p><linkWikiInvolved>Get involved in our open-source community</linkWikiInvolved></p>",
+        },
+        {
+          title: "Search interface launch",
+          content:
+            "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.<p><linkSearch>Try the new simpler search</linkSearch></p>",
+        },
+
+        {
+          title: "Co-Design Group recruitment",
+          content:
+            "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
+        },
+        {
+          title: "Opportunity Listing",
+          content:
+            "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+        },
+        {
+          title: "Search UI usability testing",
+          content:
+            "We’ve conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
+        },
+      ],
+    },
+    next: {
+      title: "What's happening next",
+      list: [
+        {
+          title: "Authenticate via Login.gov",
+          content:
+            "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
+        },
+        {
+          title: "Search & Opportunity Listing improvements",
+          content:
+            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
+        },
+        {
+          title:
+            "Full support for Opportunity Listing attachments (NOFOs/downloads)",
+          content:
+            "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+        },
+        {
+          title: "Simpler application workflow prototype",
+          content:
+            "We will create a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we'll prototype an application form with persistent data storage and scope a pilot for a small subset of opportunities.<p><linkGithub3348>Follow #3348 on GitHub</linkGithub3348></p>",
+        },
+      ],
+    },
     milestones: {
       tag: "The high-level roadmap",
       high_level_roadmap_items: {
