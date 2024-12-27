@@ -83,7 +83,6 @@ export const messages = {
     meta_description:
       "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     goal: {
-      title: "The goal",
       paragraph_1:
         "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
       title_2: "Grant seekers & applicants",
@@ -92,17 +91,17 @@ export const messages = {
       title_3: "Federal grantmaking agencies",
       paragraph_3:
         "We’re making it easier for you to post and share funding opportunities, and help your communities find the funding they need.",
-      cta: "Sign up for project updates",
+      cta: "Subscribe for project updates",
     },
     process_and_research: {
       title_1: "The process",
       title_2: "The research",
       paragraph_1:
-        "This project is transparent, iterative, and agile. All of the code we’re writing is open source and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works and what can be improved to inform what happens next.",
+        "This project is transparent, iterative, and agile. All of the code we’re writing is open source, and our roadmap is public. As we release new versions, you can try out functional software and give us feedback on what works, what can be improved, and what should happen next.",
       paragraph_2:
-        "We've conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. And you can sign up to participate in future research. Ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
-      cta_1: "Learn about what’s happening",
-      cta_2: "Learn more and sign up to participate",
+        "We conduct extensive research to gather insights from applicants, potential applicants, and grantmakers. You can sign up to participate and help inform and inspire new features as we build a simpler Grants.gov together.",
+      cta_1: "Learn about our progress",
+      cta_2: "Learn more about our research",
     },
     fo_title: "Improvements to funding opportunity announcements",
     fo_paragraph_1:
@@ -134,7 +133,7 @@ export const messages = {
     intro: {
       title: "Our existing research",
       content:
-        "We conducted extensive research in 2023 to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
+        "We conducted extensive research to gather insights from applicants, potential applicants, and grantmakers. We’re using these findings to guide our work. And your ongoing feedback will inform and inspire new features as we build a simpler Grants.gov together.",
     },
     methodology: {
       title: "The methodology",
@@ -428,7 +427,7 @@ export const messages = {
   Footer: {
     agency_name: "Grants.gov",
     agency_contact_center: "Grants.gov Program Management Office",
-    telephone: "1-877-696-6775",
+    telephone: "1-800-518-4726",
     return_to_top: "Return to top",
     link_x_twitter: "X (Twitter)",
     link_youtube: "YouTube",
