@@ -16,8 +16,21 @@ export const mockMessages = {
     intro: {
       boxes: ["firstKey"],
     },
-    milestones: {
-      high_level_roadmap_items: ["firstIcon"],
+    progress: {
+      list: [
+        {
+          title: "test title",
+          content: "test content"
+        }
+      ],
+    },
+    next: {
+      list: [
+        {
+          title: "test title",
+          content: "test content"
+        }
+      ],
     },
   },
   Research: {

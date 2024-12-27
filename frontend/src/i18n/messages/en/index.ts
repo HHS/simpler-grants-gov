@@ -300,7 +300,7 @@ export const messages = {
         {
           title: "RESTful API",
           content:
-            "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
+            "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
         },
         {
           title: "Code Challenge pilot",
