@@ -47,13 +47,9 @@ test("can view banner and return to top after scrolling to the bottom", async ({
 });
 
 test("can view the 'Search interface launch'", async ({ page }) => {
-  await page
-    .getByRole("link", { name: "Try the new simpler search" })
-    .click();
+  await page.getByRole("link", { name: "Try the new simpler search" }).click();
 
-  await expect(page).toHaveURL(
-    /search/,
-  );
+  await expect(page).toHaveURL(/search/);
 });
 
 test("can view the 'get involved' link", async ({ page }) => {
@@ -61,7 +57,5 @@ test("can view the 'get involved' link", async ({ page }) => {
     .getByRole("link", { name: "Get involved in our open-source community" })
     .click();
 
-  await expect(page).toHaveTitle(
-    /Process | Simpler.Grants.gov/,
-  );
+  await expect(page).toHaveTitle(/Process | Simpler.Grants.gov/);
 });
