@@ -96,7 +96,7 @@ const ProcessNext = () => {
               );
             })}
           </IconList>
-          <p>
+          <h3>
             <Link
               target="_blank"
               className="usa-link--external"
@@ -104,7 +104,7 @@ const ProcessNext = () => {
             >
               {t("link")}
             </Link>
-          </p>
+          </h3>
         </Grid>
       </Grid>
     </GridContainer>
