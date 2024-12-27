@@ -21,7 +21,7 @@ const ProcessProgress = () => {
   const keys = Object.keys(messages.Process.progress.list);
 
   return (
-    <GridContainer className="grid-container padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-6 padding-top-0 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-light">
+    <GridContainer className="grid-container padding-y-4 tablet:padding-y-3 desktop-lg:padding-y-6 padding-top-0 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-light">
       <h2 className="margin-bottom-0 tablet-lg:font-sans-l desktop-lg:font-sans-xl margin-top-0">
         {t("title")}
       </h2>
