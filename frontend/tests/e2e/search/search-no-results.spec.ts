@@ -2,7 +2,7 @@ import { expect, Page, test } from "@playwright/test";
 import { BrowserContextOptions } from "playwright-core";
 
 import {
-  expectURLContainsQueryParam,
+  expectURLContainsQueryParamValue,
   fillSearchInputAndSubmit,
   generateRandomString,
 } from "./searchSpecUtil";
@@ -23,7 +23,7 @@ test.describe("Search page tests", () => {
 
     await fillSearchInputAndSubmit(searchTerm, page);
     await new Promise((resolve) => setTimeout(resolve, 3250));
-    expectURLContainsQueryParam(page, "query", searchTerm);
+    expectURLContainsQueryParamValue(page, "query", searchTerm);
 
     // eslint-disable-next-line testing-library/prefer-screen-queries
     const resultsHeading = page.getByRole("heading", {
