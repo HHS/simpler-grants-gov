@@ -95,7 +95,11 @@ export class FeatureFlagsManager {
   */
   get featureFlags(): FeatureFlags {
     // eslint-disable-next-line
-    console.log("$$$ in manager", this.featureFlagsFromEnvironment);
+    console.log("$$$ in manager", {
+      ...this.defaultFeatureFlags,
+      ...this.featureFlagsFromEnvironment,
+      ...this.featureFlagsCookie,
+    });
     return {
       ...this.defaultFeatureFlags,
       ...this.featureFlagsFromEnvironment,
@@ -191,22 +195,37 @@ export class FeatureFlagsManager {
    * would enable `showSite` and disable `enableClaimFlow`.
    */
   middleware(request: NextRequest, response: NextResponse): NextResponse {
+    // handle query param
     const paramValue = request.nextUrl.searchParams.get(
       FeatureFlagsManager.FEATURE_FLAGS_KEY,
     );
 
-    const featureFlags =
+    const featureFlagsFromQuery =
       paramValue === "reset"
         ? this.defaultFeatureFlags
         : this.parseFeatureFlagsFromString(paramValue);
-    if (Object.keys(featureFlags).length === 0) {
+
+    // no need to set cookie if no feature flags are set
+    if (
+      Object.keys(featureFlagsFromQuery).length === 0 &&
+      this.featureFlags === this._defaultFeatureFlags
+    ) {
       // No valid feature flags specified
       return response;
     }
+
+    const featureFlags = {
+      ...this.featureFlags,
+      ...featureFlagsFromQuery,
+    };
+
+    console.log("$$$ setting feature flag cookie in middleware", featureFlags);
+    // set cookie
     Object.entries(featureFlags).forEach(([flagName, flagValue]) => {
       this.setFeatureFlagCookie(flagName, flagValue);
     });
     this.setCookie(JSON.stringify(this.featureFlagsCookie), response.cookies);
+
     return response;
   }
 

@@ -29,7 +29,6 @@ const withFeatureFlag = <P, R>(
         cookies: cookies(),
         envVarFlags: featureFlags,
       });
-
       if (
         featureFlagsManager.isFeatureEnabled(
           featureFlagName,

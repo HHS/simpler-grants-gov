@@ -42,7 +42,6 @@ const i18nMiddleware = createIntlMiddleware({
 
 export default function middleware(request: NextRequest): NextResponse {
   let response = i18nMiddleware(request);
-
   const featureFlagsManager = new FeatureFlagsManager({
     cookies: request.cookies,
     envVarFlags: featureFlags,
