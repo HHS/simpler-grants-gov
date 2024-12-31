@@ -7,7 +7,7 @@ import { createContext } from "react";
 
 export const FeatureFlagContext = createContext({} as FeatureFlags);
 
-export default function ClientEnvProvider({
+export default function FeatureFlagProvider({
   children,
   envVarFlags,
 }: {

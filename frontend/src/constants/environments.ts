@@ -11,20 +11,19 @@ const {
   API_AUTH_TOKEN,
   NEXT_BUILD,
   SESSION_SECRET,
-  NEXT_PUBLIC_BASE_URL, // can we get rid of this or move it over?
-  NEXT_PUBLIC_FEATURE_SEARCH_OFF,
-  NEXT_PUBLIC_FEATURE_OPPORTUNITY_OFF,
-  NEXT_PUBLIC_FEATURE_AUTH_OFF,
+  NEXT_PUBLIC_BASE_URL, // can we get rid of this?
+  FEATURE_SEARCH_OFF,
+  FEATURE_OPPORTUNITY_OFF,
+  FEATURE_AUTH_OFF,
 } = process.env;
 
-// rename this to serverSideFeatureFlags
 export const featureFlags = {
-  opportunityOff: stringToBoolean(NEXT_PUBLIC_FEATURE_OPPORTUNITY_OFF),
-  searchOff: stringToBoolean(NEXT_PUBLIC_FEATURE_SEARCH_OFF),
-  authOff: stringToBoolean(NEXT_PUBLIC_FEATURE_AUTH_OFF),
+  opportunityOff: stringToBoolean(FEATURE_OPPORTUNITY_OFF),
+  searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
+  authOff: stringToBoolean(FEATURE_AUTH_OFF),
 };
 
-console.log("$$$ server side env", NEXT_PUBLIC_FEATURE_AUTH_OFF);
+console.log("$$$ server side env", FEATURE_AUTH_OFF);
 
 // home for all interpreted server side environment variables
 export const environment: { [key: string]: string } = {

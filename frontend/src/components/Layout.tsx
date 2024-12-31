@@ -1,5 +1,5 @@
 import pick from "lodash/pick";
-import { clientSideFeatureFlags } from "src/constants/clientEnvironment";
+import { featureFlags } from "src/constants/environments";
 import FeatureFlagProvider from "src/services/featureFlags/FeatureFlagProvider";
 
 import {
@@ -18,24 +18,13 @@ type Props = {
   locale: string;
 };
 
-const UncachedHeader = ({ locale }: { locale: string }) => {
-  console.log("$$$$ in uncached header", clientSideFeatureFlags);
-  const messages = useMessages();
-  return (
-    <NextIntlClientProvider locale={locale} messages={pick(messages, "Header")}>
-      <FeatureFlagProvider envVarFlags={clientSideFeatureFlags}>
-        <Header locale={locale} />
-      </FeatureFlagProvider>
-    </NextIntlClientProvider>
-  );
-};
-
 export default function Layout({ children, locale }: Props) {
   setRequestLocale(locale);
 
   const t = useTranslations();
+  const messages = useMessages();
   // eslint-disable-next-line
-  console.log("$$$$ in layout", clientSideFeatureFlags);
+  console.log("$$$$ in layout", featureFlags);
 
   return (
     // Stick the footer to the bottom of the page
@@ -43,7 +32,14 @@ export default function Layout({ children, locale }: Props) {
       <a className="usa-skipnav" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <UncachedHeader locale={locale} />
+      <NextIntlClientProvider
+        locale={locale}
+        messages={pick(messages, "Header")}
+      >
+        <FeatureFlagProvider envVarFlags={featureFlags}>
+          <Header locale={locale} />
+        </FeatureFlagProvider>
+      </NextIntlClientProvider>
       <main id="main-content">{children}</main>
       <Footer />
       <GrantsIdentifier />
