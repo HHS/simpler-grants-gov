@@ -10,6 +10,7 @@
  */
 
 import {
+  FEATURE_FLAGS_KEY,
   FeatureFlags,
   FeatureFlagsManager,
 } from "src/services/FeatureFlagManager";
@@ -21,9 +22,7 @@ import {
 export function mockFeatureFlagsCookie(cookieValue: FeatureFlags) {
   Object.defineProperty(window.document, "cookie", {
     writable: true,
-    value: `${FeatureFlagsManager.FEATURE_FLAGS_KEY}=${JSON.stringify(
-      cookieValue,
-    )}`,
+    value: `${FEATURE_FLAGS_KEY}=${JSON.stringify(cookieValue)}`,
   });
 }
 

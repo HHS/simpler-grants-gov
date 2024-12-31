@@ -1,60 +1,59 @@
-import Cookies from "js-cookie";
-import { featureFlags } from "src/constants/environments";
-import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
-import { FeatureFlagContext } from "src/services/featureFlags/FeatureFlagProvider";
+"use client";
 
-import { useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { isBoolean } from "lodash";
+import {
+  FEATURE_FLAGS_KEY,
+  getCookieExpiration,
+} from "src/services/FeatureFlagManager";
+
+import { useCallback, useState } from "react";
 
 /**
- * React hook for reading and managing feature flags in client-side code.
+ * needs to be able to
+ *  - set the cookie
+ *  - read the cookie
  *
- * ```
- * function MyComponent() {
- *   const {
- *     featureFlagsManager,  // An instance of FeatureFlagsManager
- *     mounted,  // Useful for hydration
- *     setFeatureFlag,  // Proxy for featureFlagsManager.setFeatureFlagCookie that handles updating state
- *   } = useFeatureFlags()
- *
- *   if (featureFlagsManager.isFeatureEnabled("someFeatureFlag")) {
- *     // Do something
- *   }
- *
- *   if (!mounted) {
- *     // To allow hydration
- *     return null
- *   }
- *
- *   return (
- *     ...
- *   )
- * }
- * ```
+ * does not need access to anything else
  */
 export function useFeatureFlags() {
-  const envVarFlags = useContext(FeatureFlagContext);
-  // eslint-disable-next-line
-  console.log("$$$ in hook", envVarFlags);
-  const [featureFlagsManager, setFeatureFlagsManager] = useState(
-    new FeatureFlagsManager({ cookies: Cookies, envVarFlags }),
+  const [featureFlags, setFeatureFlags] = useState(
+    JSON.parse(Cookies.get(FEATURE_FLAGS_KEY) || "{}"),
   );
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const setFeatureFlag = useCallback(
+    (flagName: string, value: boolean) => {
+      const newFlags = {
+        ...featureFlags,
+        [flagName]: value,
+      };
+      console.log("$$$ setting flag client side", newFlags);
+      setFeatureFlags(newFlags);
+      Cookies.set(FEATURE_FLAGS_KEY, JSON.stringify(newFlags), {
+        expires: getCookieExpiration(),
+      });
+    },
+    [featureFlags, setFeatureFlags],
+  );
 
-  function setFeatureFlag(name: string, value: boolean) {
-    featureFlagsManager.setFeatureFlagCookie(name, value);
-    setFeatureFlagsManager(
-      new FeatureFlagsManager({ cookies: Cookies, envVarFlags: featureFlags }),
-    );
-  }
+  const checkFeatureFlag = useCallback(
+    (flagName: string): boolean => {
+      const value = featureFlags[flagName];
+      console.log("$$$ reading flag client side", flagName, value);
+      if (!isBoolean(value)) {
+        // why is this running on build?
+        // cookie will not be available at build time\
+        // if this will go through the build we should figure out how to avoid polluting the logs
+        console.error("Unknown or misconfigured feature flag: ", flagName);
+      }
+      return value;
+    },
+    [featureFlags],
+  );
 
   return {
-    featureFlagsManager,
-    mounted,
     setFeatureFlag,
-    currentFeatureFlags: featureFlagsManager.featureFlags,
+    checkFeatureFlag,
+    featureFlags,
   };
 }

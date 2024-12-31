@@ -32,14 +32,7 @@ export default function Layout({ children, locale }: Props) {
       <a className="usa-skipnav" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <NextIntlClientProvider
-        locale={locale}
-        messages={pick(messages, "Header")}
-      >
-        <FeatureFlagProvider envVarFlags={featureFlags}>
-          <Header locale={locale} />
-        </FeatureFlagProvider>
-      </NextIntlClientProvider>
+      <Header locale={locale} />
       <main id="main-content">{children}</main>
       <Footer />
       <GrantsIdentifier />
