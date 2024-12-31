@@ -1,4 +1,4 @@
-import { environment } from "src/constants/environments";
+import { environment, featureFlags } from "src/constants/environments";
 import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -25,7 +25,10 @@ const withFeatureFlag = <P, R>(
   ) => {
     const searchParams = props.searchParams || {};
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
-      const featureFlagsManager = new FeatureFlagsManager(cookies());
+      const featureFlagsManager = new FeatureFlagsManager({
+        cookies: cookies(),
+        envVarFlags: featureFlags,
+      });
 
       if (
         featureFlagsManager.isFeatureEnabled(

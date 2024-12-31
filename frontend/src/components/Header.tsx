@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -169,6 +170,16 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
+  // const featureFlags = useContext(FeatureFlagContext)
+  const { currentFeatureFlags } = useFeatureFlags();
+  // eslint-disable-next-line
+  console.log("$$$$ in header", currentFeatureFlags);
+  const hideLoginLink = !!currentFeatureFlags.authOff;
+
+  // const { featureFlagsManager } = useFeatureFlags();
+
+  // const hideLoginLink = featureFlagsManager.isFeatureEnabled("authOff");
+
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -218,11 +229,13 @@ const Header = ({ logoPath, locale }: Props) => {
               className="usa-menu-btn"
             />
           </div>
-          <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-            <div className="usa-nav__primary-item border-0">
-              <LoginLink navLoginLinkText={t("nav_link_login")} />
+          {!hideLoginLink && (
+            <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+              <div className="usa-nav__primary-item border-0">
+                <LoginLink navLoginLinkText={t("nav_link_login")} />
+              </div>
             </div>
-          </div>
+          )}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
