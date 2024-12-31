@@ -1,4 +1,4 @@
-import { FeatureFlags } from "src/services/FeatureFlagManager";
+export type FeatureFlags = { [name: string]: boolean };
 
 // Feature flags should default to false
 export const defaultFeatureFlags: FeatureFlags = {

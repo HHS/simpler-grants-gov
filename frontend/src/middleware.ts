@@ -5,7 +5,7 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import { defaultLocale, locales } from "src/i18n/config";
-import { featureFlagsManager } from "src/services/FeatureFlagManager";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";

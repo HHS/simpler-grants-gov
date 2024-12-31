@@ -1,30 +1,36 @@
 import { act, renderHook } from "@testing-library/react";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { mockDefaultFeatureFlags } from "src/utils/testing/FeatureFlagTestUtils";
+import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
+
+const mockSetCookie = jest.fn();
+const mockGetCookie = jest.fn();
+
+jest.mock("js-cookie", () => ({
+  get: () => mockGetCookie(),
+  set: (...args) => mockSetCookie(...args),
+}));
 
 describe("useFeatureFlags", () => {
   const MOCK_FEATURE_FLAG_NAME = "mockFeatureName";
   const MOCK_FEATURE_FLAG_INITIAL_VALUE = true;
 
-  beforeEach(() => {
-    mockDefaultFeatureFlags({
-      [MOCK_FEATURE_FLAG_NAME]: MOCK_FEATURE_FLAG_INITIAL_VALUE,
-    });
-  });
-
-  test("should allow you to update feature flags using FeatureFlagManager", () => {
+  test("should allow you to update feature flags on client cookie", () => {
     const { result } = renderHook(() => useFeatureFlags());
 
-    const { featureFlagsManager, setFeatureFlag } = result.current;
+    const { setFeatureFlag } = result.current;
 
-    expect(featureFlagsManager.isFeatureEnabled(MOCK_FEATURE_FLAG_NAME)).toBe(
-      MOCK_FEATURE_FLAG_INITIAL_VALUE,
-    );
     act(() => {
       setFeatureFlag(MOCK_FEATURE_FLAG_NAME, !MOCK_FEATURE_FLAG_INITIAL_VALUE);
     });
-    expect(featureFlagsManager.isFeatureEnabled(MOCK_FEATURE_FLAG_NAME)).toBe(
-      !MOCK_FEATURE_FLAG_INITIAL_VALUE,
+
+    expect(mockSetCookie).toHaveBeenCalledWith(
+      FEATURE_FLAGS_KEY,
+      JSON.stringify({
+        [MOCK_FEATURE_FLAG_NAME]: !MOCK_FEATURE_FLAG_INITIAL_VALUE,
+      }),
+      {
+        expires: expect.any(Date) as Date,
+      },
     );
   });
 });

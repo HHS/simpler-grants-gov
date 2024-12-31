@@ -8,12 +8,9 @@
  * default `jsdom` test environment or specify the `node` environments. Otherwise, they would need
  * to manually specify the custom `./src/utils/testing/jsdomNodeEnvironment.ts` environment.
  */
-
-import {
-  FEATURE_FLAGS_KEY,
-  FeatureFlags,
-  FeatureFlagsManager,
-} from "src/services/FeatureFlagManager";
+import { FeatureFlags } from "src/constants/defaultFeatureFlags";
+import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";
+import { FeatureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 
 /**
  * Mock feature flags cookie in `window.document` so that we don't need to mock
