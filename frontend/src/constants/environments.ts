@@ -11,7 +11,7 @@ const {
   API_AUTH_TOKEN,
   NEXT_BUILD,
   SESSION_SECRET,
-  NEXT_PUBLIC_BASE_URL, // can we get rid of this?
+  NEXT_PUBLIC_BASE_URL,
   FEATURE_SEARCH_OFF,
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_AUTH_OFF,
@@ -22,8 +22,6 @@ export const featureFlags = {
   searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
   authOff: stringToBoolean(FEATURE_AUTH_OFF),
 };
-
-console.log("$$$ server side env", FEATURE_AUTH_OFF);
 
 // home for all interpreted server side environment variables
 export const environment: { [key: string]: string } = {
@@ -42,8 +40,4 @@ export const environment: { [key: string]: string } = {
   NEXT_BUILD: NEXT_BUILD || "false",
   SESSION_SECRET: SESSION_SECRET || "",
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
-  // NEXT_PUBLIC_FEATURE_SEARCH_OFF: NEXT_PUBLIC_FEATURE_SEARCH_OFF || "",
-  // NEXT_PUBLIC_FEATURE_OPPORTUNITY_OFF:
-  //   NEXT_PUBLIC_FEATURE_OPPORTUNITY_OFF || "",
-  // NEXT_PUBLIC_FEATURE_AUTH_OFF: NEXT_PUBLIC_FEATURE_AUTH_OFF || "",
 };

@@ -1,12 +1,4 @@
-import pick from "lodash/pick";
-import { featureFlags } from "src/constants/environments";
-import FeatureFlagProvider from "src/services/featureFlags/FeatureFlagProvider";
-
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
+import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 
 import Footer from "src/components/Footer";
@@ -22,9 +14,6 @@ export default function Layout({ children, locale }: Props) {
   setRequestLocale(locale);
 
   const t = useTranslations();
-  const messages = useMessages();
-  // eslint-disable-next-line
-  console.log("$$$$ in layout", featureFlags);
 
   return (
     // Stick the footer to the bottom of the page
