@@ -1,0 +1,14 @@
+# Dockerfile for building opensearch image with Ingest-attachment plugin
+
+# Use OpenSearch base image
+FROM opensearchproject/opensearch:latest
+
+# Set environment variables
+#ENV OPENSEARCH_INITIAL_ADMIN_PASSWORD="myStrongPassword123!"
+
+# Install the Ingest Attachment plugin
+RUN /usr/share/opensearch/bin/opensearch-plugin install --batch ingest-attachment
+#
+## Expose the default ports for OpenSearch (HTTP and Monitoring API)
+#EXPOSE 9200 9600
+
