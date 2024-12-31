@@ -155,15 +155,10 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
-  // const featureFlags = useContext(FeatureFlagContext)
-  const { currentFeatureFlags } = useFeatureFlags();
+  const { checkFeatureFlag } = useFeatureFlags();
   // eslint-disable-next-line
-  console.log("$$$$ in header", currentFeatureFlags);
-  const hideLoginLink = !!currentFeatureFlags.authOff;
-
-  // const { featureFlagsManager } = useFeatureFlags();
-
-  // const hideLoginLink = featureFlagsManager.isFeatureEnabled("authOff");
+  console.log("$$$$ in header", checkFeatureFlag("authOff"));
+  const hideLoginLink = checkFeatureFlag("authOff");
 
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 

@@ -1,5 +1,5 @@
-import { environment, featureFlags } from "src/constants/environments";
-import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+import { environment } from "src/constants/environments";
+import { featureFlagsManager } from "src/services/FeatureFlagManager";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { cookies } from "next/headers";
@@ -25,13 +25,10 @@ const withFeatureFlag = <P, R>(
   ) => {
     const searchParams = props.searchParams || {};
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
-      const featureFlagsManager = new FeatureFlagsManager({
-        cookies: cookies(),
-        envVarFlags: featureFlags,
-      });
       if (
         featureFlagsManager.isFeatureEnabled(
           featureFlagName,
+          cookies(),
           props.searchParams,
         )
       ) {
