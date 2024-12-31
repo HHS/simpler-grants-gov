@@ -3,10 +3,8 @@
  */
 
 import { CookiesStatic } from "js-cookie";
-import { environment } from "src/constants/environments";
 import { featureFlags } from "src/constants/featureFlags";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
-import { camelToSnake } from "src/utils/generalUtils";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,7 +24,7 @@ export type NextServerSideCookies = Partial<{
  *
  *   ```
  *   export default async function handler(request, response) {
- *     const featureFlagsManager = new FeatureFlagsManager(request.cookies)
+ *     const featureFlagsManager = new FeatureFlagsManager({ cookies: request.cookies })
  *     if (featureFlagsManager.isFeatureEnabled("someFeatureFlag")) {
  *       // Do something
  *     }
@@ -41,11 +39,12 @@ export type NextServerSideCookies = Partial<{
  *   state. Here's how you can use it directly.
  *
  *   ```
- *   const featureFlagsManager = new FeatureFlagsManager(Cookies)
+ *   const featureFlagsManager = new FeatureFlagsManager({ cookies: Cookies })
  *   if (featureFlagsManager.isFeatureEnabled("someFeatureflag")) {
  *     // Do something
  *   }
  *   ```
+ *
  */
 export class FeatureFlagsManager {
   static FEATURE_FLAGS_KEY = "_ff";
@@ -56,27 +55,52 @@ export class FeatureFlagsManager {
 
   private _cookies;
 
-  constructor(
+  // pass in env var values at instantiation, as these won't change during runtime
+  // this supports easier integration of the class on the client side, as server side flags can be passed down
+  private _envVarFlags;
+
+  constructor({
+    cookies,
+    envVarFlags,
+  }: {
     cookies?:
       | NextRequest["cookies"]
       | CookiesStatic
       | NextServerSideCookies
-      | ReadonlyRequestCookies,
-  ) {
+      | ReadonlyRequestCookies;
+    envVarFlags: FeatureFlags;
+  }) {
     this._cookies = cookies;
+    this._envVarFlags = envVarFlags;
   }
 
   get defaultFeatureFlags(): FeatureFlags {
     return { ...this._defaultFeatureFlags };
   }
 
-  // The SSR function getServerSideProps provides a Record type for cookie, which excludes
-  // cookie methods like set or get.
-  // likely should be moved out of this class
-  private isCookieARecord(
-    cookies?: typeof this._cookies | NextResponse["cookies"],
-  ): cookies is NextServerSideCookies {
-    return !(cookies && "get" in cookies && typeof cookies.get === "function");
+  get featureFlagsFromEnvironment(): FeatureFlags {
+    return { ...this._envVarFlags };
+  }
+
+  /*
+
+    - Flags set by environment variables are the first override to default values
+    - Flags set in the /dev/feature-flags admin view will be set in the cookie
+    - Flags set in query params will result in the flag value being stored in the cookie
+    - As query param values are set in middleware on each request, query params have the highest precedence
+    - Values set in cookies will be persistent per browser session unless explicitly overwritten
+    - This means that simply removing a query param from a url will not revert the feature flag value to
+    the value specified in environment variable or default, you'll need to clear cookies or open a new private browser
+
+  */
+  get featureFlags(): FeatureFlags {
+    // eslint-disable-next-line
+    console.log("$$$ in manager", this.featureFlagsFromEnvironment);
+    return {
+      ...this.defaultFeatureFlags,
+      ...this.featureFlagsFromEnvironment,
+      ...this.featureFlagsCookie,
+    };
   }
 
   /**
@@ -120,25 +144,6 @@ export class FeatureFlagsManager {
         return this.isValidFeatureFlag(name) && typeof enabled === "boolean";
       }),
     );
-  }
-
-  /*
-
-    - Flags set by environment variables are the first override to default values
-    - Flags set in the /dev/feature-flags admin view will be set in the cookie
-    - Flags set in query params will result in the flag value being stored in the cookie
-    - As query param values are set in middleware on each request, query params have the highest precedence
-    - Values set in cookies will be persistent per browser session unless explicitly overwritten
-    - This means that simply removing a query param from a url will not revert the feature flag value to
-    the value specified in environment variable or default, you'll need to clear cookies or open a new private browser
-
-  */
-  get featureFlags(): FeatureFlags {
-    return {
-      ...this.defaultFeatureFlags,
-      ...this.featureFlagsFromEnvironment,
-      ...this.featureFlagsCookie,
-    };
   }
 
   /**
@@ -203,25 +208,6 @@ export class FeatureFlagsManager {
     });
     this.setCookie(JSON.stringify(this.featureFlagsCookie), response.cookies);
     return response;
-  }
-
-  get featureFlagsFromEnvironment() {
-    return Object.keys(this.defaultFeatureFlags).reduce(
-      (featureFlagsFromEnvironment, flagName) => {
-        // by convention all feature flag env var names start with "FEATURE"
-        // and all app side feature flag names should be in the camel case version of the env var names (minus FEATURE)
-        // ex "FEATURE_SEARCH_OFF" -> "searchOff"
-        const envVarName = `FEATURE_${camelToSnake(flagName).toUpperCase()}`;
-        const envVarValue = environment[envVarName];
-        if (envVarValue)
-          // by convention, any feature flag environment variables should use the exact string "true"
-          // when activating the flag. Negative values are more forgiving, but should be non empty strings
-          featureFlagsFromEnvironment[flagName] = envVarValue === "true";
-
-        return featureFlagsFromEnvironment;
-      },
-      {} as FeatureFlags,
-    );
   }
 
   /**
@@ -304,5 +290,14 @@ export class FeatureFlagsManager {
         expires,
       });
     }
+  }
+
+  // The SSR function getServerSideProps provides a Record type for cookie, which excludes
+  // cookie methods like set or get.
+  // likely should be moved out of this class
+  private isCookieARecord(
+    cookies?: typeof this._cookies | NextResponse["cookies"],
+  ): cookies is NextServerSideCookies {
+    return !(cookies && "get" in cookies && typeof cookies.get === "function");
   }
 }

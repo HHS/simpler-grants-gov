@@ -4,11 +4,12 @@
  * modifying the request or response headers, or responding directly.
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
+import { featureFlags } from "src/constants/environments";
+import { defaultLocale, locales } from "src/i18n/config";
+import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
-
-import { defaultLocale, locales } from "./i18n/config";
-import { FeatureFlagsManager } from "./services/FeatureFlagManager";
 
 export const config = {
   matcher: [
@@ -42,7 +43,10 @@ const i18nMiddleware = createIntlMiddleware({
 export default function middleware(request: NextRequest): NextResponse {
   let response = i18nMiddleware(request);
 
-  const featureFlagsManager = new FeatureFlagsManager(request.cookies);
+  const featureFlagsManager = new FeatureFlagsManager({
+    cookies: request.cookies,
+    envVarFlags: featureFlags,
+  });
   response = featureFlagsManager.middleware(request, response);
 
   return response;

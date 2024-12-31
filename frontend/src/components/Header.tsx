@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -15,6 +16,8 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
@@ -26,6 +29,21 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+const LoginLink = () => {
+  return (
+    <Link
+      href=""
+      className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
+    >
+      <USWDSIcon
+        className="usa-icon margin-right-05 margin-left-neg-05"
+        name="login"
+      />
+      Login
+    </Link>
+  );
+};
 
 const NavLinks = ({
   mobileExpanded,
@@ -137,6 +155,16 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
+  // const featureFlags = useContext(FeatureFlagContext)
+  const { currentFeatureFlags } = useFeatureFlags();
+  // eslint-disable-next-line
+  console.log("$$$$ in header", currentFeatureFlags);
+  const hideLoginLink = !!currentFeatureFlags.authOff;
+
+  // const { featureFlagsManager } = useFeatureFlags();
+
+  // const hideLoginLink = featureFlagsManager.isFeatureEnabled("authOff");
+
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -183,6 +211,13 @@ const Header = ({ logoPath, locale }: Props) => {
               label={t("nav_menu_toggle")}
             />
           </div>
+          {!hideLoginLink && (
+            <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+              <div className="usa-nav__primary-item border-0">
+                <LoginLink />
+              </div>
+            </div>
+          )}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
