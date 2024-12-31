@@ -236,31 +236,18 @@ export class FeatureFlagsManager {
       Object.keys(featureFlagsFromQuery).length === 0 &&
       this.featureFlags === this._defaultFeatureFlags
     ) {
-      console.log("!!! skipping due to same flags");
       // No valid feature flags specified
       return response;
     }
 
     // create new cookie value based on calculated feature flags
-    console.log(
-      "!!! middleware flags",
-      this.featureFlags,
-      getFeatureFlagsFromCookie(request.cookies),
-    );
     const featureFlags = {
       ...this.featureFlags,
       ...getFeatureFlagsFromCookie(request.cookies),
       ...featureFlagsFromQuery,
     };
 
-    console.log("$$$ setting feature flag cookie in middleware", featureFlags);
-
     // set new cookie on response
-
-    // // set cookie
-    // Object.entries(featureFlags).forEach(([flagName, flagValue]) => {
-    //   toggleFeatureFlagCookieValue(flagName, flagValue, );
-    // });
     setCookie(JSON.stringify(featureFlags), response.cookies);
 
     return response;

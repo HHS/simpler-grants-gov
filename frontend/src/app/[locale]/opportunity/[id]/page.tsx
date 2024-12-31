@@ -96,7 +96,6 @@ function emptySummary() {
 }
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
-  console.log("$$$ opp page render");
   const idForParsing = Number(params.id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
   // Opportunity id needs to be a number greater than 1

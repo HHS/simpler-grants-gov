@@ -40,9 +40,5 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
-  let response = i18nMiddleware(request);
-  console.log("!!! running middleware");
-  response = featureFlagsManager.middleware(request, response);
-
-  return response;
+  return featureFlagsManager.middleware(request, i18nMiddleware(request));
 }

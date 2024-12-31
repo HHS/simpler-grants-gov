@@ -171,8 +171,6 @@ const Header = ({ logoPath, locale }: Props) => {
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
   const { checkFeatureFlag } = useFeatureFlags();
-  // eslint-disable-next-line
-  console.log("$$$$ in header", checkFeatureFlag("authOff"));
   const hideLoginLink = checkFeatureFlag("authOff");
 
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
