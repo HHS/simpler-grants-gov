@@ -11,9 +11,9 @@ services:
     networks:
       - default
 
-  opensearch-node:
-    image: opensearchproject/opensearch:latest
-    container_name: opensearch-node
+  opensearch-container:
+    image: opensearch-ingest-attachment
+    container_name: opensearch-container
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
       - node.name=opensearch-node # Name the node that will run in this container
@@ -32,8 +32,8 @@ services:
     volumes:
       - opensearch-data:/usr/share/opensearch/data # Creates volume called opensearch-data and mounts it to the container
     ports:
-      - 9200:9200 # REST API
-      - 9600:9600 # Performance Analyzer
+      - 9201:9200 # REST API
+      - 9601:9600 # Performance Analyzer
     networks:
       - default
 
