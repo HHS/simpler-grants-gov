@@ -45,7 +45,7 @@ services:
     expose:
       - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
     environment:
-      - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
+      - 'OPENSEARCH_HOSTS=["http://opensearch-container:9200"]'
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
     networks:
       - default
@@ -101,7 +101,7 @@ services:
       - .:/api
     depends_on:
       - grants-db
-      - opensearch-node
+      - opensearch-container
       - localstack
       - mock-oauth2-server
     networks:
