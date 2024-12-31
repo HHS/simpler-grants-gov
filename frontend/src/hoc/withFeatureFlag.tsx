@@ -1,5 +1,5 @@
 import { environment } from "src/constants/environments";
-import { featureFlagsManager } from "src/services/FeatureFlagManager";
+import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { cookies } from "next/headers";
