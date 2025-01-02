@@ -100,7 +100,8 @@ def test_swap_alias_index(search_client, generic_index):
     search_client.bulk_upsert(generic_index, records, primary_key_field="id")
 
     # Create a different index that we'll attach to the alias first.
-    tmp_index = f"test-tmp-index-{uuid.uuid4().int}"
+    temp_index_prefix = "test-tmp-index"
+    tmp_index = f"{temp_index_prefix}-{uuid.uuid4().int}"
     search_client.create_index(tmp_index)
     # Add a few records
     tmp_index_records = [
@@ -110,14 +111,18 @@ def test_swap_alias_index(search_client, generic_index):
     search_client.bulk_upsert(tmp_index, tmp_index_records, primary_key_field="id")
 
     # Set the alias
-    search_client.swap_alias_index(tmp_index, alias_name, delete_prior_indexes=True)
+    search_client.swap_alias_index(
+        temp_index_prefix, tmp_index, alias_name, delete_prior_indexes=True
+    )
 
     # Can search by this alias and get records from the tmp index
     resp = search_client.search(alias_name, {}, include_scores=False)
     assert resp.records == tmp_index_records
 
     # Swap the index to the generic one + delete the tmp one
-    search_client.swap_alias_index(generic_index, alias_name, delete_prior_indexes=True)
+    search_client.swap_alias_index(
+        "test-tmp-index", generic_index, alias_name, delete_prior_indexes=True
+    )
 
     resp = search_client.search(alias_name, {}, include_scores=False)
     assert resp.records == records
@@ -140,9 +145,9 @@ def test_index_or_alias_exists(search_client, generic_index):
     alias_index_b = f"test-alias-b-{uuid.uuid4().int}"
     alias_index_c = f"test-alias-c-{uuid.uuid4().int}"
 
-    search_client.swap_alias_index(index_a, alias_index_a)
-    search_client.swap_alias_index(index_b, alias_index_b)
-    search_client.swap_alias_index(index_c, alias_index_c)
+    search_client.swap_alias_index("test-alias-a", index_a, alias_index_a)
+    search_client.swap_alias_index("test-alias-b", index_b, alias_index_b)
+    search_client.swap_alias_index("test-alias-b", index_c, alias_index_c)
 
     # Checking the indexes directly - we expect the index method to return true
     # and the alias method to not
