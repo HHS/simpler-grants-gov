@@ -15,12 +15,17 @@ const {
   FEATURE_SEARCH_OFF,
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_AUTH_OFF,
+  AUTH_LOGIN_URL,
 } = process.env;
 
 export const featureFlags = {
   opportunityOff: stringToBoolean(FEATURE_OPPORTUNITY_OFF),
   searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
   authOff: stringToBoolean(FEATURE_AUTH_OFF),
+};
+
+export const clientEnvVars = {
+  AUTH_LOGIN_URL,
 };
 
 // home for all interpreted server side environment variables
