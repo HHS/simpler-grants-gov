@@ -104,7 +104,7 @@ resource "aws_ssm_parameter" "s3_bucket_arns" {
   for_each = var.s3_buckets
 
   name  = "/buckets/${var.service_name}/${each.key}/arn"
-  type  = "String"
+  type  = "SecureString"
   value = aws_s3_bucket.s3_buckets[each.key].arn
 }
 
@@ -112,6 +112,6 @@ resource "aws_ssm_parameter" "s3_bucket_ids" {
   for_each = var.s3_buckets
 
   name  = "/buckets/${var.service_name}/${each.key}/id"
-  type  = "String"
+  type  = "SecureString"
   value = aws_s3_bucket.s3_buckets[each.key].id
 }
