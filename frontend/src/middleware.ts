@@ -10,6 +10,8 @@ import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManage
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
+import { clientEnvironmentMiddleware } from "./services/clientEnvironmentMiddleware";
+
 export const config = {
   matcher: [
     /*
@@ -40,5 +42,8 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
-  return featureFlagsManager.middleware(request, i18nMiddleware(request));
+  return featureFlagsManager.middleware(
+    request,
+    clientEnvironmentMiddleware(i18nMiddleware(request)),
+  );
 }

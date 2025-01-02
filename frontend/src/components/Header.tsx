@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useEnvironment } from "src/hooks/useEnvironment";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
@@ -139,7 +140,10 @@ const Header = ({ logoPath, locale }: Props) => {
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
   const { checkFeatureFlag } = useFeatureFlags();
+  const { getEnvironmentVariable } = useEnvironment();
+
   const hideLoginLink = checkFeatureFlag("authOff");
+  const authLoginUrl = getEnvironmentVariable("AUTH_LOGIN_URL");
 
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
@@ -187,7 +191,7 @@ const Header = ({ logoPath, locale }: Props) => {
               label={t("nav_menu_toggle")}
             />
           </div>
-          {!hideLoginLink && <span>Auth Enabled</span>}
+          {!hideLoginLink && <span>Auth Enabled - {authLoginUrl}</span>}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
