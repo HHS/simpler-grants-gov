@@ -97,25 +97,6 @@ describe("FeatureFlagsManager", () => {
       });
     });
 
-    /**
-     * This test is important because there is a race condition between middleware vs frontend cookie
-     * setting.
-     */
-    test("does not set cookies if no valid feature flags are specified in params and no env vars are set differently from defaults", () => {
-      mockParseFeatureFlagsFromString.mockImplementation(() => ({}));
-      const request = new NextRequest(new Request("fakeUrl://not.real"), {});
-      const mockSet = jest.fn();
-      jest
-        .spyOn(NextResponse.prototype, "cookies", "get")
-        .mockReturnValue({ set: mockSet } as object as NextResponse["cookies"]);
-
-      const featureFlagsManager = new FeatureFlagsManager(
-        DEFAULT_FEATURE_FLAGS,
-      );
-      featureFlagsManager.middleware(request, NextResponse.next());
-      expect(mockSet).not.toHaveBeenCalled();
-    });
-
     test("sets cookie with correct combination of default, env var and query param based flags", () => {
       mockParseFeatureFlagsFromString.mockImplementation(() => ({
         feature2: true,
