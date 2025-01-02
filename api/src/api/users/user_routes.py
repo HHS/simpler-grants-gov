@@ -205,12 +205,7 @@ def user_delete_saved_opportunity(
         raise_flask_error(401, "Unauthorized user")
 
     with db_session.begin():
-        # Try to find and delete the saved opportunity
-        result = delete_saved_opportunity(db_session, user_id, opportunity_id)
-
-    if result == 0:
-        raise_flask_error(404, "Saved opportunity not found")
-
-    db_session.commit()
+        # Delete the saved opportunity
+        delete_saved_opportunity(db_session, user_id, opportunity_id)
 
     return response.ApiResponse(message="Success")
