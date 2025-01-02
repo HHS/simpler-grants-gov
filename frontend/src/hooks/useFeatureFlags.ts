@@ -42,6 +42,8 @@ export function useFeatureFlags(): {
   const checkFeatureFlag = useCallback(
     (flagName: string): boolean => {
       if (!featureFlags || !Object.keys(featureFlags).length) {
+        // note that this hook will run on the server when building client components server side
+        // but will only return initial default values and will not have access to client side cookies
         // eslint-disable-next-line
         console.debug(
           "Feature flags not present. Likely attempting to run client side hook on server",
@@ -51,6 +53,7 @@ export function useFeatureFlags(): {
       const value = featureFlags[flagName];
       if (!isBoolean(value)) {
         console.error("Unknown or misconfigured feature flag: ", flagName);
+        return false;
       }
       return value;
     },
