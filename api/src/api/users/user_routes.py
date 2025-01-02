@@ -211,6 +211,5 @@ def user_delete_saved_opportunity(
     if result == 0:
         raise_flask_error(404, "Saved opportunity not found")
 
-    db_session.commit()
 
     return response.ApiResponse(message="Success")
