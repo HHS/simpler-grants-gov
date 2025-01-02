@@ -436,12 +436,6 @@ class OpportunityFactory(BaseFactory):
             updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
         )
 
-    # Set non-model fields after creation
-    @factory.post_generation
-    def my_attachment(self, create, extracted):
-        if extracted:
-            self.my_attachment = extracted
-
 
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
