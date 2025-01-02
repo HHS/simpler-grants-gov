@@ -33,7 +33,7 @@ def test_user_get_saved_opportunities(
     client, user, user_auth_token, enable_factory_create, db_session
 ):
     # Create an opportunity and save it for the user
-    opportunity = OpportunityFactory.create()
+    opportunity = OpportunityFactory.create(opportunity_title="Test Opportunity")
     UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
 
     # Make the request

@@ -205,31 +205,4 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
     # Get all saved opportunities for the user with their related opportunity data
     saved_opportunities = get_saved_opportunities(db_session, user_id)
 
-    # Format the response data
-    opportunities_data = []
-    for saved in saved_opportunities:
-        opp = saved.opportunity
-        summary = opp.summary
-
-        # Create the summary dict if summary exists
-        summary_data = None
-        if summary:
-            summary_data = {
-                "post_date": summary.post_date,
-                "close_date": summary.close_date,
-                "is_forecast": summary.is_forecast,
-            }
-
-        # Add the opportunity data
-        opportunities_data.append(
-            {
-                "opportunity_id": opp.opportunity_id,
-                "opportunity_title": opp.opportunity_title,
-                "opportunity_status": (
-                    opp.opportunity_status.value if opp.opportunity_status else None
-                ),
-                "summary": summary_data,
-            }
-        )
-
-    return response.ApiResponse(message="Success", data=opportunities_data)
+    return response.ApiResponse(message="Success", data=saved_opportunities)
