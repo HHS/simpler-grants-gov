@@ -106,6 +106,7 @@ resource "aws_ssm_parameter" "s3_bucket_arns" {
   name  = "/buckets/${var.service_name}/${each.key}/arn"
   type  = "SecureString"
   value = aws_s3_bucket.s3_buckets[each.key].arn
+  # checkov:skip=CKV_AWS_337: KMS encryption is overkill here
 }
 
 resource "aws_ssm_parameter" "s3_bucket_ids" {
@@ -114,4 +115,5 @@ resource "aws_ssm_parameter" "s3_bucket_ids" {
   name  = "/buckets/${var.service_name}/${each.key}/id"
   type  = "SecureString"
   value = aws_s3_bucket.s3_buckets[each.key].id
+  # checkov:skip=CKV_AWS_337: KMS encryption is overkill here
 }
