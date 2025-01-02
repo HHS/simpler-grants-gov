@@ -549,8 +549,12 @@ class SavedOpportunityResponseV1Schema(AbstractResponseSchema):
     opportunity_title = fields.String(
         metadata={"description": "The title of the opportunity", "example": "my title"}
     )
-    opportunity_status = fields.String(
-        metadata={"description": "Current status of the opportunity", "example": "posted"}
+    opportunity_status = fields.Enum(
+        OpportunityStatus,
+        metadata={
+            "description": "The current status of the opportunity",
+            "example": OpportunityStatus.POSTED,
+        },
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
