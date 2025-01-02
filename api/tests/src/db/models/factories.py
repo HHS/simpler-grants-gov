@@ -1401,13 +1401,6 @@ class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingF
     creator_id = factory.Faker("creator_id")
     last_upd_id = factory.Faker("last_upd_id")
 
-
-    # Set non-model fields after creation
-    @factory.post_generation
-    def my_attachment(self, extracted):
-        if extracted:
-            self.my_attachment = extracted
-
 ####################################
 # Transfer Table Factories
 ####################################
