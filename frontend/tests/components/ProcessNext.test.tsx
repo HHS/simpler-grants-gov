@@ -1,12 +1,12 @@
-import ResearchIntro from "src/app/[locale]/research/ResearchIntro";
+import ProcessNext from "src/app/[locale]/process/ProcessNext";
 import { render, screen } from "tests/react-utils";
 
-describe("Research Content", () => {
+describe("Process Content", () => {
   it("Renders without errors", () => {
-    render(<ResearchIntro />);
+    render(<ProcessNext />);
     const ProcessH1 = screen.getByRole("heading", {
-      level: 1,
-      name: /Our existing research/i,
+      level: 2,
+      name: /What's happening/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();

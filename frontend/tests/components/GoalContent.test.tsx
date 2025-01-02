@@ -6,8 +6,8 @@ describe("Goal Content", () => {
   it("Renders without errors", () => {
     render(<GoalContent />);
     const goalH2 = screen.getByRole("heading", {
-      level: 2,
-      name: /The goal?/i,
+      level: 3,
+      name: /Grant seekers & applicants?/i,
     });
 
     expect(goalH2).toBeInTheDocument();
