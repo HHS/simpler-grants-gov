@@ -12,8 +12,9 @@ export default function robots(): MetadataRoute.Robots {
             userAgent: "*",
             allow: "/",
             disallow: [
-              // search is a high cost, low information subset of the opportunity page data
-              "/search",
+              // don't disallow search for now as without a sitemap it's Google's only way of finding stuff
+              // search is a high cost, low information subset of the opportunity page data, which is also available via the Sitemap (soon)
+              // "/search",
               // Prevent crawling of Next.js build files.
               "/_next/",
               "/_next*",
