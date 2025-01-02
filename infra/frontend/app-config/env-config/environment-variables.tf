@@ -63,6 +63,10 @@ locals {
     SESSION_SECRET = {
       manage_method     = "generated"
       secret_store_name = "/${var.app_name}/${var.environment}/session-secret"
-    }
+    },
+    FEATURE_AUTH_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-auth-off"
+    },
   }
 }
