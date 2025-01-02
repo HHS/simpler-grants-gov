@@ -27,7 +27,7 @@ export default function Research({ params: { locale } }: LocalizedPageProps) {
   setRequestLocale(locale);
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />
       <ResearchMethodology />

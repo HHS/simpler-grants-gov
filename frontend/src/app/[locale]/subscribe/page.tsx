@@ -28,7 +28,7 @@ export default function Subscribe({ params: { locale } }: LocalizedPageProps) {
 
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">

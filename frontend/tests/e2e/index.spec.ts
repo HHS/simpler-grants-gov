@@ -38,19 +38,19 @@ test("skips to main content when navigating via keyboard", async ({
     "Firefox's built-in tabbing focuses only on buttons and inputs",
   );
 
-  const header = page.getByTestId("header");
+  const banner = page.getByTestId("govBanner");
   const skipToMainContentLink = page.getByRole("link", {
     name: /skip to main content/i,
   });
 
-  await expect(header).toBeInViewport({ ratio: 1 });
+  await expect(banner).toBeInViewport({ ratio: 1 });
   const key = browserName === "webkit" ? "Alt+Tab" : "Tab";
   await page.keyboard.press(key);
   await expect(skipToMainContentLink).toBeFocused();
   await page.keyboard.press("Enter");
 
-  // Veifies that skipping to main content means the page scrolls past the header
-  await expect(header).not.toBeInViewport({ ratio: 1 });
+  // Verifies that skipping to main content means the page scrolls past the official gov site banner
+  await expect(banner).not.toBeInViewport({ ratio: 1 });
 });
 
 test("displays mobile nav at mobile width", async ({ page }, { project }) => {
