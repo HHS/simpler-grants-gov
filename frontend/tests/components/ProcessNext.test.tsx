@@ -1,4 +1,6 @@
-import ProcessNext,{ gitHubIssueLink }  from "src/app/[locale]/process/ProcessNext";
+import ProcessNext, {
+  gitHubIssueLink,
+} from "src/app/[locale]/process/ProcessNext";
 import { render, screen } from "tests/react-utils";
 
 describe("Process Content", () => {
@@ -12,10 +14,10 @@ describe("Process Content", () => {
     expect(ProcessH1).toBeInTheDocument();
   });
   it("github link", () => {
-    const link = gitHubIssueLink(123)('');
+    const link = gitHubIssueLink(123)("");
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(link.props.href).toBe("https://github.com/HHS/simpler-grants-gov/issues/123");
+    expect(link.props.href).toBe(
+      "https://github.com/HHS/simpler-grants-gov/issues/123",
+    );
   });
-
-  
 });
