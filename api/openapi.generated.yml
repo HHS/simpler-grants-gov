@@ -1962,22 +1962,14 @@ components:
     SavedOpportunityResponseV1:
       type: object
       properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          description: The REST resource object
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
         opportunity_id:
           type: integer
           description: The ID of the saved opportunity
           example: 1234
         opportunity_title:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The title of the opportunity
           example: my title
         opportunity_status:
