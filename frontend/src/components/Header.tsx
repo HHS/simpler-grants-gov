@@ -16,8 +16,6 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-
 type PrimaryLink = {
   text?: string;
   href?: string;
@@ -29,21 +27,6 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-const LoginLink = () => {
-  return (
-    <Link
-      href=""
-      className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="login"
-      />
-      Login
-    </Link>
-  );
-};
 
 const NavLinks = ({
   mobileExpanded,
@@ -204,7 +187,7 @@ const Header = ({ logoPath, locale }: Props) => {
               label={t("nav_menu_toggle")}
             />
           </div>
-          {!hideLoginLink && <LoginLink />}
+          {!hideLoginLink && <span>Auth Enabled</span>}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
