@@ -7,7 +7,6 @@ that are persisted to the database.
 The factories are based on the `factory_boy` library. See
 https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
-
 import random
 from datetime import datetime
 from typing import Optional
@@ -343,7 +342,6 @@ class OpportunityAttachmentFactory(BaseFactory):
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
 
-
 class OpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.Opportunity
@@ -437,6 +435,12 @@ class OpportunityFactory(BaseFactory):
             created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
             updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
         )
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
 
 
 class OpportunitySummaryFactory(BaseFactory):
@@ -796,6 +800,16 @@ class AgencyFactory(BaseFactory):
     class Meta:
         model = agency_models.Agency
 
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(agency_models.Agency.agency_id)).scalar()
+            if value is not None:
+                return value + 1
+
+        return 1
+
+    agency_id = factory.Sequence(lambda n: n)
     agency_name = factory.Faker("agency_name")
 
     agency_code = factory.Iterator(CustomProvider.AGENCIES)
@@ -1155,6 +1169,14 @@ class StagingTopportunityFactory(TopportunityFactory, AbstractStagingFactory):
             category_explanation=None,
         )
 
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
+        else:
+            self.my_attachment = b'Test attachment'
+
 
 class StagingTopportunityCfdaFactory(TopportunityCfdaFactory, AbstractStagingFactory):
     class Meta:
@@ -1362,6 +1384,45 @@ class StagingTgroupsFactory(AbstractStagingFactory):
     last_upd_id = factory.Faker("first_name")
     creator_id = factory.Faker("first_name")
 
+class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.attachment.TsynopsisAttachment
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            att_revision_number=None,
+            att_type=None,
+            file_lob=None,
+            creator_id=None,
+            last_upd_id=None,
+            syn_att_folder_id=None,
+        )
+
+    syn_att_id: factory.Sequence(lambda n: n)
+    opportunity_id: int = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    mime_type = factory.Faker("mime_type")
+    link_url = factory.Faker("link_url")
+    file_name = factory.Faker("file_name")
+    file_desc = factory.Faker("sentence")
+    file_lob_size = factory.Faker("random_int", min=1000, max=10000000)
+
+    create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    created_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    last_upd_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    creator_id = factory.Faker("creator_id")
+    last_upd_id = factory.Faker("last_upd_id")
+
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, extracted):
+        if extracted:
+            self.my_attachment = extracted
 
 ####################################
 # Transfer Table Factories
@@ -1426,6 +1487,12 @@ class ForeignTopportunityFactory(TopportunityFactory):
         factory_related_name="opportunity",
         size=lambda: random.randint(1, 3),
     )
+
+    # Set non-model fields after creation
+    @factory.post_generation
+    def my_attachment(self, create, extracted):
+        if extracted:
+            self.my_attachment = extracted
 
 
 class ForeignTopportunityCfdaFactory(TopportunityCfdaFactory):
@@ -1592,6 +1659,39 @@ class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
 
+
+class ForeignTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
+    class Meta:
+        model = foreign.attachment.tsynopsisattachment
+
+    class Params:
+        # Trait to set all nullable fields to None
+        all_fields_null = factory.Trait(
+            att_revision_number=None,
+            att_type=None,
+            file_lob=None,
+            creator_id=None,
+            last_upd_id=None,
+            syn_att_folder_id=None,
+        )
+
+    syn_att_id: factory.Sequence(lambda n: n)
+    opportunity_id: int = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
+    mime_type = factory.Faker("mime_type")
+    link_url = factory.Faker("link_url")
+    file_name = factory.Faker("file_name")
+    file_desc = factory.Faker("sentence")
+    file_lob_size = factory.Faker("random_int", min=1000, max=10000000)
+
+    create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    created_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    last_upd_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+    creator_id = factory.Faker("creator_id")
+    last_upd_id = factory.Faker("last_upd_id")
 
 ##
 # Pseudo-factories

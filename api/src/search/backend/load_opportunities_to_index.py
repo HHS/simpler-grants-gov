@@ -184,7 +184,7 @@ class LoadOpportunitiesToIndex(Task):
             self.load_records(opp_batch)
 
         # handle aliasing of endpoints
-        self.search_client.swap_alias_index(
+        self.search_client.swap_alias_index(self.config.index_prefix,
             self.index_name, self.config.alias_name, delete_prior_indexes=True
         )
 

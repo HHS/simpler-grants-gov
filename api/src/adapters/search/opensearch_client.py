@@ -72,6 +72,7 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+
     def bulk_upsert(
         self,
         index_name: str,
