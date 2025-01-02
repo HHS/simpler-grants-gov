@@ -15,12 +15,12 @@ import {
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const gitHubIssueLink = (issueNumber: number) =>
+export const gitHubIssueLink = (issueNumber: number) =>
   Object.assign(
     (chunks: ReactNode) => (
       <Link
         target="_blank"
-        className="usa-link--external"
+        className="usa-link--external text-bold"
         href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
       >
         {chunks}
