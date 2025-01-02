@@ -44,7 +44,7 @@ class SearchClient:
         *,
         shard_count: int = 1,
         replica_count: int = 1,
-        analysis: dict | None = None
+        analysis: dict | None = None,
     ) -> None:
         """
         Create an empty search index
@@ -82,17 +82,17 @@ class SearchClient:
                         "processor": {
                             "attachment": {
                                 "target_field": "_ingest._value.attachment",
-                                "field": "_ingest._value.data"
+                                "field": "_ingest._value.data",
                             }
-                        }
+                        },
                     }
                 }
-            ]
+            ],
         }
         pipeline_name = "multi-attachment"
         resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
         # Check the response
-        if resp['acknowledged']:
+        if resp["acknowledged"]:
             logger.info(f"Pipeline '{pipeline_name}' created successfully!")
         else:
             logger.error(f"Error creating pipeline: {resp}")
@@ -103,7 +103,7 @@ class SearchClient:
         records: Iterable[dict[str, Any]],
         primary_key_field: str,
         *,
-        refresh: bool = True
+        refresh: bool = True,
     ) -> None:
         """
         Bulk upsert records to an index
