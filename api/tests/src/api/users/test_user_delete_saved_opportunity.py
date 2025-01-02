@@ -2,7 +2,11 @@ import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
-from tests.src.db.models.factories import OpportunityFactory, UserFactory
+from tests.src.db.models.factories import (
+    OpportunityFactory,
+    UserFactory,
+    UserSavedOpportunityFactory,
+)
 
 
 @pytest.fixture
@@ -18,7 +22,7 @@ def user_auth_token(user, db_session):
     return token
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def clear_saved_opportunities(db_session):
     db_session.query(UserSavedOpportunity).delete()
     db_session.commit()
@@ -30,9 +34,7 @@ def test_user_delete_saved_opportunity(
 ):
     # Create and save an opportunity
     opportunity = OpportunityFactory.create()
-    saved = UserSavedOpportunity(user_id=user.user_id, opportunity_id=opportunity.opportunity_id)
-    db_session.add(saved)
-    db_session.commit()
+    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
 
     # Delete the saved opportunity
     response = client.delete(
@@ -64,11 +66,7 @@ def test_user_delete_other_users_saved_opportunity(
     # Create another user and save an opportunity for them
     other_user = UserFactory.create()
     opportunity = OpportunityFactory.create()
-    saved = UserSavedOpportunity(
-        user_id=other_user.user_id, opportunity_id=opportunity.opportunity_id
-    )
-    db_session.add(saved)
-    db_session.commit()
+    UserSavedOpportunityFactory.create(user=other_user, opportunity=opportunity)
 
     # Try to delete the other user's saved opportunity
     response = client.delete(
