@@ -7,10 +7,12 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 
 * Aaron Couch
 * Brandon Tabaska
+* Bruk Abebe
 * Doug Schrashun
 * Kai Siren
 * Matt Dragon
 * Michael Chouinard
+* Mike Huneke
 
 ## Content and Design
 
@@ -18,6 +20,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Crystabel Rangel
 * Emily Ianacone
 * Jenn Snyder
+* Michelle Min
 * Risha Lee
 * Senongo Akpem
 
