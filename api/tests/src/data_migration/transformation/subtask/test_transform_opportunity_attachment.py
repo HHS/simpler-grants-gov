@@ -1,11 +1,8 @@
 import os
 
-from src.db.models.staging.opportunity import Topportunity as STopportunity
 from src.db.models.foreign.opportunity import Topportunity as FTopportunity
-
-from tests.src.db.models.factories import StagingTopportunityAttachmentFactory, StagingTopportunityFactory, \
-    ForeignTopportunityFactory
-from tests.src.data_migration.transformation.conftest import setup_opportunity, setup_synopsis_forecast
+from src.db.models.staging.opportunity import Topportunity as STopportunity
+from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory
 
 
 def test_uploading_attachment_staging(db_session, enable_factory_create):
@@ -13,7 +10,11 @@ def test_uploading_attachment_staging(db_session, enable_factory_create):
     db_session.commit()
     db_session.expire_all()
 
-    db_opp = db_session.query(STopportunity).filter(STopportunity.opportunity_id == opp.opportunity_id).one_or_none()
+    db_opp = (
+        db_session.query(STopportunity)
+        .filter(STopportunity.opportunity_id == opp.opportunity_id)
+        .one_or_none()
+    )
 
     try:
         with open("out_file.txt", "wb") as outfile:
@@ -24,8 +25,8 @@ def test_uploading_attachment_staging(db_session, enable_factory_create):
             assert file_content == db_opp.my_attachment
     finally:
         # Cleanup: delete the file after verifying
-        if os.path.exists('out_file.txt'):
-            os.remove('out_file.txt')
+        if os.path.exists("out_file.txt"):
+            os.remove("out_file.txt")
 
 
 def test_uploading_attachment_foreign(db_session, enable_factory_create):
@@ -33,7 +34,11 @@ def test_uploading_attachment_foreign(db_session, enable_factory_create):
     db_session.commit()
     db_session.expire_all()
 
-    db_opp = db_session.query(FTopportunity).filter(FTopportunity.opportunity_id == opp.opportunity_id).one_or_none()
+    db_opp = (
+        db_session.query(FTopportunity)
+        .filter(FTopportunity.opportunity_id == opp.opportunity_id)
+        .one_or_none()
+    )
 
     try:
         with open("out_file.txt", "wb") as outfile:
@@ -44,5 +49,5 @@ def test_uploading_attachment_foreign(db_session, enable_factory_create):
             assert file_content == db_opp.my_attachment
     finally:
         # Cleanup: delete the file after verifying
-        if os.path.exists('out_file.txt'):
-            os.remove('out_file.txt')
+        if os.path.exists("out_file.txt"):
+            os.remove("out_file.txt")

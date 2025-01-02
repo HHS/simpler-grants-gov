@@ -7,6 +7,7 @@ that are persisted to the database.
 The factories are based on the `factory_boy` library. See
 https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
+
 import random
 from datetime import datetime
 from typing import Optional
@@ -341,6 +342,7 @@ class OpportunityAttachmentFactory(BaseFactory):
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
+
 
 class OpportunityFactory(BaseFactory):
     class Meta:
@@ -1159,7 +1161,7 @@ class StagingTopportunityFactory(TopportunityFactory, AbstractStagingFactory):
         if extracted:
             self.my_attachment = extracted
         else:
-            self.my_attachment = b'Test attachment'
+            self.my_attachment = b"Test attachment"
 
 
 class StagingTopportunityCfdaFactory(TopportunityCfdaFactory, AbstractStagingFactory):
@@ -1368,6 +1370,7 @@ class StagingTgroupsFactory(AbstractStagingFactory):
     last_upd_id = factory.Faker("first_name")
     creator_id = factory.Faker("first_name")
 
+
 class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingFactory):
     class Meta:
         model = staging.attachment.TsynopsisAttachment
@@ -1400,6 +1403,7 @@ class StagingTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingF
     )
     creator_id = factory.Faker("creator_id")
     last_upd_id = factory.Faker("last_upd_id")
+
 
 ####################################
 # Transfer Table Factories
@@ -1669,6 +1673,7 @@ class ForeignTopportunityAttachmentFactory(TopportunityFactory, AbstractStagingF
     )
     creator_id = factory.Faker("creator_id")
     last_upd_id = factory.Faker("last_upd_id")
+
 
 ##
 # Pseudo-factories
