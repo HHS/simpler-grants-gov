@@ -32,7 +32,7 @@ def test_uploading_attachment_foreign(db_session, enable_factory_create):
     opp = ForeignTopportunityFactory.create(my_attachment=b"Testing saving to db")
     db_session.commit()
     db_session.expire_all()
-    print("opp======", opp, opp.my_attachment)
+
     db_opp = db_session.query(FTopportunity).filter(FTopportunity.opportunity_id == opp.opportunity_id).one_or_none()
 
     try:
