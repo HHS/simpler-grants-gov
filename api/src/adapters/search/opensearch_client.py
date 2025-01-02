@@ -72,6 +72,7 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+
     def bulk_upsert(
         self,
         index_name: str,
@@ -149,7 +150,7 @@ class SearchClient:
         return len(existing_index_mapping) > 0
 
     def swap_alias_index(
-        self, index_name: str, alias_name: str, *, delete_prior_indexes: bool = False
+        self, index_prefix:str, index_name: str, alias_name: str, *, delete_prior_indexes: bool = False
     ) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
@@ -175,8 +176,11 @@ class SearchClient:
         self._client.indices.update_aliases({"actions": actions})
 
         # Cleanup old indexes now that they aren't connected to the alias
+        resp = self._client.cat.indices(format="json", h=["index"])
+        old_indexes = [index['index'] for index in resp if index['index'].startswith(index_prefix) and index['index'] != index_name ] # omit the newly created one
+
         if delete_prior_indexes:
-            for index in existing_indexes:
+            for index in old_indexes:
                 self.delete_index(index)
 
     def search_raw(self, index_name: str, search_query: dict) -> dict:
