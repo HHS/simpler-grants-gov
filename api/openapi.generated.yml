@@ -1981,9 +1981,16 @@ components:
           description: The title of the opportunity
           example: my title
         opportunity_status:
-          type: string
-          description: Current status of the opportunity
-          example: posted
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
         summary:
           type:
           - object
