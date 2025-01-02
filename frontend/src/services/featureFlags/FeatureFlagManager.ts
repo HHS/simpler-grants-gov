@@ -115,18 +115,9 @@ export class FeatureFlagsManager {
         ? this.defaultFeatureFlags
         : parseFeatureFlagsFromString(paramValue);
 
-    // no need to set cookie if no feature flags are set
-    // note that the iteration here is necessary since otherwise we would need deep equality
-    // comparison for default and env var flags, and lodash is not allowed in middleware
-    // see https://karmanivero.us/lodash-nextjs-13-smh/
-    if (
-      Object.keys(featureFlagsFromQuery).length === 0 &&
-      Object.entries(this.defaultFeatureFlags).every(([key, value]) => {
-        return this.featureFlags[key] === value;
-      })
-    ) {
-      return response;
-    }
+    // previously there was logic here to break if there were no feature flags active
+    // beyond default values. Unfortunately, this breaks the implementation of the dev admin
+    // view on the front end. Easier to just always set the cookie
 
     // create new cookie value based on calculated feature flags
     const featureFlags = {

@@ -65,14 +65,6 @@ describe("useFeatureFlags", () => {
       const value = checkFeatureFlag("someFakeFeature1");
       expect(value).toEqual(true);
     });
-    test("returns false if no flags are present", () => {
-      const { result } = renderHook(() => useFeatureFlags());
-
-      const { checkFeatureFlag } = result.current;
-
-      const value = checkFeatureFlag("someFakeFeature1");
-      expect(value).toEqual(false);
-    });
 
     test("returns false if specified flag is not present", () => {
       mockGetCookie.mockReturnValue(mockDefaultFeatureFlagsString);

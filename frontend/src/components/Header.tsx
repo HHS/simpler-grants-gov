@@ -204,13 +204,7 @@ const Header = ({ logoPath, locale }: Props) => {
               label={t("nav_menu_toggle")}
             />
           </div>
-          {!hideLoginLink && (
-            <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-              <div className="usa-nav__primary-item border-0">
-                <LoginLink />
-              </div>
-            </div>
-          )}
+          {!hideLoginLink && <LoginLink />}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
