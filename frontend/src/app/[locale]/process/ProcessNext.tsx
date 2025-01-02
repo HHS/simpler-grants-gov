@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   Grid,
   GridContainer,
@@ -13,6 +14,20 @@ import {
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+const gitHubIssueLink = (issueNumber: number) =>
+  Object.assign(
+    (chunks: ReactNode) => (
+      <Link
+        target="_blank"
+        className="usa-link--external"
+        href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
+      >
+        {chunks}
+      </Link>
+    ),
+    { displayName: "gitHubIssueLink" },
+  );
 
 const ProcessNext = () => {
   const t = useTranslations("Process.next");
@@ -36,42 +51,10 @@ const ProcessNext = () => {
                     {chunks}
                   </p>
                 ),
-                linkGithub3045: (chunks) => (
-                  <Link
-                    target="_blank"
-                    className="usa-link--external"
-                    href={`${ExternalRoutes.GITHUB_REPO}/issues/3045`}
-                  >
-                    {chunks}
-                  </Link>
-                ),
-                linkGithub2875: (chunks) => (
-                  <Link
-                    target="_blank"
-                    className="usa-link--external"
-                    href={`${ExternalRoutes.GITHUB_REPO}/issues/2875`}
-                  >
-                    {chunks}
-                  </Link>
-                ),
-                linkGithub2640: (chunks) => (
-                  <Link
-                    target="_blank"
-                    className="usa-link--external"
-                    href={`${ExternalRoutes.GITHUB_REPO}/issues/2640`}
-                  >
-                    {chunks}
-                  </Link>
-                ),
-                linkGithub3348: (chunks) => (
-                  <Link
-                    target="_blank"
-                    className="usa-link--external"
-                    href={`${ExternalRoutes.GITHUB_REPO}/issues/3348`}
-                  >
-                    {chunks}
-                  </Link>
-                ),
+                linkGithub3045: gitHubIssueLink(3045),
+                linkGithub2875: gitHubIssueLink(2875),
+                linkGithub2640: gitHubIssueLink(2640),
+                linkGithub3348: gitHubIssueLink(3348),
               });
               return (
                 <IconListItem
