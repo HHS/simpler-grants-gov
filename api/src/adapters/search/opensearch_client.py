@@ -72,6 +72,31 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+    def create_multi_attachment_pipeline(self) -> None:
+        pipeline = {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+        pipeline_name = "multi-attachment"
+        resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
+        # Check the response
+        if resp['acknowledged']:
+            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
+        else:
+            logger.error(f"Error creating pipeline: {resp}")
+
     def bulk_upsert(
         self,
         index_name: str,

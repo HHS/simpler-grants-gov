@@ -240,6 +240,10 @@ class LoadOpportunitiesToIndex(Task):
 
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
+
+        # Create Pipeline
+        self.search_client.create_multi_attachment_pipeline()
+
         schema = OpportunityV1Schema()
         json_records = []
 
