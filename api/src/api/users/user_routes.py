@@ -193,7 +193,7 @@ def user_save_opportunity(
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> dict:
+def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id/saved-opportunities")
 
     user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
