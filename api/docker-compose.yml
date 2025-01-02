@@ -34,8 +34,8 @@ services:
     volumes:
       - opensearch-data:/usr/share/opensearch/data # Creates volume called opensearch-data and mounts it to the container
     ports:
-      - 9201:9200 # REST API
-      - 9601:9600 # Performance Analyzer
+      - 9200:9200 # REST API
+      - 9600:9600 # Performance Analyzer
     networks:
       - default
 
