@@ -27,6 +27,7 @@ import { NextRequest, NextResponse } from "next/server";
  * - middleware: for use in setting feature flags on cookies in next middleware
  * - isFeatureEnabled: for checking if a feature is currently enabled, requires
  * passing in existing request cookies
+ *
  */
 export class FeatureFlagsManager {
   // Define all feature flags here! You can override these in your
@@ -51,13 +52,11 @@ export class FeatureFlagsManager {
 
   /*
 
-    - Flags set by environment variables are the first override to default values
+ * - Flags set by environment variables are the first override to default values
     - Flags set in the /dev/feature-flags admin view will be set in the cookie
     - Flags set in query params will result in the flag value being stored in the cookie
     - As query param values are set in middleware on each request, query params have the highest precedence
-    - Values set in cookies will be persistent per browser session unless explicitly overwritten
-    - This means that simply removing a query param from a url will not revert the feature flag value to
-    the value specified in environment variable or default, you'll need to clear cookies or open a new private browser
+
 
   */
   get featureFlags(): FeatureFlags {
@@ -69,7 +68,17 @@ export class FeatureFlagsManager {
 
   /**
    * Check whether a feature flag is enabled
+   *
+   * @description  Server side flag values are interpreted as follows:
+   *
+   * - Default values and any environment variable overrides are grabbed from the class
+   * - Any flags from the passed in request cookie will override the class's stored flags
+   * - Any flags set in the query param are a final override, though these likely will have already been set on the cookie
+   * by the middleware
+   *
    * @param name - Feature flag name
+   * @param cookies - server side cookies to check for enabled flags
+   * @param searchParams - search params to check for enabled flags
    * @example isFeatureEnabled("featureFlagName")
    */
   isFeatureEnabled(
@@ -98,35 +107,38 @@ export class FeatureFlagsManager {
   }
 
   /**
-   * Load feature flags from query params and set them on the cookie. This allows for
+   * Load feature flags from class, existing cookie, and query params and set them on the response cookie. This allows for
    * feature flags to be set via url query params as well.
    *
-   * Expects a query string with a param of `FEATURE_FLAGS_KEY`.
-   *
-   * For example, `example.com?_ff=showSite:true;enableClaimFlow:false`
+   * Expects a query string with a param of `_ff`. For example, `example.com?_ff=showSite:true;enableClaimFlow:false`
    * would enable `showSite` and disable `enableClaimFlow`.
+   *
+   * Note that since flags set in a query param are persisted into the cookie,  simply removing a query param from a url
+   * will not revert the feature flag value to the value specified in environment variable or default.
+   * To reset a flag value you'll need to clear cookies or open a new private browser
+   *
+   * This functionality allows environment variable based feature flag values, which otherwise cannot be made
+   * available to the client in our current setup, to be exposed to the client via the cookie.
+   *
    */
   middleware(request: NextRequest, response: NextResponse): NextResponse {
-    // handle query param
     const paramValue = request.nextUrl.searchParams.get(FEATURE_FLAGS_KEY);
 
     const featureFlagsFromQuery =
       paramValue === "reset"
-        ? this.defaultFeatureFlags
+        ? this.featureFlags
         : parseFeatureFlagsFromString(paramValue);
 
-    // previously there was logic here to break if there were no feature flags active
-    // beyond default values. Unfortunately, this breaks the implementation of the dev admin
-    // view on the front end. Easier to just always set the cookie
+    // previously there was logic here to return early if there were no feature flags active
+    // beyond default values. Unfortunately, this breaks the implementation of the feature
+    // flag admin view, which depends on reading all flags from cookies, so the logic has beeen removed
 
-    // create new cookie value based on calculated feature flags
     const featureFlags = {
       ...this.featureFlags,
       ...getFeatureFlagsFromCookie(request.cookies),
       ...featureFlagsFromQuery,
     };
 
-    // set new cookie on response
     setCookie(JSON.stringify(featureFlags), response.cookies);
 
     return response;

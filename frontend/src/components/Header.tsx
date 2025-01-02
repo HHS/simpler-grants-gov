@@ -16,8 +16,6 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-
 type PrimaryLink = {
   text?: string;
   href?: string;

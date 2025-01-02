@@ -36,6 +36,7 @@ export function useFeatureFlags(): {
     setFeatureFlags(flagsFromCookie);
   }, []);
 
+  // Note that values set in cookies will be persistent per browser session unless explicitly overwritten
   const setFeatureFlag = useCallback(
     (flagName: string, value: boolean) => {
       const newFlags = {
