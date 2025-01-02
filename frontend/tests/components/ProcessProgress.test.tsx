@@ -1,12 +1,12 @@
-import ProcessMilestones from "src/app/[locale]/process/ProcessMilestones";
+import ProcessProgress from "src/app/[locale]/process/ProcessProgress";
 import { render, screen } from "tests/react-utils";
 
 describe("Process Content", () => {
   it("Renders without errors", () => {
-    render(<ProcessMilestones />);
+    render(<ProcessProgress />);
     const ProcessH1 = screen.getByRole("heading", {
       level: 2,
-      name: /The high-level roadmap/i,
+      name: /Our progress/i,
     });
 
     expect(ProcessH1).toBeInTheDocument();

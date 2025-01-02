@@ -15,7 +15,7 @@ const ProcessInvolved = () => {
         {chunks}
       </a>
     ),
-    strong: (chunks) => <strong> {chunks} </strong>,
+    strong: (chunks) => <strong>{chunks}</strong>,
   });
   const para2 = t.rich("involved.paragraph_2", {
     github: (chunks) => (
@@ -38,7 +38,7 @@ const ProcessInvolved = () => {
         {chunks}
       </a>
     ),
-    strong: (chunks) => <strong> {chunks} </strong>,
+    strong: (chunks) => <strong>{chunks}</strong>,
   });
   return (
     <ContentLayout data-testid="process-involved-content" bottomBorder="none">
