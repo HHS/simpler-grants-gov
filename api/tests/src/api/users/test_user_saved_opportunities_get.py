@@ -2,7 +2,11 @@ import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
-from tests.src.db.models.factories import OpportunityFactory, UserFactory
+from tests.src.db.models.factories import (
+    OpportunityFactory,
+    UserFactory,
+    UserSavedOpportunityFactory,
+)
 
 
 @pytest.fixture
@@ -18,7 +22,7 @@ def user_auth_token(user, db_session):
     return token
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def clear_opportunities(db_session):
     db_session.query(UserSavedOpportunity).delete()
     db_session.commit()
@@ -30,9 +34,7 @@ def test_user_get_saved_opportunities(
 ):
     # Create an opportunity and save it for the user
     opportunity = OpportunityFactory.create()
-    saved = UserSavedOpportunity(user_id=user.user_id, opportunity_id=opportunity.opportunity_id)
-    db_session.add(saved)
-    db_session.commit()
+    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
 
     # Make the request
     response = client.get(
@@ -51,14 +53,10 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     user = UserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
 
-    # Create another user and save some opportunities for them
+    # Create another user and save an opportunity for them
     other_user = UserFactory.create()
     opportunity = OpportunityFactory.create()
-    saved = UserSavedOpportunity(
-        user_id=other_user.user_id, opportunity_id=opportunity.opportunity_id
-    )
-    db_session.add(saved)
-    db_session.commit()
+    UserSavedOpportunityFactory.create(user=other_user, opportunity=opportunity)
 
     # Try to get the other user's saved opportunities
     response = client.get(

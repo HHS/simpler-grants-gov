@@ -232,4 +232,4 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
             }
         )
 
-    return {"message": "Success", "data": opportunities_data}
+    return response.ApiResponse(message="Success", data=opportunities_data)
