@@ -1,4 +1,6 @@
 import click
+from opensearchpy.exceptions import ConnectionTimeout, TransportError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -7,8 +9,6 @@ from src.adapters.search import flask_opensearch
 from src.search.backend.load_opportunities_to_index import LoadOpportunitiesToIndex
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task.ecs_background_task import ecs_background_task
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
-from opensearchpy.exceptions import ConnectionTimeout, TransportError
 
 
 @load_search_data_blueprint.cli.command(
@@ -25,7 +25,9 @@ from opensearchpy.exceptions import ConnectionTimeout, TransportError
 @retry(
     stop=stop_after_attempt(3),  # Retry up to 3 times
     wait=wait_fixed(2),  # Wait 2 seconds between retries
-    retry=retry_if_exception_type((TransportError, ConnectionTimeout)),  # Retry on TransportError (including timeouts)
+    retry=retry_if_exception_type(
+        (TransportError, ConnectionTimeout)
+    ),  # Retry on TransportError (including timeouts)
 )
 def load_opportunity_data(
     search_client: search.SearchClient, db_session: db.Session, full_refresh: bool

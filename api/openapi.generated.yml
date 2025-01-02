@@ -431,6 +431,49 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSaveOpportunityResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Save Opportunity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSaveOpportunityRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}/versions:
     get:
       parameters:
@@ -1864,6 +1907,26 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserSaveOpportunityRequest:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+      required:
+      - opportunity_id
+    UserSaveOpportunityResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
