@@ -160,8 +160,8 @@ const Header = ({ logoPath, locale }: Props) => {
   const title =
     usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
-  const LoginLink = ({ auth_login_url }: { auth_login_url: string | null }) => {
-    const passHref = auth_login_url ? { href: auth_login_url } : "";
+  const LoginLink = ({ authLoginUrl }: { authLoginUrl: string | null }) => {
+    const passHref = authLoginUrl ? { href: authLoginUrl } : "";
 
     return (
       <a
@@ -221,7 +221,7 @@ const Header = ({ logoPath, locale }: Props) => {
           </div>
           <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
             <div className="usa-nav__primary-item border-0">
-              <LoginLink auth_login_url={authLoginUrl} />
+              <LoginLink authLoginUrl={authLoginUrl} />
             </div>
           </div>
           <NavLinks
