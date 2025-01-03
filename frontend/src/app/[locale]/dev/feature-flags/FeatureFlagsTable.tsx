@@ -12,12 +12,8 @@ import Loading from "src/components/Loading";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags();
+  const { setFeatureFlag, featureFlags } = useFeatureFlags();
   const { user, isLoading, error } = useUser();
-
-  if (!mounted) {
-    return null;
-  }
 
   if (isLoading) {
     return <Loading />;
@@ -47,37 +43,35 @@ export default function FeatureFlagsTable() {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(featureFlagsManager.featureFlags).map(
-            ([featureName, enabled]) => (
-              <tr key={featureName}>
-                <td
-                  data-testid={`${featureName}-status`}
-                  style={{ background: enabled ? "#81cc81" : "#fc6a6a" }}
+          {Object.entries(featureFlags).map(([featureName, enabled]) => (
+            <tr key={featureName}>
+              <td
+                data-testid={`${featureName}-status`}
+                style={{ background: enabled ? "#81cc81" : "#fc6a6a" }}
+              >
+                {enabled ? "Enabled" : "Disabled"}
+              </td>
+              <th scope="row">{featureName}</th>
+              <td>
+                <Button
+                  data-testid={`enable-${featureName}`}
+                  disabled={!!enabled}
+                  onClick={() => setFeatureFlag(featureName, true)}
+                  type="button"
                 >
-                  {enabled ? "Enabled" : "Disabled"}
-                </td>
-                <th scope="row">{featureName}</th>
-                <td>
-                  <Button
-                    data-testid={`enable-${featureName}`}
-                    disabled={enabled}
-                    onClick={() => setFeatureFlag(featureName, true)}
-                    type="button"
-                  >
-                    Enable
-                  </Button>
-                  <Button
-                    data-testid={`disable-${featureName}`}
-                    disabled={!enabled}
-                    onClick={() => setFeatureFlag(featureName, false)}
-                    type="button"
-                  >
-                    Disable
-                  </Button>
-                </td>
-              </tr>
-            ),
-          )}
+                  Enable
+                </Button>
+                <Button
+                  data-testid={`disable-${featureName}`}
+                  disabled={!enabled}
+                  onClick={() => setFeatureFlag(featureName, false)}
+                  type="button"
+                >
+                  Disable
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </Table>
     </>
