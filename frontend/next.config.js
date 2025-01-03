@@ -68,9 +68,6 @@ const nextConfig = {
       },
     ];
   },
-  env: {
-    auth_login_url: process.env.AUTH_LOGIN_URL,
-  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
