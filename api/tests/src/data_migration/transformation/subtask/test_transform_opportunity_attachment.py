@@ -1,4 +1,4 @@
-from src.db.models.foreign.attachment import TsynopsisAttachment as tsynopsisAttachmentF
+from src.db.models.foreign.attachment import TsynopsisAttachment as TsynopsisAttachmentF
 from src.db.models.staging.attachment import TsynopsisAttachment as TsynopsisAttachmentS
 from tests.src.db.models.factories import (
     ForeignTsynopsisAttachmentFactory,
@@ -29,8 +29,8 @@ def test_uploading_attachment_foreign(db_session, enable_factory_create, tmp_pat
     db_session.expire_all()
 
     db_att = (
-        db_session.query(tsynopsisAttachmentF)
-        .filter(tsynopsisAttachmentF.opportunity_id == att.opportunity_id)
+        db_session.query(TsynopsisAttachmentF)
+        .filter(TsynopsisAttachmentF.opportunity_id == att.opportunity_id)
         .one_or_none()
     )
 
