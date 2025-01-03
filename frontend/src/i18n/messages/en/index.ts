@@ -22,7 +22,6 @@ export const messages = {
       contact_info: "Grantor contact information",
       description: "Description",
       email: "Email",
-      telephone: "Phone",
       show_summary: "Show full summary",
       show_description: "Show full description",
       hide_summary_description: "Hide full description",
