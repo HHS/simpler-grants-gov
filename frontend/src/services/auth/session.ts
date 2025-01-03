@@ -84,4 +84,6 @@ export class SessionManager {
   }
 }
 
-export const sessionManager = new SessionManager();
+// instantiating here is messing with testing. Gotta put it somewhere else or be ok with instantiating for each use
+
+// export const sessionManager = new SessionManager();
