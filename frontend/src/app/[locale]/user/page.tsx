@@ -3,6 +3,7 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
+
 import { LogoutButton } from "./LogoutButton";
 
 export async function generateMetadata({
