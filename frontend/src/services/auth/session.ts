@@ -1,6 +1,7 @@
 import "server-only";
 
-import { exportJWK, JWK, JWTPayload, jwtVerify, SignJWT } from "jose";
+import { createPublicKey, KeyObject } from "crypto";
+import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { environment } from "src/constants/environments";
 import { SimplerJwtPayload, UserSession } from "src/services/auth/types";
 import { encodeText } from "src/utils/generalUtils";
@@ -13,24 +14,26 @@ const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
 let sessionManager: SessionManager;
 
+/*
+  Some session management operations require access to an encoded version of the
+  API's public key, which entails async operations. This class includes all functionality
+  that depends on that key in order to simplify some timing and organization issues. The
+  related operations using the client side key are included as well for ease of use.
+*/
+
 class SessionManager {
   private clientSecret: Uint8Array;
-  private loginGovSecret: JWK;
+  private loginGovSecret: KeyObject;
 
-  private constructor(clientSecret: Uint8Array, loginGovSecret: JWK) {
+  private constructor(clientSecret: Uint8Array, loginGovSecret: KeyObject) {
     this.clientSecret = clientSecret;
     this.loginGovSecret = loginGovSecret;
   }
 
   static async createSessionManager() {
-    // const [clientJwk, apiJwk] = await Promise.all([
-    //   exportJWK(encodeText(environment.SESSION_SECRET)),
-    //   exportJWK(encodeText(environment.API_JWT_PUBLIC_KEY)),
-    // ]);
-    // return new SessionManager(clientJwk, apiJwk);
     const clientSecret = encodeText(environment.SESSION_SECRET);
-    const apiJwk = await exportJWK(encodeText(environment.API_JWT_PUBLIC_KEY));
-    return new SessionManager(clientSecret, apiJwk);
+    const apiKeyObject = await createPublicKey(environment.API_JWT_PUBLIC_KEY);
+    return new SessionManager(clientSecret, apiKeyObject);
   }
 
   async decryptClientToken(jwt: string): Promise<SimplerJwtPayload | null> {
@@ -42,16 +45,17 @@ class SessionManager {
     if (!payload || !payload.token) return null;
     return payload as SimplerJwtPayload;
   }
+
   async decryptLoginGovToken(jwt: string): Promise<UserSession | null> {
     const payload = await decrypt(
       jwt,
       this.loginGovSecret,
       API_JWT_ENCRYPTION_ALGORITHM,
     );
-    if (!payload || !payload.token) return null;
-    return payload as UserSession;
+    return (payload as UserSession) ?? null;
   }
 
+  // sets client token on cookie
   async createSession(token: string) {
     const expiresAt = newExpirationDate();
     const session = await encrypt(token, expiresAt, this.clientSecret);
@@ -64,16 +68,24 @@ class SessionManager {
     });
   }
 
-  async getSession() {
+  // returns the necessary user info from decrypted login gov token
+  // plus client token and expiration
+  async getSession(): Promise<UserSession | null> {
     const cookie = cookies().get("session")?.value;
     if (!cookie) return null;
     const payload = await this.decryptClientToken(cookie);
     if (!payload) {
       return null;
     }
-    const { token } = payload;
+    const { token, exp } = payload;
     const session = await this.decryptLoginGovToken(token);
-    return session || null;
+    return session
+      ? {
+          ...session,
+          token,
+          exp,
+        }
+      : null;
   }
 }
 
@@ -81,17 +93,16 @@ class SessionManager {
 export const newExpirationDate = () =>
   new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-// extracts payload object from jwt string using passed encrytion key
+// extracts payload object from jwt string using passed encrytion key and algo
 const decrypt = async (
   jwt = "",
-  encryptionKey: JWK | Uint8Array,
+  encryptionKey: KeyObject | Uint8Array,
   algorithm: string,
 ): Promise<JWTPayload | null> => {
   try {
     const { payload } = await jwtVerify(jwt, encryptionKey, {
       algorithms: [algorithm],
     });
-    console.log("!!! session payload", payload);
     return payload;
   } catch (error) {
     console.error("Failed to decrypt session cookie", error);
@@ -99,6 +110,7 @@ const decrypt = async (
   }
 };
 
+// we only encrypt using the client key
 export async function encrypt(
   token: string,
   expiresAt: Date,
@@ -111,58 +123,17 @@ export async function encrypt(
     .sign(secret);
   return jwt;
 }
+
 // currently unused, will be used in the future for logout
 export function deleteSession() {
   cookies().delete("session");
 }
 
+// this getter is necessary for dealing with the async operation of encoding
+// the API JWT key
 export async function getSessionManager() {
   if (!sessionManager) {
     sessionManager = await SessionManager.createSessionManager();
   }
   return sessionManager;
 }
-
-// const decryptJwtWithKey =
-//   <T extends SimplerJwtPayload>(encryptionKey: JWK) =>
-//   async (jwt: string): Promise<T | null> => {
-//     const payload = await decrypt(jwt, encryptionKey);
-//     if (!payload || !payload.token) return null;
-//     return payload as T;
-//   };
-
-// const decryptWithKey =
-//   (encryptionKey: Uint8Array) =>
-//   async (sessionCookie = ""): Promise<JWTPayload | null> => {
-//     try {
-//       const { payload } = await jwtVerify(sessionCookie, encryptionKey, {
-//         algorithms: ["HS256"],
-//       });
-//       console.log("!!! session payload", payload);
-//       return payload;
-//     } catch (error) {
-//       console.error("Failed to decrypt session cookie", error);
-//       return null;
-//     }
-//   };
-
-// export const decryptClientToken = decryptJwtWithKey<SimplerJwtPayload>(
-//   encodedClientSessionSecret,
-// );
-
-// export const decryptLoginGovToken = decryptJwtWithKey<UserSession>(
-//   encodedLoginGovSessionSecret,
-// );
-
-// // could try memoizing this function if it is a performance risk
-// export const getTokenFromCookie = async (
-//   cookie: string,
-// ): Promise<UserSession> => {
-//   const decryptedSession = await decryptClientToken(cookie);
-//   if (!decryptedSession) return null;
-//   const token = (decryptedSession.token as string) ?? null;
-//   if (!token) return null;
-//   return {
-//     token,
-//   };
-// };
