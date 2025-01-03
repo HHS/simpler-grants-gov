@@ -1,4 +1,5 @@
 import userEvent from "@testing-library/user-event";
+import { Response } from "node-fetch";
 import { render, screen } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
@@ -9,8 +10,6 @@ const props = {
   logoPath: "/img/logo.svg",
   locale: "en",
 };
-
-process.env.auth_login_url = "/login-url";
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
@@ -25,7 +24,25 @@ jest.mock("next/navigation", () => ({
 }));
 
 describe("Header", () => {
+  const mockResponse = {
+    auth_login_url: "/login-url",
+  } as unknown as Response;
+
+  let originalFetch: typeof global.fetch;
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+
   it("toggles the mobile nav menu", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockResponse),
+      }),
+    ) as jest.Mock;
+
     render(<Header {...props} />);
     const menuButton = screen.getByTestId("navMenuButton");
 
@@ -39,16 +56,16 @@ describe("Header", () => {
       "/process",
     );
 
-    expect(screen.getByRole("link", { name: /Sign in/i })).toHaveAttribute(
-      "href",
-      "/login-url",
-    );
-
     await userEvent.click(menuButton);
 
     const closeButton = screen.getByRole("button", { name: /close/i });
 
     expect(closeButton).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: /Sign in/i })).toHaveAttribute(
+      "href",
+      "/login-url",
+    );
   });
 
   it("displays expandable government banner", async () => {

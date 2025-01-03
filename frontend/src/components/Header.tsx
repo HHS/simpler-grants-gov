@@ -124,6 +124,7 @@ const Header = ({ logoPath, locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
+  const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
 
   const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -140,6 +141,17 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
+  useEffect(() => {
+    async function fetchEnv() {
+      const res = await fetch("/api/env");
+      const data = (await res.json()) as { auth_login_url: string };
+      data.auth_login_url
+        ? setAuthLoginUrl(data.auth_login_url)
+        : console.error("could not access auth_login_url");
+    }
+    fetchEnv().catch((error) => console.warn("error fetching api/env", error));
+  }, []);
+
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -149,19 +161,22 @@ const Header = ({ logoPath, locale }: Props) => {
   const title =
     usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
-  const LoginLink = () => {
+  const LoginLink = ({ auth_login_url }: { auth_login_url: string | null }) => {
+    const passHref = auth_login_url ? { href: auth_login_url } : "";
+
     return (
-      <Link
-        href={process.env.auth_login_url as string}
-        key={process.env.auth_login_url as string}
+      <a
+        {...passHref}
+        key="login-link"
         className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
       >
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
           name="login"
+          key="login-link-icon"
         />
         {t("nav_link_login")}
-      </Link>
+      </a>
     );
   };
 
@@ -207,7 +222,7 @@ const Header = ({ logoPath, locale }: Props) => {
           </div>
           <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
             <div className="usa-nav__primary-item border-0">
-              <LoginLink />
+              <LoginLink auth_login_url={authLoginUrl} />
             </div>
           </div>
           <NavLinks
