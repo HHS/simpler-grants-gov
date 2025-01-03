@@ -12,6 +12,7 @@ const {
   FEATURE_OPPORTUNITY_OFF = "false",
   NEXT_BUILD = "false",
   SESSION_SECRET = "",
+  API_JWT_PUBLIC_KEY = "",
 } = process.env;
 
 // home for all interpreted server side environment variables
@@ -33,4 +34,5 @@ export const environment: { [key: string]: string } = {
   FEATURE_SEARCH_OFF,
   NEXT_BUILD,
   SESSION_SECRET,
+  API_JWT_PUBLIC_KEY,
 };
