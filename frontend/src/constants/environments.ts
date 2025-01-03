@@ -1,5 +1,4 @@
 const {
-  NODE_ENV,
   NEXT_PUBLIC_BASE_PATH,
   USE_SEARCH_MOCK_DATA = "",
   SENDY_API_URL,
@@ -11,14 +10,13 @@ const {
   FEATURE_SEARCH_OFF = "false",
   FEATURE_OPPORTUNITY_OFF = "false",
   NEXT_BUILD = "false",
+  ENVIRONMENT = "dev",
 } = process.env;
 
 // home for all interpreted server side environment variables
 export const environment: { [key: string]: string } = {
   LEGACY_HOST:
-    NODE_ENV === "production"
-      ? "https://grants.gov"
-      : "https://test.grants.gov",
+    ENVIRONMENT === "prod" ? "https://grants.gov" : "https://test.grants.gov",
   NEXT_PUBLIC_BASE_PATH: NEXT_PUBLIC_BASE_PATH ?? "",
   USE_SEARCH_MOCK_DATA,
   SENDY_API_URL: SENDY_API_URL || "",
@@ -31,4 +29,5 @@ export const environment: { [key: string]: string } = {
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_SEARCH_OFF,
   NEXT_BUILD,
+  ENVIRONMENT,
 };
