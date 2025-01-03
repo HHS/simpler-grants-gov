@@ -4,7 +4,6 @@ import { useMessages, useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
 import ContentLayout from "src/components/ContentLayout";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 const ResearchImpact = () => {
   const t = useTranslations("Research");
@@ -64,12 +63,6 @@ const ResearchImpact = () => {
             ),
             strong: (chunks) => <strong>{chunks}</strong>,
             subscribe: (chunks) => <a href={"/subscribe"}>{chunks}</a>,
-            arrowUpRightFromSquare: () => (
-              <USWDSIcon
-                className="usa-icon text-middle"
-                name="launch"
-              ></USWDSIcon>
-            ),
           })}
         </p>
       </Grid>
