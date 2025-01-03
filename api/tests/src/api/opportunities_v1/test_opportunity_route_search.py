@@ -353,7 +353,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
 
         # Swap the search index alias
-        search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+        search_client.swap_alias_index(
+            "test-opportunity-index", opportunity_index, opportunity_index_alias
+        )
 
     @pytest.mark.parametrize(
         "search_request,expected_results",
