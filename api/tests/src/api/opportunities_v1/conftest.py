@@ -208,7 +208,7 @@ def validate_opportunity_summary(db_summary: OpportunitySummary, resp_summary: d
         == resp_summary["applicant_eligibility_description"]
     )
 
-    assert db_summary.agency_phone_number == resp_summary["agency_phone_number"]
+    assert "agency_phone_number" not in resp_summary
     assert db_summary.agency_contact_description == resp_summary["agency_contact_description"]
     assert db_summary.agency_email_address == resp_summary["agency_email_address"]
     assert (

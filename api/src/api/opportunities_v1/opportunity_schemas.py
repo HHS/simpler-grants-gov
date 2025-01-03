@@ -174,14 +174,6 @@ class OpportunitySummaryV1Schema(Schema):
             "example": "All types of domestic applicants are eligible to apply",
         },
     )
-
-    agency_phone_number = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The phone number of the agency who owns the opportunity",
-            "example": "123-456-7890",
-        },
-    )
     agency_contact_description = fields.String(
         allow_none=True,
         metadata={

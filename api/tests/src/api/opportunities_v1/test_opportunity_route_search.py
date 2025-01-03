@@ -42,6 +42,10 @@ def validate_search_response(
 
     response_ids = [int(opp["opportunity_id"]) for opp in opportunities]
 
+    for opp in opportunities:
+        if "summary" in opp:
+            assert "agency_phone_number" not in opp["summary"]
+
     assert (
         response_ids == expected_ids
     ), f"Actual opportunities:\n {'\n'.join([opp['opportunity_title'] for opp in opportunities])}"
@@ -77,6 +81,7 @@ def build_opp(
     award_floor: int | None,
     award_ceiling: int | None,
     estimated_total_program_funding: int | None,
+    agency_phone_number: str | None = "123-456-7890",
 ) -> Opportunity:
     opportunity = OpportunityFactory.build(
         opportunity_title=opportunity_title,
@@ -108,6 +113,7 @@ def build_opp(
         award_floor=award_floor,
         award_ceiling=award_ceiling,
         estimated_total_program_funding=estimated_total_program_funding,
+        agency_phone_number=agency_phone_number,
     )
 
     opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
@@ -150,6 +156,7 @@ NASA_SPACE_FELLOWSHIP = build_opp(
     award_floor=50_000,
     award_ceiling=5_000_000,
     estimated_total_program_funding=15_000_000,
+    agency_phone_number="123-456-7890",
 )
 
 NASA_INNOVATIONS = build_opp(
