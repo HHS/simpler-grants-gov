@@ -1,10 +1,10 @@
-import { deleteSession, getSessionManager } from "src/services/auth/session";
+import { sessionManager } from "src/services/auth/session";
+import { deleteSession } from "src/services/auth/sessionUtils";
 import { postLogout } from "src/services/fetch/fetchers/userFetcher";
 
 export async function POST() {
   try {
     // logout on API via /v1/users/token/logout
-    const sessionManager = await getSessionManager();
     const session = await sessionManager.getSession();
     if (!session || !session.token) {
       throw new Error("No active session to logout");
