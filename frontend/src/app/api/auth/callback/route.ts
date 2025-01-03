@@ -1,4 +1,4 @@
-import { getSessionManager } from "src/services/auth/session";
+import { sessionManager } from "src/services/auth/session";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -8,8 +8,7 @@ const createSessionAndSetStatus = async (
   successStatus: string,
 ): Promise<string> => {
   try {
-    const sessionManager = await getSessionManager();
-    sessionManager.createSession(token);
+    await sessionManager.createSession(token);
     return successStatus;
   } catch (error) {
     console.error("error in creating session", error);
@@ -32,7 +31,6 @@ const createSessionAndSetStatus = async (
     - ...
 */
 export async function GET(request: NextRequest) {
-  const sessionManager = await getSessionManager();
   const currentSession = await sessionManager.getSession();
   if (currentSession && currentSession.token) {
     const status = await createSessionAndSetStatus(

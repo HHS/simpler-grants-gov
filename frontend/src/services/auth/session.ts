@@ -1,55 +1,50 @@
 import "server-only";
 
 import { createPublicKey, KeyObject } from "crypto";
-import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { environment } from "src/constants/environments";
+import {
+  API_JWT_ENCRYPTION_ALGORITHM,
+  CLIENT_JWT_ENCRYPTION_ALGORITHM,
+  decrypt,
+  encrypt,
+  newExpirationDate,
+} from "src/services/auth/sessionUtils";
 import { SimplerJwtPayload, UserSession } from "src/services/auth/types";
 import { encodeText } from "src/utils/generalUtils";
 
 // note that cookies will be async in Next 15
 import { cookies } from "next/headers";
 
-const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
-const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
-
-let sessionManager: SessionManager;
-
 /*
-  Some session management operations require access to an encoded version of the
-  API's public key, which entails async operations. This class includes all functionality
-  that depends on that key in order to simplify some timing and organization issues. The
-  related operations using the client side key are included as well for ease of use.
+  All operations that need access to the client and API side session keys are handled
+  in this class
 */
 
-class SessionManager {
-  private clientSecret: Uint8Array;
-  private loginGovSecret: KeyObject;
+export class SessionManager {
+  private clientJwtKey: Uint8Array;
+  private loginGovJwtKey: KeyObject;
 
-  private constructor(clientSecret: Uint8Array, loginGovSecret: KeyObject) {
-    this.clientSecret = clientSecret;
-    this.loginGovSecret = loginGovSecret;
+  constructor() {
+    this.clientJwtKey = encodeText(environment.SESSION_SECRET);
+    this.loginGovJwtKey = createPublicKey(environment.API_JWT_PUBLIC_KEY);
   }
 
-  static async createSessionManager() {
-    const clientSecret = encodeText(environment.SESSION_SECRET);
-    const apiKeyObject = await createPublicKey(environment.API_JWT_PUBLIC_KEY);
-    return new SessionManager(clientSecret, apiKeyObject);
-  }
-
-  async decryptClientToken(jwt: string): Promise<SimplerJwtPayload | null> {
+  private async decryptClientToken(
+    jwt: string,
+  ): Promise<SimplerJwtPayload | null> {
     const payload = await decrypt(
       jwt,
-      this.clientSecret,
+      this.clientJwtKey,
       CLIENT_JWT_ENCRYPTION_ALGORITHM,
     );
     if (!payload || !payload.token) return null;
     return payload as SimplerJwtPayload;
   }
 
-  async decryptLoginGovToken(jwt: string): Promise<UserSession | null> {
+  private async decryptLoginGovToken(jwt: string): Promise<UserSession | null> {
     const payload = await decrypt(
       jwt,
-      this.loginGovSecret,
+      this.loginGovJwtKey,
       API_JWT_ENCRYPTION_ALGORITHM,
     );
     return (payload as UserSession) ?? null;
@@ -58,7 +53,7 @@ class SessionManager {
   // sets client token on cookie
   async createSession(token: string) {
     const expiresAt = newExpirationDate();
-    const session = await encrypt(token, expiresAt, this.clientSecret);
+    const session = await encrypt(token, expiresAt, this.clientJwtKey);
     cookies().set("session", session, {
       httpOnly: true,
       secure: true,
@@ -89,51 +84,4 @@ class SessionManager {
   }
 }
 
-// returns a new date 1 week from time of function call
-export const newExpirationDate = () =>
-  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-// extracts payload object from jwt string using passed encrytion key and algo
-const decrypt = async (
-  jwt = "",
-  encryptionKey: KeyObject | Uint8Array,
-  algorithm: string,
-): Promise<JWTPayload | null> => {
-  try {
-    const { payload } = await jwtVerify(jwt, encryptionKey, {
-      algorithms: [algorithm],
-    });
-    return payload;
-  } catch (error) {
-    console.error("Failed to decrypt session cookie", error);
-    return null;
-  }
-};
-
-// we only encrypt using the client key
-export async function encrypt(
-  token: string,
-  expiresAt: Date,
-  secret: Uint8Array,
-): Promise<string> {
-  const jwt = await new SignJWT({ token })
-    .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
-    .setIssuedAt()
-    .setExpirationTime(expiresAt || "")
-    .sign(secret);
-  return jwt;
-}
-
-// currently unused, will be used in the future for logout
-export function deleteSession() {
-  cookies().delete("session");
-}
-
-// this getter is necessary for dealing with the async operation of encoding
-// the API JWT key
-export async function getSessionManager() {
-  if (!sessionManager) {
-    sessionManager = await SessionManager.createSessionManager();
-  }
-  return sessionManager;
-}
+export const sessionManager = new SessionManager();

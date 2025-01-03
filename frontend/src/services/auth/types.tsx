@@ -38,16 +38,16 @@ import { JWTPayload } from "jose";
 // represents relevant client side data from API JWT
 export interface UserProfile {
   email?: string;
+  token: string;
   expiresAt: Date;
 }
-
-// represents API JWT payload
-export type UserSession = UserProfile & SimplerJwtPayload;
 
 // represents client JWT payload
 export interface SimplerJwtPayload extends JWTPayload {
   token: string;
 }
+// represents API JWT payload
+export type UserSession = UserProfile & SimplerJwtPayload;
 
 // export interface SessionPayload {
 //   token: string;
