@@ -1,13 +1,14 @@
 // initial rules were absorbed from static robots.txt file
 
 import type { MetadataRoute } from "next";
+import { environment } from "src/constants/environments";
 
 export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      process.env.AWS_ENVIRONMENT === "dev" // switching this temporarily to ensure that the variable is being set at AWS runtime as expected, will make it "prod" after confirming in Dev
+      environment.AWS_ENVIRONMENT === "dev" // switching this temporarily to ensure that the variable is being set at AWS runtime as expected, will make it "prod" after confirming in Dev
         ? {
             userAgent: "*",
             allow: "/",
