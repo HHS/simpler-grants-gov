@@ -34,6 +34,7 @@ export default function UserProvider({
       setIsLoading(true);
       const fetchedUser = await debouncedUserFetcher();
       if (fetchedUser) {
+        console.log("!!! USER", fetchedUser);
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
         setIsLoading(false);
