@@ -20,7 +20,6 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 type PrimaryLink = {
   text?: string;
   href?: string;
-  textPrimary?: boolean;
 };
 
 type Props = {
