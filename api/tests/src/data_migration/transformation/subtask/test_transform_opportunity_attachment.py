@@ -1,53 +1,41 @@
-import os
+from src.db.models.foreign.attachment import TsynopsisAttachment as tsynopsisAttachmentF
+from src.db.models.staging.attachment import TsynopsisAttachment as TsynopsisAttachmentS
+from tests.src.db.models.factories import (
+    ForeignTsynopsisAttachmentFactory,
+    StagingTsynopsisAttachmentFactory,
+)
 
-from src.db.models.foreign.opportunity import Topportunity as FTopportunity
-from src.db.models.staging.opportunity import Topportunity as STopportunity
-from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory
 
-
-def test_uploading_attachment_staging(db_session, enable_factory_create):
-    opp = StagingTopportunityFactory.create(my_attachment=b"Testing saving to db")
+def test_uploading_attachment_staging(db_session, enable_factory_create, tmp_path):
+    att = StagingTsynopsisAttachmentFactory.create(my_attachment=b"Testing saving to db")
     db_session.commit()
     db_session.expire_all()
 
-    db_opp = (
-        db_session.query(STopportunity)
-        .filter(STopportunity.opportunity_id == opp.opportunity_id)
+    db_att = (
+        db_session.query(TsynopsisAttachmentS)
+        .filter(TsynopsisAttachmentS.opportunity_id == att.opportunity_id)
         .one_or_none()
     )
+    temp_file = tmp_path / "out_file.txt"
+    temp_file.write_bytes(db_att.my_attachment)
+    file_content = temp_file.read_bytes()
 
-    try:
-        with open("out_file.txt", "wb") as outfile:
-            outfile.write(db_opp.my_attachment)
-
-        with open("out_file.txt", "rb") as infile:
-            file_content = infile.read()
-            assert file_content == db_opp.my_attachment
-    finally:
-        # Cleanup: delete the file after verifying
-        if os.path.exists("out_file.txt"):
-            os.remove("out_file.txt")
+    assert file_content == db_att.my_attachment
 
 
-def test_uploading_attachment_foreign(db_session, enable_factory_create):
-    opp = ForeignTopportunityFactory.create(my_attachment=b"Testing saving to db")
+def test_uploading_attachment_foreign(db_session, enable_factory_create, tmp_path):
+    att = ForeignTsynopsisAttachmentFactory.create(my_attachment=b"Testing saving to db")
     db_session.commit()
     db_session.expire_all()
 
-    db_opp = (
-        db_session.query(FTopportunity)
-        .filter(FTopportunity.opportunity_id == opp.opportunity_id)
+    db_att = (
+        db_session.query(tsynopsisAttachmentF)
+        .filter(tsynopsisAttachmentF.opportunity_id == att.opportunity_id)
         .one_or_none()
     )
 
-    try:
-        with open("out_file.txt", "wb") as outfile:
-            outfile.write(db_opp.my_attachment)
+    temp_file = tmp_path / "out_file.txt"
+    temp_file.write_bytes(db_att.my_attachment)
+    file_content = temp_file.read_bytes()
 
-        with open("out_file.txt", "rb") as infile:
-            file_content = infile.read()
-            assert file_content == db_opp.my_attachment
-    finally:
-        # Cleanup: delete the file after verifying
-        if os.path.exists("out_file.txt"):
-            os.remove("out_file.txt")
+    assert file_content == db_att.my_attachment

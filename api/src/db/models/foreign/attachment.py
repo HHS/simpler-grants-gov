@@ -5,11 +5,12 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-from src.db.models.legacy_mixin import synopsis_mixin
 from sqlalchemy.orm import Mapped, relationship
-from .opportunity import Topportunity
+
+from src.db.models.legacy_mixin import synopsis_mixin
 
 from . import foreignbase
+from .opportunity import Topportunity
 
 
 class TsynopsisAttachment(foreignbase.ForeignBase, synopsis_mixin.TsynopsisAttachmentMixin):

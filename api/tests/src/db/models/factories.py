@@ -996,6 +996,7 @@ class TsynopsisFactory(BaseFactory):
     publisheruid = sometimes_none(factory.Faker("first_name"))
     publisher_profile_id = sometimes_none(factory.Faker("random_int", min=1, max=99_999))
 
+
 class TsynopsisAttachmentFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -1008,7 +1009,7 @@ class TsynopsisAttachmentFactory(BaseFactory):
     link_url = factory.Faker("relevant_url")
     file_name = factory.Faker("file_name")
     file_desc = factory.Faker("sentence")
-    file_lob= factory.LazyAttribute(lambda x: fake.binary(length=16))
+    file_lob = factory.LazyAttribute(lambda x: fake.binary(length=16))
     file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
     create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     created_date = factory.LazyAttribute(
@@ -1028,6 +1029,7 @@ class TsynopsisAttachmentFactory(BaseFactory):
             self.my_attachment = extracted
         else:
             self.my_attachment = b"Test attachment"
+
 
 class TforecastFactory(BaseFactory):
     class Meta:
@@ -1402,6 +1404,7 @@ class StagingTsynopsisAttachmentFactory(TsynopsisAttachmentFactory, AbstractStag
     opportunity = factory.SubFactory(StagingTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
+
 ####################################
 # Transfer Table Factories
 ####################################
@@ -1638,6 +1641,7 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
 
     opportunity = factory.SubFactory(ForeignTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
 
 ##
 # Pseudo-factories
