@@ -1,3 +1,5 @@
+import { JWTPayload } from "jose";
+
 /**
  * Configure the UserProvider component.
  *
@@ -33,36 +35,36 @@
  * @category Client
  */
 
-/**
- * The user claims returned from the useUser hook.
- *
- * @category Client
- */
+// represents relevant client side data from API JWT
 export interface UserProfile {
-  name?: string | null;
+  email?: string;
+  expiresAt: Date;
 }
 
-export type UserSession = {
-  token: string;
-  expiresAt?: Date;
-} | null;
+// represents API JWT payload
+export type UserSession = UserProfile & SimplerJwtPayload;
 
-export type SessionPayload = {
+// represents client JWT payload
+export interface SimplerJwtPayload extends JWTPayload {
   token: string;
-  expiresAt: Date;
-};
+}
+
+// export interface SessionPayload {
+//   token: string;
+//   expiresAt: Date;
+// }
 
 /**
  * Fetches the user from the profile API route to fill the useUser hook with the
  * UserProfile object.
  */
-export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;
+export type UserFetcher = (url: string) => Promise<UserSession | undefined>;
 
 /**
  * @ignore
  */
 export type UserProviderState = {
-  user?: UserSession;
+  user?: UserProfile;
   error?: Error;
   isLoading: boolean;
 };
