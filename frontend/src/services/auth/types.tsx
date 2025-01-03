@@ -55,11 +55,6 @@ export type SessionPayload = {
 /**
  * Fetches the user from the profile API route to fill the useUser hook with the
  * UserProfile object.
- *
- * If needed, you can pass a custom fetcher to the UserProvider component via the
- * UserProviderProps.fetcher prop.
- *
- * @throws {@link RequestError}
  */
 export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;
 

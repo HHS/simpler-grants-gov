@@ -3,6 +3,7 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
+import { LogoutButton } from "./LogoutButton";
 
 export async function generateMetadata({
   params: { locale },
@@ -32,6 +33,7 @@ export default async function UserDisplay({
     <GridContainer>
       <h1>{t("heading")}</h1>
       {message && <div>{message}</div>}
+      <LogoutButton />
     </GridContainer>
   );
 }
