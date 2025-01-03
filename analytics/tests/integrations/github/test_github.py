@@ -9,7 +9,7 @@ from analytics.integrations.github.github import GitHubGraphqlClient, GraphqlErr
 @pytest.fixture
 def client() -> GitHubGraphqlClient:
     """Fixture to initialize GitHubGraphqlClient with a mock token."""
-    return GitHubGraphqlClient(token="mock_token")  # noqa: S106
+    return GitHubGraphqlClient()
 
 
 @pytest.fixture
@@ -75,18 +75,16 @@ def test_invalid_path_to_nodes(
 ) -> None:
     """Test catching an error if the path_to_nodes is incorrect."""
     # Arrange - Mock the response from requests.post()
-    mock_response = (
-        {
-            "data": {
-                "user": {
-                    "repositories": {
-                        "nodes": [{"name": "repo1"}],
-                        "pageInfo": {"hasNextPage": False, "endCursor": None},
-                    },
+    mock_response = {
+        "data": {
+            "user": {
+                "repositories": {
+                    "nodes": [{"name": "repo1"}],
+                    "pageInfo": {"hasNextPage": False, "endCursor": None},
                 },
             },
         },
-    )
+    }
     mock_post.return_value = Mock(
         status_code=200,
         json=Mock(return_value=mock_response),

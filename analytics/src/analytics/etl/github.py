@@ -101,6 +101,7 @@ class GitHubProjectETL:
         self.config = config
         # Declare private attributes shared across ETL steps
         self._transient_files: list[InputFiles]
+        self.client = github.GitHubGraphqlClient()
         self.dataset: GitHubIssues
 
     def run(self) -> None:
@@ -167,6 +168,7 @@ class GitHubProjectETL:
         )
         # Export the data
         github.export_roadmap_data(
+            client=self.client,
             owner=roadmap.owner,
             project=roadmap.project_number,
             quad_field=roadmap.quad_field,
@@ -186,6 +188,7 @@ class GitHubProjectETL:
             sprint_board.project_number,
         )
         github.export_sprint_data(
+            client=self.client,
             owner=sprint_board.owner,
             project=sprint_board.project_number,
             sprint_field=sprint_board.sprint_field,

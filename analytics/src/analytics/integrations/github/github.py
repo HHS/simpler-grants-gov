@@ -6,6 +6,8 @@ from typing import Any, Callable
 
 import requests
 
+from config import get_db_settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,7 +72,7 @@ class GitHubGraphqlClient:
 
     """
 
-    def __init__(self, token: str) -> None:
+    def __init__(self) -> None:
         """
         Initialize the GitHubClient.
 
@@ -80,9 +82,10 @@ class GitHubGraphqlClient:
             GitHub personal access token for authentication.
 
         """
+        settings = get_db_settings()
         self.endpoint = "https://api.github.com/graphql"
         self.headers = {
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"Bearer {settings.github_token}",
             "Content-Type": "application/json",
         }
 
