@@ -1975,3 +1975,14 @@ class UserTokenSessionFactory(BaseFactory):
     expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+10d")
 
     is_valid = True
+
+
+class UserSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunity
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
