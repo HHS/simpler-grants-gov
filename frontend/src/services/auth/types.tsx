@@ -55,7 +55,6 @@ export type SessionPayload = {
 /**
  * Fetches the user from the profile API route to fill the useUser hook with the
  * UserProfile object.
-
  */
 export type UserFetcher = (url: string) => Promise<SessionPayload | undefined>;
 

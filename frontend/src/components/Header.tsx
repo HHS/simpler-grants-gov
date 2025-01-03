@@ -15,6 +15,8 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
@@ -117,6 +119,36 @@ const NavLinks = ({
   );
 };
 
+const LoginLink = ({ navLoginLinkText }: { navLoginLinkText: string }) => {
+  const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchEnv() {
+      const res = await fetch("/api/env");
+      const data = (await res.json()) as { auth_login_url: string };
+      data.auth_login_url
+        ? setAuthLoginUrl(data.auth_login_url)
+        : console.error("could not access auth_login_url");
+    }
+    fetchEnv().catch((error) => console.warn("error fetching api/env", error));
+  }, []);
+
+  return (
+    <a
+      {...(authLoginUrl ? { href: authLoginUrl } : "")}
+      key="login-link"
+      className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
+    >
+      <USWDSIcon
+        className="usa-icon margin-right-05 margin-left-neg-05"
+        name="login"
+        key="login-link-icon"
+      />
+      {navLoginLinkText}
+    </a>
+  );
+};
+
 const Header = ({ logoPath, locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
@@ -162,7 +194,7 @@ const Header = ({ logoPath, locale }: Props) => {
       />
       <GovBanner language={language} />
       <USWDSHeader basic={true}>
-        <div className="usa-nav-container">
+        <div className="usa-nav-container display-flex flex-align-end">
           <div className="usa-navbar">
             <Title className="desktop:margin-top-2">
               <div className="display-flex flex-align-center">
@@ -178,10 +210,18 @@ const Header = ({ logoPath, locale }: Props) => {
                 <span className="font-sans-lg flex-fill">{title}</span>
               </div>
             </Title>
+          </div>
+          <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
+              className="usa-menu-btn"
             />
+          </div>
+          <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+            <div className="usa-nav__primary-item border-0">
+              <LoginLink navLoginLinkText={t("nav_link_login")} />
+            </div>
           </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
