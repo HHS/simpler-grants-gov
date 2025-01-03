@@ -378,3 +378,9 @@ button.usa-pagination__button.usa-button {
     color: white;
   }
 }
+
+@include at-media("desktop") {
+  .desktop\:margin-bottom-5px {
+    margin-bottom: 5px !important;
+  }
+}

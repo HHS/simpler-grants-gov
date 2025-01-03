@@ -478,6 +478,7 @@ export const messages = {
     nav_link_subscribe: "Subscribe",
     nav_menu_toggle: "Menu",
     nav_link_search: "Search",
+    nav_link_login: "Sign in",
     title: "Simpler.Grants.gov",
   },
   Hero: {
