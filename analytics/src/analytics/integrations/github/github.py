@@ -87,6 +87,7 @@ class GitHubGraphqlClient:
         self.headers = {
             "Authorization": f"Bearer {settings.github_token}",
             "Content-Type": "application/json",
+            "GraphQL-Features": "sub_issues,issue_types",
         }
 
     def execute_query(self, query: str, variables: dict[str, str | int]) -> dict:
@@ -148,8 +149,8 @@ class GitHubGraphqlClient:
         """
         all_data = []
         has_next_page = True
-        variables["first"] = batch_size
-        variables["after"] = None
+        variables["batch"] = batch_size
+        variables["endCursor"] = None
 
         while has_next_page:
             response = self.execute_query(query, variables)
@@ -164,6 +165,6 @@ class GitHubGraphqlClient:
             # Handle pagination
             page_info = data["pageInfo"]
             has_next_page = page_info["hasNextPage"]
-            variables["after"] = page_info["endCursor"]
+            variables["endCursor"] = page_info["endCursor"]
 
         return all_data

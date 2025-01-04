@@ -122,7 +122,8 @@ class GitHubProjectETL:
             output_file=roadmap_file,
         )
 
-        # Export sprint data
+        # Export sprint data for each GitHub project that the scrum teams use
+        # to manage their sprints, e.g. HHS/17 and HHS/13
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
             project = sprint_board.project_number
@@ -204,6 +205,8 @@ class GitHubProjectETL:
 
 def run_transformation_pipeline(files: InputFiles) -> list[dict]:
     """Load data from input files and apply transformations."""
+    # Log the current sprint for which we're running the transformations
+    logger.info("Running transformations for sprint: %s", files.sprint)
     # Load sprint and roadmap data
     sprint_data_in = load_json_file(files.sprint)
     roadmap_data_in = load_json_file(files.roadmap)
