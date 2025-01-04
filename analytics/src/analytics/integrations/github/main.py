@@ -1,10 +1,16 @@
-"""Export data from GitHub."""
+"""
+Export data from GitHub.
+
+TODO(widal001): 2025-01-04 Refactor and move this to src/analytics/etl/github when
+we disable writing to disk in https://github.com/HHS/simpler-grants-gov/issues/3203
+"""
 
 import json
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from analytics.integrations.github.github import GitHubGraphqlClient
+from analytics.integrations.github.client import GitHubGraphqlClient
 
 PARENT_DIR = Path(__file__).resolve().parent
 
@@ -63,7 +69,6 @@ def compute_end_date(start_date: str | None, duration: int | None) -> str | None
     """Compute the end date based on start date and duration."""
     if not start_date or not duration:
         return None
-    from datetime import datetime, timedelta
 
     start = datetime.strptime(start_date, "%Y-%m-%d")  # noqa: DTZ007
     end = start + timedelta(days=duration)

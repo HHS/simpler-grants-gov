@@ -3,17 +3,17 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from analytics.integrations.github.github import GitHubGraphqlClient, GraphqlError
+from analytics.integrations.github.client import GitHubGraphqlClient, GraphqlError
 
 
-@pytest.fixture
-def client() -> GitHubGraphqlClient:
+@pytest.fixture(name="client")
+def mock_client() -> GitHubGraphqlClient:
     """Fixture to initialize GitHubGraphqlClient with a mock token."""
     return GitHubGraphqlClient()
 
 
-@pytest.fixture
-def sample_query() -> str:
+@pytest.fixture(name="sample_query")
+def mock_query() -> str:
     """Fixture for a sample GraphQL query."""
     return """
     query($login: String!, $first: Int!, $after: String) {

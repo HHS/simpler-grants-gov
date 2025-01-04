@@ -6,7 +6,7 @@ __all__ = [
     "export_sprint_data",
 ]
 
-from analytics.integrations.github.github import GitHubGraphqlClient
+from analytics.integrations.github.client import GitHubGraphqlClient
 from analytics.integrations.github.main import (
     export_roadmap_data,
     export_sprint_data,

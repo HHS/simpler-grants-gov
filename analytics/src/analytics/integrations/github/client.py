@@ -1,8 +1,7 @@
 """Expose a client for making calls to GitHub's GraphQL API."""
 
-import functools
 import logging
-from typing import Any, Callable
+from typing import Any
 
 import requests
 
@@ -29,36 +28,6 @@ class GraphqlError(Exception):
         self.errors = errors
         self.message = f"GraphQL API returned errors: {errors}"
         super().__init__(self.message)
-
-
-def github_api_error_handler(api_call: Callable) -> Callable:
-    """
-    Wrap GitHub API calls with error handling.
-
-    Parameters
-    ----------
-    api_call : Callable
-        The GitHub API call function to wrap.
-
-    Returns
-    -------
-    Callable
-        A wrapped function that catches and logs errors.
-
-    """
-
-    @functools.wraps(api_call)
-    def try_to_make_api_call_and_catch_error(
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401
-    ) -> dict | None:
-        try:
-            return api_call(*args, **kwargs)
-        except Exception:
-            logger.exception("GitHub API error")
-            return None
-
-    return try_to_make_api_call_and_catch_error
 
 
 class GitHubGraphqlClient:
