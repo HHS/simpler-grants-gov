@@ -37,6 +37,7 @@ def transform_project_data(
     raw_data: list[dict],
     owner: str,
     project: int,
+    excluded_types: tuple = (),  # By default include everything
 ) -> list[dict]:
     """Pluck and reformat relevant fields for each item in the raw data."""
     return [
@@ -62,6 +63,7 @@ def transform_project_data(
             ),
         }
         for item in raw_data
+        if safe_pluck(item, "content.issueType.name") not in excluded_types
     ]
 
 
@@ -105,7 +107,14 @@ def export_sprint_data(
     )
 
     # Transform data
-    transformed_data = transform_project_data(data, owner, project)
+    # And exclude deliverables if they appear on the sprint boards
+    # so that we use their status value from the roadmap board instead
+    transformed_data = transform_project_data(
+        raw_data=data,
+        owner=owner,
+        project=project,
+        excluded_types=("Deliverable",),
+    )
 
     # Write output
     with open(output_file, "w", encoding="utf-8") as f:
