@@ -1,4 +1,4 @@
-import { sessionManager } from "src/services/auth/session";
+import { createSession, getSession } from "src/services/auth/session";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -8,7 +8,7 @@ const createSessionAndSetStatus = async (
   successStatus: string,
 ): Promise<string> => {
   try {
-    await sessionManager.createSession(token);
+    await createSession(token);
     return successStatus;
   } catch (error) {
     console.error("error in creating session", error);
@@ -17,8 +17,7 @@ const createSessionAndSetStatus = async (
 };
 
 /*
-  currently it looks like the API will send us a request with the params below, and we will be responsible
-  for directing the user accordingly. For now, we'll send them to generic success and error pages with cookie set on success
+  For now, we'll send them to generic success and error pages with cookie set on success
 
     message: str ("success" or "error")
     token: str | None
@@ -31,7 +30,7 @@ const createSessionAndSetStatus = async (
     - ...
 */
 export async function GET(request: NextRequest) {
-  const currentSession = await sessionManager.getSession();
+  const currentSession = await getSession();
   if (currentSession && currentSession.token) {
     const status = await createSessionAndSetStatus(
       currentSession.token,
