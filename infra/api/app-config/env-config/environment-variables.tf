@@ -19,7 +19,6 @@ locals {
     LOGIN_GOV_JWK_ENDPOINT   = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://idp.int.identitysandbox.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://idp.int.identitysandbox.gov/api/openid_connect/token"
-    LOGIN_FINAL_DESTINATION  = ""
     API_JWT_ISSUER           = "simpler-grants-api-${var.environment}"
     API_JWT_AUDIENCE         = "simpler-grants-api-${var.environment}"
   }
