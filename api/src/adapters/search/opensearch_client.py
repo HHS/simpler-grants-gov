@@ -148,11 +148,7 @@ class SearchClient:
         existing_index_mapping = self._client.cat.aliases(alias_name, format="json")
         return len(existing_index_mapping) > 0
 
-    def cleanup_old_indices(
-        self,
-        index_prefix: str,
-        indexes_to_keep: list[str]
-    ) -> None:
+    def cleanup_old_indices(self, index_prefix: str, indexes_to_keep: list[str]) -> None:
         """
         Cleanup old indexes now that they aren't connected to the alias
         """
