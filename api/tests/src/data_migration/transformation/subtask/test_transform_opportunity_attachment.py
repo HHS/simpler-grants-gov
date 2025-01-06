@@ -3,8 +3,9 @@ import datetime
 from src.db.models.foreign.attachment import TsynopsisAttachment as TsynopsisAttachmentF
 from src.db.models.staging.attachment import TsynopsisAttachment as TsynopsisAttachmentS
 from tests.src.db.models.factories import (
+    ForeignTopportunityFactory,
     ForeignTsynopsisAttachmentFactory,
-    StagingTsynopsisAttachmentFactory, ForeignTopportunityFactory,
+    StagingTsynopsisAttachmentFactory,
 )
 
 
@@ -27,8 +28,10 @@ def test_uploading_attachment_staging(db_session, enable_factory_create, tmp_pat
 
 def test_uploading_attachment_foreign(db_session, enable_factory_create, tmp_path):
     ForeignTopportunityFactory.create(
-        opportunity_id=1, oppnumber="A-1", cfdas=[], last_upd_date=datetime.datetime(2024, 1, 20, 7, 15, 0)
-
+        opportunity_id=1,
+        oppnumber="A-1",
+        cfdas=[],
+        last_upd_date=datetime.datetime(2024, 1, 20, 7, 15, 0),
     )
     att = ForeignTsynopsisAttachmentFactory.create(file_lob=b"Testing saving to db")
     db_session.commit()
