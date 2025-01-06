@@ -1,6 +1,4 @@
 import click
-from opensearchpy.exceptions import ConnectionTimeout, TransportError
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -22,13 +20,6 @@ from src.task.ecs_background_task import ecs_background_task
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name="load-opportunity-data-opensearch")
-@retry(
-    stop=stop_after_attempt(3),  # Retry up to 3 times
-    wait=wait_fixed(2),  # Wait 2 seconds between retries
-    retry=retry_if_exception_type(
-        (TransportError, ConnectionTimeout)
-    ),  # Retry on TransportError (including timeouts)
-)
 def load_opportunity_data(
     search_client: search.SearchClient, db_session: db.Session, full_refresh: bool
 ) -> None:
