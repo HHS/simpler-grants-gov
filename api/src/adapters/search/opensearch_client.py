@@ -148,6 +148,22 @@ class SearchClient:
         existing_index_mapping = self._client.cat.aliases(alias_name, format="json")
         return len(existing_index_mapping) > 0
 
+    def cleanup_old_indices(self, index_prefix: str, index_name: str, delete_prior_indexes: bool) -> None:
+        """
+        Cleanup old indexes now that they aren't connected to the alias
+        """
+        logger.error(index_prefix)
+        resp = self._client.cat.indices(format="json", h=["index"])
+        logger.error(resp)
+        resp = self._client.cat.indices(f"{index_prefix}-*", format="json", h=["index"])
+        logger.error(resp)
+
+        old_indexes = [index["index"] for index in resp if index["index"] != index_name]  # omit the newly created one
+
+        if delete_prior_indexes:
+            for index in old_indexes:
+                self.delete_index(index)
+
     def swap_alias_index(
         self,
         index_prefix: str,
@@ -179,17 +195,8 @@ class SearchClient:
 
         self._client.indices.update_aliases({"actions": actions})
 
-        # Cleanup old indexes now that they aren't connected to the alias
-        resp = self._client.cat.indices(format="json", h=["index"])
-        old_indexes = [
-            index["index"]
-            for index in resp
-            if index["index"].startswith(index_prefix) and index["index"] != index_name
-        ]  # omit the newly created one
+        self.cleanup_old_indices(index_prefix, index_name, delete_prior_indexes)
 
-        if delete_prior_indexes:
-            for index in old_indexes:
-                self.delete_index(index)
 
     def search_raw(self, index_name: str, search_query: dict) -> dict:
         # Simple wrapper around search if you don't want the request or response
