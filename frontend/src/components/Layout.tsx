@@ -1,10 +1,4 @@
-import pick from "lodash/pick";
-
-import {
-  NextIntlClientProvider,
-  useMessages,
-  useTranslations,
-} from "next-intl";
+import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 
 import Footer from "./Footer";
@@ -20,7 +14,6 @@ export default function Layout({ children, locale }: Props) {
   setRequestLocale(locale);
 
   const t = useTranslations();
-  const messages = useMessages();
 
   return (
     // Stick the footer to the bottom of the page
@@ -28,12 +21,7 @@ export default function Layout({ children, locale }: Props) {
       <a className="usa-skipnav z-top" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
-      <NextIntlClientProvider
-        locale={locale}
-        messages={pick(messages, "Header")}
-      >
-        <Header locale={locale} />
-      </NextIntlClientProvider>
+      <Header locale={locale} />
       <main id="main-content" className="border-top-0">
         {children}
       </main>
