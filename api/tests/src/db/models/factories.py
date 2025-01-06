@@ -1009,7 +1009,7 @@ class TsynopsisAttachmentFactory(BaseFactory):
     link_url = factory.Faker("relevant_url")
     file_name = factory.Faker("file_name")
     file_desc = factory.Faker("sentence")
-    file_lob = factory.LazyAttribute(lambda x: fake.binary(length=16))
+    file_lob = b"Test attachment"
     file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
     create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     created_date = factory.LazyAttribute(
@@ -1021,14 +1021,6 @@ class TsynopsisAttachmentFactory(BaseFactory):
     creator_id = factory.Faker("first_name")
     last_upd_id = factory.Faker("first_name")
     syn_att_folder_id = factory.Faker("random_int", min=1000, max=10000000)
-
-    # Set non-model fields after creation
-    @factory.post_generation
-    def my_attachment(self, create, extracted):
-        if extracted:
-            self.my_attachment = extracted
-        else:
-            self.my_attachment = b"Test attachment"
 
 
 class TforecastFactory(BaseFactory):
