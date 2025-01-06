@@ -137,8 +137,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         opportunity_index_alias,
         load_opportunities_to_index,
     ):
-        index_prefix = "partial-refresh-index"
-        index_name = f"{index_prefix}-" + get_now_us_eastern_datetime().strftime(
+        index_name = "partial-refresh-index-" + get_now_us_eastern_datetime().strftime(
             "%Y-%m-%d_%H-%M-%S"
         )
         search_client.create_index(index_name)

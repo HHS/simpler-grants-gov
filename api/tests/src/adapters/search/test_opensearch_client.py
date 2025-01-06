@@ -219,8 +219,8 @@ def test_get_connection_parameters():
 def test_cleanup_old_indices(search_client):
     index_name_1 = f"test-index-{uuid.uuid4().int}"  # old index
     index_name_2 = f"test-index-{uuid.uuid4().int}"  # old index
-    index_name_3 = f"test-index-{uuid.uuid4().int}"  # new index
-    index_name_4 = f"partial-refresh-index-{uuid.uuid4().int}"  # other index
+    index_name_3 = f"partial-refresh-index-{uuid.uuid4().int}"  # old index
+    index_name_4 = f"test-index-{uuid.uuid4().int}"  # new index
 
     search_client.create_index(index_name_1)
     search_client.create_index(index_name_2)
@@ -234,7 +234,7 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_4) is True
 
     # expect old index with same prefix to be deleted and others to remain
-    search_client.cleanup_old_indices("test-index", index_name_3, delete_prior_indexes=True)
+    search_client.cleanup_old_indices("test-index", index_name_4, delete_prior_indexes=True)
 
     assert search_client.index_exists(index_name_1) is False
     assert search_client.index_exists(index_name_2) is False

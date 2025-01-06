@@ -189,7 +189,7 @@ class LoadOpportunitiesToIndex(Task):
             self.config.alias_name,
         )
 
-        # cleanup indexes
+        # cleanup old indexes
         self.search_client.cleanup_old_indices(
             self.config.index_prefix, self.index_name, delete_prior_indexes=True
         )
