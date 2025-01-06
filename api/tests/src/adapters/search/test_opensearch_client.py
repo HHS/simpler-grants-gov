@@ -118,7 +118,7 @@ def test_swap_alias_index(search_client, generic_index):
 
     # Swap the index to the generic one + delete the tmp one
     search_client.swap_alias_index(generic_index, alias_name)
-    search_client.cleanup_old_indices("test-tmp-index", generic_index)
+    search_client.cleanup_old_indices("test-tmp-index", [generic_index])
 
     resp = search_client.search(alias_name, {}, include_scores=False)
     assert resp.records == records
@@ -234,7 +234,7 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_4) is True
 
     # expect old index with same prefix to be deleted and others to remain
-    search_client.cleanup_old_indices("test-index", index_name_4)
+    search_client.cleanup_old_indices("test-index", [index_name_4])
 
     assert search_client.index_exists(index_name_1) is False
     assert search_client.index_exists(index_name_2) is False
