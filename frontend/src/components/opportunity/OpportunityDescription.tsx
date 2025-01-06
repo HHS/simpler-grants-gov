@@ -107,23 +107,12 @@ const SummaryDescriptionDisplay = ({
 
 const OpportunityDescription = ({ summary, nofoPath }: Props) => {
   const t = useTranslations("OpportunityListing.description");
-  const agency_phone_number_stripped = summary?.agency_phone_number
-    ? summary.agency_phone_number.replace(/-/g, "")
-    : "";
 
   const additionalInformationOnEligibility =
     summary.applicant_eligibility_description ?? "--";
   const agencyEmailLink = summary?.agency_email_address ? (
     <a href={`mailto:${summary.agency_email_address}`}>
       {summary.agency_email_address}
-    </a>
-  ) : (
-    "--"
-  );
-
-  const telephoneLink = summary?.agency_phone_number ? (
-    <a href={`tel:${agency_phone_number_stripped}`}>
-      {summary.agency_phone_number}
     </a>
   ) : (
     "--"
@@ -161,8 +150,6 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
           <p>{summary.agency_email_address_description}</p>
         )}
         <p>{agencyEmailLink}</p>
-        <h4>{t("telephone")}</h4>
-        <p>{telephoneLink}</p>
       </div>
     </>
   );

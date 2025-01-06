@@ -14,13 +14,7 @@
     "dependencies"
   ],
   "branchPrefix": "renovate/",
-  "reviewers": [
-    "sammysteiner",
-    "acouch",
-    "jamesbursa",
-    "coilysiren",
-    "aplybeah"
-  ],
+  "reviewersFromCodeOwners": true,
   "rangeStrategy": "update-lockfile",
   "timezone": "America/New_York",
   "vulnerabilityAlerts": {
@@ -136,6 +130,15 @@
         "analytics/poetry.lock"
       ],
       "matchPackagePatterns": ["kaleido"]
+    },
+    {
+      "description": "Don't upgrade Python itself as annual releases reflect as minor version bumps",
+      "enabled": false,
+      "matchFileNames": [
+        "analytics/pyproject.toml",
+        "api/pyproject.toml"
+      ],
+      "matchPackagePatterns": ["python"]
     }
   ]
 }

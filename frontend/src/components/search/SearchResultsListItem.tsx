@@ -43,7 +43,7 @@ export default function SearchResultsListItem({
         <div className="desktop:grid-col-fill">
           <div className="grid-row flex-column">
             <div className="grid-col tablet:order-2">
-              <h2 className="margin-y-105 line-height-serif-2">
+              <h2 className="margin-y-105 line-height-sans-2">
                 <Link
                   href={`/opportunity/${opportunity?.opportunity_id}`}
                   className="usa-link usa-link"

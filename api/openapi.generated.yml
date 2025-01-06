@@ -432,6 +432,37 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Opportunities
+      security:
+      - ApiJwtAuth: []
     post:
       parameters:
       - in: path
@@ -522,6 +553,43 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSavedOpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Delete Saved Opportunity
+      security:
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -1465,12 +1533,6 @@ components:
           description: Additional information about the types of applicants that are
             eligible
           example: All types of domestic applicants are eligible to apply
-        agency_phone_number:
-          type:
-          - string
-          - 'null'
-          description: The phone number of the agency who owns the opportunity
-          example: 123-456-7890
         agency_contact_description:
           type:
           - string
@@ -1911,6 +1973,71 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedOpportunitySummaryV1:
+      type: object
+      properties:
+        post_date:
+          type: string
+          format: date
+          description: The date the opportunity was posted
+          example: '2024-01-01'
+        close_date:
+          type: string
+          format: date
+          description: The date the opportunity will close
+          example: '2024-01-01'
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted
+          example: false
+    SavedOpportunityResponseV1:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          description: The ID of the saved opportunity
+          example: 1234
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: my title
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
+        summary:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+    UserSavedOpportunitiesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of saved opportunities
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserSaveOpportunityRequest:
       type: object
       properties:
@@ -1959,6 +2086,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserDeleteSavedOpportunityResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
