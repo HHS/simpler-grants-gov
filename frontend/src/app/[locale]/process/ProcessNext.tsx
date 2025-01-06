@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useMessages, useTranslations } from "next-intl";
