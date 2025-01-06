@@ -24,7 +24,7 @@ export default function Home({ params: { locale } }: LocalizedPageProps) {
   return (
     <>
       <Hero />
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <IndexGoalContent />
       <ProcessAndResearchContent />
     </>

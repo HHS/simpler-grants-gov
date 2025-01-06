@@ -553,6 +553,43 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: opportunity_id
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSavedOpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Delete Saved Opportunity
+      security:
+      - ApiJwtAuth: []
 openapi: 3.1.0
 components:
   schemas:
@@ -1496,12 +1533,6 @@ components:
           description: Additional information about the types of applicants that are
             eligible
           example: All types of domestic applicants are eligible to apply
-        agency_phone_number:
-          type:
-          - string
-          - 'null'
-          description: The phone number of the agency who owns the opportunity
-          example: 123-456-7890
         agency_contact_description:
           type:
           - string
@@ -2055,6 +2086,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserDeleteSavedOpportunityResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code

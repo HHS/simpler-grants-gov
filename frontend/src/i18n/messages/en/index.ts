@@ -484,6 +484,7 @@ export const messages = {
     title: "We're building a simpler Grants.gov!",
     content:
       "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
+    search_link: "Search for grants",
     github_link: "Follow on GitHub",
   },
   Footer: {
