@@ -23,6 +23,12 @@ jest.mock("next/navigation", () => ({
   usePathname: () => usePathnameMock() as string,
 }));
 
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => true,
+  }),
+}));
+
 describe("Header", () => {
   const mockResponse = {
     auth_login_url: "/login-url",
