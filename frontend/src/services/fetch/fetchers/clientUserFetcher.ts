@@ -8,7 +8,7 @@ import { UserFetcher, UserSession } from "src/services/auth/types";
 export const userFetcher: UserFetcher = async (url) => {
   let response;
   try {
-    response = await fetch(url);
+    response = await fetch(url, { cache: "no-store" });
   } catch (e) {
     console.error("User session fetch network error", e);
     throw new ApiRequestError(0); // Network error

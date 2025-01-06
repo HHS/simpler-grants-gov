@@ -32,8 +32,10 @@ export default function UserProvider({
   const getUserSession = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log("~~~ fetching user");
       const fetchedUser = await debouncedUserFetcher();
       if (fetchedUser) {
+        console.log("~~~ fetchedUser", fetchedUser);
         setLocalUser(fetchedUser);
         setUserFetchError(undefined);
         setIsLoading(false);

@@ -1,37 +1,18 @@
 "use client";
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useUser } from "src/services/auth/useUser";
 
 import React from "react";
 import { Button, Table } from "@trussworks/react-uswds";
-
-import Loading from "src/components/Loading";
 
 /**
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
   const { setFeatureFlag, featureFlags } = useFeatureFlags();
-  const { user, isLoading, error } = useUser();
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    // there's no error page within this tree, should we make a top level error?
-    return (
-      <>
-        <h1>Error</h1>
-        {error.message}
-      </>
-    );
-  }
 
   return (
     <>
-      <h2>{user?.email ? `Logged in as: ${user.email}` : "Not logged in"}</h2>
       <Table>
         <thead>
           <tr>

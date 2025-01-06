@@ -9,6 +9,7 @@ const createSessionAndSetStatus = async (
 ): Promise<string> => {
   try {
     await createSession(token);
+    console.log("~~~ session set");
     return successStatus;
   } catch (error) {
     console.error("error in creating session", error);
