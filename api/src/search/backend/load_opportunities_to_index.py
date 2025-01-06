@@ -190,9 +190,7 @@ class LoadOpportunitiesToIndex(Task):
         )
 
         # cleanup old indexes
-        self.search_client.cleanup_old_indices(
-            self.config.index_prefix, self.index_name, delete_prior_indexes=True
-        )
+        self.search_client.cleanup_old_indices(self.config.index_prefix, self.index_name)
 
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """

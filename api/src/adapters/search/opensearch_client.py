@@ -152,8 +152,6 @@ class SearchClient:
         self,
         index_prefix: str,
         index_name: str,
-        *,
-        delete_prior_indexes: bool = False,
     ) -> None:
         """
         Cleanup old indexes now that they aren't connected to the alias
@@ -164,9 +162,8 @@ class SearchClient:
             index["index"] for index in resp if index["index"] != index_name
         ]  # omit the newly created one
 
-        if delete_prior_indexes:
-            for index in old_indexes:
-                self.delete_index(index)
+        for index in old_indexes:
+            self.delete_index(index)
 
     def swap_alias_index(self, index_name: str, alias_name: str) -> None:
         """
