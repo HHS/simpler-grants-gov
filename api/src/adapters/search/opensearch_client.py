@@ -149,7 +149,10 @@ class SearchClient:
         return len(existing_index_mapping) > 0
 
     def cleanup_old_indices(
-        self, index_prefix: str, index_name: str, *,
+        self,
+        index_prefix: str,
+        index_name: str,
+        *,
         delete_prior_indexes: bool = False,
     ) -> None:
         """
@@ -165,11 +168,7 @@ class SearchClient:
             for index in old_indexes:
                 self.delete_index(index)
 
-    def swap_alias_index(
-        self,
-        index_name: str,
-        alias_name: str
-    ) -> None:
+    def swap_alias_index(self, index_name: str, alias_name: str) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
         attached to the alias, remove them from the alias.
