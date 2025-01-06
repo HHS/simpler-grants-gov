@@ -149,16 +149,13 @@ class SearchClient:
         return len(existing_index_mapping) > 0
 
     def cleanup_old_indices(
-        self, index_prefix: str, index_name: str, delete_prior_indexes: bool
+        self, index_prefix: str, index_name: str, *,
+        delete_prior_indexes: bool = False,
     ) -> None:
         """
         Cleanup old indexes now that they aren't connected to the alias
         """
-        logger.error(index_prefix)
-        resp = self._client.cat.indices(format="json", h=["index"])
-        logger.error(resp)
         resp = self._client.cat.indices(f"{index_prefix}-*", format="json", h=["index"])
-        logger.error(resp)
 
         old_indexes = [
             index["index"] for index in resp if index["index"] != index_name
@@ -170,11 +167,8 @@ class SearchClient:
 
     def swap_alias_index(
         self,
-        index_prefix: str,
         index_name: str,
-        alias_name: str,
-        *,
-        delete_prior_indexes: bool = False,
+        alias_name: str
     ) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
@@ -198,8 +192,6 @@ class SearchClient:
             actions.append({"remove": {"index": index, "alias": alias_name}})
 
         self._client.indices.update_aliases({"actions": actions})
-
-        self.cleanup_old_indices(index_prefix, index_name, delete_prior_indexes)
 
     def search_raw(self, index_name: str, search_query: dict) -> dict:
         # Simple wrapper around search if you don't want the request or response

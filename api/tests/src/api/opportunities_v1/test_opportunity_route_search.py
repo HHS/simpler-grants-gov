@@ -354,7 +354,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
 
         # Swap the search index alias
         search_client.swap_alias_index(
-            "test-opportunity-index", opportunity_index, opportunity_index_alias
+            opportunity_index, opportunity_index_alias
         )
 
     @pytest.mark.parametrize(

@@ -143,10 +143,8 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         search_client.create_index(index_name)
         search_client.swap_alias_index(
-            index_prefix,
             index_name,
             load_opportunities_to_index.config.alias_name,
-            delete_prior_indexes=True,
         )
 
         # Load a bunch of records into the DB

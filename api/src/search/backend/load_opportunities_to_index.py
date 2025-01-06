@@ -185,11 +185,12 @@ class LoadOpportunitiesToIndex(Task):
 
         # handle aliasing of endpoints
         self.search_client.swap_alias_index(
-            self.config.index_prefix,
             self.index_name,
             self.config.alias_name,
-            delete_prior_indexes=True,
         )
+
+        # cleanup indexes
+        self.search_client.cleanup_old_indices(self.config.index_prefix, self.index_name, delete_prior_indexes=True)
 
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """
