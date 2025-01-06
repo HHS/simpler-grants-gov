@@ -22,10 +22,7 @@ const OpportunityDownload = ({ nofoPath }: Props) => {
         <div className="grid-row flex-justify">
           <Button onClick={() => downloadNOFO(nofoPath)} type="button">
             <span>{t("nofo_download")} </span>
-            <USWDSIcon
-              name={"file_download"}
-              className="usa-icon usa-icon--size-4"
-            />
+            <USWDSIcon name={"file_download"} className="usa-icon--size-4" />
           </Button>
           <Link
             className="flex-align-self-center"

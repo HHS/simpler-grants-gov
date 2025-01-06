@@ -2,6 +2,8 @@
 
 import clsx from "clsx";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { UserProfile } from "src/services/auth/types";
+import { useUser } from "src/services/auth/useUser";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -16,6 +18,7 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 type PrimaryLink = {
@@ -135,18 +138,49 @@ const LoginLink = ({ navLoginLinkText }: { navLoginLinkText: string }) => {
   }, []);
 
   return (
-    <a
-      {...(authLoginUrl ? { href: authLoginUrl } : "")}
-      key="login-link"
-      className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="login"
-        key="login-link-icon"
-      />
-      {navLoginLinkText}
-    </a>
+    <div className="usa-nav__primary-item border-0">
+      <a
+        {...(authLoginUrl ? { href: authLoginUrl } : "")}
+        key="login-link"
+        className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
+      >
+        <USWDSIcon
+          className="margin-right-05 margin-left-neg-05"
+          name="login"
+          key="login-link-icon"
+        />
+        {navLoginLinkText}
+      </a>
+    </div>
+  );
+};
+
+const UserDropdown = ({
+  user,
+  navLogoutLinkText,
+}: {
+  user: UserProfile;
+  navLogoutLinkText: string;
+}) => {
+  const logout = useCallback(async (): Promise<void> => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+  }, []);
+  return (
+    <div>
+      <USWDSIcon name="account_circle" />
+      <ContentDisplayToggle showCallToAction={user.email || "oops no email"}>
+        <USWDSIcon name="logout" />
+        <div
+          key="login-link"
+          className="usa-nav__link text-primary font-sans-2xs display-flex text-normal usa-button usa-button--unstyled"
+          onClick={() => logout()}
+        >
+          {navLogoutLinkText}
+        </div>
+      </ContentDisplayToggle>
+    </div>
   );
 };
 
@@ -173,6 +207,9 @@ const Header = ({ logoPath, locale }: Props) => {
 
   const { checkFeatureFlag } = useFeatureFlags();
   const showLoginLink = checkFeatureFlag("authOn");
+
+  const { user } = useUser();
+  console.log("!!! user", user);
 
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
@@ -224,9 +261,15 @@ const Header = ({ logoPath, locale }: Props) => {
           </div>
           {!!showLoginLink && (
             <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-              <div className="usa-nav__primary-item border-0">
+              {!user?.token && (
                 <LoginLink navLoginLinkText={t("nav_link_login")} />
-              </div>
+              )}
+              {!!user?.token && (
+                <UserDropdown
+                  user={user}
+                  navLogoutLinkText={t("nav_link_logout")}
+                />
+              )}
             </div>
           )}
           <NavLinks
