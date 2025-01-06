@@ -219,24 +219,25 @@ def test_get_connection_parameters():
         "pool_maxsize": 10,
     }
 
+
 def test_cleanup_old_indices(search_client):
-    index_name_1 = f"test-index-{uuid.uuid4().int}" # old index
-    index_name_2 = f"test-index-{uuid.uuid4().int}" # old index
-    index_name_3 = f"test-index-{uuid.uuid4().int}" # new index
-    index_name_4 = f"partial-refresh-index-{uuid.uuid4().int}" # other index
+    index_name_1 = f"test-index-{uuid.uuid4().int}"  # old index
+    index_name_2 = f"test-index-{uuid.uuid4().int}"  # old index
+    index_name_3 = f"test-index-{uuid.uuid4().int}"  # new index
+    index_name_4 = f"partial-refresh-index-{uuid.uuid4().int}"  # other index
 
     search_client.create_index(index_name_1)
     search_client.create_index(index_name_2)
     search_client.create_index(index_name_3)
     search_client.create_index(index_name_4)
 
-    #check all indexes were created
+    # check all indexes were created
     assert search_client.index_exists(index_name_1) is True
     assert search_client.index_exists(index_name_2) is True
     assert search_client.index_exists(index_name_3) is True
     assert search_client.index_exists(index_name_4) is True
 
-    #expect old index with same prefix to be deleted and others to remain
+    # expect old index with same prefix to be deleted and others to remain
     search_client.cleanup_old_indices("test-index", index_name_3, delete_prior_indexes=True)
 
     assert search_client.index_exists(index_name_1) is False
