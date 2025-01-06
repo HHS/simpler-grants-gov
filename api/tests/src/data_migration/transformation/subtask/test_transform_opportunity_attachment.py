@@ -1,9 +1,6 @@
-import datetime
-
 from src.db.models.foreign.attachment import TsynopsisAttachment as TsynopsisAttachmentF
 from src.db.models.staging.attachment import TsynopsisAttachment as TsynopsisAttachmentS
 from tests.src.db.models.factories import (
-    ForeignTopportunityFactory,
     ForeignTsynopsisAttachmentFactory,
     StagingTsynopsisAttachmentFactory,
 )
