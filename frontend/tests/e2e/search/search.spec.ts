@@ -332,7 +332,7 @@ test.describe("Search page tests", () => {
 
       let urlBeforeInteraction = page.url();
 
-      // click first nested select all
+      // click nested select all for first nested agency in list
       const selectAllNestedButton = page
         .locator('#opportunity-filter-agency button:has-text("Select All")')
         .nth(1);
@@ -340,7 +340,7 @@ test.describe("Search page tests", () => {
 
       await waitForAnyURLChange(page, urlBeforeInteraction);
 
-      // validate that new search results are returned
+      // validate that new search results are returned with filtered (smaller number) of results
       const topLevelAndNestedSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);
 
@@ -379,7 +379,7 @@ test.describe("Search page tests", () => {
         numberOfNestedFilterOptions,
       );
 
-      // click clear all
+      // click top level clear all
       await page
         .locator(`#opportunity-filter-agency button:has-text("Clear All")`)
         .first()
@@ -388,7 +388,7 @@ test.describe("Search page tests", () => {
       // validate that url is updated
       await waitForUrl(page, "http://127.0.0.1:3000/search");
 
-      // validate that new search results are returned
+      // validate that new search results are returned with no filters in place (all results)
       const fullyClearedSearchResultsCount =
         await getNumberOfOpportunitySearchResults(page);
       expect(initialSearchResultsCount).toBe(fullyClearedSearchResultsCount);
@@ -403,16 +403,17 @@ test.describe("Search page tests", () => {
       // validate that the correct number of filter options is displayed
       await expect(accordionButton).toHaveText("Agency");
 
-      // select all nested
+      // select all from first nested agency
       await selectAllNestedButton.click();
 
       await waitForURLContainsQueryParam(page, "agency");
 
-      // validate that new search results are returned, and correct counts displayed
+      // validate that new filtered search results are returned for nested agency, and correct counts displayed
+      // (fewer results than with top level agencies + nested agencies selected)
       const nestedSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);
 
-      expect(nestedSelectedNumberOfSearchResults).toBeGreaterThanOrEqual(
+      expect(nestedSelectedNumberOfSearchResults).toBeLessThanOrEqual(
         topLevelAndNestedSelectedNumberOfSearchResults,
       );
 
@@ -423,7 +424,7 @@ test.describe("Search page tests", () => {
         numberOfNestedFilterOptions,
       );
 
-      // select all top level
+      // select all top level agencies
       urlBeforeInteraction = page.url();
       await selectAllTopLevelFilterOptions(page, "agency");
 
@@ -432,6 +433,7 @@ test.describe("Search page tests", () => {
       const newTopLevelAndNestedSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);
 
+      // validate that counts equal previous counts for this state (top level and first nested agency selected)
       expect(newTopLevelAndNestedSelectedNumberOfSearchResults).toEqual(
         topLevelAndNestedSelectedNumberOfSearchResults,
       );
@@ -444,24 +446,25 @@ test.describe("Search page tests", () => {
       );
 
       urlBeforeInteraction = page.url();
-      // clear nested
+
+      // clear nested agency selection
       await page
         .locator(`#opportunity-filter-agency button:has-text("Clear All")`)
         .nth(1)
         .click();
 
       // validate that url is updated
-
       await waitForAnyURLChange(page, urlBeforeInteraction);
 
-      // validate that new search results are returned
+      // validate that new unfiltered filtered results are returned with fewer results than with
+      // sub-agencies selected
       const partiallyClearedSearchResultsCount =
         await getNumberOfOpportunitySearchResults(page);
-      expect(partiallyClearedSearchResultsCount).toBeGreaterThanOrEqual(
+      expect(partiallyClearedSearchResultsCount).toBeLessThanOrEqual(
         topLevelAndNestedSelectedNumberOfSearchResults,
       );
 
-      // validate that checkboxes are not checked
+      // validate that nested agency checkboxes are not checked
       checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();
 
       await Promise.all(

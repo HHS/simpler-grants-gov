@@ -1,3 +1,4 @@
+from src.api.opportunities_v1.opportunity_schemas import SavedOpportunityResponseV1Schema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
@@ -75,3 +76,14 @@ class UserSaveOpportunityRequestSchema(Schema):
 
 class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(SavedOpportunityResponseV1Schema),
+        metadata={"description": "List of saved opportunities"},
+    )

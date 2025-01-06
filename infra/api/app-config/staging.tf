@@ -30,5 +30,7 @@ module "staging_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
+    # Login.gov OAuth
+    ENABLE_AUTH_ENDPOINT = 0
   }
 }
