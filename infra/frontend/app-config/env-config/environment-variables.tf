@@ -46,7 +46,7 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
     },
-    # URL for the API login route. 
+    # URL for the API login route.
     AUTH_LOGIN_URL = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/auth-login-url"
@@ -70,6 +70,10 @@ locals {
     SESSION_SECRET = {
       manage_method     = "generated"
       secret_store_name = "/${var.app_name}/${var.environment}/session-secret"
-    }
+    },
+    FEATURE_AUTH_ON = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-auth-on"
+    },
   }
 }
