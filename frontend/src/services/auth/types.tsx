@@ -67,4 +67,5 @@ export type UserProviderState = {
   user?: UserProfile;
   error?: Error;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
 };

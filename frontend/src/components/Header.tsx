@@ -2,8 +2,6 @@
 
 import clsx from "clsx";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { UserProfile } from "src/services/auth/types";
-import { useUser } from "src/services/auth/useUser";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -18,8 +16,7 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -123,67 +120,6 @@ const NavLinks = ({
   );
 };
 
-const LoginLink = ({ navLoginLinkText }: { navLoginLinkText: string }) => {
-  const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchEnv() {
-      const res = await fetch("/api/env");
-      const data = (await res.json()) as { auth_login_url: string };
-      data.auth_login_url
-        ? setAuthLoginUrl(data.auth_login_url)
-        : console.error("could not access auth_login_url");
-    }
-    fetchEnv().catch((error) => console.warn("error fetching api/env", error));
-  }, []);
-
-  return (
-    <div className="usa-nav__primary-item border-0">
-      <a
-        {...(authLoginUrl ? { href: authLoginUrl } : "")}
-        key="login-link"
-        className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
-      >
-        <USWDSIcon
-          className="margin-right-05 margin-left-neg-05"
-          name="login"
-          key="login-link-icon"
-        />
-        {navLoginLinkText}
-      </a>
-    </div>
-  );
-};
-
-const UserDropdown = ({
-  user,
-  navLogoutLinkText,
-}: {
-  user: UserProfile;
-  navLogoutLinkText: string;
-}) => {
-  const logout = useCallback(async (): Promise<void> => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-  }, []);
-  return (
-    <div>
-      <USWDSIcon name="account_circle" />
-      <ContentDisplayToggle showCallToAction={user.email || "oops no email"}>
-        <USWDSIcon name="logout" />
-        <div
-          key="login-link"
-          className="usa-nav__link text-primary font-sans-2xs display-flex text-normal usa-button usa-button--unstyled"
-          onClick={() => logout()}
-        >
-          {navLogoutLinkText}
-        </div>
-      </ContentDisplayToggle>
-    </div>
-  );
-};
-
 const Header = ({ logoPath, locale }: Props) => {
   logoPath = "./img/grants-logo.svg";
   const t = useTranslations("Header");
@@ -207,10 +143,6 @@ const Header = ({ logoPath, locale }: Props) => {
 
   const { checkFeatureFlag } = useFeatureFlags();
   const showLoginLink = checkFeatureFlag("authOn");
-
-  const { user } = useUser();
-  console.log("!!! user", user);
-
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -261,15 +193,7 @@ const Header = ({ logoPath, locale }: Props) => {
           </div>
           {!!showLoginLink && (
             <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-              {!user?.token && (
-                <LoginLink navLoginLinkText={t("nav_link_login")} />
-              )}
-              {!!user?.token && (
-                <UserDropdown
-                  user={user}
-                  navLogoutLinkText={t("nav_link_logout")}
-                />
-              )}
+              <UserControl />
             </div>
           )}
           <NavLinks

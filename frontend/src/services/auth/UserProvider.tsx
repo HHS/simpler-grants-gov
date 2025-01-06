@@ -54,7 +54,12 @@ export default function UserProvider({
   }, [localUser, getUserSession]);
 
   const value = useMemo(
-    () => ({ user: localUser, error: userFetchError, isLoading }),
+    () => ({
+      user: localUser,
+      error: userFetchError,
+      isLoading,
+      refreshUser: getUserSession,
+    }),
     [localUser, userFetchError, isLoading],
   );
 
