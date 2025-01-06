@@ -8,10 +8,11 @@ version = "0.1.0"
 
 [tool.poetry.scripts]
 analytics = "analytics.cli:app"
-db-migrate = "src.analytics.cli:migrate_database"
+db-migrate = "analytics.cli:migrate_database"
 
 [tool.poetry.dependencies]
 dynaconf = "^3.2.4"
+jinja2 = ">=3.1.5"
 kaleido = "0.2.1"
 notebook = "^7.0.0"                               # Goal is to replace this with another method of presenting charts
 pandas = "^2.0.3"
@@ -20,12 +21,13 @@ plotly = "^5.15.0"
 pydantic = "^2.0.3"
 python = "~3.13"
 slack-sdk = "^3.23.0"
-typer = { extras = ["all"], version = "^0.13.0" }
+typer = { extras = ["all"], version = "^0.15.0" }
 sqlalchemy = "^2.0.30"
-psycopg = ">=3.0.7"
 pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
+psycopg = "^3.2.3"
+smart-open = "^7.0.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -33,9 +35,10 @@ mypy = "^1.4.1"
 pylint = "^3.0.2"
 pytest = "^8.0.0"
 pytest-cov = "^5.0.0"
-ruff = "^0.7.0"
+ruff = "^0.8.0"
 safety = "^3.0.0"
 types-requests = "^2.32.0.20241016"
+moto = "^5.0.22"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -75,7 +78,6 @@ ignore = [
   "PTH123",  # `open()` should be replaced by `Path.open()`
   "RUF012",  # Mutable class attributes should be annotated with `typing.ClassVar`
   "TD003",   # missing an issue link on TODO
-  "T201",    # use of `print` detected
   "PT004",   # pytest fixture leading underscore - is marked deprecated
   "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
 ]

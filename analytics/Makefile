@@ -6,7 +6,7 @@ ORG ?= HHS
 REPO ?= simpler-grants-gov
 SPRINT_PROJECT ?= 13
 ROADMAP_PROJECT ?= 12
-OUTPUT_DIR ?= data
+OUTPUT_DIR ?= $(shell mkdir -p data && echo data)
 CONFIG_DIR ?= config
 PROJECT_CONFIG_FILE ?= $(CONFIG_DIR)/github-projects.json
 ISSUE_FILE ?= $(OUTPUT_DIR)/delivery-data.json
@@ -148,6 +148,12 @@ db-migrate:
 	@echo "=> Migrating the database schema"
 	@echo "====================================================="
 	$(POETRY) analytics etl db_migrate
+	@echo "====================================================="
+
+opportunity-load:
+	@echo "=> Ingesting opportunity data into the database"
+	@echo "====================================================="
+	$(POETRY) analytics etl opportunity-load
 	@echo "====================================================="
 
 gh-transform-and-load:

@@ -5,9 +5,8 @@ import logging
 import os
 import time
 import uuid
-from collections.abc import Callable, Generator
 from functools import wraps
-from typing import ParamSpec, TypeVar
+from typing import Callable, Generator, ParamSpec, TypeVar  # noqa:  UP035
 
 import requests
 
@@ -63,8 +62,6 @@ def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
 
     start = time.perf_counter()
     _add_log_metadata(task_name)
-
-    # initialize new relic here when we add that
 
     logger.info("Starting ECS task %s", task_name)
 

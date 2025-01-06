@@ -10,8 +10,7 @@
                     "requestParam": "code",
                     "match": "*",
                     "claims": {
-                        "sub": "184c4c61-4a5d-4b5a-b3b9-bb9cfd7fe2ae",
-                        "email": "johns.smith@grant.gov"
+                        "email": "fake_mail@mail.com"
                     }
                 }
             ]

@@ -206,7 +206,7 @@ release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-metabase.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)	
+	./bin/deploy-metabase.sh $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

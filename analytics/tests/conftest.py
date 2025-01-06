@@ -5,13 +5,23 @@ Configure pytest settings and create reusable fixtures and functions.
 Visit pytest docs for more info:
 https://docs.pytest.org/en/7.1.x/reference/fixtures.html
 """
-
 import json
+import logging
+import uuid
 from pathlib import Path
 
+import _pytest.monkeypatch
+import boto3
+import moto
 import pandas as pd
 import pytest
+
+from sqlalchemy import text  # isort: skip
 from analytics.datasets.issues import IssueMetadata, IssueType
+from analytics.integrations.etldb.etldb import EtlDb
+
+logger = logging.getLogger(__name__)
+
 
 # skips the integration tests in tests/integrations/
 # to run the integration tests, invoke them directly: pytest tests/integrations/
@@ -255,3 +265,135 @@ def issue(  # pylint: disable=too-many-locals
         sprint_start=sprint_start,
         sprint_end=sprint_end_ts.strftime("%Y-%m-%d"),
     )
+
+
+####################
+# AWS Mock Fixtures
+####################
+
+
+@pytest.fixture(autouse=True)
+def reset_aws_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Reset the aws env vars.
+
+    This will prevent you from accidentally connecting
+    to a real AWS account if you were doing some local testing.
+    """
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
+
+@pytest.fixture
+def mock_s3() -> boto3.resource:
+    """Instantiate an S3 bucket resource."""
+    # https://docs.getmoto.org/en/stable/docs/configuration/index.html#whitelist-services
+    with moto.mock_aws(config={"core": {"service_whitelist": ["s3"]}}):
+        yield boto3.resource("s3")
+
+
+@pytest.fixture
+def mock_s3_bucket_resource(
+    mock_s3: boto3.resource,
+) -> boto3.resource("s3").Bucket:
+    """Create and return a mock S3 bucket resource."""
+    bucket = mock_s3.Bucket("test_bucket")
+    bucket.create()
+    return bucket
+
+
+@pytest.fixture
+def mock_s3_bucket(mock_s3_bucket_resource: boto3.resource("s3").Bucket) -> str:
+    """Return name of mock S3 bucket."""
+    return mock_s3_bucket_resource.name
+
+
+# From https://github.com/pytest-dev/pytest/issues/363
+@pytest.fixture(scope="session")
+def monkeypatch_session() -> pytest.MonkeyPatch:
+    """
+    Create a monkeypatch instance.
+
+    This can be used to monkeypatch global environment, objects, and attributes
+    for the duration the test session.
+    """
+    mpatch = _pytest.monkeypatch.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+@pytest.fixture(scope="session")
+def test_schema() -> str:
+    """Create a unique test schema."""
+    return f"test_schema_{uuid.uuid4().int}"
+
+
+@pytest.fixture(scope="session")
+def create_test_db(test_schema: str) -> EtlDb:
+    """
+    Create a temporary PostgreSQL schema.
+
+    This function creates schema and a database engine
+    that connects to that schema. Drops the schema after the context manager
+    exits.
+    """
+    etldb_conn = EtlDb()
+
+    with etldb_conn.connection() as conn:
+
+        _create_schema(conn, test_schema)
+
+        _create_opportunity_table(conn, test_schema)
+        try:
+            yield etldb_conn
+
+        finally:
+            _drop_schema(conn, test_schema)
+
+
+def _create_schema(conn: EtlDb.connection, schema: str) -> None:
+    """Create a database schema."""
+    db_test_user = "app"
+
+    with conn.begin():
+        conn.execute(
+            text(f"CREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {db_test_user};"),
+        )
+    logger.info("Created schema %s", schema)
+
+
+def _drop_schema(conn: EtlDb.connection, schema: str) -> None:
+    """Drop a database schema."""
+    with conn.begin():
+        conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
+
+    logger.info("Dropped schema %s", schema)
+
+
+def _create_opportunity_table(conn: EtlDb.connection, schema: str) -> None:
+    """Create opportunity tables."""
+    with conn.begin():
+        conn.execute(text(f"SET search_path TO {schema};"))
+        # Get the path of the current file (test file)
+        test_file_path = Path(__file__).resolve()
+
+        # Construct the path to the SQL file
+        sql_file_path = (
+            test_file_path.parent.parent
+            / "src"
+            / "analytics"
+            / "integrations"
+            / "etldb"
+            / "migrations"
+            / "versions"
+            / "0007_add_opportunity_tables.sql"
+        )
+
+        with open(sql_file_path) as file:
+            create_table_commands = file.read()
+            conn.execute(text(create_table_commands))
+
+    logger.info("Created opportunity tables")

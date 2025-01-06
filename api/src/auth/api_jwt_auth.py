@@ -67,7 +67,7 @@ def get_config() -> ApiJwtConfig:
 
 
 def create_jwt_for_user(
-    user: User, db_session: db.Session, config: ApiJwtConfig | None = None
+    user: User, db_session: db.Session, config: ApiJwtConfig | None = None, email: str | None = None
 ) -> Tuple[str, UserTokenSession]:
     if config is None:
         config = get_config()
@@ -90,6 +90,8 @@ def create_jwt_for_user(
         "iat": current_time,
         "aud": config.audience,
         "iss": config.issuer,
+        "email": email,
+        "user_id": str(user.user_id),
     }
 
     logger.info(

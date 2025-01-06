@@ -5,6 +5,19 @@ data "aws_ecr_repository" "app" {
   name  = var.image_repository_name
 }
 
+data "external" "whoami" {
+  program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
+}
+
+# TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
+# data "external" "deploy_github_ref" {
+#   program = ["sh", "-c", "git branch --show-current | xargs -I {} echo '{\"value\": \"{}\"}'"]
+# }
+
+data "external" "deploy_github_sha" {
+  program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
+}
+
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
@@ -17,7 +30,13 @@ locals {
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
-    { name : "S3_BUCKET_ARN", value : aws_s3_bucket.general_purpose.arn },
+    { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
+    { name : "ENVIRONMENT", value : var.environment_name },
+    { name : "DEPLOY_TIMESTAMP", value : timestamp() },
+    { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
+    # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
+    # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
@@ -29,11 +48,22 @@ locals {
   environment_variables = concat(
     local.base_environment_variables,
     local.db_environment_variables,
-    [{ name : "DRAFTS_S3_BUCKET_ARN", value : aws_s3_bucket.draft_documents.arn }],
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
     ],
+    [
+      for name, value in var.s3_buckets :
+      { name : value.env_var, value : "s3://${aws_s3_bucket.s3_buckets[name].id}" }
+    ],
+    flatten([
+      for name, s3_bucket in var.s3_buckets : [
+        for paths in s3_bucket.paths : {
+          name  = paths.env_var,
+          value = "s3://${aws_s3_bucket.s3_buckets[name].id}${paths.path}"
+        }
+      ]
+    ])
   )
 }
 

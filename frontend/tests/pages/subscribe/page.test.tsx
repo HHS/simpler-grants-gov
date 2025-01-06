@@ -1,12 +1,13 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Subscribe from "src/app/[locale]/subscribe/page";
-import { render, screen } from "tests/react-utils";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react-dom", () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const originalModule = jest.requireActual("react-dom");
+  const originalModule =
+    jest.requireActual<typeof import("react-dom")>("react-dom");
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...originalModule,
     useFormStatus: jest.fn(() => ({ pending: false })),
@@ -29,19 +30,28 @@ jest.mock("react-dom", () => {
   };
 });
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-  unstable_setRequestLocale: identity,
+  setRequestLocale: identity,
 }));
 
 describe("Subscribe", () => {
   it("renders intro text", () => {
-    render(<Subscribe />);
+    render(Subscribe({ params: { locale: "en" } }));
 
-    const content = screen.getByText(
-      "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
-    );
+    const content = screen.getByText("intro");
 
     expect(content).toBeInTheDocument();
+  });
+
+  it("passes accessibility scan", async () => {
+    const { container } = render(Subscribe({ params: { locale: "en" } }));
+    const results = await waitFor(() => axe(container));
+
+    expect(results).toHaveNoViolations();
   });
 });

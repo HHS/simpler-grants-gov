@@ -14,7 +14,7 @@ from src.auth.api_jwt_auth import (
     parse_jwt_for_user,
 )
 from src.db.models.user_models import UserTokenSession
-from tests.src.db.models.factories import UserFactory
+from tests.src.db.models.factories import LinkExternalUserFactory, UserFactory
 
 
 @pytest.fixture
@@ -57,6 +57,7 @@ def mini_app(monkeypatch_module):
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
 def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     user = UserFactory.create()
+    linked_external_user = LinkExternalUserFactory.create(user=user)
     token, token_session = create_jwt_for_user(user, db_session, jwt_config)
     decoded_token = jwt.decode(
         token, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
@@ -67,8 +68,18 @@ def test_create_jwt_for_user(enable_factory_create, db_session, jwt_config):
     assert decoded_token["iat"] == timegm(
         datetime.fromisoformat("2024-11-14 12:00:00+00:00").utctimetuple()
     )
+    assert decoded_token["user_id"] == str(user.user_id)
+    assert decoded_token["email"] is None
     assert decoded_token["iss"] == jwt_config.issuer
     assert decoded_token["aud"] == jwt_config.audience
+
+    token_with_email, _ = create_jwt_for_user(
+        user, db_session, jwt_config, email=linked_external_user.email
+    )
+    decoded_token_with_email = jwt.decode(
+        token_with_email, algorithms=[jwt_config.algorithm], options={"verify_signature": False}
+    )
+    assert decoded_token_with_email["email"] == linked_external_user.email
 
     # Verify that the sub_id returned can be used to fetch a UserTokenSession object
     token_session = (

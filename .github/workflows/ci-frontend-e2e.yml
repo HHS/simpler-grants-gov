@@ -22,7 +22,7 @@ concurrency:
 jobs:
   e2e-tests:
     name: Run E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -82,7 +82,7 @@ jobs:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
     needs: [e2e-tests]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code

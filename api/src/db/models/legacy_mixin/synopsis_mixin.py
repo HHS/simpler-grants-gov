@@ -158,3 +158,22 @@ class TfundinstrSynopsisHistMixin:
     last_upd_date: Mapped[datetime.datetime | None]
     creator_id: Mapped[str | None]
     last_upd_id: Mapped[str | None]
+
+
+class TsynopsisAttachmentMixin:
+    syn_att_id: Mapped[int] = mapped_column(primary_key=True)
+    opportunity_id: Mapped[int]
+    att_revision_number: Mapped[int | None]
+    att_type: Mapped[str | None]
+    mime_type: Mapped[str | None]
+    link_url: Mapped[str | None]
+    file_name: Mapped[str | None]
+    file_desc: Mapped[str | None]
+    file_lob: Mapped[bytes | None]
+    file_lob_size: Mapped[int | None]
+    create_date: Mapped[datetime.datetime | None]
+    created_date: Mapped[datetime.datetime | None]
+    last_upd_date: Mapped[datetime.datetime | None]
+    creator_id: Mapped[str | None]
+    last_upd_id: Mapped[str | None]
+    syn_att_folder_id: Mapped[int | None]

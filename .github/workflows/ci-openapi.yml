@@ -19,10 +19,9 @@ concurrency:
   group: ${{ github.head_ref }}
   cancel-in-progress: true
 
-
 jobs:
   update-openapi-docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:

@@ -5,7 +5,7 @@ describe("Research Content", () => {
   it("Renders without errors", () => {
     render(<ResearchIntro />);
     const ProcessH1 = screen.getByRole("heading", {
-      level: 2,
+      level: 1,
       name: /Our existing research/i,
     });
 

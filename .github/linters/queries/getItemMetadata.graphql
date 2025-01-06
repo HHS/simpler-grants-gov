@@ -8,6 +8,10 @@ query (
       issueType {
         name
       }
+
+      # get list of pull requests that are linked to this issue
+      ...pullRequestMetadata
+
       # get all of the project items associated with this issue
       projectItems(first: 10) {
         nodes {
@@ -43,6 +47,23 @@ fragment projectMetadata on ProjectV2Item {
     owner {
       ... on Organization {
         login
+      }
+    }
+  }
+}
+
+fragment pullRequestMetadata on Issue {
+  pullRequests: closedByPullRequestsReferences(
+    first: 10
+    includeClosedPrs: true
+  ) {
+    nodes {
+      ... on PullRequest {
+        author {
+          ... on User {
+            login
+          }
+        }
       }
     }
   }

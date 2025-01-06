@@ -9,11 +9,7 @@ const IndexGoalContent = () => {
   const t = useTranslations("Index");
 
   return (
-    <ContentLayout
-      title={t("goal.title")}
-      data-testid="goal-content"
-      bottomBorder="light"
-    >
+    <ContentLayout data-testid="goal-content" bottomBorder="light">
       <Grid tabletLg={{ col: 6 }}>
         <p className="usa-intro padding-bottom-2">{t("goal.paragraph_1")}</p>
         <Link href="/subscribe" passHref>

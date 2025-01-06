@@ -34,7 +34,7 @@ test("can view banner and return to top after scrolling to the bottom", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: /Attention! Go to www.grants.gov to search and apply for grants./i,
+      name: /This site is a work in progress, with new features and updates based on your feedback./i,
     }),
   ).toBeVisible();
 
@@ -46,22 +46,16 @@ test("can view banner and return to top after scrolling to the bottom", async ({
   ).toBeInViewport();
 });
 
-test("can view the API milestone on GitHub", async ({ page }) => {
-  await page
-    .getByRole("link", { name: "View the API milestone on GitHub" })
-    .click();
+test("can view the 'Search interface launch'", async ({ page }) => {
+  await page.getByRole("link", { name: "Try the new simpler search" }).click();
 
-  await expect(page).toHaveURL(
-    /https:\/\/github.com\/HHS\/simpler-grants-gov\/issues\/70/,
-  );
+  await expect(page).toHaveURL(/search/);
 });
 
-test("can view the search milestone on GitHub", async ({ page }) => {
+test("can view the 'get involved' link", async ({ page }) => {
   await page
-    .getByRole("link", { name: "View the search milestone on GitHub" })
+    .getByRole("link", { name: "Get involved in our open-source community" })
     .click();
 
-  await expect(page).toHaveURL(
-    /https:\/\/github.com\/HHS\/simpler-grants-gov\/issues\/89/,
-  );
+  await expect(page).toHaveTitle(/Process | Simpler.Grants.gov/);
 });

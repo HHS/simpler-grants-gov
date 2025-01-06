@@ -1,5 +1,5 @@
-from . import forecast, opportunity, staging_base, synopsis, tgroups
+from . import attachment, forecast, opportunity, staging_base, synopsis, tgroups
 
 metadata = staging_base.metadata
 
-__all__ = ["metadata", "opportunity", "forecast", "synopsis", "tgroups"]
+__all__ = ["metadata", "opportunity", "forecast", "synopsis", "tgroups", "attachment"]

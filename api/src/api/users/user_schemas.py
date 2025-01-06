@@ -1,3 +1,4 @@
+from src.api.opportunities_v1.opportunity_schemas import SavedOpportunityResponseV1Schema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
@@ -22,7 +23,7 @@ class UserSchema(Schema):
     email = fields.String(
         metadata={
             "description": "The email address returned from Oauth2 provider",
-            "example": "js@gmail.com",
+            "example": "user@example.com",
         }
     )
     external_user_type = fields.Enum(
@@ -34,23 +35,25 @@ class UserSchema(Schema):
     )
 
 
-class UserTokenSchema(Schema):
-    token = fields.String(
+class UserLoginGovCallbackSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # authorization endpoint and must match:
+    # https://developers.login.gov/oidc/authorization/#authorization-response
+    code = fields.String(
         metadata={
-            "description": "Internal token generated for a user",
+            "description": "A unique authorization code that can be passed to the token endpoint"
         }
     )
-    user = fields.Nested(UserSchema())
-    is_user_new = fields.Boolean(
-        allow_none=False,
-        metadata={
-            "description": "Whether or not the user existed in our database",
-        },
+    state = fields.String(
+        metadata={"description": "The state value originally provided by us when calling login.gov"}
     )
-
-
-class UserTokenResponseSchema(AbstractResponseSchema):
-    data = fields.Nested(UserTokenSchema)
+    error = fields.String(
+        allow_none=True,
+        metadata={"description": "The error type, either access_denied or invalid_request"},
+    )
+    error_description = fields.String(
+        allow_none=True, metadata={"description": "A description of the error"}
+    )
 
 
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
@@ -61,3 +64,26 @@ class UserTokenRefreshResponseSchema(AbstractResponseSchema):
 class UserTokenLogoutResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserGetResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(UserSchema)
+
+
+class UserSaveOpportunityRequestSchema(Schema):
+    opportunity_id = fields.Integer(required=True)
+
+
+class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(SavedOpportunityResponseV1Schema),
+        metadata={"description": "List of saved opportunities"},
+    )

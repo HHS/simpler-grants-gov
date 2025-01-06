@@ -174,14 +174,6 @@ class OpportunitySummaryV1Schema(Schema):
             "example": "All types of domestic applicants are eligible to apply",
         },
     )
-
-    agency_phone_number = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The phone number of the agency who owns the opportunity",
-            "example": "123-456-7890",
-        },
-    )
     agency_contact_description = fields.String(
         allow_none=True,
         metadata={
@@ -365,7 +357,7 @@ class OpportunitySearchFilterV1Schema(Schema):
         .build()
     )
     agency = fields.Nested(
-        StrSearchSchemaBuilder("AgencyFilterV1Schema")
+        StrSearchSchemaBuilder("AgencySearchFilterV1Schema")
         .with_one_of(example="USAID", minimum_length=2)
         .build()
     )
@@ -454,7 +446,7 @@ class OpportunityFacetV1Schema(Schema):
         values=fields.Integer(),
         metadata={
             "description": "The counts of agency values in the full response",
-            "example": {"USAID": 4, "ARPAH": 3},
+            "example": {"USAID": 4, "DOC": 3},
         },
     )
 
@@ -528,3 +520,34 @@ class OpportunitySearchResponseV1Schema(AbstractResponseSchema, PaginationMixinS
         OpportunityFacetV1Schema(),
         metadata={"description": "Counts of filter/facet values in the full response"},
     )
+
+
+class SavedOpportunitySummaryV1Schema(Schema):
+    post_date = fields.Date(
+        metadata={"description": "The date the opportunity was posted", "example": "2024-01-01"}
+    )
+    close_date = fields.Date(
+        metadata={"description": "The date the opportunity will close", "example": "2024-01-01"}
+    )
+    is_forecast = fields.Boolean(
+        metadata={"description": "Whether the opportunity is forecasted", "example": False}
+    )
+
+
+class SavedOpportunityResponseV1Schema(Schema):
+    opportunity_id = fields.Integer(
+        metadata={"description": "The ID of the saved opportunity", "example": 1234}
+    )
+    opportunity_title = fields.String(
+        allow_none=True,
+        metadata={"description": "The title of the opportunity", "example": "my title"},
+    )
+    opportunity_status = fields.Enum(
+        OpportunityStatus,
+        metadata={
+            "description": "The current status of the opportunity",
+            "example": OpportunityStatus.POSTED,
+        },
+    )
+
+    summary = fields.Nested(SavedOpportunitySummaryV1Schema())

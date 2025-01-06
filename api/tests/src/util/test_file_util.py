@@ -1,5 +1,6 @@
 import os
 
+import boto3
 import pytest
 from smart_open import open as smart_open
 
@@ -81,3 +82,31 @@ def test_get_s3_file_key(path, file_key):
 )
 def test_get_s3_file_name(path, file_name):
     assert file_util.get_file_name(path) == file_name
+
+
+def test_get_file_length_bytes(tmp_path):
+    test_content = "Hello, World!"
+    test_file = tmp_path / "test.txt"
+    test_file.write_text(test_content)
+
+    size = file_util.get_file_length_bytes(str(test_file))
+
+    # Verify size matches content length
+    assert size == len(test_content)
+
+
+def test_get_file_length_bytes_s3_with_content(mock_s3_bucket):
+    """Test getting file size from S3 with actual content"""
+    # Create test content
+    test_content = b"Test content!"
+    test_file_path = f"s3://{mock_s3_bucket}/test/file.txt"
+
+    # Upload test content to mock S3
+    s3_client = boto3.client("s3")
+    s3_client.put_object(Bucket=mock_s3_bucket, Key="test/file.txt", Body=test_content)
+
+    # Get file size using our utility
+    size = file_util.get_file_length_bytes(test_file_path)
+
+    # Verify size matches content length
+    assert size == len(test_content)

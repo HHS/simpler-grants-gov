@@ -11,7 +11,7 @@ as a script outside the virtual environment if needed.
 
 import datetime
 import json
-from collections.abc import Mapping
+from typing import Mapping  # noqa:  UP035
 
 RED = "\033[31m"
 GREEN = "\033[32m"

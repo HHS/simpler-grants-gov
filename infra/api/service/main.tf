@@ -125,6 +125,7 @@ module "service" {
   enable_autoscaling     = true
   cpu                    = local.service_config.instance_cpu
   memory                 = local.service_config.instance_memory
+  environment_name       = var.environment_name
 
   cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
 
@@ -132,6 +133,7 @@ module "service" {
   migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
 
   scheduled_jobs = local.environment_config.scheduled_jobs
+  s3_buckets     = local.environment_config.s3_buckets
 
   db_vars = module.app_config.has_database ? {
     security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
@@ -144,10 +146,9 @@ module "service" {
     }
   } : null
 
-  extra_environment_variables = merge(
-    local.service_config.extra_environment_variables,
-    { "ENVIRONMENT" : var.environment_name },
-  )
+  enable_drafts_bucket = true
+
+  extra_environment_variables = merge(local.service_config.extra_environment_variables)
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
