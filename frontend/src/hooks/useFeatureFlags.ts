@@ -28,7 +28,6 @@ export function useFeatureFlags(): {
     useState<FeatureFlags>(defaultFeatureFlags);
 
   // a workaround, as setting this in default state value results in hydration error
-  // on feature flag admin page. Does it cause a blip on other pages?
   useEffect(() => {
     const flagsFromCookie = JSON.parse(
       Cookies.get(FEATURE_FLAGS_KEY) || "{}",

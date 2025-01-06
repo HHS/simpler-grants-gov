@@ -171,7 +171,7 @@ const Header = ({ logoPath, locale }: Props) => {
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
   const { checkFeatureFlag } = useFeatureFlags();
-  const hideLoginLink = checkFeatureFlag("authOff");
+  const showLoginLink = checkFeatureFlag("authOn");
 
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
@@ -222,7 +222,7 @@ const Header = ({ logoPath, locale }: Props) => {
               className="usa-menu-btn"
             />
           </div>
-          {!hideLoginLink && (
+          {!!showLoginLink && (
             <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
               <div className="usa-nav__primary-item border-0">
                 <LoginLink navLoginLinkText={t("nav_link_login")} />
