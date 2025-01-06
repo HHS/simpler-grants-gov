@@ -14,7 +14,7 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
-    OpportunitySummary,
+    OpportunitySummary, OpportunityAttachment,
 )
 from tests.conftest import BaseTestClass
 
@@ -329,6 +329,30 @@ def setup_agency(
 
     return tgroups
 
+
+def setup_opportunity_attachment(
+        create_existing: bool,
+        opportunity: Opportunity,
+        is_delete: bool = False,
+        is_already_processed: bool = False,
+        source_values: dict | None = None,
+):
+
+    # TODO - need the factories for the tsynopsisattachment
+    synopsis_attachment = my_factory.create(
+        **source_values,
+        opportunity_id=opportunity.opportunity_id,
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+    )
+
+    if create_existing:
+        f.OpportunityAttachmentFactory.create(
+            opportunity=opportunity,
+            # TODO - file location likely needs some complexity to work nicely
+        )
+
+    return synopsis_attachment
 
 def validate_matching_fields(
     source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
@@ -759,4 +783,38 @@ def validate_agency(
 
     validate_matching_fields(
         tgroup_map, agency.agency_contact_info, agency_contact_field_mapping, expect_values_to_match
+    )
+
+
+def validate_opportunity_attachment(
+        db_session,
+        source_attachment,
+        expect_in_db: bool = True,
+        was_processed: bool = True,
+        expect_values_to_match: bool = True,
+):
+    assert (source_attachment.transformed_at is not None) == was_processed
+
+    opportunity_attachment = db_session.query(OpportunityAttachment).filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id).one_or_none()
+
+    if not expect_in_db:
+        assert opportunity_attachment is None
+        return
+
+    assert opportunity_attachment is not None
+    validate_matching_fields(
+        source_attachment,
+        opportunity_attachment,
+        [
+            ("syn_att_id", "attachment_id"),
+            ("opportunity_id", "opportunity_id"),
+            ("mime_type", "mime_type"),
+            ("file_name", "file_name"),
+            ("file_desc", "file_description"),
+            ("file_lob_size", "file_size_bytes"),
+            ("creator_id", "created_by"),
+            ("last_upd_id", "updated_by"),
+            ("syn_att_folder_id", "legacy_folder_id"),
+        ],
+        expect_values_to_match,
     )
