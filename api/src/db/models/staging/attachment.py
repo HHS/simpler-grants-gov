@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, foreign, relationship
 
 from src.db.models.legacy_mixin import synopsis_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
@@ -11,7 +11,8 @@ class TsynopsisAttachment(StagingBase, synopsis_mixin.TsynopsisAttachmentMixin, 
 
     opportunity: Mapped[Topportunity | None] = relationship(
         Topportunity,
-        primaryjoin="TsynopsisAttachment.opportunity_id == foreign(Topportunity.opportunity_id)",
+        primaryjoin=lambda: TsynopsisAttachment.opportunity_id
+        == foreign(Topportunity.opportunity_id),
         uselist=False,
         overlaps="opportunity",
     )

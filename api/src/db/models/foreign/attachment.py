@@ -5,7 +5,7 @@
 # match by oracle_fdw, but we are matching them for maintainability.
 #
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, foreign, relationship
 
 from src.db.models.legacy_mixin import synopsis_mixin
 
@@ -18,7 +18,8 @@ class TsynopsisAttachment(foreignbase.ForeignBase, synopsis_mixin.TsynopsisAttac
 
     opportunity: Mapped[Topportunity | None] = relationship(
         Topportunity,
-        primaryjoin="TsynopsisAttachment.opportunity_id == foreign(Topportunity.opportunity_id)",
+        primaryjoin=lambda: TsynopsisAttachment.opportunity_id
+        == foreign(Topportunity.opportunity_id),
         uselist=False,
         overlaps="opportunity",
     )
