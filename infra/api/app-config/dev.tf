@@ -32,7 +32,6 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT    = 1
-    LOGIN_FINAL_DESTINATION = "frontend-dev-1739892538.us-east-1.elb.amazonaws.com/api/auth/callback"
+    ENABLE_AUTH_ENDPOINT = 1
   }
 }

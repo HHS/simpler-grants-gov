@@ -54,5 +54,9 @@ locals {
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     }
 
+    LOGIN_FINAL_DESTINATION = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/frontend-login-redirect-url"
+    }
   }
 }

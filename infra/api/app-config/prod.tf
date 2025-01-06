@@ -53,6 +53,5 @@ module "prod_config" {
     LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
-    LOGIN_FINAL_DESTINATION  = "https://simpler.grants.gov/api/auth/callback"
   }
 }

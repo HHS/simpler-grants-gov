@@ -31,7 +31,6 @@ module "staging_config" {
 
   service_override_extra_environment_variables = {
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT    = 0
-    LOGIN_FINAL_DESTINATION = "frontend-staging-1506108424.us-east-1.elb.amazonaws.com/api/auth/callback"
+    ENABLE_AUTH_ENDPOINT = 0
   }
 }
