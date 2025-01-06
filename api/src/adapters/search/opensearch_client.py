@@ -151,7 +151,7 @@ class SearchClient:
     def cleanup_old_indices(
         self,
         index_prefix: str,
-        index_name: str,
+        indexes_to_keep: list[str]
     ) -> None:
         """
         Cleanup old indexes now that they aren't connected to the alias
@@ -159,7 +159,7 @@ class SearchClient:
         resp = self._client.cat.indices(f"{index_prefix}-*", format="json", h=["index"])
 
         old_indexes = [
-            index["index"] for index in resp if index["index"] != index_name
+            index["index"] for index in resp if index["index"] not in indexes_to_keep
         ]  # omit the newly created one
 
         for index in old_indexes:
