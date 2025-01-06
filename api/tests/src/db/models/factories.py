@@ -24,7 +24,6 @@ import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
-import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
@@ -1361,44 +1360,6 @@ class StagingTgroupsFactory(AbstractStagingFactory):
 
     last_upd_id = factory.Faker("first_name")
     creator_id = factory.Faker("first_name")
-
-
-####################################
-# Transfer Table Factories
-####################################
-
-
-class TransferTopportunityFactory(BaseFactory):
-    class Meta:
-        model = transfer_topportunity_models.TransferTopportunity
-
-    opportunity_id = factory.Sequence(lambda n: n)
-
-    oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
-
-    owningagency = factory.Faker("agency_code")
-
-    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
-    # only set the category explanation if category is Other
-    category_explanation = factory.Maybe(
-        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
-        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
-        no_declaration=None,
-    )
-
-    is_draft = "N"  # Because we filter out drafts, just default these to False
-
-    revision_number = 0
-
-    # Make sure updated_at is after created_at just to make the data realistic
-    created_at = factory.Faker("date_time")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
-    )
-
-    created_date = factory.LazyAttribute(lambda o: o.created_at.date())
-    last_upd_date = factory.LazyAttribute(lambda o: o.updated_at.date())
 
 
 ####################################
