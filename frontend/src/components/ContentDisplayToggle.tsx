@@ -14,7 +14,6 @@ type ContentDisplayToggleTypes = "default" | "centered";
  *
  * Toggles display of child content
  *
- * @param {string} hideCallToAction - text to show when content is expanded, falls back to showCallToAction if not passed
  * @param {string} breakpoint - used to:
  *  - add a class to toggled content to always display it at viewport sizes above the specified breakpoint
  *  - add a class to toggled button to hide it at viewport sizes above the specified breakpoint
@@ -29,7 +28,7 @@ export default function ContentDisplayToggle({
   type = "default",
   children,
 }: {
-  hideCallToAction?: string;
+  hideCallToAction: string;
   showCallToAction: string;
   breakpoint?: Breakpoints;
   showContentByDefault?: boolean;
@@ -71,11 +70,9 @@ export default function ContentDisplayToggle({
           aria-pressed={toggledContentVisible}
           className="usa-button usa-button--unstyled text-no-underline"
         >
-          <USWDSIcon name={iconName} className="usa-icon--size-4" />
+          <USWDSIcon name={iconName} className="usa-icon usa-icon--size-4" />
           <span className={clsx(type === "centered" && "text-bold")}>
-            {toggledContentVisible
-              ? hideCallToAction || showCallToAction
-              : showCallToAction}
+            {toggledContentVisible ? hideCallToAction : showCallToAction}
           </span>
         </button>
       </div>

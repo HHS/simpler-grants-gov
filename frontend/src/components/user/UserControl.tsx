@@ -3,8 +3,15 @@ import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import {
+  IconList,
+  IconListContent,
+  IconListIcon,
+  IconListItem,
+  Menu,
+  NavDropDownButton,
+} from "@trussworks/react-uswds";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 const LoginLink = ({
@@ -41,19 +48,47 @@ const UserDropdown = ({
   navLogoutLinkText: string;
   logout: () => {};
 }) => {
+  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+  // TODO mobile view
+  // TODO match sizing
+  const buttonContent = (
+    <span className="display-flex flex-align-center">
+      <USWDSIcon
+        name="account_circle"
+        className="usa-icon--size-3 display-block"
+      />
+      <IconListContent className="font-sans-sm">{user.email}</IconListContent>
+    </span>
+  );
+
+  const logoutNavItem = (
+    <a
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      onClick={() => logout()}
+    >
+      <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
+      <IconListContent className="font-sans-sm">
+        {navLogoutLinkText}
+      </IconListContent>
+    </a>
+  );
+
   return (
-    <div>
-      <USWDSIcon name="account_circle" />
-      <ContentDisplayToggle showCallToAction={user.email || "oops no email"}>
-        <USWDSIcon name="logout" />
-        <div
-          key="login-link"
-          className="usa-nav__link text-primary font-sans-2xs display-flex text-normal usa-button usa-button--unstyled"
-          onClick={() => logout()}
-        >
-          {navLogoutLinkText}
-        </div>
-      </ContentDisplayToggle>
+    <div className="usa-nav__primary-item">
+      <NavDropDownButton
+        label={buttonContent}
+        isOpen={userProfileMenuOpen}
+        onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
+        isCurrent={false}
+        menuId="user-control"
+      />
+      <Menu
+        className="position-absolute"
+        id="user-control"
+        items={[logoutNavItem]}
+        type="subnav"
+        isOpen={userProfileMenuOpen}
+      />
     </div>
   );
 };
@@ -61,15 +96,14 @@ const UserDropdown = ({
 export const UserControl = () => {
   const t = useTranslations("Header");
 
+  const { user, refreshUser } = useUser();
+
   const logout = useCallback(async (): Promise<void> => {
     await fetch("/api/auth/logout", {
       method: "POST",
     });
-    refreshUser();
-  }, []);
-
-  const { user, refreshUser } = useUser();
-  console.log("!!!! user", user);
+    await refreshUser();
+  }, [refreshUser]);
 
   const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
 

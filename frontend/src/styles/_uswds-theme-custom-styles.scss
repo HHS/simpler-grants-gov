@@ -384,3 +384,12 @@ button.usa-pagination__button.usa-button {
     margin-bottom: 5px !important;
   }
 }
+
+.mobile-nav-dropdown-uncollapsed-override {
+  .usa-nav__submenu-item {
+    a {
+      color: white
+    }
+
+  }
+}
