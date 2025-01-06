@@ -10,6 +10,9 @@ const postLogoutMock = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("src/services/auth/sessionUtils", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
 }));
 

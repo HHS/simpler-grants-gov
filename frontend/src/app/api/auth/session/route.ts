@@ -5,9 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const currentSession = await getSession();
   if (currentSession) {
-    return NextResponse.json({
-      token: currentSession.token,
-    });
+    return NextResponse.json(currentSession);
   } else {
     return NextResponse.json({ token: "" });
   }

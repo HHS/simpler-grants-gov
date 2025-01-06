@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createPublicKey } from "crypto";
+import { createPublicKey, KeyObject } from "crypto";
 import { environment } from "src/constants/environments";
 import {
   API_JWT_ENCRYPTION_ALGORITHM,
@@ -15,11 +15,16 @@ import { encodeText } from "src/utils/generalUtils";
 // note that cookies will be async in Next 15
 import { cookies } from "next/headers";
 
-// creates a Uint8Array
-const clientJwtKey = encodeText(environment.SESSION_SECRET);
+let clientJwtKey: Uint8Array;
+let loginGovJwtKey: KeyObject;
 
-// creates a KeyObject
-const loginGovJwtKey = createPublicKey(environment.API_JWT_PUBLIC_KEY);
+// isolate encoding behavior from file execution
+const initializeSessionSecrets = () => {
+  // eslint-disable-next-line
+  console.debug("Initializing Session Secrets");
+  clientJwtKey = encodeText(environment.SESSION_SECRET);
+  loginGovJwtKey = createPublicKey(environment.API_JWT_PUBLIC_KEY);
+};
 
 const decryptClientToken = async (
   jwt: string,
@@ -46,6 +51,9 @@ const decryptLoginGovToken = async (
 
 // sets client token on cookie
 export const createSession = async (token: string) => {
+  if (!clientJwtKey) {
+    initializeSessionSecrets();
+  }
   const expiresAt = newExpirationDate();
   const session = await encrypt(token, expiresAt, clientJwtKey);
   cookies().set("session", session, {
@@ -60,6 +68,9 @@ export const createSession = async (token: string) => {
 // returns the necessary user info from decrypted login gov token
 // plus client token and expiration
 export const getSession = async (): Promise<UserSession | null> => {
+  if (!clientJwtKey || !loginGovJwtKey) {
+    initializeSessionSecrets();
+  }
   const cookie = cookies().get("session")?.value;
   if (!cookie) return null;
   const payload = await decryptClientToken(cookie);

@@ -28,18 +28,18 @@ export const decrypt = async (
 };
 
 // we only encrypt using the client key
-export async function encrypt(
+export const encrypt = async (
   token: string,
   expiresAt: Date,
   clientJwtKey: Uint8Array,
-): Promise<string> {
+): Promise<string> => {
   const jwt = await new SignJWT({ token })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime(expiresAt || "")
     .sign(clientJwtKey);
   return jwt;
-}
+};
 
 export function deleteSession() {
   cookies().delete("session");

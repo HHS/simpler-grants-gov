@@ -31,9 +31,7 @@ export default function FeatureFlagsTable() {
 
   return (
     <>
-      <h2>
-        {user?.token ? `Logged in with token: ${user.token}` : "Not logged in"}
-      </h2>
+      <h2>{user?.email ? `Logged in as: ${user.email}` : "Not logged in"}</h2>
       <Table>
         <thead>
           <tr>
