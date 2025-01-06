@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 
-import Footer from "src/components/Footer";
-import GrantsIdentifier from "src/components/GrantsIdentifier";
-import Header from "src/components/Header";
+import Footer from "./Footer";
+import GrantsIdentifier from "./GrantsIdentifier";
+import Header from "./Header";
 
 type Props = {
   children: React.ReactNode;
