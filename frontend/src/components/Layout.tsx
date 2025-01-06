@@ -25,7 +25,7 @@ export default function Layout({ children, locale }: Props) {
   return (
     // Stick the footer to the bottom of the page
     <div className="display-flex flex-column minh-viewport">
-      <a className="usa-skipnav" href="#main-content">
+      <a className="usa-skipnav z-top" href="#main-content">
         {t("Layout.skip_to_main")}
       </a>
       <NextIntlClientProvider
@@ -34,7 +34,9 @@ export default function Layout({ children, locale }: Props) {
       >
         <Header locale={locale} />
       </NextIntlClientProvider>
-      <main id="main-content">{children}</main>
+      <main id="main-content" className="border-top-0">
+        {children}
+      </main>
       <Footer />
       <GrantsIdentifier />
     </div>
