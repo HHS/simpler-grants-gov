@@ -129,6 +129,7 @@
   * [Shared Team Calendar Platform](decisions/adr/2024-12-05-shared-team-calendar-platform.md)
   * [Cross-Program Team Health Survey Tool](decisions/adr/2024-12-06-team-health-survey-tool.md)
   * [Adding Slack Users to SimplerGrants Slack Workspace](decisions/adr/2024-12-17-adding-slack-users.md)
+  * [Repo organization](decisions/adr/2025-01-02-repo-organization.md)
 * [Infra](decisions/infra/README.md)
   * [Use markdown architectural decision records](decisions/infra/0000-use-markdown-architectural-decision-records.md)
   * [CI/CD interface](decisions/infra/0001-ci-cd-interface.md)

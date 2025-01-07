@@ -48,3 +48,4 @@ The following list links to all of the ADRs we've adopted:
 * [Document Storage](2024-10-18-document-storage.md)
 * [Document Sharing](2024-11-14-document-sharing.md)
 * [Adding Slack Users to SimplerGrants Slack Workspace](2024-12-17-adding-slack-users.md)
+* [Repository organization](2025-01-02-repo-organization.md)
