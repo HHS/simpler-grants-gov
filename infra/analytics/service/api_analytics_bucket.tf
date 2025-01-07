@@ -1,6 +1,7 @@
 locals {
   api_analytics_bucket_environment_variables = {
     "API_ANALYTICS_BUCKET" : "s3://${data.aws_ssm_parameter.api_analytics_bucket_id.value}"
+    "API_ANALYTICS_DB_EXTRACTS_PATH" : "s3://${data.aws_ssm_parameter.api_analytics_bucket_id.value}/db-extracts"
   }
 }
 
