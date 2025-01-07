@@ -21,6 +21,8 @@ describe("formatDate", () => {
   it("invokes console warn when date string does not contain 3 parts", () => {
     const logSpy = jest.spyOn(global.console, "warn");
     formatDate("10-1019999");
-    expect(logSpy).toHaveBeenCalledWith("invalid date string provided for parse");
+    expect(logSpy).toHaveBeenCalledWith(
+      "invalid date string provided for parse",
+    );
   });
 });
