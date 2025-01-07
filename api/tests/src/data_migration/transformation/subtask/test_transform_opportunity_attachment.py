@@ -1,6 +1,7 @@
 import pytest
 
 import tests.src.db.models.factories as f
+from src.data_migration.transformation import transform_constants
 from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
     TransformOpportunityAttachment,
 )
@@ -68,6 +69,21 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
 
         validate_opportunity_attachment(db_session, delete_but_current_missing, expect_in_db=False)
+
+        metrics = transform_opportunity_attachment.metrics
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 9
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
+
+        db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
+        transform_opportunity_attachment.run_subtask()
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 9
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     def test_transform_opportunity_attachment_delete_but_current_missing(
         self, db_session, transform_opportunity_attachment
