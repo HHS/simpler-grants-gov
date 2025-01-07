@@ -22,7 +22,6 @@ export const messages = {
       contact_info: "Grantor contact information",
       description: "Description",
       email: "Email",
-      telephone: "Phone",
       show_summary: "Show full summary",
       show_description: "Show full description",
       hide_summary_description: "Hide full description",
@@ -485,6 +484,7 @@ export const messages = {
     title: "We're building a simpler Grants.gov!",
     content:
       "Join us as we modernize the Grants.gov experience and make it easier to find, share, and apply for grants.",
+    search_link: "Search for grants",
     github_link: "Follow on GitHub",
   },
   Footer: {

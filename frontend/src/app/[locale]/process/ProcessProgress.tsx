@@ -54,7 +54,7 @@ const ProcessProgress = () => {
                 >
                   <IconListIcon>
                     <USWDSIcon
-                      className="usa-icon text-green"
+                      className="usa-icon text-primary-darker"
                       name="check_circle"
                     />
                   </IconListIcon>

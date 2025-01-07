@@ -28,3 +28,6 @@ ignore:
   # Last Checked: Dec 19th, 2024
   - vulnerability: GHSA-v778-237x-gjrc
   - vulnerability: GHSA-w32m-9786-jp63
+  # Issue with asyncio library in Python, should be fixed
+  # in 3.13.2 (early February 2025)
+  - vulnerability: CVE-2024-12254

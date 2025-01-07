@@ -118,6 +118,7 @@ const NavLinks = ({
 };
 
 const Header = ({ logoPath, locale }: Props) => {
+  logoPath = "./img/grants-logo.svg";
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -143,9 +144,6 @@ const Header = ({ logoPath, locale }: Props) => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
 
-  const title =
-    usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
-
   return (
     <>
       <div
@@ -161,21 +159,23 @@ const Header = ({ logoPath, locale }: Props) => {
         }}
       />
       <GovBanner language={language} />
-      <USWDSHeader basic={true}>
+      <USWDSHeader
+        basic={true}
+        className="desktop:position-sticky top-0 desktop:z-500 bg-white border-bottom-2px border-primary-vivid"
+      >
         <div className="usa-nav-container">
-          <div className="usa-navbar">
-            <Title className="desktop:margin-top-2">
+          <div className="usa-navbar border-bottom-0">
+            <Title className="margin-y-2">
               <div className="display-flex flex-align-center">
-                {logoPath && (
-                  <span className="margin-right-1">
+                <Link href="/" className="display-block">
+                  {logoPath && (
                     <img
-                      className="width-3 desktop:width-5 text-bottom margin-right-05"
                       src={assetPath(logoPath)}
-                      alt="Site logo"
+                      alt={t("title")}
+                      className="display-block height-4  desktop:height-auto"
                     />
-                  </span>
-                )}
-                <span className="font-sans-lg flex-fill">{title}</span>
+                  )}
+                </Link>
               </div>
             </Title>
             <NavMenuButton
