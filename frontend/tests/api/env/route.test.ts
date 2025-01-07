@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { GET } from "src/app/api/env/route";
+import { GET } from "src/app/api/auth/login/route";
 
 jest.mock("src/constants/environments", () => ({
   environment: {

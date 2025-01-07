@@ -17,6 +17,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { LoginModal } from "./LoginModal";
 
 type PrimaryLink = {
   text?: string;
@@ -222,13 +223,7 @@ const Header = ({ logoPath, locale }: Props) => {
               className="usa-menu-btn"
             />
           </div>
-          {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-              <div className="usa-nav__primary-item border-0">
-                <LoginLink navLoginLinkText={t("nav_link_login")} />
-              </div>
-            </div>
-          )}
+          {!!showLoginLink && <LoginModal />}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
