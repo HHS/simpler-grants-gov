@@ -73,6 +73,9 @@ class SearchClient:
         self._client.indices.delete(index=index_name)
 
     def create_multi_attachment_pipeline(self) -> None:
+        """
+        Create multi-attachment processor
+        """
         pipeline = {
             "description": "Extract attachment information",
             "processors": [
