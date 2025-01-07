@@ -22,7 +22,9 @@ from src.data_migration.transformation.subtask.transform_funding_instrument impo
     TransformFundingInstrument,
 )
 from src.data_migration.transformation.subtask.transform_opportunity import TransformOpportunity
-from src.data_migration.transformation.subtask.transform_opportunity_attachment import TransformOpportunityAttachment
+from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
+    TransformOpportunityAttachment,
+)
 from src.data_migration.transformation.subtask.transform_opportunity_summary import (
     TransformOpportunitySummary,
 )
@@ -43,7 +45,9 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     enable_funding_category: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_CATEGORY
     enable_funding_instrument: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_FUNDING_INSTRUMENT
     enable_agency: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_AGENCY
-    enable_opportunity_attachment: bool = False # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
+    enable_opportunity_attachment: bool = (
+        False  # TRANSFORM_ORACLE_DATA_ENABLE_OPPORTUNITY_ATTACHMENT
+    )
 
 
 class TransformOracleDataTask(Task):

@@ -14,7 +14,8 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingInstrument,
     Opportunity,
     OpportunityAssistanceListing,
-    OpportunitySummary, OpportunityAttachment,
+    OpportunityAttachment,
+    OpportunitySummary,
 )
 from tests.conftest import BaseTestClass
 
@@ -331,11 +332,11 @@ def setup_agency(
 
 
 def setup_opportunity_attachment(
-        create_existing: bool,
-        opportunity: Opportunity,
-        is_delete: bool = False,
-        is_already_processed: bool = False,
-        source_values: dict | None = None,
+    create_existing: bool,
+    opportunity: Opportunity,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    source_values: dict | None = None,
 ):
     if source_values is None:
         source_values = {}
@@ -355,6 +356,7 @@ def setup_opportunity_attachment(
         )
 
     return synopsis_attachment
+
 
 def validate_matching_fields(
     source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
@@ -789,13 +791,17 @@ def validate_agency(
 
 
 def validate_opportunity_attachment(
-        db_session,
-        source_attachment,
-        expect_in_db: bool = True,
-        expect_values_to_match: bool = True,
+    db_session,
+    source_attachment,
+    expect_in_db: bool = True,
+    expect_values_to_match: bool = True,
 ):
 
-    opportunity_attachment = db_session.query(OpportunityAttachment).filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id).one_or_none()
+    opportunity_attachment = (
+        db_session.query(OpportunityAttachment)
+        .filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id)
+        .one_or_none()
+    )
 
     if not expect_in_db:
         assert opportunity_attachment is None

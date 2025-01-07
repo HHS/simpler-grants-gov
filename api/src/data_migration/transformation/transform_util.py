@@ -537,6 +537,7 @@ def get_log_extra_funding_instrument(source_funding_instrument: SourceFundingIns
         "table_name": source_funding_instrument.__tablename__,
     }
 
+
 def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment) -> dict:
     return {
         "opportunity_id": source_attachment.opportunity_id,
