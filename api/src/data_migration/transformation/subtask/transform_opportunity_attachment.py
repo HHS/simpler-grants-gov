@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 class TransformOpportunityAttachment(AbstractTransformSubTask):
 
     def transform_records(self) -> None:
+
+        # Fetch staging attachment / our attachment / opportunity groups
         records = self.fetch_with_opportunity(TsynopsisAttachment, OpportunityAttachment, [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id])
 
         self.process_opportunity_attachment_group(records)
@@ -27,6 +29,7 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                 logger.exception("Failed to process opportunity attachment", extra=transform_util.get_log_extra_opportunity_attachment(source_attachment))
 
     def process_opportunity_attachment(self, source_attachment: TsynopsisAttachment, target_attachment: OpportunityAttachment | None, opportunity: Opportunity | None) -> None:
+
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,
             prefix=transform_constants.OPPORTUNITY_ATTACHMENT,
@@ -86,6 +89,7 @@ def transform_opportunity_attachment(source_attachment: TsynopsisAttachment, inc
     target_attachment = OpportunityAttachment(
         attachment_id=source_attachment.syn_att_id,
         opportunity_id=source_attachment.opportunity_id,
+        # TODO - we'll eventually remove attachment type, for now just arbitrarily set the value
         opportunity_attachment_type=OpportunityAttachmentType.OTHER,
         # TODO - in https://github.com/HHS/simpler-grants-gov/issues/3322
         #        we'll actually handle the file location logic with s3

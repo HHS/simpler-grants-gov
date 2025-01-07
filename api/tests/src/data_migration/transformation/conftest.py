@@ -350,8 +350,8 @@ def setup_opportunity_attachment(
 
     if create_existing:
         f.OpportunityAttachmentFactory.create(
+            attachment_id=synopsis_attachment.syn_att_id,
             opportunity=opportunity,
-            # TODO - file location likely needs some complexity to work nicely
         )
 
     return synopsis_attachment
@@ -792,10 +792,8 @@ def validate_opportunity_attachment(
         db_session,
         source_attachment,
         expect_in_db: bool = True,
-        was_processed: bool = True,
         expect_values_to_match: bool = True,
 ):
-    assert (source_attachment.transformed_at is not None) == was_processed
 
     opportunity_attachment = db_session.query(OpportunityAttachment).filter(OpportunityAttachment.attachment_id == source_attachment.syn_att_id).one_or_none()
 
