@@ -42,8 +42,10 @@ def transform_project_data(
     """Pluck and reformat relevant fields for each item in the raw data."""
     return [
         {
+            # project metadata
             "project_owner": owner,
             "project_number": project,
+            # issue metadata
             "issue_title": safe_pluck(item, "content.title"),
             "issue_url": safe_pluck(item, "content.url"),
             "issue_parent": safe_pluck(item, "content.parent.url"),
@@ -53,6 +55,7 @@ def transform_project_data(
             "issue_opened_at": safe_pluck(item, "content.createdAt"),
             "issue_closed_at": safe_pluck(item, "content.closedAt"),
             "issue_points": safe_pluck(item, "points.number"),
+            # sprint metadata
             "sprint_id": safe_pluck(item, "sprint.iterationId"),
             "sprint_name": safe_pluck(item, "sprint.title"),
             "sprint_start": safe_pluck(item, "sprint.startDate"),
@@ -60,6 +63,16 @@ def transform_project_data(
             "sprint_end": compute_end_date(
                 safe_pluck(item, "sprint.startDate"),
                 safe_pluck(item, "sprint.duration"),
+            ),
+            # roadmap metadata
+            "deliverable_pillar": safe_pluck(item, "pillar.name"),
+            "quad_id": safe_pluck(item, "quad.id"),
+            "quad_name": safe_pluck(item, "quad.name"),
+            "quad_start": safe_pluck(item, "quad.startDate"),
+            "quad_length": safe_pluck(item, "quad.duration"),
+            "quad_end": compute_end_date(
+                safe_pluck(item, "quad.startDate"),
+                safe_pluck(item, "quad.duration"),
             ),
         }
         for item in raw_data
