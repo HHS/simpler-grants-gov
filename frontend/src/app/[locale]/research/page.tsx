@@ -31,7 +31,7 @@ export default function Research({ params: { locale } }: LocalizedPageProps) {
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />
       <ResearchMethodology />
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ResearchArchetypes />
         <ResearchThemes />
       </div>
