@@ -29,10 +29,10 @@ export default function Process({ params: { locale } }: LocalizedPageProps) {
       <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessIntro />
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ProcessProgress />
       </div>
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ProcessNext />
       </div>
       <ProcessInvolved />
