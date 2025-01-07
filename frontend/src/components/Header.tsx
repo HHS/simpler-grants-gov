@@ -192,7 +192,7 @@ const Header = ({ logoPath, locale }: Props) => {
             />
           </div>
           {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 desktop:margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
               <UserControl />
             </div>
           )}

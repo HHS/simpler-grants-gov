@@ -24,7 +24,7 @@ const LoginLink = ({
       <a
         {...(loginUrl ? { href: loginUrl } : "")}
         key="login-link"
-        className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
+        className="usa-nav__link font-sans-2xs display-flex"
       >
         <USWDSIcon
           className="margin-right-05 margin-left-neg-05"
@@ -37,6 +37,10 @@ const LoginLink = ({
   );
 };
 
+// used in three different places
+// 1. on desktop - nav item drop down button content
+// 2. on mobile - nav item drop down button content, without email text
+// 3. on mobile - nav sub item content
 const UserEmailItem = ({
   email,
   isSubnav,
@@ -47,22 +51,25 @@ const UserEmailItem = ({
   return (
     <a
       className={clsx("flex-align-center", "display-flex", {
+        "padding-x-0": !isSubnav,
         "desktop:display-none": isSubnav,
         "usa-nav__submenu-item": isSubnav,
+        "usa-button": isSubnav,
+        "border-y-0": isSubnav,
       })}
     >
       <USWDSIcon
         name="account_circle"
         className="usa-icon--size-3 display-block"
       />
-      <IconListContent
-        className={clsx("font-sans-sm", {
+      <div
+        className={clsx("padding-left-1", {
           "display-none": !isSubnav,
           "desktop:display-block": !isSubnav,
         })}
       >
         {email}
-      </IconListContent>
+      </div>
     </a>
   );
 };
@@ -95,7 +102,7 @@ const UserDropdown = ({
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override">
       <NavDropDownButton
-        className="padding-0 desktop:padding-bottom-1 desktop:padding-x-2 margin-right-2 height-6"
+        className="padding-y-0 padding-x-2 margin-right-2 height-6"
         label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
         onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
