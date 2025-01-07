@@ -72,6 +72,12 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
+        """
+        Create a pipeline
+        """
+        return self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
+
     def bulk_upsert(
         self,
         index_name: str,

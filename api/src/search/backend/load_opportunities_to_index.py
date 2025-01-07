@@ -21,6 +21,7 @@ from src.db.models.opportunity_models import (
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
+from src.api.route_utils import raise_flask_error
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class LoadOpportunitiesToIndex(Task):
                         "processor": {
                             "attachment": {
                                 "target_field": "_ingest._value.attachment",
-                                "field": "_ingest._value.data",
+                                # "field": "_ingest._value.data",
                             }
                         },
                     }
@@ -96,12 +97,16 @@ class LoadOpportunitiesToIndex(Task):
             ],
         }
         pipeline_name = "multi-attachment"
-        resp = self.search_client._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
-        # Check the response
+        resp = self.search_client.put_pipeline(pipeline, "multi-attachment")
+
         if resp["acknowledged"]:
             logger.info(f"Pipeline '{pipeline_name}' created successfully!")
         else:
-            logger.error(f"Error creating pipeline: {resp}")
+            status_code = resp["status"] or 500
+            error_message = resp["error"]["reason"] or 'Internal Server Error'
+
+            raise Exception(error_message, extra={"pipeline_name": pipeline_name, "status_code": status_code})
+
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
