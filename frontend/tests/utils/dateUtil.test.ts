@@ -17,4 +17,10 @@ describe("formatDate", () => {
   it("returns a human readable string for properly formatted dates", () => {
     expect(formatDate("2024-10-10")).toBe("October 10, 2024");
   });
+
+  it("invokes console warn when date string does not contain 3 parts", () => {
+    const logSpy = jest.spyOn(global.console, "warn");
+    formatDate("10-1019999");
+    expect(logSpy).toHaveBeenCalledWith("invalid date string provided for parse");
+  });
 });
