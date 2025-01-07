@@ -1,13 +1,11 @@
+import clsx from "clsx";
 import { UserProfile } from "src/services/auth/types";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import {
-  IconList,
   IconListContent,
-  IconListIcon,
-  IconListItem,
   Menu,
   NavDropDownButton,
 } from "@trussworks/react-uswds";
@@ -39,6 +37,36 @@ const LoginLink = ({
   );
 };
 
+const UserEmailItem = ({
+  email,
+  isSubnav,
+}: {
+  email?: string;
+  isSubnav: boolean;
+}) => {
+  return (
+    <a
+      className={clsx("flex-align-center", "display-flex", {
+        "desktop:display-none": isSubnav,
+        "usa-nav__submenu-item": isSubnav,
+      })}
+    >
+      <USWDSIcon
+        name="account_circle"
+        className="usa-icon--size-3 display-block"
+      />
+      <IconListContent
+        className={clsx("font-sans-sm", {
+          "display-none": !isSubnav,
+          "desktop:display-block": !isSubnav,
+        })}
+      >
+        {email}
+      </IconListContent>
+    </a>
+  );
+};
+
 const UserDropdown = ({
   user,
   navLogoutLinkText,
@@ -46,20 +74,11 @@ const UserDropdown = ({
 }: {
   user: UserProfile;
   navLogoutLinkText: string;
-  logout: () => {};
+  logout: () => Promise<void>;
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
   // TODO mobile view
   // TODO match sizing
-  const buttonContent = (
-    <span className="display-flex flex-align-center">
-      <USWDSIcon
-        name="account_circle"
-        className="usa-icon--size-3 display-block"
-      />
-      <IconListContent className="font-sans-sm">{user.email}</IconListContent>
-    </span>
-  );
 
   const logoutNavItem = (
     <a
@@ -74,18 +93,22 @@ const UserDropdown = ({
   );
 
   return (
-    <div className="usa-nav__primary-item">
+    <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override">
       <NavDropDownButton
-        label={buttonContent}
+        className="padding-0 desktop:padding-bottom-1 desktop:padding-x-2 margin-right-2 height-6"
+        label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
         onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}
         isCurrent={false}
         menuId="user-control"
       />
       <Menu
-        className="position-absolute"
+        className="position-absolute z-index-10000 desktop:width-full z-top"
         id="user-control"
-        items={[logoutNavItem]}
+        items={[
+          <UserEmailItem key="email" isSubnav={true} email={user.email} />,
+          logoutNavItem,
+        ]}
         type="subnav"
         isOpen={userProfileMenuOpen}
       />
