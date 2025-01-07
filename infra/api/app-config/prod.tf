@@ -46,5 +46,12 @@ module "prod_config" {
     # Set the opportunity search index to have more shards/replicas in prod
     LOAD_OPP_SEARCH_SHARD_COUNT   = 3
     LOAD_OPP_SEARCH_REPLICA_COUNT = 2
+
+    # Login.gov OAuth
+    ENABLE_AUTH_ENDPOINT     = 0
+    LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
+    LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
+    LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
+    LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
   }
 }

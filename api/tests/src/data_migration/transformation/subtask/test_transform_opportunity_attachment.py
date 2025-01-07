@@ -26,5 +26,8 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
 
         # TODO - already processed, error scenarios
 
+
+        transform_opportunity_attachment.run_subtask()
+
     def test_transform_opportunity_attachment_delete_but_current_missing(self, db_session, transform_opportunity_attachment):
         pass

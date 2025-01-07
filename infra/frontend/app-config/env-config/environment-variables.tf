@@ -7,6 +7,8 @@ locals {
     NEW_RELIC_ENABLED = "true"
     # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
     NODE_OPTIONS = "-r newrelic"
+    # expose the current AWS Env to the FE Next Node Server at Runtime
+    ENVIRONMENT = var.environment
   }
 
   # Configuration for secrets

@@ -2,10 +2,12 @@ import logging
 from enum import StrEnum
 from typing import Iterator, Sequence
 
+from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy import delete, select
 from sqlalchemy.orm import noload, selectinload
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -185,8 +187,12 @@ class LoadOpportunitiesToIndex(Task):
 
         # handle aliasing of endpoints
         self.search_client.swap_alias_index(
-            self.index_name, self.config.alias_name, delete_prior_indexes=True
+            self.index_name,
+            self.config.alias_name,
         )
+
+        # cleanup old indexes
+        self.search_client.cleanup_old_indices(self.config.index_prefix, [self.index_name])
 
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """
@@ -238,6 +244,13 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
+    @retry(
+        stop=stop_after_attempt(3),  # Retry up to 3 times
+        wait=wait_fixed(2),  # Wait 2 seconds between retries
+        retry=retry_if_exception_type(
+            (TransportError, ConnectionTimeout)
+        ),  # Retry on TransportError (including timeouts)
+    )
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
         schema = OpportunityV1Schema()

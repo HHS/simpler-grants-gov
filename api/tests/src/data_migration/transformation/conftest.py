@@ -337,13 +337,15 @@ def setup_opportunity_attachment(
         is_already_processed: bool = False,
         source_values: dict | None = None,
 ):
+    if source_values is None:
+        source_values = {}
 
-    # TODO - need the factories for the tsynopsisattachment
-    synopsis_attachment = my_factory.create(
-        **source_values,
+    synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
+        opportunity=None,
         opportunity_id=opportunity.opportunity_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
+        **source_values,
     )
 
     if create_existing:

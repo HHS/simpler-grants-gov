@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - "frontend/**"
+      - "infra/frontend/**"
   release:
     types: [published]
   workflow_dispatch:
