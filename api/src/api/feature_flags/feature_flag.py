@@ -18,6 +18,7 @@ class FeatureFlag(StrEnum):
     # Header: FF-Enable-Opportunity-Log-Msg
     # EnvVar: ENABLE_OPPORTUNITY_LOG_MSG
     ENABLE_OPPORTUNITY_LOG_MSG = "enable_opportunity_log_msg"
+    ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE = "enable_opportunity_attachment_pipeline"
 
     def get_header_name(self) -> str:
         value = "-".join([v.capitalize() for v in self.value.lower().split("_")])
