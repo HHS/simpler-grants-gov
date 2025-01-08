@@ -84,12 +84,11 @@ const UserDropdown = ({
   logout: () => Promise<void>;
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
-  // TODO mobile view
-  // TODO match sizing
 
   const logoutNavItem = (
     <a
       className="display-flex usa-button usa-button--unstyled text-no-underline"
+      // eslint-disable-next-line
       onClick={() => logout()}
     >
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
@@ -103,6 +102,10 @@ const UserDropdown = ({
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override">
       <NavDropDownButton
         className="padding-y-0 padding-x-2 margin-right-2 height-6"
+        // The NavDropDownButton needlessly restricts the label to a string, when passing an Element works
+        // perfectly well.
+        // eslint-disable-next-line
+        // @ts-ignore: Type 'Element' is not assignable to type 'string'
         label={<UserEmailItem isSubnav={false} email={user.email} />}
         isOpen={userProfileMenuOpen}
         onToggle={() => setUserProfileMenuOpen(!userProfileMenuOpen)}

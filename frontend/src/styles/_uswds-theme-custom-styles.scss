@@ -392,22 +392,24 @@ button.usa-pagination__button.usa-button {
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
   .mobile-nav-dropdown-uncollapsed-override {
-    button[aria-expanded=true] {
+    button[aria-expanded="true"] {
       background-color: color("mint-60");
       a {
         color: white;
       }
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+          linear-gradient(transparent, transparent);
       }
     }
-    button[aria-expanded=false] {
+    button[aria-expanded="false"] {
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+          linear-gradient(transparent, transparent);
       }
     }
     .usa-nav__submenu-item {
-      background-color: color('mint-60');
+      background-color: color("mint-60");
       a {
         padding-left: 1rem;
         padding-right: 1rem;
