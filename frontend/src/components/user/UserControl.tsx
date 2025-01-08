@@ -20,7 +20,7 @@ const LoginLink = ({
   loginUrl: string;
 }) => {
   return (
-    <div className="usa-nav__primary-item border-0">
+    <div className="usa-nav__primary-item border-0 desktop:margin-top-0 margin-top-1">
       <a
         {...(loginUrl ? { href: loginUrl } : "")}
         key="login-link"
