@@ -110,7 +110,7 @@ class SearchClient:
                 "operation": "update",
             },
         )
-        bulk_args ={"index":index_name, "body":bulk_operations, "refresh":refresh}
+        bulk_args = {"index": index_name, "body": bulk_operations, "refresh": refresh}
         if pipeline:
             bulk_args["pipeline"] = pipeline
 

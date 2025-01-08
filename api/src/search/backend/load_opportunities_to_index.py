@@ -3,6 +3,7 @@ import logging
 from contextlib import ExitStack
 from enum import StrEnum
 from typing import Iterator, Sequence
+
 import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -13,12 +14,14 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 
 import src.adapters.db as db
 import src.adapters.search as search
+from src.api.feature_flags.feature_flag_config import get_feature_flag_config
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
-    OpportunitySearchIndexQueue, OpportunityAttachment,
+    OpportunityAttachment,
+    OpportunitySearchIndexQueue,
 )
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
@@ -253,7 +256,6 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-
     def fetch_attachments(self, opportunity_id) -> list:
         return self.db_session.execute(
             select(OpportunityAttachment.file_location, OpportunityAttachment.file_name).where(
@@ -261,14 +263,13 @@ class LoadOpportunitiesToIndex(Task):
             )
         ).all()
 
-
     def get_attachment_data(self, file_path) -> str:
         with ExitStack() as stack:
             file = stack.enter_context(
                 smart_open.open(file_path, "rb"),
             )
             file_content = file.read()
-            return  base64.b64encode(file_content).decode("utf-8")
+            return base64.b64encode(file_content).decode("utf-8")
 
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
@@ -293,18 +294,18 @@ class LoadOpportunitiesToIndex(Task):
                 self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
                 continue
 
-            json_record=schema.dump(record)
+            json_record = schema.dump(record)
 
-            json_record["attachments"] = []
-            attachments = self.fetch_attachments(record.opportunity_id)
+            feature_flag_config = get_feature_flag_config()
 
-            for attachment in attachments:
-                file_loc, file_name = attachment
-                # data = self.get_attachment_data(file_loc)
-                json_record["attachments"].append({
-                    "filename": file_name ,
-                    "data": "data"
-                })
+            if feature_flag_config.enable_opportunity_attachment_pipeline:
+                json_record["attachments"] = []
+                attachments = self.fetch_attachments(record.opportunity_id)
+
+                for attachment in attachments:
+                    file_loc, file_name = attachment
+                    # data = self.get_attachment_data(file_loc)
+                    json_record["attachments"].append({"filename": file_name, "data": "data"})
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)

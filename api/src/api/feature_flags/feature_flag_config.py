@@ -21,7 +21,9 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
         False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name()
     )
     # ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE
-    enable_opportunity_attachment_pipeline: bool = Field(False,  alias=FeatureFlag.ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE.get_env_var_name())
+    enable_opportunity_attachment_pipeline: bool = Field(
+        False, alias=FeatureFlag.ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE.get_env_var_name()
+    )
 
 
 # Global, loaded once at startup by calling initialize
