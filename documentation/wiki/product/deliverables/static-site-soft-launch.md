@@ -101,7 +101,7 @@ Following sections describe the conditions that must be met to consider this del
 * Number of unique site visitors
 * Total number of site visits
 * Uptime service
-* [Lighthouse score](../../../../deliverables/individual\_deliverables/lighthouse) for the site
+* [Lighthouse score](../../../deliverables/individual_deliverables/lighthouse) for the site
 * Deployment build time
 * Deployment/hosting costs
 * Number of visits to outbound links to the following external resources (once added to the site)

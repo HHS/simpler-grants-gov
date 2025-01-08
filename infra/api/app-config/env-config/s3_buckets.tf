@@ -30,7 +30,12 @@ locals {
     api-analytics-transfer = {
       env_var = "API_ANALYTICS_BUCKET"
       public  = false
-      paths   = []
+      paths = [
+        {
+          path    = "/db-extracts"
+          env_var = "API_ANALYTICS_DB_EXTRACTS_PATH"
+        },
+      ]
     }
   }
 }

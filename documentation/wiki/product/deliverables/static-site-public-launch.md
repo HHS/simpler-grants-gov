@@ -155,7 +155,7 @@ Following sections describe the conditions that must be met to consider this del
 * Total number of visits per page
 * Total number of visits to outbound links to external resources
 * Site availability
-* [Lighthouse score](../../../../deliverables/individual\_deliverables/lighthouse) for the site
+* [Lighthouse score](../../../deliverables/individual_deliverables/lighthouse) for the site
 * Deployment build time
 * Deployment/hosting costs
 * Number of visitors who subscribe to the mailing list
