@@ -138,7 +138,11 @@ module "service" {
     }
   }
 
-  extra_environment_variables = merge(local.service_config.extra_environment_variables, { "ENVIRONMENT" : var.environment_name })
+  extra_environment_variables = merge(
+    local.service_config.extra_environment_variables,
+    local.api_analytics_bucket_environment_variables,
+    { "ENVIRONMENT" : var.environment_name },
+  )
 
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
