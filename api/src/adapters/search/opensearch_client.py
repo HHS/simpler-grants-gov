@@ -44,7 +44,7 @@ class SearchClient:
         *,
         shard_count: int = 1,
         replica_count: int = 1,
-        analysis: dict | None = None
+        analysis: dict | None = None,
     ) -> None:
         """
         Create an empty search index
@@ -72,13 +72,28 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
+        """
+        Create a pipeline
+        """
+        resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
+        if resp["acknowledged"]:
+            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
+        else:
+            status_code = resp["status"] or 500
+            error_message = resp["error"]["reason"] or "Internal Server Error"
+
+            raise Exception(
+                f"Failed to create pipeline {pipeline_name}: {error_message}. Status code: {status_code}"
+            )
+
     def bulk_upsert(
         self,
         index_name: str,
         records: Iterable[dict[str, Any]],
         primary_key_field: str,
         *,
-        refresh: bool = True
+        refresh: bool = True,
     ) -> None:
         """
         Bulk upsert records to an index
@@ -148,9 +163,20 @@ class SearchClient:
         existing_index_mapping = self._client.cat.aliases(alias_name, format="json")
         return len(existing_index_mapping) > 0
 
-    def swap_alias_index(
-        self, index_name: str, alias_name: str, *, delete_prior_indexes: bool = False
-    ) -> None:
+    def cleanup_old_indices(self, index_prefix: str, indexes_to_keep: list[str]) -> None:
+        """
+        Cleanup old indexes now that they aren't connected to the alias
+        """
+        resp = self._client.cat.indices(f"{index_prefix}-*", format="json", h=["index"])
+
+        old_indexes = [
+            index["index"] for index in resp if index["index"] not in indexes_to_keep
+        ]  # omit the newly created one
+
+        for index in old_indexes:
+            self.delete_index(index)
+
+    def swap_alias_index(self, index_name: str, alias_name: str) -> None:
         """
         For a given index, set it to the given alias. If any existing index(es) are
         attached to the alias, remove them from the alias.
@@ -173,11 +199,6 @@ class SearchClient:
             actions.append({"remove": {"index": index, "alias": alias_name}})
 
         self._client.indices.update_aliases({"actions": actions})
-
-        # Cleanup old indexes now that they aren't connected to the alias
-        if delete_prior_indexes:
-            for index in existing_indexes:
-                self.delete_index(index)
 
     def search_raw(self, index_name: str, search_query: dict) -> dict:
         # Simple wrapper around search if you don't want the request or response

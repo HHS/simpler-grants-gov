@@ -996,6 +996,32 @@ class TsynopsisFactory(BaseFactory):
     publisher_profile_id = sometimes_none(factory.Faker("random_int", min=1, max=99_999))
 
 
+class TsynopsisAttachmentFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    syn_att_id: factory.Sequence(lambda n: n)
+    opportunity_id: factory.Sequence(lambda n: n)
+    att_revision_number = factory.Faker("random_int", min=1000, max=10000000)
+    att_type: factory.Faker("att_type")
+    mime_type = factory.Faker("mime_type")
+    link_url = factory.Faker("relevant_url")
+    file_name = factory.Faker("file_name")
+    file_desc = factory.Faker("sentence")
+    file_lob = b"Test attachment"
+    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
+    create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    created_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.create_date, end_date="now")
+    )
+    last_upd_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_date, end_date="now")
+    )
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+    syn_att_folder_id = factory.Faker("random_int", min=1000, max=10000000)
+
+
 class TforecastFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -1362,6 +1388,14 @@ class StagingTgroupsFactory(AbstractStagingFactory):
     creator_id = factory.Faker("first_name")
 
 
+class StagingTsynopsisAttachmentFactory(TsynopsisAttachmentFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.attachment.TsynopsisAttachment
+
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
 ####################################
 # Foreign Table Factories
 ####################################
@@ -1552,6 +1586,14 @@ class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
     synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
+    class Meta:
+        model = foreign.attachment.TsynopsisAttachment
+
+    opportunity = factory.SubFactory(ForeignTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
 ##
