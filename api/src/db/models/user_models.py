@@ -98,6 +98,6 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="saved_searches")
 
-    search_query: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    search_query: Mapped[dict] = mapped_column(JSONB)
 
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str]
