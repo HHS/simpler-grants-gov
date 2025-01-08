@@ -95,18 +95,8 @@ class LoadOpportunitiesToIndex(Task):
                 }
             ],
         }
-        pipeline_name = "multi-attachment"
-        resp = self.search_client.put_pipeline(pipeline, "multi-attachment")
 
-        if resp["acknowledged"]:
-            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
-        else:
-            status_code = resp["status"] or 500
-            error_message = resp["error"]["reason"] or "Internal Server Error"
-
-            raise Exception(
-                error_message, {"pipeline_name": pipeline_name, "status_code": status_code}
-            )
+        self.search_client.put_pipeline(pipeline, "multi-attachment")
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
