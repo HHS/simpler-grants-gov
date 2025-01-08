@@ -49,11 +49,6 @@ export interface SimplerJwtPayload extends JWTPayload {
 // represents API JWT payload
 export type UserSession = UserProfile & SimplerJwtPayload;
 
-// export interface SessionPayload {
-//   token: string;
-//   expiresAt: Date;
-// }
-
 /**
  * Fetches the user from the profile API route to fill the useUser hook with the
  * UserProfile object.
