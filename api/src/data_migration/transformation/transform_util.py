@@ -23,6 +23,7 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunitySummary,
 )
+from src.db.models.staging.attachment import TsynopsisAttachment
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.util import datetime_util
@@ -534,4 +535,12 @@ def get_log_extra_funding_instrument(source_funding_instrument: SourceFundingIns
         "fi_syn_id": getattr(source_funding_instrument, "fi_syn_id", None),
         "revision_number": getattr(source_funding_instrument, "revision_number", None),
         "table_name": source_funding_instrument.__tablename__,
+    }
+
+
+def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment) -> dict:
+    return {
+        "opportunity_id": source_attachment.opportunity_id,
+        "syn_att_id": source_attachment.syn_att_id,
+        "att_revision_number": source_attachment.att_revision_number,
     }
