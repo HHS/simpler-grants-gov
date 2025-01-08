@@ -87,3 +87,21 @@ class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
         fields.Nested(SavedOpportunityResponseV1Schema),
         metadata={"description": "List of saved opportunities"},
     )
+
+
+class UserSaveSearchRequestSchema(Schema):
+    name = fields.String(
+        required=True,
+        metadata={"description": "Name of the saved search", "example": "Tech jobs in California"},
+    )
+    search_query = fields.Dict(
+        required=True,
+        metadata={
+            "description": "The search query parameters to save",
+            "example": {"keywords": "technology", "location": "CA"},
+        },
+    )
+
+
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

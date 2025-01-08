@@ -15,13 +15,19 @@ from src.api.users.user_schemas import (
     UserSavedOpportunitiesResponseSchema,
     UserSaveOpportunityRequestSchema,
     UserSaveOpportunityResponseSchema,
+    UserSaveSearchRequestSchema,
+    UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
-from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
+from src.db.models.user_models import (
+    UserSavedOpportunity,
+    UserTokenSession,
+    UserSavedSearch,
+)
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_user import get_user
@@ -231,3 +237,40 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
     saved_opportunities = get_saved_opportunities(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=saved_opportunities)
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-searches")
+@user_blueprint.input(UserSaveSearchRequestSchema, location="json")
+@user_blueprint.output(UserSaveSearchResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_save_search(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/saved-searches")
+
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+
+    # Verify the authenticated user matches the requested user_id
+    print(user_token_session.user_id, user_id)
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    # Create the saved search record
+    saved_search = UserSavedSearch(
+        user_id=user_id, name=json_data["name"], search_query=json_data["search_query"]
+    )
+
+    with db_session.begin():
+        db_session.add(saved_search)
+
+    logger.info(
+        "Saved search for user",
+        extra={
+            "user.id": str(user_id),
+            "saved_search.id": str(saved_search.saved_search_id),
+        },
+    )
+
+    return response.ApiResponse(message="Success")
