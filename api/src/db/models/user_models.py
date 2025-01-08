@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import BigInteger, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -22,6 +22,10 @@ class User(ApiSchemaTable, TimestampMixin):
         back_populates="user",
         uselist=True,
         cascade="all, delete-orphan",
+    )
+
+    saved_searches: Mapped[list["UserSavedSearch"]] = relationship(
+        "UserSavedSearch", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
 
@@ -82,3 +86,18 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
+
+
+class UserSavedSearch(ApiSchemaTable, TimestampMixin):
+    """Table for storing saved search queries for users"""
+
+    __tablename__ = "user_saved_search"
+
+    saved_search_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User, back_populates="saved_searches")
+
+    search_query: Mapped[dict] = mapped_column(JSONB, nullable=False)
+
+    name: Mapped[str] = mapped_column(nullable=False)
