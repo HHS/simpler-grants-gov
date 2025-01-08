@@ -72,7 +72,7 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
-    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
+    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> dict:
         """
         Create a pipeline
         """

@@ -105,7 +105,7 @@ class LoadOpportunitiesToIndex(Task):
             error_message = resp["error"]["reason"] or "Internal Server Error"
 
             raise Exception(
-                error_message, extra={"pipeline_name": pipeline_name, "status_code": status_code}
+                error_message, {"pipeline_name": pipeline_name, "status_code": status_code}
             )
 
     def incremental_updates_and_deletes(self) -> None:
