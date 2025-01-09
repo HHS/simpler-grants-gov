@@ -27,6 +27,10 @@ locals {
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
 
+  cdn_default_origin_id        = "default"
+  cdn_ssl_protocols            = ["TLSv1.2"]
+  cdn_minimum_protocol_version = "TLSv1.2_2021"
+
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
     { name : "AWS_REGION", value : data.aws_region.current.name },
