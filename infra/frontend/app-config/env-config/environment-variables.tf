@@ -75,5 +75,9 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-auth-on"
     },
+    API_JWT_PUBLIC_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-jwt-public-key"
+    },
   }
 }

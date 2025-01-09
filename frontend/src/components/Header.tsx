@@ -16,7 +16,7 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -120,36 +120,6 @@ const NavLinks = ({
   );
 };
 
-const LoginLink = ({ navLoginLinkText }: { navLoginLinkText: string }) => {
-  const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchEnv() {
-      const res = await fetch("/api/env");
-      const data = (await res.json()) as { auth_login_url: string };
-      data.auth_login_url
-        ? setAuthLoginUrl(data.auth_login_url)
-        : console.error("could not access auth_login_url");
-    }
-    fetchEnv().catch((error) => console.warn("error fetching api/env", error));
-  }, []);
-
-  return (
-    <a
-      {...(authLoginUrl ? { href: authLoginUrl } : "")}
-      key="login-link"
-      className="usa-nav__link text-primary font-sans-2xs display-flex text-normal"
-    >
-      <USWDSIcon
-        className="usa-icon margin-right-05 margin-left-neg-05"
-        name="login"
-        key="login-link-icon"
-      />
-      {navLoginLinkText}
-    </a>
-  );
-};
-
 const Header = ({ logoPath, locale }: Props) => {
   logoPath = "./img/grants-logo.svg";
   const t = useTranslations("Header");
@@ -173,7 +143,6 @@ const Header = ({ logoPath, locale }: Props) => {
 
   const { checkFeatureFlag } = useFeatureFlags();
   const showLoginLink = checkFeatureFlag("authOn");
-
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -223,10 +192,8 @@ const Header = ({ logoPath, locale }: Props) => {
             />
           </div>
           {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
-              <div className="usa-nav__primary-item border-0">
-                <LoginLink navLoginLinkText={t("nav_link_login")} />
-              </div>
+            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+              <UserControl />
             </div>
           )}
           <NavLinks

@@ -1,38 +1,16 @@
-import {
-  createSession,
-  decrypt,
-  deleteSession,
-  encrypt,
-  getSession,
-  getTokenFromCookie,
-} from "src/services/auth/session";
+import { createSession, getSession } from "src/services/auth/session";
 
-type RecursiveObject = {
-  [key: string]: () => RecursiveObject | string;
-};
-
-const getCookiesMock = jest.fn();
+const getCookiesMock = jest.fn(() => ({
+  value: "some cookie value",
+}));
 const setCookiesMock = jest.fn();
 const deleteCookiesMock = jest.fn();
-const reallyFakeMockJWTConstructor = jest.fn();
-const setProtectedHeaderMock = jest.fn(() => fakeJWTInstance());
-const setIssuedAtMock = jest.fn(() => fakeJWTInstance());
-const setExpirationTimeMock = jest.fn(() => fakeJWTInstance());
-const signMock = jest.fn();
-const jwtVerifyMock = jest.fn();
 
-// close over the token
-// all of this rigmarole means that the mocked signing functionality will output the token passed into it
-const setJWTMocksWithToken = (token: string) => {
-  signMock.mockImplementation(() => token);
-};
+const encodeTextMock = jest.fn((arg: string): string => arg);
+const createPublicKeyMock = jest.fn((arg: string): string => arg);
 
-const fakeJWTInstance = (): RecursiveObject => ({
-  setProtectedHeader: setProtectedHeaderMock,
-  setIssuedAt: setIssuedAtMock,
-  setExpirationTime: setExpirationTimeMock,
-  sign: signMock,
-});
+const decryptMock = jest.fn();
+const encryptMock = jest.fn();
 
 const cookiesMock = () => {
   return {
@@ -42,145 +20,106 @@ const cookiesMock = () => {
   };
 };
 
-jest.mock("next/headers", () => ({
-  cookies: () => cookiesMock(),
+jest.mock("src/services/auth/sessionUtils", () => ({
+  decrypt: (...args: unknown[]) => decryptMock(args) as unknown,
+  encrypt: (...args: unknown[]) => encryptMock(args) as unknown,
+  CLIENT_JWT_ENCRYPTION_ALGORITHM: "algo one",
+  API_JWT_ENCRYPTION_ALGORITHM: "algo two",
+  newExpirationDate: () => new Date(0),
 }));
 
-jest.mock("jose", () => ({
-  jwtVerify: (...args: unknown[]): unknown => jwtVerifyMock(...args),
-  SignJWT: function SignJWTMock(
-    this: {
-      setProtectedHeader: typeof jest.fn;
-      setIssuedAt: typeof jest.fn;
-      setExpirationTime: typeof jest.fn;
-      sign: typeof jest.fn;
-      token: string;
-    },
-    { token = "" } = {},
-  ) {
-    reallyFakeMockJWTConstructor();
-    setJWTMocksWithToken(token);
-    return {
-      ...fakeJWTInstance(),
-    };
-  },
+jest.mock("next/headers", () => ({
+  cookies: () => cookiesMock(),
 }));
 
 jest.mock("src/constants/environments", () => ({
   environment: {
     SESSION_SECRET: "session secret",
+    API_JWT_PUBLIC_KEY: "api secret",
   },
 }));
 
 jest.mock("src/utils/generalUtils", () => ({
-  encodeText: (arg: string): string => arg,
+  encodeText: (arg: string): string => encodeTextMock(arg),
 }));
 
-describe("encrypt", () => {
+jest.mock("crypto", () => ({
+  createPublicKey: (arg: string): string => createPublicKeyMock(arg),
+}));
+
+describe("getSession", () => {
   afterEach(() => jest.clearAllMocks());
-  it("calls all the JWT functions with expected values and returns expected value", async () => {
-    const token = "fakeToken";
-    const expiresAt = new Date();
-    const encrypted = await encrypt({ token, expiresAt });
-
-    expect(reallyFakeMockJWTConstructor).toHaveBeenCalledTimes(1);
-
-    expect(setProtectedHeaderMock).toHaveBeenCalledTimes(1);
-    expect(setProtectedHeaderMock).toHaveBeenCalledWith({ alg: "HS256" });
-
-    expect(setIssuedAtMock).toHaveBeenCalledTimes(1);
-
-    expect(setExpirationTimeMock).toHaveBeenCalledTimes(1);
-    expect(setExpirationTimeMock).toHaveBeenCalledWith(expiresAt);
-
-    expect(signMock).toHaveBeenCalledTimes(1);
-    expect(signMock).toHaveBeenCalledWith("session secret");
-
-    // this is synthetic but generally proves things are working
-    expect(encrypted).toEqual(token);
+  it("initializes session secrets if necessary", async () => {
+    await getSession();
+    expect(encodeTextMock).toHaveBeenCalledWith("session secret");
+    expect(createPublicKeyMock).toHaveBeenCalledWith("api secret");
   });
-});
-
-describe("decrypt", () => {
-  afterEach(() => jest.clearAllMocks());
-  it("calls JWT verification with expected values and returns payload", async () => {
-    const cookie = "fakeCookie";
-    jwtVerifyMock.mockImplementation((...args) => ({ payload: args }));
-    const decrypted = await decrypt(cookie);
-
-    expect(jwtVerifyMock).toHaveBeenCalledTimes(1);
-    expect(jwtVerifyMock).toHaveBeenCalledWith(cookie, "session secret", {
-      algorithms: ["HS256"],
+  it("calls decrypt with the correct arguments and returns successfully", async () => {
+    decryptMock.mockReturnValue({
+      token: "some decrypted token",
+      exp: 123,
     });
-
-    expect(decrypted).toEqual([
-      cookie,
+    const session = await getSession();
+    expect(decryptMock).toHaveBeenCalledTimes(2);
+    expect(decryptMock).toHaveBeenCalledWith([
+      "some cookie value",
       "session secret",
-      { algorithms: ["HS256"] },
+      "algo one",
     ]);
-  });
-
-  it("returns null on error", async () => {
-    jwtVerifyMock.mockImplementation(() => {
-      throw new Error();
+    expect(decryptMock).toHaveBeenCalledWith([
+      "some decrypted token",
+      "api secret",
+      "algo two",
+    ]);
+    expect(session).toEqual({
+      token: "some decrypted token",
+      exp: 123,
     });
-    const cookie = "fakeCookie";
-    const decrypted = await decrypt(cookie);
-    expect(decrypted).toEqual(null);
+  });
+  it("returns null if client token decrypt does not return a payload and token", async () => {
+    decryptMock.mockReturnValue(null);
+    const session = await getSession();
+    expect(session).toEqual(null);
+  });
+  it("returns null if api token decrypt does not return a payload", async () => {
+    decryptMock
+      .mockReturnValueOnce({
+        token: "some decrypted token",
+        exp: 123,
+      })
+      .mockReturnValueOnce(null);
+    const session = await getSession();
+    expect(session).toEqual(null);
   });
 });
 
 describe("createSession", () => {
   afterEach(() => jest.clearAllMocks());
-  it("calls cookie.set with expected values", async () => {
+  // to get this to work we'd need to manage resetting all modules before the test, which is a bit of a pain
+  it.skip("initializes session secrets if necessary", async () => {
     await createSession("nothingSpecial");
+    expect(encodeTextMock).toHaveBeenCalledWith("session secret");
+    expect(createPublicKeyMock).toHaveBeenCalledWith("api secret");
+  });
+  it("calls cookie.set with expected values", async () => {
+    encryptMock.mockReturnValue("encrypted session");
+    await createSession("nothingSpecial");
+    expect(encryptMock).toHaveBeenCalledWith([
+      "nothingSpecial",
+      new Date(0),
+      "session secret",
+    ]);
     expect(setCookiesMock).toHaveBeenCalledTimes(1);
-    expect(setCookiesMock).toHaveBeenCalledWith("session", "nothingSpecial", {
-      httpOnly: true,
-      secure: true,
-      expires: expect.any(Date) as Date,
-      sameSite: "lax",
-      path: "/",
-    });
-  });
-});
-
-describe("deleteSession", () => {
-  afterEach(() => jest.clearAllMocks());
-  it("calls cookie.delete with expected values", () => {
-    deleteSession();
-    expect(deleteCookiesMock).toHaveBeenCalledTimes(1);
-    expect(deleteCookiesMock).toHaveBeenCalledWith("session");
-  });
-});
-
-describe("getTokenFromCookie", () => {
-  afterEach(() => jest.clearAllMocks());
-  it("returns null if decrypt returns no session", async () => {
-    jwtVerifyMock.mockImplementation(() => null);
-    const result = await getTokenFromCookie("invalidEncryptedCookie");
-    expect(result).toEqual(null);
-  });
-
-  it("returns null if decrypt returns session with no token", async () => {
-    jwtVerifyMock.mockImplementation(() => ({}));
-    const result = await getTokenFromCookie("invalidEncryptedCookie");
-    expect(result).toEqual(null);
-  });
-
-  it("returns token returned from decryp", async () => {
-    jwtVerifyMock.mockImplementation((token: string) => ({
-      payload: { token },
-    }));
-    const result = await getTokenFromCookie("invalidEncryptedCookie");
-    expect(result).toEqual({ token: "invalidEncryptedCookie" });
-  });
-});
-
-describe("getSession", () => {
-  afterEach(() => jest.clearAllMocks());
-  it("returns null if there is no session cookie", async () => {
-    const result = await getSession();
-    expect(result).toEqual(null);
+    expect(setCookiesMock).toHaveBeenCalledWith(
+      "session",
+      "encrypted session",
+      {
+        httpOnly: true,
+        secure: true,
+        expires: new Date(0),
+        sameSite: "lax",
+        path: "/",
+      },
+    );
   });
 });
