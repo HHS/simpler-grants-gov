@@ -2,7 +2,7 @@ import base64
 import logging
 from contextlib import ExitStack
 from enum import StrEnum
-from typing import Iterator, Sequence
+from typing import Iterator, List, Sequence
 
 import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
@@ -281,11 +281,11 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def filter_attachments(self, attachments: [OpportunityAttachment]) -> list:
-        upload_types = ["text/plain"] #anyother ?
+    def filter_attachments(self, attachments: List[OpportunityAttachment]) -> list:
+        upload_types = ["text/plain"]  # anyother ?
         return [attachment for attachment in attachments if attachment.mime_type in upload_types]
 
-    def get_attachment_data(self, file_path) -> str:
+    def get_attachment_data(self, file_path: str) -> str:
         with ExitStack() as stack:
             file = stack.enter_context(
                 smart_open.open(file_path, "rb"),
@@ -326,7 +326,9 @@ class LoadOpportunitiesToIndex(Task):
                 attachments = self.filter_attachments(record.opportunity_attachments)
                 for attachment in attachments:
                     # data = self.get_attachment_data(attachment.file_location)
-                    json_record["attachments"].append({"filename": attachment.file_name, "data": "data"})
+                    json_record["attachments"].append(
+                        {"filename": attachment.file_name, "data": "data"}
+                    )
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
