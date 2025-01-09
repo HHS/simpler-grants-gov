@@ -17,10 +17,15 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
     # Try to save a search for a different user ID
     different_user = UserFactory.create()
 
+    search_query = get_search_request(
+        funding_instrument_one_of=[FundingInstrument.GRANT],
+        agency_one_of=["LOC"],
+    )
+
     response = client.post(
         f"/v1/users/{different_user.user_id}/saved-searches",
         headers={"X-SGG-Token": user_auth_token},
-        json={"name": "Test Search", "search_query": {"keywords": "python"}},
+        json={"name": "Test Search", "search_query": search_query},
     )
 
     assert response.status_code == 401
@@ -32,10 +37,15 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
 
 
 def test_user_save_search_post_no_auth(client, db_session, user):
+    search_query = get_search_request(
+        funding_instrument_one_of=[FundingInstrument.GRANT],
+        agency_one_of=["LOC"],
+    )
+
     # Try to save a search without authentication
     response = client.post(
         f"/v1/users/{user.user_id}/saved-searches",
-        json={"name": "Test Search", "search_query": {"keywords": "python"}},
+        json={"name": "Test Search", "search_query": search_query},
     )
 
     assert response.status_code == 401
@@ -67,7 +77,6 @@ def test_user_save_search_post(client, user, user_auth_token, enable_factory_cre
     search_query = get_search_request(
         funding_instrument_one_of=[FundingInstrument.GRANT],
         agency_one_of=["LOC"],
-        post_date={"gte": "2024-01-01"},
     )
 
     # Make the request to save a search
@@ -84,4 +93,13 @@ def test_user_save_search_post(client, user, user_auth_token, enable_factory_cre
     saved_search = db_session.query(UserSavedSearch).one()
     assert saved_search.user_id == user.user_id
     assert saved_search.name == search_name
-    assert saved_search.search_query == search_query
+    assert saved_search.search_query == {
+        "format": "json",
+        "filters": {"agency": {"one_of": ["LOC"]}, "funding_instrument": {"one_of": ["grant"]}},
+        "pagination": {
+            "order_by": "opportunity_id",
+            "page_size": 25,
+            "page_offset": 1,
+            "sort_direction": "ascending",
+        },
+    }

@@ -1,4 +1,7 @@
-from src.api.opportunities_v1.opportunity_schemas import SavedOpportunityResponseV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunitySearchRequestV1Schema,
+    SavedOpportunityResponseV1Schema,
+)
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
@@ -94,13 +97,7 @@ class UserSaveSearchRequestSchema(Schema):
         required=True,
         metadata={"description": "Name of the saved search", "example": "Example search"},
     )
-    search_query = fields.Dict(
-        required=True,
-        metadata={
-            "description": "The search query parameters to save",
-            "example": {"keywords": "search", "location": "Foo, Bar"},
-        },
-    )
+    search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
 
 
 class UserSaveSearchResponseSchema(AbstractResponseSchema):
