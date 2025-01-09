@@ -204,10 +204,22 @@ variable "enable_load_balancer" {
   default     = true
 }
 
-variable "enable_cdn" {
-  description = "Whether to enable a CDN for the service"
+variable "enable_alb_cdn" {
+  description = "Whether to enable an ALB origin CDN for the service"
   type        = bool
   default     = false
+}
+
+variable "enable_s3_cdn" {
+  description = "Whether to enable a S3 origin CDN for the service"
+  type        = bool
+  default     = false
+}
+
+variable "s3_cdn_bucket_name" {
+  description = "The name of the S3 bucket to use for the S3 CDN"
+  type        = string
+  default     = null
 }
 
 variable "healthcheck_command" {

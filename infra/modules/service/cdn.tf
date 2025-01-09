@@ -4,17 +4,17 @@ locals {
   default_origin_id        = "default"
   ssl_protocols            = ["TLSv1.2"]
   minimum_protocol_version = "TLSv1.2_2021"
-
+  enable_cdn               = var.enable_alb_cdn || var.enable_s3_cdn
 }
 
 resource "aws_cloudfront_origin_access_identity" "cdn" {
-  count = var.enable_cdn ? 1 : 0
+  count = local.enable_cdn ? 1 : 0
 
   comment = "Origin Access Identity for CloudFront to access S3 bucket"
 }
 
 resource "aws_cloudfront_cache_policy" "default" {
-  count = var.enable_cdn ? 1 : 0
+  count = local.enable_cdn ? 1 : 0
 
   name = var.service_name
 
@@ -39,13 +39,13 @@ resource "aws_cloudfront_cache_policy" "default" {
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
-  count = var.enable_cdn ? 1 : 0
+  count = local.enable_cdn ? 1 : 0
 
-  enabled = var.enable_cdn ? true : false
+  enabled = local.enable_cdn ? true : false
   aliases = var.domain == null ? null : [var.domain]
 
   origin {
-    domain_name = aws_lb.alb[0].dns_name
+    domain_name = var.enable_alb_cdn ? aws_lb.alb[0].dns_name : aws_s3_bucket.s3_buckets[var.s3_cdn_bucket_name].bucket_regional_domain_name
     origin_id   = local.default_origin_id
     custom_origin_config {
       http_port              = 80
@@ -105,7 +105,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket.cdn[0],
   ]
 
-  #checkov:skip=CKV2_AWS_46:We aren't using a S3 origin
+  #checkov:skip=CKV2_AWS_46:We sometimes us a ALB origin
   #checkov:skip=CKV_AWS_174:False positive
   #checkov:skip=CKV_AWS_310:Configure a failover in future work
   #checkov:skip=CKV_AWS_68:Configure WAF in future work
