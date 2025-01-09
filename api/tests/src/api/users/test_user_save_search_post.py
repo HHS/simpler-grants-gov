@@ -1,12 +1,9 @@
-import uuid
-
 import pytest
 
-from tests.src.api.opportunities_v1.conftest import get_search_request
-
-from src.constants.lookup_constants import FundingInstrument
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.constants.lookup_constants import FundingInstrument
 from src.db.models.user_models import UserSavedSearch
+from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import UserFactory
 
 
