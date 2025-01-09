@@ -19,12 +19,12 @@ export const LoginModal = () => {
 
   return (
     <>
-      <div className="usa-nav__primary margin-top-0 margin-bottom-1 desktop:margin-bottom-5px text-no-wrap desktop:order-last margin-left-auto">
+      <div className="usa-nav__primary margin-top-0 margin-bottom-neg-1px desktop:margin-bottom-3px text-no-wrap desktop:order-last margin-left-auto">
         <div className="usa-nav__primary-item border-0">
           <ModalToggleButton
             modalRef={modalRef}
             opener
-            className="usa-nav__link text-ysaprimary font-sans-2xs display-flex text-normal"
+            className="usa-nav__link text-ysaprimary font-sans-2xs display-flex text-normal border-0"
           >
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"
@@ -45,7 +45,7 @@ export const LoginModal = () => {
         <ModalHeading id="login-modal-heading">{t("title")}</ModalHeading>
         <div className="usa-prose">
           <p>{t("help")}</p>
-          <p className="font-sans-3xs margin-y-5">{t("description")}</p>
+          <p className="font-sans-2xs margin-y-4">{t("description")}</p>
         </div>
         <ModalFooter>
           <ButtonGroup>
