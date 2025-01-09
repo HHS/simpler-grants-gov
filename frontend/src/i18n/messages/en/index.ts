@@ -479,6 +479,7 @@ export const messages = {
     nav_menu_toggle: "Menu",
     nav_link_search: "Search",
     nav_link_login: "Sign in",
+    nav_link_logout: "Sign out",
     title: "Simpler.Grants.gov",
   },
   Hero: {

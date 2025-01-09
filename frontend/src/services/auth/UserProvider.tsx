@@ -3,7 +3,7 @@
 // note that importing these individually allows us to mock them, otherwise mocks don't work :shrug:
 import debounce from "lodash/debounce";
 import noop from "lodash/noop";
-import { UserSession } from "src/services/auth/types";
+import { UserProfile } from "src/services/auth/types";
 import { UserContext } from "src/services/auth/useUser";
 import { userFetcher } from "src/services/fetch/fetchers/clientUserFetcher";
 import { isSessionExpired } from "src/utils/authUtil";
@@ -25,7 +25,7 @@ export default function UserProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [localUser, setLocalUser] = useState<UserSession>(null);
+  const [localUser, setLocalUser] = useState<UserProfile>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userFetchError, setUserFetchError] = useState<Error | undefined>();
 
@@ -52,8 +52,13 @@ export default function UserProvider({
   }, [localUser, getUserSession]);
 
   const value = useMemo(
-    () => ({ user: localUser, error: userFetchError, isLoading }),
-    [localUser, userFetchError, isLoading],
+    () => ({
+      user: localUser,
+      error: userFetchError,
+      isLoading,
+      refreshUser: getUserSession,
+    }),
+    [localUser, userFetchError, isLoading, getUserSession],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

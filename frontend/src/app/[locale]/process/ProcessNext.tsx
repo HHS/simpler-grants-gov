@@ -72,7 +72,7 @@ const ProcessNext = () => {
                 >
                   <IconListIcon>
                     <USWDSIcon
-                      className="usa-icon text-base"
+                      className="text-base"
                       name="check_circle_outline"
                     />
                   </IconListIcon>

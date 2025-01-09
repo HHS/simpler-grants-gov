@@ -36,10 +36,7 @@ const OpportunityCTA = ({ id }: { id: number }) => {
       >
         <Button type="button" outline={true} className="margin-top-2">
           <span>{t("button_content")}</span>
-          <USWDSIcon
-            name="launch"
-            className="usa-icon usa-icon--size-4 text-middle"
-          />
+          <USWDSIcon name="launch" className="usa-icon--size-4 text-middle" />
         </Button>
       </a>
     </>

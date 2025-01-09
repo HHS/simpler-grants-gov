@@ -16,6 +16,7 @@ const {
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_AUTH_ON,
   AUTH_LOGIN_URL,
+  API_JWT_PUBLIC_KEY,
 } = process.env;
 
 export const featureFlags = {
@@ -41,4 +42,5 @@ export const environment: { [key: string]: string } = {
   NEXT_BUILD: NEXT_BUILD || "false",
   SESSION_SECRET: SESSION_SECRET || "",
   NEXT_PUBLIC_BASE_URL: NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+  API_JWT_PUBLIC_KEY: API_JWT_PUBLIC_KEY || "",
 };
