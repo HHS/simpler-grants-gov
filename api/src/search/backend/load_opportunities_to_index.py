@@ -281,12 +281,9 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def fetch_attachments(self, opportunity_id) -> list:
-        return self.db_session.execute(
-            select(OpportunityAttachment.file_location, OpportunityAttachment.file_name).where(
-                OpportunityAttachment.opportunity_id == opportunity_id
-            )
-        ).all()
+    def filter_attachments(self, attachments: [OpportunityAttachment]) -> list:
+        upload_types = ["text/plain"] #anyother ?
+        return [attachment for attachment in attachments if attachment.mime_type in upload_types]
 
     def get_attachment_data(self, file_path) -> str:
         with ExitStack() as stack:
@@ -326,12 +323,10 @@ class LoadOpportunitiesToIndex(Task):
 
             if feature_flag_config.enable_opportunity_attachment_pipeline:
                 json_record["attachments"] = []
-                attachments = self.fetch_attachments(record.opportunity_id)
-
+                attachments = self.filter_attachments(record.opportunity_attachments)
                 for attachment in attachments:
-                    file_loc, file_name = attachment
-                    # data = self.get_attachment_data(file_loc)
-                    json_record["attachments"].append({"filename": file_name, "data": "data"})
+                    # data = self.get_attachment_data(attachment.file_location)
+                    json_record["attachments"].append({"filename": attachment.file_name, "data": "data"})
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
