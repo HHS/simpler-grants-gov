@@ -8,10 +8,14 @@ locals {
 
   # The domain name of the CDN, ie. URL people use in order to access the CDN.
   # Null outputs here result in the CDN content being served from the CDN's default domain name.
-  #   - If the origin is an ALB, and the ALB's domain name is not null, this is the domain name of the ALB
-  #   - If the origin is an ALB, and the ALB's domain name is null, then return null
-  #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is not null, this is the domain name of the S3 bucket
-  #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is null, then return null
+  #   - If the origin is an ALB, and the ALB's domain name is not null,
+  #     then use the domain name of the ALB
+  #   - If the origin is an ALB, and the ALB's domain name is null,
+  #     then return null
+  #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is not null,
+  #     then use the domain name of the S3 bucket
+  #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is null,
+  #     then return null
   cdn_domain_name = var.enable_alb_cdn && var.domain != null ? var.domain : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
 
   # The domain name of the origin, ie. where the content is being served from.
