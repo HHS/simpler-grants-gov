@@ -40,7 +40,7 @@ export const LoginModal = () => {
         forceAction
         aria-labelledby="login-modal-heading"
         aria-describedby="login-modal-description"
-        id="example-login-modal"
+        id="login-modal"
       >
         <ModalHeading id="login-modal-heading">{t("title")}</ModalHeading>
         <div className="usa-prose">
