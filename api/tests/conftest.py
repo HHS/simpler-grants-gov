@@ -366,6 +366,15 @@ def mock_s3_bucket_resource(mock_s3):
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
 
+@pytest.fixture
+def other_mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("test_bucket")
+    bucket.create()
+    yield bucket
+
+@pytest.fixture
+def other_mock_s3_bucket(other_mock_s3_bucket_resource):
+    yield other_mock_s3_bucket_resource.name
 
 ####################
 # Class-based testing

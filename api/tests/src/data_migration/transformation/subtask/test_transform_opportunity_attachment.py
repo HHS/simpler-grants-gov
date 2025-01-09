@@ -5,6 +5,7 @@ from src.data_migration.transformation import transform_constants
 from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
     TransformOpportunityAttachment,
 )
+from src.services.opportunity_attachments.attachment_config import OpportunityAttachmentConfig
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_opportunity_attachment,
@@ -13,41 +14,54 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformOpportunitySummary(BaseTransformTestClass):
-    @pytest.fixture()
-    def transform_opportunity_attachment(self, transform_oracle_data_task):
-        return TransformOpportunityAttachment(transform_oracle_data_task)
 
-    def test_transform_opportunity_attachment(self, db_session, transform_opportunity_attachment):
+    @pytest.fixture
+    def opportunity_attachment_config(self, mock_s3_bucket, other_mock_s3_bucket):
+        return OpportunityAttachmentConfig(PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}", DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}")
+
+    @pytest.fixture()
+    def transform_opportunity_attachment(self, transform_oracle_data_task, opportunity_attachment_config):
+        return TransformOpportunityAttachment(transform_oracle_data_task, opportunity_attachment_config)
+
+    def test_transform_opportunity_attachment(self, db_session, transform_opportunity_attachment, opportunity_attachment_config):
 
         opportunity1 = f.OpportunityFactory.create(opportunity_attachments=[])
 
-        insert1 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity1)
-        insert2 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity1)
+        insert1 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity1, config=opportunity_attachment_config)
+        insert2 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity1, config=opportunity_attachment_config)
 
-        update1 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity1)
-        update2 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity1)
+        update1 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity1, config=opportunity_attachment_config)
+        update2 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity1, config=opportunity_attachment_config)
 
         delete1 = setup_opportunity_attachment(
-            create_existing=True, is_delete=True, opportunity=opportunity1
+            create_existing=True, is_delete=True, opportunity=opportunity1, config=opportunity_attachment_config
         )
 
         opportunity2 = f.OpportunityFactory.create(opportunity_attachments=[])
 
-        insert3 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity2)
-        update3 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity2)
+        insert3 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity2, config=opportunity_attachment_config)
+        update3 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity2, config=opportunity_attachment_config)
         delete2 = setup_opportunity_attachment(
-            create_existing=True, is_delete=True, opportunity=opportunity2
+            create_existing=True, is_delete=True, opportunity=opportunity2, config=opportunity_attachment_config
         )
 
         already_processed_insert = setup_opportunity_attachment(
-            create_existing=False, opportunity=opportunity2, is_already_processed=True
+            create_existing=False, opportunity=opportunity2, is_already_processed=True, config=opportunity_attachment_config
         )
         already_processed_update = setup_opportunity_attachment(
-            create_existing=True, opportunity=opportunity2, is_already_processed=True
+            create_existing=True, opportunity=opportunity2, is_already_processed=True, config=opportunity_attachment_config
         )
 
         delete_but_current_missing = setup_opportunity_attachment(
-            create_existing=False, opportunity=opportunity2, is_delete=True
+            create_existing=False, opportunity=opportunity2, is_delete=True, config=opportunity_attachment_config
+        )
+
+        # Draft opportunity
+        opportunity3 = f.OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
+        insert4 = setup_opportunity_attachment(create_existing=False, opportunity=opportunity3, config=opportunity_attachment_config)
+        update4 = setup_opportunity_attachment(create_existing=True, opportunity=opportunity3, config=opportunity_attachment_config)
+        delete3 = setup_opportunity_attachment(
+            create_existing=True, is_delete=True, opportunity=opportunity3, config=opportunity_attachment_config
         )
 
         transform_opportunity_attachment.run_subtask()
@@ -55,10 +69,12 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         validate_opportunity_attachment(db_session, insert1)
         validate_opportunity_attachment(db_session, insert2)
         validate_opportunity_attachment(db_session, insert3)
+        validate_opportunity_attachment(db_session, insert4)
 
         validate_opportunity_attachment(db_session, update1)
         validate_opportunity_attachment(db_session, update2)
         validate_opportunity_attachment(db_session, update3)
+        validate_opportunity_attachment(db_session, update4)
 
         validate_opportunity_attachment(db_session, delete1, expect_in_db=False)
         validate_opportunity_attachment(db_session, delete2, expect_in_db=False)
@@ -86,11 +102,11 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
     def test_transform_opportunity_attachment_delete_but_current_missing(
-        self, db_session, transform_opportunity_attachment
+        self, db_session, transform_opportunity_attachment, opportunity_attachment_config
     ):
         opportunity = f.OpportunityFactory.create(opportunity_attachments=[])
         delete_but_current_missing = setup_opportunity_attachment(
-            create_existing=False, opportunity=opportunity, is_delete=True
+            create_existing=False, opportunity=opportunity, is_delete=True, config=opportunity_attachment_config
         )
 
         transform_opportunity_attachment.process_opportunity_attachment(
@@ -102,10 +118,10 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     def test_transform_opportunity_attachment_no_opportunity(
-        self, db_session, transform_opportunity_attachment
+        self, db_session, transform_opportunity_attachment, opportunity_attachment_config
     ):
         opportunity = f.OpportunityFactory.create(opportunity_attachments=[])
-        insert = setup_opportunity_attachment(create_existing=False, opportunity=opportunity)
+        insert = setup_opportunity_attachment(create_existing=False, opportunity=opportunity, config=opportunity_attachment_config)
 
         # Don't pass the opportunity in - as if it wasn't found
         with pytest.raises(
@@ -115,3 +131,15 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             transform_opportunity_attachment.process_opportunity_attachment(insert, None, None)
 
         assert insert.transformed_at is None
+
+
+    @pytest.mark.parametrize("is_draft", [True, False])
+    def test_transform_opportunity_attachment_insert(
+        self, db_session, transform_opportunity_attachment, opportunity_attachment_config, is_draft
+    ):
+        opportunity = f.OpportunityFactory.create(is_draft=is_draft, opportunity_attachments=[])
+        insert = setup_opportunity_attachment(create_existing=False, opportunity=opportunity, config=opportunity_attachment_config)
+
+        transform_opportunity_attachment.process_opportunity_attachment(insert, None, opportunity)
+
+        validate_opportunity_attachment(db_session, insert)

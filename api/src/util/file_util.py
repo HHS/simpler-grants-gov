@@ -90,3 +90,14 @@ def get_file_length_bytes(path: str) -> int:
 
     file_stats = os.stat(path)
     return file_stats.st_size
+
+
+def delete_file(path: str) -> None:
+    """Delete a file from s3 or local disk"""
+    if is_s3_path(path):
+        bucket, s3_path = split_s3_url(path)
+
+        s3_client = get_s3_client()
+        s3_client.delete_object(Bucket=bucket, Key=s3_path)
+    else:
+        os.remove(path)

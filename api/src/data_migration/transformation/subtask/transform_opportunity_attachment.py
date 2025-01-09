@@ -9,11 +9,24 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.attachment import TsynopsisAttachment
+from src.services.opportunity_attachments import attachment_util
+from src.services.opportunity_attachments.attachment_config import OpportunityAttachmentConfig
+from src.task.task import Task
+from src.util import file_util
+import smart_open
 
 logger = logging.getLogger(__name__)
 
 
 class TransformOpportunityAttachment(AbstractTransformSubTask):
+
+    def __init__(self, task: Task, opportunity_attachment_config: OpportunityAttachmentConfig | None = None):
+        super().__init__(task)
+
+        if opportunity_attachment_config is None:
+            opportunity_attachment_config = OpportunityAttachmentConfig()
+
+        self.opportunity_attachment_config = opportunity_attachment_config
 
     def transform_records(self) -> None:
 
@@ -63,15 +76,16 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
         logger.info("Processing opportunity attachment", extra=extra)
 
         if source_attachment.is_deleted:
-            # TODO - https://github.com/HHS/simpler-grants-gov/issues/3322
-            #        deletes are more complex because of s3
-            #        this just handles deleting the DB record at the moment
             self._handle_delete(
                 source=source_attachment,
                 target=target_attachment,
                 record_type=transform_constants.OPPORTUNITY_ATTACHMENT,
                 extra=extra,
             )
+
+            # Delete the file from s3 as well
+            if target_attachment is not None:
+                file_util.delete_file(target_attachment.file_location)
 
         elif opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
@@ -85,11 +99,21 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             # here whether it's an insert/update and we'll increment after transforming
             is_insert = target_attachment is None
 
+            prior_attachment_location = target_attachment.file_location if target_attachment else None
+
             logger.info("Transforming and upserting opportunity attachment", extra=extra)
 
             transformed_opportunity_attachment = transform_opportunity_attachment(
-                source_attachment, target_attachment
+                source_attachment, target_attachment, opportunity, self.opportunity_attachment_config
             )
+
+            # Write the file to s3
+            write_file(source_attachment, transformed_opportunity_attachment)
+            # TODO - cleanup of old files
+
+            # TODO - is this fine here?
+            if prior_attachment_location is not None and prior_attachment_location != transformed_opportunity_attachment.file_location:
+                file_util.delete_file(prior_attachment_location)
 
             # TODO - we'll need to handle more with the s3 files here
             if is_insert:
@@ -98,6 +122,7 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                     prefix=transform_constants.OPPORTUNITY_ATTACHMENT,
                 )
                 self.db_session.add(transformed_opportunity_attachment)
+
             else:
                 self.increment(
                     transform_constants.Metrics.TOTAL_RECORDS_UPDATED,
@@ -105,18 +130,26 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                 )
                 self.db_session.merge(transformed_opportunity_attachment)
 
+                # TODO - create the record in s3
+                # TODO - if the record is differently named, delete the old
+
         logger.info("Processed opportunity attachment", extra=extra)
         source_attachment.transformed_at = self.transform_time
 
 
 def transform_opportunity_attachment(
-    source_attachment: TsynopsisAttachment, incoming_attachment: OpportunityAttachment | None
+    source_attachment: TsynopsisAttachment, incoming_attachment: OpportunityAttachment | None, opportunity: Opportunity, opportunity_attachment_config: OpportunityAttachmentConfig
 ) -> OpportunityAttachment:
 
     log_extra = transform_util.get_log_extra_opportunity_attachment(source_attachment)
 
     if incoming_attachment is None:
         logger.info("Creating new opportunity attachment record", extra=log_extra)
+
+    # Adjust the file_name to remove characters clunky in URLs
+    file_name = attachment_util.adjust_legacy_file_name(source_attachment.file_name)
+
+    file_location = attachment_util.get_s3_attachment_path(file_name, source_attachment.syn_att_id, opportunity, opportunity_attachment_config)
 
     # We always create a new record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
@@ -125,11 +158,11 @@ def transform_opportunity_attachment(
         opportunity_id=source_attachment.opportunity_id,
         # TODO - we'll eventually remove attachment type, for now just arbitrarily set the value
         opportunity_attachment_type=OpportunityAttachmentType.OTHER,
-        # TODO - in https://github.com/HHS/simpler-grants-gov/issues/3322
-        #        we'll actually handle the file location logic with s3
-        file_location="TODO",  # TODO - next PR
+        # Note we calculate the file location here, but haven't yet done anything
+        # with s3, the calling function, will handle writing the file to s3.
+        file_location=file_location,
         mime_type=source_attachment.mime_type,
-        file_name=source_attachment.file_name,
+        file_name=file_name,
         file_description=source_attachment.file_desc,
         file_size_bytes=source_attachment.file_lob_size,
         created_by=source_attachment.creator_id,
@@ -142,3 +175,8 @@ def transform_opportunity_attachment(
     )
 
     return target_attachment
+
+
+def write_file(source_attachment: TsynopsisAttachment, destination_attachment: OpportunityAttachment):
+    with file_util.open_stream(destination_attachment.file_location, "wb") as outfile:
+        outfile.write(source_attachment.file_lob)
