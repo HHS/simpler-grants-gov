@@ -2,6 +2,9 @@ import uuid
 
 import pytest
 
+from tests.src.api.opportunities_v1.conftest import get_search_request
+
+from src.constants.lookup_constants import FundingInstrument
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedSearch
 from tests.src.db.models.factories import UserFactory
@@ -78,7 +81,11 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
 def test_user_save_search_post(client, user, user_auth_token, enable_factory_create, db_session):
     # Test data
     search_name = "Test Search"
-    search_query = {"keywords": "python"}
+    search_query = get_search_request(
+        funding_instrument_one_of=[FundingInstrument.GRANT],
+        agency_one_of=["LOC"],
+        post_date={"gte": "2024-01-01"},
+    )
 
     # Make the request to save a search
     response = client.post(
