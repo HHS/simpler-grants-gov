@@ -273,6 +273,27 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
+    def filter_attachments(self, attachments: List[OpportunityAttachment]) -> List[OpportunityAttachment]:
+        upload_types = ["text/plain"]  # any other ?
+        return [attachment for attachment in attachments if attachment.mime_type in upload_types]
+
+    def get_attachment_json_for_opportunity(
+        self, opp_attachments: List[OpportunityAttachment]
+    ) -> list[dict]:
+        opp_attachments = self.filter_attachments(opp_attachments)
+        attachments = []
+        for att in opp_attachments:
+            with smart_open.open(att.file_location, "rb") as file:
+                file_content = file.read()
+                attachments.append(
+                    {
+                        "filename": att.file_name,
+                        "data": base64.b64encode(file_content).decode("utf-8"),
+                    }
+                )
+
+        return attachments
+
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
         wait=wait_fixed(2),  # Wait 2 seconds between retries
@@ -280,19 +301,6 @@ class LoadOpportunitiesToIndex(Task):
             (TransportError, ConnectionTimeout)
         ),  # Retry on TransportError (including timeouts)
     )
-    def filter_attachments(self, attachments: List[OpportunityAttachment]) -> list[dict]:
-        upload_types = ["text/plain"]  # any other ?
-        return [attachment for attachment in attachments if attachment.mime_type in upload_types]
-
-    def get_attachment_json_for_opportunity(self, opp_attachments: List[OpportunityAttachment] ) -> list[dict]:
-        attachments = []
-        for att in opp_attachments:
-            with smart_open.open(att.file_location, "rb") as file:
-                file_content = file.read()
-                attachments.append({"filename": att.file_name, "data": base64.b64encode(file_content).decode("utf-8")})
-
-        return attachments
-
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
 
@@ -322,8 +330,9 @@ class LoadOpportunitiesToIndex(Task):
             feature_flag_config = get_feature_flag_config()
 
             if feature_flag_config.enable_opportunity_attachment_pipeline:
-                opp_attachments = self.filter_attachments(record.opportunity_attachments)
-                json_record["attachments"] = self.get_attachment_json_for_opportunity(opp_attachments)
+                json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                    record.opportunity_attachments
+                )
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
