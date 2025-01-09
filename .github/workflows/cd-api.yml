@@ -51,7 +51,7 @@ jobs:
     with:
       app_name: "api"
       environment: ${{ matrix.envs }}
-      version: ${{ inputs.version || 'main' }}
+      version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
     if: failure()

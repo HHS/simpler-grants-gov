@@ -49,7 +49,7 @@ jobs:
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}
-      version: ${{ inputs.version || 'main' }}
+      version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
     if: failure()
