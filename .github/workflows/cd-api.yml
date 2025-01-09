@@ -5,7 +5,9 @@ on:
   push:
     branches:
       - "main"
+      - "kai/platform-deploy"
     paths:
+      - ".github/**"
       - "api/**"
       - "infra/api/**"
   release:
