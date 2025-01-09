@@ -24,6 +24,7 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserSavedOpportunity, UserSavedSearch, UserTokenSession
+from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_user import get_user
@@ -252,10 +253,7 @@ def user_save_search(
     if user_token_session.user_id != user_id:
         raise_flask_error(401, "Unauthorized user")
 
-    # Create the saved search record
-    saved_search = UserSavedSearch(
-        user_id=user_id, name=json_data["name"], search_query=json_data["search_query"]
-    )
+    saved_search = create_saved_search(db_session, user_id, json_data)
 
     with db_session.begin():
         db_session.add(saved_search)
