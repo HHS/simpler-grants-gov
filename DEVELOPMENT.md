@@ -95,9 +95,9 @@ Step by step instructions for creating a release:
   - Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, ths second release on that day would be `2000.10.10-2`, etc.
 - On Github.com, open the Releases page: https://github.com/HHS/simpler-grants-gov/releases
 - Click "Draft a new release"
-- Choose the tag you just pushed as the current tag, and the last CalVer release as the previous tag
+- Choose the tag you just pushed as the current tag, and the last CalVer release as the previous tag. You can use the current tag as a release title.
 - Click "Generate release notes" to auto-generate release notes
-- Click "Publish" to finalize this step
+- Click "Publish" to finalize this step. Publishing the release will automatically trigger the necessary deployment jobs in Github Actions.
 - On Github.com, open the Actions page: https://github.com/HHS/simpler-grants-gov/actions
 - You should see Actions that correspond to your release. Follow their status to ensure that they succeed. Follow-up may be required if the Github Actions fail. Here's some places where you might see Github Actions status:
   - https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-api.yml

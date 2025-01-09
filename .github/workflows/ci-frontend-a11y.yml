@@ -49,7 +49,7 @@ jobs:
       - name: Build Site
         run: |
           cat .env.development >> .env.local
-          npm run build
+          npm run build -- --no-lint
 
       - name: Run Server
         run: npm run start &
