@@ -253,7 +253,6 @@ def user_save_search(
     user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
 
     # Verify the authenticated user matches the requested user_id
-    print(user_token_session.user_id, user_id)
     if user_token_session.user_id != user_id:
         raise_flask_error(401, "Unauthorized user")
 

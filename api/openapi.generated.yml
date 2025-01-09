@@ -431,6 +431,49 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-searches:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSaveSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Save Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSaveSearchRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities:
     get:
       parameters:
@@ -1969,6 +2012,35 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserSaveSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the saved search
+          example: Example search
+        search_query:
+          type: object
+          description: The search query parameters to save
+          example:
+            keywords: search
+            location: Foo, Bar
+      required:
+      - name
+      - search_query
+    UserSaveSearchResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
