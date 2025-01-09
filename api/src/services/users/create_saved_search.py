@@ -2,7 +2,6 @@ import logging
 from uuid import UUID
 
 from src.adapters import db
-
 from src.db.models.user_models import UserSavedSearch
 
 logger = logging.getLogger(__name__)
