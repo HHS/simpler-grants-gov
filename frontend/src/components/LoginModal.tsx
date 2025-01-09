@@ -23,7 +23,7 @@ export const LoginModal = ({
 
   return (
     <>
-      <div className="usa-nav__primary margin-top-0 margin-bottom-neg-1px desktop:margin-bottom-3px text-no-wrap desktop:order-last margin-left-auto">
+      <div className="usa-nav__primary margin-top-0 margin-bottom-neg-1px desktop:margin-bottom-1px text-no-wrap desktop:order-last margin-left-auto">
         <div className="usa-nav__primary-item border-0">
           <ModalToggleButton
             modalRef={modalRef}
