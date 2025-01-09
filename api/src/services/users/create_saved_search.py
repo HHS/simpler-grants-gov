@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import db
+from src.adapters import db
 
 from src.db.models.user_models import UserSavedSearch
 
