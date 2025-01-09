@@ -92,13 +92,13 @@ class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
 class UserSaveSearchRequestSchema(Schema):
     name = fields.String(
         required=True,
-        metadata={"description": "Name of the saved search", "example": "Tech jobs in California"},
+        metadata={"description": "Name of the saved search", "example": "Example search"},
     )
     search_query = fields.Dict(
         required=True,
         metadata={
             "description": "The search query parameters to save",
-            "example": {"keywords": "technology", "location": "CA"},
+            "example": {"keywords": "search", "location": "Foo, Bar"},
         },
     )
 

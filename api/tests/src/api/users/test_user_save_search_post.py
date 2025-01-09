@@ -34,7 +34,7 @@ def test_user_save_search_post_unauthorized_user(client, db_session, user, user_
     response = client.post(
         f"/v1/users/{different_user.user_id}/saved-searches",
         headers={"X-SGG-Token": user_auth_token},
-        json={"name": "Test Search", "search_query": {"keywords": "python", "location": "remote"}},
+        json={"name": "Test Search", "search_query": {"keywords": "python"}},
     )
 
     assert response.status_code == 401
@@ -49,7 +49,7 @@ def test_user_save_search_post_no_auth(client, db_session, user):
     # Try to save a search without authentication
     response = client.post(
         f"/v1/users/{user.user_id}/saved-searches",
-        json={"name": "Test Search", "search_query": {"keywords": "python", "location": "remote"}},
+        json={"name": "Test Search", "search_query": {"keywords": "python"}},
     )
 
     assert response.status_code == 401
@@ -78,7 +78,7 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
 def test_user_save_search_post(client, user, user_auth_token, enable_factory_create, db_session):
     # Test data
     search_name = "Test Search"
-    search_query = {"keywords": "python", "location": "remote"}
+    search_query = {"keywords": "python"}
 
     # Make the request to save a search
     response = client.post(
