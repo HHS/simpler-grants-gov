@@ -56,7 +56,7 @@ jobs:
       - name: Build a prod version of the site
         run: |
           cat .env.development >> .env.local
-          npm run build
+          npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
         env:
