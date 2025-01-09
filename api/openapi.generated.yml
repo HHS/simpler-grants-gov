@@ -2024,14 +2024,12 @@ components:
           description: Name of the saved search
           example: Example search
         search_query:
-          type: object
-          description: The search query parameters to save
-          example:
-            keywords: search
-            location: Foo, Bar
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
       required:
       - name
-      - search_query
     UserSaveSearchResponse:
       type: object
       properties:
