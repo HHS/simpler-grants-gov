@@ -273,16 +273,19 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
-    def filter_attachments(self, attachments: List[OpportunityAttachment]) -> List[OpportunityAttachment]:
-        upload_types = ["text/plain"]  # any other ?
-        return [attachment for attachment in attachments if attachment.mime_type in upload_types]
+    def filter_attachments(
+        self, attachments: List[OpportunityAttachment], filters: list
+    ) -> List[OpportunityAttachment]:
+        return [attachment for attachment in attachments if attachment.mime_type in filters]
 
     def get_attachment_json_for_opportunity(
         self, opp_attachments: List[OpportunityAttachment]
     ) -> list[dict]:
-        opp_attachments = self.filter_attachments(opp_attachments)
+        filtered_attachments = self.filter_attachments(
+            opp_attachments, ["text/plain"]
+        )  # any other ?
         attachments = []
-        for att in opp_attachments:
+        for att in filtered_attachments:
             with smart_open.open(att.file_location, "rb") as file:
                 file_content = file.read()
                 attachments.append(
