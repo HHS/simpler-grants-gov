@@ -40,5 +40,21 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
-  return featureFlagsManager.middleware(request, i18nMiddleware(request));
+  const response = featureFlagsManager.middleware(
+    request,
+    i18nMiddleware(request),
+  );
+  if (request.url.includes("/error")) {
+    return new NextResponse(response.body, {
+      status: 500,
+      headers: response.headers,
+    });
+  }
+  if (request.url.includes("/unauthorized")) {
+    return new NextResponse(response.body, {
+      status: 401,
+      headers: response.headers,
+    });
+  }
+  return response;
 }
