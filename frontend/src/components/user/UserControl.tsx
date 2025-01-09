@@ -113,7 +113,7 @@ const UserDropdown = ({
         menuId="user-control"
       />
       <Menu
-        className="position-absolute desktop:width-full z-top"
+        className="position-absolute desktop:width-full z-200"
         id="user-control"
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
