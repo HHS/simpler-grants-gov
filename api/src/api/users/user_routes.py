@@ -23,7 +23,7 @@ from src.api.users.user_schemas import (
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
-from src.db.models.user_models import UserSavedOpportunity, UserSavedSearch, UserTokenSession
+from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
 from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.get_saved_opportunities import get_saved_opportunities
