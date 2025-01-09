@@ -66,7 +66,7 @@ const nextConfig = {
           },
         ],
       },
-      // don't cache the api 
+      // don't cache the api
       {
         source: "/api/:path*",
         headers: [

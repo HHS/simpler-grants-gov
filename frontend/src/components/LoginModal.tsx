@@ -13,7 +13,11 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 const LOGIN_URL = "/api/auth/login";
 
-export const LoginModal = () => {
+export const LoginModal = ({
+  navLoginLinkText,
+}: {
+  navLoginLinkText: string;
+}) => {
   const t = useTranslations("LoginModal");
   const modalRef = useRef<ModalRef>(null);
 
@@ -31,7 +35,7 @@ export const LoginModal = () => {
               name="login"
               key="login-link-icon"
             />
-            {t("link")}
+            {navLoginLinkText}
           </ModalToggleButton>
         </div>
       </div>

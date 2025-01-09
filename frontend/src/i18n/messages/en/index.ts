@@ -483,7 +483,6 @@ export const messages = {
     title: "Simpler.Grants.gov",
   },
   LoginModal: {
-    link: "Sign in",
     title: "Sign in to Simpler.Grants.gov",
     help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
     description:

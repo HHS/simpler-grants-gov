@@ -18,7 +18,7 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 
 describe("LoginModal", () => {
   it("renders", () => {
-    render(<LoginModal />);
+    render(<LoginModal navLoginLinkText="Sign in" />);
     const loginGovLink = screen.getByRole("link", {
       name: /Sign in with Login.gov/i,
     });
