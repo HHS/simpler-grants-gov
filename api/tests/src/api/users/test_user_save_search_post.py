@@ -1,26 +1,12 @@
 import pytest
 
-from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import FundingInstrument
 from src.db.models.user_models import UserSavedSearch
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import UserFactory
 
 
-@pytest.fixture
-def user(enable_factory_create, db_session):
-    user = UserFactory.create()
-    db_session.commit()
-    return user
-
-
-@pytest.fixture
-def user_auth_token(user, db_session):
-    token, _ = create_jwt_for_user(user, db_session)
-    return token
-
-
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def clear_saved_searches(db_session):
     db_session.query(UserSavedSearch).delete()
     db_session.commit()
