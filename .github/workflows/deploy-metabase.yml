@@ -1,9 +1,12 @@
-name: Chained Deploy
-run-name: Chained Deploy Layer for ${{ github.ref_name }} to Metabase ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+name: Deploy
 
 on:
   workflow_call:
     inputs:
+      app_name:
+        description: "name of application folder under infra directory"
+        required: true
+        type: string
       environment:
         description: "the name of the application environment (e.g. dev, staging, prod)"
         required: true
@@ -13,7 +16,7 @@ on:
         required: true
         type: string
 
-concurrency: cd-${{ inputs.environment }}
+concurrency: cd-${{inputs.app_name}}-${{ inputs.environment }}
 
 jobs:
   deploy:
@@ -24,16 +27,15 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.7
-          terraform_wrapper: false
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
 
       - name: Configure AWS credentials
         uses: ./.github/actions/configure-aws-credentials
         with:
-          app_name: analytics
+          app_name: metabase
           environment: ${{ inputs.environment }}
 
       - name: Deploy metabase
-        run: make metabase-deploy APP_NAME=metabase ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ inputs.version }}
+        run: make metabase-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ inputs.version }}
