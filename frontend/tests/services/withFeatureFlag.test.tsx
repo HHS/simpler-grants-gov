@@ -1,12 +1,12 @@
 // import Cookies from "js-cookie";
 import Cookies from "js-cookie";
 import { identity } from "lodash";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { render } from "tests/react-utils";
 
 let enableFeature = false;
 
-jest.mock("src/services/FeatureFlagManager", () => {
+jest.mock("src/services/featureFlags/FeatureFlagManager", () => {
   class FakeFeatureFlagManager {
     isFeatureEnabled() {
       return enableFeature;
@@ -14,7 +14,7 @@ jest.mock("src/services/FeatureFlagManager", () => {
   }
 
   return {
-    FeatureFlagsManager: FakeFeatureFlagManager,
+    featureFlagsManager: new FakeFeatureFlagManager(),
   };
 });
 

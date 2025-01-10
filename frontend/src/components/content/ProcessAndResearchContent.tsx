@@ -27,7 +27,7 @@ const ProcessAndResearchContent = () => {
             </span>
             <USWDSIcon
               name="arrow_forward"
-              className="usa-icon usa-icon--size-4 text-middle margin-left-neg-4"
+              className="usa-icon--size-4 text-middle margin-left-neg-4"
               aria-label="arrow-forward"
             />
           </Button>
@@ -47,7 +47,7 @@ const ProcessAndResearchContent = () => {
             </span>
             <USWDSIcon
               name="arrow_forward"
-              className="usa-icon usa-icon--size-4 text-middle margin-left-neg-4"
+              className="usa-icon--size-4 text-middle margin-left-neg-4"
               aria-label="arrow-forward"
             />
           </Button>

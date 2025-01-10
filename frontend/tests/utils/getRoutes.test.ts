@@ -27,6 +27,7 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/dev/feature-flags",
+      "/error",
       "/health",
       "/maintenance",
       "/opportunity/1",
@@ -37,6 +38,8 @@ describe("getNextRoutes", () => {
       "/subscribe/confirmation",
       "/subscribe",
       "/subscribe/unsubscribe",
+      "/unauthorized",
+      "/user",
     ]);
   });
 });
@@ -60,7 +63,6 @@ function getPaths() {
     "src/app/[locale]/search/SearchForm.tsx",
     "src/app/[locale]/search/actions.ts",
     "src/app/[locale]/search/error.tsx",
-    "src/app/[locale]/search/loading.tsx",
     "src/app/[locale]/search/page.tsx",
     "src/app/[locale]/subscribe/SubscriptionForm.tsx",
     "src/app/[locale]/subscribe/confirmation/page.tsx",

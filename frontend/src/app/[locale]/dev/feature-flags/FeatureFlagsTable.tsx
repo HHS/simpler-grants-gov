@@ -9,24 +9,20 @@ import { Button, Table } from "@trussworks/react-uswds";
  * View for managing feature flags
  */
 export default function FeatureFlagsTable() {
-  const { featureFlagsManager, mounted, setFeatureFlag } = useFeatureFlags();
-
-  if (!mounted) {
-    return null;
-  }
+  const { setFeatureFlag, featureFlags } = useFeatureFlags();
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th scope="col">Status</th>
-          <th scope="col">Feature Flag</th>
-          <th scope="col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Object.entries(featureFlagsManager.featureFlags).map(
-          ([featureName, enabled]) => (
+    <>
+      <Table>
+        <thead>
+          <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Feature Flag</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(featureFlags).map(([featureName, enabled]) => (
             <tr key={featureName}>
               <td
                 data-testid={`${featureName}-status`}
@@ -38,7 +34,7 @@ export default function FeatureFlagsTable() {
               <td>
                 <Button
                   data-testid={`enable-${featureName}`}
-                  disabled={enabled}
+                  disabled={!!enabled}
                   onClick={() => setFeatureFlag(featureName, true)}
                   type="button"
                 >
@@ -54,9 +50,9 @@ export default function FeatureFlagsTable() {
                 </Button>
               </td>
             </tr>
-          ),
-        )}
-      </tbody>
-    </Table>
+          ))}
+        </tbody>
+      </Table>
+    </>
   );
 }

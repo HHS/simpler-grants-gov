@@ -62,7 +62,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
     switch (status) {
       case "archived":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("archived")}</strong>
               <span>{formatDate(archiveDate) || "--"}</span>
@@ -71,7 +71,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         );
       case "closed":
         return (
-          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-lighter text-ink border-radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("closed")}</strong>
               <span>{formatDate(closeDate) || "--"}</span>
@@ -81,7 +81,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
       case "posted":
         return (
           <>
-            <div className="usa-tag bg-accent-warm-dark width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+            <div className="usa-tag bg-accent-warm-dark radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
               <p>
                 <strong>{t("closing")}</strong>
                 <span>{formatDate(closeDate) || "--"}</span>
@@ -96,7 +96,7 @@ const OpportunityStatusWidget = ({ opportunityData }: Props) => {
         );
       case "forecasted":
         return (
-          <div className="usa-tag bg-base-dark border-radius-2 width-100 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
+          <div className="usa-tag bg-base-dark border-radius-2 radius-md margin-right-0 font-sans-sm text-center text-no-uppercase">
             <p>
               <strong>{t("forecasted")}</strong>
             </p>

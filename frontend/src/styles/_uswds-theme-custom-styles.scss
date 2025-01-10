@@ -378,3 +378,50 @@ button.usa-pagination__button.usa-button {
     color: white;
   }
 }
+
+@include at-media("desktop") {
+  .usa-nav__submenu {
+    right: 0;
+  }
+}
+
+// we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
+// these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
+.usa-nav__primary {
+  .mobile-nav-dropdown-uncollapsed-override {
+    button[aria-expanded="true"] {
+      background-color: color("mint-60");
+      a {
+        color: white;
+      }
+      span:after {
+        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+          linear-gradient(transparent, transparent);
+      }
+    }
+    button[aria-expanded="false"] {
+      span:after {
+        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+          linear-gradient(transparent, transparent);
+      }
+    }
+    button[aria-expanded] {
+      span:after {
+        right: 0.75rem;
+      }
+    }
+    .usa-nav__submenu-item {
+      background-color: color("mint-60");
+      a {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        color: white;
+        line-height: 1.4;
+        display: block;
+      }
+    }
+    .usa-nav__submenu {
+      right: 3.7em;
+    }
+  }
+}

@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/not-found";
-import { fetchOpportunity } from "src/app/api/fetchers";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import withFeatureFlag from "src/hoc/withFeatureFlag";
+import { fetchOpportunity } from "src/services/fetch/fetchers/fetchers";
 import { Opportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 

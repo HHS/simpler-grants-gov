@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -15,17 +16,20 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { UserControl } from "./user/UserControl";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
 };
 
 type Props = {
-  logoPath?: string;
   locale?: string;
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+const logoPath = "./img/grants-logo.svg";
 
 const NavLinks = ({
   mobileExpanded,
@@ -117,8 +121,7 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ logoPath, locale }: Props) => {
-  logoPath = "./img/grants-logo.svg";
+const Header = ({ locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -138,6 +141,8 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
+  const { checkFeatureFlag } = useFeatureFlags();
+  const showLoginLink = checkFeatureFlag("authOn");
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -163,7 +168,7 @@ const Header = ({ logoPath, locale }: Props) => {
         basic={true}
         className="desktop:position-sticky top-0 desktop:z-500 bg-white border-bottom-2px border-primary-vivid"
       >
-        <div className="usa-nav-container">
+        <div className="usa-nav-container display-flex flex-align-end">
           <div className="usa-navbar border-bottom-0">
             <Title className="margin-y-2">
               <div className="display-flex flex-align-center">
@@ -178,11 +183,19 @@ const Header = ({ logoPath, locale }: Props) => {
                 </Link>
               </div>
             </Title>
+          </div>
+          <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
+              className="usa-menu-btn"
             />
           </div>
+          {!!showLoginLink && (
+            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+              <UserControl />
+            </div>
+          )}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
