@@ -27,6 +27,7 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/dev/feature-flags",
+      "/error",
       "/health",
       "/maintenance",
       "/opportunity/1",
@@ -37,6 +38,7 @@ describe("getNextRoutes", () => {
       "/subscribe/confirmation",
       "/subscribe",
       "/subscribe/unsubscribe",
+      "/unauthorized",
       "/user",
     ]);
   });
