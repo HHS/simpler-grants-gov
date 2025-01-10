@@ -482,7 +482,7 @@ export const messages = {
     nav_link_logout: "Sign out",
     title: "Simpler.Grants.gov",
   },
-  LoginModal: {
+  LoginButtonModal: {
     title: "Sign in to Simpler.Grants.gov",
     help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
     description:
