@@ -67,11 +67,6 @@ describe("Header", () => {
     const closeButton = screen.getByRole("button", { name: /close/i });
 
     expect(closeButton).toBeInTheDocument();
-
-    expect(screen.getByRole("link", { name: /Sign in/i })).toHaveAttribute(
-      "href",
-      "/login-url",
-    );
   });
 
   it("displays expandable government banner", async () => {

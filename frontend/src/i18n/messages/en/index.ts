@@ -482,6 +482,14 @@ export const messages = {
     nav_link_logout: "Sign out",
     title: "Simpler.Grants.gov",
   },
+  LoginModal: {
+    title: "Sign in to Simpler.Grants.gov",
+    help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
+    description:
+      "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+    button: "Sign in with Login.gov",
+    close: "Cancel",
+  },
   Hero: {
     title: "We're building a simpler Grants.gov!",
     content:
