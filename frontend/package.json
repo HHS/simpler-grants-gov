@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "all-checks": "npm run lint && npm run ts:check && npm run test && npm run build",
@@ -13,7 +13,7 @@
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
-    "lint": "next lint --dir src --dir stories --dir .storybook --dir tests --dir scripts --dir frontend --dir lib --dir types",
+    "lint": "next lint",
     "lint-fix": "npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
     "start:nr": "NODE_OPTIONS= '-r @newrelic/next' next start -p ${PORT:-3000}",
@@ -66,7 +66,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.13",
     "@types/newrelic": "^9.14.6",
-    "@types/node": "^20.8.2",
+    "@types/node": "^22.10.5",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

@@ -11,7 +11,7 @@ defaults:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 22
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
 
