@@ -7,7 +7,6 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 import Header from "src/components/Header";
 
 const props = {
-  logoPath: "/img/logo.svg",
   locale: "en",
 };
 

@@ -24,11 +24,12 @@ type PrimaryLink = {
 };
 
 type Props = {
-  logoPath?: string;
   locale?: string;
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+const logoPath = "./img/grants-logo.svg";
 
 const NavLinks = ({
   mobileExpanded,
@@ -120,8 +121,7 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ logoPath, locale }: Props) => {
-  logoPath = "./img/grants-logo.svg";
+const Header = ({ locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
