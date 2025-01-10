@@ -1,7 +1,9 @@
+import base64
 import logging
 from enum import StrEnum
-from typing import Iterator, Sequence
+from typing import Iterator, List, Sequence
 
+import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -11,11 +13,13 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 
 import src.adapters.db as db
 import src.adapters.search as search
+from src.api.feature_flags.feature_flag_config import get_feature_flag_config
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
+    OpportunityAttachment,
     OpportunitySearchIndexQueue,
 )
 from src.task.task import Task
@@ -269,6 +273,30 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
+    def filter_attachments(
+        self, attachments: List[OpportunityAttachment], filters: list
+    ) -> List[OpportunityAttachment]:
+        return [attachment for attachment in attachments if attachment.mime_type in filters]
+
+    def get_attachment_json_for_opportunity(
+        self, opp_attachments: List[OpportunityAttachment]
+    ) -> list[dict]:
+        filtered_attachments = self.filter_attachments(
+            opp_attachments, ["text/plain"]
+        )  # any other ?
+        attachments = []
+        for att in filtered_attachments:
+            with smart_open.open(att.file_location, "rb") as file:
+                file_content = file.read()
+                attachments.append(
+                    {
+                        "filename": att.file_name,
+                        "data": base64.b64encode(file_content).decode("utf-8"),
+                    }
+                )
+
+        return attachments
+
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
         wait=wait_fixed(2),  # Wait 2 seconds between retries
@@ -300,7 +328,16 @@ class LoadOpportunitiesToIndex(Task):
                 self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
                 continue
 
-            json_records.append(schema.dump(record))
+            json_record = schema.dump(record)
+
+            feature_flag_config = get_feature_flag_config()
+
+            if feature_flag_config.enable_opportunity_attachment_pipeline:
+                json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                    record.opportunity_attachments
+                )
+
+            json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
 
             loaded_opportunity_ids.add(record.opportunity_id)
