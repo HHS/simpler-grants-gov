@@ -405,6 +405,11 @@ button.usa-pagination__button.usa-button {
           linear-gradient(transparent, transparent);
       }
     }
+    button[aria-expanded] {
+      span:after {
+        right: 0.75rem;
+      }
+    }
     .usa-nav__submenu-item {
       background-color: color("mint-60");
       a {
@@ -416,7 +421,7 @@ button.usa-pagination__button.usa-button {
       }
     }
     .usa-nav__submenu {
-      right: 3.6em;
+      right: 3.7em;
     }
   }
 }
