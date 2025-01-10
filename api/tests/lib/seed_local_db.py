@@ -6,7 +6,6 @@ import random
 import boto3
 import click
 from botocore.exceptions import ClientError
-from sqlalchemy import func
 
 import src.adapters.db as db
 import src.logging
