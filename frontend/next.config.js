@@ -81,6 +81,18 @@ const nextConfig = {
     nrExternals(config);
     return config;
   },
+  eslint: {
+    dirs: [
+      "src",
+      "stories",
+      ".storybook",
+      "tests",
+      "scripts",
+      "frontend",
+      "lib",
+      "types",
+    ],
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
