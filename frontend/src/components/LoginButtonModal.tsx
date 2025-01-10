@@ -11,14 +11,14 @@ import {
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const LOGIN_URL = "/api/auth/login";
+export const LOGIN_URL = "/api/auth/login";
 
-export const LoginModal = ({
+export const LoginButtonModal = ({
   navLoginLinkText,
 }: {
   navLoginLinkText: string;
 }) => {
-  const t = useTranslations("LoginModal");
+  const t = useTranslations("LoginButtonModal");
   const modalRef = useRef<ModalRef>(null);
 
   return (
