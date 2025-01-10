@@ -339,15 +339,15 @@ export const messages = {
             "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
         },
         {
-          title: "Search & Opportunity Listing improvements",
-          content:
-            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
-        },
-        {
           title:
             "Full support for Opportunity Listing attachments (NOFOs/downloads)",
           content:
             "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+        },
+        {
+          title: "Search & Opportunity Listing improvements",
+          content:
+            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
         },
         {
           title: "Simpler application workflow prototype",
