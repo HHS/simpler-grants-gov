@@ -25,7 +25,29 @@ export const gitHubIssueLink = (issueNumber: number) =>
         {chunks}
       </Link>
     ),
-    { displayName: "gitHubIssueLink" },
+const GithubIssueLink = ({
+  issueNumber,
+  chunks,
+}: {
+  issueNumber: number;
+  chunks: ReactNode;
+}) => (
+  <Link
+    target="_blank"
+    className="usa-link--external text-bold"
+    href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
+  >
+    {chunks}
+  </Link>
+);
+
+const gitHubLinkForIssue = (issueNumber: number) => {
+  const PartialIssueLink = (chunks: ReactNode) => (
+    <GithubIssueLink issueNumber={issueNumber} chunks={chunks} />
+  );
+  PartialIssueLink.displayName = "GithubIssueLink";
+  return PartialIssueLink;
+};
   );
 
 const ProcessNext = () => {
