@@ -40,5 +40,25 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
-  return featureFlagsManager.middleware(request, i18nMiddleware(request));
+  const response = featureFlagsManager.middleware(
+    request,
+    i18nMiddleware(request),
+  );
+  // in Next 15 there is an experimental `unauthorized` function that will send a 401
+  // code to the client and display an unauthorized page
+  // see https://nextjs.org/docs/app/api-reference/functions/unauthorized
+  // For now we can set status codes on auth redirect errors here
+  if (request.url.includes("/error")) {
+    return new NextResponse(response.body, {
+      status: 500,
+      headers: response.headers,
+    });
+  }
+  if (request.url.includes("/unauthorized")) {
+    return new NextResponse(response.body, {
+      status: 401,
+      headers: response.headers,
+    });
+  }
+  return response;
 }

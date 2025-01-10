@@ -10,7 +10,7 @@ import BetaAlert from "src/components/BetaAlert";
 export async function generateMetadata() {
   const t = await getTranslations();
   const meta: Metadata = {
-    title: t("ErrorPages.page_not_found.title"),
+    title: t("ErrorPages.page_not_found.page_title"),
     description: t("Index.meta_description"),
   };
   return meta;

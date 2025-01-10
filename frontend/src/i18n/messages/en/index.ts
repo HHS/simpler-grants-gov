@@ -463,8 +463,14 @@ export const messages = {
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
-    page_title: "Page Not Found | Simpler.Grants.gov",
+    generic_error: {
+      page_title: "Error | Simpler.Grants.gov",
+    },
+    unauthorized: {
+      page_title: "Unauthorized | Simpler.Grants.gov",
+    },
     page_not_found: {
+      page_title: "Page Not Found | Simpler.Grants.gov",
       title: "Oops! Page Not Found",
       message_content_1:
         "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
@@ -530,6 +536,9 @@ export const messages = {
   Errors: {
     heading: "We're sorry.",
     generic_message: "There seems to have been an error.",
+    try_again: "Please try again.",
+    unauthorized: "Unauthorized",
+    authorization_fail: "Login or user authorization failed. Please try again.",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
