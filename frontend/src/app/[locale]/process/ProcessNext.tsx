@@ -14,17 +14,6 @@ import {
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-export const gitHubIssueLink = (issueNumber: number) =>
-  Object.assign(
-    (chunks: ReactNode) => (
-      <Link
-        target="_blank"
-        className="usa-link--external text-bold"
-        href={`${ExternalRoutes.GITHUB_REPO}/issues/${issueNumber}`}
-      >
-        {chunks}
-      </Link>
-    ),
 const GithubIssueLink = ({
   issueNumber,
   chunks,
@@ -41,14 +30,13 @@ const GithubIssueLink = ({
   </Link>
 );
 
-const gitHubLinkForIssue = (issueNumber: number) => {
+export const gitHubLinkForIssue = (issueNumber: number) => {
   const PartialIssueLink = (chunks: ReactNode) => (
     <GithubIssueLink issueNumber={issueNumber} chunks={chunks} />
   );
   PartialIssueLink.displayName = "GithubIssueLink";
   return PartialIssueLink;
 };
-  );
 
 const ProcessNext = () => {
   const t = useTranslations("Process.next");
@@ -72,10 +60,10 @@ const ProcessNext = () => {
                     {chunks}
                   </p>
                 ),
-                linkGithub3045: gitHubIssueLink(3045),
-                linkGithub2875: gitHubIssueLink(2875),
-                linkGithub2640: gitHubIssueLink(2640),
-                linkGithub3348: gitHubIssueLink(3348),
+                linkGithub3045: gitHubLinkForIssue(3045),
+                linkGithub2875: gitHubLinkForIssue(2875),
+                linkGithub2640: gitHubLinkForIssue(2640),
+                linkGithub3348: gitHubLinkForIssue(3348),
               });
               return (
                 <IconListItem
