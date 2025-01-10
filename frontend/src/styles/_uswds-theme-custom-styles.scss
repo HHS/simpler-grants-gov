@@ -380,9 +380,6 @@ button.usa-pagination__button.usa-button {
 }
 
 @include at-media("desktop") {
-  .desktop\:margin-bottom-5px {
-    margin-bottom: 5px !important;
-  }
   .usa-nav__submenu {
     right: 0;
   }

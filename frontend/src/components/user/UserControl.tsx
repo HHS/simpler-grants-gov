@@ -3,39 +3,15 @@ import { UserProfile } from "src/services/auth/types";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   IconListContent,
   Menu,
   NavDropDownButton,
 } from "@trussworks/react-uswds";
 
+import { LoginModal } from "src/components/LoginModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const LoginLink = ({
-  navLoginLinkText,
-  loginUrl,
-}: {
-  navLoginLinkText: string;
-  loginUrl: string;
-}) => {
-  return (
-    <div className="usa-nav__primary-item border-0 desktop:margin-top-0 margin-top-1">
-      <a
-        {...(loginUrl ? { href: loginUrl } : "")}
-        key="login-link"
-        className="usa-nav__link font-sans-2xs display-flex"
-      >
-        <USWDSIcon
-          className="margin-right-05 margin-left-neg-05"
-          name="login"
-          key="login-link-icon"
-        />
-        {navLoginLinkText}
-      </a>
-    </div>
-  );
-};
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
@@ -138,27 +114,9 @@ export const UserControl = () => {
     await refreshUser();
   }, [refreshUser]);
 
-  const [authLoginUrl, setAuthLoginUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchEnv() {
-      const res = await fetch("/api/env");
-      const data = (await res.json()) as { auth_login_url: string };
-      data.auth_login_url
-        ? setAuthLoginUrl(data.auth_login_url)
-        : console.error("could not access auth_login_url");
-    }
-    fetchEnv().catch((error) => console.warn("error fetching api/env", error));
-  }, []);
-
   return (
     <>
-      {!user?.token && (
-        <LoginLink
-          navLoginLinkText={t("nav_link_login")}
-          loginUrl={authLoginUrl || ""}
-        />
-      )}
+      {!user?.token && <LoginModal navLoginLinkText={t("nav_link_login")} />}
       {!!user?.token && (
         <UserDropdown
           user={user}
