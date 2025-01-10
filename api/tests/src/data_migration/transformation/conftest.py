@@ -4,6 +4,7 @@ from typing import Tuple
 import pytest
 
 import tests.src.db.models.factories as f
+from src.adapters.aws import S3Config
 from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
@@ -18,7 +19,6 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.services.opportunity_attachments import attachment_util
-from src.services.opportunity_attachments.attachment_config import OpportunityAttachmentConfig
 from src.util import file_util
 from tests.conftest import BaseTestClass
 
@@ -337,7 +337,7 @@ def setup_agency(
 def setup_opportunity_attachment(
     create_existing: bool,
     opportunity: Opportunity,
-    config: OpportunityAttachmentConfig,
+    config: S3Config,
     is_delete: bool = False,
     is_already_processed: bool = False,
     source_values: dict | None = None,
@@ -354,7 +354,9 @@ def setup_opportunity_attachment(
     )
 
     if create_existing:
-        s3_path = attachment_util.get_s3_attachment_path(synopsis_attachment.file_name, synopsis_attachment.syn_att_id, opportunity, config)
+        s3_path = attachment_util.get_s3_attachment_path(
+            synopsis_attachment.file_name, synopsis_attachment.syn_att_id, opportunity, config
+        )
 
         with file_util.open_stream(s3_path, "w") as outfile:
             outfile.write(f.fake.sentence(25))

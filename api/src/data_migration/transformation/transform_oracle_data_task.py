@@ -92,5 +92,5 @@ class TransformOracleDataTask(Task):
             TransformAgency(self).run()
             TransformAgencyHierarchy(self).run()
 
-        if self.transform_config.enable_opportunity_attachment:
+        if True:  # self.transform_config.enable_opportunity_attachment:
             TransformOpportunityAttachment(self).run()

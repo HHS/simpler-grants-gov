@@ -3,6 +3,7 @@ from typing import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
+from src.adapters.aws import S3Config
 from src.constants.lookup_constants import OpportunityAttachmentType
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
@@ -10,23 +11,21 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.attachment import TsynopsisAttachment
 from src.services.opportunity_attachments import attachment_util
-from src.services.opportunity_attachments.attachment_config import OpportunityAttachmentConfig
 from src.task.task import Task
 from src.util import file_util
-import smart_open
 
 logger = logging.getLogger(__name__)
 
 
 class TransformOpportunityAttachment(AbstractTransformSubTask):
 
-    def __init__(self, task: Task, opportunity_attachment_config: OpportunityAttachmentConfig | None = None):
+    def __init__(self, task: Task, s3_config: S3Config | None = None):
         super().__init__(task)
 
-        if opportunity_attachment_config is None:
-            opportunity_attachment_config = OpportunityAttachmentConfig()
+        if s3_config is None:
+            s3_config = S3Config()
 
-        self.opportunity_attachment_config = opportunity_attachment_config
+        self.s3_config = s3_config
 
     def transform_records(self) -> None:
 
@@ -99,12 +98,14 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             # here whether it's an insert/update and we'll increment after transforming
             is_insert = target_attachment is None
 
-            prior_attachment_location = target_attachment.file_location if target_attachment else None
+            prior_attachment_location = (
+                target_attachment.file_location if target_attachment else None
+            )
 
             logger.info("Transforming and upserting opportunity attachment", extra=extra)
 
             transformed_opportunity_attachment = transform_opportunity_attachment(
-                source_attachment, target_attachment, opportunity, self.opportunity_attachment_config
+                source_attachment, target_attachment, opportunity, self.s3_config
             )
 
             # Write the file to s3
@@ -112,7 +113,10 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             # TODO - cleanup of old files
 
             # TODO - is this fine here?
-            if prior_attachment_location is not None and prior_attachment_location != transformed_opportunity_attachment.file_location:
+            if (
+                prior_attachment_location is not None
+                and prior_attachment_location != transformed_opportunity_attachment.file_location
+            ):
                 file_util.delete_file(prior_attachment_location)
 
             # TODO - we'll need to handle more with the s3 files here
@@ -138,7 +142,10 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
 
 
 def transform_opportunity_attachment(
-    source_attachment: TsynopsisAttachment, incoming_attachment: OpportunityAttachment | None, opportunity: Opportunity, opportunity_attachment_config: OpportunityAttachmentConfig
+    source_attachment: TsynopsisAttachment,
+    incoming_attachment: OpportunityAttachment | None,
+    opportunity: Opportunity,
+    s3_config: S3Config,
 ) -> OpportunityAttachment:
 
     log_extra = transform_util.get_log_extra_opportunity_attachment(source_attachment)
@@ -147,9 +154,13 @@ def transform_opportunity_attachment(
         logger.info("Creating new opportunity attachment record", extra=log_extra)
 
     # Adjust the file_name to remove characters clunky in URLs
+    if source_attachment.file_name is None:
+        raise ValueError("Opportunity attachment does not have a file name, cannot process.")
     file_name = attachment_util.adjust_legacy_file_name(source_attachment.file_name)
 
-    file_location = attachment_util.get_s3_attachment_path(file_name, source_attachment.syn_att_id, opportunity, opportunity_attachment_config)
+    file_location = attachment_util.get_s3_attachment_path(
+        file_name, source_attachment.syn_att_id, opportunity, s3_config
+    )
 
     # We always create a new record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
@@ -177,6 +188,8 @@ def transform_opportunity_attachment(
     return target_attachment
 
 
-def write_file(source_attachment: TsynopsisAttachment, destination_attachment: OpportunityAttachment):
+def write_file(
+    source_attachment: TsynopsisAttachment, destination_attachment: OpportunityAttachment
+) -> None:
     with file_util.open_stream(destination_attachment.file_location, "wb") as outfile:
         outfile.write(source_attachment.file_lob)
