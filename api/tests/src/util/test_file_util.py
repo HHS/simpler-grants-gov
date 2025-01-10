@@ -130,6 +130,7 @@ def test_file_exists_local_filesystem(tmp_path):
     assert file_util.file_exists(tmp_path / "test4.txt") is False
     assert file_util.file_exists(tmp_path / "test5.txt") is False
 
+
 def test_file_exists_s3(mock_s3_bucket):
     file_path1 = f"s3://{mock_s3_bucket}/test.txt"
     file_path2 = f"s3://{mock_s3_bucket}/test2.txt"

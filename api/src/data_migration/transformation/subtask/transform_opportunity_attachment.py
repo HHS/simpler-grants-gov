@@ -110,16 +110,15 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
 
             # Write the file to s3
             write_file(source_attachment, transformed_opportunity_attachment)
-            # TODO - cleanup of old files
 
-            # TODO - is this fine here?
+            # If this was an update, and the file name changed
+            # Cleanup the old file from s3.
             if (
                 prior_attachment_location is not None
                 and prior_attachment_location != transformed_opportunity_attachment.file_location
             ):
                 file_util.delete_file(prior_attachment_location)
 
-            # TODO - we'll need to handle more with the s3 files here
             if is_insert:
                 self.increment(
                     transform_constants.Metrics.TOTAL_RECORDS_INSERTED,
@@ -133,9 +132,6 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                     prefix=transform_constants.OPPORTUNITY_ATTACHMENT,
                 )
                 self.db_session.merge(transformed_opportunity_attachment)
-
-                # TODO - create the record in s3
-                # TODO - if the record is differently named, delete the old
 
         logger.info("Processed opportunity attachment", extra=extra)
         source_attachment.transformed_at = self.transform_time

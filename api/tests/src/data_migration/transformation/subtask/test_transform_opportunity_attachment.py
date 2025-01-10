@@ -1,7 +1,7 @@
 import pytest
 
 import tests.src.db.models.factories as f
-from src.adapters.aws import S3Config, get_s3_client
+from src.adapters.aws import S3Config
 from src.data_migration.transformation import transform_constants
 from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
     TransformOpportunityAttachment,
@@ -185,7 +185,9 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         opportunity = f.OpportunityFactory.create(is_draft=False, opportunity_attachments=[])
         update = setup_opportunity_attachment(
             # Don't create the existing, we'll do that below
-            create_existing=False, opportunity=opportunity, config=s3_config
+            create_existing=False,
+            opportunity=opportunity,
+            config=s3_config,
         )
 
         old_s3_path = attachment_util.get_s3_attachment_path(
@@ -199,17 +201,21 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             attachment_id=update.syn_att_id,
             opportunity=opportunity,
             file_location=old_s3_path,
-            file_name="old_file_name.txt"
+            file_name="old_file_name.txt",
         )
 
-        transform_opportunity_attachment.process_opportunity_attachment(update, target_attachment, opportunity)
+        transform_opportunity_attachment.process_opportunity_attachment(
+            update, target_attachment, opportunity
+        )
 
         validate_opportunity_attachment(db_session, update)
 
         # Verify the old file name was deleted
         assert file_util.file_exists(old_s3_path) is False
 
-    def test_transform_opportunity_attachment_delete_file_missing_on_s3(self, db_session, transform_opportunity_attachment, s3_config):
+    def test_transform_opportunity_attachment_delete_file_missing_on_s3(
+        self, db_session, transform_opportunity_attachment, s3_config
+    ):
         opportunity = f.OpportunityFactory.create(opportunity_attachments=[])
 
         synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
@@ -230,6 +236,8 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
 
         # This won't error, s3 delete object doesn't error if the object doesn't exist
-        transform_opportunity_attachment.process_opportunity_attachment(synopsis_attachment, target_attachment, opportunity)
+        transform_opportunity_attachment.process_opportunity_attachment(
+            synopsis_attachment, target_attachment, opportunity
+        )
 
         validate_opportunity_attachment(db_session, synopsis_attachment, expect_in_db=False)

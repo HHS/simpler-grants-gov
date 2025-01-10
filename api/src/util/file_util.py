@@ -1,11 +1,11 @@
 import os
-from pathlib import PosixPath, Path
-from typing import Any, Tuple
+from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
+import botocore
 import smart_open
 from botocore.config import Config
-import botocore
 
 from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 
@@ -14,22 +14,22 @@ from src.adapters.aws import S3Config, get_boto_session, get_s3_client
 ##################################
 
 
-def is_s3_path(path: str | PosixPath) -> bool:
+def is_s3_path(path: str | Path) -> bool:
     return str(path).startswith("s3://")
 
 
-def split_s3_url(path: str) -> Tuple[str, str]:
-    parts = urlparse(path)
+def split_s3_url(path: str | Path) -> tuple[str, str]:
+    parts = urlparse(str(path))
     bucket_name = parts.netloc
     prefix = parts.path.lstrip("/")
-    return (bucket_name, prefix)
+    return bucket_name, prefix
 
 
-def get_s3_bucket(path: str) -> str:
+def get_s3_bucket(path: str | Path) -> str:
     return split_s3_url(path)[0]
 
 
-def get_s3_file_key(path: str) -> str:
+def get_s3_file_key(path: str | Path) -> str:
     return split_s3_url(path)[1]
 
 
@@ -105,7 +105,9 @@ def delete_file(path: str) -> None:
     else:
         os.remove(path)
 
+
 def file_exists(path: str | Path) -> bool:
+    """Get whether a file exists or not"""
     if is_s3_path(path):
         s3_client = get_s3_client()
 
