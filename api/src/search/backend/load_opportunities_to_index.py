@@ -2,7 +2,6 @@ import base64
 import logging
 from enum import StrEnum
 from typing import Iterator, List, Sequence
-
 import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -281,12 +280,10 @@ class LoadOpportunitiesToIndex(Task):
     def get_attachment_json_for_opportunity(
         self, opp_attachments: List[OpportunityAttachment]
     ) -> list[dict]:
-        filtered_attachments = self.filter_attachments(
-            opp_attachments, ["text/plain"]
-        )  # any other ?
+
         attachments = []
-        for att in filtered_attachments:
-            with smart_open.open(att.file_location, "rb") as file:
+        for att in opp_attachments:
+            with smart_open.open(att.file_location, "rb", ) as file: # transport_params={'client': s3_client}
                 file_content = file.read()
                 attachments.append(
                     {
@@ -312,6 +309,8 @@ class LoadOpportunitiesToIndex(Task):
 
         loaded_opportunity_ids = set()
 
+        feature_flag_config = get_feature_flag_config()
+
         for record in records:
             log_extra = {
                 "opportunity_id": record.opportunity_id,
@@ -329,8 +328,6 @@ class LoadOpportunitiesToIndex(Task):
                 continue
 
             json_record = schema.dump(record)
-
-            feature_flag_config = get_feature_flag_config()
 
             if feature_flag_config.enable_opportunity_attachment_pipeline:
                 json_record["attachments"] = self.get_attachment_json_for_opportunity(
