@@ -92,7 +92,6 @@ class SearchClient:
         index_name: str,
         records: Iterable[dict[str, Any]],
         primary_key_field: str,
-        pipeline: str = "",
         *,
         refresh: bool = True,
     ) -> None:
@@ -125,11 +124,7 @@ class SearchClient:
                 "operation": "update",
             },
         )
-        bulk_args = {"index": index_name, "body": bulk_operations, "refresh": refresh}
-        if pipeline:
-            bulk_args["pipeline"] = pipeline
-
-        self._client.bulk(**bulk_args)
+        self._client.bulk(index=index_name, body=bulk_operations, refresh=refresh)
 
     def bulk_delete(self, index_name: str, ids: Iterable[Any], *, refresh: bool = True) -> None:
         """
