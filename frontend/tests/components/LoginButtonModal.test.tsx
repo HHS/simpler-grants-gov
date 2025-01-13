@@ -2,7 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { render, screen } from "tests/react-utils";
 
 import Header from "src/components/Header";
-import { LoginModal } from "src/components/LoginModal";
+import { LOGIN_URL, LoginButtonModal } from "src/components/LoginButtonModal";
 
 const usePathnameMock = jest.fn().mockReturnValue("/fakepath");
 
@@ -16,13 +16,15 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
-describe("LoginModal", () => {
+describe("LoginButtonModal", () => {
   it("renders", () => {
-    render(<LoginModal navLoginLinkText="Sign in" />);
+    render(<LoginButtonModal navLoginLinkText="Sign in" />);
     const loginGovLink = screen.getByRole("link", {
       name: /Sign in with Login.gov/i,
     });
     expect(loginGovLink).toBeInTheDocument();
+    expect(loginGovLink).toHaveAttribute("href", LOGIN_URL);
+
     const modalTitle = screen.getByRole("heading", { level: 2 });
     expect(modalTitle).toHaveTextContent("Sign in to Simpler.Grants.gov");
   });
