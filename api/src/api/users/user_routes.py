@@ -254,7 +254,7 @@ def user_save_search(
         raise_flask_error(401, "Unauthorized user")
 
     with db_session.begin():
-        create_saved_search(db_session, user_id, json_data)
+        saved_search = create_saved_search(db_session, user_id, json_data)
 
     logger.info(
         "Saved search for user",
