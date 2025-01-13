@@ -286,10 +286,7 @@ def user_delete_saved_search(
         raise_flask_error(401, "Unauthorized user")
 
     with db_session.begin():
-        try:
-            delete_saved_search(db_session, user_id, saved_search_id)
-        except Exception as e:
-            raise_flask_error(404, str(e))
+        delete_saved_search(db_session, user_id, saved_search_id)
 
     logger.info(
         "Deleted saved search",

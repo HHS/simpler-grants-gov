@@ -3,15 +3,14 @@ import uuid
 import pytest
 
 from src.db.models.user_models import UserSavedSearch, UserTokenSession
-from tests.src.db.models.factories import UserFactory
+from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
 @pytest.fixture
-def saved_search(user, db_session):
-    search = UserSavedSearch(
-        user_id=user.user_id, name="Test Search", search_query={"keywords": "python"}
+def saved_search(enable_factory_create, user, db_session):
+    search = UserSavedSearchFactory.create(
+        user=user, name="Test Search", search_query={"keywords": "python"}
     )
-    db_session.add(search)
     db_session.commit()
     return search
 
