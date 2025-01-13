@@ -7,18 +7,16 @@ import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { ReactNode } from "react";
 
 import { ValidationErrors } from "src/components/subscribe/SubscriptionForm";
 
 type sendyResponse = {
   validationErrors: ValidationErrors;
-  errorMessage: string;
+  errorMessage: string | ReactNode;
 };
 
-export async function subscribeEmail(
-  prevState: sendyResponse,
-  formData: FormData,
-) {
+export async function subscribeEmail(_prevState: unknown, formData: FormData) {
   const t = await getTranslations();
 
   const { errorMessage, validationErrors } = await subscribeEmailAction(
@@ -39,6 +37,11 @@ export async function subscribeEmailAction(
   t: TFn,
   formData: FormData,
 ): Promise<sendyResponse> {
+  const errorMessage = t.rich("Subscribe.errors.server", {
+    "email-link": (content) => (
+      <a href="mailto:simpler@grants.gov">{content}</a>
+    ),
+  });
   const schema = z.object({
     name: z.string().min(1, {
       message: t("Subscribe.errors.missing_name"),
@@ -75,9 +78,6 @@ export async function subscribeEmailAction(
     hp: formData.get("hp") as string,
   };
 
-  // TODO: Implement the email subscription logic here, putting old SENDY code here for reference
-  // Note: Noone is sure where the api url/key/list ID are at the moment and I believe the intention is
-  // to move away from SENDY to a different service.
   try {
     const sendyApiUrl = environment.SENDY_API_URL;
     const sendyApiKey = environment.SENDY_API_KEY;
@@ -115,16 +115,17 @@ export async function subscribeEmailAction(
     if (!sendyResponse.ok || !["1", "true"].includes(responseData)) {
       return {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        errorMessage: t("Subscribe.errors.server"),
+        errorMessage,
         validationErrors: {},
       };
     }
-  } catch (error) {
+  } catch (e) {
     // General try failure catch error
-    console.error("Error subscribing user:", (<Error>error).message);
+    const error = e as Error;
+    console.error("Error subscribing user:", error.message);
     return {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      errorMessage: t("Subscribe.errors.server"),
+      errorMessage,
       validationErrors: {},
     };
   }
