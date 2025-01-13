@@ -66,6 +66,16 @@ const nextConfig = {
           },
         ],
       },
+      // don't cache the api
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
     ];
   },
   basePath,
@@ -80,6 +90,18 @@ const nextConfig = {
   webpack: (config) => {
     nrExternals(config);
     return config;
+  },
+  eslint: {
+    dirs: [
+      "src",
+      "stories",
+      ".storybook",
+      "tests",
+      "scripts",
+      "frontend",
+      "lib",
+      "types",
+    ],
   },
 };
 

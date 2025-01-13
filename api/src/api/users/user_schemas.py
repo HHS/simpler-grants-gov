@@ -1,4 +1,7 @@
-from src.api.opportunities_v1.opportunity_schemas import SavedOpportunityResponseV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunitySearchRequestV1Schema,
+    SavedOpportunityResponseV1Schema,
+)
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
@@ -87,3 +90,15 @@ class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
         fields.Nested(SavedOpportunityResponseV1Schema),
         metadata={"description": "List of saved opportunities"},
     )
+
+
+class UserSaveSearchRequestSchema(Schema):
+    name = fields.String(
+        required=True,
+        metadata={"description": "Name of the saved search", "example": "Example search"},
+    )
+    search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
+
+
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

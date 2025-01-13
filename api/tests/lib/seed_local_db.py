@@ -6,7 +6,6 @@ import random
 import boto3
 import click
 from botocore.exceptions import ClientError
-from sqlalchemy import func
 
 import src.adapters.db as db
 import src.logging
@@ -15,7 +14,6 @@ import tests.src.db.models.factories as factories
 from src.adapters.aws import S3Config, get_s3_client
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.transfer.topportunity_models import TransferTopportunity
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 
@@ -142,16 +140,6 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
             )
 
     logger.info("Finished creating opportunities")
-
-    logger.info("Creating records in the transfer_topportunity table")
-    # Also seed the topportunity table for now in the same way
-    max_opportunity_id = db_session.query(func.max(TransferTopportunity.opportunity_id)).scalar()
-    if max_opportunity_id is None:
-        max_opportunity_id = 0
-
-    factories.TransferTopportunityFactory.reset_sequence(value=max_opportunity_id + 1)
-    factories.TransferTopportunityFactory.create_batch(size=25)
-    logger.info("Finished creating records in the transfer_topportunity table")
 
 
 @click.command()

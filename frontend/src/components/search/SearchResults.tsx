@@ -1,9 +1,9 @@
-import Loading from "src/app/[locale]/search/loading";
-import { searchForOpportunities } from "src/app/api/searchFetcher";
+import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 import { Suspense } from "react";
 
+import Loading from "src/components/Loading";
 import SearchPagination from "src/components/search/SearchPagination";
 import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
