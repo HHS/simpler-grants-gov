@@ -287,7 +287,7 @@ class LoadOpportunitiesToIndex(Task):
             with smart_open.open(
                 att.file_location,
                 "rb",
-            ) as file:  # transport_params={'client': s3_client}
+            ) as file:
                 file_content = file.read()
                 attachments.append(
                     {
