@@ -63,7 +63,7 @@ export const createSession = async (token: string) => {
   const session = await encrypt(token, expiresAt, clientJwtKey);
   cookies().set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: environment.ENVIRONMENT === "prod",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",

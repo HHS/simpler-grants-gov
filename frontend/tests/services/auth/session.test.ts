@@ -115,7 +115,7 @@ describe("createSession", () => {
       "encrypted session",
       {
         httpOnly: true,
-        secure: true,
+        secure: false, // true only in prod for now
         expires: new Date(0),
         sameSite: "lax",
         path: "/",
