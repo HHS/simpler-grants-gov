@@ -6,7 +6,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "all-checks": "npm run lint && npm run ts:check && npm run test && npm run build",
+    "all-checks": "npm run lint && npm run ts:check && npm run test && npm run build -- --no-lint",
     "build": "next build",
     "dev": "NEW_RELIC_ENABLED=false next dev",
     "dev:nr": "NODE_OPTIONS='-r @newrelic/next' next dev",
