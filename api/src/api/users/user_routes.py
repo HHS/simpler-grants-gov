@@ -11,6 +11,7 @@ from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
+    UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -26,6 +27,7 @@ from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_re
 from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
 from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
+from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_user import get_user
 from src.services.users.login_gov_callback_handler import (
@@ -261,6 +263,39 @@ def user_save_search(
         extra={
             "user.id": str(user_id),
             "saved_search.id": str(saved_search.saved_search_id),
+        },
+    )
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.delete("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
+@user_blueprint.output(UserDeleteSavedSearchResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_delete_saved_search(
+    db_session: db.Session, user_id: UUID, saved_search_id: UUID
+) -> response.ApiResponse:
+    logger.info("DELETE /v1/users/:user_id/saved-searches/:saved_search_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    with db_session.begin():
+        try:
+            delete_saved_search(db_session, user_id, saved_search_id)
+        except Exception as e:
+            raise_flask_error(404, str(e))
+
+    logger.info(
+        "Deleted saved search",
+        extra={
+            "user.id": str(user_id),
+            "saved_search.id": str(saved_search_id),
         },
     )
 
