@@ -56,8 +56,6 @@ const decryptLoginGovToken = async (
 
 // sets client token on cookie
 export const createSession = async (token: string) => {
-  // eslint-disable-next-line
-  console.log(`Creating session in ${environment.ENVIRONMENT}`);
   if (!clientJwtKey) {
     initializeSessionSecrets();
   }
