@@ -12,7 +12,6 @@ def create_saved_search(db_session: db.Session, user_id: UUID, json_data: dict) 
         user_id=user_id, name=json_data["name"], search_query=json_data["search_query"]
     )
 
-    with db_session.begin():
-        db_session.add(saved_search)
+    db_session.add(saved_search)
 
     return saved_search
