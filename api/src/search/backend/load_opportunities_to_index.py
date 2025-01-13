@@ -2,6 +2,7 @@ import base64
 import logging
 from enum import StrEnum
 from typing import Iterator, List, Sequence
+
 import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
@@ -283,7 +284,10 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            with smart_open.open(att.file_location, "rb", ) as file: # transport_params={'client': s3_client}
+            with smart_open.open(
+                att.file_location,
+                "rb",
+            ) as file:  # transport_params={'client': s3_client}
                 file_content = file.read()
                 attachments.append(
                     {

@@ -65,19 +65,21 @@ def set_logging_defaults(monkeypatch_session):
 
 ### Uploads test files
 @pytest.fixture
-def upload_opportunity_attachment_s3(reset_aws_env_vars,mock_s3_bucket):
-    #Uploads opportunity attachment files to "test_bucket" unless specified otherwise
+def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
+    # Uploads opportunity attachment files to "test_bucket" unless specified otherwise
     def _upload_opportunity_attachment_s3(bucket=None):
         s3_client = boto3.client("s3")
         test_folder_path = (
-                pathlib.Path(__file__).parent.resolve() / "lib/opportunity_attachment_test_files"
+            pathlib.Path(__file__).parent.resolve() / "lib/opportunity_attachment_test_files"
         )
 
         for root, _, files in os.walk(test_folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 s3_client.upload_file(
-                    file_path, Bucket=bucket if bucket else mock_s3_bucket, Key=os.path.relpath(file_path, test_folder_path)
+                    file_path,
+                    Bucket=bucket if bucket else mock_s3_bucket,
+                    Key=os.path.relpath(file_path, test_folder_path),
                 )
 
         # Check files were uploaded to mock s3
@@ -85,6 +87,7 @@ def upload_opportunity_attachment_s3(reset_aws_env_vars,mock_s3_bucket):
         assert len(s3_files["Contents"]) == 5
 
     return _upload_opportunity_attachment_s3
+
 
 ####################
 # Test DB session

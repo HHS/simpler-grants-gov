@@ -2,6 +2,7 @@ import base64
 import itertools
 
 import pytest
+
 from src.api.feature_flags import feature_flag_config
 from src.db.models.opportunity_models import OpportunitySearchIndexQueue
 from src.search.backend.load_opportunities_to_index import (
@@ -12,20 +13,23 @@ from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
-    OpportunitySearchIndexQueueFactory, OpportunityAttachmentFactory,
+    OpportunitySearchIndexQueueFactory,
 )
 
 feature_flag_config.initialize()
 
+
 @pytest.fixture(autouse=True)
-def create_mock_s3_bucket( mock_s3, upload_opportunity_attachment_s3):
+def create_mock_s3_bucket(mock_s3, upload_opportunity_attachment_s3):
     bucket_name = "local-opportunities"
     bucket = mock_s3.Bucket(bucket_name)
     bucket.create()
     upload_opportunity_attachment_s3(bucket_name)
 
     yield bucket_name
+
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
@@ -130,15 +134,32 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             [record["opportunity_id"] for record in resp.records]
         )
 
-    def test_opportunity_attachment_pipeline(self, create_mock_s3_bucket, reset_aws_env_vars, db_session, enable_factory_create,load_opportunities_to_index, monkeypatch: pytest.MonkeyPatch, opportunity_index_alias, search_client):
+    def test_opportunity_attachment_pipeline(
+        self,
+        create_mock_s3_bucket,
+        reset_aws_env_vars,
+        db_session,
+        enable_factory_create,
+        load_opportunities_to_index,
+        monkeypatch: pytest.MonkeyPatch,
+        opportunity_index_alias,
+        search_client,
+    ):
         bucket = create_mock_s3_bucket
-        filename="test_file_1.txt"
-        file_path = f"s3://{bucket}/{filename}" # use this specific file
+        filename = "test_file_1.txt"
+        file_path = f"s3://{bucket}/{filename}"  # use this specific file
 
         opportunity = OpportunityFactory.create(opportunity_attachments=[])
-        OpportunityAttachmentFactory.create(mime_type="text/plain", opportunity=opportunity, file_location=file_path, file_name=filename)
+        OpportunityAttachmentFactory.create(
+            mime_type="text/plain",
+            opportunity=opportunity,
+            file_location=file_path,
+            file_name=filename,
+        )
 
-        load_opportunities_to_index.index_name = load_opportunities_to_index.index_name + "-pipeline"
+        load_opportunities_to_index.index_name = (
+            load_opportunities_to_index.index_name + "-pipeline"
+        )
 
         load_opportunities_to_index.run()
 
@@ -153,7 +174,8 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         # assert content of file was b64decoded
         decoded = base64.b64decode(attachment["data"])
 
-        assert decoded.decode('utf-8') == "Hello, world"
+        assert decoded.decode("utf-8") == "Hello, world"
+
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
