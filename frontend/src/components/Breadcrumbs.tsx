@@ -16,18 +16,20 @@ type Props = {
   breadcrumbList: BreadcrumbList;
 };
 
-const rdfaMetadata = {
+const microdata = {
   ol: {
-    vocab: "http://schema.org/",
-    typeof: "BreadcrumbList",
+    itemScope: true,
+    itemType: "https://schema.org/BreadcrumbList",
   },
   li: {
-    property: "itemListElement",
-    typeof: "ListItem",
+    itemScope: true,
+    itemProp: "itemListElement",
+    itemType: "https://schema.org/ListItem",
   },
   a: {
-    property: "item",
-    typeof: "WebPage",
+    itemScope: true,
+    itemProp: "item",
+    itemType: "https://schema.org/WebPage",
   },
 };
 
@@ -37,17 +39,21 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
       <Breadcrumb
         key={breadcrumbInfo.title + "-crumb"}
         current={i + 1 === breadcrumbList.length}
-        {...rdfaMetadata.li}
+        {...microdata.li}
       >
         {i + 1 !== breadcrumbList.length ? (
-          <BreadcrumbLink href={breadcrumbInfo.path} {...rdfaMetadata.a}>
+          <BreadcrumbLink
+            href={breadcrumbInfo.path}
+            itemID={breadcrumbInfo.path}
+            {...microdata.a}
+          >
             {}
-            <span property="name">{breadcrumbInfo.title}</span>
+            <span itemProp="name">{breadcrumbInfo.title}</span>
           </BreadcrumbLink>
         ) : (
-          <span property="name">{breadcrumbInfo.title}</span>
+          <span itemProp="name">{breadcrumbInfo.title}</span>
         )}
-        <meta property="position" content={(i + 1).toString()} />
+        <meta itemProp="position" content={(i + 1).toString()} />
       </Breadcrumb>
     );
   });
@@ -57,7 +63,7 @@ const Breadcrumbs = ({ breadcrumbList }: Props) => {
       className="padding-top-1 tablet:padding-top-3 desktop-lg:padding-top-4"
       data-testid="breadcrumb"
     >
-      <BreadcrumbBar listProps={{ ...rdfaMetadata.ol }}>
+      <BreadcrumbBar listProps={{ ...microdata.ol }}>
         {breadcrumArray}
       </BreadcrumbBar>
     </GridContainer>
