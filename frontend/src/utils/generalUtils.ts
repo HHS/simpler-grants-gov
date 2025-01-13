@@ -90,7 +90,7 @@ export const splitMarkup = (
 export const findFirstWhitespace = (content: string, startAt: number): number =>
   content.substring(startAt).search(/\s/) + startAt;
 
-export const encodeText = (valueToEncode: string) =>
+export const encodeText = (valueToEncode: string): Uint8Array =>
   new TextEncoder().encode(valueToEncode);
 
 export const stringToBoolean = (
