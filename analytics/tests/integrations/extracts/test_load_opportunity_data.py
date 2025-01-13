@@ -49,7 +49,7 @@ def test_extract_copy_opportunity_data(
     """Test files are uploaded to mocks3 and all records are in test schema."""
     monkeypatch.setenv("DB_SCHEMA", test_schema)
     monkeypatch_session.setenv(
-        "LOAD_OPPORTUNITY_DATA_FILE_PATH",
+        "API_ANALYTICS_DB_EXTRACTS_PATH",
         f"S3://{mock_s3_bucket}/public-extracts",
     )
     test_db_conn = create_test_db

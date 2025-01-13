@@ -11,5 +11,11 @@ locals {
       schedule_expression = "rate(1 days)"
       state               = "ENABLED"
     }
+    opportunity-load-csvs = {
+      task_command = ["poetry", "run", "analytics", "etl", "opportunity-load"]
+      # Every day at 6am Eastern Time during DST. 7am during non-DST.
+      schedule_expression = "cron(0 11 * * ? *)"
+      state               = "ENABLED"
+    }
   }
 }

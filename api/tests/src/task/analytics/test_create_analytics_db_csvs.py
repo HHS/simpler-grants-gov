@@ -38,7 +38,7 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
     @pytest.fixture()
     def task(self, db_session, mock_s3_bucket, test_api_schema):
         config = CreateAnalyticsDbCsvsConfig(
-            file_path=f"s3://{mock_s3_bucket}/table-extracts", db_schema=test_api_schema
+            API_ANALYTICS_DB_EXTRACTS_PATH=f"s3://{mock_s3_bucket}/table-extracts", API_ANALYTICS_DB_SCHEMA=test_api_schema
         )
         return CreateAnalyticsDbCsvsTask(db_session, config=config)
 
