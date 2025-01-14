@@ -40,6 +40,10 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     alias_name: str = Field(default="opportunity-index-alias")  # LOAD_OPP_SEARCH_ALIAS_NAME
     index_prefix: str = Field(default="opportunity-index")  # LOAD_OPP_INDEX_PREFIX
 
+    enable_opportunity_attachment_pipeline: bool = Field(
+        default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
+    )
+
 
 class LoadOpportunitiesToIndex(Task):
     class Metrics(StrEnum):
@@ -332,8 +336,7 @@ class LoadOpportunitiesToIndex(Task):
                 continue
 
             json_record = schema.dump(record)
-
-            if feature_flag_config.enable_opportunity_attachment_pipeline:
+            if self.config.enable_opportunity_attachment_pipeline:
                 json_record["attachments"] = self.get_attachment_json_for_opportunity(
                     record.opportunity_attachments
                 )
