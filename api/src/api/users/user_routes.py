@@ -292,7 +292,7 @@ def user_delete_saved_search(
         "Deleted saved search",
         extra={
             "user.id": str(user_id),
-            "saved_search.id": str(saved_search_id),
+            "saved_search.id": saved_search_id,
         },
     )
 
