@@ -1989,3 +1989,15 @@ class UserSavedOpportunityFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class UserSavedSearchFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedSearch
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    saved_search_id = Generators.UuidObj
+
+    name = factory.Faker("sentence")
