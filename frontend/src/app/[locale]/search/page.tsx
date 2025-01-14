@@ -22,7 +22,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Search.title"),
-    description: t("Index.meta_description"),
+    description: t("Search.meta_description"),
   };
   return meta;
 }
