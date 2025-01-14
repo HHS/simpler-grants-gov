@@ -127,5 +127,7 @@ class UserSavedSearchesResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
     )
+
+
 class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
