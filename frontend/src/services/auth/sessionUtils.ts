@@ -22,7 +22,7 @@ export const decrypt = async (
     });
     return payload;
   } catch (error) {
-    console.error("Failed to decrypt session cookie", error);
+    console.error(`Failed to decrypt session cookie with ${algorithm}`, error);
     return null;
   }
 };
