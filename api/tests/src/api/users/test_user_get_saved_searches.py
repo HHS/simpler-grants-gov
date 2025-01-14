@@ -95,7 +95,6 @@ def test_user_get_saved_searches(client, user, user_auth_token, saved_searches):
     data = response.json["data"]
     assert len(data) == 2
 
-    print(data[0])
     # Verify the searches are returned in descending order by created_at
     assert data[0]["name"] == "Test Search 2"
     assert data[0]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
