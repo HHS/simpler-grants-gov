@@ -21,6 +21,7 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
         False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name()
     )
 
+
 # Global, loaded once at startup by calling initialize
 """
 NOTE: This structure of requiring you to initialize the config

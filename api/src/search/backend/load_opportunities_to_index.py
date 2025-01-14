@@ -13,7 +13,6 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 
 import src.adapters.db as db
 import src.adapters.search as search
-from src.api.feature_flags.feature_flag_config import get_feature_flag_config
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
@@ -61,7 +60,6 @@ class LoadOpportunitiesToIndex(Task):
 
         self.search_client = search_client
         self.is_full_refresh = is_full_refresh
-
         if config is None:
             config = LoadOpportunitiesToIndexConfig()
         self.config = config
@@ -316,8 +314,6 @@ class LoadOpportunitiesToIndex(Task):
         json_records = []
 
         loaded_opportunity_ids = set()
-
-        feature_flag_config = get_feature_flag_config()
 
         for record in records:
             log_extra = {

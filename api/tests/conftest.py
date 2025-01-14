@@ -97,6 +97,7 @@ def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
     s3_files = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
     assert len(s3_files["Contents"]) == 5
 
+
 ####################
 # Test DB session
 ####################
@@ -360,6 +361,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     monkeypatch.delenv("S3_ENDPOINT_URL")
+
 
 @pytest.fixture
 def mock_s3(reset_aws_env_vars):

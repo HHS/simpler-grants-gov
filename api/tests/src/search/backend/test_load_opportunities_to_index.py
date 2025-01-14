@@ -1,6 +1,5 @@
 import base64
 import itertools
-from fileinput import filename
 
 import pytest
 
@@ -18,6 +17,7 @@ from tests.src.db.models.factories import (
     OpportunityFactory,
     OpportunitySearchIndexQueueFactory,
 )
+
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     @pytest.fixture(scope="class")
@@ -42,17 +42,33 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         opportunities = []
         opportunities.extend(
             OpportunityFactory.create_batch(
-                size=6, is_posted_summary=True, agency_code=agency.agency_code, opportunity_attachments=[]
+                size=6,
+                is_posted_summary=True,
+                agency_code=agency.agency_code,
+                opportunity_attachments=[],
             )
-        )
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_forecasted_summary=True, opportunity_attachments=[]))
-        opportunities.extend(OpportunityFactory.create_batch(size=2, is_closed_summary=True, opportunity_attachments=[]))
-        opportunities.extend(
-            OpportunityFactory.create_batch(size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[])
         )
         opportunities.extend(
             OpportunityFactory.create_batch(
-                size=6, is_archived_forecast_summary=True, agency_code=agency.agency_code, opportunity_attachments=[]
+                size=3, is_forecasted_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=2, is_closed_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=6,
+                is_archived_forecast_summary=True,
+                agency_code=agency.agency_code,
+                opportunity_attachments=[],
             )
         )
 
@@ -61,7 +77,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         OpportunityFactory.create_batch(size=4, no_current_summary=True, opportunity_attachments=[])
 
         AgencyFactory.create(agency_code="MY-TEST-AGENCY", is_test_agency=True)
-        OpportunityFactory.create_batch(size=3, agency_code="MY-TEST-AGENCY", opportunity_attachments=[])
+        OpportunityFactory.create_batch(
+            size=3, agency_code="MY-TEST-AGENCY", opportunity_attachments=[]
+        )
 
         for opportunity in opportunities:
             OpportunitySearchIndexQueueFactory.create(
@@ -131,9 +149,8 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         monkeypatch: pytest.MonkeyPatch,
         opportunity_index_alias,
         search_client,
-
     ):
-        filename="test_file_1.txt"
+        filename = "test_file_1.txt"
         file_path = f"s3://{mock_s3_bucket}/{filename}"
         content = "I am a file"
         with file_util.open_stream(file_path, "w") as outfile:
@@ -195,18 +212,36 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
         # Load a bunch of records into the DB
         opportunities = []
-        opportunities.extend(OpportunityFactory.create_batch(size=6, is_posted_summary=True, opportunity_attachments=[]))
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_forecasted_summary=True, opportunity_attachments=[]))
-        opportunities.extend(OpportunityFactory.create_batch(size=2, is_closed_summary=True, opportunity_attachments=[]))
         opportunities.extend(
-            OpportunityFactory.create_batch(size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[])
+            OpportunityFactory.create_batch(
+                size=6, is_posted_summary=True, opportunity_attachments=[]
+            )
         )
         opportunities.extend(
-            OpportunityFactory.create_batch(size=6, is_archived_forecast_summary=True, opportunity_attachments=[])
+            OpportunityFactory.create_batch(
+                size=3, is_forecasted_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=2, is_closed_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=6, is_archived_forecast_summary=True, opportunity_attachments=[]
+            )
         )
 
         AgencyFactory.create(agency_code="MY-TEST-AGENCY-123", is_test_agency=True)
-        test_opps = OpportunityFactory.create_batch(size=2, agency_code="MY-TEST-AGENCY-123", opportunity_attachments=[])
+        test_opps = OpportunityFactory.create_batch(
+            size=2, agency_code="MY-TEST-AGENCY-123", opportunity_attachments=[]
+        )
 
         for opportunity in itertools.chain(opportunities, test_opps):
             OpportunitySearchIndexQueueFactory.create(
@@ -226,7 +261,11 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         ] == len(test_opps)
 
         # Add a few more opportunities that will be created
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_posted_summary=True, opportunity_attachments=[]))
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=3, is_posted_summary=True, opportunity_attachments=[]
+            )
+        )
 
         # Delete some opportunities
         opportunities_to_delete = [opportunities.pop(), opportunities.pop(), opportunities.pop()]
