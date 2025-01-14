@@ -112,7 +112,10 @@ class SavedSearchResponseSchema(Schema):
         }
     )
     name = fields.String(
-        metadata={"description": "Name of the saved search", "example": "Tech jobs in California"}
+        metadata={
+            "description": "Name of the saved search",
+            "example": "Grant opportunities in California",
+        }
     )
     search_query = fields.Nested(
         OpportunitySearchRequestV1Schema,
