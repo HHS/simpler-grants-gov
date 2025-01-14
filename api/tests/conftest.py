@@ -79,7 +79,7 @@ def set_logging_defaults(monkeypatch_session):
 ### Uploads test files
 @pytest.fixture
 def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
-    # Uploads opportunity attachment files to "test_bucket" unless specified otherwise
+    # Uploads opportunity attachment files to mock "test_bucket" unless specified otherwise
     def _upload_opportunity_attachment_s3(bucket=None):
         s3_client = boto3.client("s3")
         test_folder_path = (

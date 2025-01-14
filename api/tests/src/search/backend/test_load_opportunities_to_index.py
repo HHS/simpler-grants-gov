@@ -147,7 +147,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
     ):
         bucket = create_mock_s3_bucket
         filename = "test_file_1.txt"
-        file_path = f"s3://{bucket}/{filename}"  # use this specific file
+        file_path = f"s3://{bucket}/{filename}"
 
         opportunity = OpportunityFactory.create(opportunity_attachments=[])
         OpportunityAttachmentFactory.create(
@@ -171,7 +171,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         # assert correct attachment was uploaded
         assert attachment["filename"] == filename
 
-        # assert content of file was b64decoded
+        # assert content of file was b64encoded
         decoded = base64.b64decode(attachment["data"])
 
         assert decoded.decode("utf-8") == "Hello, world"
