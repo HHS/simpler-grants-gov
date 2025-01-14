@@ -4,7 +4,6 @@ from datetime import timedelta
 from typing import Tuple
 
 import jwt
-from apiflask import HTTPTokenAuth
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -14,13 +13,16 @@ from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
 from src.auth.auth_errors import JwtValidationError
+from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
 from src.db.models.user_models import User, UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
-api_jwt_auth = HTTPTokenAuth("ApiKey", header="X-SGG-Token", security_scheme_name="ApiJwtAuth")
+api_jwt_auth = JwtUserHttpTokenAuth(
+    "ApiKey", header="X-SGG-Token", security_scheme_name="ApiJwtAuth"
+)
 
 
 class ApiJwtConfig(PydanticBaseEnvConfig):

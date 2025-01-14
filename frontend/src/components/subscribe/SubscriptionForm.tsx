@@ -81,7 +81,7 @@ export default function SubscriptionForm() {
         <TextInput type="text" name="hp" id="hp" />
       </div>
       <SubscriptionSubmitButton />
-      {state?.errorMessage?.length > 0 ? (
+      {state?.errorMessage ? (
         <ErrorMessage className="maxw-mobile-lg">
           {state?.errorMessage}
         </ErrorMessage>

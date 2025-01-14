@@ -102,3 +102,7 @@ class UserSaveSearchRequestSchema(Schema):
 
 class UserSaveSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
