@@ -101,7 +101,7 @@ def login_result() -> flask.Response:
 def user_token_logout(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/logout")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
     with db_session.begin():
         user_token_session.is_valid = False
         db_session.add(user_token_session)
@@ -125,7 +125,7 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/refresh")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     with db_session.begin():
         refresh_token_expiration(user_token_session)
@@ -150,7 +150,7 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
 def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     if user_token_session.user_id == user_id:
         with db_session.begin():
@@ -172,7 +172,7 @@ def user_save_opportunity(
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-opportunities")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -207,7 +207,7 @@ def user_delete_saved_opportunity(
 ) -> response.ApiResponse:
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -228,7 +228,7 @@ def user_delete_saved_opportunity(
 def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id/saved-opportunities")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -251,7 +251,7 @@ def user_save_search(
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-searches")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
