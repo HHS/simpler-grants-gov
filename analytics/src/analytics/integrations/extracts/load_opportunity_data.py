@@ -24,7 +24,7 @@ class LoadOpportunityDataFileConfig(BaseSettings):
 
     load_opportunity_data_file_path: str | None = Field(
         default=None,
-        alias="LOAD_OPPORTUNITY_DATA_FILE_PATH",
+        alias="API_ANALYTICS_DB_EXTRACTS_PATH",
     )
 
 

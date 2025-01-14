@@ -4,7 +4,7 @@ from enum import StrEnum
 
 import click
 import sqlalchemy
-from pydantic_settings import SettingsConfigDict
+from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -40,14 +40,12 @@ def create_analytics_db_csvs(db_session: db.Session, tables_to_extract: list[str
 
 
 class CreateAnalyticsDbCsvsConfig(PydanticBaseEnvConfig):
-    model_config = SettingsConfigDict(env_prefix="ANALYTICS_DB_CSV_")
-
-    # ANALYTICS_DB_CSV_FILE_PATH
-    file_path: str
+    # API_ANALYTICS_DB_EXTRACTS_PATH
+    file_path: str = Field(alias="API_ANALYTICS_DB_EXTRACTS_PATH")
 
     # Override the schema for where the tables exist, only needed
     # for testing right now
-    db_schema: str | None = None
+    db_schema: str | None = Field(None, alias="API_ANALYTICS_DB_SCHEMA")
 
 
 class CreateAnalyticsDbCsvsTask(Task):
