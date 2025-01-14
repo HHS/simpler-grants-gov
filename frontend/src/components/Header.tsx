@@ -1,13 +1,12 @@
 "use client";
-import GrantsLogo from "public/img/grants-logo.png";
+
 import clsx from "clsx";
-import GrantsLogo from "public/img/grants-logo.svg";
+import GrantsLogo from "public/img/grants-logo.png";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
