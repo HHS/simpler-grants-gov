@@ -432,7 +432,7 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       server:
-        "Failed to subscribe, due to a server error. Please try again later.",
+        "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       already_subscribed: "This email address has already been subscribed.",
     },
   },
