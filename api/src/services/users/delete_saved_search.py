@@ -14,7 +14,6 @@ def delete_saved_search(db_session: db.Session, user_id: UUID, saved_search_id: 
         )
     ).scalar_one_or_none()
 
-
     if not saved_search:
         raise_flask_error(404, "Saved search not found")
 
