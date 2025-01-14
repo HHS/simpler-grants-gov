@@ -111,8 +111,6 @@ def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_
 def test_get_opportunity_s3_endpoint_url_200(
     upload_opportunity_attachment_s3, client, api_auth_token, enable_factory_create, db_session
 ):
-    # upload attachment files to mock s3 bucket
-    upload_opportunity_attachment_s3()
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
     bucket = "test_bucket"
