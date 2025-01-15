@@ -20,6 +20,7 @@ import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.foreign import metadata as foreign_metadata
@@ -31,6 +32,18 @@ from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def user(enable_factory_create, db_session):
+    return factories.UserFactory.create()
+
+
+@pytest.fixture
+def user_auth_token(user, db_session):
+    token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+    return token
 
 
 @pytest.fixture(scope="session", autouse=True)

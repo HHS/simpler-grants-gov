@@ -7,7 +7,8 @@ export const messages = {
   },
   OpportunityListing: {
     page_title: "Opportunity Listing",
-    meta_description: "Summary details for the specific opportunity listing.",
+    meta_description:
+      "Read detailed information about this funding opportunity.",
     intro: {
       agency: "Agency: ",
       assistance_listings: "Assistance Listings: ",
@@ -80,7 +81,7 @@ export const messages = {
   Index: {
     page_title: "Simpler.Grants.gov",
     meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+      "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
     goal: {
       paragraph_1:
         "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
@@ -127,8 +128,6 @@ export const messages = {
   },
   Research: {
     page_title: "Research | Simpler.Grants.gov",
-    meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     intro: {
       title: "Our existing research",
       content:
@@ -269,8 +268,6 @@ export const messages = {
   },
   Process: {
     page_title: "Process | Simpler.Grants.gov",
-    meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     intro: {
       title: "Our open process",
       content:
@@ -339,15 +336,15 @@ export const messages = {
             "Enable grant seekers to create an account on Simpler.Grants.gov using the Login.gov single sign-on platform to minimize the steps and friction users experience when signing up.<p><linkGithub2640>Follow #2640 on GitHub</linkGithub2640></p>",
         },
         {
-          title: "Search & Opportunity Listing improvements",
-          content:
-            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
-        },
-        {
           title:
             "Full support for Opportunity Listing attachments (NOFOs/downloads)",
           content:
             "The opportunity listings on Simpler.Grants.gov will include all information and file attachments available on Grants.gov. Design updates will make the Notice of Funding Opportunity (NOFO) easier to access.<p><linkGithub3045>Follow #3045 on GitHub</linkGithub3045></p>",
+        },
+        {
+          title: "Search & Opportunity Listing improvements",
+          content:
+            "With feedback from the community, we will iterate on improvements that make it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.<p><linkGithub2875>Follow #2875 on GitHub</linkGithub2875></p>",
         },
         {
           title: "Simpler application workflow prototype",
@@ -411,6 +408,8 @@ export const messages = {
   },
   Subscribe: {
     page_title: "Subscribe | Simpler.Grants.gov",
+    meta_description:
+      "Sign up for email updates from the Simpler.Grants.gov team.",
     title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     paragraph_1:
@@ -432,7 +431,7 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       server:
-        "Failed to subscribe, due to a server error. Please try again later.",
+        "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       already_subscribed: "This email address has already been subscribed.",
     },
   },
@@ -463,8 +462,14 @@ export const messages = {
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
   ErrorPages: {
-    page_title: "Page Not Found | Simpler.Grants.gov",
+    generic_error: {
+      page_title: "Error | Simpler.Grants.gov",
+    },
+    unauthorized: {
+      page_title: "Unauthorized | Simpler.Grants.gov",
+    },
     page_not_found: {
+      page_title: "Page Not Found | Simpler.Grants.gov",
       title: "Oops! Page Not Found",
       message_content_1:
         "The page you have requested cannot be displayed because it does not exist, has been moved, or the server has been instructed not to let you view it. There is nothing to see here.",
@@ -478,7 +483,17 @@ export const messages = {
     nav_link_subscribe: "Subscribe",
     nav_menu_toggle: "Menu",
     nav_link_search: "Search",
+    nav_link_login: "Sign in",
+    nav_link_logout: "Sign out",
     title: "Simpler.Grants.gov",
+  },
+  LoginButtonModal: {
+    title: "Sign in to Simpler.Grants.gov",
+    help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
+    description:
+      "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+    button: "Sign in with Login.gov",
+    close: "Cancel",
   },
   Hero: {
     title: "We're building a simpler Grants.gov!",
@@ -520,11 +535,14 @@ export const messages = {
   Errors: {
     heading: "We're sorry.",
     generic_message: "There seems to have been an error.",
+    try_again: "Please try again.",
+    unauthorized: "Unauthorized",
+    authorization_fail: "Login or user authorization failed. Please try again.",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
     meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+      "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
     accordion: {
       titles: {
@@ -607,5 +625,10 @@ export const messages = {
     body: "Our team is working to improve the site, and we’ll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
+  },
+  User: {
+    heading: "User",
+    pageTitle: "User | Simpler.Grants.Gov",
+    errorHeading: "Error",
   },
 };

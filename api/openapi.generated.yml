@@ -431,6 +431,80 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-searches:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedSearchesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Searches
+      security:
+      - ApiJwtAuth: []
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSaveSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Save Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSaveSearchRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities:
     get:
       parameters:
@@ -553,6 +627,43 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-searches/{saved_search_id}:
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: saved_search_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteSavedSearchResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Delete Saved Search
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -1973,6 +2084,75 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
+    UserSavedSearchesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of saved searches
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserSaveSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the saved search
+          example: Example search
+        search_query:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+      required:
+      - name
+    UserSaveSearchResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     SavedOpportunitySummaryV1:
       type: object
       properties:
@@ -2086,6 +2266,19 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserDeleteSavedSearchResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code

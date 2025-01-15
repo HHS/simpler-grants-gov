@@ -11,10 +11,14 @@ from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
+    UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
     UserSaveOpportunityResponseSchema,
+    UserSaveSearchRequestSchema,
+    UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
 )
@@ -22,8 +26,11 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
+from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
+from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_saved_opportunities import get_saved_opportunities
+from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
@@ -94,7 +101,7 @@ def login_result() -> flask.Response:
 def user_token_logout(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/logout")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
     with db_session.begin():
         user_token_session.is_valid = False
         db_session.add(user_token_session)
@@ -118,7 +125,7 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
     logger.info("POST /v1/users/token/refresh")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     with db_session.begin():
         refresh_token_expiration(user_token_session)
@@ -143,7 +150,7 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
 def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     if user_token_session.user_id == user_id:
         with db_session.begin():
@@ -165,7 +172,7 @@ def user_save_opportunity(
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-opportunities")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -200,7 +207,7 @@ def user_delete_saved_opportunity(
 ) -> response.ApiResponse:
     logger.info("DELETE /v1/users/:user_id/saved-opportunities/:opportunity_id")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -221,7 +228,7 @@ def user_delete_saved_opportunity(
 def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id/saved-opportunities")
 
-    user_token_session: UserTokenSession = api_jwt_auth.current_user  # type: ignore
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
@@ -231,3 +238,83 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
     saved_opportunities = get_saved_opportunities(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=saved_opportunities)
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-searches")
+@user_blueprint.input(UserSaveSearchRequestSchema, location="json")
+@user_blueprint.output(UserSaveSearchResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_save_search(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/saved-searches")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    with db_session.begin():
+        saved_search = create_saved_search(db_session, user_id, json_data)
+
+    logger.info(
+        "Saved search for user",
+        extra={
+            "user.id": str(user_id),
+            "saved_search.id": str(saved_search.saved_search_id),
+        },
+    )
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.delete("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
+@user_blueprint.output(UserDeleteSavedSearchResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_delete_saved_search(
+    db_session: db.Session, user_id: UUID, saved_search_id: UUID
+) -> response.ApiResponse:
+    logger.info("DELETE /v1/users/:user_id/saved-searches/:saved_search_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    with db_session.begin():
+        delete_saved_search(db_session, user_id, saved_search_id)
+
+    logger.info(
+        "Deleted saved search",
+        extra={
+            "user.id": str(user_id),
+            "saved_search.id": saved_search_id,
+        },
+    )
+
+    return response.ApiResponse(message="Success")
+
+
+@user_blueprint.get("/<uuid:user_id>/saved-searches")
+@user_blueprint.output(UserSavedSearchesResponseSchema)
+@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id/saved-searches")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    saved_searches = get_saved_searches(db_session, user_id)
+
+    return response.ApiResponse(message="Success", data=saved_searches)

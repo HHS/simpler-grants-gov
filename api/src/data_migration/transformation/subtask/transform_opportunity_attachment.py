@@ -119,13 +119,14 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             ):
                 file_util.delete_file(prior_attachment_location)
 
+            logger.info("Transforming and upserting opportunity attachment", extra=extra)
+
             if is_insert:
                 self.increment(
                     transform_constants.Metrics.TOTAL_RECORDS_INSERTED,
                     prefix=transform_constants.OPPORTUNITY_ATTACHMENT,
                 )
                 self.db_session.add(transformed_opportunity_attachment)
-
             else:
                 self.increment(
                     transform_constants.Metrics.TOTAL_RECORDS_UPDATED,

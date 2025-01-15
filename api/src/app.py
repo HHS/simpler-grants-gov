@@ -60,6 +60,7 @@ def create_app() -> APIFlask:
     configure_app(app)
     register_blueprints(app)
     register_index(app)
+    register_robots_txt(app)
     register_search_client(app)
 
     auth_endpoint_config = AuthEndpointConfig()
@@ -162,4 +163,15 @@ def register_index(app: APIFlask) -> None:
                     <p>Visit <a href="/docs">/docs</a> to view the api documentation for this project.</p>
                 </body>
             </html>
+        """
+
+
+def register_robots_txt(app: APIFlask) -> None:
+    @app.route("/robots.txt")
+    @app.doc(hide=True)
+    def robots() -> str:
+        return """
+        User-Agent: *
+        Allow: /docs
+        Disallow: /
         """

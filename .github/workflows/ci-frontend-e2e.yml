@@ -11,7 +11,7 @@ defaults:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 22
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
 
@@ -56,7 +56,7 @@ jobs:
       - name: Build a prod version of the site
         run: |
           cat .env.development >> .env.local
-          npm run build
+          npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
         env:
