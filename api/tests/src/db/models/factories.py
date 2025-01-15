@@ -2001,3 +2001,5 @@ class UserSavedSearchFactory(BaseFactory):
     saved_search_id = Generators.UuidObj
 
     name = factory.Faker("sentence")
+
+    search_query = factory.LazyAttribute(lambda s: s.search_query)
