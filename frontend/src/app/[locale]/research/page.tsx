@@ -18,7 +18,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Research.page_title"),
-    description: t("Research.meta_description"),
+    description: t("Index.meta_description"),
   };
   return meta;
 }

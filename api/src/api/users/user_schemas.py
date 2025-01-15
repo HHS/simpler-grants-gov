@@ -102,3 +102,35 @@ class UserSaveSearchRequestSchema(Schema):
 
 class UserSaveSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class SavedSearchResponseSchema(Schema):
+    saved_search_id = fields.UUID(
+        metadata={
+            "description": "The ID of the saved search",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    name = fields.String(
+        metadata={
+            "description": "Name of the saved search",
+            "example": "Grant opportunities in California",
+        }
+    )
+    search_query = fields.Nested(
+        OpportunitySearchRequestV1Schema,
+        metadata={"description": "The saved search query parameters"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
+    )
+
+
+class UserSavedSearchesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
+    )
+
+
+class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

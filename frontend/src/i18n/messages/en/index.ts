@@ -7,7 +7,8 @@ export const messages = {
   },
   OpportunityListing: {
     page_title: "Opportunity Listing",
-    meta_description: "Summary details for the specific opportunity listing.",
+    meta_description:
+      "Read detailed information about this funding opportunity.",
     intro: {
       agency: "Agency: ",
       assistance_listings: "Assistance Listings: ",
@@ -80,7 +81,7 @@ export const messages = {
   Index: {
     page_title: "Simpler.Grants.gov",
     meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+      "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
     goal: {
       paragraph_1:
         "Grants.gov should be extremely simple, accessible, and easy to use. Our mission is to increase access to federal financial assistance and continuously improve the grants experience for everyone.",
@@ -127,8 +128,6 @@ export const messages = {
   },
   Research: {
     page_title: "Research | Simpler.Grants.gov",
-    meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     intro: {
       title: "Our existing research",
       content:
@@ -269,8 +268,6 @@ export const messages = {
   },
   Process: {
     page_title: "Process | Simpler.Grants.gov",
-    meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
     intro: {
       title: "Our open process",
       content:
@@ -411,6 +408,8 @@ export const messages = {
   },
   Subscribe: {
     page_title: "Subscribe | Simpler.Grants.gov",
+    meta_description:
+      "Sign up for email updates from the Simpler.Grants.gov team.",
     title: "Subscribe to project updates",
     intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
     paragraph_1:
@@ -432,7 +431,7 @@ export const messages = {
       invalid_email:
         "Enter an email address in the correct format, like name@example.com.",
       server:
-        "Failed to subscribe, due to a server error. Please try again later.",
+        "An error occurred when trying to save your subscription. If this continues to happen, email <email-link>simpler@grants.gov</email-link>.",
       already_subscribed: "This email address has already been subscribed.",
     },
   },
@@ -543,7 +542,7 @@ export const messages = {
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
     meta_description:
-      "A one‑stop shop for all federal discretionary funding to make it easy for you to discover, understand, and apply for opportunities.",
+      "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
     accordion: {
       titles: {

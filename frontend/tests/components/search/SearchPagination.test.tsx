@@ -46,4 +46,24 @@ describe("SearchPagination", () => {
 
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
+
+  it("Renders Pagination component when totalResults > 0", () => {
+    render(
+      <SearchPagination
+        totalResults={"1"}
+        page={1}
+        query={"test"}
+        total={10}
+      />,
+    );
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+  });
+  it("Does not render Pagination component when total results is 0", () => {
+    render(
+      <SearchPagination page={1} query={"test"} totalResults={"0"} total={0} />,
+    );
+
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
 });
