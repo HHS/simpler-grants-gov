@@ -2091,8 +2091,7 @@ components:
           type: string
           format: uuid
           description: The ID of the saved search
-          example: !!python/object:uuid.UUID
-            int: 82637552140693101888240202082641616217
+          example: 123e4567-e89b-12d3-a456-426614174001
         name:
           type: string
           description: Name of the saved search
@@ -2306,4 +2305,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-
