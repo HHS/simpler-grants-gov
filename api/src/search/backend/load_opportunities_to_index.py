@@ -342,6 +342,6 @@ class LoadOpportunitiesToIndex(Task):
 
             loaded_opportunity_ids.add(record.opportunity_id)
 
-        self.search_client.bulk_upsert(self.index_name, json_records, "opportunity_id")
+        self.search_client.bulk_upsert(self.index_name, json_records, "opportunity_id", pipeline="multi-attachment")
 
         return loaded_opportunity_ids
