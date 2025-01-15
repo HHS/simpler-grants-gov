@@ -2092,7 +2092,7 @@ components:
           format: uuid
           description: The ID of the saved search
           example: !!python/object:uuid.UUID
-            int: 82637552140693101888240202082641616217
+            int: 64775123006620764804804060251485008766
         name:
           type: string
           description: Name of the saved search
