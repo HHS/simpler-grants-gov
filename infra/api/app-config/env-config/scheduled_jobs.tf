@@ -58,5 +58,11 @@ locals {
       schedule_expression = "cron(0 9 * * ? *)"
       state               = "ENABLED"
     }
+    create-analytics-db-csvs = {
+      task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
+      # Every day at 5am Eastern Time during DST. 6am during non-DST.
+      schedule_expression = "cron(0 10 * * ? *)"
+      state               = "ENABLED"
+    }
   }
 }

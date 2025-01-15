@@ -9,14 +9,13 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from slack_sdk import WebClient
 from sqlalchemy import text
 
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
-from analytics.integrations import etldb, slack
+from analytics.integrations import etldb
 from analytics.integrations.db import PostgresDbClient
 from analytics.integrations.extracts.load_opportunity_data import (
     extract_copy_opportunity_data,
@@ -24,10 +23,6 @@ from analytics.integrations.extracts.load_opportunity_data import (
 from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
-from analytics.metrics.base import BaseMetric, Unit
-from analytics.metrics.burndown import SprintBurndown
-from analytics.metrics.burnup import SprintBurnup
-from analytics.metrics.percent_complete import DeliverablePercentComplete
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +33,8 @@ ISSUE_FILE_ARG = typer.Option(help="Path to file with exported issue data")
 OUTPUT_FILE_ARG = typer.Option(help="Path to file where exported data will be saved")
 OUTPUT_DIR_ARG = typer.Option(help="Path to directory where output files will be saved")
 TMP_DIR_ARG = typer.Option(help="Path to directory where intermediate files will be saved")
-SPRINT_ARG = typer.Option(help="Name of the sprint for which we're calculating burndown")
-UNIT_ARG = typer.Option(help="Whether to calculate completion by 'points' or 'tickets'")
 OWNER_ARG = typer.Option(help="Name of the GitHub project owner, e.g. HHS")
 PROJECT_ARG = typer.Option(help="Number of the GitHub project, e.g. 13")
-SHOW_RESULTS_ARG = typer.Option(help="Display a chart of the results in a browser")
-POST_RESULTS_ARG = typer.Option(help="Post the results to slack")
-STATUS_ARG = typer.Option(
-    help="Deliverable status to include in report, can be passed multiple times",
-)
 EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to each imported row")
 # fmt: on
 
@@ -54,12 +42,10 @@ EFFECTIVE_DATE_ARG = typer.Option(help="YYYY-MM-DD effective date to apply to ea
 app = typer.Typer()
 # instantiate sub-commands for exporting data and calculating metrics
 export_app = typer.Typer()
-metrics_app = typer.Typer()
 import_app = typer.Typer()
 etl_app = typer.Typer()
 # add sub-commands to main entrypoint
 app.add_typer(export_app, name="export", help="Export data needed to calculate metrics")
-app.add_typer(metrics_app, name="calculate", help="Calculate key project metrics")
 app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
@@ -99,121 +85,6 @@ def export_github_data(
     config.output_file = output_file
     # Run ETL pipeline
     GitHubProjectETL(config).run()
-
-
-# ===========================================================
-# Calculate commands
-# ===========================================================
-
-
-@metrics_app.command(name="sprint_burndown")
-def calculate_sprint_burndown(
-    issue_file: Annotated[str, ISSUE_FILE_ARG],
-    sprint: Annotated[str, SPRINT_ARG],
-    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
-    *,  # makes the following args keyword only
-    show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
-    post_results: Annotated[bool, POST_RESULTS_ARG] = False,
-    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    owner: Annotated[str, OWNER_ARG] = "HHS",
-    project: Annotated[int, PROJECT_ARG] = 13,
-) -> None:
-    """Calculate the burndown for a particular sprint."""
-    # load the input data
-    sprint_data = GitHubIssues.from_json(issue_file)
-    # calculate burndown
-    burndown = SprintBurndown(
-        sprint_data,
-        sprint=sprint,
-        unit=unit,
-        project=project,
-        owner=owner,
-    )
-    show_and_or_post_results(
-        metric=burndown,
-        show_results=show_results,
-        post_results=post_results,
-        output_dir=output_dir,
-    )
-
-
-@metrics_app.command(name="sprint_burnup")
-def calculate_sprint_burnup(
-    issue_file: Annotated[str, ISSUE_FILE_ARG],
-    sprint: Annotated[str, SPRINT_ARG],
-    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
-    *,  # makes the following args keyword only
-    show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
-    post_results: Annotated[bool, POST_RESULTS_ARG] = False,
-    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-) -> None:
-    """Calculate the burnup of a particular sprint."""
-    # load the input data
-    sprint_data = GitHubIssues.from_json(issue_file)
-    # calculate burnup
-    burnup = SprintBurnup(sprint_data, sprint=sprint, unit=unit)
-    show_and_or_post_results(
-        metric=burnup,
-        show_results=show_results,
-        post_results=post_results,
-        output_dir=output_dir,
-    )
-
-
-@metrics_app.command(name="deliverable_percent_complete")
-def calculate_deliverable_percent_complete(
-    issue_file: Annotated[str, ISSUE_FILE_ARG],
-    # Typer uses the Unit enum to validate user inputs from the CLI
-    # but the default arg must be a string or the CLI will throw an error
-    unit: Annotated[Unit, UNIT_ARG] = Unit.points.value,  # type: ignore[assignment]
-    *,  # makes the following args keyword only
-    show_results: Annotated[bool, SHOW_RESULTS_ARG] = False,
-    post_results: Annotated[bool, POST_RESULTS_ARG] = False,
-    output_dir: Annotated[str, OUTPUT_DIR_ARG] = "data",
-    include_status: Annotated[list[str] | None, STATUS_ARG] = None,
-) -> None:
-    """Calculate percentage completion by deliverable."""
-    task_data = GitHubIssues.from_json(issue_file)
-    # calculate percent complete
-    metric = DeliverablePercentComplete(
-        dataset=task_data,
-        unit=unit,
-        statuses_to_include=include_status,
-    )
-    show_and_or_post_results(
-        metric=metric,
-        show_results=show_results,
-        post_results=post_results,
-        output_dir=output_dir,
-    )
-
-
-def show_and_or_post_results(
-    metric: BaseMetric,
-    *,  # makes the following args keyword only
-    show_results: bool,
-    post_results: bool,
-    output_dir: str,
-) -> None:
-    """Optionally show the results of a metric and/or post them to slack."""
-    # defer load of settings until this command is called
-    # this prevents an error if ANALYTICS_SLACK_BOT_TOKEN env var is unset
-    from config import get_db_settings
-
-    settings = get_db_settings()
-
-    # optionally display the burndown chart in the browser
-    if show_results:
-        metric.show_chart()
-        print("Slack message:\n")
-        print(metric.format_slack_message())
-    if post_results:
-        slackbot = slack.SlackBot(client=WebClient(token=settings.slack_bot_token))
-        metric.post_results_to_slack(
-            slackbot=slackbot,
-            channel_id=settings.reporting_channel_id,
-            output_dir=Path(output_dir),
-        )
 
 
 # ===========================================================

@@ -21,31 +21,49 @@ layout:
 
 The impact of Grants.gov's purposeful investments comes alive in our compelling photo library.
 
-Each image paints a vivid picture of how Grants.gov successfully empowers individuals and organizations worldwide and delivers real-world results. The photos highlight the multifaceted nature of the grants ecosystem – from students pursuing innovative research to community initiatives tackling the lack of clean water to organizations improving outcomes for seniors.
+Each image paints a vivid picture of how Grants.gov is successfully empowering individuals and organizations across the world and delivering real-world results. The photos highlight the multifaceted nature of the grants ecosystem – from students pursuing innovative research, to community initiatives tackling the lack of clean water, to organizations improving outcomes for seniors. Photos are organized around the following categories:
 
-<figure><img src="../../.gitbook/assets/Grants Photography Overview.png" alt=""><figcaption></figcaption></figure>
+* Agriculture
+* Arts
+* Business
+* Community
+* Family
+* HHS Grants Team
+* Infrastructure
+* Justice
+* Nature
+* Portraits
+* School
+* Science & Technology
+
+<figure><img src="../../.gitbook/assets/Simpler Grants Photography Overview.jpg" alt=""><figcaption></figcaption></figure>
 
 ## Color & Photography
 
 When choosing a photo, look for things in the image that closely match a color in our palette. This will be the most harmonious way of situating a photo in our brand identity. Make sure there’s enough contrast between the image and background color.
 
-<figure><img src="../../.gitbook/assets/Grants Color &#x26; Photography.png" alt=""><figcaption></figcaption></figure>
-
-## Examples
-
-Photography supports our communication needs in composition by pairing a clear and dynamic visual with text or other content. Align photos to the grid to maintain relationships with the surrounding elements. Below are some examples of photography in use.
-
-* _Coming Soon_
+<figure><img src="../../.gitbook/assets/Simpler Grants Color &#x26; Photography.jpg" alt=""><figcaption></figcaption></figure>
 
 ## Additional Don’ts
 
-<div align="left"><figure><img src="../../.gitbook/assets/Crop.png" alt=""><figcaption><p>Do not crop inappropriately</p></figcaption></figure></div>
+Don't crop inappropriately.
 
-<div align="left"><figure><img src="../../.gitbook/assets/Low res.png" alt=""><figcaption><p>Do not use low-resolution photos</p></figcaption></figure></div>
+<figure><img src="../../.gitbook/assets/simpler grants photos do not crop inappropriately.png" alt=""><figcaption></figcaption></figure>
 
-<div align="left"><figure><img src="../../.gitbook/assets/AI-generated imagery.png" alt=""><figcaption><p>Do not use AI-generated imagery</p></figcaption></figure></div>
 
-<div align="left"><figure><img src="../../.gitbook/assets/Off-topic imagery.png" alt=""><figcaption><p>Do not use distracting or off-topic imagery</p></figcaption></figure></div>
 
-\
-\
+Don't use low-res photos.
+
+<figure><img src="../../.gitbook/assets/simpler grants photos do not use low res photos.png" alt=""><figcaption></figcaption></figure>
+
+
+
+Don't use AI-generated imagery.
+
+<figure><img src="../../.gitbook/assets/simpler grants photos do not use AI-generated imagery.png" alt=""><figcaption></figcaption></figure>
+
+
+
+Don't use distracting or off-topic imagery.
+
+<figure><img src="../../.gitbook/assets/simpler grants photos do not use distracting or off-topic imagery.png" alt=""><figcaption></figcaption></figure>

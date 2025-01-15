@@ -24,7 +24,7 @@ type SocialLinkProps = {
 const SocialLink = ({ href, name, icon }: SocialLinkProps) => (
   <a className="usa-social-link" href={href} title={name} target="_blank">
     <USWDSIcon
-      className="usa-icon usa-social-link__icon"
+      className="usa-social-link__icon"
       height="40px"
       name={icon}
       aria-label={name}

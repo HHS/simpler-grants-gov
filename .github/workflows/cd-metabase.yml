@@ -28,6 +28,7 @@ jobs:
       matrix:
         envs: ${{ fromJSON(format('["{0}"]', inputs.environment))  }}
     with:
+      app_name: "metabase"
       version: ${{ inputs.image-tag }}
       environment: ${{ matrix.envs }}
 
