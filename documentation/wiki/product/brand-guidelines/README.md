@@ -59,4 +59,4 @@ We are:
 
 Major updates to the content of this page will be added here.
 
-<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>12/13/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+<table><thead><tr><th>Date</th><th width="246">Update</th><th>Notes</th></tr></thead><tbody><tr><td>12/13/2024</td><td>Initial Content</td><td>Updated with Initial content</td></tr><tr><td>01/13/2025</td><td>Content updates</td><td>Logo, Grid &#x26; Comp, and Photos &#x26; Illustrations pages: Updated with new brand colors, larger images, and clearer written guidelines.</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>

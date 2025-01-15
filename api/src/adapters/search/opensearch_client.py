@@ -72,6 +72,21 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
+    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
+        """
+        Create a pipeline
+        """
+        resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
+        if resp["acknowledged"]:
+            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
+        else:
+            status_code = resp["status"] or 500
+            error_message = resp["error"]["reason"] or "Internal Server Error"
+
+            raise Exception(
+                f"Failed to create pipeline {pipeline_name}: {error_message}. Status code: {status_code}"
+            )
+
     def bulk_upsert(
         self,
         index_name: str,

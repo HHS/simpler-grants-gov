@@ -66,12 +66,37 @@ class LoadOpportunitiesToIndex(Task):
         self.set_metrics({"index_name": self.index_name})
 
     def run_task(self) -> None:
+        logger.info("Creating multi-attachment pipeline")
+        self._create_multi_attachment_pipeline()
         if self.is_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
         else:
             logger.info("Running incremental load")
             self.incremental_updates_and_deletes()
+
+    def _create_multi_attachment_pipeline(self) -> None:
+        """
+        Create multi-attachment processor
+        """
+        pipeline = {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                    }
+                }
+            ],
+        }
+
+        self.search_client.put_pipeline(pipeline, "multi-attachment")
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
@@ -253,6 +278,7 @@ class LoadOpportunitiesToIndex(Task):
     )
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
+
         schema = OpportunityV1Schema()
         json_records = []
 

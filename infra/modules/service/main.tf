@@ -155,6 +155,11 @@ resource "aws_ecs_task_definition" "app" {
 
   # Reference https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html
   network_mode = "awsvpc"
+
+  depends_on = [
+    aws_iam_role_policy.task_executor,
+    aws_iam_role_policy_attachment.extra_policies,
+  ]
 }
 
 resource "aws_ecs_cluster" "cluster" {
