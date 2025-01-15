@@ -16,7 +16,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Subscribe.page_title"),
-    description: t("Index.meta_description"),
+    description: t("Subscribe.meta_description"),
   };
 
   return meta;
