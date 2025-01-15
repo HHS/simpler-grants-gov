@@ -75,9 +75,6 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
         logger.info("Processing opportunity attachment", extra=extra)
 
         if source_attachment.is_deleted:
-            # TODO - https://github.com/HHS/simpler-grants-gov/issues/3322
-            #        deletes are more complex because of s3
-            #        this just handles deleting the DB record at the moment
             self._handle_delete(
                 source=source_attachment,
                 target=target_attachment,
@@ -123,10 +120,6 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                 file_util.delete_file(prior_attachment_location)
 
             logger.info("Transforming and upserting opportunity attachment", extra=extra)
-
-            transformed_opportunity_attachment = transform_opportunity_attachment(
-                source_attachment, target_attachment
-            )
 
             if is_insert:
                 self.increment(
