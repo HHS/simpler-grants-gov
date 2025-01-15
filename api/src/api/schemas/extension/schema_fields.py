@@ -1,7 +1,6 @@
 import copy
 import enum
 import typing
-import uuid
 
 from apiflask import fields as original_fields
 from marshmallow import ValidationError
@@ -133,7 +132,12 @@ class UUID(original_fields.UUID, MixinField):
 
     def __init__(self, **kwargs: typing.Any):
         super().__init__(**kwargs)
-        self.metadata["example"] = uuid.uuid4()
+
+        # Set a default value for the UUID if none supplied
+        example_value = kwargs.get("metadata", {}).get(
+            "example", "123e4567-e89b-12d3-a456-426614174000"
+        )
+        self.metadata["example"] = example_value
 
 
 class Date(original_fields.Date, MixinField):
