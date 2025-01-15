@@ -276,9 +276,9 @@ class LoadOpportunitiesToIndex(Task):
         return opportunity_ids
 
     def filter_attachments(
-        self, attachments: List[OpportunityAttachment], filters: list
+        self, attachments: List[OpportunityAttachment]
     ) -> List[OpportunityAttachment]:
-        return [attachment for attachment in attachments if attachment.mime_type in filters]
+        return [attachment for attachment in attachments]
 
     def get_attachment_json_for_opportunity(
         self, opp_attachments: List[OpportunityAttachment]

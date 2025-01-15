@@ -124,7 +124,7 @@ class SearchClient:
                 "operation": "update",
             },
         )
-        self._client.bulk(index=index_name, body=bulk_operations, refresh=refresh)
+        self._client.bulk(index=index_name, body=bulk_operations, refresh=refresh, pipeline="multi-attachment")
 
     def bulk_delete(self, index_name: str, ids: Iterable[Any], *, refresh: bool = True) -> None:
         """

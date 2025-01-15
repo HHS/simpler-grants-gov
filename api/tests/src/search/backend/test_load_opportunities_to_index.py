@@ -174,14 +174,10 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         record = [d for d in resp.records if d.get("opportunity_id") == opportunity.opportunity_id]
         attachment = record[0]["attachments"][0]
-
         # assert correct attachment was uploaded
         assert attachment["filename"] == filename
-
-        # assert content of file was b64encoded
-        decoded = base64.b64decode(attachment["data"])
-
-        assert decoded.decode("utf-8") == content
+        # assert data was b64encoded
+        assert attachment["attachment"]["content"] == content # decoded b64encoded attachment
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
