@@ -180,7 +180,9 @@ def search_opportunities(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
 
-    response = search_client.search(index_alias, search_request)
+
+    response = search_client.search(index_alias, search_request, excludes=["attachments"])
+    logger.error(response.records[0])
 
     pagination_info = PaginationInfo(
         page_offset=search_params.pagination.page_offset,
