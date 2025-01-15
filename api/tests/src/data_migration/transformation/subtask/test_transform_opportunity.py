@@ -169,3 +169,4 @@ class TestTransformOpportunity(BaseTransformTestClass):
         # Verify all of the files were moved to the public bucket
         for attachment in attachments:
             assert attachment.file_location.startswith(s3_config.public_files_bucket_path) is True
+            assert file_util.file_exists(attachment.file_location) is True
