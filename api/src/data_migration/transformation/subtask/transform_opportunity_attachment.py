@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 class TransformOpportunityAttachmentConfig(PydanticBaseEnvConfig):
     # This is just for testing, we want to be able to only
     # import a few attachments when manually testing.
-    # TODO - rename
-    total_opportunities_to_process: int | None = None
+    total_attachments_to_process: int | None = None
 
 
 class TransformOpportunityAttachment(AbstractTransformSubTask):
@@ -45,8 +44,8 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             OpportunityAttachment,
             [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id],
             batch_size=(
-                self.attachment_config.total_opportunities_to_process
-                if self.attachment_config.total_opportunities_to_process
+                self.attachment_config.total_attachments_to_process
+                if self.attachment_config.total_attachments_to_process
                 else 1000
             ),
         )
@@ -66,8 +65,8 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                 # Note we increment first in case there are errors, want it to always increment
                 records_processed += 1
                 if (
-                    self.attachment_config.total_opportunities_to_process is not None
-                    and self.attachment_config.total_opportunities_to_process <= records_processed
+                    self.attachment_config.total_attachments_to_process is not None
+                    and self.attachment_config.total_attachments_to_process <= records_processed
                 ):
                     logger.info("Ending processing early due to configuration")
                     break
