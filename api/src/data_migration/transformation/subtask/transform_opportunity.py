@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Tuple, cast
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -100,7 +100,7 @@ class TransformOpportunity(AbstractTransformSubTask):
                 # then we need to move all of its attachments to the public bucket
                 # from the draft s3 bucket.
                 if was_draft and transformed_opportunity.is_draft is False:
-                    for attachment in transformed_opportunity.opportunity_attachments:
+                    for attachment in cast(Opportunity, target_opportunity).opportunity_attachments:
                         # Determine the new path
                         file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
                         s3_path = attachment_util.get_s3_attachment_path(
