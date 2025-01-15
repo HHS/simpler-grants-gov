@@ -1,7 +1,7 @@
 import base64
 import logging
 from enum import StrEnum
-from typing import Iterator, List, Sequence
+from typing import Iterator, Sequence
 
 import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
@@ -276,12 +276,12 @@ class LoadOpportunitiesToIndex(Task):
         return opportunity_ids
 
     def filter_attachments(
-        self, attachments: List[OpportunityAttachment]
-    ) -> List[OpportunityAttachment]:
+        self, attachments: list[OpportunityAttachment]
+    ) -> list[OpportunityAttachment]:
         return [attachment for attachment in attachments]
 
     def get_attachment_json_for_opportunity(
-        self, opp_attachments: List[OpportunityAttachment]
+        self, opp_attachments: list[OpportunityAttachment]
     ) -> list[dict]:
 
         attachments = []
@@ -342,6 +342,8 @@ class LoadOpportunitiesToIndex(Task):
 
             loaded_opportunity_ids.add(record.opportunity_id)
 
-        self.search_client.bulk_upsert(self.index_name, json_records, "opportunity_id", pipeline="multi-attachment")
+        self.search_client.bulk_upsert(
+            self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
+        )
 
         return loaded_opportunity_ids

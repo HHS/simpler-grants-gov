@@ -1,4 +1,3 @@
-import base64
 import itertools
 
 import pytest
@@ -177,7 +176,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         # assert correct attachment was uploaded
         assert attachment["filename"] == filename
         # assert data was b64encoded
-        assert attachment["attachment"]["content"] == content # decoded b64encoded attachment
+        assert attachment["attachment"]["content"] == content  # decoded b64encoded attachment
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
