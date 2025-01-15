@@ -32,7 +32,7 @@ def create_bucket_if_not_exists(s3_client: botocore.client.BaseClient, bucket_na
         logger.info("Creating S3 bucket %s", bucket_name)
         s3_client.create_bucket(Bucket=bucket_name)
     else:
-        logger.info("S3 bucket %s already exists - skipping", bucket_name)
+        logger.info("S3 bucket %s already exists - skipping creation", bucket_name)
 
 
 def setup_s3() -> None:
