@@ -20,6 +20,8 @@ Typography is one of the most, if not the most, important communication tools fo
 
 ## Primary Typeface
 
+### Public Sans
+
 Public Sans is a strong, neutral, open-source typeface for interfaces, text, and headings developed by USWDS. It is seen across US government websites and communications, giving Grants an additional source of credibility.
 
 <figure><img src="../../.gitbook/assets/Simpler Grants Public Sans Sample.png" alt=""><figcaption></figcaption></figure>
