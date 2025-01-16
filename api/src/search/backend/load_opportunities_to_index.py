@@ -28,8 +28,9 @@ from src.util.env_config import PydanticBaseEnvConfig
 logger = logging.getLogger(__name__)
 
 ALLOWED_ATTACHMENT_SUFFIXES = set(
-            ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
-        )
+    ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
+)
+
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     model_config = SettingsConfigDict(env_prefix="LOAD_OPP_SEARCH_")
