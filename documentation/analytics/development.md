@@ -37,7 +37,7 @@ This package runs in Docker by default, but can also be configured to run native
 4. Run `make test-audit` to confirm the application is running correctly.
 5. Proceed to next section to learn how to invoke commands 
 
-#### Run Natively (without Docker)
+#### Run Natively
 
 **Pre-requisites**
 
