@@ -14,13 +14,12 @@ The service does not listen on a port or run as a daemon. Instead, it must be tr
 
 In current practice, the service is triggered daily via an AWS Step Function (akin to a cron job) orchestrated with Terraform.
 
-## Local Development
+##  Developer Information
 
-The service may be installed and run locally, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
+The service is open-source and can be installed and run in a local development environment, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
 
-1. [Technical overview](../documentation/analytics/technical-overview.md)
-2. [Installation and development guide](../documentation/analytics/development.md)
-   - [Adding a new data source](../documentation/analytics/development.md#adding-a-new-dataset)
-3. [Writing and running tests](../documentation/analytics/testing.md)
-4. [Command line interface (CLI) user guide](../documentation/analytics/usage.md#using-the-command-line-interface)
+1. [Technical Overview](../documentation/analytics/technical-overview.md)
+2. [Developer Getting Started Guide](../documentation/analytics/development.md)
+3. [Writing and Running Tests](../documentation/analytics/testing.md)
+4. [CLI User Guide](../documentation/analytics/usage.md#using-the-command-line-interface)
 
