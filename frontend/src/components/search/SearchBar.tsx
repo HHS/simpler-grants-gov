@@ -59,13 +59,15 @@ export default function SearchBar({ query }: SearchBarProps) {
           ),
         })}
       </label>
+      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <input
           ref={inputRef}
           className={clsx("usa-input", "maxw-none", {
-            "border-secondary-darker": !!validationError,
-            "border-width-2px": !!validationError,
-            "border-solid": !!validationError,
+            "usa-input--error": !!validationError,
+            // "border-secondary-darker": !!validationError,
+            // "border-width-2px": !!validationError,
+            // "border-solid": !!validationError,
           })}
           id="query"
           type="search"
@@ -85,7 +87,6 @@ export default function SearchBar({ query }: SearchBarProps) {
           />
         </button>
       </div>
-      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
     </div>
   );
 }
