@@ -118,7 +118,7 @@ Individual services can be run through Docker, which can be useful in concert wi
 * **Localstack (local s3)**
    * Run `make init-localstack`
 * **Mock OAuth server**
-   * Run `make init-mock-oath2`
+   * Run `make init-mock-oauth2`
 
 ## Next steps
 
