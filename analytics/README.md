@@ -19,7 +19,7 @@ In current practice, the service is triggered daily via an AWS Step Function (ak
 The service is open-source and can be installed and run in a local development environment, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
 
 1. [Technical Overview](../documentation/analytics/technical-overview.md)
-2. [Developer Getting Started Guide](../documentation/analytics/development.md)
+2. [Getting Started Guide for Developers](../documentation/analytics/development.md)
 3. [Writing and Running Tests](../documentation/analytics/testing.md)
-4. [CLI User Guide](../documentation/analytics/usage.md#using-the-command-line-interface)
+4. [Usage Guide: Data Pipeline Service & CLI](../documentation/analytics/usage.md)
 
