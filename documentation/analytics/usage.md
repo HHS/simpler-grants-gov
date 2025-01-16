@@ -6,7 +6,7 @@ This package encapsulates a data-pipeline service and a CLI that can be used to 
 
 ## Pre-Requisites 
 
-This guide assumes the analytics package is installed in the reader's local development environment. For more information about how to install and run the analytics package, visit the [Developer Getting Started Guide](development.md).
+This guide assumes the analytics package is installed in the reader's local development environment. For more information about how to install and run the analytics package, visit the [Getting Started Guide for Developers](development.md).
 
 ## Data Pipeline Commands
 
