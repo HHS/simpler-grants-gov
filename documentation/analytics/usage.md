@@ -47,3 +47,6 @@ The same can be achieved with the more verbose and more flexible `poetry` comman
 ```bash
 poetry run analytics etl transform_and_load --issue-file ./data/test-etl-01.json --effective-date 2024-10-28 
 ```
+
+
+

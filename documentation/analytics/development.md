@@ -98,31 +98,28 @@ The package includes a CLI that can be used to discover the available commands. 
 3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/)
 4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint
 
-### How To Copy Table from grants-db to analytics-db
+### How to Extend Analytics DB Schema
 
-1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` and prefix file name with the next iteration number (ex: `0007`)
-2. Use your database management system(ex: `pg_admin`, `db_beaver`...) and right-click on the table you wish to copy and select `SQL scripts` then `request and copy original DDL` 
-3. Paste the DDL in your new migration file. Fix any formating issues, see previous migration files for reference
-4. Remove all reference to schema, roles, triggers and the use of `default now()` for timestamp columns
+1. Add a new migration file to [`integrations/etldb/migrations/versions/`](../../analytics/src/analytics/integrations/etldb/migrations/versions) and prefix file name with the next iteration number (ex: `0007_`)
+2. Add valid Postgres SQL to the new integration file
+3. Run the migration command: `make db-migrate` 
 
-    Example: 
-    ``` sql 
-    create table if not exists opi.opportunity
-    ( 
-     ...,
-     created_at              timestamp with time zone default now() not null,
-     ...
-    )
-    ```
-    should be
-    ``` sql 
-    CREATE TABLE IF NOT EXISTS opportunity;
-    ( 
-     ...,
-     created_at              timestamp with time zone not null
-     ...
-    )
-      ```
+### How To Check Code Quality
 
-5. Run migration via `make db-migrate` command
+Run linters:
 
+```bash
+make lint
+```
+
+Run unit tests:
+
+```bash
+make unit-test
+```
+
+Check code formatting without overwriting the source file(s):
+
+```bash
+make format-check
+```
