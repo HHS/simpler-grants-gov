@@ -27,6 +27,9 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
+ALLOWED_ATTACHMENT_SUFFIXES = set(
+            ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
+        )
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     model_config = SettingsConfigDict(env_prefix="LOAD_OPP_SEARCH_")
@@ -276,9 +279,6 @@ class LoadOpportunitiesToIndex(Task):
         return opportunity_ids
 
     def filter_attachment(self, attachment: OpportunityAttachment) -> bool:
-        ALLOWED_ATTACHMENT_SUFFIXES = set(
-            ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
-        )
         file_suffix = attachment.file_name.lower().split(".")[-1]
         return file_suffix in ALLOWED_ATTACHMENT_SUFFIXES
 
