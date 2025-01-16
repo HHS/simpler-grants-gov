@@ -1,4 +1,4 @@
-# Developer Getting Started Guide 
+# Getting Started Guide for Developers
 
 > [!NOTE]
 > All of the steps on this page should be run from the root of the [`analytics/`](../../analytics/) directory
