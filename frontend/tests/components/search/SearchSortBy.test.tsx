@@ -100,4 +100,28 @@ describe("SearchSortBy", () => {
 
     expect(updateTotalResultsMock).toHaveBeenCalledWith("10");
   });
+
+  it("handles order number sort option change", () => {
+    render(<SearchSortBy totalResults={"10"} queryTerm="test" sortby="" />);
+
+    let selectedOption = screen.getByRole("option", {
+      selected: true,
+    });
+
+    expect(selectedOption).not.toHaveTextContent(
+      "sortBy.options.opportunity_number_asc",
+    );
+
+    fireEvent.select(screen.getByRole("combobox"), {
+      target: { value: "opportunityNumberAsc" },
+    });
+
+    selectedOption = screen.getByRole("option", {
+      selected: true,
+    });
+
+    expect(selectedOption).toHaveTextContent(
+      "sortBy.options.opportunity_number_asc",
+    );
+  });
 });
