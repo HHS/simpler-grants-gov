@@ -159,7 +159,6 @@ export class ValidationError extends ApiRequestError {
 export class InternalServerError extends ApiRequestError {
   constructor(message: string, details?: FrontendErrorDetails) {
     super(message, "InternalServerError", 500, details);
-    details;
   }
 }
 

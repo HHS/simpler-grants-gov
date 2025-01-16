@@ -10,10 +10,17 @@ export const userFetcher: UserFetcher = async (url) => {
   try {
     response = await fetch(url, { cache: "no-store" });
   } catch (e) {
+    const error = e as Error;
     console.error("User session fetch network error", e);
-    throw new ApiRequestError(0); // Network error
+    // I think the idea is that we want a 0 status code here, but this doesn't accomplish that.
+    // What error do we actually want to throw?
+    throw new ApiRequestError(error.message, "NetworkError", 0); // Network error
   }
   if (response.status === 204) return undefined;
   if (response.ok) return (await response.json()) as UserSession;
-  throw new ApiRequestError(response.status);
+  throw new ApiRequestError(
+    "Unknown error fetching user",
+    undefined,
+    response.status,
+  );
 };

@@ -17,12 +17,15 @@ export default function SearchBar({ query }: SearchBarProps) {
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
-  const [validationError, setValidationError] = useState<String>();
+  const [validationError, setValidationError] = useState<string>();
 
   const handleSubmit = () => {
     if (queryTerm && queryTerm.length > 99) {
       setValidationError(t("tooLongError"));
       return;
+    }
+    if (validationError) {
+      setValidationError(undefined);
     }
     updateQueryParams("", "query", queryTerm, false);
   };

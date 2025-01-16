@@ -128,7 +128,7 @@ describe("sendRequest", () => {
     };
 
     await expect(sendErrorRequest()).rejects.toThrow(
-      new ApiRequestError("", "APIRequestError", 0, searchInputs),
+      new ApiRequestError("", "APIRequestError", 0, { searchInputs }),
     );
   });
 

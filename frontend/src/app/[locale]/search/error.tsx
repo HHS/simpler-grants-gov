@@ -76,10 +76,11 @@ export default function SearchError({ error }: ErrorProps) {
     console.error(error);
   }, [error]);
 
+  // note that the validation error will contain untranslated strings
   const ErrorAlert =
     parsedErrorData.details && parsedErrorData.type === "ValidationError" ? (
       <Alert type="error" heading={t("validationError")} headingLevel="h4">
-        {`Error in ${parsedErrorData.details.field}: ${parsedErrorData.details.message}`}
+        {`Error in ${parsedErrorData.details.field || "a search field"}: ${parsedErrorData.details.message || "adjust your search and try again"}`}
       </Alert>
     ) : (
       <ServerErrorAlert callToAction={t("generic_error_cta")} />
