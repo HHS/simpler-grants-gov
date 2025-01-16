@@ -1,9 +1,9 @@
-# Development 
+# Developer Getting Started Guide 
 
 > [!NOTE]
 > All of the steps on this page should be run from the root of the [`analytics/`](../../analytics/) directory
 
-## Developer Environment Setup 
+## Development Environment Setup 
 
 ### Docker vs Native
 
