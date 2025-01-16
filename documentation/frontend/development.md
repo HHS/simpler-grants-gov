@@ -177,7 +177,7 @@ The following features require additional local setup to use.
 
 ### Search and Opportunity Pages
 
-The `/search` and opportunity pages rely on the application API. The API endpoint and authenticaion token are defined in `.env.development` and can be overwritten in an `.env.ocal` file.
+The `/search` and opportunity pages rely on the application API. The API endpoint and authentication token are defined in `.env.development` and can be overwritten in an `.env.local` file.
 
 Update the `API_URL` can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. This requires the correct `API_AUTH_TOKEN` variable to be set correctly.
 
