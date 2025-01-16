@@ -34,7 +34,7 @@ This package runs in Docker by default, but can also be configured to run native
       - admin:public_key
       - project
 3. Add `GH_TOKEN=...` to your environment variables, e.g. in .zshrc or .bashrc
-4. Run `make test-audit` to confirm the application is running correctly.
+4. Run `make test-audit` to confirm the application is running correctly
 5. Proceed to next section to learn how to invoke commands 
 
 #### Run Natively
@@ -61,7 +61,8 @@ This package runs in Docker by default, but can also be configured to run native
       - admin:public_key
       - project
 4. Add `GH_TOKEN=...` to your environment variables, e.g. in .zshrc or .bashrc
-5. Run `make test-audit` to confirm the application is running correctly.
+5. Run `make test-audit` to confirm the application is running correctly
+6. Proceed to next section to learn how to invoke commands 
 
 ## Invoke Commands on the Service
 
@@ -84,25 +85,25 @@ The package includes a CLI that can be used to discover the available commands. 
 
 ### How To Add New Dataset
 
-1. Create a new python file in `src/analytics/datasets/`.
-2. In that file, create a new class that inherits from the `BaseDataset`.
-3. Store the names of key columns as either class or instance attributes.
-4. If you need to combine multiple source files (or other datasets) to produce this dataset, consider creating a class method that can be used to instantiate this dataset from those sources.
-5. Create **at least** one unit test for each method that is implemented with the new class.
+1. Create a new python file in `src/analytics/datasets/`
+2. In that file, create a new class that inherits from the `BaseDataset`
+3. Store the names of key columns as either class or instance attributes
+4. If you need to combine multiple source files (or other datasets) to produce this dataset, consider creating a class method that can be used to instantiate this dataset from those sources
+5. Create **at least** one unit test for each method that is implemented with the new class
 
 ### How To Add New CLI Entrypoint
 
 1. Add a new function to [`cli.py`](../../analytics/src/analytics/cli.py)
-2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/). 
-3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/).
-4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint.
+2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/) 
+3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/)
+4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint
 
 ### How To Copy Table from grants-db to analytics-db
 
-1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` and prefix file name with the next iteration number (ex: `0007`).
+1. Add a new sql migration file in `src/analytics/integrations/etldb/migrations/versions` and prefix file name with the next iteration number (ex: `0007`)
 2. Use your database management system(ex: `pg_admin`, `db_beaver`...) and right-click on the table you wish to copy and select `SQL scripts` then `request and copy original DDL` 
-3. Paste the DDL in your new migration file. Fix any formating issues, see previous migration files for reference.
-4. Remove all reference to schema, roles, triggers and the use of `default now()` for timestamp columns.
+3. Paste the DDL in your new migration file. Fix any formating issues, see previous migration files for reference
+4. Remove all reference to schema, roles, triggers and the use of `default now()` for timestamp columns
 
     Example: 
     ``` sql 
