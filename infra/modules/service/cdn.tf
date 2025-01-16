@@ -119,6 +119,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   depends_on = [
     aws_s3_bucket_public_access_block.cdn[0],
+    aws_s3_bucket_acl.cdn[0],
     aws_s3_bucket_policy.cdn[0],
     aws_s3_bucket.cdn[0],
   ]
