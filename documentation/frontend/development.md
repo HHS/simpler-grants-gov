@@ -181,7 +181,7 @@ The `/search` and opportunity pages rely on the application API. The API endpoin
 
 Update the `API_URL` can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. This requires the correct `API_AUTH_TOKEN` variable to be set correctly.
 
-To connect to the development version of the API, run `make init && db-seed-local && populate-search-opportunities` in the `/api` folder.
+To start a local development version of the API, run `make init && db-seed-local && populate-search-opportunities` in the `/api` folder.
 
 See [documentation/api/development.md](../api/development.md) for more details.
 
