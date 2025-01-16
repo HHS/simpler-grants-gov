@@ -74,42 +74,42 @@ Arial is installed on your computer.
 
 ## Don’ts
 
-Don't apply effects to type
+Don't apply effects to type.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont apply effects to type.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't center align type
+Don't center align type.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont center align type.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't justify text
+Don't justify text.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont justify text.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't outline the type
+Don't outline the type.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont outline type.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't right align type
+Don't right align type.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont right alight type.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't set type in all caps
+Don't set type in all caps.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type in all caps.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't set type in all lowercase
+Don't set type in all lowercase.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type in all lower case.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't set type too small
+Don't set type too small.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont set type too small.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't use low contrast on type
+Don't use low contrast on type.
 
 <div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont use low contrast on type.png" alt=""><figcaption></figcaption></figure></div>
 
-Don't use unapproved typefaces
+Don't use unapproved typefaces.
 
-<div align="left"><figure><img src="../../.gitbook/assets/simpler grants dont use unapproved typefaces.png" alt=""><figcaption></figcaption></figure></div>
+<div align="left" data-full-width="false"><figure><img src="../../.gitbook/assets/simpler grants dont use unapproved typefaces.png" alt=""><figcaption></figcaption></figure></div>
