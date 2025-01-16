@@ -40,4 +40,17 @@ describe("BadRequestError (as an example of other error types)", () => {
 
     expect(errorData.message).toEqual("Unknown Error");
   });
+
+  it("passes along additional error details", () => {
+    const error = new BadRequestError("", {
+      field: "fieldName",
+      message: "a more detailed message",
+      type: "a subtype",
+    });
+    const errorData = JSON.parse(error.message) as ParsedError;
+
+    expect(errorData.details?.field).toEqual("fieldName");
+    expect(errorData.details?.message).toEqual("a more detailed message");
+    expect(errorData.details?.type).toEqual("a subtype");
+  });
 });

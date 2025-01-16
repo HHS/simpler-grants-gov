@@ -146,7 +146,7 @@ function handleNotOkResponse(
   }
 }
 
-const throwError = (
+export const throwError = (
   response: APIResponse,
   url: string,
   searchInputs?: QueryParamData,

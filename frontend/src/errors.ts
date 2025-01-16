@@ -1,5 +1,7 @@
 /**
  * @file Custom Error classes. Useful as a way to see all potential errors that our system may throw/catch
+ * Note that the errors defined here rely on stringifying JSON data into the Error's message parameter
+ * That data will need to be parsed back out into JSON when reading the error
  */
 
 import { QueryParamData } from "src/types/search/searchRequestTypes";
