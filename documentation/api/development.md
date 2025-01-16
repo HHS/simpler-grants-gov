@@ -21,7 +21,7 @@ This stands up the following services:
 * Flask API (http://localhost:8080)
 * Postgres database
 * OpenSearch node
-* OpenSearchdashboard (http://localhost:5601)
+* OpenSearch Dashboard (http://localhost:5601)
 * localstack
 * mock oauth server (http://localhost:5001)
 
