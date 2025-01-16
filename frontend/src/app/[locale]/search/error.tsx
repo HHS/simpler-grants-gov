@@ -1,12 +1,14 @@
 "use client";
 
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
+import { FrontendErrorDetails } from "src/errors";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 import { Breakpoints, ErrorProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import { Alert } from "@trussworks/react-uswds";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 import SearchBar from "src/components/search/SearchBar";
@@ -18,6 +20,7 @@ export interface ParsedError {
   searchInputs: ServerSideSearchParams;
   status: number;
   type: string;
+  details?: FrontendErrorDetails;
 }
 
 function isValidJSON(str: string) {
@@ -73,6 +76,15 @@ export default function SearchError({ error }: ErrorProps) {
     console.error(error);
   }, [error]);
 
+  const ErrorAlert =
+    parsedErrorData.details && parsedErrorData.type === "ValidationError" ? (
+      <Alert type="error" heading={t("validationError")} headingLevel="h4">
+        {`Error in ${parsedErrorData.details.field}: ${parsedErrorData.details.message}`}
+      </Alert>
+    ) : (
+      <ServerErrorAlert callToAction={t("generic_error_cta")} />
+    );
+
   return (
     <QueryProvider>
       <div className="grid-container">
@@ -95,9 +107,7 @@ export default function SearchError({ error }: ErrorProps) {
               />
             </ContentDisplayToggle>
           </div>
-          <div className="tablet:grid-col-8">
-            <ServerErrorAlert callToAction={t("generic_error_cta")} />
-          </div>
+          <div className="tablet:grid-col-8">{ErrorAlert}</div>
         </div>
       </div>
     </QueryProvider>

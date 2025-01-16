@@ -1,3 +1,4 @@
+import { FrontendErrorDetails } from "src/errors";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 export enum Breakpoints {

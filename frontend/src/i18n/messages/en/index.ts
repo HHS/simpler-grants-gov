@@ -619,6 +619,7 @@ export const messages = {
       hideFilters: "Hide Filters",
     },
     generic_error_cta: "Please try your search again.",
+    validationError: "Search Validation Error",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",

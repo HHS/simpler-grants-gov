@@ -126,6 +126,9 @@ function fetchErrorToNetworkError(
     : new NetworkError(error);
 }
 
+// note that this will pass along filter inputs in order to maintain the state
+// of the page when relaying an error, but anything passed in the body of the request,
+// such as keyword search query will not be included
 function handleNotOkResponse(
   response: APIResponse,
   url: string,
@@ -155,32 +158,33 @@ const throwError = (
     searchInputs,
   );
 
-  // Include just firstError for now, we can expand this
-  // If we need ValidationErrors to be more expanded
-  const error = firstError ? { message, firstError } : { message };
+  const details = {
+    searchInputs,
+    ...(firstError || {}),
+  };
   switch (status_code) {
     case 400:
-      throw new BadRequestError(error, searchInputs);
+      throw new BadRequestError(message, details);
     case 401:
-      throw new UnauthorizedError(error, searchInputs);
+      throw new UnauthorizedError(message, details);
     case 403:
-      throw new ForbiddenError(error, searchInputs);
+      throw new ForbiddenError(message, details);
     case 404:
-      throw new NotFoundError(error, searchInputs);
+      throw new NotFoundError(message, details);
     case 422:
-      throw new ValidationError(error, searchInputs);
+      throw new ValidationError(message, details);
     case 408:
-      throw new RequestTimeoutError(error, searchInputs);
+      throw new RequestTimeoutError(message, details);
     case 500:
-      throw new InternalServerError(error, searchInputs);
+      throw new InternalServerError(message, details);
     case 503:
-      throw new ServiceUnavailableError(error, searchInputs);
+      throw new ServiceUnavailableError(message, details);
     default:
       throw new ApiRequestError(
-        error,
+        message,
         "APIRequestError",
         status_code,
-        searchInputs,
+        details,
       );
   }
 };
