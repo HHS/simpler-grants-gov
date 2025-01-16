@@ -104,22 +104,14 @@ The package includes a CLI that can be used to discover the available commands. 
 2. Add valid Postgres SQL to the new integration file
 3. Run the migration command: `make db-migrate` 
 
-### How To Check Code Quality
-
-Run linters:
+### How To Run Linters
 
 ```bash
 make lint
 ```
 
-Run unit tests:
+### How To Run Unit Tests
 
 ```bash
 make unit-test
-```
-
-Check code formatting without overwriting the source file(s):
-
-```bash
-make format-check
 ```
