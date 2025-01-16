@@ -1,20 +1,31 @@
-## Command Line Interface
+# Usage Guide: Data Pipeline Service & CLI 
 
-The package includes a CLI that can be used to discover and execute data-pipeline commands. The following sections describe common use cases and overall usage instructions.
+## Purpose
 
-The following sections assume the analytics package is installed in your local development environment. For more information about how to install and run the analytics package, visit the [Developer Getting Started Guide](development.md).
+This package encapsulates a data-pipeline service and a CLI that can be used to discover and execute data-pipeline commands. This usage guide describes overall usage instructions and some common use cases. 
 
-## Summary of Available Commands
+## Pre-Requisites 
 
+This guide assumes the analytics package is installed in the reader's local development environment. For more information about how to install and run the analytics package, visit the [Developer Getting Started Guide](development.md).
+
+## Data Pipeline Commands
+
+### Using `make`
+
+Currently available data-pipeline commands are defined in the project [`Makefile`](../../analytics/Makefile). Commands can be invoked from the command line, as in the following examples:
+
+- `make install` - Verify that dependencies are installed 
 - `make db-migrate` - Initialize or update analytics database schema 
 - `make gh-data-export` - Export issue and sprint data from GitHub to a local flatfile 
 - `make gh-transform-and-load` - Transform GitHub project data and load it into the analytics database
 
-## Usage
+### Using the CLI
 
-### Launch CLI
+The CLI can be used to discover and interactively execute data-pipeline commands.  To run the CLI, type the following into the command line to view a list of available commands:
 
-To run the CLI, type `poetry run analytics --help` at the command line, and the CLI should respond with a list of available commands.
+```bash
+poetry run analytics --help 
+```
 
 ![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
 
@@ -25,6 +36,8 @@ poetry run analytics export gh_issue_data --help
 ```
 
 ![Screenshot of passing the --help flag to a specific command](../../analytics/static/screenshot-command-help.png)
+
+## Common Use Cases
 
 ### Export GitHub Data
 
