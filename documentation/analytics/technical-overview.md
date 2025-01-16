@@ -11,11 +11,11 @@ The analytics package is written in Python. It marshalls data using pandas, expo
 
 ## Integrations
 
-In order to obtain input data for our pipeline, the analytics package is integrated with GitHub. Integrations of third-party tools, such as GitHub, are encapsulated and maintained as individual modules in the `src/analytics/integrations` sub-directory.
+In order to obtain input data for our pipeline, the analytics package is integrated with GitHub. Integrations of third-party tools, such as GitHub, are encapsulated and maintained as individual modules in [analytics/integrations](../../analytics/src/analytics/integrations/).
 
 ### GitHub
 
-We use the GitHub GraphQL api to export data from GitHub. 
+We use the GitHub GraphQL API to export data from GitHub. 
 
 - [GitHub integration](../../analytics/src/analytics/integrations/github/)
 
