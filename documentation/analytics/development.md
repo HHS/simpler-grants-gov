@@ -93,7 +93,7 @@ The package includes a CLI that can be used to discover the available commands. 
 ### How To Add New CLI Entrypoint
 
 1. Add a new function to [`cli.py`](../../analytics/src/analytics/cli.py)
-2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/). For example if you want to calculate sprint burndown with the entrypoint `analytics calculate sprint_burndown`, you'd use the decorator: `metrics_app.command(name="sprint_burndown")`
+2. Wrap this function with a [sub-command `typer` decorator](https://typer.tiangolo.com/tutorial/subcommands/single-file/). 
 3. If the function accepts parameters, [annotate those parameters](https://typer.tiangolo.com/tutorial/options/name/).
 4. Add *at least* one unit test for the CLI entrypoint, optionally mocking potential side effects of calling the entrypoint.
 
