@@ -1,11 +1,12 @@
 "use client";
 
+import clsx from "clsx";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 
 import { useTranslations } from "next-intl";
-import { useContext, useEffect, useRef } from "react";
-import { Icon } from "@trussworks/react-uswds";
+import { useContext, useEffect, useRef, useState } from "react";
+import { ErrorMessage, Icon } from "@trussworks/react-uswds";
 
 interface SearchBarProps {
   query: string | null | undefined;
@@ -16,8 +17,13 @@ export default function SearchBar({ query }: SearchBarProps) {
   const { queryTerm, updateQueryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
+  const [validationError, setValidationError] = useState<String>();
 
   const handleSubmit = () => {
+    if (queryTerm && queryTerm.length > 99) {
+      setValidationError(t("tooLongError"));
+      return;
+    }
     updateQueryParams("", "query", queryTerm, false);
   };
 
@@ -53,7 +59,11 @@ export default function SearchBar({ query }: SearchBarProps) {
       <div className="usa-search usa-search--big" role="search">
         <input
           ref={inputRef}
-          className="usa-input maxw-none"
+          className={clsx("usa-input", "maxw-none", {
+            "border-secondary-darker": !!validationError,
+            "border-width-2px": !!validationError,
+            "border-solid": !!validationError,
+          })}
           id="query"
           type="search"
           name="query"
@@ -72,6 +82,7 @@ export default function SearchBar({ query }: SearchBarProps) {
           />
         </button>
       </div>
+      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
     </div>
   );
 }
