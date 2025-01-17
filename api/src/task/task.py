@@ -90,9 +90,11 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
         return self.__class__.__name__
 
     def update_job(self, job_status: JobStatus, metrics: dict[str, Any] | None = None) -> None:
+        if self.job is None:
+            raise ValueError("Job is not initialized")
+
         self.job.job_status = job_status
-        if metrics is not None:
-            self.job.metrics = metrics
+        self.job.metrics = metrics
         self.db_session.commit()
 
     @abc.abstractmethod

@@ -141,7 +141,6 @@ class LoadOpportunitiesToIndex(Task):
             .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
         )
 
-        print(last_successful_job.created_at)
         # Add timestamp filter if we have a last successful job
         if last_successful_job:
             query = query.where(
