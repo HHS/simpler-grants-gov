@@ -48,12 +48,13 @@ def test_extract_metadata_get_default_dates(
 
 
 def test_extract_metadata_get_with_custom_dates(
-    client, api_auth_token, enable_factory_create, db_session
+    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket
 ):
     """Test with explicitly provided date range"""
     ExtractMetadataFactory.create_batch(
         2,
         created_at=datetime.now() - timedelta(days=10),
+        file_path=f"s3://{mock_s3_bucket}/path/to/file.txt",
     )
 
     payload = {
@@ -77,7 +78,7 @@ def test_extract_metadata_get_with_custom_dates(
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 2
-    assert data[0]["download_path"].startswith("http://localhost:4566/bucket/key")
+    assert "/path/to/file.txt" in data[0]["download_path"]
 
 
 def test_extract_metadata_get_with_type_filter(

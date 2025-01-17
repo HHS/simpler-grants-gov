@@ -3,50 +3,18 @@ import os
 import pathlib
 import random
 
-import boto3
 import click
-from botocore.exceptions import ClientError
 
 import src.adapters.db as db
 import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
-from src.adapters.aws import S3Config, get_s3_client
 from src.adapters.db import PostgresDBClient
 from src.db.models.opportunity_models import Opportunity
-from src.util import file_util
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 
 logger = logging.getLogger(__name__)
-
-TESTS_FOLDER = pathlib.Path(__file__).parent.resolve()
-
-
-def _upload_opportunity_attachments_s3():
-    s3_config = S3Config()
-    s3_client = get_s3_client(
-        s3_config, boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
-    )
-    test_folder_path = TESTS_FOLDER / "opportunity_attachment_test_files"
-
-    for root, _, files in os.walk(test_folder_path):
-        for file in files:
-            file_path = os.path.join(root, file)
-            object_name = os.path.relpath(file_path, test_folder_path)
-
-            try:
-                s3_client.upload_file(
-                    file_path,
-                    file_util.get_s3_bucket(s3_config.public_files_bucket_path),
-                    object_name,
-                )
-                logger.info("Successfully uploaded files")
-            except ClientError as e:
-                logger.error(
-                    "Error uploading to s3: %s",
-                    extra={"object_name": object_name, "file_path": file_path, "error": e},
-                )
 
 
 def _add_history(
@@ -90,7 +58,9 @@ def _build_opportunities(db_session: db.Session, iterations: int, include_histor
         forecasted_opps = factories.OpportunityFactory.create_batch(
             size=5, is_forecasted_summary=True
         )
-        posted_opps = factories.OpportunityFactory.create_batch(size=5, is_posted_summary=True)
+        posted_opps = factories.OpportunityFactory.create_batch(
+            size=5, is_posted_summary=True, has_attachments=True
+        )
         closed_opps = factories.OpportunityFactory.create_batch(size=5, is_closed_summary=True)
         archived_non_forecast_opps = factories.OpportunityFactory.create_batch(
             size=5, is_archived_non_forecast_summary=True
@@ -163,8 +133,6 @@ def seed_local_db(iterations: int, include_history: bool) -> None:
     with src.logging.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
-
-        _upload_opportunity_attachments_s3()
 
         db_client = PostgresDBClient()
 

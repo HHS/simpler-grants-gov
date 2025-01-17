@@ -365,11 +365,7 @@ class OpportunityFactory(BaseFactory):
         factory_related_name="opportunity",
     )
 
-    opportunity_attachments = factory.RelatedFactoryList(
-        "tests.src.db.models.factories.OpportunityAttachmentFactory",
-        factory_related_name="opportunity",
-        size=lambda: random.randint(1, 2),
-    )
+    opportunity_attachments = []  # Use has_attachments=True to add attachments
 
     class Params:
         # These are common scenarios we might want for an opportunity.
@@ -409,6 +405,14 @@ class OpportunityFactory(BaseFactory):
         timestamps_in_past = factory.Trait(
             created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
             updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
+
+        has_attachments = factory.Trait(
+            opportunity_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OpportunityAttachmentFactory",
+                factory_related_name="opportunity",
+                size=lambda: random.randint(1, 2),
+            )
         )
 
 

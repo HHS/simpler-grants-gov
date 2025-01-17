@@ -71,7 +71,7 @@ def test_get_opportunity_with_attachment_200(
     client, api_auth_token, enable_factory_create, db_session
 ):
     # Create an opportunity with an attachment
-    opportunity = OpportunityFactory.create()
+    opportunity = OpportunityFactory.create(has_attachments=True)
     db_session.commit()
 
     # Make the GET request
