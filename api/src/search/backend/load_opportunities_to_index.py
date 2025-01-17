@@ -3,7 +3,6 @@ import logging
 from enum import StrEnum
 from typing import Iterator, Sequence
 
-import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -24,10 +23,15 @@ from src.db.models.opportunity_models import (
 )
 from src.db.models.task_models import JobTable
 from src.task.task import Task
+from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+ALLOWED_ATTACHMENT_SUFFIXES = set(
+    ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
+)
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -99,6 +103,7 @@ class LoadOpportunitiesToIndex(Task):
                                 "field": "_ingest._value.data",
                             }
                         },
+                        "ignore_missing": True,
                     }
                 }
             ],
@@ -297,10 +302,9 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
-    def filter_attachments(
-        self, attachments: list[OpportunityAttachment]
-    ) -> list[OpportunityAttachment]:
-        return [attachment for attachment in attachments]
+    def filter_attachment(self, attachment: OpportunityAttachment) -> bool:
+        file_suffix = attachment.file_name.lower().split(".")[-1]
+        return file_suffix in ALLOWED_ATTACHMENT_SUFFIXES
 
     def get_attachment_json_for_opportunity(
         self, opp_attachments: list[OpportunityAttachment]
@@ -308,17 +312,18 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            with smart_open.open(
-                att.file_location,
-                "rb",
-            ) as file:
-                file_content = file.read()
-                attachments.append(
-                    {
-                        "filename": att.file_name,
-                        "data": base64.b64encode(file_content).decode("utf-8"),
-                    }
-                )
+            if self.filter_attachment(att):
+                with file_util.open_stream(
+                    att.file_location,
+                    "rb",
+                ) as file:
+                    file_content = file.read()
+                    attachments.append(
+                        {
+                            "filename": att.file_name,
+                            "data": base64.b64encode(file_content).decode("utf-8"),
+                        }
+                    )
 
         return attachments
 

@@ -151,18 +151,27 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         opportunity_index_alias,
         search_client,
     ):
-        filename = "test_file_1.txt"
-        file_path = f"s3://{mock_s3_bucket}/{filename}"
+        filename_1 = "test_file_1.txt"
+        file_path_1 = f"s3://{mock_s3_bucket}/{filename_1}"
         content = "I am a file"
-        with file_util.open_stream(file_path, "w") as outfile:
+
+        with file_util.open_stream(file_path_1, "w") as outfile:
             outfile.write(content)
+
+        filename_2 = "test_file_2.css"
+        file_path_2 = f"s3://{mock_s3_bucket}/{filename_2}"
 
         opportunity = OpportunityFactory.create(opportunity_attachments=[])
         OpportunityAttachmentFactory.create(
-            mime_type="text/plain",
             opportunity=opportunity,
-            file_location=file_path,
-            file_name=filename,
+            file_location=file_path_1,
+            file_name=filename_1,
+        )
+
+        OpportunityAttachmentFactory.create(
+            opportunity=opportunity,
+            file_location=file_path_2,
+            file_name=filename_2,
         )
 
         load_opportunities_to_index.index_name = (
@@ -174,11 +183,14 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         resp = search_client.search(opportunity_index_alias, {"size": 100})
 
         record = [d for d in resp.records if d.get("opportunity_id") == opportunity.opportunity_id]
-        attachment = record[0]["attachments"][0]
+        attachments = record[0]["attachments"]
+
+        # assert only one (allowed) opportunity attachment was uploaded
+        assert len(attachments) == 1
         # assert correct attachment was uploaded
-        assert attachment["filename"] == filename
+        assert attachments[0]["filename"] == filename_1
         # assert data was b64encoded
-        assert attachment["attachment"]["content"] == content  # decoded b64encoded attachment
+        assert attachments[0]["attachment"]["content"] == content  # decoded b64encoded attachment
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
