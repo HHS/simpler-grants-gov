@@ -379,23 +379,18 @@ button.usa-pagination__button.usa-button {
   }
 }
 
-@include at-media("desktop") {
-  .usa-nav__submenu {
-    right: 0;
-  }
-  .usa-nav__primary {
-    .mobile-nav-dropdown-uncollapsed-override {
-      button:hover {
-        background-color: white;
-      }
-    }
-  }
-}
-
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
   .mobile-nav-dropdown-uncollapsed-override {
+    @include at-media("desktop") {
+      button:hover {
+        background-color: white;
+      }
+      .usa-nav__submenu {
+        right: 0;
+      }
+    }
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
     }
