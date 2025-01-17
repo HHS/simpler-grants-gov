@@ -47,7 +47,11 @@ export default function SearchBar({ query }: SearchBarProps) {
   }, [searchParams, updateQueryParams]);
 
   return (
-    <div className="margin-top-5 margin-bottom-2 usa-form-group--error">
+    <div
+      className={clsx("margin-top-5", "margin-bottom-2", {
+        "usa-form-group--error": !!validationError,
+      })}
+    >
       <label
         htmlFor="query"
         className="font-sans-lg display-block margin-bottom-2"
