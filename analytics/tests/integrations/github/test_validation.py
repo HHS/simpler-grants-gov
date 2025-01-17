@@ -167,8 +167,6 @@ class TestIssueContent:
         assert issue.title == "Test Issue"
         assert issue.url == "https://github.com/test/repo/issues/1"
         assert issue.closed is True
-        assert isinstance(issue.created_at, datetime)
-        assert isinstance(issue.closed_at, datetime)
         assert issue.parent.title == "Test Parent"
         assert issue.issue_type.name == "Bug"
 
@@ -264,6 +262,7 @@ class TestProjectFields:
         assert iteration.title == "Sprint 1"
         assert iteration.start_date == "2024-01-01"
         assert iteration.duration == 14
+        assert iteration.end_date == "2024-01-15"
 
     def test_iteration_value_with_empty_data(self) -> None:
         """Test validating an iteration value with empty data."""
@@ -272,6 +271,7 @@ class TestProjectFields:
         assert iteration.title is None
         assert iteration.start_date is None
         assert iteration.duration is None
+        assert iteration.end_date is None
 
     def test_single_select_value_fully_populated(self) -> None:
         """Test validating a fully populated single select value."""

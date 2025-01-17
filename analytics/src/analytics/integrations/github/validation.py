@@ -1,12 +1,17 @@
 """Pydantic schemas for validating GitHub API responses."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 
 def safe_default_factory(data: dict, keys_to_replace: list[str]) -> dict:
-    """Replace keys that are explicitly set to None with an empty dict for default_factory."""
+    """
+    Replace keys that are explicitly set to None with an empty dict for default_factory.
+
+    We need to do this because if a key is present, but its value is None or null,
+    it will raise a Pydantic ValidationError rather than using the default_factory.
+    """
     for key in keys_to_replace:
         if data.get(key) is None:
             data[key] = {}
@@ -37,8 +42,8 @@ class IssueContent(BaseModel):
     title: str
     url: str
     closed: bool
-    created_at: datetime = Field(alias="createdAt")
-    closed_at: datetime | None = Field(alias="closedAt", default=None)
+    created_at: str = Field(alias="createdAt")
+    closed_at: str | None = Field(alias="closedAt", default=None)
     issue_type: IssueType = Field(alias="type", default_factory=IssueType)
     parent: IssueParent = Field(default_factory=IssueParent)
 
@@ -61,6 +66,16 @@ class IterationValue(BaseModel):
     title: str | None = None
     start_date: str | None = Field(alias="startDate", default=None)
     duration: int | None = None
+
+    @computed_field
+    def end_date(self) -> str | None:
+        """Calculate the end date of the iteration."""
+        if not self.start_date or not self.duration:
+            return None
+
+        start = datetime.strptime(self.start_date, "%Y-%m-%d")  # noqa: DTZ007
+        end = start + timedelta(days=self.duration)
+        return end.strftime("%Y-%m-%d")
 
 
 class SingleSelectValue(BaseModel):
@@ -118,3 +133,22 @@ class SprintItem(ProjectItem):
         """Replace None with default_factory instances."""
         # Replace None with default_factory instances
         return safe_default_factory(values, ["sprint", "points", "status"])
+
+
+class CombinedProjectItem(ProjectItem):
+    """Schema that combines fields from both RoadmapItem and SprintItem."""
+
+    # Sprint fields
+    sprint: IterationValue = Field(default_factory=IterationValue)
+    points: NumberValue = Field(default_factory=NumberValue)
+    # Roadmap fields
+    quad: IterationValue = Field(default_factory=IterationValue)
+    pillar: SingleSelectValue = Field(default_factory=SingleSelectValue)
+
+    @model_validator(mode="before")
+    def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
+        """Replace None with default_factory instances."""
+        return safe_default_factory(
+            values,
+            ["sprint", "points", "quad", "pillar", "status"],
+        )
