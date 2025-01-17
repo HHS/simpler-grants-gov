@@ -6,31 +6,17 @@ we disable writing to disk in https://github.com/HHS/simpler-grants-gov/issues/3
 """
 
 import json
-from datetime import datetime, timedelta
+import logging
 from pathlib import Path
-from typing import Any
+
+from pydantic import ValidationError
 
 from analytics.integrations.github.client import GitHubGraphqlClient
+from analytics.integrations.github.validation import ProjectItem
+
+logger = logging.getLogger(__name__)
 
 PARENT_DIR = Path(__file__).resolve().parent
-
-
-def safe_pluck(data: dict, keys: str) -> Any:  # noqa: ANN401
-    """
-    Safely pluck a value from a nested dictionary using a string of dot-separated keys.
-
-    Example:
-        data = {"content": {"parent": {"url": "example.com"}}}
-        safe_pluck(data, "content.parent.url") # returns "example.com"
-        safe_pluck(data, "content.missing") # returns None
-
-    """
-    current = data
-    for key in keys.split("."):
-        if not isinstance(current, dict) or key not in current:
-            return None
-        current = current[key]
-    return current
 
 
 def transform_project_data(
@@ -40,54 +26,53 @@ def transform_project_data(
     excluded_types: tuple = (),  # By default include everything
 ) -> list[dict]:
     """Pluck and reformat relevant fields for each item in the raw data."""
-    return [
-        {
-            # project metadata
-            "project_owner": owner,
-            "project_number": project,
-            # issue metadata
-            "issue_title": safe_pluck(item, "content.title"),
-            "issue_url": safe_pluck(item, "content.url"),
-            "issue_parent": safe_pluck(item, "content.parent.url"),
-            "issue_type": safe_pluck(item, "content.issueType.name"),
-            "issue_status": safe_pluck(item, "status.name"),
-            "issue_is_closed": safe_pluck(item, "content.closed"),
-            "issue_opened_at": safe_pluck(item, "content.createdAt"),
-            "issue_closed_at": safe_pluck(item, "content.closedAt"),
-            "issue_points": safe_pluck(item, "points.number"),
-            # sprint metadata
-            "sprint_id": safe_pluck(item, "sprint.iterationId"),
-            "sprint_name": safe_pluck(item, "sprint.title"),
-            "sprint_start": safe_pluck(item, "sprint.startDate"),
-            "sprint_length": safe_pluck(item, "sprint.duration"),
-            "sprint_end": compute_end_date(
-                safe_pluck(item, "sprint.startDate"),
-                safe_pluck(item, "sprint.duration"),
-            ),
-            # roadmap metadata
-            "deliverable_pillar": safe_pluck(item, "pillar.name"),
-            "quad_id": safe_pluck(item, "quad.id"),
-            "quad_name": safe_pluck(item, "quad.name"),
-            "quad_start": safe_pluck(item, "quad.startDate"),
-            "quad_length": safe_pluck(item, "quad.duration"),
-            "quad_end": compute_end_date(
-                safe_pluck(item, "quad.startDate"),
-                safe_pluck(item, "quad.duration"),
-            ),
-        }
-        for item in raw_data
-        if safe_pluck(item, "content.issueType.name") not in excluded_types
-    ]
+    transformed_data = []
 
+    for i, item in enumerate(raw_data):
+        try:
+            # Validate and parse the raw item
+            validated_item = ProjectItem.model_validate(item)
 
-def compute_end_date(start_date: str | None, duration: int | None) -> str | None:
-    """Compute the end date based on start date and duration."""
-    if not start_date or not duration:
-        return None
+            # Skip excluded issue types
+            if validated_item.content.issue_type.name in excluded_types:
+                continue
 
-    start = datetime.strptime(start_date, "%Y-%m-%d")  # noqa: DTZ007
-    end = start + timedelta(days=duration)
-    return end.strftime("%Y-%m-%d")
+            # Transform into flattened format
+            transformed = {
+                # project metadata
+                "project_owner": owner,
+                "project_number": project,
+                # issue metadata
+                "issue_title": validated_item.content.title,
+                "issue_url": validated_item.content.url,
+                "issue_parent": validated_item.content.parent.url,
+                "issue_type": validated_item.content.issue_type.name,
+                "issue_status": validated_item.status.name,
+                "issue_is_closed": validated_item.content.closed,
+                "issue_opened_at": validated_item.content.created_at,
+                "issue_closed_at": validated_item.content.closed_at,
+                "issue_points": validated_item.points.number,
+                # sprint metadata
+                "sprint_id": validated_item.sprint.iteration_id,
+                "sprint_name": validated_item.sprint.title,
+                "sprint_start": validated_item.sprint.start_date,
+                "sprint_length": validated_item.sprint.duration,
+                "sprint_end": validated_item.sprint.end_date,
+                # roadmap metadata
+                "deliverable_pillar": validated_item.pillar.name,
+                "quad_id": validated_item.quad.iteration_id,
+                "quad_name": validated_item.quad.title,
+                "quad_start": validated_item.quad.start_date,
+                "quad_length": validated_item.quad.duration,
+                "quad_end": validated_item.quad.end_date,
+            }
+            transformed_data.append(transformed)
+        except ValidationError as err:
+            logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
+            logger.debug("Error: %s", err)
+            continue
+
+    return transformed_data
 
 
 def export_sprint_data(
