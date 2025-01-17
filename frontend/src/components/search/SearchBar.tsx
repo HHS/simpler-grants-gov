@@ -69,9 +69,6 @@ export default function SearchBar({ query }: SearchBarProps) {
           ref={inputRef}
           className={clsx("usa-input", "maxw-none", {
             "usa-input--error": !!validationError,
-            // "border-secondary-darker": !!validationError,
-            // "border-width-2px": !!validationError,
-            // "border-solid": !!validationError,
           })}
           id="query"
           type="search"
