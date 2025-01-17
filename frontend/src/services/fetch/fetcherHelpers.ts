@@ -40,6 +40,7 @@ export function getDefaultHeaders(): HeadersDict {
 
 /**
  * Send a request and handle the response
+ * @param queryParamData: note that this is only used in error handling in order to help restore original page state
  */
 export async function sendRequest<ResponseType extends APIResponse>(
   url: string,

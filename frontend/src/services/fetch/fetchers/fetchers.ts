@@ -33,7 +33,7 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
   return async function (
     options: {
       subPath?: string;
-      queryParamData?: QueryParamData;
+      queryParamData?: QueryParamData; // only used for error handling purposes
       body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
     } = {},
