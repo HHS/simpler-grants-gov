@@ -3,6 +3,7 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
+  fetchAgenciesEndpoint,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
   userLogoutEndpoint,
@@ -102,3 +103,5 @@ export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
 export const userSavedOpportunity = (type: "GET" | "POST" | "DELETE") =>
   requesterForEndpoint(userSavedOpportunityEndpoint(type));
+
+export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);

@@ -114,13 +114,13 @@ export default function SearchError({ error, reset }: ErrorProps) {
               hideCallToAction={t("filterDisplayToggle.hideFilters")}
               breakpoint={Breakpoints.TABLET}
             >
-              <SearchFilters
+              {/* <SearchFilters
                 opportunityStatus={status}
                 eligibility={eligibility}
                 category={category}
                 fundingInstrument={fundingInstrument}
                 agency={agency}
-              />
+              /> */}
             </ContentDisplayToggle>
           </div>
           <div className="tablet:grid-col-8">{ErrorAlert}</div>
