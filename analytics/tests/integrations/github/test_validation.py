@@ -1,16 +1,12 @@
 """Test the validation schemas for GitHub API responses."""
 
-from datetime import datetime
-
 import pytest
 from analytics.integrations.github.validation import (
     IssueContent,
     IterationValue,
     NumberValue,
     ProjectItem,
-    RoadmapItem,
     SingleSelectValue,
-    SprintItem,
 )
 from pydantic import ValidationError
 
@@ -52,85 +48,50 @@ VALID_SINGLE_SELECT = {
 
 
 class TestProjectItems:
-    """Test cases for top-level project item schemas."""
+    """Test cases for project item schemas."""
 
-    def test_project_item_fully_populated(self) -> None:
+    def test_fully_populated(self) -> None:
         """Test validating a fully populated project item."""
-        data = {
-            "content": VALID_ISSUE_CONTENT,
-            "status": VALID_SINGLE_SELECT,
-        }
-        item = ProjectItem.model_validate(data)
-        assert item.content.title == "Test Issue"
-        assert item.status.name == "In Progress"
-
-    def test_project_item_minimal(self) -> None:
-        """Test validating a project item with only required fields."""
-        data = {
-            "content": VALID_ISSUE_CONTENT,
-        }
-        item = ProjectItem.model_validate(data)
-        assert item.status.name is None
-        assert item.status.option_id is None
-
-
-class TestRoadmapItems:
-    """Test cases for roadmap item schemas."""
-
-    def test_fully_populated(self) -> None:
-        """Test validating a fully populated roadmap item."""
-        data = {
-            "content": VALID_ISSUE_CONTENT,
-            "status": VALID_SINGLE_SELECT,
-            "quad": VALID_ITERATION_VALUE,
-            "pillar": VALID_SINGLE_SELECT,
-        }
-        item = RoadmapItem.model_validate(data)
-        assert item.quad.title == "Sprint 1"
-        assert item.pillar.name == "In Progress"
-
-    def test_with_nulls(self) -> None:
-        """Test validating a roadmap item with null values."""
-        data = {
-            "content": {
-                "title": "Test Issue",
-                "url": "https://github.com/test/repo/issues/1",
-                "closed": True,
-                "createdAt": "2024-01-01T00:00:00Z",
-                "closedAt": "2024-01-02T00:00:00Z",
-                "type": None,
-                "parent": None,
-            },
-            "quad": None,
-            "pillar": None,
-            "status": None,
-        }
-        item = RoadmapItem.model_validate(data)
-        assert item.quad.title is None
-        assert item.quad.iteration_id is None
-        assert item.pillar.name is None
-        assert item.pillar.option_id is None
-        assert item.status.name is None
-        assert item.status.option_id is None
-
-
-class TestSprintItem:
-    """Test cases for sprint item schemas."""
-
-    def test_fully_populated(self) -> None:
-        """Test validating a fully populated sprint item."""
         data = {
             "content": VALID_ISSUE_CONTENT,
             "status": VALID_SINGLE_SELECT,
             "sprint": VALID_ITERATION_VALUE,
             "points": {"number": 5},
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
         }
-        item = SprintItem.model_validate(data)
+        item = ProjectItem.model_validate(data)
+        # Check issue content
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
+        # Check sprint fields
         assert item.sprint.title == "Sprint 1"
         assert item.points.number == 5
+        # Check roadmap fields
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
+
+    def test_minimal(self) -> None:
+        """Test validating a project item with only required fields."""
+        data = {
+            "content": VALID_ISSUE_CONTENT,
+        }
+        item = ProjectItem.model_validate(data)
+        # Check status defaults
+        assert item.status.name is None
+        assert item.status.option_id is None
+        # Check sprint defaults
+        assert item.sprint.title is None
+        assert item.sprint.iteration_id is None
+        assert item.points.number is None
+        # Check roadmap defaults
+        assert item.quad.title is None
+        assert item.quad.iteration_id is None
+        assert item.pillar.name is None
+        assert item.pillar.option_id is None
 
     def test_with_nulls(self) -> None:
-        """Test validating a sprint item with null values."""
+        """Test validating a project item with null values explicitly set."""
         data = {
             "content": {
                 "title": "Test Issue",
@@ -141,16 +102,25 @@ class TestSprintItem:
                 "type": None,
                 "parent": None,
             },
+            "status": None,
             "sprint": None,
             "points": None,
-            "status": None,
+            "quad": None,
+            "pillar": None,
         }
-        item = SprintItem(**data)
+        item = ProjectItem.model_validate(data)
+        # Check status defaults
+        assert item.status.name is None
+        assert item.status.option_id is None
+        # Check sprint defaults
         assert item.sprint.title is None
         assert item.sprint.iteration_id is None
         assert item.points.number is None
-        assert item.status.name is None
-        assert item.status.option_id is None
+        # Check roadmap defaults
+        assert item.quad.title is None
+        assert item.quad.iteration_id is None
+        assert item.pillar.name is None
+        assert item.pillar.option_id is None
 
 
 # #############################################

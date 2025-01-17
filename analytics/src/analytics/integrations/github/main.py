@@ -12,7 +12,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from analytics.integrations.github.client import GitHubGraphqlClient
-from analytics.integrations.github.validation import CombinedProjectItem
+from analytics.integrations.github.validation import ProjectItem
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def transform_project_data(
     for i, item in enumerate(raw_data):
         try:
             # Validate and parse the raw item
-            validated_item = CombinedProjectItem.model_validate(item)
+            validated_item = ProjectItem.model_validate(item)
 
             # Skip excluded issue types
             if validated_item.content.issue_type.name in excluded_types:

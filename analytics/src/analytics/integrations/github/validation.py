@@ -97,47 +97,11 @@ class NumberValue(BaseModel):
 
 
 class ProjectItem(BaseModel):
-    """Schema for a project board item."""
-
-    content: IssueContent
-    status: SingleSelectValue = Field(default_factory=SingleSelectValue)
-
-    @model_validator(mode="before")
-    def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
-        """Replace None with default_factory instances."""
-        # Replace None with default_factory instances
-        return safe_default_factory(values, ["status"])
-
-
-class RoadmapItem(ProjectItem):
-    """Schema for an item on the roadmap board."""
-
-    quad: IterationValue = Field(default_factory=IterationValue)
-    pillar: SingleSelectValue = Field(default_factory=SingleSelectValue)
-
-    @model_validator(mode="before")
-    def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
-        """Replace None with default_factory instances."""
-        # Replace None with default_factory instances
-        return safe_default_factory(values, ["quad", "pillar", "status"])
-
-
-class SprintItem(ProjectItem):
-    """Schema for an item on the sprint board."""
-
-    sprint: IterationValue = Field(default_factory=IterationValue)
-    points: NumberValue = Field(default_factory=NumberValue)
-
-    @model_validator(mode="before")
-    def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
-        """Replace None with default_factory instances."""
-        # Replace None with default_factory instances
-        return safe_default_factory(values, ["sprint", "points", "status"])
-
-
-class CombinedProjectItem(ProjectItem):
     """Schema that combines fields from both RoadmapItem and SprintItem."""
 
+    # Issue fields
+    content: IssueContent
+    status: SingleSelectValue = Field(default_factory=SingleSelectValue)
     # Sprint fields
     sprint: IterationValue = Field(default_factory=IterationValue)
     points: NumberValue = Field(default_factory=NumberValue)
