@@ -26,7 +26,6 @@ import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
-from src.adapters.aws import get_s3_client
 from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
@@ -277,8 +276,6 @@ factory.Faker.add_provider(CustomProvider)
 
 _db_session: Optional[db.Session] = None
 
-_s3_client: botocore.client.BaseClient | None = None
-
 
 def get_db_session() -> db.Session:
     # _db_session is only set in the pytest fixture `enable_factory_create`
@@ -298,14 +295,6 @@ def get_db_session() -> db.Session:
 
     return _db_session
 
-
-def _get_s3_client() -> botocore.client.BaseClient:
-    global _s3_client
-    if _s3_client is None:
-        _s3_client = get_s3_client()
-
-    return _s3_client
-
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
 # see https://docs.sqlalchemy.org/en/20/orm/contextual.html
@@ -317,25 +306,12 @@ class Generators:
     UuidObj = factory.Faker("uuid4", cast_to=None)
     PhoneNumber = factory.Sequence(lambda n: f"123-456-{n:04}")
 
-
-class OverrideOptions(factory.alchemy.SQLAlchemyOptions):
-
-    def _build_default_options(self):
-        return super()._build_default_options() + [
-            factory.base.OptionDefault('s3_client_func', None, inherit=True)
-        ]
-
 class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
-    #_options_class = OverrideOptions
 
     class Meta:
         abstract = True
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
-
-        #s3_client_func = get_s3_client
-
-
 
 
 class OpportunityFactory(BaseFactory):
@@ -778,7 +754,12 @@ class OpportunityAttachmentFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
 
-    file_location = factory.LazyAttribute(lambda o: f"s3://test-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1,max=100_000_000)}/{o.file_name}")
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+    # NOTE: If you want the file to properly get written to s3 for tests/locally
+    # make sure the bucket actually exists
+    file_location = factory.LazyAttribute(lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1,max=100_000_000)}/{o.file_name}")
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
     file_description = factory.Faker("sentence")
@@ -792,12 +773,22 @@ class OpportunityAttachmentFactory(BaseFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
         attachment = super()._create(model_class, *args, **kwargs)
 
-        # TODO - some sort of error handling that tells a user why it isn't working
-        # TODO - needs to have pulled in the s3 bucket stuff (could also just do that in enable_create..)
-        with file_util.open_stream(attachment.file_location, "w") as my_file:
-            my_file.write(fake.sentence(25))
+        try:
+            with file_util.open_stream(attachment.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your attachment to {attachment.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
 
         return attachment
 
@@ -1031,9 +1022,9 @@ class TsynopsisAttachmentFactory(BaseFactory):
     att_type: factory.Faker("att_type")
     mime_type = factory.Faker("mime_type")
     link_url = factory.Faker("relevant_url")
-    file_name = factory.Faker("file_name")
+    file_name = factory.Faker("file_name", category="text")
     file_desc = factory.Faker("sentence")
-    file_lob = b"Test attachment"
+    file_lob = factory.LazyFunction(lambda: fake.sentence(25).encode())
     file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
     create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     created_date = factory.LazyAttribute(

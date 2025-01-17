@@ -3,7 +3,6 @@ import logging
 from enum import StrEnum
 from typing import Iterator, Sequence
 
-import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -22,6 +21,7 @@ from src.db.models.opportunity_models import (
     OpportunitySearchIndexQueue,
 )
 from src.task.task import Task
+from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -286,7 +286,7 @@ class LoadOpportunitiesToIndex(Task):
 
         attachments = []
         for att in opp_attachments:
-            with smart_open.open(
+            with file_util.open_stream(
                 att.file_location,
                 "rb",
             ) as file:
