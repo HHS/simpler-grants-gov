@@ -5,8 +5,6 @@ from datetime import datetime
 import pytest
 from analytics.integrations.github.validation import (
     IssueContent,
-    IssueParent,
-    IssueType,
     IterationValue,
     NumberValue,
     ProjectItem,
@@ -16,123 +14,165 @@ from analytics.integrations.github.validation import (
 )
 from pydantic import ValidationError
 
+# #############################################
+# Test data constants
+# #############################################
 
-@pytest.fixture
-def valid_issue_content() -> dict:
-    """Fixture for a fully populated issue content."""
-    return {
-        "title": "Test Issue",
-        "url": "https://github.com/test/repo/issues/1",
-        "closed": True,
-        "createdAt": "2024-01-01T00:00:00Z",
-        "closedAt": "2024-01-02T00:00:00Z",
-    }
+VALID_ISSUE_CONTENT = {
+    "title": "Test Issue",
+    "url": "https://github.com/test/repo/issues/1",
+    "closed": True,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "closedAt": "2024-01-02T00:00:00Z",
+    "parent": {
+        "title": "Test Parent",
+        "url": "https://github.com/test/repo/issues/2",
+    },
+    "type": {
+        "name": "Bug",
+    },
+}
+
+VALID_ITERATION_VALUE = {
+    "iterationId": "123",
+    "title": "Sprint 1",
+    "startDate": "2024-01-01",
+    "duration": 14,
+}
+
+VALID_SINGLE_SELECT = {
+    "optionId": "456",
+    "name": "In Progress",
+}
 
 
-@pytest.fixture
-def valid_iteration_value() -> dict:
-    """Fixture for a fully populated iteration value."""
-    return {
-        "iterationId": "123",
-        "title": "Sprint 1",
-        "startDate": "2024-01-01",
-        "duration": 14,
-    }
-
-
-@pytest.fixture
-def valid_single_select() -> dict:
-    """Fixture for a fully populated single select value."""
-    return {
-        "optionId": "456",
-        "name": "In Progress",
-    }
+# #############################################
+# Project items tests
+# #############################################
 
 
 class TestProjectItems:
     """Test cases for top-level project item schemas."""
 
-    def test_project_item_fully_populated(
-        self,
-        valid_issue_content: dict,
-        valid_single_select: dict,
-    ) -> None:
+    def test_project_item_fully_populated(self) -> None:
         """Test validating a fully populated project item."""
         data = {
-            "content": valid_issue_content,
-            "status": valid_single_select,
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
         }
         item = ProjectItem.model_validate(data)
-        assert isinstance(item.content, IssueContent)
-        assert isinstance(item.status, SingleSelectValue)
+        assert item.content.title == "Test Issue"
+        assert item.status.name == "In Progress"
 
-    def test_project_item_minimal(self, valid_issue_content: dict) -> None:
+    def test_project_item_minimal(self) -> None:
         """Test validating a project item with only required fields."""
         data = {
-            "content": valid_issue_content,
+            "content": VALID_ISSUE_CONTENT,
         }
         item = ProjectItem.model_validate(data)
-        assert item.status is None
+        assert item.status.name is None
+        assert item.status.option_id is None
 
-    def test_roadmap_item_fully_populated(
-        self,
-        valid_issue_content: dict,
-        valid_single_select: dict,
-        valid_iteration_value: dict,
-    ) -> None:
+
+class TestRoadmapItems:
+    """Test cases for roadmap item schemas."""
+
+    def test_fully_populated(self) -> None:
         """Test validating a fully populated roadmap item."""
         data = {
-            "content": valid_issue_content,
-            "status": valid_single_select,
-            "quad": valid_iteration_value,
-            "pillar": valid_single_select,
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
         }
         item = RoadmapItem.model_validate(data)
-        assert isinstance(item.quad, IterationValue)
-        assert isinstance(item.pillar, SingleSelectValue)
+        assert item.quad.title == "Sprint 1"
+        assert item.pillar.name == "In Progress"
 
-    def test_sprint_item_fully_populated(
-        self,
-        valid_issue_content: dict,
-        valid_single_select: dict,
-        valid_iteration_value: dict,
-    ) -> None:
+    def test_with_nulls(self) -> None:
+        """Test validating a roadmap item with null values."""
+        data = {
+            "content": {
+                "title": "Test Issue",
+                "url": "https://github.com/test/repo/issues/1",
+                "closed": True,
+                "createdAt": "2024-01-01T00:00:00Z",
+                "closedAt": "2024-01-02T00:00:00Z",
+                "type": None,
+                "parent": None,
+            },
+            "quad": None,
+            "pillar": None,
+            "status": None,
+        }
+        item = RoadmapItem.model_validate(data)
+        assert item.quad.title is None
+        assert item.quad.iteration_id is None
+        assert item.pillar.name is None
+        assert item.pillar.option_id is None
+        assert item.status.name is None
+        assert item.status.option_id is None
+
+
+class TestSprintItem:
+    """Test cases for sprint item schemas."""
+
+    def test_fully_populated(self) -> None:
         """Test validating a fully populated sprint item."""
         data = {
-            "content": valid_issue_content,
-            "status": valid_single_select,
-            "sprint": valid_iteration_value,
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
             "points": {"number": 5},
         }
         item = SprintItem.model_validate(data)
-        assert isinstance(item.sprint, IterationValue)
-        assert isinstance(item.points, NumberValue)
+        assert item.sprint.title == "Sprint 1"
         assert item.points.number == 5
 
-    def test_sprint_item_minimal(self, valid_issue_content: dict) -> None:
-        """Test validating a sprint item with only required fields."""
+    def test_with_nulls(self) -> None:
+        """Test validating a sprint item with null values."""
         data = {
-            "content": valid_issue_content,
+            "content": {
+                "title": "Test Issue",
+                "url": "https://github.com/test/repo/issues/1",
+                "closed": True,
+                "createdAt": "2024-01-01T00:00:00Z",
+                "closedAt": "2024-01-02T00:00:00Z",
+                "type": None,
+                "parent": None,
+            },
+            "sprint": None,
+            "points": None,
+            "status": None,
         }
-        item = SprintItem.model_validate(data)
-        assert item.sprint is None
-        assert item.points is None
-        assert item.status is None
+        item = SprintItem(**data)
+        assert item.sprint.title is None
+        assert item.sprint.iteration_id is None
+        assert item.points.number is None
+        assert item.status.name is None
+        assert item.status.option_id is None
+
+
+# #############################################
+# Issue content tests
+# #############################################
 
 
 class TestIssueContent:
     """Test cases for issue content schemas."""
 
-    def test_issue_content_fully_populated(self, valid_issue_content: dict) -> None:
+    def test_fully_populated(self) -> None:
         """Test validating a fully populated issue content."""
-        issue = IssueContent.model_validate(valid_issue_content)
+        issue = IssueContent.model_validate(VALID_ISSUE_CONTENT)
         assert issue.title == "Test Issue"
         assert issue.url == "https://github.com/test/repo/issues/1"
         assert issue.closed is True
         assert isinstance(issue.created_at, datetime)
         assert isinstance(issue.closed_at, datetime)
+        assert issue.parent.title == "Test Parent"
+        assert issue.issue_type.name == "Bug"
 
-    def test_issue_content_minimal(self) -> None:
+    def test_minimal(self) -> None:
         """Test validating an issue content with only required fields."""
         minimal_content = {
             "title": "Test Issue",
@@ -142,6 +182,27 @@ class TestIssueContent:
         }
         issue = IssueContent.model_validate(minimal_content)
         assert issue.closed_at is None
+        assert issue.parent.title is None
+        assert issue.parent.url is None
+        assert issue.issue_type.name is None
+
+    def test_with_nulls(self) -> None:
+        """Test validating an issue content with null values."""
+        data = {
+            "title": "Test Issue",
+            "url": "https://github.com/test/repo/issues/1",
+            "closed": True,
+            "createdAt": "2024-01-01T00:00:00Z",
+            "closedAt": None,
+            "type": None,
+            "parent": None,
+        }
+        issue = IssueContent.model_validate(data)
+        assert issue.title == "Test Issue"
+        assert issue.closed_at is None
+        assert issue.issue_type.name is None
+        assert issue.parent.title is None
+        assert issue.parent.url is None
 
     def test_missing_title_raises_error(self) -> None:
         """Test that validation fails when title is missing."""
@@ -187,29 +248,18 @@ class TestIssueContent:
                 },
             )
 
-    def test_issue_parent_with_empty_data(self) -> None:
-        """Test validating issue parent with empty data."""
-        parent = IssueParent.model_validate({})
-        assert parent.title is None
-        assert parent.url is None
 
-    def test_issue_type_with_name(self) -> None:
-        """Test validating issue type with a name value."""
-        type_with_value = IssueType.model_validate({"name": "Bug"})
-        assert type_with_value.name == "Bug"
-
-    def test_issue_type_with_empty_data(self) -> None:
-        """Test validating issue type with empty data."""
-        type_without_value = IssueType.model_validate({})
-        assert type_without_value.name is None
+# #############################################
+# Project field tests
+# #############################################
 
 
 class TestProjectFields:
     """Test cases for project field schemas."""
 
-    def test_iteration_value_fully_populated(self, valid_iteration_value: dict) -> None:
+    def test_iteration_value_fully_populated(self) -> None:
         """Test validating a fully populated iteration value."""
-        iteration = IterationValue.model_validate(valid_iteration_value)
+        iteration = IterationValue.model_validate(VALID_ITERATION_VALUE)
         assert iteration.iteration_id == "123"
         assert iteration.title == "Sprint 1"
         assert iteration.start_date == "2024-01-01"
@@ -223,12 +273,9 @@ class TestProjectFields:
         assert iteration.start_date is None
         assert iteration.duration is None
 
-    def test_single_select_value_fully_populated(
-        self,
-        valid_single_select: dict,
-    ) -> None:
+    def test_single_select_value_fully_populated(self) -> None:
         """Test validating a fully populated single select value."""
-        select = SingleSelectValue.model_validate(valid_single_select)
+        select = SingleSelectValue.model_validate(VALID_SINGLE_SELECT)
         assert select.option_id == "456"
         assert select.name == "In Progress"
 
