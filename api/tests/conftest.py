@@ -361,6 +361,8 @@ def mock_s3_bucket(mock_s3_bucket_resource):
 
 @pytest.fixture
 def other_mock_s3_bucket_resource(mock_s3):
+    # This second bucket exists for tests where we want there to be multiple buckets
+    # and/or test behavior when moving files between buckets.
     bucket = mock_s3.Bucket("local-mock-draft-bucket")
     bucket.create()
     yield bucket

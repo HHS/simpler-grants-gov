@@ -1,6 +1,4 @@
 import logging
-import os
-import pathlib
 import random
 
 import click
