@@ -372,7 +372,7 @@ def mock_s3(reset_aws_env_vars):
 
 @pytest.fixture
 def mock_s3_bucket_resource(mock_s3):
-    bucket = mock_s3.Bucket("test_bucket")
+    bucket = mock_s3.Bucket("test-bucket")
     bucket.create()
     yield bucket
 

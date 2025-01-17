@@ -3,6 +3,7 @@ from pathlib import PosixPath
 from typing import Any, Optional, Tuple
 from urllib.parse import urlparse
 
+import botocore.client
 import smart_open
 from botocore.config import Config
 
@@ -47,13 +48,17 @@ def join(*parts: str) -> str:
 
 def open_stream(path: str, mode: str = "r", encoding: str | None = None) -> Any:
     if is_s3_path(path):
+        s3_client = get_s3_client()
+
         so_config = Config(
             max_pool_connections=10,
             connect_timeout=60,
             read_timeout=60,
             retries={"max_attempts": 10},
         )
-        so_transport_params = {"client_kwargs": {"config": so_config}}
+        so_transport_params = {"client_kwargs": {"config": so_config}, "client": s3_client}
+
+
 
         return smart_open.open(path, mode, transport_params=so_transport_params, encoding=encoding)
     else:
