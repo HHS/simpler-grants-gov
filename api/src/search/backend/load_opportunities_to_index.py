@@ -97,6 +97,7 @@ class LoadOpportunitiesToIndex(Task):
                                 "field": "_ingest._value.data",
                             }
                         },
+                        "ignore_missing": True
                     }
                 }
             ],
@@ -336,11 +337,6 @@ class LoadOpportunitiesToIndex(Task):
                 json_record["attachments"] = self.get_attachment_json_for_opportunity(
                     record.opportunity_attachments
                 )
-            else:
-                # TODO: This shouldn't be needed, but with the pipeline enabled, if we don't
-                # include any attachments, then the opportunities don't get added.
-                # Need to further investigate the pipeline logic to see if we can reconfigure it.
-                json_record["attachments"] = []
 
             json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
