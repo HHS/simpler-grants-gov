@@ -4,7 +4,6 @@ import pytest
 from sqlalchemy import select
 
 from src.db.models.opportunity_models import OpportunityChangeAudit
-from src.db.models.task_models import JobTable
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,

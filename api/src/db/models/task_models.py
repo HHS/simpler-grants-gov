@@ -1,5 +1,4 @@
 import uuid
-from enum import StrEnum
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID

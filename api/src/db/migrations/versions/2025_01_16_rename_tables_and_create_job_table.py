@@ -117,7 +117,7 @@ def upgrade():
         text(
             """
             INSERT INTO api.opportunity_change_audit (opportunity_id, last_loaded_at, created_at, updated_at)
-            SELECT 
+            SELECT
                 opportunity_id,
                 updated_at as last_loaded_at,
                 CURRENT_TIMESTAMP as created_at,
