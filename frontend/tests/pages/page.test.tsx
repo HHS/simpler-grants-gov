@@ -8,6 +8,13 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+}));
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
   setRequestLocale: identity,

@@ -13,6 +13,13 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: identity,
 }));
 
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  use: jest.fn(() => ({
+    locale: "en",
+  })),
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
   useMessages: () => mockMessages,

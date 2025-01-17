@@ -41,7 +41,7 @@ describe("WithFeatureFlag", () => {
     expect(OriginalComponent).toHaveBeenCalledTimes(1);
 
     // not sure what the second arg represents here but let's forget about it for now
-    expect(OriginalComponent).toHaveBeenCalledWith({ searchParams }, {});
+    expect(OriginalComponent).toHaveBeenCalledWith({ searchParams }, undefined);
   });
   it("calls onEnabled during wrapped component render when feature flag is enabled", () => {
     enableFeature = true;

@@ -2,7 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import Search from "src/app/[locale]/search/page";
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import {
+  useTranslationsMock,
+} from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -54,6 +56,7 @@ jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
   cache: (fn: unknown) => fn,
+  use: jest.fn((e:{ [key: string]: string }) => (e)),
 }));
 
 const fetchMock = jest.fn().mockResolvedValue({
