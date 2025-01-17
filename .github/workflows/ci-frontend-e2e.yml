@@ -14,6 +14,7 @@ env:
   NODE_VERSION: 22
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
+  ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
