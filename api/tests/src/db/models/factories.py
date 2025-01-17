@@ -11,7 +11,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 import random
 from datetime import datetime
 from typing import Optional
-import botocore
+
 import factory
 import factory.fuzzy
 import faker
@@ -295,16 +295,19 @@ def get_db_session() -> db.Session:
 
     return _db_session
 
+
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
 # see https://docs.sqlalchemy.org/en/20/orm/contextual.html
 Session = scoped_session(lambda: get_db_session(), scopefunc=lambda: get_db_session())
+
 
 class Generators:
     Now = factory.LazyFunction(datetime.now)
     UtcNow = factory.LazyFunction(datetime_util.utcnow)
     UuidObj = factory.Faker("uuid4", cast_to=None)
     PhoneNumber = factory.Sequence(lambda n: f"123-456-{n:04}")
+
 
 class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
 
@@ -759,7 +762,9 @@ class OpportunityAttachmentFactory(BaseFactory):
     file_contents = factory.Faker("sentence")
     # NOTE: If you want the file to properly get written to s3 for tests/locally
     # make sure the bucket actually exists
-    file_location = factory.LazyAttribute(lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1,max=100_000_000)}/{o.file_name}")
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1, max=100_000_000)}/{o.file_name}"
+    )
     mime_type = factory.Faker("mime_type")
     file_name = factory.Faker("file_name")
     file_description = factory.Faker("sentence")
@@ -770,6 +775,11 @@ class OpportunityAttachmentFactory(BaseFactory):
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
     )
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
@@ -791,6 +801,7 @@ class OpportunityAttachmentFactory(BaseFactory):
             ) from e
 
         return attachment
+
 
 class AgencyContactInfoFactory(BaseFactory):
     class Meta:

@@ -115,7 +115,9 @@ def test_get_opportunity_s3_endpoint_url_200(
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
     object_name = "test_file_1.txt"
     file_loc = f"s3://{mock_s3_bucket}/{object_name}"
-    OpportunityAttachmentFactory.create(file_location=file_loc, opportunity=opportunity, file_contents="Hello, world")
+    OpportunityAttachmentFactory.create(
+        file_location=file_loc, opportunity=opportunity, file_contents="Hello, world"
+    )
 
     # Make the GET request
     resp = client.get(

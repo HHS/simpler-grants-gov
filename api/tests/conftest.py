@@ -1,6 +1,4 @@
 import logging
-import os
-import pathlib
 import uuid
 
 import _pytest.monkeypatch
@@ -147,7 +145,7 @@ def db_session(db_client: db.DBClient) -> db.Session:
 
 
 @pytest.fixture
-def enable_factory_create(monkeypatch, db_session) -> db.Session:
+def enable_factory_create(monkeypatch, db_session, mock_s3_bucket) -> db.Session:
     """
     Allows the create method of factories to be called. By default, the create
     throws an exception to prevent accidental creation of database objects for tests

@@ -159,6 +159,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         OpportunityAttachmentFactory.create(
             mime_type="text/plain",
             opportunity=opportunity,
+            file_contents=content,
             file_location=file_path,
             file_name=filename,
         )

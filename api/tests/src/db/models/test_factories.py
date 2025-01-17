@@ -5,7 +5,7 @@ import pytest
 import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
-from tests.src.db.models.factories import OpportunityFactory, OpportunityAttachmentFactory
+from tests.src.db.models.factories import OpportunityFactory
 
 opportunity_params = {
     "opportunity_number": 100123456,
@@ -82,11 +82,3 @@ def test_opportunity_factory_create(enable_factory_create, db_session: db.Sessio
     null_params = {"agency_code": None}
     opportunity = OpportunityFactory.create(**null_params)
     validate_opportunity_record(opportunity, null_params)
-
-
-def test_thing(enable_factory_create, mock_s3_bucket):
-    # TODO _REMOVE
-
-    y = OpportunityFactory.create(opportunity_attachments=[])
-    x = OpportunityAttachmentFactory.create(opportunity_id=y.opportunity_id)
-    print(x)
