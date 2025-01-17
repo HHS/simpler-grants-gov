@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import select
 
 from src.db.models.opportunity_models import OpportunityChangeAudit
+from src.db.models.task_models import JobTable
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
@@ -11,12 +12,11 @@ from src.search.backend.load_opportunities_to_index import (
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
-from src.db.models.task_models import JobTable
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAttachmentFactory,
-    OpportunityFactory,
     OpportunityChangeAuditFactory,
+    OpportunityFactory,
 )
 
 

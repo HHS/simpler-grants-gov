@@ -15,13 +15,14 @@ import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
+from src.db.models.lookup_models import JobStatus
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunityAttachment,
     OpportunityChangeAudit,
 )
-from src.db.models.task_models import JobStatus, JobTable
+from src.db.models.task_models import JobTable
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
@@ -121,7 +122,8 @@ class LoadOpportunitiesToIndex(Task):
         last_successful_job = (
             self.db_session.query(JobTable)
             .filter(
-                JobTable.job_type == self.cls_name(), JobTable.job_status == JobStatus.COMPLETED
+                JobTable.job_type == self.cls_name(),
+                JobTable.job_status == JobStatus.COMPLETED,
             )
             .order_by(JobTable.created_at.desc())
             .first()

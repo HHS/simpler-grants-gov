@@ -57,15 +57,14 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             self.set_metrics({"task_duration_sec": duration})
 
             # Update job status to completed
-            self.job.job_status = JobStatus.COMPLETED
+            self.update_job(JobStatus.COMPLETED, metrics=self.metrics)
+            self.job.metrics = self.metrics
             self.db_session.commit()
 
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
             # Update job status to failed
-            if self.job is not None:
-                self.job.job_status = JobStatus.FAILED
-                self.db_session.commit()
+            self.update_job(JobStatus.FAILED, metrics=self.metrics)
 
             logger.exception("Failed to run task %s", self.cls_name())
             raise
@@ -89,6 +88,12 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
     def cls_name(self) -> str:
         return self.__class__.__name__
+
+    def update_job(self, job_status: JobStatus, metrics: dict[str, Any] | None = None) -> None:
+        self.job.job_status = job_status
+        if metrics is not None:
+            self.job.metrics = metrics
+        self.db_session.commit()
 
     @abc.abstractmethod
     def run_task(self) -> None:
