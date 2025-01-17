@@ -14,7 +14,6 @@ export const localeParams = new Promise<{ locale: string }>((resolve) => {
   resolve({ locale: "en" });
 });
 
-
 // mocking all types of messages, could split by message type in the future
 export const mockMessages = {
   Process: {
