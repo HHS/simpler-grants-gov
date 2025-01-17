@@ -1918,12 +1918,14 @@ def create_tgroups_agency(
     return groups
 
 
-class OpportunitySearchIndexQueueFactory(BaseFactory):
+class OpportunityChangeAuditFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunitySearchIndexQueue
+        model = opportunity_models.OpportunityChangeAudit
 
     opportunity = factory.SubFactory(OpportunityFactory)
+    last_loaded_at = factory.Faker("date_time_between", start_date="-1d", end_date="+1d")
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+    has_update = True
 
 
 class UserFactory(BaseFactory):

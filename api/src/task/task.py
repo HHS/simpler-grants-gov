@@ -1,10 +1,12 @@
 import abc
 import logging
 import time
+import uuid
 from enum import StrEnum
 from typing import Any
 
 import src.adapters.db as db
+from src.db.models.task_models import JobStatus, JobTable
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +30,18 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def __init__(self, db_session: db.Session) -> None:
         self.db_session = db_session
         self.metrics: dict[str, Any] = {}
+        self.job: JobTable | None = None
 
     def run(self) -> None:
         try:
+            # Create initial job record
+            job_id = uuid.uuid4()
+            self.job = JobTable(
+                job_id=job_id, job_type=self.cls_name(), job_status=JobStatus.STARTED
+            )
+            self.db_session.add(self.job)
+            self.db_session.commit()
+
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
 
@@ -45,8 +56,17 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             duration = round((end - start), 3)
             self.set_metrics({"task_duration_sec": duration})
 
+            # Update job status to completed
+            self.job.job_status = JobStatus.COMPLETED
+            self.db_session.commit()
+
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
+            # Update job status to failed
+            if self.job is not None:
+                self.job.job_status = JobStatus.FAILED
+                self.db_session.commit()
+
             logger.exception("Failed to run task %s", self.cls_name())
             raise
 

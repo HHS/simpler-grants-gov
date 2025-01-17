@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
@@ -69,7 +69,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    opportunity_search_index_queue: Mapped["OpportunitySearchIndexQueue | None"] = relationship(
+    opportunity_change_audit: Mapped["OpportunityChangeAudit | None"] = relationship(
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
 
@@ -452,10 +452,15 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
 
 
-class OpportunitySearchIndexQueue(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "opportunity_search_index_queue"
+class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_change_audit"
 
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    has_update: Mapped[bool]
+    last_loaded_at: Mapped[datetime | None] = mapped_column(
+        nullable=True,
+    )

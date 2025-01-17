@@ -7,7 +7,7 @@ import smart_open
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import delete, select
+from sqlalchemy import select, update
 from sqlalchemy.orm import noload, selectinload
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
@@ -19,8 +19,9 @@ from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunityAttachment,
-    OpportunitySearchIndexQueue,
+    OpportunityChangeAudit,
 )
+from src.db.models.task_models import JobStatus, JobTable
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
@@ -116,25 +117,45 @@ class LoadOpportunitiesToIndex(Task):
     def _handle_incremental_upserts(self, existing_opportunity_ids: set[int]) -> None:
         """Handle updates/inserts of opportunities into the search index when running incrementally"""
 
-        # Fetch opportunities that need processing from the queue
-        queued_opportunities = (
-            self.db_session.execute(
-                select(Opportunity)
-                .join(OpportunitySearchIndexQueue)
-                .join(CurrentOpportunitySummary)
-                .where(
-                    Opportunity.is_draft.is_(False),
-                    CurrentOpportunitySummary.opportunity_status.isnot(None),
-                )
-                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+        # Get last successful job timestamp
+        last_successful_job = (
+            self.db_session.query(JobTable)
+            .filter(
+                JobTable.job_type == self.cls_name(), JobTable.job_status == JobStatus.COMPLETED
             )
-            .scalars()
-            .all()
+            .order_by(JobTable.created_at.desc())
+            .first()
         )
+
+        # Fetch opportunities that need processing from the queue
+        query = (
+            select(Opportunity)
+            .join(OpportunityChangeAudit)
+            .join(CurrentOpportunitySummary)
+            .where(
+                Opportunity.is_draft.is_(False),
+                CurrentOpportunitySummary.opportunity_status.isnot(None),
+            )
+            .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+        )
+
+        print(last_successful_job.created_at)
+        # Add timestamp filter if we have a last successful job
+        if last_successful_job:
+            query = query.where(
+                (OpportunityChangeAudit.last_loaded_at.is_(None))
+                | (OpportunityChangeAudit.last_loaded_at > last_successful_job.created_at)
+            )
+        else:
+            # If no previous successful job, get unprocessed records
+            query = query.where(OpportunityChangeAudit.last_loaded_at.is_(None))
+
+        queued_opportunities = self.db_session.execute(query).scalars().all()
 
         # Process updates and inserts
         processed_opportunity_ids = set()
         opportunities_to_index = []
+        now = get_now_us_eastern_datetime()
 
         for opportunity in queued_opportunities:
             logger.info(
@@ -158,12 +179,12 @@ class LoadOpportunitiesToIndex(Task):
             loaded_ids = self.load_records(opportunities_to_index)
             logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
-        # Clear processed / skipped entries from the queue
-        self.db_session.execute(
-            delete(OpportunitySearchIndexQueue).where(
-                OpportunitySearchIndexQueue.opportunity_id.in_(processed_opportunity_ids)
+            # Update last_loaded_at timestamp instead of deleting records
+            self.db_session.execute(
+                update(OpportunityChangeAudit)
+                .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
+                .values(last_loaded_at=now, has_update=False)
             )
-        )
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
         """Handle deletion of opportunities when running incrementally
