@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { createContext, useCallback, useMemo, useState } from "react";
 
-export interface QueryContextParams {
+interface QueryContextParams {
   queryTerm: string | null | undefined;
   updateQueryTerm: (term: string) => void;
   totalPages: string | null | undefined;
