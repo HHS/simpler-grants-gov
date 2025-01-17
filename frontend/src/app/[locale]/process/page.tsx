@@ -17,7 +17,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Process.page_title"),
-    description: t("Process.meta_description"),
+    description: t("Index.meta_description"),
   };
   return meta;
 }
@@ -26,13 +26,13 @@ export default function Process({ params: { locale } }: LocalizedPageProps) {
   setRequestLocale(locale);
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={PROCESS_CRUMBS} />
       <ProcessIntro />
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ProcessProgress />
       </div>
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ProcessNext />
       </div>
       <ProcessInvolved />

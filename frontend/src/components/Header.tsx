@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
@@ -15,17 +16,20 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { UserControl } from "./user/UserControl";
+
 type PrimaryLink = {
   text?: string;
   href?: string;
 };
 
 type Props = {
-  logoPath?: string;
   locale?: string;
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
+
+const logoPath = "./img/grants-logo.svg";
 
 const NavLinks = ({
   mobileExpanded,
@@ -117,7 +121,7 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ logoPath, locale }: Props) => {
+const Header = ({ locale }: Props) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -137,14 +141,13 @@ const Header = ({ logoPath, locale }: Props) => {
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
+  const { checkFeatureFlag } = useFeatureFlags();
+  const showLoginLink = checkFeatureFlag("authOn");
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
     setIsMobileNavExpanded(!isMobileNavExpanded);
   };
-
-  const title =
-    usePathname() === "/" ? t("title") : <Link href="/">{t("title")}</Link>;
 
   return (
     <>
@@ -161,28 +164,38 @@ const Header = ({ logoPath, locale }: Props) => {
         }}
       />
       <GovBanner language={language} />
-      <USWDSHeader basic={true}>
-        <div className="usa-nav-container">
-          <div className="usa-navbar">
-            <Title className="desktop:margin-top-2">
+      <USWDSHeader
+        basic={true}
+        className="desktop:position-sticky top-0 desktop:z-500 bg-white border-bottom-2px border-primary-vivid"
+      >
+        <div className="usa-nav-container display-flex flex-align-end">
+          <div className="usa-navbar border-bottom-0">
+            <Title className="margin-y-2">
               <div className="display-flex flex-align-center">
-                {logoPath && (
-                  <span className="margin-right-1">
+                <Link href="/" className="display-block">
+                  {logoPath && (
                     <img
-                      className="width-3 desktop:width-5 text-bottom margin-right-05"
                       src={assetPath(logoPath)}
-                      alt="Site logo"
+                      alt={t("title")}
+                      className="display-block height-4  desktop:height-auto"
                     />
-                  </span>
-                )}
-                <span className="font-sans-lg flex-fill">{title}</span>
+                  )}
+                </Link>
               </div>
             </Title>
+          </div>
+          <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
               label={t("nav_menu_toggle")}
+              className="usa-menu-btn"
             />
           </div>
+          {!!showLoginLink && (
+            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+              <UserControl />
+            </div>
+          )}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}

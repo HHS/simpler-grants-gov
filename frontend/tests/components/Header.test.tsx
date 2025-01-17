@@ -1,4 +1,5 @@
 import userEvent from "@testing-library/user-event";
+import { Response } from "node-fetch";
 import { render, screen } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
@@ -6,7 +7,6 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 import Header from "src/components/Header";
 
 const props = {
-  logoPath: "/img/logo.svg",
   locale: "en",
 };
 
@@ -22,8 +22,32 @@ jest.mock("next/navigation", () => ({
   usePathname: () => usePathnameMock() as string,
 }));
 
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => true,
+  }),
+}));
+
 describe("Header", () => {
+  const mockResponse = {
+    auth_login_url: "/login-url",
+  } as unknown as Response;
+
+  let originalFetch: typeof global.fetch;
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+
   it("toggles the mobile nav menu", async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockResponse),
+      }),
+    ) as jest.Mock;
+
     render(<Header {...props} />);
     const menuButton = screen.getByTestId("navMenuButton");
 
@@ -80,15 +104,6 @@ describe("Header", () => {
     const homeLink = screen.getByRole("link", { name: "Simpler.Grants.gov" });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute("href", "/");
-  });
-
-  it("display text without a home link if on home page", () => {
-    usePathnameMock.mockReturnValue("/");
-    render(<Header />);
-
-    const homeText = screen.getByText("Simpler.Grants.gov");
-    expect(homeText).toBeInTheDocument();
-    expect(homeText).not.toHaveAttribute("href", "/");
   });
 
   it("shows the correct styling for active nav item", async () => {

@@ -22,11 +22,406 @@ i.e.
 
 @use "uswds-core" as *;
 
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
+
 .pdf-card {
   transition: transform 0.2s;
   @include u-shadow(2);
   &:hover {
     transform: scale(1.1) rotate(1deg);
     @include u-shadow(4);
+  }
+}
+
+// Typography
+// prevent orphaned words in short blocks of text
+.text-balance {
+  text-wrap: balance;
+}
+
+// Button
+.usa-button {
+  &,
+  &:visited {
+    background-color: color("mint-50");
+    color: white;
+    border-bottom: 5px solid color("mint-cool-40v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("mint-60");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("mint-70");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    color: color("gray-60");
+    background-color: color("gray-20");
+    border-bottom: 5px solid color("gray-10");
+  }
+}
+
+// Button: Base
+.usa-button--base {
+  &,
+  &:visited {
+    background-color: color("gray-warm-50");
+    color: white;
+    border-bottom: 5px solid color("gray-warm-30");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("gray-warm-60");
+    border-bottom: 5px solid color("gray-warm-40");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("gray-warm-70");
+    border-bottom: 5px solid color("gray-warm-50");
+  }
+}
+
+// Button: Secondary
+.usa-button--secondary {
+  &,
+  &:visited {
+    background-color: color("mint-5");
+    color: color("mint-60");
+    border-bottom: 5px solid color("mint-cool-40v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("mint-10");
+    color: color("mint-70");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("mint-20");
+    color: color("mint-80");
+    border-bottom: 5px solid color("mint-cool-60v");
+  }
+}
+
+// Button: Accent Cool
+.usa-button--accent-cool {
+  &,
+  &:visited {
+    background-color: color("violet-30");
+    color: color("violet-80");
+    border-bottom: 5px solid color("violet-40");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("violet-20");
+    color: color("violet-70");
+    border-bottom: 5px solid color("violet-30");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("violet-10");
+    color: color("violet-60");
+    border-bottom: 5px solid color("violet-20");
+  }
+}
+
+// Button: Accent Warm
+.usa-button--accent-warm {
+  &,
+  &:visited {
+    background-color: color("yellow-20v");
+    color: color("gray-warm-80");
+    border-bottom: 5px solid color("orange-30v");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("yellow-10v");
+    border-bottom: 5px solid color("gold-20v");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("yellow-5v");
+    border-bottom: 5px solid color("yellow-20v");
+  }
+}
+
+// Button: Outline
+.usa-button--outline {
+  &,
+  &:visited {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-50");
+    color: color("mint-50");
+    border-bottom: 5px solid color("mint-50");
+  }
+
+  &:hover,
+  &.usa-button--hover {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-60");
+    color: color("mint-60");
+    border-bottom-color: color("mint-60");
+  }
+
+  &:active,
+  &.usa-button--active {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("mint-70");
+    color: color("mint-70");
+    border-bottom-color: color("mint-70");
+  }
+
+  &.usa-button--inverse {
+    &,
+    &:visited {
+      box-shadow: inset 0 0 0 2px color("mint-10");
+      color: color("mint-10");
+      border-bottom-color: color("mint-10");
+    }
+
+    &:hover,
+    &.usa-button--hover {
+      box-shadow: inset 0 0 0 2px color("mint-5");
+      color: color("mint-5");
+      border-bottom-color: color("mint-5");
+    }
+
+    &:active,
+    &.usa-button--active {
+      box-shadow: inset 0 0 0 2px white;
+      color: white;
+      border-bottom-color: white;
+    }
+  }
+}
+
+// Button: Outline Disabled
+.usa-button--outline:disabled,
+.usa-button--outline[aria-disabled="true"],
+.usa-button--outline-inverse:disabled,
+.usa-button--outline-inverse[aria-disabled="true"] {
+  &,
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: color("transparent");
+    box-shadow: inset 0 0 0 2px color("gray-20");
+    color: color("gray-60");
+    border-bottom: 5px solid color("gray-20");
+  }
+}
+
+// Button: Unstyled
+.usa-button--unstyled {
+  @include button-unstyled;
+  border-bottom: 0 !important;
+}
+
+// Button: Small
+.usa-button--small {
+  font-size: font-size($theme-button-font-family, "sm");
+  padding: units(1) units(2);
+}
+
+// There is no config for setting the current nav item border color
+.usa-header--basic .usa-nav__primary-item > .usa-current::after {
+  background-color: color("mint-40");
+}
+
+// Hero
+.hero {
+  .hero--container {
+    position: relative;
+
+    &::after {
+      @include at-media("tablet-lg") {
+        $size: 0.5;
+        content: "";
+        background: url("/img/grants-star-symbol.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: absolute;
+        width: calc(832px * $size);
+        height: calc(815px * $size);
+        right: 0;
+        bottom: 0;
+        margin-right: calc(-78px * $size);
+        margin-bottom: calc(-206px * $size);
+        opacity: 50%;
+        z-index: 0;
+      }
+
+      @include at-media("desktop-lg") {
+        $size: 0.6;
+        width: calc(832px * $size);
+        height: calc(815px * $size);
+        margin-right: calc(-78px * $size);
+        margin-bottom: calc(-206px * $size);
+      }
+    }
+  }
+
+  .hero--text {
+    @include at-media("tablet-lg") {
+      max-width: 34rem;
+    }
+    @include at-media("desktop") {
+      max-width: 42rem;
+    }
+  }
+}
+
+// Footer
+.usa-footer__primary-section {
+  background-color: color("mint-5");
+  border-top: 6px solid color("mint-50");
+  box-shadow: inset 0 6px 0 0 color("mint-20");
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  @include at-media("tablet") {
+    padding-top: calc(1rem + 3vw);
+    padding-bottom: calc(1rem + 3vw);
+  }
+}
+
+.usa-footer__secondary-section {
+  background-color: color("mint-5");
+}
+
+.footer-logo-container {
+  max-width: 16rem;
+  margin: 2rem 0;
+}
+
+.usa-social-link {
+  &,
+  &:visited {
+    background-color: color("transparent");
+    color: color("gray-warm-90");
+  }
+
+  &:hover {
+    background-color: color("transparent");
+    color: color("mint-70");
+  }
+}
+
+.usa-footer__contact-heading {
+  text-align: left;
+
+  @include at-media("tablet") {
+    text-align: right;
+  }
+}
+
+.usa-footer__social-links,
+.usa-footer__contact-info {
+  justify-content: left;
+
+  @include at-media("tablet") {
+    justify-content: flex-end;
+  }
+}
+
+.usa-identifier {
+  padding-top: calc(1rem + 3vw);
+  padding-bottom: calc(1rem + 3vw);
+}
+
+// truss adds usa-button classes and button elements in the pagination component
+// overriding button styles for pagination
+.usa-pagination__button.usa-button,
+button.usa-pagination__button.usa-button {
+  align-items: center;
+  background-color: color("mint-5");
+  border-width: 0px;
+  color: color("gray-warm-90");
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
+  padding: units(1);
+  width: 100%;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: white;
+    background-color: color("mint-70");
+  }
+}
+
+.usa-pagination button.usa-button.usa-current,
+.usa-pagination .usa-button.usa-current {
+  color: white;
+  background-color: color("mint-40");
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: color("mint-80");
+    color: white;
+  }
+}
+
+@include at-media("desktop") {
+  .usa-nav__submenu {
+    right: 0;
+  }
+}
+
+// we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
+// these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
+.usa-nav__primary {
+  .mobile-nav-dropdown-uncollapsed-override {
+    button[aria-expanded="true"] {
+      background-color: color("mint-60");
+      a {
+        color: white;
+      }
+      span:after {
+        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+          linear-gradient(transparent, transparent);
+      }
+    }
+    button[aria-expanded="false"] {
+      span:after {
+        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+          linear-gradient(transparent, transparent);
+      }
+    }
+    button[aria-expanded] {
+      span:after {
+        right: 0.75rem;
+      }
+    }
+    .usa-nav__submenu-item {
+      background-color: color("mint-60");
+      a {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        color: white;
+        line-height: 1.4;
+        display: block;
+      }
+    }
+    .usa-nav__submenu {
+      right: 3.7em;
+    }
   }
 }

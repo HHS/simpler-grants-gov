@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - "frontend/**"
+      - "infra/frontend/**"
   release:
     types: [published]
   workflow_dispatch:
@@ -20,6 +21,10 @@ on:
           - dev
           - staging
           - prod
+      version:
+        required: true
+        default: "main"
+        description: Tag or branch or SHA to deploy
 
 jobs:
   frontend-checks:
@@ -44,6 +49,7 @@ jobs:
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}
+      version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
     if: failure()

@@ -17,8 +17,6 @@ from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
-from src.api.opportunities_v0 import opportunity_blueprint as opportunities_v0_blueprint
-from src.api.opportunities_v0_1 import opportunity_blueprint as opportunities_v0_1_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
@@ -62,6 +60,7 @@ def create_app() -> APIFlask:
     configure_app(app)
     register_blueprints(app)
     register_index(app)
+    register_robots_txt(app)
     register_search_client(app)
 
     auth_endpoint_config = AuthEndpointConfig()
@@ -133,8 +132,6 @@ def configure_app(app: APIFlask) -> None:
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
-    app.register_blueprint(opportunities_v0_blueprint)
-    app.register_blueprint(opportunities_v0_1_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
@@ -166,4 +163,15 @@ def register_index(app: APIFlask) -> None:
                     <p>Visit <a href="/docs">/docs</a> to view the api documentation for this project.</p>
                 </body>
             </html>
+        """
+
+
+def register_robots_txt(app: APIFlask) -> None:
+    @app.route("/robots.txt")
+    @app.doc(hide=True)
+    def robots() -> str:
+        return """
+        User-Agent: *
+        Allow: /docs
+        Disallow: /
         """

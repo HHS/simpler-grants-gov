@@ -1,11 +1,14 @@
+import base64
 import logging
 from enum import StrEnum
 from typing import Iterator, Sequence
 
+from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy import delete, select
 from sqlalchemy.orm import noload, selectinload
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
@@ -14,13 +17,19 @@ from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
+    OpportunityAttachment,
     OpportunitySearchIndexQueue,
 )
 from src.task.task import Task
+from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+ALLOWED_ATTACHMENT_SUFFIXES = set(
+    ["txt", "pdf", "docx", "doc", "xlsx", "xlsm", "html", "htm", "pptx", "ppt", "rtf"]
+)
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -33,6 +42,10 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     # look into this a bit more when we setup the search endpoint itself.
     alias_name: str = Field(default="opportunity-index-alias")  # LOAD_OPP_SEARCH_ALIAS_NAME
     index_prefix: str = Field(default="opportunity-index")  # LOAD_OPP_INDEX_PREFIX
+
+    enable_opportunity_attachment_pipeline: bool = Field(
+        default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
+    )
 
 
 class LoadOpportunitiesToIndex(Task):
@@ -51,7 +64,6 @@ class LoadOpportunitiesToIndex(Task):
 
         self.search_client = search_client
         self.is_full_refresh = is_full_refresh
-
         if config is None:
             config = LoadOpportunitiesToIndexConfig()
         self.config = config
@@ -64,12 +76,37 @@ class LoadOpportunitiesToIndex(Task):
         self.set_metrics({"index_name": self.index_name})
 
     def run_task(self) -> None:
+        logger.info("Creating multi-attachment pipeline")
+        self._create_multi_attachment_pipeline()
         if self.is_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
         else:
             logger.info("Running incremental load")
             self.incremental_updates_and_deletes()
+
+    def _create_multi_attachment_pipeline(self) -> None:
+        """
+        Create multi-attachment processor
+        """
+        pipeline = {
+            "description": "Extract attachment information",
+            "processors": [
+                {
+                    "foreach": {
+                        "field": "attachments",
+                        "processor": {
+                            "attachment": {
+                                "target_field": "_ingest._value.attachment",
+                                "field": "_ingest._value.data",
+                            }
+                        },
+                    }
+                }
+            ],
+        }
+
+        self.search_client.put_pipeline(pipeline, "multi-attachment")
 
     def incremental_updates_and_deletes(self) -> None:
         existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
@@ -185,8 +222,12 @@ class LoadOpportunitiesToIndex(Task):
 
         # handle aliasing of endpoints
         self.search_client.swap_alias_index(
-            self.index_name, self.config.alias_name, delete_prior_indexes=True
+            self.index_name,
+            self.config.alias_name,
         )
+
+        # cleanup old indexes
+        self.search_client.cleanup_old_indices(self.config.index_prefix, [self.index_name])
 
     def fetch_opportunities(self) -> Iterator[Sequence[Opportunity]]:
         """
@@ -238,8 +279,41 @@ class LoadOpportunitiesToIndex(Task):
 
         return opportunity_ids
 
+    def filter_attachment(self, attachment: OpportunityAttachment) -> bool:
+        file_suffix = attachment.file_name.lower().split(".")[-1]
+        return file_suffix in ALLOWED_ATTACHMENT_SUFFIXES
+
+    def get_attachment_json_for_opportunity(
+        self, opp_attachments: list[OpportunityAttachment]
+    ) -> list[dict]:
+
+        attachments = []
+        for att in opp_attachments:
+            if self.filter_attachment(att):
+                with file_util.open_stream(
+                    att.file_location,
+                    "rb",
+                ) as file:
+                    file_content = file.read()
+                    attachments.append(
+                        {
+                            "filename": att.file_name,
+                            "data": base64.b64encode(file_content).decode("utf-8"),
+                        }
+                    )
+
+        return attachments
+
+    @retry(
+        stop=stop_after_attempt(3),  # Retry up to 3 times
+        wait=wait_fixed(2),  # Wait 2 seconds between retries
+        retry=retry_if_exception_type(
+            (TransportError, ConnectionTimeout)
+        ),  # Retry on TransportError (including timeouts)
+    )
     def load_records(self, records: Sequence[Opportunity]) -> set[int]:
         logger.info("Loading batch of opportunities...")
+
         schema = OpportunityV1Schema()
         json_records = []
 
@@ -261,11 +335,19 @@ class LoadOpportunitiesToIndex(Task):
                 self.increment(self.Metrics.TEST_RECORDS_SKIPPED)
                 continue
 
-            json_records.append(schema.dump(record))
+            json_record = schema.dump(record)
+            if self.config.enable_opportunity_attachment_pipeline:
+                json_record["attachments"] = self.get_attachment_json_for_opportunity(
+                    record.opportunity_attachments
+                )
+
+            json_records.append(json_record)
             self.increment(self.Metrics.RECORDS_LOADED)
 
             loaded_opportunity_ids.add(record.opportunity_id)
 
-        self.search_client.bulk_upsert(self.index_name, json_records, "opportunity_id")
+        self.search_client.bulk_upsert(
+            self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
+        )
 
         return loaded_opportunity_ids

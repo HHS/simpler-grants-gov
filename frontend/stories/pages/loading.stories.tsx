@@ -1,5 +1,6 @@
 import { Meta } from "@storybook/react";
-import Loading from "src/app/[locale]/search/loading";
+
+import Loading from "src/components/Loading";
 
 const meta: Meta<typeof Loading> = {
   component: Loading,

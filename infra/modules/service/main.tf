@@ -45,9 +45,13 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
+  cdn_environment_variables = local.enable_cdn ? [
+    { name : "CDN_URL", value : local.cdn_domain_name_env_var },
+  ] : []
   environment_variables = concat(
     local.base_environment_variables,
     local.db_environment_variables,
+    local.cdn_environment_variables,
     [
       for name, value in var.extra_environment_variables :
       { name : name, value : value }
@@ -155,6 +159,11 @@ resource "aws_ecs_task_definition" "app" {
 
   # Reference https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html
   network_mode = "awsvpc"
+
+  depends_on = [
+    aws_iam_role_policy.task_executor,
+    aws_iam_role_policy_attachment.extra_policies,
+  ]
 }
 
 resource "aws_ecs_cluster" "cluster" {

@@ -33,6 +33,7 @@ in the form $setting: value,
     ),
   $theme-banner-max-width: "desktop-lg",
   $theme-header-max-width: "desktop-lg",
+  $theme-header-logo-text-width: 27%,
   $theme-grid-container-max-width: "desktop-lg",
   $theme-footer-max-width: "desktop-lg",
   $theme-identifier-max-width: "desktop-lg",
@@ -48,6 +49,8 @@ in the form $setting: value,
     hover: false,
     visited: false
   ),
+  $height-settings: (responsive: true),
+  $z-index-settings: (responsive: true),
   $flex-settings: (
     output: true,
     responsive: true,
@@ -58,6 +61,15 @@ in the form $setting: value,
   ),
 
   // Typography settings
+  $theme-font-type-sans: "public-sans",
+  $theme-typeface-tokens: (
+    newsreader: (
+      display-name: "Newsreader",
+      cap-height: 364px,
+      stack: "Georgia, serif",
+    )
+  ),
+  $theme-font-type-serif: "newsreader",
   $theme-global-link-styles: true,
   $theme-body-font-size: "md",
   $theme-type-scale-3xs: 2,
@@ -69,6 +81,8 @@ in the form $setting: value,
   $theme-type-scale-xl: 12,
   $theme-type-scale-2xl: 15,
   $theme-type-scale-3xl: 17,
+  $theme-font-role-heading: "sans",
+  $theme-lead-font-family: "body",
 
   // Color settings
   $background-color-palettes:
@@ -77,5 +91,127 @@ in the form $setting: value,
       "palette-color-system-yellow-light",
       "palette-color-system-green-cool",
       "palette-color-system-red-warm"
-    )
+    ),
+
+  // Base colors
+  $theme-color-base-family: "gray-warm",
+  $theme-color-base-lightest: "gray-warm-5",
+  $theme-color-base-lighter: "gray-warm-10",
+  $theme-color-base-light: "gray-warm-20",
+  $theme-color-base: "gray-warm-30",
+  $theme-color-base-dark: "gray-warm-50",
+  $theme-color-base-darker: "gray-warm-70",
+  $theme-color-base-darkest: "gray-warm-90",
+  $theme-color-base-ink: "gray-warm-90",
+
+  // Primary colors
+  $theme-color-primary-family: "mint",
+  $theme-color-primary-lightest: "mint-5",
+  $theme-color-primary-lighter: "mint-10",
+  $theme-color-primary-light: "mint-20",
+  $theme-color-primary: "mint-30",
+  $theme-color-primary-vivid: "mint-40",
+  $theme-color-primary-dark: "mint-50",
+  $theme-color-primary-darker: "mint-60",
+  $theme-color-primary-darkest: "mint-70",
+
+  // Secondary colors
+  $theme-color-secondary-family: "blue-cool-vivid",
+  $theme-color-secondary-lightest: "blue-cool-5v",
+  $theme-color-secondary-lighter: "blue-cool-10v",
+  $theme-color-secondary-light: "blue-cool-20v",
+  $theme-color-secondary: "blue-cool-30v",
+  $theme-color-secondary-vivid: "blue-cool-40v",
+  $theme-color-secondary-dark: "blue-cool-50v",
+  $theme-color-secondary-darker: "blue-cool-60v",
+  $theme-color-secondary-darkest: "blue-cool-70v",
+
+  // Accent warm colors
+  $theme-color-accent-warm-family: "yellow-vivid",
+  $theme-color-accent-warm-lightest: "yellow-5v",
+  $theme-color-accent-warm-lighter: "yellow-10v",
+  $theme-color-accent-warm-light: "yellow-20v",
+  $theme-color-accent-warm: "gold-20v",
+  $theme-color-accent-warm-dark: "orange-30v",
+  $theme-color-accent-warm-darker: "orange-warm-40v",
+  $theme-color-accent-warm-darkest: "orange-warm-50v",
+
+  // Accent cool colors
+  $theme-color-accent-cool-family: "violet",
+  $theme-color-accent-cool-lightest: "violet-10",
+  $theme-color-accent-cool-lighter: "violet-20",
+  $theme-color-accent-cool-light: "violet-30",
+  $theme-color-accent-cool: "violet-40",
+  $theme-color-accent-cool-dark: "violet-50",
+  $theme-color-accent-cool-darker: "violet-60",
+  $theme-color-accent-cool-darkest: "violet-70",
+
+  // Error colors
+  // $theme-color-error-family: "red-warm",
+  // $theme-color-error-lighter: "red-warm-10",
+  // $theme-color-error-light: "red-warm-30v",
+  // $theme-color-error: "red-warm-50v",
+  // $theme-color-error-dark: "red-60v",
+  // $theme-color-error-darker: "red-70",
+  // Warning colors
+  $theme-color-warning-family: "yellow",
+  $theme-color-warning-lighter: "yellow-5v",
+  $theme-color-warning-light: "yellow-10v",
+  $theme-color-warning: "yellow-20v",
+  $theme-color-warning-dark: "gold-30v",
+  $theme-color-warning-darker: "orange-warm-40v",
+  // Success colors
+  // $theme-color-success-family: "green-cool",
+  // $theme-color-success-lighter: "green-cool-5",
+  // $theme-color-success-light: "green-cool-20v",
+  // $theme-color-success: "green-cool-40v",
+  // $theme-color-success-dark: "green-cool-50v",
+  // $theme-color-success-darker: "green-cool-60v",
+  // Info colors
+  // $theme-color-info-family: "cyan",
+  // $theme-color-info-lighter: "cyan-5",
+  // $theme-color-info-light: "cyan-20",
+  // $theme-color-info: "cyan-30v",
+  // $theme-color-info-dark: "cyan-40v",
+  // $theme-color-info-darker: "blue-cool-60",
+  // Disabled colors
+  // $theme-color-disabled-family: "gray",
+  // $theme-color-disabled-lighter: "gray-20",
+  // $theme-color-disabled-light: "gray-40",
+  // $theme-color-disabled: "gray-50",
+  // $theme-color-disabled-dark: "gray-70",
+  // $theme-color-disabled-darker: "gray-90",
+  // Emergency colors
+  // $theme-color-emergency: "red-warm-60v",
+  // $theme-color-emergency-dark: "red-warm-80",
+  // Body colors
+  // $theme-body-background-color: "white" !default;
+  // Text
+  // $theme-text-color: "ink" !default;
+  // $theme-text-reverse-color: "white" !default;
+  // Links
+  $theme-link-color: "mint-50",
+  $theme-link-visited-color: "violet-60",
+  $theme-link-hover-color: "mint-60",
+  $theme-link-active-color: "mint-70",
+  $theme-link-reverse-color: "mint-5",
+  $theme-link-reverse-hover-color: "mint-10",
+  $theme-link-reverse-active-color: "white",
+
+  // Button
+  $theme-button-border-radius: 2px,
+  // $theme-button-font-family: "ui",
+  // $theme-button-icon-gap: 1,
+  // $theme-button-small-width: 6,
+  // $theme-button-stroke-width: 2px,
+  // Alert
+  $theme-alert-padding-x: 2.5,
+  $theme-alert-padding-y: 3,
+  $theme-alert-icon-size: 3,
+
+  // Identifier
+  $theme-identifier-background-color: "mint-70",
+  $theme-identifier-primary-link-color: "mint-5",
+  $theme-identifier-identity-domain-color: "white",
+  $theme-identifier-secondary-link-color: "mint-5"
 );

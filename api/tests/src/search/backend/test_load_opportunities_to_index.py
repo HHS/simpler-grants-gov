@@ -7,10 +7,12 @@ from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
 )
+from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
+    OpportunityAttachmentFactory,
     OpportunityFactory,
     OpportunitySearchIndexQueueFactory,
 )
@@ -39,26 +41,44 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         opportunities = []
         opportunities.extend(
             OpportunityFactory.create_batch(
-                size=6, is_posted_summary=True, agency_code=agency.agency_code
+                size=6,
+                is_posted_summary=True,
+                agency_code=agency.agency_code,
+                opportunity_attachments=[],
             )
-        )
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_forecasted_summary=True))
-        opportunities.extend(OpportunityFactory.create_batch(size=2, is_closed_summary=True))
-        opportunities.extend(
-            OpportunityFactory.create_batch(size=8, is_archived_non_forecast_summary=True)
         )
         opportunities.extend(
             OpportunityFactory.create_batch(
-                size=6, is_archived_forecast_summary=True, agency_code=agency.agency_code
+                size=3, is_forecasted_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=2, is_closed_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=6,
+                is_archived_forecast_summary=True,
+                agency_code=agency.agency_code,
+                opportunity_attachments=[],
             )
         )
 
         # Create some opportunities that won't get fetched / loaded into search
-        OpportunityFactory.create_batch(size=3, is_draft=True)
-        OpportunityFactory.create_batch(size=4, no_current_summary=True)
+        OpportunityFactory.create_batch(size=3, is_draft=True, opportunity_attachments=[])
+        OpportunityFactory.create_batch(size=4, no_current_summary=True, opportunity_attachments=[])
 
         AgencyFactory.create(agency_code="MY-TEST-AGENCY", is_test_agency=True)
-        OpportunityFactory.create_batch(size=3, agency_code="MY-TEST-AGENCY")
+        OpportunityFactory.create_batch(
+            size=3, agency_code="MY-TEST-AGENCY", opportunity_attachments=[]
+        )
 
         for opportunity in opportunities:
             OpportunitySearchIndexQueueFactory.create(
@@ -105,7 +125,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         )
 
         # Rerunning but first add a few more opportunities to show up
-        opportunities.extend(OpportunityFactory.create_batch(size=3))
+        opportunities.extend(OpportunityFactory.create_batch(size=3, opportunity_attachments=[]))
         load_opportunities_to_index.index_name = (
             load_opportunities_to_index.index_name + "-new-data"
         )
@@ -118,6 +138,57 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         assert set([opp.opportunity_id for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
+
+    def test_opportunity_attachment_pipeline(
+        self,
+        mock_s3_bucket,
+        db_session,
+        enable_factory_create,
+        load_opportunities_to_index,
+        monkeypatch: pytest.MonkeyPatch,
+        opportunity_index_alias,
+        search_client,
+    ):
+        filename_1 = "test_file_1.txt"
+        file_path_1 = f"s3://{mock_s3_bucket}/{filename_1}"
+        content = "I am a file"
+
+        with file_util.open_stream(file_path_1, "w") as outfile:
+            outfile.write(content)
+
+        filename_2 = "test_file_2.css"
+        file_path_2 = f"s3://{mock_s3_bucket}/{filename_2}"
+
+        opportunity = OpportunityFactory.create(opportunity_attachments=[])
+        OpportunityAttachmentFactory.create(
+            opportunity=opportunity,
+            file_location=file_path_1,
+            file_name=filename_1,
+        )
+
+        OpportunityAttachmentFactory.create(
+            opportunity=opportunity,
+            file_location=file_path_2,
+            file_name=filename_2,
+        )
+
+        load_opportunities_to_index.index_name = (
+            load_opportunities_to_index.index_name + "-pipeline"
+        )
+
+        load_opportunities_to_index.run()
+
+        resp = search_client.search(opportunity_index_alias, {"size": 100})
+
+        record = [d for d in resp.records if d.get("opportunity_id") == opportunity.opportunity_id]
+        attachments = record[0]["attachments"]
+
+        # assert only one (allowed) opportunity attachment was uploaded
+        assert len(attachments) == 1
+        # assert correct attachment was uploaded
+        assert attachments[0]["filename"] == filename_1
+        # assert data was b64encoded
+        assert attachments[0]["attachment"]["content"] == content  # decoded b64encoded attachment
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
@@ -142,23 +213,42 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
         search_client.create_index(index_name)
         search_client.swap_alias_index(
-            index_name, load_opportunities_to_index.config.alias_name, delete_prior_indexes=True
+            index_name,
+            load_opportunities_to_index.config.alias_name,
         )
 
         # Load a bunch of records into the DB
         opportunities = []
-        opportunities.extend(OpportunityFactory.create_batch(size=6, is_posted_summary=True))
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_forecasted_summary=True))
-        opportunities.extend(OpportunityFactory.create_batch(size=2, is_closed_summary=True))
         opportunities.extend(
-            OpportunityFactory.create_batch(size=8, is_archived_non_forecast_summary=True)
+            OpportunityFactory.create_batch(
+                size=6, is_posted_summary=True, opportunity_attachments=[]
+            )
         )
         opportunities.extend(
-            OpportunityFactory.create_batch(size=6, is_archived_forecast_summary=True)
+            OpportunityFactory.create_batch(
+                size=3, is_forecasted_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=2, is_closed_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=8, is_archived_non_forecast_summary=True, opportunity_attachments=[]
+            )
+        )
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=6, is_archived_forecast_summary=True, opportunity_attachments=[]
+            )
         )
 
         AgencyFactory.create(agency_code="MY-TEST-AGENCY-123", is_test_agency=True)
-        test_opps = OpportunityFactory.create_batch(size=2, agency_code="MY-TEST-AGENCY-123")
+        test_opps = OpportunityFactory.create_batch(
+            size=2, agency_code="MY-TEST-AGENCY-123", opportunity_attachments=[]
+        )
 
         for opportunity in itertools.chain(opportunities, test_opps):
             OpportunitySearchIndexQueueFactory.create(
@@ -178,7 +268,11 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         ] == len(test_opps)
 
         # Add a few more opportunities that will be created
-        opportunities.extend(OpportunityFactory.create_batch(size=3, is_posted_summary=True))
+        opportunities.extend(
+            OpportunityFactory.create_batch(
+                size=3, is_posted_summary=True, opportunity_attachments=[]
+            )
+        )
 
         # Delete some opportunities
         opportunities_to_delete = [opportunities.pop(), opportunities.pop(), opportunities.pop()]
@@ -220,7 +314,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
     def test_new_opportunity_gets_indexed(self, db_session, load_opportunities_to_index):
         """Test that a new opportunity in the queue gets indexed"""
-        test_opportunity = OpportunityFactory.create()
+        test_opportunity = OpportunityFactory.create(opportunity_attachments=[])
 
         # Add to queue
         OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
@@ -233,7 +327,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
 
     def test_draft_opportunity_not_indexed(self, db_session, load_opportunities_to_index):
         """Test that draft opportunities are not indexed"""
-        test_opportunity = OpportunityFactory.create(is_draft=True)
+        test_opportunity = OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
 
         # Add to queue
         OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)

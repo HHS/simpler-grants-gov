@@ -16,7 +16,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Subscribe.page_title"),
-    description: t("Index.meta_description"),
+    description: t("Subscribe.meta_description"),
   };
 
   return meta;
@@ -28,7 +28,7 @@ export default function Subscribe({ params: { locale } }: LocalizedPageProps) {
 
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={SUBSCRIBE_CRUMBS} />
 
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">

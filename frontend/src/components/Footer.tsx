@@ -1,4 +1,4 @@
-import GrantsLogo from "public/img/grants-gov-logo.png";
+import GrantsLogo from "public/img/grants-logo.png";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
@@ -24,7 +24,7 @@ type SocialLinkProps = {
 const SocialLink = ({ href, name, icon }: SocialLinkProps) => (
   <a className="usa-social-link" href={href} title={name} target="_blank">
     <USWDSIcon
-      className="usa-icon usa-social-link__icon"
+      className="usa-social-link__icon"
       height="40px"
       name={icon}
       aria-label={name}
@@ -79,42 +79,45 @@ const Footer = () => {
           <a href="#">{t("return_to_top")}</a>
         </GridContainer>
       }
-      primary={null}
-      secondary={
-        <Grid row gap>
-          <Grid tablet={{ col: 4 }} desktop={{ col: 6 }}>
-            <Image
-              className="maxh-15 width-auto margin-bottom-2 tablet:margin-bottom-0"
-              alt={t("logo_alt")}
-              src={GrantsLogo}
-              height={168}
-              width={500}
-              priority={false}
-            />
+      primary={
+        <GridContainer>
+          <Grid row gap>
+            <Grid tablet={{ col: 4 }}>
+              <div className="footer-logo-container">
+                <Image
+                  className="height-auto"
+                  alt={t("logo_alt")}
+                  src={GrantsLogo}
+                  height={214}
+                  width={1075}
+                  priority={false}
+                />
+              </div>
+            </Grid>
+            <Grid className="usa-footer__contact-links" tablet={{ col: 8 }}>
+              <SocialLinks links={links} />
+              <h2 className="usa-footer__contact-heading text-balance">
+                {t("agency_contact_center")}
+              </h2>
+              <Address
+                size="medium"
+                items={[
+                  <a key="telephone" href={`tel:${t("telephone")}`}>
+                    {t("telephone")}
+                  </a>,
+                  <a
+                    key="email"
+                    href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}
+                  >
+                    {ExternalRoutes.EMAIL_SUPPORT}
+                  </a>,
+                ]}
+              />
+            </Grid>
           </Grid>
-          <Grid
-            className="usa-footer__contact-links"
-            tablet={{ col: 8 }}
-            desktop={{ col: 6 }}
-          >
-            <SocialLinks links={links} />
-            <h2 className="usa-footer__contact-heading">
-              {t("agency_contact_center")}
-            </h2>
-            <Address
-              size="medium"
-              items={[
-                <a key="telephone" href={`tel:${t("telephone")}`}>
-                  {t("telephone")}
-                </a>,
-                <a key="email" href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
-                  {ExternalRoutes.EMAIL_SUPPORT}
-                </a>,
-              ]}
-            />
-          </Grid>
-        </Grid>
+        </GridContainer>
       }
+      secondary={null}
     />
   );
 };

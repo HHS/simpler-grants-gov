@@ -24,7 +24,6 @@ import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
 import src.db.models.staging as staging
-import src.db.models.transfer.topportunity_models as transfer_topportunity_models
 import src.db.models.user_models as user_models
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import (
@@ -228,11 +227,11 @@ class CustomProvider(BaseProvider):
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
     OPPORTUNITY_ATTACHMENT_S3_PATHS = [
-        "s3://local-opportunities/test_file_1.txt",
-        "s3://local-opportunities/test_file_2.txt",
-        "s3://local-opportunities/test_file_3.txt",
-        "s3://local-opportunities/test_file_4.pdf",
-        "s3://local-opportunities/test_file_5.pdf",
+        "s3://local-mock-public-bucket/test_file_1.txt",
+        "s3://local-mock-public-bucket/test_file_2.txt",
+        "s3://local-mock-public-bucket/test_file_3.txt",
+        "s3://local-mock-public-bucket/test_file_4.pdf",
+        "s3://local-mock-public-bucket/test_file_5.pdf",
     ]
 
     def agency_code(self) -> str:
@@ -333,7 +332,7 @@ class OpportunityAttachmentFactory(BaseFactory):
 
     file_location = factory.Faker("s3_file_location")
     mime_type = factory.Faker("mime_type")
-    file_name = factory.Faker("file_name")
+    file_name = factory.Faker("file_name", category="text")
     file_description = factory.Faker("sentence")
     file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
     opportunity_attachment_type = factory.fuzzy.FuzzyChoice(OpportunityAttachmentType)
@@ -997,6 +996,32 @@ class TsynopsisFactory(BaseFactory):
     publisher_profile_id = sometimes_none(factory.Faker("random_int", min=1, max=99_999))
 
 
+class TsynopsisAttachmentFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    syn_att_id: factory.Sequence(lambda n: n)
+    opportunity_id: factory.Sequence(lambda n: n)
+    att_revision_number = factory.Faker("random_int", min=1000, max=10000000)
+    att_type: factory.Faker("att_type")
+    mime_type = factory.Faker("mime_type")
+    link_url = factory.Faker("relevant_url")
+    file_name = factory.Faker("file_name", category="text")
+    file_desc = factory.Faker("sentence")
+    file_lob = factory.LazyFunction(lambda: fake.sentence(25).encode())
+    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
+    create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    created_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.create_date, end_date="now")
+    )
+    last_upd_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_date, end_date="now")
+    )
+    creator_id = factory.Faker("first_name")
+    last_upd_id = factory.Faker("first_name")
+    syn_att_folder_id = factory.Faker("random_int", min=1000, max=10000000)
+
+
 class TforecastFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -1363,42 +1388,12 @@ class StagingTgroupsFactory(AbstractStagingFactory):
     creator_id = factory.Faker("first_name")
 
 
-####################################
-# Transfer Table Factories
-####################################
-
-
-class TransferTopportunityFactory(BaseFactory):
+class StagingTsynopsisAttachmentFactory(TsynopsisAttachmentFactory, AbstractStagingFactory):
     class Meta:
-        model = transfer_topportunity_models.TransferTopportunity
+        model = staging.attachment.TsynopsisAttachment
 
-    opportunity_id = factory.Sequence(lambda n: n)
-
-    oppnumber = factory.Sequence(lambda n: f"ABC-{n}-XYZ-001")
-    opptitle = factory.LazyFunction(lambda: f"Detailed research into {fake.job()} industry")
-
-    owningagency = factory.Faker("agency_code")
-
-    oppcategory = factory.fuzzy.FuzzyChoice(OpportunityCategoryLegacy)
-    # only set the category explanation if category is Other
-    category_explanation = factory.Maybe(
-        decider=factory.LazyAttribute(lambda o: o.oppcategory == OpportunityCategoryLegacy.OTHER),
-        yes_declaration=factory.Sequence(lambda n: f"Category as chosen by order #{n * n - 1}"),
-        no_declaration=None,
-    )
-
-    is_draft = "N"  # Because we filter out drafts, just default these to False
-
-    revision_number = 0
-
-    # Make sure updated_at is after created_at just to make the data realistic
-    created_at = factory.Faker("date_time")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
-    )
-
-    created_date = factory.LazyAttribute(lambda o: o.created_at.date())
-    last_upd_date = factory.LazyAttribute(lambda o: o.updated_at.date())
+    opportunity = factory.SubFactory(StagingTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
 ####################################
@@ -1591,6 +1586,14 @@ class ForeignTfundinstrSynopsisHistFactory(ForeignTfundinstrSynopsisFactory):
     synopsis = factory.SubFactory(ForeignTsynopsisHistFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
     revision_number = factory.LazyAttribute(lambda s: s.synopsis.revision_number)
+
+
+class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
+    class Meta:
+        model = foreign.attachment.TsynopsisAttachment
+
+    opportunity = factory.SubFactory(ForeignTopportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
 ##
@@ -1986,3 +1989,17 @@ class UserSavedOpportunityFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class UserSavedSearchFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedSearch
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    saved_search_id = Generators.UuidObj
+
+    name = factory.Faker("sentence")
+
+    search_query = factory.LazyAttribute(lambda s: s.search_query)

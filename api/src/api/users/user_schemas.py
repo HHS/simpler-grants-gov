@@ -1,4 +1,7 @@
-from src.api.opportunities_v1.opportunity_schemas import SavedOpportunityResponseV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunitySearchRequestV1Schema,
+    SavedOpportunityResponseV1Schema,
+)
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
@@ -78,8 +81,56 @@ class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
 class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(SavedOpportunityResponseV1Schema),
         metadata={"description": "List of saved opportunities"},
     )
+
+
+class UserSaveSearchRequestSchema(Schema):
+    name = fields.String(
+        required=True,
+        metadata={"description": "Name of the saved search", "example": "Example search"},
+    )
+    search_query = search_query = fields.Nested(OpportunitySearchRequestV1Schema)
+
+
+class UserSaveSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class SavedSearchResponseSchema(Schema):
+    saved_search_id = fields.UUID(
+        metadata={
+            "description": "The ID of the saved search",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    name = fields.String(
+        metadata={
+            "description": "Name of the saved search",
+            "example": "Grant opportunities in California",
+        }
+    )
+    search_query = fields.Nested(
+        OpportunitySearchRequestV1Schema,
+        metadata={"description": "The saved search query parameters"},
+    )
+    created_at = fields.DateTime(
+        metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
+    )
+
+
+class UserSavedSearchesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
+    )
+
+
+class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

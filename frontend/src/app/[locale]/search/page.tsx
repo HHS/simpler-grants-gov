@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import withFeatureFlag from "src/hoc/search/withFeatureFlag";
+import withFeatureFlag from "src/hoc/withFeatureFlag";
 import { LocalizedPageProps } from "src/types/intl";
 import { SearchParamsTypes } from "src/types/search/searchRequestTypes";
 import { Breakpoints } from "src/types/uiTypes";
@@ -22,7 +22,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Search.title"),
-    description: t("Index.meta_description"),
+    description: t("Search.meta_description"),
   };
   return meta;
 }

@@ -51,7 +51,6 @@ def test_bulk_upsert(search_client, generic_index):
     ]
 
     search_client.bulk_upsert(generic_index, records, primary_key_field="id")
-
     # Verify the records are in the index
     for record in records:
         assert search_client._client.get(generic_index, record["id"])["_source"] == record
@@ -110,14 +109,15 @@ def test_swap_alias_index(search_client, generic_index):
     search_client.bulk_upsert(tmp_index, tmp_index_records, primary_key_field="id")
 
     # Set the alias
-    search_client.swap_alias_index(tmp_index, alias_name, delete_prior_indexes=True)
+    search_client.swap_alias_index(tmp_index, alias_name)
 
     # Can search by this alias and get records from the tmp index
     resp = search_client.search(alias_name, {}, include_scores=False)
     assert resp.records == tmp_index_records
 
     # Swap the index to the generic one + delete the tmp one
-    search_client.swap_alias_index(generic_index, alias_name, delete_prior_indexes=True)
+    search_client.swap_alias_index(generic_index, alias_name)
+    search_client.cleanup_old_indices("test-tmp-index", [generic_index])
 
     resp = search_client.search(alias_name, {}, include_scores=False)
     assert resp.records == records
@@ -213,3 +213,29 @@ def test_get_connection_parameters():
         "connection_class": opensearchpy.RequestsHttpConnection,
         "pool_maxsize": 10,
     }
+
+
+def test_cleanup_old_indices(search_client):
+    index_name_1 = f"test-index-{uuid.uuid4().int}"  # old index
+    index_name_2 = f"test-index-{uuid.uuid4().int}"  # old index
+    index_name_3 = f"partial-refresh-index-{uuid.uuid4().int}"  # old index
+    index_name_4 = f"test-index-{uuid.uuid4().int}"  # new index
+
+    search_client.create_index(index_name_1)
+    search_client.create_index(index_name_2)
+    search_client.create_index(index_name_3)
+    search_client.create_index(index_name_4)
+
+    # check all indexes were created
+    assert search_client.index_exists(index_name_1) is True
+    assert search_client.index_exists(index_name_2) is True
+    assert search_client.index_exists(index_name_3) is True
+    assert search_client.index_exists(index_name_4) is True
+
+    # expect old index with same prefix to be deleted and others to remain
+    search_client.cleanup_old_indices("test-index", [index_name_4])
+
+    assert search_client.index_exists(index_name_1) is False
+    assert search_client.index_exists(index_name_2) is False
+    assert search_client.index_exists(index_name_3) is True
+    assert search_client.index_exists(index_name_4) is True

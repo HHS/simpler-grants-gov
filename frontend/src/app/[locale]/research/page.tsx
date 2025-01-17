@@ -18,7 +18,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("Research.page_title"),
-    description: t("Research.meta_description"),
+    description: t("Index.meta_description"),
   };
   return meta;
 }
@@ -27,11 +27,11 @@ export default function Research({ params: { locale } }: LocalizedPageProps) {
   setRequestLocale(locale);
   return (
     <>
-      <BetaAlert />
+      <BetaAlert containerClasses="margin-top-5" />
       <Breadcrumbs breadcrumbList={RESEARCH_CRUMBS} />
       <ResearchIntro />
       <ResearchMethodology />
-      <div className="padding-top-4 bg-gray-5">
+      <div className="padding-top-4 bg-base-lightest">
         <ResearchArchetypes />
         <ResearchThemes />
       </div>

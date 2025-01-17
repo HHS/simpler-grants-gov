@@ -2,22 +2,8 @@ import uuid
 
 import pytest
 
-from src.auth.api_jwt_auth import create_jwt_for_user
 from src.db.models.user_models import UserSavedOpportunity
-from tests.src.db.models.factories import OpportunityFactory, UserFactory
-
-
-@pytest.fixture
-def user(enable_factory_create, db_session):
-    user = UserFactory.create()
-    db_session.commit()
-    return user
-
-
-@pytest.fixture
-def user_auth_token(user, db_session):
-    token, _ = create_jwt_for_user(user, db_session)
-    return token
+from tests.src.db.models.factories import OpportunityFactory
 
 
 @pytest.fixture(autouse=True)

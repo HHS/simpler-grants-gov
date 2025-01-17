@@ -18,7 +18,9 @@ import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
+from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
+from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
 from src.db import models
 from src.db.models.foreign import metadata as foreign_metadata
@@ -30,6 +32,18 @@ from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def user(enable_factory_create, db_session):
+    return factories.UserFactory.create()
+
+
+@pytest.fixture
+def user_auth_token(user, db_session):
+    token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+    return token
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -75,7 +89,9 @@ def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
         for file in files:
             file_path = os.path.join(root, file)
             s3_client.upload_file(
-                file_path, Bucket=mock_s3_bucket, Key=os.path.relpath(file_path, test_folder_path)
+                file_path,
+                Bucket=mock_s3_bucket,
+                Key=os.path.relpath(file_path, test_folder_path),
             )
 
     # Check files were uploaded to mock s3
@@ -365,6 +381,26 @@ def mock_s3_bucket_resource(mock_s3):
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def other_mock_s3_bucket_resource(mock_s3):
+    bucket = mock_s3.Bucket("other_test_bucket")
+    bucket.create()
+    yield bucket
+
+
+@pytest.fixture
+def other_mock_s3_bucket(other_mock_s3_bucket_resource):
+    yield other_mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+    return S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+    )
 
 
 ####################

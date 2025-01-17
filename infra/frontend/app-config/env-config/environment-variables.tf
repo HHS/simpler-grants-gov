@@ -7,6 +7,8 @@ locals {
     NEW_RELIC_ENABLED = "true"
     # see https://github.com/newrelic/node-newrelic?tab=readme-ov-file#setup
     NODE_OPTIONS = "-r newrelic"
+    # expose the current AWS Env to the FE Next Node Server at Runtime
+    ENVIRONMENT = var.environment
   }
 
   # Configuration for secrets
@@ -44,6 +46,11 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
     },
+    # URL for the API login route.
+    AUTH_LOGIN_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/auth-login-url"
+    },
     NEW_RELIC_APP_NAME = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/new-relic-app-name"
@@ -59,6 +66,18 @@ locals {
     FEATURE_OPPORTUNITY_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-opportunity-off"
-    }
+    },
+    SESSION_SECRET = {
+      manage_method     = "generated"
+      secret_store_name = "/${var.app_name}/${var.environment}/session-secret"
+    },
+    FEATURE_AUTH_ON = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-auth-on"
+    },
+    API_JWT_PUBLIC_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-jwt-public-key"
+    },
   }
 }

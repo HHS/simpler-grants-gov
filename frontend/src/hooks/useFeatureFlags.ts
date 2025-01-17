@@ -1,48 +1,70 @@
-import Cookies from "js-cookie";
-import { FeatureFlagsManager } from "src/services/FeatureFlagManager";
+"use client";
 
-import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { isBoolean } from "lodash";
+import {
+  defaultFeatureFlags,
+  FeatureFlags,
+} from "src/constants/defaultFeatureFlags";
+import {
+  FEATURE_FLAGS_KEY,
+  getCookieExpiration,
+} from "src/services/featureFlags/featureFlagHelpers";
+
+import { useCallback, useEffect, useState } from "react";
 
 /**
- * React hook for reading and managing feature flags in client-side code.
+ * Allows client components to access feature flags by
+ *  - setting the cookie
+ *  - reading the cookie
  *
- * ```
- * function MyComponent() {
- *   const {
- *     featureFlagsManager,  // An instance of FeatureFlagsManager
- *     mounted,  // Useful for hydration
- *     setFeatureFlag,  // Proxy for featureFlagsManager.setFeatureFlagCookie that handles updating state
- *   } = useFeatureFlags()
- *
- *   if (featureFlagsManager.isFeatureEnabled("someFeatureFlag")) {
- *     // Do something
- *   }
- *
- *   if (!mounted) {
- *     // To allow hydration
- *     return null
- *   }
- *
- *   return (
- *     ...
- *   )
- * }
- * ```
  */
-export function useFeatureFlags() {
-  const [featureFlagsManager, setFeatureFlagsManager] = useState(
-    new FeatureFlagsManager(Cookies),
-  );
-  const [mounted, setMounted] = useState(false);
+export function useFeatureFlags(): {
+  setFeatureFlag: (flagName: string, value: boolean) => void;
+  checkFeatureFlag: (flagName: string) => boolean;
+  featureFlags: FeatureFlags;
+} {
+  const [featureFlags, setFeatureFlags] =
+    useState<FeatureFlags>(defaultFeatureFlags);
 
+  // a workaround, as setting this in default state value results in hydration error
   useEffect(() => {
-    setMounted(true);
+    const flagsFromCookie = JSON.parse(
+      Cookies.get(FEATURE_FLAGS_KEY) || "{}",
+    ) as FeatureFlags;
+    setFeatureFlags(flagsFromCookie);
   }, []);
 
-  function setFeatureFlag(name: string, value: boolean) {
-    featureFlagsManager.setFeatureFlagCookie(name, value);
-    setFeatureFlagsManager(new FeatureFlagsManager(Cookies));
-  }
+  // Note that values set in cookies will be persistent per browser session unless explicitly overwritten
+  const setFeatureFlag = useCallback(
+    (flagName: string, value: boolean) => {
+      const newFlags = {
+        ...featureFlags,
+        [flagName]: value,
+      };
+      setFeatureFlags(newFlags);
+      Cookies.set(FEATURE_FLAGS_KEY, JSON.stringify(newFlags), {
+        expires: getCookieExpiration(),
+      });
+    },
+    [featureFlags, setFeatureFlags],
+  );
 
-  return { featureFlagsManager, mounted, setFeatureFlag };
+  const checkFeatureFlag = useCallback(
+    (flagName: string): boolean => {
+      const value = featureFlags[flagName];
+      if (!isBoolean(value)) {
+        console.error("Unknown or misconfigured feature flag: ", flagName);
+        return false;
+      }
+      return value;
+    },
+    [featureFlags],
+  );
+
+  return {
+    setFeatureFlag,
+    checkFeatureFlag,
+    featureFlags,
+  };
 }
