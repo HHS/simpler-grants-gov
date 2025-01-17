@@ -1,6 +1,7 @@
 """Test the validation schemas for GitHub API responses."""
 
-import pytest
+import pytest  # noqa: I001
+from pydantic import ValidationError
 from analytics.integrations.github.validation import (
     IssueContent,
     IterationValue,
@@ -8,7 +9,6 @@ from analytics.integrations.github.validation import (
     ProjectItem,
     SingleSelectValue,
 )
-from pydantic import ValidationError
 
 # #############################################
 # Test data constants

@@ -1,5 +1,6 @@
 """Pydantic schemas for validating GitHub API responses."""
 
+# pylint: disable=no-self-argument
 from datetime import datetime, timedelta
 
 from pydantic import BaseModel, Field, computed_field, model_validator
