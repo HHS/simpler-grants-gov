@@ -97,7 +97,7 @@ class LoadOpportunitiesToIndex(Task):
                                 "field": "_ingest._value.data",
                             }
                         },
-                        "ignore_missing": True
+                        "ignore_missing": True,
                     }
                 }
             ],
