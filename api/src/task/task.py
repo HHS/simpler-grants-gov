@@ -94,7 +94,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             raise ValueError("Job is not initialized")
 
         self.job.job_status = job_status
-        self.job.metrics = metrics
+        self.job.metrics = self.metrics
         self.db_session.commit()
 
     @abc.abstractmethod
