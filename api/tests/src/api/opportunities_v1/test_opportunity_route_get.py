@@ -71,7 +71,7 @@ def test_get_opportunity_with_attachment_200(
     client, api_auth_token, enable_factory_create, db_session
 ):
     # Create an opportunity with an attachment
-    opportunity = OpportunityFactory.create()
+    opportunity = OpportunityFactory.create(has_attachments=True)
     db_session.commit()
 
     # Make the GET request
@@ -109,14 +109,15 @@ def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_
 
 
 def test_get_opportunity_s3_endpoint_url_200(
-    upload_opportunity_attachment_s3, client, api_auth_token, enable_factory_create, db_session
+    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket
 ):
     # Create an opportunity with a specific attachment
     opportunity = OpportunityFactory.create(opportunity_attachments=[])
-    bucket = "test_bucket"
     object_name = "test_file_1.txt"
-    file_loc = f"s3://{bucket}/{object_name}"
-    OpportunityAttachmentFactory.create(file_location=file_loc, opportunity=opportunity)
+    file_loc = f"s3://{mock_s3_bucket}/{object_name}"
+    OpportunityAttachmentFactory.create(
+        file_location=file_loc, opportunity=opportunity, file_contents="Hello, world"
+    )
 
     # Make the GET request
     resp = client.get(
