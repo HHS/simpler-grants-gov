@@ -233,3 +233,21 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
 
         validate_opportunity_attachment(db_session, synopsis_attachment, expect_in_db=False)
+
+    def test_transform_opportunity_attachment_null_file_lob(
+        self, db_session, transform_opportunity_attachment, s3_config
+    ):
+        opportunity = f.OpportunityFactory.create(opportunity_attachments=[])
+        insert = setup_opportunity_attachment(
+            create_existing=False,
+            opportunity=opportunity,
+            config=s3_config,
+            source_values={"file_lob": None},
+        )
+
+        with pytest.raises(ValueError, match="Attachment is null, cannot copy"):
+            transform_opportunity_attachment.process_opportunity_attachment(
+                insert, None, opportunity
+            )
+
+        assert insert.transformed_at is None
