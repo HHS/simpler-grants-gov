@@ -35,9 +35,8 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def run(self) -> None:
         try:
             # Create initial job record
-            job_id = uuid.uuid4()
             self.job = JobTable(
-                job_id=job_id, job_type=self.cls_name(), job_status=JobStatus.STARTED
+                job_type=self.cls_name(), job_status=JobStatus.STARTED
             )
             self.db_session.add(self.job)
             self.db_session.commit()
