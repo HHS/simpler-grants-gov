@@ -57,8 +57,6 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
             # Update job status to completed
             self.update_job(JobStatus.COMPLETED, metrics=self.metrics)
-            self.job.metrics = self.metrics
-            self.db_session.commit()
 
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
