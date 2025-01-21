@@ -82,7 +82,7 @@ The API can be run in debug mode that allows for remote attach debugging (curren
 
 Run `export PY_RUN_APPROACH=local` to run API and test functions locally when running commands in the Makefile. For example, `make test` or `make format` will run outside of Docker.
 
-**Note:** even with the native mode, many components like the DB and API will only ever run in Docker, and you should always make sure that any implementations work within docker.
+**Note:** even with the native mode, many components like the DB and API will only ever run in Docker, and you should always make sure that any implementations work within Docker.
 
 Running in the native/local approach may require additional packages to be installed on your machine to get working.
 
