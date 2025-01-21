@@ -62,7 +62,7 @@ To run tests:
 - `npm run test-update` - Updates test snapshots
 - `npm run test-watch` - Runs tests in [watch](https://jestjs.io/docs/cli#--watch) mode. Tests will re-run when files are changed, and an interactive prompt will allow you to run specific tests or update snapshots.
 
-A subset of tests can be ran by passing a pattern to the script. For example, to only run tests in `tests/pages/`:
+A subset of tests can be run by passing a pattern to the script. For example, to only run tests in `tests/pages/`:
 
 ```sh
 npm run test-watch -- pages
