@@ -14,7 +14,7 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-Run `make init && make run logs` to start the local containers. The application will be available at `http://localhost:8080/docs`.
+Run `make init && make run logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
 This stands up the following services:
 
@@ -22,8 +22,8 @@ This stands up the following services:
 * Postgres database
 * OpenSearch node
 * OpenSearch Dashboard (http://localhost:5601)
-* localstack
-* mock oauth server (http://localhost:5001)
+* [localstack](https://www.localstack.cloud) for mocking s3 actions locally
+* [mock oauth2 server](https://github.com/navikt/mock-oauth2-server) (http://localhost:5001)
 
 ### Seed data
 
@@ -36,6 +36,10 @@ This API uses a very simple [ApiKey authentication approach](https://apiflask.co
 ### User Authentication
 
 Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running the user.
+
+#### Mock Oauth2 Server
+
+A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](../../api/docker-compose.yml) file. It creates a mock endpoint that is configured to work with the API to stand in for login.gov for local development, and is available at `http://localhost:5001` when running the API containers.
 
 ### Environment Variables
 

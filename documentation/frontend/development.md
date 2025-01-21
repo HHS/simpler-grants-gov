@@ -192,7 +192,12 @@ Running authentication locally requires running the API, directing the API redir
 1. Run `make setup-env-override-file` to create the `override.env` file in the `/api` folder
 2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to `/frontend/.env.local` file which creates the necessary keys
 3. Add `LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback` to the `api/override.env` so the API redirects to the correct callback route
-4. Start the API and frontend for development
+4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
+
+#### Mock Oauth2 Server
+
+When clicking "Sign in" or other buttons that simulate the login flow locally, shoule be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
+
 
 ### New Relic and Sendy (email)
 
