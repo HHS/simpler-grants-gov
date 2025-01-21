@@ -371,4 +371,4 @@ class LoadOpportunitiesToIndex(Task):
             self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
         )
 
-        return loaded_opportun
+        return loaded_opportunity_ids
