@@ -168,7 +168,7 @@ const Header = ({ locale }: Props) => {
         basic={true}
         className="desktop:position-sticky top-0 desktop:z-500 bg-white border-bottom-2px border-primary-vivid"
       >
-        <div className="usa-nav-container display-flex flex-align-end">
+        <div className="usa-nav-container display-flex flex-justify">
           <div className="usa-navbar border-bottom-0">
             <Title className="margin-y-2">
               <div className="display-flex flex-align-center">
