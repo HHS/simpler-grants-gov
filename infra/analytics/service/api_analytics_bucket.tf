@@ -21,11 +21,6 @@ data "aws_iam_policy_document" "api_analytics_bucket_access" {
       "${data.aws_ssm_parameter.api_analytics_bucket_arn.value}/*",
     ]
     actions = ["s3:Get*", "s3:List*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = [module.service.app_service_arn]
-    }
   }
 }
 
