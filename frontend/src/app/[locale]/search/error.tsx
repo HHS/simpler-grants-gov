@@ -1,7 +1,7 @@
 "use client";
 
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import { FrontendErrorDetails } from "src/errors";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 import { Breakpoints, ErrorProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";

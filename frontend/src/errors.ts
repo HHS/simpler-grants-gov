@@ -4,15 +4,8 @@
  * That data will need to be parsed back out into JSON when reading the error
  */
 
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-
-export interface FrontendErrorDetails {
-  status?: number;
-  searchInputs?: QueryParamData;
-  field?: string;
-  message?: string;
-  type?: string;
-}
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
