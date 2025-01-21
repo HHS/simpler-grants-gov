@@ -461,6 +461,3 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
     has_update: Mapped[bool]
-    last_loaded_at: Mapped[datetime | None] = mapped_column(
-        nullable=True,
-    )

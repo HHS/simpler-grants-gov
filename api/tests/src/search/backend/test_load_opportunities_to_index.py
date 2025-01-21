@@ -84,7 +84,6 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         for opportunity in opportunities:
             OpportunityChangeAuditFactory.create(
                 opportunity=opportunity,
-                last_loaded_at=None,
             )
 
         load_opportunities_to_index.run()
@@ -253,7 +252,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
 
         for opportunity in itertools.chain(opportunities, test_opps):
-            OpportunityChangeAuditFactory.create(opportunity=opportunity, last_loaded_at=None)
+            OpportunityChangeAuditFactory.create(opportunity=opportunity, updated_at=None)
 
         load_opportunities_to_index.run()
 
@@ -319,7 +318,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
 
         # Add to queue
-        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, last_loaded_at=None)
+        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, updated_at=None)
 
         load_opportunities_to_index.run()
 
@@ -328,7 +327,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
             db_session.execute(
                 select(OpportunityChangeAudit).where(
                     OpportunityChangeAudit.opportunity_id == test_opportunity.opportunity_id,
-                    OpportunityChangeAudit.last_loaded_at.is_(None),
+                    OpportunityChangeAudit.updated_at.is_(None),
                 )
             )
             .scalars()
@@ -341,16 +340,15 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         test_opportunity = OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
 
         # Add to queue
-        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, last_loaded_at=None)
-
-        load_opportunities_to_index.run()
+        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, updated_at=None)
+        now = get_now_us_eastern_datetime()
 
         # Verify queue was not cleared
         remaining_queue = (
             db_session.execute(
                 select(OpportunityChangeAudit).where(
                     OpportunityChangeAudit.opportunity_id == test_opportunity.opportunity_id,
-                    OpportunityChangeAudit.last_loaded_at.is_(None),
+                    OpportunityChangeAudit.updated_at <= now,
                 )
             )
             .scalars()

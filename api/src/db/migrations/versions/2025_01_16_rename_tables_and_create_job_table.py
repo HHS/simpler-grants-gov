@@ -80,7 +80,6 @@ def upgrade():
     op.create_table(
         "opportunity_change_audit",
         sa.Column("opportunity_id", sa.BigInteger(), nullable=False),
-        sa.Column("last_loaded_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("has_update", sa.Boolean(), nullable=False),
         sa.Column(
             "created_at",
@@ -116,10 +115,9 @@ def upgrade():
     op.execute(
         text(
             """
-            INSERT INTO api.opportunity_change_audit (opportunity_id, last_loaded_at, created_at, updated_at)
+            INSERT INTO api.opportunity_change_audit (opportunity_id, created_at, updated_at)
             SELECT
                 opportunity_id,
-                updated_at as last_loaded_at,
                 CURRENT_TIMESTAMP as created_at,
                 CURRENT_TIMESTAMP as updated_at
             FROM api.opportunity

@@ -146,22 +146,17 @@ class LoadOpportunitiesToIndex(Task):
             .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
         )
 
-        # Add timestamp filter if we have a last successful job
-        if last_successful_job:
-            query = query.where(
-                (OpportunityChangeAudit.last_loaded_at.is_(None))
-                | (OpportunityChangeAudit.last_loaded_at > last_successful_job.created_at)
-            )
-        else:
-            # If no previous successful job, get unprocessed records
-            query = query.where(OpportunityChangeAudit.last_loaded_at.is_(None))
+        # Add timestamp filter
+        query = query.where(
+            (OpportunityChangeAudit.updated_at.is_(None))
+            | (OpportunityChangeAudit.updated_at > last_successful_job.created_at)
+        )
 
         queued_opportunities = self.db_session.execute(query).scalars().all()
 
         # Process updates and inserts
         processed_opportunity_ids = set()
         opportunities_to_index = []
-        now = get_now_us_eastern_datetime()
 
         for opportunity in queued_opportunities:
             logger.info(
@@ -185,11 +180,11 @@ class LoadOpportunitiesToIndex(Task):
             loaded_ids = self.load_records(opportunities_to_index)
             logger.info(f"Indexed {len(loaded_ids)} opportunities")
 
-            # Update last_loaded_at timestamp instead of deleting records
+            # Update updated_at timestamp instead of deleting records
             self.db_session.execute(
                 update(OpportunityChangeAudit)
                 .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                .values(last_loaded_at=now, has_update=False)
+                .values(has_update=False)
             )
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
