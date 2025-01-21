@@ -194,10 +194,14 @@ Running authentication locally requires running the API, directing the API redir
 3. Add `LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback` to the `api/override.env` so the API redirects to the correct callback route
 4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
 
+#### Login flow
+The [documentation/api/authentication.md](../api/authentication.md) details the login flow from the frontend → API → login.gov → API → frontend.
+
+The `/api/auth/callback` route handler receives a JSON web token as query parameter, uses the `API_JWT_PUBLIC_KEY` env variable to verify that it was created by the API, sets a cookie with the token, then later uses that token to verify the user identity in `/api/auth/session` and other routes.
+
 #### Mock Oauth2 Server
 
 When clicking "Sign in" or other buttons that simulate the login flow locally, shoule be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
-
 
 ### New Relic and Sendy (email)
 
