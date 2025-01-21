@@ -1,7 +1,6 @@
 import abc
 import logging
 import time
-import uuid
 from enum import StrEnum
 from typing import Any
 
@@ -35,9 +34,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def run(self) -> None:
         try:
             # Create initial job record
-            self.job = JobTable(
-                job_type=self.cls_name(), job_status=JobStatus.STARTED
-            )
+            self.job = JobTable(job_type=self.cls_name(), job_status=JobStatus.STARTED)
             self.db_session.add(self.job)
             self.db_session.commit()
 

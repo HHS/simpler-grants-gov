@@ -147,10 +147,13 @@ class LoadOpportunitiesToIndex(Task):
         )
 
         # Add timestamp filter
-        query = query.where(
-            (OpportunityChangeAudit.updated_at.is_(None))
-            | (OpportunityChangeAudit.updated_at > last_successful_job.created_at)
-        )
+        if last_successful_job:
+            query = query.where(
+                (OpportunityChangeAudit.updated_at.is_(None))
+                | (OpportunityChangeAudit.updated_at > last_successful_job.created_at)
+            )
+        else:
+            query = query.where(OpportunityChangeAudit.updated_at.is_(None))
 
         queued_opportunities = self.db_session.execute(query).scalars().all()
 
@@ -368,4 +371,4 @@ class LoadOpportunitiesToIndex(Task):
             self.index_name, json_records, "opportunity_id", pipeline="multi-attachment"
         )
 
-        return loaded_opportunity_ids
+        return loaded_opportun
