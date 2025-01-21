@@ -38,6 +38,11 @@ locals {
       secret_store_name = "/api/${var.environment}/api-auth-token"
     }
 
+    NEW_RELIC_LICENSE_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/new-relic-license-key"
+    }
+
     LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/login-gov-client-assertion-private-key"
