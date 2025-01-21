@@ -25,33 +25,16 @@ export interface ParsedError {
   details?: FrontendErrorDetails;
 }
 
-function isValidJSON(str: string) {
-  try {
-    JSON.parse(str);
-    return true;
-  } catch (e) {
-    return false; // String is not valid JSON
-  }
-}
-
-function createBlankParsedError(): ParsedError {
-  return {
-    type: "NetworkError",
-    searchInputs: {
-      query: "",
-      status: "",
-      fundingInstrument: "",
-      eligibility: "",
-      agency: "",
-      category: "",
-      sortby: undefined,
-      page: "1",
-      actionType: "initialLoad",
-    },
-    message: "Invalid error message JSON returned",
-    status: -1,
-  };
-}
+/*
+  - expand the layout to ensure that server side rendering can happen on the agency filter
+  - - problem is that then we would not be able to repopulate the form state on error
+  - mock out the agency list based on hardcoded options
+  - - this just seems like a bad hack, and we have to bloat our payload with bad data
+  - - also the inconsistency would be very confusing
+  - explicitly stash the agency list in local storage and retrieve it here?
+  - - probably creating a local storage provider in the layout is a good idea, and we can use it to store the agency list for use here
+  - - we'll also need to restructure the filters to support pulling from local storage instead of the API (since we just pass a promise containing the agencies down, maybe it's enough to make how we create that promise more flexible)
+*/
 
 export default function SearchError({ error, reset }: ErrorProps) {
   const t = useTranslations("Search");
@@ -73,28 +56,9 @@ export default function SearchError({ error, reset }: ErrorProps) {
     console.error(error);
   }, [error]);
 
-  // The error message is passed as an object that's been stringified.
-  // Parse it here.
-  let parsedErrorData;
-
-  if (!isValidJSON(error.message)) {
-    // the error likely is just a string with a non-specific Server Component error when running the built app
-    // "An error occurred in the Server Components render. The specific message is omitted in production builds..."
-    parsedErrorData = createBlankParsedError();
-  } else {
-    // Valid error thrown from server component
-    parsedErrorData = JSON.parse(error.message) as ParsedError;
-  }
   const convertedSearchParams = convertSearchParamsToProperTypes(
-    parsedErrorData.searchInputs,
+    Object.fromEntries(searchParams.entries().toArray()),
   );
-  const { agency, category, eligibility, fundingInstrument, query, status } =
-    convertedSearchParams;
-
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   // note that the validation error will contain untranslated strings
   const ErrorAlert =
     parsedErrorData.details && parsedErrorData.type === "ValidationError" ? (
@@ -113,19 +77,19 @@ export default function SearchError({ error, reset }: ErrorProps) {
         </div>
         <div className="grid-row grid-gap">
           <div className="tablet:grid-col-4">
-            <ContentDisplayToggle
+            {/* <ContentDisplayToggle
               showCallToAction={t("filterDisplayToggle.showFilters")}
               hideCallToAction={t("filterDisplayToggle.hideFilters")}
               breakpoint={Breakpoints.TABLET}
             >
-              {/* <SearchFilters
+              <SearchFilters
                 opportunityStatus={status}
                 eligibility={eligibility}
                 category={category}
                 fundingInstrument={fundingInstrument}
                 agency={agency}
-              /> */}
-            </ContentDisplayToggle>
+              />
+            </ContentDisplayToggle> */}
           </div>
           <div className="tablet:grid-col-8">{ErrorAlert}</div>
         </div>
