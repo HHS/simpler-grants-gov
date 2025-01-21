@@ -119,6 +119,7 @@ class AbstractTransformSubTask(SubTask):
         source_model: Type[transform_constants.S],
         destination_model: Type[transform_constants.D],
         join_clause: Sequence,
+        batch_size: int = 5000,
     ) -> list[Tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
@@ -134,7 +135,7 @@ class AbstractTransformSubTask(SubTask):
                     isouter=True,
                 )
                 .where(source_model.transformed_at.is_(None))
-                .execution_options(yield_per=5000)
+                .execution_options(yield_per=batch_size)
             ),
         )
 

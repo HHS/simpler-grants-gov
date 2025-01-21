@@ -13,8 +13,15 @@ from src.db.models.staging.attachment import TsynopsisAttachment
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
 from src.util import file_util
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+class TransformOpportunityAttachmentConfig(PydanticBaseEnvConfig):
+    # This is just for testing, we want to be able to only
+    # import a few attachments when manually testing.
+    total_attachments_to_process: int | None = None
 
 
 class TransformOpportunityAttachment(AbstractTransformSubTask):
@@ -27,6 +34,8 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
 
         self.s3_config = s3_config
 
+        self.attachment_config = TransformOpportunityAttachmentConfig()
+
     def transform_records(self) -> None:
 
         # Fetch staging attachment / our attachment / opportunity groups
@@ -34,6 +43,11 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             TsynopsisAttachment,
             OpportunityAttachment,
             [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id],
+            batch_size=(
+                self.attachment_config.total_attachments_to_process
+                if self.attachment_config.total_attachments_to_process
+                else 1000
+            ),
         )
 
         self.process_opportunity_attachment_group(records)
@@ -44,8 +58,19 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             tuple[TsynopsisAttachment, OpportunityAttachment | None, Opportunity | None]
         ],
     ) -> None:
+
+        records_processed = 0
         for source_attachment, target_attachment, opportunity in records:
             try:
+                # Note we increment first in case there are errors, want it to always increment
+                records_processed += 1
+                if (
+                    self.attachment_config.total_attachments_to_process is not None
+                    and self.attachment_config.total_attachments_to_process <= records_processed
+                ):
+                    logger.info("Ending processing early due to configuration")
+                    break
+
                 self.process_opportunity_attachment(
                     source_attachment, target_attachment, opportunity
                 )
@@ -188,5 +213,9 @@ def transform_opportunity_attachment(
 def write_file(
     source_attachment: TsynopsisAttachment, destination_attachment: OpportunityAttachment
 ) -> None:
+
+    if source_attachment.file_lob is None:
+        raise ValueError("Attachment is null, cannot copy")
+
     with file_util.open_stream(destination_attachment.file_location, "wb") as outfile:
         outfile.write(source_attachment.file_lob)
