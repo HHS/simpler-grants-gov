@@ -153,7 +153,7 @@ module "service" {
 
   extra_policies = merge(
     {
-      api_analytics_bucket_access = data.aws_iam_policy_document.api_analytics_bucket_access.json
+      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
     },
   )
 }
