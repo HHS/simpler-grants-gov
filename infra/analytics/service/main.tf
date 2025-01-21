@@ -150,4 +150,10 @@ module "service" {
       valueFrom = module.secrets[secret_name].secret_arn
     }],
   )
+
+  extra_policies = merge(
+    {
+      api_analytics_bucket_access = data.aws_iam_policy_document.api_analytics_bucket_access.json
+    },
+  )
 }
