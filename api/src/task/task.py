@@ -35,9 +35,8 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def run(self) -> None:
         try:
             # Create initial job record
-            job_id = uuid.uuid4()
             self.job = JobTable(
-                job_id=job_id, job_type=self.cls_name(), job_status=JobStatus.STARTED
+                job_type=self.cls_name(), job_status=JobStatus.STARTED
             )
             self.db_session.add(self.job)
             self.db_session.commit()
@@ -58,8 +57,6 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
             # Update job status to completed
             self.update_job(JobStatus.COMPLETED, metrics=self.metrics)
-            self.job.metrics = self.metrics
-            self.db_session.commit()
 
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
@@ -94,7 +91,7 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             raise ValueError("Job is not initialized")
 
         self.job.job_status = job_status
-        self.job.metrics = metrics
+        self.job.metrics = self.metrics
         self.db_session.commit()
 
     @abc.abstractmethod
