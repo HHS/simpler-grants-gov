@@ -2,7 +2,7 @@
 
 This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
-**Running in locally is the default**, but it can be useful to run the built images in order to troubleshoot and to connect directly with the local API application for development.
+**Running locally is the default**, but it can be useful to run the built Docker images in order to more closely simulate our deployed environment, troubleshoot production issues, and to connect directly with the local API application for development.
 
 ## Local (non-Docker)
 
