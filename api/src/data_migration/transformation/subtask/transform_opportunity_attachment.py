@@ -188,5 +188,9 @@ def transform_opportunity_attachment(
 def write_file(
     source_attachment: TsynopsisAttachment, destination_attachment: OpportunityAttachment
 ) -> None:
+
+    if source_attachment.file_lob is None:
+        raise ValueError("Attachment is null, cannot copy")
+
     with file_util.open_stream(destination_attachment.file_location, "wb") as outfile:
         outfile.write(source_attachment.file_lob)

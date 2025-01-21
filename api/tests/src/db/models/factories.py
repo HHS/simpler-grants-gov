@@ -1009,7 +1009,7 @@ class TsynopsisAttachmentFactory(BaseFactory):
     file_name = factory.Faker("file_name", category="text")
     file_desc = factory.Faker("sentence")
     file_lob = factory.LazyFunction(lambda: fake.sentence(25).encode())
-    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
+    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob) if x.file_lob else 0)
     create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     created_date = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.create_date, end_date="now")
