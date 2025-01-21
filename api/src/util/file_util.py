@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-import botocore
+import botocore.client
 import smart_open
 from botocore.config import Config
 

@@ -17,7 +17,7 @@ locals {
   #   - If the origin is an S3 bucket, and the S3 bucket's desired domain name is null,
   #     then return null
   cdn_domain_name         = var.enable_alb_cdn && var.domain != null ? var.domain : var.enable_s3_cdn && var.s3_cdn_domain_name != null ? var.s3_cdn_domain_name : null
-  cdn_domain_name_env_var = local.cdn_domain_name != null ? local.cdn_domain_name : aws_cloudfront_distribution.cdn[0].domain_name
+  cdn_domain_name_env_var = local.cdn_domain_name != null ? local.cdn_domain_name : length(aws_cloudfront_distribution.cdn) != 0 ? aws_cloudfront_distribution.cdn[0].domain_name : null
 
   # The domain name of the origin, ie. where the content is being served from.
   #   - If the origin is an ALB, this is the DNS name of the ALB

@@ -163,12 +163,14 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         opportunity = OpportunityFactory.create(opportunity_attachments=[])
         OpportunityAttachmentFactory.create(
             opportunity=opportunity,
+            file_contents=content,
             file_location=file_path_1,
             file_name=filename_1,
         )
 
         OpportunityAttachmentFactory.create(
             opportunity=opportunity,
+            file_contents=content,
             file_location=file_path_2,
             file_name=filename_2,
         )
