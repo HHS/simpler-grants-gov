@@ -35,7 +35,7 @@ This API uses a very simple [ApiKey authentication approach](https://apiflask.co
 
 ### User Authentication
 
-Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running the user.
+Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running user authentication within the app.
 
 #### Mock Oauth2 Server
 
