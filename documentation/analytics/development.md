@@ -3,43 +3,25 @@
 > [!NOTE]
 > All of the steps on this page should be run from the root of the [`analytics/`](../../analytics/) directory
 
-## Development Environment Setup 
+## Install Prerequisites 
 
-### Docker vs Native
+## Development Environment: Docker vs. Native
 
-This package runs in Docker by default, but can also be configured to run natively without Docker. Choose the option that's best for you, and then follow the instructions for that option:
+This package runs in Docker by default, but can also be configured to run natively without Docker. Choose the option that's best for you, and then install the prerequisites for that option:
 
 - [Run with Docker](#run-with-docker)
 - [Run Natively](#run-natively)
 
-#### Run with Docker
+#### Run with Docker (recommended)
 
-**Pre-requisites**
+**Prerequisites**
 
-- **Docker** installed and running locally: `docker --version`
-- **Docker compose** installed: `docker-compose --version`
-
-**Steps**
-
-1. Run `make build`
-2. Acquire a GitHub Token using one of the methods below
-  - Via AWS (Project Team)
-    - Retrieve GH_TOKEN from [AWS](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/%252Fanalytics%252Fgithub-token/description?region=us-east-1&tab=Table#list_parameter_filters=Name:Contains:analytics%2Fgithub-token)
-  - Create your own in GitHub (Open Source)
-    - Go to https://github.com/settings/tokens
-    - Generate a new token (classic)
-    - Give it the following scopes:
-      - repo
-      - read:org
-      - admin:public_key
-      - project
-3. Add `GH_TOKEN=...` to your environment variables, e.g. in .zshrc or .bashrc
-4. Run `make test-audit` to confirm the application is running correctly
-5. Proceed to next section to learn how to invoke commands 
+- **Docker** [Installation options](https://docs.docker.com/desktop/setup/install/mac-install/) 
+- **docker-compose** [Installation options](https://formulae.brew.sh/formula/docker-compose)
 
 #### Run Natively
 
-**Pre-requisites**
+**Prerequisites**
 
 - **Python version 3.12:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python, or [asdf](https://asdf-vm.com/)
 - **Poetry:** [Install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx)
@@ -47,9 +29,11 @@ This package runs in Docker by default, but can also be configured to run native
 - **Postgres:** [Installation options for macOS](https://www.postgresql.org/download/macosx/)
 - **Psycopg:** [Installation options](https://www.psycopg.org/psycopg3/docs/basic/install.html)
 
+### Install the Package
+
 **Steps**
 
-1. Add PY_RUN_APPROACH=local to your environment variables, e.g. in .zshrc or .bashrc
+1. Install all prerequisites
 2. Set up the project: `make install` -- This will install the required packages and prompt you to authenticate with GitHub
 3. Acquire a GitHub Token using one of the methods below
   - Via AWS (Project Team)
@@ -63,8 +47,9 @@ This package runs in Docker by default, but can also be configured to run native
       - admin:public_key
       - project
 4. Add `GH_TOKEN=...` to your environment variables, e.g. in .zshrc or .bashrc
-5. Run `make test-audit` to confirm the application is running correctly
-6. Proceed to next section to learn how to invoke commands 
+5. If running natively, add PY_RUN_APPROACH=local to your environment variables
+6. Run `make test-audit` to confirm the application is running correctly
+
 
 ## Invoke Commands on the Service
 
@@ -84,6 +69,14 @@ The package includes a CLI that can be used to discover the available commands. 
 ![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
 
 ## Example Development Tasks
+
+### How To Access Dockerized Postgres DB from MacOS Terminal
+
+1. Start the database container: `sudo docker-compose up -d`
+2. Ensure container is running: `docker-compose ls`
+3. Get your IP address, which will be used in next step: `ifconfig -u | grep 'inet ' | grep -v 127.0.0.1 | cut -d\  -f2 | head -1` (this will display a value similar to `10.0.1.101`)
+4. Launch the terminal-based front-end to Postgres: `psql -h 10.0.1.101 -p 5432 -U app -W app` (use IP address from previous step for the value of `-h` arg)
+5. Type a PostgresSQL command, e.g.: `\dir`.
 
 ### How To Add New Dataset
 
