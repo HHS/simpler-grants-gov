@@ -1,10 +1,11 @@
 "use client";
 
 import clsx from "clsx";
+import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { assetPath } from "src/utils/assetPath";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,8 +29,6 @@ type Props = {
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
-
-const logoPath = "./img/grants-logo.svg";
 
 const NavLinks = ({
   mobileExpanded,
@@ -172,14 +171,14 @@ const Header = ({ locale }: Props) => {
           <div className="usa-navbar border-bottom-0">
             <Title className="margin-y-2">
               <div className="display-flex flex-align-center">
-                <Link href="/" className="display-block">
-                  {logoPath && (
-                    <img
-                      src={assetPath(logoPath)}
-                      alt={t("title")}
-                      className="display-block height-4  desktop:height-auto"
-                    />
-                  )}
+                <Link href="/" className="position-relative">
+                  <Image
+                    alt={t("title")}
+                    src={GrantsLogo as string}
+                    className="height-4 display-block position-relative desktop:height-auto"
+                    unoptimized
+                    fill={true}
+                  />
                 </Link>
               </div>
             </Title>
