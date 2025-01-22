@@ -1979,6 +1979,19 @@ class LinkExternalUserFactory(BaseFactory):
     email = factory.Faker("email")
 
 
+class UserNotificationLogFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationLog
+
+    user_notification_log_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    notification_reason = "test"
+    notification_sent = True
+
+
 class LoginGovStateFactory(BaseFactory):
     class Meta:
         model = user_models.LoginGovState
