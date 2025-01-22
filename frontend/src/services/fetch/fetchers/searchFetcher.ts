@@ -50,7 +50,10 @@ export const searchForOpportunities = async (searchInputs: QueryParamData) => {
     requestBody.query = query;
   }
 
-  const response = await fetchOpportunitySearch({ body: requestBody });
+  const response = await fetchOpportunitySearch({
+    body: requestBody,
+    queryParamData: searchInputs,
+  });
 
   response.actionType = searchInputs.actionType;
   response.fieldChanged = searchInputs.fieldChanged;
