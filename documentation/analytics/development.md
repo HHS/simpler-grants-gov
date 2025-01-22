@@ -12,7 +12,7 @@ This package runs in Docker by default, but can also be configured to run native
 - [Run with Docker](#run-with-docker)
 - [Run Natively](#run-natively)
 
-#### Run with Docker (recommended)
+#### Run with Docker 
 
 **Prerequisites**
 
@@ -48,7 +48,8 @@ This package runs in Docker by default, but can also be configured to run native
       - project
 4. Add `GH_TOKEN=...` to your environment variables, e.g. in .zshrc or .bashrc
 5. If running natively, add PY_RUN_APPROACH=local to your environment variables
-6. Run `make test-audit` to confirm the application is running correctly
+6. Edit `local.env` and set the value of DB_HOST accordingly
+7. Run `make test-audit` to confirm the application is running correctly
 
 
 ## Invoke Commands on the Service
