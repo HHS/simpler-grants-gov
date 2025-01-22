@@ -1,4 +1,4 @@
-import GrantsLogo from "public/img/grants-logo.png";
+import GrantsLogo from "public/img/grants-logo.svg";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
@@ -83,13 +83,13 @@ const Footer = () => {
         <GridContainer>
           <Grid row gap>
             <Grid tablet={{ col: 4 }}>
-              <div className="footer-logo-container">
+              <div className="footer-logo-container position-relative">
                 <Image
                   className="height-auto"
                   alt={t("logo_alt")}
-                  src={GrantsLogo}
-                  height={214}
-                  width={1075}
+                  src={GrantsLogo as string}
+                  unoptimized
+                  fill={true}
                   priority={false}
                 />
               </div>
