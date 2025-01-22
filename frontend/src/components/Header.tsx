@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import GrantsLogo from "public/img/grants-logo.png";
+import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import { useTranslations } from "next-intl";
