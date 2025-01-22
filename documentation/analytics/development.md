@@ -42,8 +42,10 @@ This package runs in Docker by default, but can also be configured to run native
 **Pre-requisites**
 
 - **Python version 3.12:** [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python, or [asdf](https://asdf-vm.com/)
-- **Poetry:** [install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx)
+- **Poetry:** [Install poetry with the official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) or alternatively use [pipx to install](https://python-poetry.org/docs/#installing-with-pipx)
 - **GitHub CLI:** [Install the GitHub CLI](https://github.com/cli/cli#installation)
+- **Postgres:** [Installation options for macOS](https://www.postgresql.org/download/macosx/)
+- **Psycopg:** [Installation options](https://www.psycopg.org/psycopg3/docs/basic/install.html)
 
 **Steps**
 
