@@ -80,7 +80,7 @@ describe("SearchSortBy", () => {
   });
 
   it("handles order number sort option change", () => {
-    render(<SearchSortBy totalResults={"10"} queryTerm="test" sortby="" />);
+    render(<SearchSortBy queryTerm="test" sortby="" />);
 
     let selectedOption = screen.getByRole("option", {
       selected: true,
