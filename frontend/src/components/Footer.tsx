@@ -83,14 +83,13 @@ const Footer = () => {
         <GridContainer>
           <Grid row gap>
             <Grid tablet={{ col: 4 }}>
-              <div className="footer-logo-container position-relative">
+              <div className="footer-logo-container position-relative dekstop:height-5">
                 <Image
-                  className="height-auto"
+                  className="height-auto position-relative"
                   alt={t("logo_alt")}
                   src={GrantsLogo as string}
                   unoptimized
-                  fill={true}
-                  priority={false}
+                  fill
                 />
               </div>
             </Grid>

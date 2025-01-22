@@ -177,7 +177,8 @@ const Header = ({ locale }: Props) => {
                     src={GrantsLogo as string}
                     className="height-4 display-block position-relative desktop:height-auto"
                     unoptimized
-                    fill={true}
+                    priority
+                    fill
                   />
                 </Link>
               </div>
