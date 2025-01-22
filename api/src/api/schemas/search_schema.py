@@ -293,6 +293,10 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
     def with_date_range(self) -> "DateSearchSchemaBuilder":
         self.schema_fields["start_date"] = fields.Date(allow_none=True)
         self.schema_fields["end_date"] = fields.Date(allow_none=True)
+
+        self.schema_fields["start_date_relative"] = fields.Integer(allow_none=True)
+        self.schema_fields["end_date_relative"] = fields.Integer(allow_none=True)
+
         self._with_date_range_validator()
 
         return self
@@ -302,11 +306,28 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
         # rules that go across fields in the validation
         @validates_schema
         def validate_date_range(_: Any, data: dict, **kwargs: Any) -> None:
+
             start_date = data.get("start_date", None)
             end_date = data.get("end_date", None)
 
-            # Error if start and end date are None (either explicitly set, or because they are missing)
-            if start_date is None and end_date is None:
+            start_date_relative = data.get("start_date_relative", None)
+            end_date_relative = data.get("end_date_relative", None)
+
+            # Error if a mix of relative date and absolute date provided
+            if ("start_date" in data or "end_date" in data) and ("start_date_relative" in data or "end_date_relative" in data):
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Cannot have both absolute and relative date parameters."
+                        )
+                    ]
+                )
+
+            # Error if both start and end date for either relative or absolute date are None (either explicitly set, or because they are missing)
+            if (start_date is None and end_date is None) and (
+                start_date_relative is None and end_date_relative is None
+            ):
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
