@@ -387,43 +387,62 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         validate_valid_request(search_client, search_index, builder, expected_results)
 
     @pytest.mark.parametrize(
-        "start_date,end_date,expected_results",
+        "start_date,end_date,start_date_relative,end_date_relative,expected_results",
         [
             # Date range that will include all results
-            (date(1900, 1, 1), date(2050, 1, 1), FULL_DATA),
+            (date(1900, 1, 1), date(2050, 1, 1), None, None, FULL_DATA),
             # Start only date range that will get all results
-            (date(1950, 1, 1), None, FULL_DATA),
+            (date(1950, 1, 1), None, None, None, FULL_DATA),
             # End only date range that will get all results
-            (None, date(2025, 1, 1), FULL_DATA),
+            (None, date(2025, 1, 1), None, None, FULL_DATA),
             # Range that filters to just oldest
             (
                 date(1950, 1, 1),
                 date(1960, 1, 1),
+                None,
+                None,
                 [FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING],
             ),
             # Unbounded range for oldest few
-            (None, date(1990, 1, 1), [FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING]),
+            (
+                None,
+                date(1990, 1, 1),
+                None,
+                None,
+                [FELLOWSHIP_OF_THE_RING, TWO_TOWERS, RETURN_OF_THE_KING],
+            ),
             # Unbounded range for newest few
-            (date(2011, 8, 1), None, [WORDS_OF_RADIANCE, OATHBRINGER, RHYTHM_OF_WAR]),
+            (date(2011, 8, 1), None, None, None, [WORDS_OF_RADIANCE, OATHBRINGER, RHYTHM_OF_WAR]),
             # Selecting a few in the middle
             (
                 date(2005, 1, 1),
                 date(2014, 1, 1),
+                None,
+                None,
                 [WAY_OF_KINGS, FEAST_FOR_CROWS, DANCE_WITH_DRAGONS],
             ),
             # Exact date
-            (date(1954, 7, 29), date(1954, 7, 29), [FELLOWSHIP_OF_THE_RING]),
+            (date(1954, 7, 29), date(1954, 7, 29), None, None, [FELLOWSHIP_OF_THE_RING]),
             # None fetched in range
-            (date(1981, 1, 1), date(1989, 1, 1), []),
+            (date(1981, 1, 1), date(1989, 1, 1), None, None, []),
         ],
     )
     def test_query_builder_filter_date_range(
-        self, search_client, search_index, start_date, end_date, expected_results
+        self,
+        search_client,
+        search_index,
+        start_date,
+        end_date,
+        start_date_relative,
+        end_date_relative,
+        expected_results,
     ):
         builder = (
             SearchQueryBuilder()
             .sort_by([])
-            .filter_date_range("publication_date", start_date, end_date)
+            .filter_date_range(
+                "publication_date", start_date, end_date, start_date_relative, end_date_relative
+            )
         )
 
         expected_ranges = {}
@@ -497,7 +516,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             SearchQueryBuilder()
             .sort_by([])
             .filter_int_range("page_count", 600, 1100)
-            .filter_date_range("publication_date", date(2000, 1, 1), date(2013, 1, 1))
+            .filter_date_range("publication_date", date(2000, 1, 1), date(2013, 1, 1), None, None)
         )
 
         expected_results = [WAY_OF_KINGS, STORM_OF_SWORDS, FEAST_FOR_CROWS, DANCE_WITH_DRAGONS]
@@ -511,7 +530,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
 
     def test_filter_date_range_both_none(self):
         with pytest.raises(ValueError, match="Cannot use date range filter"):
-            SearchQueryBuilder().filter_date_range("test_field", None, None)
+            SearchQueryBuilder().filter_date_range("test_field", None, None, None, None)
 
     @pytest.mark.parametrize(
         "query,fields,expected_results,expected_aggregations",
