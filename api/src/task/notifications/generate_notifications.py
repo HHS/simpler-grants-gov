@@ -2,7 +2,6 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Dict, List
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
