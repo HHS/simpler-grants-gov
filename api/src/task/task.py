@@ -4,6 +4,8 @@ import time
 from enum import StrEnum
 from typing import Any
 
+from sqlalchemy.exc import SQLAlchemyError
+
 import src.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
 
@@ -44,8 +46,17 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # Initialize the metrics
             self.initialize_metrics()
 
-            # Run the actual task
-            self.run_task()
+            try:
+                # Run the actual task
+                self.run_task()
+            except SQLAlchemyError:
+                # Rollback and begin new transaction only for DB-specific errors
+                self.db_session.rollback()
+                self.db_session.begin()
+                raise
+            except Exception:
+                # For non-DB errors, just raise without touching the transaction
+                raise
 
             # Calculate and set a duration
             end = time.perf_counter()

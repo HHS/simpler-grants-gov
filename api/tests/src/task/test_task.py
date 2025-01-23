@@ -39,7 +39,6 @@ def test_task_handles_general_error(db_session):
     assert task.job.job_status == JobStatus.FAILED
 
     # Verify session is still usable
-    db_session.rollback()  # Should not raise
     db_session.begin()  # Start a new transaction
     assert db_session.is_active  # Session should be active with new transaction
 
@@ -52,7 +51,6 @@ def test_task_handles_db_error(db_session):
         task.run()
 
     # Verify session was rolled back and is usable
-    db_session.rollback()  # Should not raise
     db_session.begin()  # Start a new transaction
     assert db_session.is_active  # Session should be active with new transaction
 
@@ -67,6 +65,5 @@ def test_successful_task_completion(db_session):
     assert "task_duration_sec" in task.metrics
 
     # Verify session is still usable by starting a new transaction
-    db_session.rollback()  # Should not raise
     db_session.begin()  # Start a new transaction
     assert db_session.is_active  # Session should be active with new transaction
