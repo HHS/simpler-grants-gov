@@ -127,7 +127,13 @@ def _add_search_filters(
             builder.filter_int_range(field_name, field_filters.min, field_filters.max)
 
         elif isinstance(field_filters, DateSearchFilter):
-            builder.filter_date_range(field_name, field_filters.start_date, field_filters.end_date, field_filters.start_date_relative, field_filters.end_date_relative)
+            builder.filter_date_range(
+                field_name,
+                field_filters.start_date,
+                field_filters.end_date,
+                field_filters.start_date_relative,
+                field_filters.end_date_relative,
+            )
 
 
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:

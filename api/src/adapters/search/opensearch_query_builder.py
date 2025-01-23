@@ -195,7 +195,12 @@ class SearchQueryBuilder:
         return self
 
     def filter_date_range(
-        self, field: str, start_date: datetime.date | None, end_date: datetime.date | None, start_date_relative: int | None, end_date_relative: int | None
+        self,
+        field: str,
+        start_date: datetime.date | None,
+        end_date: datetime.date | None,
+        start_date_relative: int | None,
+        end_date_relative: int | None,
     ) -> typing.Self:
         """
         For a given field, filter results to a range of dates.
@@ -206,8 +211,12 @@ class SearchQueryBuilder:
         These filters do not affect the relevancy score, they are purely
         a binary filter on the overall results.
         """
-        if (start_date is None and end_date is None) and (start_date_relative is None and end_date_relative is None):
-            raise ValueError("Cannot use date range filter if both start and end are None or start_date_relative andend_date_relative are None")
+        if (start_date is None and end_date is None) and (
+            start_date_relative is None and end_date_relative is None
+        ):
+            raise ValueError(
+                "Cannot use date range filter if both start and end are None or start_date_relative andend_date_relative are None"
+            )
 
         range_filter = {}
         if start_date is not None:
@@ -216,9 +225,17 @@ class SearchQueryBuilder:
             range_filter["lte"] = end_date.isoformat()
 
         if start_date_relative is not None:
-            range_filter["gte"] = f"now+{abs(start_date_relative)}d" if  start_date_relative >= 0 else f"now-{abs(start_date_relative)}d"
+            range_filter["gte"] = (
+                f"now+{abs(start_date_relative)}d"
+                if start_date_relative >= 0
+                else f"now-{abs(start_date_relative)}d"
+            )
         if end_date_relative is not None:
-            range_filter["lte"] = f"now+{abs(end_date_relative)}d" if  end_date_relative >= 0 else f"now-{abs(end_date_relative)}d"
+            range_filter["lte"] = (
+                f"now+{abs(end_date_relative)}d"
+                if end_date_relative >= 0
+                else f"now-{abs(end_date_relative)}d"
+            )
 
         self.filters.append({"range": {field: range_filter}})
         return self
