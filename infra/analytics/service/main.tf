@@ -113,7 +113,7 @@ module "service" {
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
   cpu                   = 1024
-  memory                = 2048
+  memory                = 4096
 
   readonly_root_filesystem = false
 
