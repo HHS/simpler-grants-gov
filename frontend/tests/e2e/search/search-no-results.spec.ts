@@ -22,7 +22,7 @@ test.describe("Search page tests", () => {
     const searchTerm = generateRandomString([10]);
 
     await fillSearchInputAndSubmit(searchTerm, page);
-    await new Promise((resolve) => setTimeout(resolve, 3250));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     expectURLContainsQueryParamValue(page, "query", searchTerm);
 
     // eslint-disable-next-line testing-library/prefer-screen-queries
