@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Any
 
 import src.adapters.db as db
-from src.db.models.task_models import JobStatus, JobLog
+from src.db.models.task_models import JobLog, JobStatus
 
 logger = logging.getLogger(__name__)
 
