@@ -29,9 +29,9 @@ class NotificationContainer:
     """Container for collecting notifications for a single user"""
 
     user: User
-    updated_opportunity_ids: List[int] = field(default_factory=list)
+    updated_opportunity_ids: list[int] = field(default_factory=list)
     # TODO: Change from str to something else
-    updated_searches: List[str] = field(default_factory=list)
+    updated_searches: list[str] = field(default_factory=list)
 
 
 class NotificationTask(Task):
@@ -46,7 +46,7 @@ class NotificationTask(Task):
 
     def __init__(self, db_session: db.Session) -> None:
         super().__init__(db_session)
-        self.user_notification_map: Dict[uuid.UUID, NotificationContainer] = {}
+        self.user_notification_map: dict[uuid.UUID, NotificationContainer] = {}
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
