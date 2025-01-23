@@ -1,18 +1,9 @@
-import { expect, Page, test } from "@playwright/test";
-import { BrowserContextOptions } from "playwright-core";
+import { expect, test } from "@playwright/test";
 
 import { toggleCheckbox, toggleMobileSearchFilters } from "./searchSpecUtil";
 
-interface PageProps {
-  page: Page;
-  browserName?: string;
-  contextOptions?: BrowserContextOptions;
-}
-
 test.describe("Search error page", () => {
-  test("should return an error page when expected", async ({
-    page,
-  }: PageProps) => {
+  test("should return an error page when expected", async ({ page }) => {
     // trigger error by providing an invalid status value
     await page.goto("/search?status=not_a_status");
 
@@ -30,7 +21,7 @@ test.describe("Search error page", () => {
 
     await toggleCheckbox(page, "status-closed");
 
-    await page.waitForURL(/status\=forecasted\,posted\,closed/, {
+    await page.waitForURL(/status=forecasted,posted,closed/, {
       timeout: 5000,
     });
   });
