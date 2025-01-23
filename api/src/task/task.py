@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import Any
 
 import src.adapters.db as db
-from src.db.models.task_models import JobStatus, JobTable
+from src.db.models.task_models import JobStatus, JobLog
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +29,12 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def __init__(self, db_session: db.Session) -> None:
         self.db_session = db_session
         self.metrics: dict[str, Any] = {}
-        self.job: JobTable | None = None
+        self.job: JobLog | None = None
 
     def run(self) -> None:
         try:
             # Create initial job record
-            self.job = JobTable(job_type=self.cls_name(), job_status=JobStatus.STARTED)
+            self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
             self.db_session.add(self.job)
             self.db_session.commit()
 

@@ -21,7 +21,7 @@ from src.db.models.opportunity_models import (
     OpportunityAttachment,
     OpportunityChangeAudit,
 )
-from src.db.models.task_models import JobTable
+from src.db.models.task_models import JobLog
 from src.task.task import Task
 from src.util import file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
@@ -125,12 +125,12 @@ class LoadOpportunitiesToIndex(Task):
 
         # Get last successful job timestamp
         last_successful_job = (
-            self.db_session.query(JobTable)
+            self.db_session.query(JobLog)
             .filter(
-                JobTable.job_type == self.cls_name(),
-                JobTable.job_status == JobStatus.COMPLETED,
+                JobLog.job_type == self.cls_name(),
+                JobLog.job_status == JobStatus.COMPLETED,
             )
-            .order_by(JobTable.created_at.desc())
+            .order_by(JobLog.created_at.desc())
             .first()
         )
 
@@ -187,7 +187,7 @@ class LoadOpportunitiesToIndex(Task):
             self.db_session.execute(
                 update(OpportunityChangeAudit)
                 .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                .values(has_update=False)
+                .values(updated_at=get_now_us_eastern_datetime())
             )
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:
