@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "api_analytics_bucket_access" {
   }
 }
 
-resource "aws_s3_bucket_policy" "api_analytics_bucket_access" {
-  bucket = data.aws_ssm_parameter.api_analytics_bucket_id.value
+resource "aws_iam_policy" "api_analytics_bucket_access" {
+  name   = "${var.environment_name}-api-analytics-transfer"
   policy = data.aws_iam_policy_document.api_analytics_bucket_access.json
 }
