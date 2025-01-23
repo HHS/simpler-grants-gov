@@ -294,8 +294,8 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
         self.schema_fields["start_date"] = fields.Date(allow_none=True)
         self.schema_fields["end_date"] = fields.Date(allow_none=True)
 
-        self.schema_fields["start_date_relative"] = fields.Integer(allow_none=True)
-        self.schema_fields["end_date_relative"] = fields.Integer(allow_none=True)
+        self.schema_fields["start_date_relative"] = fields.Integer(allow_none=True,  validate=[validators.Range(min=-1000000, max=10000000)])
+        self.schema_fields["end_date_relative"] = fields.Integer(allow_none=True, validate=[validators.Range(min=-1000000, max=100000)])
 
         self._with_date_range_validator()
 
