@@ -215,7 +215,7 @@ class SearchQueryBuilder:
             start_date_relative is None and end_date_relative is None
         ):
             raise ValueError(
-                "Cannot use date range filter if both start and end are None or start_date_relative andend_date_relative are None"
+                "Cannot use date range filter if both start and end are None or start_date_relative and end_date_relative are None"
             )
 
         range_filter = {}

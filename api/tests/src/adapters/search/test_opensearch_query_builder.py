@@ -126,6 +126,7 @@ def validate_valid_request(
     json_value = request.build()
     try:
         resp = search_client.search(index, json_value, include_scores=False)
+        print(resp)
 
     except Exception:
         # If it errors while making the query, catch the exception just to give a message that makes it a bit clearer
@@ -390,11 +391,20 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         "start_date,end_date,start_date_relative,end_date_relative,expected_results",
         [
             # Date range that will include all results
+            # Absolute
             (date(1900, 1, 1), date(2050, 1, 1), None, None, FULL_DATA),
+            # Relative
+            (None, None, -45656, 9131, FULL_DATA),
             # Start only date range that will get all results
+            # Absolute
             (date(1950, 1, 1), None, None, None, FULL_DATA),
+            # Relative
+            (None, None, -45656, None, FULL_DATA),
             # End only date range that will get all results
+            # Absolute
             (None, date(2025, 1, 1), None, None, FULL_DATA),
+            # Relative
+            (None, None, None, 9131, FULL_DATA),
             # Range that filters to just oldest
             (
                 date(1950, 1, 1),
@@ -422,9 +432,15 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
                 [WAY_OF_KINGS, FEAST_FOR_CROWS, DANCE_WITH_DRAGONS],
             ),
             # Exact date
+            # Absolute
             (date(1954, 7, 29), date(1954, 7, 29), None, None, [FELLOWSHIP_OF_THE_RING]),
+            # Relative
+            (None, None, -25747, -25747, []),
             # None fetched in range
+            # Absolute
             (date(1981, 1, 1), date(1989, 1, 1), None, None, []),
+            # Relative
+            (None, None, -16093, -13171, []),
         ],
     )
     def test_query_builder_filter_date_range(
@@ -450,6 +466,18 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             expected_ranges["gte"] = start_date.isoformat()
         if end_date is not None:
             expected_ranges["lte"] = end_date.isoformat()
+        if start_date_relative is not None:
+            expected_ranges["gte"] = (
+                f"now+{abs(start_date_relative)}d"
+                if start_date_relative >= 0
+                else f"now-{abs(start_date_relative)}d"
+            )
+        if end_date_relative is not None:
+            expected_ranges["lte"] = (
+                f"now+{abs(end_date_relative)}d"
+                if end_date_relative >= 0
+                else f"now-{abs(end_date_relative)}d"
+            )
 
         expected_query = {
             "size": 25,
@@ -528,7 +556,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         with pytest.raises(ValueError, match="Cannot use int range filter"):
             SearchQueryBuilder().filter_int_range("test_field", None, None)
 
-    def test_filter_date_range_both_none(self):
+    def test_filter_date_range_all_none(self):
         with pytest.raises(ValueError, match="Cannot use date range filter"):
             SearchQueryBuilder().filter_date_range("test_field", None, None, None, None)
 
