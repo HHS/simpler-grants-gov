@@ -40,14 +40,14 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             self.db_session.add(self.job)
             self.db_session.commit()
 
+            # Initialize the metrics
+            self.initialize_metrics()
+
             # Run the actual task
             self.run_task()
 
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
-
-            # Initialize the metrics
-            self.initialize_metrics()
 
             # Calculate and set a duration
             end = time.perf_counter()
