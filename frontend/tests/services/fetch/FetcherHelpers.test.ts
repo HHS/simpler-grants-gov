@@ -1,11 +1,13 @@
 import "server-only";
 
-import { ApiRequestError, NetworkError } from "src/errors";
+import { ApiRequestError, NetworkError, UnauthorizedError } from "src/errors";
 import {
   createRequestUrl,
   sendRequest,
+  throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const searchInputs: QueryParamData = {
   status: new Set(["active"]),
@@ -128,7 +130,7 @@ describe("sendRequest", () => {
     };
 
     await expect(sendErrorRequest()).rejects.toThrow(
-      new ApiRequestError("", "APIRequestError", 0, searchInputs),
+      new ApiRequestError("", "APIRequestError", 0, { searchInputs }),
     );
   });
 
@@ -156,6 +158,37 @@ describe("sendRequest", () => {
 
     await expect(sendErrorRequest()).rejects.toThrow(
       new NetworkError(networkError, searchInputs),
+    );
+  });
+});
+
+describe("throwError", () => {
+  it("passes along message from response and details from first error, in error type based on status code", async () => {
+    const expectedError = await wrapForExpectedError<Error>(() => {
+      throwError(
+        { data: {}, message: "response message", status_code: 401 },
+        "http://any.url",
+        undefined,
+        {
+          field: "fieldName",
+          type: "a subtype",
+          message: "a detailed message",
+        },
+      );
+    });
+    expect(expectedError).toBeInstanceOf(UnauthorizedError);
+    expect(expectedError.message).toEqual(
+      JSON.stringify({
+        type: "UnauthorizedError",
+        searchInputs: {},
+        message: "response message",
+        status: 401,
+        details: {
+          field: "fieldName",
+          type: "a subtype",
+          message: "a detailed message",
+        },
+      }),
     );
   });
 });

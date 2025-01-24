@@ -20,9 +20,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-describe("SearchBar", () => {
-  const initialQueryParams = "initial query";
+const initialQueryParams = "initial query";
 
+describe("SearchBar", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
   it("should not have basic accessibility issues", async () => {
     const { container } = render(
       <QueryProvider>
@@ -65,5 +68,42 @@ describe("SearchBar", () => {
       "new query",
       false,
     );
+  });
+
+  it("raises a validation error on submit if search term is > 99 characters, then clears error on successful search", () => {
+    render(
+      <QueryProvider>
+        <SearchBar query={initialQueryParams} />
+      </QueryProvider>,
+    );
+
+    const input = screen.getByRole("searchbox");
+    fireEvent.change(input, {
+      target: {
+        value:
+          "how long do I need to type for before I get to 100 characters? it's looking like around two sentenc-",
+      },
+    });
+
+    const searchButton = screen.getByRole("button", { name: /search/i });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.click(searchButton);
+
+    expect(mockUpdateQueryParams).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    fireEvent.change(input, {
+      target: {
+        value: "totally valid search terms",
+      },
+    });
+    fireEvent.click(searchButton);
+    expect(mockUpdateQueryParams).toHaveBeenCalledWith(
+      "",
+      "query",
+      "totally valid search terms",
+      false,
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

@@ -57,6 +57,18 @@ describe("searchForOpportunities", () => {
           },
         },
       },
+      queryParamData: {
+        actionType: "fun",
+        agency: new Set(),
+        category: new Set(),
+        eligibility: new Set(),
+        fieldChanged: "baseball",
+        fundingInstrument: new Set(["grant", "cooperative_agreement"]),
+        page: 1,
+        query: "research",
+        sortby: "opportunityNumberAsc",
+        status: new Set(["forecasted", "posted"]),
+      },
     });
 
     expect(result).toEqual({

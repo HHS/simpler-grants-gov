@@ -113,7 +113,7 @@ module "service" {
   public_subnet_ids     = data.aws_subnets.public.ids
   private_subnet_ids    = data.aws_subnets.private.ids
   cpu                   = 1024
-  memory                = 2048
+  memory                = 4096
 
   readonly_root_filesystem = false
 
@@ -149,5 +149,11 @@ module "service" {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
+  )
+
+  extra_policies = merge(
+    {
+      api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
+    },
   )
 }

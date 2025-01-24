@@ -1,7 +1,9 @@
 import boto3
 import botocore.client
 import botocore.config
+from pydantic import Field
 
+from src.adapters.aws import get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
 
 
@@ -16,9 +18,9 @@ class S3Config(PydanticBaseEnvConfig):
     # so that we don't need to set all of these for every
     # process that uses S3
 
-    # TODO - I'm not sure how we want to organize our
-    #        s3 buckets so this will likely change in the future
-    s3_opportunity_bucket: str | None = None
+    # Note these env vars get set as "s3://..."
+    public_files_bucket_path: str = Field(alias="PUBLIC_FILES_BUCKET")
+    draft_files_bucket_path: str = Field(alias="DRAFT_FILES_BUCKET")
 
 
 def get_s3_client(
@@ -38,7 +40,7 @@ def get_s3_client(
 
     params["config"] = boto_config
 
-    if session is not None:
-        return session.client("s3", **params)
+    if session is None:
+        session = get_boto_session()
 
-    return boto3.client("s3", **params)
+    return session.client("s3", **params)

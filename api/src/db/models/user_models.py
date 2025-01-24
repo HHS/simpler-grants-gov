@@ -101,3 +101,15 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
     search_query: Mapped[dict] = mapped_column(JSONB)
 
     name: Mapped[str]
+
+
+class UserNotificationLog(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_notification_log"
+
+    user_notification_log_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User)
+
+    notification_reason: Mapped[str]
+    notification_sent: Mapped[bool]

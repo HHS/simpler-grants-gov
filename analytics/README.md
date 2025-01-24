@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This a command line interface (CLI) tool written in python that is used to run analytics on operational data for the Simpler.Grants.gov initiative. For a more in depth discussion of tools used and the structure of the codebase, view the technical details for the analytics package.
+This package encapsulates a data pipeline service. The service is responsible for extracting project data from GitHub and transforming the extracted data into rows in a data warehouse. 
 
-## Project directory structure
+## Project Directory Structure
 
-Outlines the structure of the analytics codebase, relative to the root of the simpler-grants-gov repo.
+The structure of the analytics codebase is outlined below, relative to the root of the `simpler-grants-gov` repo.
 
 ```text
 root
@@ -15,11 +15,9 @@ root
 │       └── analytics
 │           └── datasets      Create re-usable data interfaces for calculating metrics
 │           └── integrations  Integrate with external systems used to export data or metrics
-│           └── metrics       Calculate the project's operational metrics
 │   └── tests
 │       └── integrations      Integration tests, mostly for src/analytics/integrations
 │       └── datasets          Unit tests for src/analytics/datasets
-│       └── metrics           Unit tests for src/analytics/metrics
 |
 │   └── config.py             Load configurations from environment vars or local .toml files
 │   └── settings.toml         Default configuration settings, tracked by git
@@ -28,22 +26,22 @@ root
 │   └── pyproject.toml        Python project configuration file
 ```
 
-## Using the tool
+## Data Pipeline
 
-Project maintainers and members of the public have a few options for interacting with the tool and the reports it produces. Read more about each option in the [usage guide](../documentation/analytics/usage.md):
+The service in this package provides capabilities to satisfy the middle step (denoted as "ETL") in the following data flow diagram:
 
-1. [Viewing the reports in Slack](../documentation/analytics/usage.md#view-daily-reports-in-slack)
-2. [Triggering reports from GitHub](../documentation/analytics/usage.md#trigger-a-report-from-github)
-3. [Triggering reports from the command line](../documentation/analytics/usage.md#trigger-a-report-from-the-command-line)
+  `SGG Project Data → GitHub → ETL → Postgres DW → Metabase → End User`
 
-## Contributing to the tool
+The service does not listen on a port or run as a daemon. Instead, it must be triggered manually, via `Make` commands on the command-line, or via a text-based interactive tool written in Python and referred to as CLI.
 
-Project maintainers or open source contributors are encouraged to contribute to the tool. Follow the guides linked below for more information:
+In current practice, the service is triggered daily via an AWS Step Function (akin to a cron job) orchestrated with Terraform. This results in a daily update to the analytics data warehouse in Postgres, and a visible data refresh for viewers of SGG program-level metrics dashboards in Metabase. 
 
-1. [Technical overview](../documentation/analytics/technical-overview.md)
-2. [Installation and development guide](../documentation/analytics/development.md)
-   - [Adding a new data source](../documentation/analytics/development.md#adding-a-new-dataset)
-   - [Adding a new metric](../documentation/analytics/development.md#adding-a-new-metric)
-3. [Writing and running tests](../documentation/analytics/testing.md)
-4. [Command line interface (CLI) user guide](../documentation/analytics/usage.md#using-the-command-line-interface)
-5. [Description of existing metrics](../documentation/analytics/metrics/README.md)
+##  Developer Information
+
+The service is open-source and can be installed and run in a local development environment, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
+
+1. [Technical Overview](../documentation/analytics/technical-overview.md)
+2. [Getting Started Guide for Developers](../documentation/analytics/development.md)
+3. [Writing and Running Tests](../documentation/analytics/testing.md)
+4. [Usage Guide: Data Pipeline Service & CLI](../documentation/analytics/usage.md)
+

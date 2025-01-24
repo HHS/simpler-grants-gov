@@ -40,6 +40,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models import agency_models
+from src.util import file_util
 
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
@@ -226,14 +227,6 @@ class CustomProvider(BaseProvider):
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
-    OPPORTUNITY_ATTACHMENT_S3_PATHS = [
-        "s3://local-opportunities/test_file_1.txt",
-        "s3://local-opportunities/test_file_2.txt",
-        "s3://local-opportunities/test_file_3.txt",
-        "s3://local-opportunities/test_file_4.pdf",
-        "s3://local-opportunities/test_file_5.pdf",
-    ]
-
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -276,9 +269,6 @@ class CustomProvider(BaseProvider):
     def yn_yesno_boolean(self) -> str:
         return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
 
-    def s3_file_location(self) -> str:
-        return self.random_element(self.OPPORTUNITY_ATTACHMENT_S3_PATHS)
-
 
 fake = faker.Faker()
 fake.add_provider(CustomProvider)
@@ -320,27 +310,11 @@ class Generators:
 
 
 class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
+
     class Meta:
         abstract = True
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = "commit"
-
-
-class OpportunityAttachmentFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.OpportunityAttachment
-
-    file_location = factory.Faker("s3_file_location")
-    mime_type = factory.Faker("mime_type")
-    file_name = factory.Faker("file_name")
-    file_description = factory.Faker("sentence")
-    file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
-    opportunity_attachment_type = factory.fuzzy.FuzzyChoice(OpportunityAttachmentType)
-
-    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
-    updated_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
-    )
 
 
 class OpportunityFactory(BaseFactory):
@@ -391,11 +365,7 @@ class OpportunityFactory(BaseFactory):
         factory_related_name="opportunity",
     )
 
-    opportunity_attachments = factory.RelatedFactoryList(
-        OpportunityAttachmentFactory,
-        factory_related_name="opportunity",
-        size=lambda: random.randint(1, 2),
-    )
+    opportunity_attachments = []  # Use has_attachments=True to add attachments
 
     class Params:
         # These are common scenarios we might want for an opportunity.
@@ -435,6 +405,14 @@ class OpportunityFactory(BaseFactory):
         timestamps_in_past = factory.Trait(
             created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
             updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
+
+        has_attachments = factory.Trait(
+            opportunity_attachments=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OpportunityAttachmentFactory",
+                factory_related_name="opportunity",
+                size=lambda: random.randint(1, 2),
+            )
         )
 
 
@@ -776,6 +754,59 @@ class LinkOpportunitySummaryApplicantTypeFactory(BaseFactory):
     applicant_type = factory.Iterator(ApplicantType)
 
 
+class OpportunityAttachmentFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityAttachment
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
+
+    # Whatever you pass in for file_contents will end up in the file, but
+    # not included anywhere on the model itself
+    file_contents = factory.Faker("sentence")
+    # NOTE: If you want the file to properly get written to s3 for tests/locally
+    # make sure the bucket actually exists
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/opportunities/{o.opportunity_id}/attachments/{fake.random_int(min=1, max=100_000_000)}/{o.file_name}"
+    )
+    mime_type = factory.Faker("mime_type")
+    file_name = factory.Faker("file_name")
+    file_description = factory.Faker("sentence")
+    file_size_bytes = factory.Faker("random_int", min=1000, max=10000000)
+    opportunity_attachment_type = factory.fuzzy.FuzzyChoice(OpportunityAttachmentType)
+
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="now")
+    )
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Don't file for build strategy
+        super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        attachment = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(attachment.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your attachment to {attachment.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return attachment
+
+
 class AgencyContactInfoFactory(BaseFactory):
     class Meta:
         model = agency_models.AgencyContactInfo
@@ -1006,10 +1037,10 @@ class TsynopsisAttachmentFactory(BaseFactory):
     att_type: factory.Faker("att_type")
     mime_type = factory.Faker("mime_type")
     link_url = factory.Faker("relevant_url")
-    file_name = factory.Faker("file_name")
+    file_name = factory.Faker("file_name", category="text")
     file_desc = factory.Faker("sentence")
-    file_lob = b"Test attachment"
-    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob))
+    file_lob = factory.LazyFunction(lambda: fake.sentence(25).encode())
+    file_lob_size = factory.LazyAttribute(lambda x: len(x.file_lob) if x.file_lob else 0)
     create_date = factory.Faker("date_time_between", start_date="-1y", end_date="now")
     created_date = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.create_date, end_date="now")
@@ -1946,6 +1977,19 @@ class LinkExternalUserFactory(BaseFactory):
     external_user_type = factory.fuzzy.FuzzyChoice(ExternalUserType)
 
     email = factory.Faker("email")
+
+
+class UserNotificationLogFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserNotificationLog
+
+    user_notification_log_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    notification_reason = "test"
+    notification_sent = True
 
 
 class LoginGovStateFactory(BaseFactory):

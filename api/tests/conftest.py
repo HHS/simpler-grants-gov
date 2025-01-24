@@ -1,6 +1,4 @@
 import logging
-import os
-import pathlib
 import uuid
 
 import _pytest.monkeypatch
@@ -18,6 +16,7 @@ import src.app as app_entry
 import src.auth.login_gov_jwt_auth as login_gov_jwt_auth
 import tests.src.db.models.factories as factories
 from src.adapters import search
+from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
@@ -74,28 +73,6 @@ def env_vars():
 def set_logging_defaults(monkeypatch_session):
     # Some loggers are noisy/buggy in our tests, so adjust them
     monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
-
-
-### Uploads test files
-@pytest.fixture
-def upload_opportunity_attachment_s3(reset_aws_env_vars, mock_s3_bucket):
-    s3_client = boto3.client("s3")
-    test_folder_path = (
-        pathlib.Path(__file__).parent.resolve() / "lib/opportunity_attachment_test_files"
-    )
-
-    for root, _, files in os.walk(test_folder_path):
-        for file in files:
-            file_path = os.path.join(root, file)
-            s3_client.upload_file(
-                file_path,
-                Bucket=mock_s3_bucket,
-                Key=os.path.relpath(file_path, test_folder_path),
-            )
-
-    # Check files were uploaded to mock s3
-    s3_files = s3_client.list_objects_v2(Bucket=mock_s3_bucket)
-    assert len(s3_files["Contents"]) == 5
 
 
 ####################
@@ -168,7 +145,7 @@ def db_session(db_client: db.DBClient) -> db.Session:
 
 
 @pytest.fixture
-def enable_factory_create(monkeypatch, db_session) -> db.Session:
+def enable_factory_create(monkeypatch, db_session, mock_s3_bucket) -> db.Session:
     """
     Allows the create method of factories to be called. By default, the create
     throws an exception to prevent accidental creation of database objects for tests
@@ -372,7 +349,7 @@ def mock_s3(reset_aws_env_vars):
 
 @pytest.fixture
 def mock_s3_bucket_resource(mock_s3):
-    bucket = mock_s3.Bucket("test_bucket")
+    bucket = mock_s3.Bucket("local-mock-public-bucket")
     bucket.create()
     yield bucket
 
@@ -380,6 +357,28 @@ def mock_s3_bucket_resource(mock_s3):
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
     yield mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def other_mock_s3_bucket_resource(mock_s3):
+    # This second bucket exists for tests where we want there to be multiple buckets
+    # and/or test behavior when moving files between buckets.
+    bucket = mock_s3.Bucket("local-mock-draft-bucket")
+    bucket.create()
+    yield bucket
+
+
+@pytest.fixture
+def other_mock_s3_bucket(other_mock_s3_bucket_resource):
+    yield other_mock_s3_bucket_resource.name
+
+
+@pytest.fixture
+def s3_config(mock_s3_bucket, other_mock_s3_bucket):
+    return S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{other_mock_s3_bucket}",
+    )
 
 
 ####################
