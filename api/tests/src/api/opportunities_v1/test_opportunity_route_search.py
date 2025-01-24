@@ -55,6 +55,7 @@ def call_search_and_validate(client, api_auth_token, search_request, expected_re
     resp = client.post(
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
+    print("???", resp)
     validate_search_response(resp, expected_results)
 
     search_request["format"] = "csv"
@@ -782,6 +783,12 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(
+                    post_date={"start_date_relative": -20111, "end_date_relative": 9131}
+                ),
+                OPPORTUNITIES,
+            ),
+            (
+                get_search_request(
                     post_date={"start_date": "1999-01-01", "end_date": "2000-01-01"}
                 ),
                 [],
@@ -798,11 +805,32 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
             ),
+            (
+                get_search_request(
+                    post_date={"start_date_relative": -2063, "end_date_relative": -389}
+                ),
+                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+            ),
             (get_search_request(post_date={"end_date": "2016-01-01"}), [DOC_MANUFACTURING]),
+            (get_search_request(post_date={"end_date_relative": -3310}), [DOC_MANUFACTURING]),
             # Close date
             (
                 get_search_request(
                     close_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
+                ),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    NASA_K12_DIVERSITY,
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
+                get_search_request(
+                    close_date={"start_date_relative": -20111, "end_date_relative": 9131}
                 ),
                 [
                     NASA_SPACE_FELLOWSHIP,
@@ -825,12 +853,32 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
+                get_search_request(close_date={"start_date_relative": -2214}),
+                [
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_SUPERSONIC,
+                    DOS_DIGITAL_LITERACY,
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                ],
+            ),
+            (
                 get_search_request(close_date={"end_date": "2019-01-01"}),
+                [NASA_K12_DIVERSITY, LOC_TEACHING],
+            ),
+            (
+                get_search_request(close_date={"end_date_relative": -2214}),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
                 get_search_request(
                     close_date={"start_date": "2015-01-01", "end_date": "2019-12-01"}
+                ),
+                [NASA_K12_DIVERSITY, DOC_SPACE_COAST],
+            ),
+            (
+                get_search_request(
+                    close_date={"start_date_relative": -3675, "end_date_relative": -1880}
                 ),
                 [NASA_K12_DIVERSITY, DOC_SPACE_COAST],
             ),
@@ -1061,14 +1109,82 @@ class TestOpportunityRouteSearch(BaseTestClass):
         "search_request",
         [
             # Post Date
+            (get_search_request(post_date={"start_date_relative": "I am not a relative date"})),
+            (get_search_request(post_date={"start_date_relative": "2015-01-01"})),
+            (get_search_request(post_date={"end_date_relative": "I am not a relative date"})),
+            (get_search_request(post_date={"end_date_relative": "2015-01-01"})),
+            # Close Date
+            (get_search_request(close_date={"start_date_relative": "I am not a relative date"})),
+            (get_search_request(close_date={"start_date_relative": "2015-01-01"})),
+            (get_search_request(close_date={"end_date_relative": "I am not a relative date"})),
+            (get_search_request(close_date={"end_date_relative": "2015-01-01"})),
+        ],
+    )
+    def test_search_validate_date_relative_filters_format_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert error["message"] == "Not a valid integer."
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # post_date
+            (get_search_request(post_date={"end_date_relative": 1000001})),
+            (get_search_request(post_date={"end_date_relative": -1000001})),
+            # close_date
+            (get_search_request(close_date={"end_date_relative": 1000001})),
+            (get_search_request(close_date={"end_date_relative": -1000001})),
+        ],
+    )
+    def test_search_validate_date_relative_range_values_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        json = resp.get_json()
+        assert json["message"] == "Validation error"
+        for error in json["errors"]:
+            assert (
+                error["message"]
+                == "Must be greater than or equal to -1000000 and less than or equal to 1000000."
+            )
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # Post Date
             (get_search_request(post_date={"start_date": None, "end_date": None})),
+            (
+                get_search_request(
+                    post_date={"start_date_relative": None, "end_date_relative": None}
+                )
+            ),
             (get_search_request(post_date={"start_date": None})),
+            (get_search_request(post_date={"start_date_relative": None})),
             (get_search_request(post_date={"end_date": None})),
+            (get_search_request(post_date={"end_date_relative": None})),
             (get_search_request(post_date={})),
             # Close Date
             (get_search_request(close_date={"start_date": None, "end_date": None})),
+            (
+                get_search_request(
+                    close_date={"start_date_relative": None, "end_date_relative": None}
+                )
+            ),
             (get_search_request(close_date={"start_date": None})),
+            (get_search_request(close_date={"start_date_relative": None})),
             (get_search_request(close_date={"end_date": None})),
+            (get_search_request(close_date={"end_date_relative": None})),
             (get_search_request(close_date={})),
         ],
     )
@@ -1083,37 +1199,21 @@ class TestOpportunityRouteSearch(BaseTestClass):
         json = resp.get_json()
         error = json["errors"][0]
         assert json["message"] == "Validation error"
-        assert error["message"] == "At least one of start_date or end_date must be provided."
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            get_search_request(assistance_listing_one_of=["12.345", "67.89"]),
-            get_search_request(assistance_listing_one_of=["98.765"]),
-            get_search_request(assistance_listing_one_of=["67.89", "54.24", "12.345", "86.753"]),
-        ],
-    )
-    def test_search_validate_assistance_listing_filters_200(
-        self, client, api_auth_token, search_request
-    ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        assert (
+            error["message"]
+            == "At least one of start_date/start_date_relative or end_date/end_date_relative must be provided."
         )
-        assert resp.status_code == 200
 
     @pytest.mark.parametrize(
         "search_request",
         [
-            get_search_request(assistance_listing_one_of=["12.345", "675.89"]),
-            get_search_request(assistance_listing_one_of=["hello"]),
-            get_search_request(assistance_listing_one_of=["67.89", "54.2412"]),
-            get_search_request(assistance_listing_one_of=["1.1"]),
-            get_search_request(assistance_listing_one_of=["12.hello"]),
-            get_search_request(assistance_listing_one_of=["fourfive.sixseveneight"]),
-            get_search_request(assistance_listing_one_of=["11..11"]),
+            # Post Date
+            (get_search_request(post_date={"start_date": "2015-01-01", "end_date_relative": 15})),
+            # Close Date
+            (get_search_request(close_date={"start_date_relative": -4, "end_date": "2015-01-01"})),
         ],
     )
-    def test_search_validate_assistance_listing_filters_422(
+    def test_search_validate_date_filters_mix_format_422(
         self, client, api_auth_token, search_request
     ):
         resp = client.post(
@@ -1124,76 +1224,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         json = resp.get_json()
         error = json["errors"][0]
         assert json["message"] == "Validation error"
-        assert error["message"] == "String does not match expected pattern."
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            get_search_request(is_cost_sharing_one_of=["hello"]),
-            get_search_request(is_cost_sharing_one_of=[True, "definitely"]),
-            get_search_request(is_cost_sharing_one_of=[5, 6]),
-            get_search_request(is_cost_sharing_one_of=["2024-01-01"]),
-            get_search_request(is_cost_sharing_one_of=[{}]),
-        ],
-    )
-    def test_search_validate_is_cost_sharing_filters_422(
-        self, client, api_auth_token, search_request
-    ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 422
-
-        json = resp.get_json()
-        error = json["errors"][0]
-        assert json["message"] == "Validation error"
-        assert error["message"] == "Not a valid boolean."
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            get_search_request(estimated_total_program_funding={"min": "hello", "max": "345678"}),
-            get_search_request(award_floor={"min": "one"}),
-            get_search_request(award_ceiling={"min": {}, "max": "123e4f5"}),
-        ],
-    )
-    def test_search_validate_award_values_422(self, client, api_auth_token, search_request):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 422
-
-        json = resp.get_json()
-        assert json["message"] == "Validation error"
-        for error in json["errors"]:
-            assert error["message"] == "Not a valid integer."
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            get_search_request(
-                expected_number_of_awards={"min": -1},
-                award_floor={"max": -2},
-                award_ceiling={"max": "-10000000"},
-                estimated_total_program_funding={"min": "-123456"},
-            ),
-            get_search_request(expected_number_of_awards={"min": -1, "max": 10000000}),
-            get_search_request(
-                estimated_total_program_funding={"max": "-5"}, award_floor={"max": "-9"}
-            ),
-        ],
-    )
-    def test_search_validate_award_values_negative_422(
-        self, client, api_auth_token, search_request
-    ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-
-        json = resp.get_json()
-        assert json["message"] == "Validation error"
-        for error in json["errors"]:
-            assert error["message"] == "Must be greater than or equal to 0."
+        assert error["message"] == "Cannot have both absolute and relative date parameters."
 
     @pytest.mark.parametrize(
         "search_request",

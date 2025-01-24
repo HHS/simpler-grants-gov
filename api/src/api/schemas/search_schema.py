@@ -295,10 +295,10 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
         self.schema_fields["end_date"] = fields.Date(allow_none=True)
 
         self.schema_fields["start_date_relative"] = fields.Integer(
-            allow_none=True, validate=[validators.Range(min=-1000000, max=10000000)]
+            allow_none=True, validate=[validators.Range(min=-1000000, max=1000000)]
         )
         self.schema_fields["end_date_relative"] = fields.Integer(
-            allow_none=True, validate=[validators.Range(min=-1000000, max=100000)]
+            allow_none=True, validate=[validators.Range(min=-1000000, max=1000000)]
         )
 
         self._with_date_range_validator()
@@ -338,7 +338,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
                     [
                         MarshmallowErrorContainer(
                             ValidationErrorType.REQUIRED,
-                            "At least one of start_date or end_date must be provided.",
+                            "At least one of start_date/start_date_relative or end_date/end_date_relative must be provided.",
                         )
                     ]
                 )
