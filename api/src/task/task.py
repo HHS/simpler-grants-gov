@@ -60,8 +60,13 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             raise
         finally:
             job_status = JobStatus.COMPLETED if job_succeeded else JobStatus.FAILED
-            with self.db_session.begin():
+            # If the session is active, we can commit the job update
+            if job_succeeded:
                 self.update_job(job_status, metrics=self.metrics)
+            else:
+                # If the session is not active due to an error upstream, we need to begin a new transaction
+                with self.db_session.begin():
+                    self.update_job(job_status, metrics=self.metrics)
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
