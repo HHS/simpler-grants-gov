@@ -82,6 +82,10 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
     )
 
+    last_notified_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, server_default="NOW()", nullable=False
+    )
+
     user: Mapped[User] = relationship(User, back_populates="saved_opportunities")
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="saved_opportunities_by_users"
