@@ -26,10 +26,10 @@ import SearchOpportunityStatus from "src/components/search/SearchOpportunityStat
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 export interface ParsedError {
-  message: string;
-  searchInputs: OptionalStringDict;
-  status: number;
-  type: string;
+  message?: string;
+  searchInputs?: OptionalStringDict;
+  status?: number;
+  type?: string;
   details?: FrontendErrorDetails;
 }
 
@@ -55,7 +55,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
   }, [error]);
 
   const parsedErrorData = isValidJSON(error.message)
-    ? JSON.parse(error.message)
+    ? (JSON.parse(error.message) as ParsedError)
     : {};
 
   const { agencyOptions } = useGlobalState(({ agencyOptions }) => ({
@@ -80,6 +80,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
     convertedSearchParams;
 
   // note that the validation error will contain untranslated strings
+  // and will only appear in development, prod builds will not include user facing error details
   const ErrorAlert =
     parsedErrorData.details && parsedErrorData.type === "ValidationError" ? (
       <Alert type="error" heading={t("validationError")} headingLevel="h4">
