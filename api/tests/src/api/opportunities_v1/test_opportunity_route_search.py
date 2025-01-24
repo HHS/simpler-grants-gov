@@ -55,7 +55,6 @@ def call_search_and_validate(client, api_auth_token, search_request, expected_re
     resp = client.post(
         "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
     )
-    print("???", resp)
     validate_search_response(resp, expected_results)
 
     search_request["format"] = "csv"
@@ -1109,6 +1108,51 @@ class TestOpportunityRouteSearch(BaseTestClass):
         "search_request",
         [
             # Post Date
+            (get_search_request(post_date={"start_date": None, "end_date": None})),
+            (
+                get_search_request(
+                    post_date={"start_date_relative": None, "end_date_relative": None}
+                )
+            ),
+            (get_search_request(post_date={"start_date": None})),
+            (get_search_request(post_date={"start_date_relative": None})),
+            (get_search_request(post_date={"end_date": None})),
+            (get_search_request(post_date={"end_date_relative": None})),
+            (get_search_request(post_date={})),
+            # Close Date
+            (get_search_request(close_date={"start_date": None, "end_date": None})),
+            (
+                get_search_request(
+                    close_date={"start_date_relative": None, "end_date_relative": None}
+                )
+            ),
+            (get_search_request(close_date={"start_date": None})),
+            (get_search_request(close_date={"start_date_relative": None})),
+            (get_search_request(close_date={"end_date": None})),
+            (get_search_request(close_date={"end_date_relative": None})),
+            (get_search_request(close_date={})),
+        ],
+    )
+    def test_search_validate_date_filters_nullability_422(
+        self, client, api_auth_token, search_request
+    ):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert (
+            error["message"]
+            == "At least one of start_date/start_date_relative or end_date/end_date_relative must be provided."
+        )
+
+    @pytest.mark.parametrize(
+        "search_request",
+        [
+            # Post Date
             (get_search_request(post_date={"start_date_relative": "I am not a relative date"})),
             (get_search_request(post_date={"start_date_relative": "2015-01-01"})),
             (get_search_request(post_date={"end_date_relative": "I am not a relative date"})),
@@ -1158,51 +1202,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 error["message"]
                 == "Must be greater than or equal to -1000000 and less than or equal to 1000000."
             )
-
-    @pytest.mark.parametrize(
-        "search_request",
-        [
-            # Post Date
-            (get_search_request(post_date={"start_date": None, "end_date": None})),
-            (
-                get_search_request(
-                    post_date={"start_date_relative": None, "end_date_relative": None}
-                )
-            ),
-            (get_search_request(post_date={"start_date": None})),
-            (get_search_request(post_date={"start_date_relative": None})),
-            (get_search_request(post_date={"end_date": None})),
-            (get_search_request(post_date={"end_date_relative": None})),
-            (get_search_request(post_date={})),
-            # Close Date
-            (get_search_request(close_date={"start_date": None, "end_date": None})),
-            (
-                get_search_request(
-                    close_date={"start_date_relative": None, "end_date_relative": None}
-                )
-            ),
-            (get_search_request(close_date={"start_date": None})),
-            (get_search_request(close_date={"start_date_relative": None})),
-            (get_search_request(close_date={"end_date": None})),
-            (get_search_request(close_date={"end_date_relative": None})),
-            (get_search_request(close_date={})),
-        ],
-    )
-    def test_search_validate_date_filters_nullability_422(
-        self, client, api_auth_token, search_request
-    ):
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        assert resp.status_code == 422
-
-        json = resp.get_json()
-        error = json["errors"][0]
-        assert json["message"] == "Validation error"
-        assert (
-            error["message"]
-            == "At least one of start_date/start_date_relative or end_date/end_date_relative must be provided."
-        )
 
     @pytest.mark.parametrize(
         "search_request",

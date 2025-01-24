@@ -126,7 +126,6 @@ def validate_valid_request(
     json_value = request.build()
     try:
         resp = search_client.search(index, json_value, include_scores=False)
-        print(resp)
 
     except Exception:
         # If it errors while making the query, catch the exception just to give a message that makes it a bit clearer
