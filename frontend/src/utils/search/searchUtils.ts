@@ -1,3 +1,5 @@
+import { Opportunity } from "src/types/search/searchResponseTypes";
+
 import { FilterOption } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 export const alphabeticalOptionSort = (
@@ -19,4 +21,31 @@ export const sortFilterOptions = (
     return option;
   });
   return childrenSorted.toSorted(alphabeticalOptionSort);
+};
+
+// finds human readable agency name by agency code in list of agency filter options
+// agency options will come in pre-flattened
+// THIS NEEDS TO SUPPORT THE NEW LOGIC
+
+/*
+                {opportunity?.top_level_agency_name &&
+                opportunity?.agency_name &&
+                opportunity?.top_level_agency_name !== opportunity?.agency_name
+                  ? `${opportunity?.top_level_agency_name} - ${opportunity?.agency_name}`
+                  : opportunity?.agency_name ||
+                    (agencyNameLookup && opportunity?.summary?.agency_code
+                      ? // Use same exact label we're using for the agency filter list
+                        agencyNameLookup[opportunity?.summary?.agency_code]
+                      : "--")}
+*/
+export const lookUpAgencyName = (
+  opportunity: Opportunity,
+  agencyOptions: FilterOption[],
+): string => {
+  const match = agencyOptions.find(
+    (option) =>
+      option.value === opportunity.agency ||
+      option.value === opportunity.summary.agency_code,
+  );
+  return match?.label || "--";
 };
