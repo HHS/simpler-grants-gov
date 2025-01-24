@@ -4,8 +4,6 @@ import time
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy.exc import SQLAlchemyError
-
 import src.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
 
@@ -34,11 +32,16 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
         self.job: JobLog | None = None
 
     def run(self) -> None:
+        job_succeeded = True
+
         try:
             # Create initial job record
             self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
             self.db_session.add(self.job)
             self.db_session.commit()
+
+            # Run the actual task
+            self.run_task()
 
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
@@ -46,33 +49,19 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             # Initialize the metrics
             self.initialize_metrics()
 
-            try:
-                # Run the actual task
-                self.run_task()
-            except SQLAlchemyError:
-                # Rollback and begin new transaction only for DB-specific errors
-                self.db_session.rollback()
-                self.db_session.begin()
-                raise
-            except Exception:
-                # For non-DB errors, just raise without touching the transaction
-                raise
-
             # Calculate and set a duration
             end = time.perf_counter()
             duration = round((end - start), 3)
             self.set_metrics({"task_duration_sec": duration})
 
-            # Update job status to completed
-            self.update_job(JobStatus.COMPLETED, metrics=self.metrics)
-
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
-            # Update job status to failed
-            self.update_job(JobStatus.FAILED, metrics=self.metrics)
-
-            logger.exception("Failed to run task %s", self.cls_name())
+            job_succeeded = False
             raise
+        finally:
+            job_status = JobStatus.COMPLETED if job_succeeded else JobStatus.FAILED
+            with self.db_session.begin():
+                self.update_job(job_status, metrics=self.metrics)
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
