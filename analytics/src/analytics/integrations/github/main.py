@@ -84,13 +84,13 @@ def export_sprint_data_to_file(
     output_file: str,
 ) -> None:
     """Export the issue and project data from a Sprint Board."""
+
     transformed_data = self.export_sprint_data_to_object(
         client=client,
         owner=owner,
         project=project,
         sprint_field=sprint_field,
         points_field=points_field,
-        output_file=output_file,
     )
     print("=========> transformed data is of type %s", str(type(transformed_data)))
 
@@ -106,6 +106,7 @@ def export_sprint_data_to_object(
     points_field: str,
 ) -> list[dict]:
     """Export the issue and project data from a Sprint Board."""
+
     # Load query
     query_path = PARENT_DIR / "getSprintData.graphql"
     with open(query_path) as f:
@@ -145,14 +146,13 @@ def export_roadmap_data_to_file(
     pillar_field: str,
     output_file: str,
 ) -> None:
-    """Export the issue and project data from a Roadmap Board."""
-    transformed_data = self.export_roadmap_data_to_object(
+
+    transformed_data = export_roadmap_data_to_object(
         client=client,
         owner=owner,
         project=project,
         quad_field=quad_field,
         pillar_field=pillar_field,
-        output_file=output_file,
     )
 
     # Write output
@@ -166,9 +166,9 @@ def export_roadmap_data_to_object(
     project: int,
     quad_field: str,
     pillar_field: str,
-    output_file: str,
-) -> None:
+) -> list[dict]:
     """Export the issue and project data from a Roadmap Board."""
+
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
     with open(query_path) as f:
@@ -191,4 +191,5 @@ def export_roadmap_data_to_object(
 
     # Transform data
     return transform_project_data(data, owner, project)
+
 
