@@ -49,7 +49,7 @@ test.describe("Search page tests", () => {
     };
     const agencyCheckboxes = {
       EPA: "EPA",
-      AC: "AC",
+      NSF: "NSF",
     };
     const categoryCheckboxes = {
       "category-recovery_act": "recovery_act",
@@ -57,6 +57,8 @@ test.describe("Search page tests", () => {
     };
 
     await waitForSearchResultsInitialLoad(page);
+    await selectSortBy(page, "agencyDesc");
+    await expectSortBy(page, "agencyDesc");
 
     await selectSortBy(page, "agencyDesc");
 
@@ -72,7 +74,6 @@ test.describe("Search page tests", () => {
       "status",
       "forecasted,posted",
     );
-
     await clickAccordionWithTitle(page, "Funding instrument");
     await toggleCheckboxes(
       page,
