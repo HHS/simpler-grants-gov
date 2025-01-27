@@ -110,7 +110,9 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
 class UserNotificationLog(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_notification_log"
 
-    user_notification_log_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    user_notification_log_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
