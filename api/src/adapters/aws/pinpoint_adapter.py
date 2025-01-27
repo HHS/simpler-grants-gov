@@ -5,21 +5,11 @@ import boto3
 import botocore.client
 from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings
 
 from src.adapters.aws import get_boto_session
 from src.adapters.aws.aws_session import is_local_aws
 
 logger = logging.getLogger(__name__)
-
-
-class PinpointConfig(BaseSettings):
-
-    is_local_aws: bool = False  # we override this locally
-
-    # The app ID manages the from email, and manages templates, and campaigns
-    pinpoint_app_id: str
-
 
 # An example of what the Pinpoint response looks like:
 """
