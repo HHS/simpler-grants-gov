@@ -40,6 +40,11 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             self.db_session.add(self.job)
             self.db_session.commit()
 
+            # Create initial job record
+            self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
+            self.db_session.add(self.job)
+            self.db_session.commit()
+
             # Initialize the metrics
             self.initialize_metrics()
 
