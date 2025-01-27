@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { camelCase } from "lodash";
 import {
-  PageProps,
   waitForAnyURLChange,
   waitForUrl,
   waitForURLContainsQueryParam,
@@ -23,6 +22,7 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   validateTopLevelAndNestedSelectedFilterCounts,
+  waitForFilterOptions,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
@@ -60,11 +60,15 @@ test.describe("Search page tests", () => {
     await selectSortBy(page, "agencyDesc");
     await expectSortBy(page, "agencyDesc");
 
-    await selectSortBy(page, "agencyDesc");
-
     if (project.name.match(/[Mm]obile/)) {
       await toggleMobileSearchFilters(page);
     }
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
+    await selectSortBy(page, "agencyDesc");
+    await expectSortBy(page, "agencyDesc");
 
     await fillSearchInputAndSubmit(searchTerm, page);
 
@@ -143,7 +147,10 @@ test.describe("Search page tests", () => {
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
     // Wait for the page to reload
-    await waitForSearchResultsInitialLoad(page);
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
 
     // Verify that page 1 is highlighted
     currentPageButton = page
@@ -157,9 +164,17 @@ test.describe("Search page tests", () => {
 
   test("last result becomes first result when flipping sort order", async ({
     page,
-  }: PageProps) => {
+  }, { project }) => {
     await page.goto("/search");
-    await waitForSearchResultsInitialLoad(page);
+
+    if (project.name.match(/[Mm]obile/)) {
+      await toggleMobileSearchFilters(page);
+    }
+
+    await Promise.all([
+      waitForSearchResultsInitialLoad(page),
+      waitForFilterOptions(page, "agency"),
+    ]);
 
     await selectSortBy(page, "opportunityTitleDesc");
 
@@ -226,13 +241,17 @@ test.describe("Search page tests", () => {
         // load search page
         await page.goto("/search");
 
-        const initialSearchResultsCount =
-          await getNumberOfOpportunitySearchResults(page);
-
         // open accordion for filter type
         if (project.name.match(/[Mm]obile/)) {
           await toggleMobileSearchFilters(page);
         }
+        await Promise.all([
+          waitForSearchResultsInitialLoad(page),
+          waitForFilterOptions(page, "agency"),
+        ]);
+
+        const initialSearchResultsCount =
+          await getNumberOfOpportunitySearchResults(page);
 
         await clickAccordionWithTitle(page, filterType);
 
@@ -314,13 +333,17 @@ test.describe("Search page tests", () => {
 
       await page.goto("/search");
 
-      const initialSearchResultsCount =
-        await getNumberOfOpportunitySearchResults(page);
-
       // open accordion for filter type
       if (project.name.match(/[Mm]obile/)) {
         await toggleMobileSearchFilters(page);
       }
+      await Promise.all([
+        waitForSearchResultsInitialLoad(page),
+        waitForFilterOptions(page, "agency"),
+      ]);
+
+      const initialSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
 
       await clickAccordionWithTitle(page, "Agency");
 

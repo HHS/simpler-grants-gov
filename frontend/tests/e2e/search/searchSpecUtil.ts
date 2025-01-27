@@ -216,3 +216,14 @@ export const validateTopLevelAndNestedSelectedFilterCounts = async (
     await expect(expanderButton).toContainText(`${expectedNestedCount}`);
   }
 };
+
+export const waitForFilterOptions = async (page: Page, filterType: string) => {
+  const filterButton = page.locator(
+    `button[aria-controls="opportunity-filter-${filterType}"]`,
+  );
+  await filterButton.click();
+  // expect(page.locator(`input[name="${filterType}-*"]`)).toBeTruthy();
+  const filterOptions = page.locator(`input[name="${filterType}-*"]`);
+  await filterOptions.isVisible();
+  await filterButton.click();
+};
