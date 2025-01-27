@@ -130,3 +130,9 @@ class OpportunityAttachmentType(StrEnum):
 
 class ExternalUserType(StrEnum):
     LOGIN_GOV = "login_gov"
+
+
+class JobStatus(StrEnum):
+    STARTED = "started"
+    COMPLETED = "completed"
+    FAILED = "failed"

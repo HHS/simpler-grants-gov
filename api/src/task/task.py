@@ -5,6 +5,7 @@ from enum import StrEnum
 from typing import Any
 
 import src.adapters.db as db
+from src.db.models.task_models import JobLog, JobStatus
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,19 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
     def __init__(self, db_session: db.Session) -> None:
         self.db_session = db_session
         self.metrics: dict[str, Any] = {}
+        self.job: JobLog | None = None
 
     def run(self) -> None:
+        job_succeeded = True
+
         try:
             logger.info("Starting %s", self.cls_name())
             start = time.perf_counter()
+
+            # Create initial job record
+            self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
+            self.db_session.add(self.job)
+            self.db_session.commit()
 
             # Initialize the metrics
             self.initialize_metrics()
@@ -47,8 +56,17 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
             logger.info("Completed %s in %s seconds", self.cls_name(), duration, extra=self.metrics)
         except Exception:
-            logger.exception("Failed to run task %s", self.cls_name())
+            job_succeeded = False
             raise
+        finally:
+            job_status = JobStatus.COMPLETED if job_succeeded else JobStatus.FAILED
+            # If the session is active, we can commit the job update
+            if job_succeeded:
+                self.update_job(job_status, metrics=self.metrics)
+            else:
+                # If the session is not active due to an error upstream, we need to begin a new transaction
+                with self.db_session.begin():
+                    self.update_job(job_status, metrics=self.metrics)
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}
@@ -69,6 +87,14 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
     def cls_name(self) -> str:
         return self.__class__.__name__
+
+    def update_job(self, job_status: JobStatus, metrics: dict[str, Any] | None = None) -> None:
+        if self.job is None:
+            raise ValueError("Job is not initialized")
+
+        self.job.job_status = job_status
+        self.job.metrics = self.metrics
+        self.db_session.commit()
 
     @abc.abstractmethod
     def run_task(self) -> None:

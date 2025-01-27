@@ -1,8 +1,9 @@
 import itertools
 
 import pytest
+from sqlalchemy import select
 
-from src.db.models.opportunity_models import OpportunitySearchIndexQueue
+from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
@@ -13,8 +14,8 @@ from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityAttachmentFactory,
+    OpportunityChangeAuditFactory,
     OpportunityFactory,
-    OpportunitySearchIndexQueueFactory,
 )
 
 
@@ -81,7 +82,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         )
 
         for opportunity in opportunities:
-            OpportunitySearchIndexQueueFactory.create(
+            OpportunityChangeAuditFactory.create(
                 opportunity=opportunity,
             )
 
@@ -253,9 +254,7 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         )
 
         for opportunity in itertools.chain(opportunities, test_opps):
-            OpportunitySearchIndexQueueFactory.create(
-                opportunity=opportunity,
-            )
+            OpportunityChangeAuditFactory.create(opportunity=opportunity, updated_at=None)
 
         load_opportunities_to_index.run()
 
@@ -286,11 +285,6 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         for opportunity in opportunities_now_with_test_agency:
             opportunity.agency_code = "MY-TEST-AGENCY-123"
 
-        for opportunity in opportunities:
-            OpportunitySearchIndexQueueFactory.create(
-                opportunity=opportunity,
-            )
-
         db_session.commit()
         db_session.expunge_all()
         load_opportunities_to_index.run()
@@ -314,17 +308,33 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         with pytest.raises(RuntimeError, match="please run the full refresh job"):
             load_opportunities_to_index.run()
 
-    def test_new_opportunity_gets_indexed(self, db_session, load_opportunities_to_index):
+    def test_new_opportunity_gets_indexed(
+        self,
+        db_session,
+        load_opportunities_to_index,
+    ):
         """Test that a new opportunity in the queue gets indexed"""
-        test_opportunity = OpportunityFactory.create(opportunity_attachments=[])
+        test_opportunity = OpportunityFactory.create(
+            opportunity_attachments=[],
+            is_draft=False,
+        )
 
         # Add to queue
-        OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
+        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, updated_at=None)
 
         load_opportunities_to_index.run()
 
         # Verify queue was cleared
-        remaining_queue = db_session.query(OpportunitySearchIndexQueue).all()
+        remaining_queue = (
+            db_session.execute(
+                select(OpportunityChangeAudit).where(
+                    OpportunityChangeAudit.opportunity_id == test_opportunity.opportunity_id,
+                    OpportunityChangeAudit.updated_at.is_(None),
+                )
+            )
+            .scalars()
+            .all()
+        )
         assert len(remaining_queue) == 0
 
     def test_draft_opportunity_not_indexed(self, db_session, load_opportunities_to_index):
@@ -332,10 +342,18 @@ class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
         test_opportunity = OpportunityFactory.create(is_draft=True, opportunity_attachments=[])
 
         # Add to queue
-        OpportunitySearchIndexQueueFactory.create(opportunity=test_opportunity)
-
-        load_opportunities_to_index.run()
+        OpportunityChangeAuditFactory.create(opportunity=test_opportunity, updated_at=None)
+        now = get_now_us_eastern_datetime()
 
         # Verify queue was not cleared
-        remaining_queue = db_session.query(OpportunitySearchIndexQueue).all()
+        remaining_queue = (
+            db_session.execute(
+                select(OpportunityChangeAudit).where(
+                    OpportunityChangeAudit.opportunity_id == test_opportunity.opportunity_id,
+                    OpportunityChangeAudit.updated_at <= now,
+                )
+            )
+            .scalars()
+            .all()
+        )
         assert len(remaining_queue) == 1
