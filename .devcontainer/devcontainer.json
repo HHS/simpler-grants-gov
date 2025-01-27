@@ -1,0 +1,20 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "hostRequirements": {
+    "cpus": 4
+  },
+  "waitFor": "onCreateCommand",
+  "updateContentCommand": "cd frontend && npm install && npm run build",
+  "postCreateCommand": "",
+  "postAttachCommand": {
+    "server": "cd frontend && npm start"
+  },
+
+  "portsAttributes": {
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "forwardPorts": [3000]
+}
