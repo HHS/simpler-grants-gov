@@ -23,7 +23,7 @@ from src.db.models.opportunity_models import (
 )
 from src.db.models.task_models import JobLog
 from src.task.task import Task
-from src.util import file_util
+from src.util import datetime_util, file_util
 from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -182,7 +182,7 @@ class LoadOpportunitiesToIndex(Task):
             self.db_session.execute(
                 update(OpportunityChangeAudit)
                 .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                .values(updated_at=get_now_us_eastern_datetime())
+                .values(updated_at=datetime_util.utcnow())
             )
 
     def _handle_incremental_delete(self, existing_opportunity_ids: set[int]) -> None:

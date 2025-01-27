@@ -35,6 +35,9 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
         job_succeeded = True
 
         try:
+            logger.info("Starting %s", self.cls_name())
+            start = time.perf_counter()
+
             # Create initial job record
             self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
             self.db_session.add(self.job)
@@ -45,9 +48,6 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
 
             # Run the actual task
             self.run_task()
-
-            logger.info("Starting %s", self.cls_name())
-            start = time.perf_counter()
 
             # Calculate and set a duration
             end = time.perf_counter()
