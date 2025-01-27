@@ -25,6 +25,9 @@ def is_local_aws() -> bool:
 
 def get_boto_session() -> boto3.Session:
     if is_local_aws():
-        return boto3.Session(aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+        # Locally, set fake creds in a region we don't actually use so we can't hit actual AWS resources
+        return boto3.Session(
+            aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS", region_name="us-west-2"
+        )
 
     return boto3.Session()
