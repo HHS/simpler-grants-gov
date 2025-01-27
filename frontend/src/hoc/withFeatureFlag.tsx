@@ -24,12 +24,12 @@ const withFeatureFlag = <P, R>(
     props: P & WithFeatureFlagProps,
   ) => {
     const searchParams = (await props.searchParams) || {};
-    const cookiesRead = await cookies();
+    const resolvedCookies = await cookies();
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
       if (
         featureFlagsManager.isFeatureEnabled(
           featureFlagName,
-          cookiesRead,
+          resolvedCookies,
           searchParams,
         )
       ) {

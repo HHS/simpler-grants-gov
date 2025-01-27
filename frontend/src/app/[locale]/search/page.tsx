@@ -33,22 +33,22 @@ type SearchPageProps = {
 
 function Search({ searchParams, params }: SearchPageProps) {
   const { locale } = use(params);
-  const searchParamsRead = use(searchParams);
+  const resolvedSearchParams = use(searchParams);
   setRequestLocale(locale);
   const t = useTranslations("Search");
 
   const convertedSearchParams =
-    convertSearchParamsToProperTypes(searchParamsRead);
+    convertSearchParamsToProperTypes(resolvedSearchParams);
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
 
-  if (!("page" in searchParamsRead)) {
-    searchParamsRead.page = "1";
+  if (!("page" in resolvedSearchParams)) {
+    resolvedSearchParams.page = "1";
   }
 
   return (
     <>
-      <SearchAnalytics params={searchParamsRead} />
+      <SearchAnalytics params={resolvedSearchParams} />
       <QueryProvider>
         <div className="grid-container">
           <div className="search-bar">
