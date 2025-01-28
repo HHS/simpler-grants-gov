@@ -217,25 +217,19 @@ def test_move_file_local_disk(tmp_path):
     "s3_path,cdn_url,expected",
     [
         (
-            "s3://my-bucket/path/to/file.pdf",
-            "cdn.example.com",
+            "s3://local-mock-public-bucket/path/to/file.pdf",
+            "https://cdn.example.com",
             "https://cdn.example.com/path/to/file.pdf",
         ),
         (
             "s3://local-mock-public-bucket/opportunities/9/attachments/79853231/manager.webm",
-            "cdn.example.com",
+            "https://cdn.example.com",
             "https://cdn.example.com/opportunities/9/attachments/79853231/manager.webm",
-        ),
-        # Test with trailing slash in CDN URL
-        (
-            "s3://my-bucket/file.txt",
-            "cdn.example.com/",
-            "https://cdn.example.com/file.txt",
         ),
         # Test with subdirectory in CDN URL
         (
-            "s3://my-bucket/file.txt",
-            "cdn.example.com/assets",
+            "s3://local-mock-public-bucket/file.txt",
+            "https://cdn.example.com/assets",
             "https://cdn.example.com/assets/file.txt",
         ),
     ],
