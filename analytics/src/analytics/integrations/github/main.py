@@ -81,8 +81,7 @@ def export_sprint_data(
     project: int,
     sprint_field: str,
     points_field: str,
-    output_file: str,
-) -> None:
+) -> list[dict]:
     """Export the issue and project data from a Sprint Board."""
     # Load query
     query_path = PARENT_DIR / "getSprintData.graphql"
@@ -114,9 +113,8 @@ def export_sprint_data(
         excluded_types=("Deliverable",),
     )
 
-    # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
+    return transformed_data
+
 
 
 def export_roadmap_data(
@@ -125,8 +123,7 @@ def export_roadmap_data(
     project: int,
     quad_field: str,
     pillar_field: str,
-    output_file: str,
-) -> None:
+) -> list[dict]:
     """Export the issue and project data from a Roadmap Board."""
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
@@ -152,5 +149,4 @@ def export_roadmap_data(
     transformed_data = transform_project_data(data, owner, project)
 
     # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
+    return transformed_data
