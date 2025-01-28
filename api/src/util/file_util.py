@@ -166,3 +166,17 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
     """Simple function for just getting all of the contents of a file"""
     with open_stream(path, mode, encoding) as input_file:
         return input_file.read()
+
+
+def convert_s3_to_cdn_url(file_path: str, cdn_url: str) -> str:
+    """
+    Convert an S3 URL to a CDN URL
+
+    Example:
+        s3://bucket-name/path/to/file.txt -> https://cdn.example.com/path/to/file.txt
+    """
+    if not is_s3_path(file_path):
+        raise ValueError(f"Expected s3:// path, got: {file_path}")
+
+    _, key = split_s3_url(file_path)
+    return f"{cdn_url.rstrip('/')}/{key}"
