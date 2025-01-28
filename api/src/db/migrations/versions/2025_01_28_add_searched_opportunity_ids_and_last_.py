@@ -1,8 +1,8 @@
-"""add saved_opportunity_ids and last_notified_at to user_saved_opportunity
+"""add searched_opportunity_ids_and_last_notified_at to user_saved_opportunity
 
-Revision ID: 2408905c1435
+Revision ID: 9e7fc937646a
 Revises: dc04ce955a9a
-Create Date: 2025-01-28 16:57:55.572278
+Create Date: 2025-01-28 19:06:19.397240
 
 """
 
@@ -11,7 +11,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "2408905c1435"
+revision = "9e7fc937646a"
 down_revision = "dc04ce955a9a"
 branch_labels = None
 depends_on = None
@@ -31,7 +31,7 @@ def upgrade():
     )
     op.add_column(
         "user_saved_search",
-        sa.Column("searched_opportunity_ids", postgresql.ARRAY(sa.Integer()), nullable=False),
+        sa.Column("searched_opportunity_ids", postgresql.ARRAY(sa.BigInteger()), nullable=False),
         schema="api",
     )
     # ### end Alembic commands ###
