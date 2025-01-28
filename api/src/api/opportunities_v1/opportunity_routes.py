@@ -157,6 +157,8 @@ def opportunity_search(
         search_client, search_params
     )
 
+    logger.error(pagination_info)
+
     add_extra_data_to_current_request_logs(
         {
             "response.pagination.total_pages": pagination_info.total_pages,
