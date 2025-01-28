@@ -1949,9 +1949,9 @@ def create_tgroups_agency(
     return groups
 
 
-class OpportunitySearchIndexQueueFactory(BaseFactory):
+class OpportunityChangeAuditFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunitySearchIndexQueue
+        model = opportunity_models.OpportunityChangeAudit
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)

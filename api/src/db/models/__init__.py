@@ -1,6 +1,14 @@
 import logging
 
-from . import agency_models, base, extract_models, lookup_models, opportunity_models, user_models
+from . import (
+    agency_models,
+    base,
+    extract_models,
+    lookup_models,
+    opportunity_models,
+    task_models,
+    user_models,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,4 +23,5 @@ __all__ = [
     "agency_models",
     "user_models",
     "extract_models",
+    "task_models",
 ]
