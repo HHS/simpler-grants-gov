@@ -9,6 +9,7 @@ import SearchPaginationFetch from "src/components/search/SearchPaginationFetch";
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
 import SearchResultsHeaderFetch from "src/components/search/SearchResultsHeaderFetch";
 import SearchResultsListFetch from "src/components/search/SearchResultsListFetch";
+import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
 
 export default function SearchResults({
   searchParams,
@@ -39,14 +40,19 @@ export default function SearchResults({
         <Suspense
           key={pager1key}
           fallback={
-            <SearchPagination loading={true} page={page} query={query} />
+            <SearchPagination
+              showExportButton={true}
+              loading={true}
+              page={page}
+              query={query}
+            />
           }
         >
           <SearchPaginationFetch
             page={page}
             query={query}
             searchResultsPromise={searchResultsPromise}
-            scroll={false}
+            showExportButton={true}
           />
         </Suspense>
         <Suspense key={key} fallback={<Loading message={loadingMessage} />}>

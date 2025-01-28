@@ -6,6 +6,8 @@ import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useContext, useEffect } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
+import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
+
 export enum PaginationPosition {
   Top = "topPagination",
   Bottom = "bottomPagination",
@@ -18,6 +20,7 @@ interface SearchPaginationProps {
   scroll?: boolean;
   totalResults?: string;
   loading?: boolean;
+  showExportButton?: boolean;
 }
 
 const MAX_SLOTS = 7;
@@ -25,6 +28,7 @@ const MAX_SLOTS = 7;
 // in addition to handling client side page navigation, this client component handles setting client state for:
 // - total pages of search results
 // - total number of search results
+// Also includes an optional search download button
 export default function SearchPagination({
   page,
   query,
@@ -32,6 +36,7 @@ export default function SearchPagination({
   scroll = false,
   totalResults = "",
   loading = false,
+  showExportButton = false,
 }: SearchPaginationProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const {
@@ -63,9 +68,13 @@ export default function SearchPagination({
   const pageCount = totalPages || Number(totalPagesFromQuery);
 
   return (
-    <div className={`grants-pagination ${loading ? "disabled" : ""}`}>
+    <div
+      className={`grants-pagination tablet-lg:display-flex display-static  ${loading ? "disabled" : ""}`}
+    >
+      {showExportButton && <ExportSearchResultsButton />}
       {totalResults !== "0" && pageCount > 0 && (
         <Pagination
+          className="tablet-lg:flex-justify-end flex-justify-center padding-top-2 border-top-1px border-base tablet-lg:padding-top-0 tablet-lg:border-top-0"
           aria-disabled={loading}
           pathname="/search"
           totalPages={pageCount}
