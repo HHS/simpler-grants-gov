@@ -1,9 +1,10 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, ForeignKey, Integer
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType
@@ -11,8 +12,7 @@ from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkExternalUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
-from sqlalchemy.sql.functions import now as sqlnow
-from sqlalchemy.dialects.postgresql import ARRAY
+
 
 class User(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
@@ -109,7 +109,7 @@ class UserSavedSearch(ApiSchemaTable, TimestampMixin):
         default=datetime_util.utcnow,
         server_default=sqlnow(),
     )
-    searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=False)
+    searched_opportunity_ids: Mapped[list[int]] = mapped_column(ARRAY(BigInteger))
 
 
 class UserNotificationLog(ApiSchemaTable, TimestampMixin):
