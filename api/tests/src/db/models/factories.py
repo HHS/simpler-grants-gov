@@ -2050,4 +2050,4 @@ class UserSavedSearchFactory(BaseFactory):
 
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
-    search_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+    searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
