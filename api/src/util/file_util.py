@@ -178,5 +178,4 @@ def convert_s3_to_cdn_url(file_path: str, cdn_url: str) -> str:
     if not is_s3_path(file_path):
         raise ValueError(f"Expected s3:// path, got: {file_path}")
 
-    _, key = split_s3_url(file_path)
-    return join(cdn_url, key)
+    return file_path.replace(os.environ["PUBLIC_FILES_BUCKET"], cdn_url)
