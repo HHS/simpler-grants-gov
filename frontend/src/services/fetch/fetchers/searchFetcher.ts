@@ -34,7 +34,10 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
-export const searchForOpportunities = async (searchInputs: QueryParamData) => {
+export const searchForOpportunities = async (
+  searchInputs: QueryParamData,
+  download?: boolean,
+) => {
   const { query } = searchInputs;
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
@@ -48,6 +51,10 @@ export const searchForOpportunities = async (searchInputs: QueryParamData) => {
 
   if (query) {
     requestBody.query = query;
+  }
+
+  if (download) {
+    requestBody.format = "csv";
   }
 
   const response = await fetchOpportunitySearch({

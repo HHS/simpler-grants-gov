@@ -36,7 +36,7 @@ export default function SearchPagination({
   scroll = false,
   totalResults = "",
   loading = false,
-  showExportButton = false,
+  // showExportButton = false,
 }: SearchPaginationProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const {
@@ -69,12 +69,11 @@ export default function SearchPagination({
 
   return (
     <div
-      className={`grants-pagination tablet-lg:display-flex display-static  ${loading ? "disabled" : ""}`}
+      className={`grants-pagination tablet-lg:display-flex display-static ${loading ? "disabled" : ""}`}
     >
-      {showExportButton && <ExportSearchResultsButton />}
       {totalResults !== "0" && pageCount > 0 && (
         <Pagination
-          className="tablet-lg:flex-justify-end flex-justify-center padding-top-2 border-top-1px border-base tablet-lg:padding-top-0 tablet-lg:border-top-0"
+          className={`grants-pagination tablet-lg:flex-justify-end flex-justify-center padding-top-2 border-top-1px border-base tablet-lg:padding-top-0 tablet-lg:border-top-0 ${loading ? "disabled" : ""}`}
           aria-disabled={loading}
           pathname="/search"
           totalPages={pageCount}

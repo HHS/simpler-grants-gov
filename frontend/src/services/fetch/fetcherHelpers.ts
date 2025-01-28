@@ -27,7 +27,6 @@ export interface HeadersDict {
 }
 
 // Configuration of headers to send with all requests
-// Can include feature flags in child classes
 export function getDefaultHeaders(): HeadersDict {
   const headers: HeadersDict = {};
 
@@ -62,6 +61,30 @@ export async function sendRequest<ResponseType extends APIResponse>(
   }
 
   return responseBody;
+}
+
+/**
+ * Send a request without assuming a json response (refactor this better later)
+ */
+export async function sendNonJsonRequest(
+  url: string,
+  fetchOptions: RequestInit,
+  queryParamData?: QueryParamData,
+): Promise<ReadableStream<Uint8Array<ArrayBufferLike>> | null> {
+  let response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch (error) {
+    // API most likely down, but also possibly an error setting up or sending a request
+    // or parsing the response.
+    throw fetchErrorToNetworkError(error, queryParamData);
+  }
+  // improve this later
+  if (!response.ok) {
+    throw new Error(`error fetching ${url} - ${response.status}`);
+  }
+
+  return response.body;
 }
 
 export function createRequestUrl(

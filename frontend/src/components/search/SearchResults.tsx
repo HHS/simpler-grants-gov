@@ -1,3 +1,4 @@
+import { environment } from "src/constants/environments";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
@@ -37,24 +38,29 @@ export default function SearchResults({
         />
       </Suspense>
       <div className="usa-prose">
-        <Suspense
-          key={pager1key}
-          fallback={
-            <SearchPagination
-              showExportButton={true}
-              loading={true}
+        <div className="tablet-lg:display-flex display-static">
+          <ExportSearchResultsButton
+            baseUrl={environment.NEXT_PUBLIC_BASE_URL}
+          />
+          <Suspense
+            key={pager1key}
+            fallback={
+              <SearchPagination
+                showExportButton={true}
+                loading={true}
+                page={page}
+                query={query}
+              />
+            }
+          >
+            <SearchPaginationFetch
               page={page}
               query={query}
+              searchResultsPromise={searchResultsPromise}
+              showExportButton={true}
             />
-          }
-        >
-          <SearchPaginationFetch
-            page={page}
-            query={query}
-            searchResultsPromise={searchResultsPromise}
-            showExportButton={true}
-          />
-        </Suspense>
+          </Suspense>
+        </div>
         <Suspense key={key} fallback={<Loading message={loadingMessage} />}>
           <SearchResultsListFetch searchResultsPromise={searchResultsPromise} />
         </Suspense>

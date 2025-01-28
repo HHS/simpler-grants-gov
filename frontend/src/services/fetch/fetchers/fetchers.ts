@@ -12,6 +12,7 @@ import {
   getDefaultHeaders,
   HeadersDict,
   JSONRequestBody,
+  sendNonJsonRequest,
   sendRequest,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
@@ -52,7 +53,19 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
       ...additionalHeaders,
     };
 
-    const response = await sendRequest<ResponseType>(
+    if (headers["Content-Type"] === "application/json") {
+      const response = await sendRequest<ResponseType>(
+        url,
+        {
+          body: method === "GET" || !body ? null : createRequestBody(body),
+          headers,
+          method,
+        },
+        queryParamData,
+      );
+      return response;
+    }
+    const response = await sendNonJsonRequest(
       url,
       {
         body: method === "GET" || !body ? null : createRequestBody(body),
@@ -61,8 +74,7 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
       },
       queryParamData,
     );
-
-    return response;
+    return response as unknown as ResponseType;
   };
 }
 
