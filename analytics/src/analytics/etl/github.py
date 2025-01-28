@@ -101,7 +101,7 @@ class GitHubProjectETL:
         # Store the config
         self.config = config
         # Declare private attributes shared across ETL steps
-        self._transient_files: InputFiles = InputFiles(roadmap=[], sprint=[])
+        self._transient_files: InputFiles = list[InputFiles]
         self.client = github.GitHubGraphqlClient()
         self.dataset: GitHubIssues
 
@@ -123,15 +123,19 @@ class GitHubProjectETL:
         # Export sprint data for each GitHub project that the scrum teams use
         # to manage their sprints, e.g. HHS/17 and HHS/13
 
+        input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
             project = sprint_board.project_number
             # Export data
             sprint_data = self._export_sprint_data(
                 sprint_board=sprint_board,
             )
-            # Add to file list
-            self._transient_files.roadmap.append(roadmap_data)
-            self._transient_files.sprint.append(sprint_data)
+
+            input_files.append(InputFiles(roadmap=roadmap_data, sprint=sprint_data))
+        
+        # Add to file list
+        self._transient_files = input_files
+            
 
         # store transient files for re-use during the transform step
 
@@ -196,14 +200,8 @@ def run_transformation_pipeline(files: InputFiles) -> list[dict]:
     """Load data from input files and apply transformations."""
     # Log the current sprint for which we're running the transformations
     logger.info("Running transformations for sprint: %s", files.sprint)
-    # Load sprint and roadmap data
 
-    logger.info(files.roadmap)
-    logger.info(files.sprint)
-
-    # sprint_data_in = json.load(files.sprint)
-    # roadmap_data_in = json.load(files.roadmap)
-    # Populate a lookup table with this data
+    # Populate a lookup table 
     lookup: dict = {}
     lookup = populate_issue_lookup_table(lookup, files.roadmap)
     lookup = populate_issue_lookup_table(lookup, files.sprint)
