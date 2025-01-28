@@ -1207,9 +1207,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         "search_request",
         [
             # Post Date
-            (get_search_request(post_date={"start_date": "2015-01-01", "end_date_relative": 15})),
+            (get_search_request(post_date={"start_date": "2015-01-01", "start_date_relative": 15})),
             # Close Date
-            (get_search_request(close_date={"start_date_relative": -4, "end_date": "2015-01-01"})),
+            (get_search_request(close_date={"end_date_relative": -4, "end_date": "2015-01-01"})),
         ],
     )
     def test_search_validate_date_filters_mix_format_422(
@@ -1223,7 +1223,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         json = resp.get_json()
         error = json["errors"][0]
         assert json["message"] == "Validation error"
-        assert error["message"] == "Cannot have both absolute and relative date parameters."
+        assert error["message"] == "Cannot have both absolute and relative start/end date."
 
     @pytest.mark.parametrize(
         "search_request",
@@ -1234,7 +1234,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_assistance_listing_filters_200(
-            self, client, api_auth_token, search_request
+        self, client, api_auth_token, search_request
     ):
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -1254,7 +1254,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_assistance_listing_filters_422(
-            self, client, api_auth_token, search_request
+        self, client, api_auth_token, search_request
     ):
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -1277,7 +1277,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_is_cost_sharing_filters_422(
-            self, client, api_auth_token, search_request
+        self, client, api_auth_token, search_request
     ):
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
@@ -1324,7 +1324,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
         ],
     )
     def test_search_validate_award_values_negative_422(
-            self, client, api_auth_token, search_request
+        self, client, api_auth_token, search_request
     ):
         resp = client.post(
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}

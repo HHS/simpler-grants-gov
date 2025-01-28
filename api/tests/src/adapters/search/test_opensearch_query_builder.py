@@ -428,7 +428,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
             # Absolute
             (date(1954, 7, 29), date(1954, 7, 29), [FELLOWSHIP_OF_THE_RING]),
             # Relative
-            ( -25747, -25747, []),
+            (-25747, -25747, []),
             # None fetched in range
             # Absolute
             (date(1981, 1, 1), date(1989, 1, 1), []),
@@ -447,16 +447,18 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         builder = (
             SearchQueryBuilder()
             .sort_by([])
-            .filter_date_range(
-                "publication_date", start_date, end_date
-            )
+            .filter_date_range("publication_date", start_date, end_date)
         )
 
-        expected_ranges={}
+        expected_ranges = {}
         if start_date is not None:
-            expected_ranges["gte"] = f"now{start_date:+}d" if isinstance(start_date, int) else start_date.isoformat()
+            expected_ranges["gte"] = (
+                f"now{start_date:+}d" if isinstance(start_date, int) else start_date.isoformat()
+            )
         if end_date is not None:
-            expected_ranges["lte"] = f"now{end_date:+}d" if isinstance(end_date, int) else end_date.isoformat()
+            expected_ranges["lte"] = (
+                f"now{end_date:+}d" if isinstance(end_date, int) else end_date.isoformat()
+            )
 
         expected_query = {
             "size": 25,

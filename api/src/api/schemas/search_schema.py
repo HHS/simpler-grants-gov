@@ -317,22 +317,25 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
             start_date_relative = data.get("start_date_relative", None)
             end_date_relative = data.get("end_date_relative", None)
 
-            # Error if a mix of relative date and absolute date provided
-            if ("start_date" in data or "end_date" in data) and (
-                "start_date_relative" in data or "end_date_relative" in data
+            # Error if both relative date and absolute date provided for either start or end date
+            if ("start_date" in data and "start_date_relative" in data) or (
+                "end_date" in data and "end_date_relative" in data
             ):
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
                             ValidationErrorType.INVALID,
-                            "Cannot have both absolute and relative date parameters.",
+                            "Cannot have both absolute and relative start/end date.",
                         )
                     ]
                 )
 
             # Error if both start and end date for either relative or absolute date are None (either explicitly set, or because they are missing)
-            if (start_date is None and end_date is None) and (
-                start_date_relative is None and end_date_relative is None
+            if (
+                start_date is None
+                and end_date is None
+                and start_date_relative is None
+                and end_date_relative is None
             ):
                 raise ValidationError(
                     [
