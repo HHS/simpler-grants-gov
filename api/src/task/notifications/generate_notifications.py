@@ -28,6 +28,10 @@ def run_notification_task(db_session: db.Session) -> None:
     task.run()
 
 
+class NotificationConstants:
+    OPPORTUNITY_UPDATES = "opportunity_updates"
+
+
 @dataclass
 class NotificationContainer:
     """Container for collecting notifications for a single user"""
@@ -112,10 +116,9 @@ class NotificationTask(Task):
             )
 
             # Create notification log entry
-            # TODO: Use enum for notification reason?
             notification_log = UserNotificationLog(
                 user_id=user_id,
-                notification_reason="opportunity_updates",
+                notification_reason=NotificationConstants.OPPORTUNITY_UPDATES,
                 notification_sent=True,
             )
             self.db_session.add(notification_log)

@@ -4,6 +4,7 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.db.models.user_models import UserNotificationLog
+from src.task.notifications.generate_notifications import NotificationConstants
 
 
 @pytest.fixture
@@ -106,7 +107,7 @@ def test_notification_log_creation(
 
     log = notification_logs[0]
     assert log.user_id == user.user_id
-    assert log.notification_reason == "opportunity_updates"
+    assert log.notification_reason == NotificationConstants.OPPORTUNITY_UPDATES
     assert log.notification_sent is True
 
 
