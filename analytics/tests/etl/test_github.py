@@ -54,7 +54,7 @@ def mock_sprint_data_file(config: GitHubProjectConfig) -> list[dict]:
     ]
     roadmap_data = [i.model_dump() for i in sprint_data]
   
-    return roadmap_data
+    return sprint_data
 
 
 @pytest.fixture(name="roadmap_file")
@@ -140,7 +140,7 @@ class TestGitHubProjectETL:
             ),
         ]
         wanted = [i.model_dump() for i in output_data]
-        etl._transient_files = InputFiles(roadmap=[roadmap_file], sprint=[sprint_file])
+        etl._transient_files = [InputFiles(roadmap=[roadmap_file], sprint=[sprint_file])]
         # Act
         etl.transform()
         # Assert
