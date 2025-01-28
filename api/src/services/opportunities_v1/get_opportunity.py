@@ -9,7 +9,7 @@ from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.file_util import convert_s3_to_cdn_url, pre_sign_file_location
+from src.util.file_util import convert_public_s3_to_cdn_url, pre_sign_file_location
 
 
 class AttachmentConfig(PydanticBaseEnvConfig):
@@ -59,7 +59,7 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     attachment_config = AttachmentConfig()
     if attachment_config.cdn_url is not None:
         for opp_att in opportunity.opportunity_attachments:
-            opp_att.download_path = convert_s3_to_cdn_url(  # type: ignore
+            opp_att.download_path = convert_public_s3_to_cdn_url(  # type: ignore
                 opp_att.file_location, attachment_config.cdn_url
             )
     else:

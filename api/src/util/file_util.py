@@ -168,7 +168,7 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
-def convert_s3_to_cdn_url(file_path: str, cdn_url: str) -> str:
+def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str) -> str:
     """
     Convert an S3 URL to a CDN URL
 

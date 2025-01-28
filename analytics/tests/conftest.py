@@ -289,6 +289,7 @@ def reset_aws_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture(autouse=True)
 def use_cdn(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Set up CDN URL environment variable for tests."""s
     monkeypatch.setenv("CDN_URL", "http://localhost:4566")
 
 

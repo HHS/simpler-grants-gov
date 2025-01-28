@@ -235,9 +235,9 @@ def test_move_file_local_disk(tmp_path):
     ],
 )
 def test_convert_s3_to_cdn_url(s3_path, cdn_url, expected):
-    assert file_util.convert_s3_to_cdn_url(s3_path, cdn_url) == expected
+    assert file_util.convert_public_s3_to_cdn_url(s3_path, cdn_url) == expected
 
 
 def test_convert_s3_to_cdn_url_invalid_path():
     with pytest.raises(ValueError, match="Expected s3:// path"):
-        file_util.convert_s3_to_cdn_url("http://not-s3/file.txt", "cdn.example.com")
+        file_util.convert_public_s3_to_cdn_url("http://not-s3/file.txt", "cdn.example.com")
