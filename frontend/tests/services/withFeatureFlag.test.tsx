@@ -75,4 +75,23 @@ describe("WithFeatureFlag", () => {
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(1);
   });
+  it("does not call onEnabled during wrapped component render when feature flag is not enabled", async () => {
+    const OriginalComponent = jest.fn();
+    const onEnabled = jest.fn();
+    const searchParams = { any: "param" };
+    const WrappedComponent = withFeatureFlag(
+      OriginalComponent,
+      "searchOff",
+      onEnabled,
+    );
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const component = await WrappedComponent({
+      searchParams: searchPromise(searchParams),
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    render(component);
+    expect(onEnabled).toHaveBeenCalledTimes(0);
+  });
 });
