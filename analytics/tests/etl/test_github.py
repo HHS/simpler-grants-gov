@@ -52,8 +52,8 @@ def mock_sprint_data_file(config: GitHubProjectConfig) -> list[dict]:
         issue(issue=1, kind=IssueType.TASK, parent="Epic3", points=2),
         issue(issue=2, kind=IssueType.TASK, parent="Epic4", points=1),
     ]
-    roadmap_data = [i.model_dump() for i in sprint_data]
-  
+    sprint_data = [i.model_dump() for i in sprint_data]
+
     return sprint_data
 
 
@@ -103,7 +103,6 @@ class TestGitHubProjectETL:
         sprint_board = etl.config.sprint_projects[0]
         mock_export_sprint_data.assert_called_once_with(
             sprint_board=sprint_board,
-
         )
 
         # Verify transient files were set correctly
@@ -140,7 +139,7 @@ class TestGitHubProjectETL:
             ),
         ]
         wanted = [i.model_dump() for i in output_data]
-        etl._transient_files = [InputFiles(roadmap=[roadmap_file], sprint=[sprint_file])]
+        etl._transient_files = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
         # Act
         etl.transform()
         # Assert
@@ -162,13 +161,16 @@ class TestGitHubProjectETL:
         self,
         monkeypatch: pytest.MonkeyPatch,
         etl: GitHubProjectETL,
-        sprint_file: str,
-        roadmap_file: str,
+        sprint_file: list[dict],
+        roadmap_file: list[dict],
     ):
         """Test the entire ETL pipeline by verifying method calls in run."""
-        # Arrange - Mock the export private methods
-        monkeypatch.setattr(github, "export_roadmap_data", MagicMock())
-        monkeypatch.setattr(github, "export_sprint_data", MagicMock())
+        # Arrange - Mock the export functions with sample sprint and roadmap data
+        mock_export_roadmap = MagicMock(return_value=roadmap_file)
+        mock_export_sprint = MagicMock(return_value=sprint_file)
+        monkeypatch.setattr(github, "export_roadmap_data", mock_export_roadmap)
+        monkeypatch.setattr(github, "export_sprint_data", mock_export_sprint)
+
         # Arrange - specify the output wanted
         output_data = [
             issue(
@@ -190,8 +192,10 @@ class TestGitHubProjectETL:
         ]
         dataset_wanted = [i.model_dump() for i in output_data]
         files_wanted = [InputFiles(roadmap=roadmap_file, sprint=sprint_file)]
+
         # Act - run the ETL
         etl.run()
+
         # Assert
         assert etl._transient_files == files_wanted
         assert etl.dataset.to_dict() == dataset_wanted
