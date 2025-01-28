@@ -1,4 +1,3 @@
-import os
 from datetime import date
 
 from sqlalchemy import select
@@ -57,11 +56,12 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
         db_session, opportunity_id, load_all_opportunity_summaries=False
     )
 
-    # attachment_config = AttachmentConfig()
-    cdn_url = os.environ.get("CDN_URL")
-    if cdn_url is not None:
+    attachment_config = AttachmentConfig()
+    if attachment_config.cdn_url is not None:
         for opp_att in opportunity.opportunity_attachments:
-            opp_att.download_path = convert_s3_to_cdn_url(opp_att.file_location, cdn_url)  # type: ignore
+            opp_att.download_path = convert_s3_to_cdn_url(  # type: ignore
+                opp_att.file_location, attachment_config.cdn_url
+            )
     else:
         pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
 
