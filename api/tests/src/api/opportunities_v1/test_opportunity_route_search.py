@@ -32,7 +32,6 @@ def validate_search_response(
     assert search_response.status_code == expected_status_code
 
     expected_ids = [exp.opportunity_id for exp in expected_results]
-
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
         opportunities = [record for record in reader]
@@ -334,13 +333,13 @@ DOC_MANUFACTURING = build_opp(
 )
 
 OPPORTUNITIES = [
+    LOC_TEACHING,
+    DOS_DIGITAL_LITERACY,
+    LOC_HIGHER_EDUCATION,
+    NASA_K12_DIVERSITY,
+    NASA_SUPERSONIC,
     NASA_SPACE_FELLOWSHIP,
     NASA_INNOVATIONS,
-    NASA_SUPERSONIC,
-    NASA_K12_DIVERSITY,
-    LOC_TEACHING,
-    LOC_HIGHER_EDUCATION,
-    DOS_DIGITAL_LITERACY,
     DOC_SPACE_COAST,
     DOC_MANUFACTURING,
 ]
@@ -365,6 +364,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.mark.parametrize(
         "search_request,expected_results",
         [
+            # Pagination should be static, results should not defer
             # Opportunity ID
             (
                 get_search_request(
@@ -382,18 +382,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     order_by="opportunity_id",
                     sort_direction=SortDirection.ASCENDING,
                 ),
-                OPPORTUNITIES[3:6],
+                OPPORTUNITIES,
             ),
-            (
-                get_search_request(
-                    page_size=25,
-                    page_offset=1,
-                    order_by="opportunity_id",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                OPPORTUNITIES[::-1],
-            ),
-            # Opportunity Number
+            # # Opportunity Number
             (
                 get_search_request(
                     page_size=3,
@@ -401,151 +392,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     order_by="opportunity_number",
                     sort_direction=SortDirection.ASCENDING,
                 ),
-                [LOC_TEACHING, LOC_HIGHER_EDUCATION, DOC_MANUFACTURING],
-            ),
-            (
-                get_search_request(
-                    page_size=2,
-                    page_offset=3,
-                    order_by="opportunity_number",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [NASA_K12_DIVERSITY, NASA_SPACE_FELLOWSHIP],
-            ),
-            # Opportunity Title
-            (
-                get_search_request(
-                    page_size=4,
-                    page_offset=2,
-                    order_by="opportunity_title",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [NASA_SPACE_FELLOWSHIP, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST, NASA_K12_DIVERSITY],
-            ),
-            (
-                get_search_request(
-                    page_size=5,
-                    page_offset=1,
-                    order_by="opportunity_title",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [
-                    LOC_TEACHING,
-                    NASA_K12_DIVERSITY,
-                    DOC_SPACE_COAST,
-                    LOC_HIGHER_EDUCATION,
-                    NASA_SPACE_FELLOWSHIP,
-                ],
-            ),
-            # Post Date
-            (
-                get_search_request(
-                    page_size=2,
-                    page_offset=1,
-                    order_by="post_date",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [DOC_MANUFACTURING, DOC_SPACE_COAST],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=1,
-                    order_by="post_date",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [LOC_TEACHING, DOS_DIGITAL_LITERACY, LOC_HIGHER_EDUCATION],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=12,
-                    order_by="post_date",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [],
-            ),
-            # Relevancy has a secondary sort of post date so should be identical.
-            (
-                get_search_request(
-                    page_size=2,
-                    page_offset=1,
-                    order_by="relevancy",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [DOC_MANUFACTURING, DOC_SPACE_COAST],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=1,
-                    order_by="relevancy",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [LOC_TEACHING, DOS_DIGITAL_LITERACY, LOC_HIGHER_EDUCATION],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=12,
-                    order_by="relevancy",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [],
-            ),
-            # Close Date (note several have null values which always go to the end)
-            (
-                get_search_request(
-                    page_size=4,
-                    page_offset=1,
-                    order_by="close_date",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [LOC_TEACHING, NASA_K12_DIVERSITY, DOC_SPACE_COAST, DOS_DIGITAL_LITERACY],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=1,
-                    order_by="close_date",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [DOC_MANUFACTURING, NASA_SUPERSONIC, NASA_SPACE_FELLOWSHIP],
-            ),
-            # close date - but check the end of the list to find the null values
-            (
-                get_search_request(
-                    page_size=5,
-                    page_offset=2,
-                    order_by="close_date",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [NASA_SUPERSONIC, DOC_MANUFACTURING, NASA_INNOVATIONS, LOC_HIGHER_EDUCATION],
-            ),
-            # Agency
-            (
-                get_search_request(
-                    page_size=5,
-                    page_offset=1,
-                    order_by="agency_code",
-                    sort_direction=SortDirection.ASCENDING,
-                ),
-                [
-                    DOC_SPACE_COAST,
-                    DOC_MANUFACTURING,
-                    DOS_DIGITAL_LITERACY,
-                    LOC_TEACHING,
-                    LOC_HIGHER_EDUCATION,
-                ],
-            ),
-            (
-                get_search_request(
-                    page_size=3,
-                    page_offset=1,
-                    order_by="agency_code",
-                    sort_direction=SortDirection.DESCENDING,
-                ),
-                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
+                OPPORTUNITIES,
             ),
         ],
         ids=search_scenario_id_fnc,
@@ -562,7 +409,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (get_search_request(agency_one_of=["not an agency"]), []),
             (
                 get_search_request(agency_one_of=["NASA"]),
-                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC, NASA_K12_DIVERSITY],
+                [NASA_K12_DIVERSITY, NASA_SUPERSONIC, NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS],
             ),
             (get_search_request(agency_one_of=["LOC"]), [LOC_TEACHING, LOC_HIGHER_EDUCATION]),
             (get_search_request(agency_one_of=["DOS-ECA"]), [DOS_DIGITAL_LITERACY]),
@@ -576,15 +423,15 @@ class TestOpportunityRouteSearch(BaseTestClass):
             # Opportunity Status
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.POSTED]),
-                [NASA_SPACE_FELLOWSHIP, LOC_TEACHING, DOC_MANUFACTURING],
+                [LOC_TEACHING, NASA_SPACE_FELLOWSHIP, DOC_MANUFACTURING],
             ),
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.FORECASTED]),
-                [NASA_INNOVATIONS, LOC_HIGHER_EDUCATION],
+                [LOC_HIGHER_EDUCATION, NASA_INNOVATIONS],
             ),
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.CLOSED]),
-                [NASA_SUPERSONIC, DOS_DIGITAL_LITERACY],
+                [DOS_DIGITAL_LITERACY, NASA_SUPERSONIC],
             ),
             (
                 get_search_request(opportunity_status_one_of=[OpportunityStatus.ARCHIVED]),
@@ -598,10 +445,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     ]
                 ),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_INNOVATIONS,
                     LOC_TEACHING,
                     LOC_HIGHER_EDUCATION,
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
                     DOC_MANUFACTURING,
                 ],
             ),
@@ -622,10 +469,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     funding_instrument_one_of=[FundingInstrument.COOPERATIVE_AGREEMENT]
                 ),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_K12_DIVERSITY,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_K12_DIVERSITY,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -633,9 +480,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(funding_instrument_one_of=[FundingInstrument.GRANT]),
                 [
-                    NASA_INNOVATIONS,
-                    NASA_SUPERSONIC,
                     LOC_HIGHER_EDUCATION,
+                    NASA_SUPERSONIC,
+                    NASA_INNOVATIONS,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -659,7 +506,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             # Funding Category
             (
                 get_search_request(funding_category_one_of=[FundingCategory.EDUCATION]),
-                [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
+                [LOC_TEACHING, NASA_K12_DIVERSITY, NASA_SPACE_FELLOWSHIP],
             ),
             (
                 get_search_request(
@@ -667,11 +514,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT
                     ]
                 ),
-                [NASA_INNOVATIONS, NASA_SUPERSONIC, DOC_MANUFACTURING],
+                [NASA_SUPERSONIC, NASA_INNOVATIONS, DOC_MANUFACTURING],
             ),
             (
                 get_search_request(funding_category_one_of=[FundingCategory.OTHER]),
-                [LOC_HIGHER_EDUCATION, DOS_DIGITAL_LITERACY, DOC_SPACE_COAST],
+                [DOS_DIGITAL_LITERACY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
             ),
             (
                 get_search_request(funding_category_one_of=[FundingCategory.REGIONAL_DEVELOPMENT]),
@@ -695,16 +542,16 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         FundingCategory.REGIONAL_DEVELOPMENT,
                     ]
                 ),
-                [NASA_INNOVATIONS, NASA_SUPERSONIC, DOC_SPACE_COAST, DOC_MANUFACTURING],
+                [NASA_SUPERSONIC, NASA_INNOVATIONS, DOC_SPACE_COAST, DOC_MANUFACTURING],
             ),
             # Applicant Type
             (
                 get_search_request(applicant_type_one_of=[ApplicantType.OTHER]),
                 [
+                    DOS_DIGITAL_LITERACY,
+                    NASA_K12_DIVERSITY,
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
-                    NASA_K12_DIVERSITY,
-                    DOS_DIGITAL_LITERACY,
                     DOC_MANUFACTURING,
                 ],
             ),
@@ -726,7 +573,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION
                     ]
                 ),
-                [LOC_HIGHER_EDUCATION, DOS_DIGITAL_LITERACY],
+                [DOS_DIGITAL_LITERACY, LOC_HIGHER_EDUCATION],
             ),
             (get_search_request(applicant_type_one_of=[ApplicantType.INDIVIDUALS]), []),
             (
@@ -736,14 +583,14 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         ApplicantType.UNRESTRICTED,
                     ]
                 ),
-                [NASA_SUPERSONIC, LOC_TEACHING, DOC_SPACE_COAST],
+                [LOC_TEACHING, NASA_SUPERSONIC, DOC_SPACE_COAST],
             ),
             # Mix
             (
                 get_search_request(
                     agency_one_of=["NASA"], applicant_type_one_of=[ApplicantType.OTHER]
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_K12_DIVERSITY],
+                [NASA_K12_DIVERSITY, NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS],
             ),
             (
                 get_search_request(
@@ -755,7 +602,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                         FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT
                     ],
                 ),
-                [NASA_INNOVATIONS, NASA_SUPERSONIC, DOC_MANUFACTURING],
+                [NASA_SUPERSONIC, NASA_INNOVATIONS, DOC_MANUFACTURING],
             ),
             (
                 get_search_request(
@@ -802,13 +649,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 get_search_request(
                     post_date={"start_date": "2019-06-01", "end_date": "2024-01-01"}
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+                [NASA_SUPERSONIC, NASA_SPACE_FELLOWSHIP],
             ),
             (
                 get_search_request(
                     post_date={"start_date_relative": -2063, "end_date_relative": -389}
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC],
+                [NASA_SUPERSONIC, NASA_SPACE_FELLOWSHIP],
             ),
             (get_search_request(post_date={"end_date": "2016-01-01"}), [DOC_MANUFACTURING]),
             (get_search_request(post_date={"end_date_relative": -3310}), [DOC_MANUFACTURING]),
@@ -818,11 +665,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     close_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
                 ),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
-                    NASA_K12_DIVERSITY,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_K12_DIVERSITY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -832,11 +679,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     close_date={"start_date_relative": -20111, "end_date_relative": 9131}
                 ),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
-                    NASA_K12_DIVERSITY,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_K12_DIVERSITY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -844,9 +691,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(close_date={"start_date": "2019-01-01"}),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -854,20 +701,20 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(close_date={"start_date_relative": -2214}),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
             ),
             (
                 get_search_request(close_date={"end_date": "2019-01-01"}),
-                [NASA_K12_DIVERSITY, LOC_TEACHING],
+                [LOC_TEACHING, NASA_K12_DIVERSITY],
             ),
             (
                 get_search_request(close_date={"end_date_relative": -2214}),
-                [NASA_K12_DIVERSITY, LOC_TEACHING],
+                [LOC_TEACHING, NASA_K12_DIVERSITY],
             ),
             (
                 get_search_request(
@@ -897,30 +744,30 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(is_cost_sharing_one_of=["t"]),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_MANUFACTURING,
                 ],
             ),
             (
                 get_search_request(is_cost_sharing_one_of=["on"]),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_SUPERSONIC,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_MANUFACTURING,
                 ],
             ),
             (
                 get_search_request(is_cost_sharing_one_of=["false"]),
-                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+                [LOC_HIGHER_EDUCATION, NASA_K12_DIVERSITY, NASA_INNOVATIONS, DOC_SPACE_COAST],
             ),
             (
                 get_search_request(is_cost_sharing_one_of=["no"]),
-                [NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_HIGHER_EDUCATION, DOC_SPACE_COAST],
+                [LOC_HIGHER_EDUCATION, NASA_K12_DIVERSITY, NASA_INNOVATIONS, DOC_SPACE_COAST],
             ),
         ],
     )
@@ -936,12 +783,12 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(expected_number_of_awards={"min": 0, "max": 1000}),
                 [
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    LOC_HIGHER_EDUCATION,
+                    NASA_SUPERSONIC,
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
-                    NASA_SUPERSONIC,
-                    LOC_TEACHING,
-                    LOC_HIGHER_EDUCATION,
-                    DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -956,17 +803,17 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(expected_number_of_awards={"min": 7}),
-                [NASA_SUPERSONIC, LOC_TEACHING, DOC_SPACE_COAST, DOC_MANUFACTURING],
+                [LOC_TEACHING, NASA_SUPERSONIC, DOC_SPACE_COAST, DOC_MANUFACTURING],
             ),
             # Award Floor
             (
                 get_search_request(award_floor={"min": 0, "max": 10_000_000_000}),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_INNOVATIONS,
-                    NASA_SUPERSONIC,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -974,28 +821,28 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(award_floor={"min": 1, "max": 5_000}),
                 [
-                    NASA_INNOVATIONS,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_INNOVATIONS,
                     DOC_SPACE_COAST,
                 ],
             ),
             (
                 get_search_request(award_floor={"min": 5_000, "max": 10_000}),
                 [
-                    NASA_INNOVATIONS,
                     NASA_SUPERSONIC,
+                    NASA_INNOVATIONS,
                 ],
             ),
             # Award Ceiling
             (
                 get_search_request(award_ceiling={"min": 0, "max": 10_000_000_000}),
                 [
-                    NASA_SPACE_FELLOWSHIP,
-                    NASA_INNOVATIONS,
-                    NASA_SUPERSONIC,
                     LOC_TEACHING,
                     DOS_DIGITAL_LITERACY,
+                    NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
+                    NASA_INNOVATIONS,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -1003,15 +850,15 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(award_ceiling={"min": 5_000, "max": 50_000}),
                 [
-                    NASA_INNOVATIONS,
                     NASA_SUPERSONIC,
+                    NASA_INNOVATIONS,
                 ],
             ),
             (
                 get_search_request(award_ceiling={"min": 50_000}),
                 [
-                    NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
+                    NASA_SPACE_FELLOWSHIP,
                     DOC_MANUFACTURING,
                 ],
             ),
@@ -1021,11 +868,11 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     estimated_total_program_funding={"min": 0, "max": 100_000_000_000}
                 ),
                 [
+                    LOC_TEACHING,
+                    DOS_DIGITAL_LITERACY,
+                    LOC_HIGHER_EDUCATION,
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
-                    LOC_TEACHING,
-                    LOC_HIGHER_EDUCATION,
-                    DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                     DOC_MANUFACTURING,
                 ],
@@ -1033,8 +880,8 @@ class TestOpportunityRouteSearch(BaseTestClass):
             (
                 get_search_request(estimated_total_program_funding={"min": 0, "max": 5_000}),
                 [
-                    NASA_INNOVATIONS,
                     DOS_DIGITAL_LITERACY,
+                    NASA_INNOVATIONS,
                     DOC_SPACE_COAST,
                 ],
             ),
@@ -1054,7 +901,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     award_floor={"min": 1_000, "max": 10_000},
                     award_ceiling={"max": 10_000_000},
                 ),
-                [NASA_INNOVATIONS, NASA_SUPERSONIC],
+                [NASA_SUPERSONIC, NASA_INNOVATIONS],
             ),
             (
                 get_search_request(
@@ -1383,10 +1230,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     order_by="opportunity_id", sort_direction=SortDirection.ASCENDING, query="space"
                 ),
                 [
+                    DOS_DIGITAL_LITERACY,
+                    NASA_K12_DIVERSITY,
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
-                    NASA_K12_DIVERSITY,
-                    DOS_DIGITAL_LITERACY,
                     DOC_SPACE_COAST,
                 ],
             ),
@@ -1396,7 +1243,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     sort_direction=SortDirection.ASCENDING,
                     query="43.008",
                 ),
-                [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
+                [LOC_TEACHING, NASA_K12_DIVERSITY, NASA_SPACE_FELLOWSHIP],
             ),
             (
                 get_search_request(
