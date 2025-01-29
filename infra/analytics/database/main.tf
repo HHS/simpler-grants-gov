@@ -78,26 +78,22 @@ data "aws_security_groups" "aws_services" {
 }
 
 module "database" {
-  source = "../../modules/database"
-
+  source                      = "../../modules/database"
   name                        = "${local.prefix}${local.database_config.cluster_name}"
   access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
-
   # The following are not AWS infra resources and therefore do not need to be
   # isolated via the terraform workspace prefix
-  app_username      = local.database_config.app_username
-  migrator_username = local.database_config.migrator_username
-  schema_name       = local.database_config.schema_name
-  instance_count    = local.database_config.instance_count
-
-  enable_http_endpoint = true
-
+  app_username                   = local.database_config.app_username
+  migrator_username              = local.database_config.migrator_username
+  schema_name                    = local.database_config.schema_name
+  instance_count                 = local.database_config.instance_count
+  enable_http_endpoint           = true
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-  db_subnet_group_name           = var.environment_name
+  database_subnet_group_name     = var.environment_name
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
 }

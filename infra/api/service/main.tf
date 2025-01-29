@@ -110,33 +110,43 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
+data "aws_security_groups" "aws_services" {
+  filter {
+    name   = "group-name"
+    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
+}
+
 module "service" {
-  source                 = "../../modules/service"
-  service_name           = local.service_name
-  is_temporary           = local.is_temporary
-  image_repository_name  = module.app_config.image_repository_name
-  image_tag              = local.image_tag
-  vpc_id                 = data.aws_vpc.network.id
-  public_subnet_ids      = data.aws_subnets.public.ids
-  private_subnet_ids     = data.aws_subnets.private.ids
-  desired_instance_count = local.service_config.instance_desired_instance_count
-  max_capacity           = local.service_config.instance_scaling_max_capacity
-  min_capacity           = local.service_config.instance_scaling_min_capacity
-  enable_autoscaling     = true
-  enable_s3_cdn          = true
-  s3_cdn_bucket_name     = "public-files"
-  cpu                    = local.service_config.instance_cpu
-  memory                 = local.service_config.instance_memory
-  environment_name       = var.environment_name
-
-  cert_arn = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
-
-  app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-  migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
-
-  scheduled_jobs = local.environment_config.scheduled_jobs
-  s3_buckets     = local.environment_config.s3_buckets
-
+  source                         = "../../modules/service"
+  service_name                   = local.service_name
+  is_temporary                   = local.is_temporary
+  image_repository_name          = module.app_config.image_repository_name
+  image_tag                      = local.image_tag
+  vpc_id                         = data.aws_vpc.network.id
+  public_subnet_ids              = data.aws_subnets.public.ids
+  private_subnet_ids             = data.aws_subnets.private.ids
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  desired_instance_count         = local.service_config.instance_desired_instance_count
+  max_capacity                   = local.service_config.instance_scaling_max_capacity
+  min_capacity                   = local.service_config.instance_scaling_min_capacity
+  enable_autoscaling             = true
+  enable_s3_cdn                  = true
+  s3_cdn_bucket_name             = "public-files"
+  cpu                            = local.service_config.instance_cpu
+  memory                         = local.service_config.instance_memory
+  environment_name               = var.environment_name
+  cert_arn                       = local.domain != null ? data.aws_acm_certificate.cert[0].arn : null
+  app_access_policy_arn          = data.aws_iam_policy.app_db_access_policy[0].arn
+  migrator_access_policy_arn     = data.aws_iam_policy.migrator_db_access_policy[0].arn
+  scheduled_jobs                 = local.environment_config.scheduled_jobs
+  s3_buckets                     = local.environment_config.s3_buckets
+  enable_drafts_bucket           = true
   db_vars = module.app_config.has_database ? {
     security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
     connection_info = {
@@ -147,11 +157,7 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
-
-  enable_drafts_bucket = true
-
   extra_environment_variables = merge(local.service_config.extra_environment_variables)
-
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
