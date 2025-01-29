@@ -28,6 +28,10 @@ export function ExportSearchResultsButton({ baseUrl }: { baseUrl: string }) {
           throw new Error(`Unsuccessful csv download. ${response.status}`);
         }
         console.log("Successfully downloaded csv", response);
+        return response.blob();
+      })
+      .then((csvBlob) => {
+        location.assign(URL.createObjectURL(csvBlob));
       })
       .catch((e) => console.error(e));
   }, [searchParams, baseUrl]);

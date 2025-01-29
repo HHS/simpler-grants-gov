@@ -1,6 +1,9 @@
 import "server-only";
 
-import { fetchOpportunitySearch } from "src/services/fetch/fetchers/fetchers";
+import {
+  exportOpportunitySearch,
+  fetchOpportunitySearch,
+} from "src/services/fetch/fetchers/fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -9,6 +12,8 @@ import {
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
+
+import { HeadersDict } from "../fetcherHelpers";
 
 const orderByFieldLookup = {
   relevancy: "relevancy",
@@ -36,7 +41,7 @@ const filterNameMap = {
 
 export const searchForOpportunities = async (
   searchInputs: QueryParamData,
-  download?: boolean,
+  // additionalHeaders?: HeadersDict,
 ) => {
   const { query } = searchInputs;
   const filters = buildFilters(searchInputs);
@@ -53,13 +58,10 @@ export const searchForOpportunities = async (
     requestBody.query = query;
   }
 
-  if (download) {
-    requestBody.format = "csv";
-  }
-
   const response = await fetchOpportunitySearch({
     body: requestBody,
     queryParamData: searchInputs,
+    // additionalHeaders,
   });
 
   response.actionType = searchInputs.actionType;
@@ -68,6 +70,39 @@ export const searchForOpportunities = async (
   if (!response.data) {
     throw new Error("No data returned from Opportunity Search API");
   }
+  return response;
+};
+
+export const downloadOpportunities = async (
+  searchInputs: QueryParamData,
+  // additionalHeaders?: HeadersDict,
+) => {
+  const { query } = searchInputs;
+  const filters = buildFilters(searchInputs);
+  const pagination = {
+    order_by: "relevancy",
+    page_offset: 1,
+    page_size: 5000,
+    sort_direction: "descending",
+  };
+
+  const requestBody: SearchRequestBody = { pagination };
+
+  // Only add filters if there are some
+  if (Object.keys(filters).length > 0) {
+    requestBody.filters = filters;
+  }
+
+  if (query) {
+    requestBody.query = query;
+  }
+
+  const response = await exportOpportunitySearch({
+    body: { ...requestBody, format: "csv" },
+    queryParamData: searchInputs,
+    // additionalHeaders,
+  });
+
   return response;
 };
 

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ReadableStream } from "stream/web";
 import {
   EndpointConfig,
   fetchOpportunityEndpoint,
@@ -53,7 +54,7 @@ export function requesterForEndpoint<ResponseType extends APIResponse>({
       ...additionalHeaders,
     };
 
-    if (headers["Content-Type"] === "application/json") {
+    if (body?.format !== "csv") {
       const response = await sendRequest<ResponseType>(
         url,
         {
@@ -88,3 +89,7 @@ export const fetchOpportunitySearch = requesterForEndpoint<SearchAPIResponse>(
 
 export const postUserLogout =
   requesterForEndpoint<APIResponse>(userLogoutEndpoint);
+
+export const exportOpportunitySearch = requesterForEndpoint<APIResponse>(
+  opportunitySearchEndpoint,
+);

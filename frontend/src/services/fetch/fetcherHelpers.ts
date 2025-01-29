@@ -81,7 +81,11 @@ export async function sendNonJsonRequest(
   }
   // improve this later
   if (!response.ok) {
-    throw new Error(`error fetching ${url} - ${response.status}`);
+    const body = await response.json();
+    const errorMessage = body.errors[0]?.message;
+    throw new Error(
+      `error fetching ${url} - ${response.status}${errorMessage || ""} `,
+    );
   }
 
   return response.body;
