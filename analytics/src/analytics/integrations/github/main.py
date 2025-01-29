@@ -5,7 +5,6 @@ TODO(widal001): 2025-01-04 Refactor and move this to src/analytics/etl/github wh
 we disable writing to disk in https://github.com/HHS/simpler-grants-gov/issues/3203
 """
 
-import json
 import logging
 from pathlib import Path
 
@@ -106,14 +105,13 @@ def export_sprint_data(
     # Transform data
     # And exclude deliverables if they appear on the sprint boards
     # so that we use their status value from the roadmap board instead
-    transformed_data = transform_project_data(
+    return transform_project_data(
         raw_data=data,
         owner=owner,
         project=project,
         excluded_types=("Deliverable",),
     )
 
-    return transformed_data
 
 
 
@@ -146,7 +144,6 @@ def export_roadmap_data(
     )
 
     # Transform data
-    transformed_data = transform_project_data(data, owner, project)
+    return transform_project_data(data, owner, project)
 
     # Write output
-    return transformed_data

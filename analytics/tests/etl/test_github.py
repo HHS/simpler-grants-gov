@@ -2,13 +2,11 @@
 # pylint: disable=protected-access
 """Test the GitHubProjectETL class."""
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from analytics.datasets.issues import IssueType
-from analytics.datasets.utils import dump_to_json
+from analytics.datasets.issues import GitHubIssues, IssueType
 from analytics.etl.github import (
     GitHubProjectConfig,
     GitHubProjectETL,
@@ -104,7 +102,7 @@ class TestGitHubProjectETL:
 
         # Verify transient files were set correctly
         assert etl._transient_files is not None
-   
+
     def test_transform(
         self,
         etl: GitHubProjectETL,
@@ -140,15 +138,13 @@ class TestGitHubProjectETL:
 
     def test_load(self, etl: GitHubProjectETL):
         """Test the load step by mocking the to_json method."""
-        mock_to_json = MagicMock()
         etl.dataset = MagicMock()
-        etl.dataset.to_json = mock_to_json
 
         # Run the load method
-        etl.load()
+        outcome: GitHubIssues = etl.load()
 
         # Check if to_json was called with the correct output file
-        mock_to_json.assert_called_once_with(etl.config.output_file)
+        assert outcome is not None
 
     def test_run(
         self,

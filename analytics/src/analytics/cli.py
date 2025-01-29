@@ -84,8 +84,9 @@ def export_github_data(
     config.temp_dir = temp_dir
     config.output_file = output_file
     # Run ETL pipeline
-    GitHubProjectETL(config).run()
+    data_to_load = GitHubProjectETL(config).run()
 
+    export_json_to_database(data_to_load)
 
 # ===========================================================
 # Import commands
@@ -114,16 +115,12 @@ def test_connection() -> None:
     result.close()
 
 
-@import_app.command(name="db_import")
-def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
+def export_json_to_database(issues: GitHubIssues) -> None:
     """Import JSON data to the database."""
     logger.info("Beginning import")
 
     # Get the database engine and establish a connection
     client = PostgresDbClient()
-
-    # Load data from the sprint board
-    issues = GitHubIssues.from_json(delivery_file)
 
     issues.to_sql(
         output_table="github_project_data",
