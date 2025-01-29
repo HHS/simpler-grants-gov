@@ -36,6 +36,8 @@ REQUEST_FIELD_NAME_MAPPING = {
     "close_date": "summary.close_date",
     "agency_code": "agency_code.keyword",
     "agency": "agency_code.keyword",
+    "agency_name": "agency_name.keyword",
+    "top_level_agency_name": "top_level_agency_name.keyword",
     "opportunity_status": "opportunity_status.keyword",
     "funding_instrument": "summary.funding_instruments.keyword",
     "funding_category": "summary.funding_categories.keyword",
@@ -100,6 +102,13 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
     # Add a secondary sort for relevancy to sort by post date (matching the sort direction)
     if pagination.order_by == "relevancy":
         sort_by.append((_adjust_field_name("post_date"), pagination.sort_direction))
+
+    # Agency is really a two piece data point
+    if pagination.order_by == "agency_code":
+        sort_by = [
+            (_adjust_field_name("top_level_agency_name"), pagination.sort_direction),
+            (_adjust_field_name("agency_name"), pagination.sort_direction),
+        ]
 
     return sort_by
 
