@@ -54,7 +54,7 @@ const GlobalStateContext = createContext<GlobalStore | undefined>(undefined);
 
 // ref usage works around Next JS weirdness - see https://zustand.docs.pmnd.rs/guides/nextjs
 export const GlobalStateProvider = ({ children }: GlobalStateProviderProps) => {
-  const storeRef = useRef<GlobalStore>();
+  const storeRef = useRef<GlobalStore>(undefined);
   if (!storeRef.current) {
     storeRef.current = createGlobalStore();
   }

@@ -74,7 +74,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
     ) {
       reset();
     }
-  }, [searchParams, reset]);
+  }, [searchParams, reset, previousSearchParams]);
 
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
