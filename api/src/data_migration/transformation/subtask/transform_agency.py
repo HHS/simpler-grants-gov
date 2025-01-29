@@ -73,6 +73,8 @@ NOT_MAPPED_FIELDS = {
     # These fields were only found in the test environment
     "ASSISTCompatible",
     "SAMValidation",
+    # This was added in Jan 2025 in Grants.gov, we aren't using it yet
+    "AllowSubmitWithExpSAM",
 }
 
 REQUIRED_FIELDS = {
