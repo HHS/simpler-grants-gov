@@ -11,7 +11,6 @@ interface SearchPaginationProps {
   scroll?: boolean;
   page: number;
   query?: string | null;
-  showExportButton?: boolean;
 }
 
 export default async function SearchPaginationFetch({
@@ -19,7 +18,6 @@ export default async function SearchPaginationFetch({
   query,
   searchResultsPromise,
   scroll = false,
-  showExportButton = false,
 }: SearchPaginationProps) {
   const searchResults = await searchResultsPromise;
   const totalPages = searchResults.pagination_info?.total_pages;
@@ -33,7 +31,6 @@ export default async function SearchPaginationFetch({
         query={query}
         scroll={scroll}
         totalResults={String(totalResults)}
-        showExportButton={showExportButton}
       />
     </>
   );

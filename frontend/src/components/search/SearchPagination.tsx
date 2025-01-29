@@ -6,8 +6,6 @@ import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { useContext, useEffect } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
-import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
-
 export enum PaginationPosition {
   Top = "topPagination",
   Bottom = "bottomPagination",
@@ -20,7 +18,6 @@ interface SearchPaginationProps {
   scroll?: boolean;
   totalResults?: string;
   loading?: boolean;
-  showExportButton?: boolean;
 }
 
 const MAX_SLOTS = 7;
@@ -28,7 +25,6 @@ const MAX_SLOTS = 7;
 // in addition to handling client side page navigation, this client component handles setting client state for:
 // - total pages of search results
 // - total number of search results
-// Also includes an optional search download button
 export default function SearchPagination({
   page,
   query,
@@ -36,7 +32,6 @@ export default function SearchPagination({
   scroll = false,
   totalResults = "",
   loading = false,
-  // showExportButton = false,
 }: SearchPaginationProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const {

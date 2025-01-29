@@ -1,6 +1,6 @@
 import "server-only";
 
-import { compact, isEmpty } from "lodash";
+import { compact } from "lodash";
 import { environment } from "src/constants/environments";
 import {
   ApiRequestError,
@@ -35,60 +35,6 @@ export function getDefaultHeaders(): HeadersDict {
   }
   headers["Content-Type"] = "application/json";
   return headers;
-}
-
-/**
- * Send a request and handle the response
- * @param queryParamData: note that this is only used in error handling in order to help restore original page state
- */
-export async function sendRequest<ResponseType extends APIResponse>(
-  url: string,
-  fetchOptions: RequestInit,
-  queryParamData?: QueryParamData,
-): Promise<ResponseType> {
-  let response;
-  let responseBody;
-  try {
-    response = await fetch(url, fetchOptions);
-    responseBody = (await response.json()) as ResponseType;
-  } catch (error) {
-    // API most likely down, but also possibly an error setting up or sending a request
-    // or parsing the response.
-    throw fetchErrorToNetworkError(error, queryParamData);
-  }
-  if (!response.ok) {
-    handleNotOkResponse(responseBody, url, queryParamData);
-  }
-
-  return responseBody;
-}
-
-/**
- * Send a request without assuming a json response (refactor this better later)
- */
-export async function sendNonJsonRequest(
-  url: string,
-  fetchOptions: RequestInit,
-  queryParamData?: QueryParamData,
-): Promise<ReadableStream<Uint8Array<ArrayBufferLike>> | null> {
-  let response;
-  try {
-    response = await fetch(url, fetchOptions);
-  } catch (error) {
-    // API most likely down, but also possibly an error setting up or sending a request
-    // or parsing the response.
-    throw fetchErrorToNetworkError(error, queryParamData);
-  }
-  // improve this later
-  if (!response.ok) {
-    const body = await response.json();
-    const errorMessage = body.errors[0]?.message;
-    throw new Error(
-      `error fetching ${url} - ${response.status}${errorMessage || ""} `,
-    );
-  }
-
-  return response.body;
 }
 
 export function createRequestUrl(
@@ -142,7 +88,7 @@ export function createRequestBody(
 /**
  * Handle request errors
  */
-function fetchErrorToNetworkError(
+export function fetchErrorToNetworkError(
   error: unknown,
   searchInputs?: QueryParamData,
 ) {
@@ -154,42 +100,12 @@ function fetchErrorToNetworkError(
     : new NetworkError(error);
 }
 
-// note that this will pass along filter inputs in order to maintain the state
-// of the page when relaying an error, but anything passed in the body of the request,
-// such as keyword search query will not be included
-function handleNotOkResponse(
-  response: APIResponse,
-  url: string,
-  searchInputs?: QueryParamData,
-) {
-  const { errors } = response;
-  if (isEmpty(errors)) {
-    // No detailed errors provided, throw generic error based on status code
-    throwError(response, url, searchInputs);
-  } else {
-    if (errors) {
-      const firstError = errors[0];
-      throwError(response, url, searchInputs, firstError);
-    }
-  }
-}
+export const throwError = (responseBody: APIResponse, url: string) => {
+  const { status_code = 0, message = "", errors } = responseBody;
+  console.error(`API request error at ${url} (${status_code}): ${message}`);
 
-export const throwError = (
-  response: APIResponse,
-  url: string,
-  searchInputs?: QueryParamData,
-  firstError?: unknown,
-) => {
-  const { status_code = 0, message = "" } = response;
-  console.error(
-    `API request error at ${url} (${status_code}): ${message}`,
-    searchInputs,
-  );
+  const details = (errors && errors[0]) || {};
 
-  const details = {
-    searchInputs,
-    ...(firstError || {}),
-  };
   switch (status_code) {
     case 400:
       throw new BadRequestError(message, details);

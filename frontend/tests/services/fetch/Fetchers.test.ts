@@ -9,7 +9,18 @@ const createRequestUrlMock = jest.fn(
     return "fakeurl";
   },
 );
-const sendRequestMock = jest.fn((..._args) => Promise.resolve("done"));
+// const sendRequestMock = jest.fn((..._args) => Promise.resolve("done"));
+
+const responseJsonMock = jest
+  .fn()
+  .mockResolvedValue({ data: [], errors: [], warnings: [] });
+
+const fetchMock = jest.fn().mockResolvedValue({
+  json: responseJsonMock,
+  ok: true,
+  status: 200,
+});
+
 const createRequestBodyMock = jest.fn((obj) => JSON.stringify(obj));
 const getDefaultHeadersMock = jest.fn(() => ({
   "Content-Type": "application/json",
@@ -32,7 +43,7 @@ jest.mock("src/services/fetch/fetcherHelpers", () => ({
       subPath,
       _body,
     ),
-  sendRequest: (...args: unknown[]) => sendRequestMock(...args),
+  // sendRequest: (...args: unknown[]) => sendRequestMock(...args),
   createRequestBody: (arg: unknown) => createRequestBodyMock(arg),
   getDefaultHeaders: () => getDefaultHeadersMock(),
 }));
@@ -50,23 +61,25 @@ describe("requesterForEndpoint", () => {
     method: "POST",
   };
 
+  let originalFetch: typeof global.fetch;
+  beforeAll(() => {
+    originalFetch = global.fetch;
+  });
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
+  beforeEach(() => {
+    global.fetch = fetchMock;
+  });
+
   it("returns a function", () => {
     expect(typeof requesterForEndpoint(basicEndpoint)).toBe("function");
   });
 
-  it("returns a function that calls `createRequestUrl` andf `sendRequest` with the expected arguments", async () => {
+  it("returns a function that calls `createRequestUrl` and `fetch` with the expected arguments", async () => {
     const requester = requesterForEndpoint(basicEndpoint);
     await requester({
       subPath: "1",
-      queryParamData: {
-        page: 1,
-        status: new Set(),
-        fundingInstrument: new Set(),
-        eligibility: new Set(),
-        agency: new Set(),
-        category: new Set(),
-        sortby: null,
-      },
       body: { key: "value" },
       additionalHeaders: { "Header-Name": "headerValue" },
     });
@@ -78,7 +91,7 @@ describe("requesterForEndpoint", () => {
       "1",
       { key: "value" },
     );
-    expect(sendRequestMock).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "fakeurl/1",
       {
         body: JSON.stringify({ key: "value" }),

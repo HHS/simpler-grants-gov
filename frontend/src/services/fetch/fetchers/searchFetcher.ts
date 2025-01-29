@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  exportOpportunitySearch,
-  fetchOpportunitySearch,
-} from "src/services/fetch/fetchers/fetchers";
+import { fetchOpportunitySearch } from "src/services/fetch/fetchers/fetchers";
 import {
   PaginationOrderBy,
   PaginationRequestBody,
@@ -12,8 +9,7 @@ import {
   SearchFilterRequestBody,
   SearchRequestBody,
 } from "src/types/search/searchRequestTypes";
-
-import { HeadersDict } from "../fetcherHelpers";
+import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 const orderByFieldLookup = {
   relevancy: "relevancy",
@@ -39,10 +35,7 @@ const filterNameMap = {
   category: "funding_category",
 } as const;
 
-export const searchForOpportunities = async (
-  searchInputs: QueryParamData,
-  // additionalHeaders?: HeadersDict,
-) => {
+export const searchForOpportunities = async (searchInputs: QueryParamData) => {
   const { query } = searchInputs;
   const filters = buildFilters(searchInputs);
   const pagination = buildPagination(searchInputs);
@@ -60,35 +53,34 @@ export const searchForOpportunities = async (
 
   const response = await fetchOpportunitySearch({
     body: requestBody,
-    queryParamData: searchInputs,
-    // additionalHeaders,
   });
 
-  response.actionType = searchInputs.actionType;
-  response.fieldChanged = searchInputs.fieldChanged;
+  const responseBody = (await response.json()) as SearchAPIResponse;
 
-  if (!response.data) {
+  responseBody.actionType = searchInputs.actionType;
+  responseBody.fieldChanged = searchInputs.fieldChanged;
+
+  if (!responseBody.data) {
     throw new Error("No data returned from Opportunity Search API");
   }
-  return response;
+  return responseBody;
 };
 
+// this is very similar to `searchForOpportunities`, but
+// * hardcodes some pagination params
+// * sets format param = 'csv'
+// * response body on success is not json, so does not parse it
 export const downloadOpportunities = async (
   searchInputs: QueryParamData,
-  // additionalHeaders?: HeadersDict,
-) => {
+): Promise<ReadableStream<Uint8Array<ArrayBufferLike>>> => {
   const { query } = searchInputs;
   const filters = buildFilters(searchInputs);
-  const pagination = {
-    order_by: "relevancy",
-    page_offset: 1,
-    page_size: 5000,
-    sort_direction: "descending",
+  const pagination = buildPagination(searchInputs);
+
+  const requestBody: SearchRequestBody = {
+    pagination: { ...pagination, page_size: 5000, page_offset: 1 },
   };
 
-  const requestBody: SearchRequestBody = { pagination };
-
-  // Only add filters if there are some
   if (Object.keys(filters).length > 0) {
     requestBody.filters = filters;
   }
@@ -97,13 +89,15 @@ export const downloadOpportunities = async (
     requestBody.query = query;
   }
 
-  const response = await exportOpportunitySearch({
+  const response = await fetchOpportunitySearch({
     body: { ...requestBody, format: "csv" },
-    queryParamData: searchInputs,
-    // additionalHeaders,
   });
 
-  return response;
+  if (!response.body) {
+    throw new Error("No data returned from Opportunity Search API export");
+  }
+
+  return response.body;
 };
 
 // Translate frontend filter param names to expected backend parameter names, and use one_of syntax
