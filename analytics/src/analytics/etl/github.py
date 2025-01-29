@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from dataclasses import dataclass
-from pathlib import Path
 
 import pandas as pd
 from pydantic import BaseModel, ValidationError
@@ -15,7 +13,6 @@ from analytics.datasets.issues import (
     IssueMetadata,
     IssueType,
 )
-from analytics.datasets.utils import load_json_file
 from analytics.integrations import github
 
 logger = logging.getLogger(__name__)
@@ -105,11 +102,11 @@ class GitHubProjectETL:
         self.client = github.GitHubGraphqlClient()
         self.dataset: GitHubIssues
 
-    def run(self) -> None:
+    def run(self) -> GitHubIssues:
         """Run the ETL pipeline."""
         self.extract()
         self.transform()
-        self.load()
+        return self.load()
 
     def extract(self) -> None:
         """Run the extract step of the ETL pipeline."""
@@ -123,6 +120,7 @@ class GitHubProjectETL:
         # to manage their sprints, e.g. HHS/17 and HHS/13
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
+            breakpoint()
             # Export data
             sprint_data = self._export_sprint_data(
                 sprint_board=sprint_board,
@@ -143,9 +141,9 @@ class GitHubProjectETL:
             issues.extend(run_transformation_pipeline(files=f))
         self.dataset = GitHubIssues(pd.DataFrame(data=issues))
 
-    def load(self) -> None:
+    def load(self) -> GitHubIssues:
         """Run the load step of the ETL pipeline."""
-        self.dataset.to_json(self.config.output_file)
+        return self.dataset
 
     def _export_roadmap_data(
         self,
