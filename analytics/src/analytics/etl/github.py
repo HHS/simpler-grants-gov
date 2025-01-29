@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InputFiles:
-    """Expected input files for loading this dataset."""
+    """Class for loading this dataset."""
 
     roadmap: list[dict]
     sprint: list[dict]
@@ -113,7 +113,6 @@ class GitHubProjectETL:
 
     def extract(self) -> None:
         """Run the extract step of the ETL pipeline."""
-
         # Export the roadmap data
         roadmap = self.config.roadmap_project
         roadmap_data = self._export_roadmap_data(
@@ -124,7 +123,6 @@ class GitHubProjectETL:
         # to manage their sprints, e.g. HHS/17 and HHS/13
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
-            project = sprint_board.project_number
             # Export data
             sprint_data = self._export_sprint_data(
                 sprint_board=sprint_board,
