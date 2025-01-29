@@ -115,12 +115,16 @@ def test_connection() -> None:
     result.close()
 
 
-def export_json_to_database(issues: GitHubIssues) -> None:
+@import_app.command(name="db_import")
+def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
     """Import JSON data to the database."""
     logger.info("Beginning import")
 
     # Get the database engine and establish a connection
     client = PostgresDbClient()
+
+ # Load data from the sprint board
+    issues = GitHubIssues.from_json(delivery_file)
 
     issues.to_sql(
         output_table="github_project_data",
