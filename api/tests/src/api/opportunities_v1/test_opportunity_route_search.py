@@ -41,6 +41,10 @@ def validate_search_response(
 
     response_ids = [int(opp["opportunity_id"]) for opp in opportunities]
 
+    for opp in opportunities:
+        if "summary" in opp:
+            assert "agency_phone_number" not in opp["summary"]
+
     assert (
         response_ids == expected_ids
     ), f"Actual opportunities:\n {'\n'.join([opp['opportunity_title'] for opp in opportunities])}"
