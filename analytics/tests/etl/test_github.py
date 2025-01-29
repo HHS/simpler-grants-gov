@@ -45,30 +45,27 @@ def mock_etl(config: GitHubProjectConfig):
 
 @pytest.fixture(name="sprint_file")
 def mock_sprint_data_file(config: GitHubProjectConfig) -> list[dict]:
-    """Create a path to a JSON file with mock sprint data exported from GitHub."""
+    """Create mock sprint data exported from GitHub."""
     # Arrange - create dummy sprint data
-    proj_number = config.sprint_projects[0].project_number
+
     sprint_data = [
         issue(issue=1, kind=IssueType.TASK, parent="Epic3", points=2),
         issue(issue=2, kind=IssueType.TASK, parent="Epic4", points=1),
     ]
-    sprint_data = [i.model_dump() for i in sprint_data]
+    return [i.model_dump() for i in sprint_data]
 
-    return sprint_data
 
 
 @pytest.fixture(name="roadmap_file")
 def mock_roadmap_data_file(config: GitHubProjectConfig) -> list[dict]:
-    """Create a path to a JSON file with mock sprint data exported from GitHub."""
-
+    """Create mock sprint data exported from GitHub."""
     roadmap_data = [
         issue(issue=3, kind=IssueType.EPIC, parent="Deliverable5"),
         issue(issue=4, kind=IssueType.EPIC, parent="Deliverable6"),
         issue(issue=5, kind=IssueType.DELIVERABLE, quad="quad1"),
     ]
-    roadmap_data = [i.model_dump() for i in roadmap_data]
+    return [i.model_dump() for i in roadmap_data]
 
-    return roadmap_data
 
 
 # ===========================================================
@@ -106,12 +103,8 @@ class TestGitHubProjectETL:
         )
 
         # Verify transient files were set correctly
-        assert etl._transient_files != None
-        # assert etl._transient_files[0].roadmap.endswith("roadmap-data.json")
-        # assert etl._transient_files[0].sprint.endswith(
-        #     f"sprint-data-{sprint_board.project_number}.json",
-        # )
-
+        assert etl._transient_files is not None
+   
     def test_transform(
         self,
         etl: GitHubProjectETL,
