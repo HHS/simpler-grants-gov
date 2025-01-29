@@ -160,7 +160,7 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
     # Make sure total hit count gets counted for more than 10k records
     builder.track_total_hits(True)
 
-   # Pagination
+    # Pagination
     builder.pagination(
         page_size=params.pagination.page_size, page_number=params.pagination.page_offset
     )
@@ -194,9 +194,16 @@ def search_opportunities(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
 
-    response = search_client.search(index_alias, search_request, excludes=["attachments"])
+    response = search_client.search(index_alias, search_request, includes=["opportunity_id"], excludes=["attachments"])
 
-    pagination_info = {"order_by": "post_date", "page_offset": 1, "page_size": 1000, "sort_direction": "descending"}
+    pagination_info = PaginationInfo(
+        page_offset=search_params.pagination.page_offset,
+        page_size=search_params.pagination.page_size,
+        order_by=search_params.pagination.order_by,
+        sort_direction=search_params.pagination.sort_direction,
+        total_records=response.total_records,
+        total_pages=int(math.ceil(response.total_records / search_params.pagination.page_size)),
+    )
 
     # While the data returned is already JSON/dicts like we want to return
     # APIFlask will try to run whatever we return through the deserializers
