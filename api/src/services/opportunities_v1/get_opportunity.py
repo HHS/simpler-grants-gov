@@ -5,6 +5,7 @@ from sqlalchemy.orm import noload, selectinload
 
 import src.adapters.db as db
 import src.util.datetime_util as datetime_util
+from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment, OpportunitySummary
@@ -58,9 +59,10 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
 
     attachment_config = AttachmentConfig()
     if attachment_config.cdn_url is not None:
+        s3_config = S3Config()
         for opp_att in opportunity.opportunity_attachments:
             opp_att.download_path = convert_public_s3_to_cdn_url(  # type: ignore
-                opp_att.file_location, attachment_config.cdn_url
+                opp_att.file_location, attachment_config.cdn_url, s3_config
             )
     else:
         pre_sign_opportunity_file_location(opportunity.opportunity_attachments)
