@@ -37,21 +37,21 @@ release-build:
 ##################################################
 # Local development
 ##################################################
-build-dev: # Build the Next.js local dev server in Docker
+build-dev: ## Build the Next.js local dev server in Docker
 	docker compose build --no-cache nextjs
 
-build-storybook: # Build Storybook in Docker
+build-storybook: ## Build Storybook in Docker
 	docker compose build --no-cache storybook
 
-reinstall-deps:
+reinstall-deps: ## Delete node_modules and npm install
 	rm -rf node_modules
 	npm install
 
-dev: # Run the Next.js local dev server in Docker
+dev: ## Run the Next.js local dev server in Docker
 	docker compose up --detach nextjs
 	docker compose logs --follow nextjs
 
-storybook: # Run the Storybook local dev server in Docker
+storybook: ## Run the Storybook local dev server in Docker
 	docker compose up --detach storybook
 	docker compose logs --follow storybook
 
@@ -62,14 +62,17 @@ stop:
 # Load testing
 ##################################################
 
-load-test-local: # Load test the local environment at localhost:3000
+load-test-local: ## Load test the local environment at localhost:3000
 	artillery run -e local artillery-load-test.yml
 
-load-test-dev: # Load test the dev environment in aws
+load-test-dev: ## Load test the dev environment in aws
 	artillery run -e dev artillery-load-test.yml
 
-load-test-staging: # Load test the staging environment in aws
+load-test-staging: ## Load test the staging environment in aws
 	artillery run -e stage artillery-load-test.yml
 
-load-test-prod: # Load test the production environment in aws. Please test responsibly
+load-test-prod: ## Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
+
+help: ## Prints the help documentation and info about each command
+	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

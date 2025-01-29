@@ -6,6 +6,8 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ## Local (non-Docker)
 
+In addition to the npm `package.json` scripts there are also several helpful make commands defined in the `Makefile` which are explained by running `make help`
+
 ### 🏗️ Development version
 
 Run `npm install && npm run dev` to install and start the application.
@@ -195,6 +197,7 @@ Running authentication locally requires running the API, directing the API redir
 4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
 
 #### Login flow
+
 The [documentation/api/authentication.md](../api/authentication.md) details the login flow from the frontend → API → login.gov → API → frontend.
 
 The `/api/auth/callback` route handler receives a JSON web token as query parameter, uses the `API_JWT_PUBLIC_KEY` env variable to verify that it was created by the API, sets a cookie with the token, then later uses that token to verify the user identity in `/api/auth/session` and other routes.
