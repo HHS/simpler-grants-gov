@@ -360,13 +360,13 @@ test.describe("Search page tests", () => {
 
       await waitForAnyURLChange(page, urlBeforeInteraction);
 
-      // validate that new search results are returned with filtered (smaller number) of results
       const topLevelAndNestedSelectedNumberOfSearchResults =
         await getNumberOfOpportunitySearchResults(page);
 
+      // we've selected more agencies, so there should be more results
       expect(
         topLevelAndNestedSelectedNumberOfSearchResults,
-      ).toBeLessThanOrEqual(topLevelSelectedNumberOfSearchResults);
+      ).toBeGreaterThanOrEqual(topLevelSelectedNumberOfSearchResults);
 
       // validate that nested checkboxes are checked
       let checkboxes = await page.locator(nestedFilterCheckboxesSelector).all();
