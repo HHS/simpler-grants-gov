@@ -223,7 +223,11 @@ class SearchClient:
             params = {}
 
         response = self._client.search(
-            index=index_name, body=search_query, params=params, _source_includes=includes, _source_excludes=excludes
+            index=index_name,
+            body=search_query,
+            params=params,
+            _source_includes=includes,
+            _source_excludes=excludes,
         )
         return SearchResponse.from_opensearch_response(response, include_scores)
 

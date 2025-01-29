@@ -154,7 +154,12 @@ def opportunity_search(
     logger.info("POST /v1/opportunities/search")
 
     # Override  pagination
-    search_params["pagination"] =  {"order_by": "post_date", "page_offset": 1, "page_size": 1000, "sort_direction": "descending"}
+    search_params["pagination"] = {
+        "order_by": "post_date",
+        "page_offset": 1,
+        "page_size": 1000,
+        "sort_direction": "descending",
+    }
 
     opportunities, aggregations, pagination_info = search_opportunities(
         search_client, search_params
