@@ -120,7 +120,6 @@ class GitHubProjectETL:
         # to manage their sprints, e.g. HHS/17 and HHS/13
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
-            breakpoint()
             # Export data
             sprint_data = self._export_sprint_data(
                 sprint_board=sprint_board,
