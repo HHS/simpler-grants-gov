@@ -153,11 +153,12 @@ def opportunity_search(
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search")
 
+    # Override  pagination
+    search_params["pagination"] =  {"order_by": "post_date", "page_offset": 1, "page_size": 1000, "sort_direction": "descending"}
+
     opportunities, aggregations, pagination_info = search_opportunities(
         search_client, search_params
     )
-
-    logger.error(pagination_info)
 
     add_extra_data_to_current_request_logs(
         {
