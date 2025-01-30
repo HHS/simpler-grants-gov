@@ -210,7 +210,7 @@ def search_opportunities(
     # which means anything that requires conversions like timestamps end up failing
     # as they don't need to be converted. So, we convert everything to those types (serialize)
     # so that deserialization won't fail.
-    records = SCHEMA.load(response.records, many=True)  # different just op id
+    records = SCHEMA.load(response.records, many=True)
 
     return records, response.aggregations, pagination_info
 
