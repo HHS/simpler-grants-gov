@@ -1,4 +1,3 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -6,7 +5,6 @@ data "aws_vpc" "network" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
@@ -18,7 +16,6 @@ data "aws_subnets" "private" {
   }
 }
 
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
 data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
@@ -45,6 +42,8 @@ locals {
   service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
   is_temporary = startswith(terraform.workspace, "t-")
+  # Include project name in bucket name since buckets need to be globally unique across AWS
+  bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
@@ -154,13 +153,13 @@ module "service" {
       schema_name = local.database_config.schema_name
     }
   } : null
-  extra_environment_variables = local.service_config.extra_environment_variables
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
   )
+  extra_environment_variables = local.service_config.extra_environment_variables
 }
 
 module "monitoring" {
@@ -173,4 +172,3 @@ module "monitoring" {
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   incident_management_service_integration_url = module.app_config.has_incident_management_service ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
 }
-
