@@ -1,8 +1,10 @@
 import pytest
 
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import FundingInstrument
 from src.db.models.user_models import UserSavedSearch
 from tests.src.api.opportunities_v1.conftest import get_search_request
+from tests.src.api.opportunities_v1.test_opportunity_route_search import LOC_HIGHER_EDUCATION
 from tests.src.db.models.factories import UserFactory
 
 
@@ -71,13 +73,30 @@ def test_user_save_search_post_invalid_request(client, user, user_auth_token, db
     assert len(saved_searches) == 0
 
 
-def test_user_save_search_post(client, user, user_auth_token, enable_factory_create, db_session):
+def test_user_save_search_post(
+    client,
+    opportunity_index,
+    opportunity_index_alias,
+    search_client,
+    user,
+    user_auth_token,
+    enable_factory_create,
+    db_session,
+):
     # Test data
     search_name = "Test Search"
     search_query = get_search_request(
         funding_instrument_one_of=[FundingInstrument.GRANT],
         agency_one_of=["LOC"],
     )
+
+    # Load into the search index
+    schema = OpportunityV1Schema()
+    json_records = [schema.dump(LOC_HIGHER_EDUCATION)]
+    search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+
+    # Swap the search index alias
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
     # Make the request to save a search
     response = client.post(
@@ -103,3 +122,5 @@ def test_user_save_search_post(client, user, user_auth_token, enable_factory_cre
             "sort_direction": "ascending",
         },
     }
+    assert 1 == 2
+    assert saved_search.searched_opportunity_ids == [LOC_HIGHER_EDUCATION.opportunity_id]
