@@ -51,7 +51,6 @@ __check_defined = \
 	infra-update-current-account \
 	infra-update-network \
 	infra-validate-modules \
-	lint-markdown \
 	release-build \
 	release-deploy \
 	release-image-name \
@@ -147,7 +146,7 @@ infra-check-compliance-checkov: ## Run checkov compliance checks
 infra-check-compliance-tfsec: ## Run tfsec compliance checks
 	tfsec infra
 
-infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
+infra-lint: infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
 
 infra-lint-scripts: ## Lint shell scripts
 	shellcheck bin/**
