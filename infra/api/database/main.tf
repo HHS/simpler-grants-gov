@@ -18,7 +18,6 @@ data "aws_subnets" "database" {
   }
 }
 
-
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
   # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
@@ -33,6 +32,7 @@ locals {
 
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
+  network_config     = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -81,7 +81,6 @@ module "database" {
   source = "../../modules/database"
 
   name                        = "${local.prefix}${local.database_config.cluster_name}"
-  access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
   # The following are not AWS infra resources and therefore do not need to be

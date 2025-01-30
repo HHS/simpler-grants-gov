@@ -10,8 +10,16 @@ output "environments" {
   value = local.environments
 }
 
+output "feature_flags" {
+  value = local.feature_flags
+}
+
 output "has_database" {
   value = local.has_database
+}
+
+output "has_external_non_aws_service" {
+  value = local.has_external_non_aws_service
 }
 
 output "has_incident_management_service" {

@@ -5,6 +5,8 @@ locals {
   has_database                    = true
   has_incident_management_service = false
 
+  feature_flags = ["foo", "bar"]
+
   environment_configs = {
     dev     = module.dev_config
     staging = module.staging_config
