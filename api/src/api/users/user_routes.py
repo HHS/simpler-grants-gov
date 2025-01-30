@@ -261,7 +261,7 @@ def user_save_search(
         raise_flask_error(401, "Unauthorized user")
 
     # Retrieve opportunity IDs
-    opportunity_ids = search_opportunities_id(search_client, json_data)
+    opportunity_ids = search_opportunities_id(search_client, json_data["search_query"])
 
     with db_session.begin():
         saved_search = create_saved_search(db_session, user_id, json_data, opportunity_ids)

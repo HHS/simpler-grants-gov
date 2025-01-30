@@ -215,8 +215,19 @@ def search_opportunities(
     return records, response.aggregations, pagination_info
 
 
-def search_opportunities_id(search_client: search.SearchClient, search_data: dict) -> list:
-    search_params = SearchOpportunityParams.model_validate(search_data["search_query"])
+def search_opportunities_id(search_client: search.SearchClient, search_query: dict) -> list:
+    # Override pagination when calling opensearch
+    updated_search_query = {
+        **search_query,
+        "pagination": {
+            "order_by": "post_date",
+            "page_offset": 1,
+            "page_size": 1000,
+            "sort_direction": "descending",
+        },
+    }
+
+    search_params = SearchOpportunityParams.model_validate(updated_search_query)
 
     search_request = _get_search_request(search_params, False)
 

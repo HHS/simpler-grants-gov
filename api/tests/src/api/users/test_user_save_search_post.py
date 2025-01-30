@@ -6,7 +6,10 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import FundingInstrument
 from src.db.models.user_models import UserSavedSearch
 from tests.src.api.opportunities_v1.conftest import get_search_request
-from tests.src.api.opportunities_v1.test_opportunity_route_search import LOC_HIGHER_EDUCATION
+from tests.src.api.opportunities_v1.test_opportunity_route_search import (
+    NASA_INNOVATIONS,
+    NASA_SUPERSONIC,
+)
 from tests.src.db.models.factories import UserFactory
 
 
@@ -90,12 +93,12 @@ def test_user_save_search_post(
     search_name = "Test Search"
     search_query = get_search_request(
         funding_instrument_one_of=[FundingInstrument.GRANT],
-        agency_one_of=["LOC"],
+        agency_one_of=["NASA"],
     )
 
     # Load into the search index
     schema = OpportunityV1Schema()
-    json_records = [schema.dump(LOC_HIGHER_EDUCATION)]
+    json_records = [schema.dump(opp) for opp in [NASA_INNOVATIONS, NASA_SUPERSONIC]]
     search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
 
     # Swap the search index alias
@@ -113,14 +116,14 @@ def test_user_save_search_post(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
-
     # Verify the search was saved in the database
     saved_search = db_session.query(UserSavedSearch).one()
+
     assert saved_search.user_id == user.user_id
     assert saved_search.name == search_name
     assert saved_search.search_query == {
         "format": "json",
-        "filters": {"agency": {"one_of": ["LOC"]}, "funding_instrument": {"one_of": ["grant"]}},
+        "filters": {"agency": {"one_of": ["NASA"]}, "funding_instrument": {"one_of": ["grant"]}},
         "pagination": {
             "order_by": "opportunity_id",
             "page_size": 25,
@@ -128,4 +131,8 @@ def test_user_save_search_post(
             "sort_direction": "ascending",
         },
     }
-    assert saved_search.searched_opportunity_ids == [LOC_HIGHER_EDUCATION.opportunity_id]
+    # Verify pagination for the query was over-written. searched_opportunity_ids should be ordered by "post_date"
+    assert saved_search.searched_opportunity_ids == [
+        NASA_SUPERSONIC.opportunity_id,
+        NASA_INNOVATIONS.opportunity_id,
+    ]
