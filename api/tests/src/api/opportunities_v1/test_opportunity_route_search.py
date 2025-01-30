@@ -403,6 +403,28 @@ class TestOpportunityRouteSearch(BaseTestClass):
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
 
     @pytest.mark.parametrize(
+        "search_request",
+        [
+            get_search_request(page_size=0),
+            get_search_request(page_size=-1),
+            get_search_request(page_size=5001),
+        ],
+        ids=search_scenario_id_fnc,
+    )
+    def test_page_size_422(self, client, api_auth_token, search_request):
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+        assert resp.status_code == 422
+
+        json = resp.get_json()
+        error = json["errors"][0]
+        assert json["message"] == "Validation error"
+        assert (
+            error["message"] == "Must be greater than or equal to 1 and less than or equal to 5000."
+        )
+
+    @pytest.mark.parametrize(
         "search_request, expected_results",
         [
             # Agency

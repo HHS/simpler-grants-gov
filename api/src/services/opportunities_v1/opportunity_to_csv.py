@@ -9,7 +9,7 @@ CSV_FIELDS = [
     "opportunity_number",
     "opportunity_title",
     "opportunity_status",
-    "agency",
+    "agency_code",
     "category",
     "category_explanation",
     "post_date",
@@ -29,10 +29,8 @@ CSV_FIELDS = [
     "funding_category_description",
     "applicant_types",
     "applicant_eligibility_description",
-    "agency_code",
     "agency_name",
     "top_level_agency_name",
-    "agency_phone_number",
     "agency_contact_description",
     "agency_email_address",
     "agency_email_address_description",
@@ -60,7 +58,8 @@ def _process_assistance_listing(assistance_listings: list[dict]) -> str:
 
 
 def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> None:
-    opportunities_to_write: list[dict] = []
+    writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL)
+    writer.writeheader()
 
     for opportunity in opportunities:
         opp = flatten_dict(opportunity)
@@ -83,8 +82,4 @@ def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> 
 
             out_opportunity[k] = v
 
-        opportunities_to_write.append(out_opportunity)
-
-    writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL)
-    writer.writeheader()
-    writer.writerows(opportunities_to_write)
+        writer.writerow(out_opportunity)
