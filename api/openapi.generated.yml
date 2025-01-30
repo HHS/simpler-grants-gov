@@ -837,6 +837,7 @@ components:
         page_size:
           type: integer
           minimum: 1
+          maximum: 5000
           description: The size of the page to fetch
           example: 25
         page_offset:
@@ -978,6 +979,7 @@ components:
         page_size:
           type: integer
           minimum: 1
+          maximum: 5000
           description: The size of the page to fetch
           example: 25
         page_offset:
@@ -1469,6 +1471,7 @@ components:
         page_size:
           type: integer
           minimum: 1
+          maximum: 5000
           description: The size of the page to fetch
           example: 25
         page_offset:
