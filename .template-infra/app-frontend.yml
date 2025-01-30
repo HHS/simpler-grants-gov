@@ -1,3 +1,4 @@
-_commit: 929a959
+_commit: platform-cli-migration/v0.4.0
 _src_path: https://github.com/navapbc/template-infra
 app_name: frontend
+template: app
