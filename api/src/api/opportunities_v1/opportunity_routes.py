@@ -163,6 +163,7 @@ def opportunity_search(
             "response.pagination.total_records": pagination_info.total_records,
         }
     )
+    logger.info("Successfully fetched opportunities")
 
     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
         # Convert the response into a CSV and return the contents
