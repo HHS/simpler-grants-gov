@@ -86,7 +86,7 @@ def export_github_data(
     # Run ETL pipeline
     data_to_load = GitHubProjectETL(config).run()
 
-    export_json_to_database(data_to_load)
+    pipeline(data_to_load, "2025-01-29")
 
 # ===========================================================
 # Import commands
@@ -177,6 +177,63 @@ def transform_and_load(
     # finish
     print("transform and load is done")
 
+
+def pipeline(data: GitHubIssues, effective_date: str) ->None:
+    try:
+        dateformat = "%Y-%m-%d"
+        datestamp = (
+            datetime.strptime(effective_date, dateformat)
+            .astimezone()
+            .strftime(dateformat)
+        )
+        print(f"running transform and load with effective date {datestamp}")
+    except ValueError:
+        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        return
+
+    mapping = {
+        "deliverable_url": "deliverable_ghid",
+        "deliverable_title": "deliverable_title",
+        "deliverable_pillar": "deliverable_pillar",
+        "deliverable_status": "deliverable_status",
+        "epic_url": "epic_ghid",
+        "epic_title": "epic_title",
+        "issue_url": "issue_ghid",
+        "issue_title": "issue_title",
+        "issue_parent": "issue_parent",
+        "issue_type": "issue_type",
+        "issue_is_closed": "issue_is_closed",
+        "issue_opened_at": "issue_opened_at",
+        "issue_closed_at": "issue_closed_at",
+        "issue_points": "issue_points",
+        "issue_status": "issue_status",
+        "project_owner": "project_name",
+        "project_number": "project_ghid",
+        "sprint_id": "sprint_ghid",
+        "sprint_name": "sprint_name",
+        "sprint_start": "sprint_start",
+        "sprint_length": "sprint_length",
+        "sprint_end": "sprint_end",
+        "quad_id": "quad_ghid",
+        "quad_name": "quad_name",
+        "quad_start": "quad_start",
+        "quad_length": "quad_length",
+        "quad_end": "quad_end",
+    }
+    # hydrate a dataset instance from the input data
+    data.df.rename(columns = mapping, inplace=True)
+
+    prefix = "https://github.com/"
+    for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
+        data.df[col] = data.df[col].str.replace(prefix, "")
+
+    dataset = EtlDataset(data.df)
+
+    # sync data to db
+    etldb.sync_data(dataset, datestamp)
+
+    # finish
+    print("pipeline is done")
 
 @etl_app.command(name="opportunity-load")
 def load_opportunity_data() -> None:
