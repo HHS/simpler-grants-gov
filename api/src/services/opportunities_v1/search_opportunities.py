@@ -154,7 +154,7 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
     builder.aggregation_terms("agency", _adjust_field_name("agency_code"), size=1000)
 
 
-def _get_search_request(params: SearchOpportunityParams) -> dict:
+def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
     builder = search.SearchQueryBuilder()
 
     # Make sure total hit count gets counted for more than 10k records
@@ -176,8 +176,9 @@ def _get_search_request(params: SearchOpportunityParams) -> dict:
     # Filters
     _add_search_filters(builder, params.filters)
 
-    # Aggregations / Facet / Filter Counts
-    _add_aggregations(builder)
+    if aggregation:
+        # Aggregations / Facet / Filter Counts
+        _add_aggregations(builder)
 
     return builder.build()
 
@@ -186,7 +187,6 @@ def search_opportunities(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> Tuple[Sequence[dict], dict, PaginationInfo]:
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
-
     search_request = _get_search_request(search_params)
 
     index_alias = get_search_config().opportunity_search_index_alias
@@ -210,6 +210,23 @@ def search_opportunities(
     # which means anything that requires conversions like timestamps end up failing
     # as they don't need to be converted. So, we convert everything to those types (serialize)
     # so that deserialization won't fail.
-    records = SCHEMA.load(response.records, many=True)
+    records = SCHEMA.load(response.records, many=True)  # different just op id
 
     return records, response.aggregations, pagination_info
+
+
+def search_opportunities_id(search_client: search.SearchClient, search_data: dict) -> list:
+    search_params = SearchOpportunityParams.model_validate(search_data["search_query"])
+
+    search_request = _get_search_request(search_params, False)
+
+    index_alias = get_search_config().opportunity_search_index_alias
+    logger.info(
+        "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
+    )
+
+    response = search_client.search(
+        index_alias, search_request, includes=["opportunity_id"], excludes=["attachments"]
+    )
+
+    return [opp["opportunity_id"] for opp in response.records]
