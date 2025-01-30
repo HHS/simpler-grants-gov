@@ -16,13 +16,11 @@ locals {
   # If enabled, the networks associated with this application's environments
   # will have NAT gateways, which allows the service in the private subnet to
   # make calls to the internet.
-  has_external_non_aws_service = false
+  has_external_non_aws_service = true
 
   has_incident_management_service = false
   enable_autoscaling              = true
   hostname                        = "0.0.0.0"
-
-  feature_flags = ["foo", "bar"]
 
   environment_configs = {
     dev     = module.dev_config

@@ -5,7 +5,11 @@ locals {
   has_database                    = true
   has_incident_management_service = false
 
-  feature_flags = ["foo", "bar"]
+  # Whether or not the application depends on external non-AWS services.
+  # If enabled, the networks associated with this application's environments
+  # will have NAT gateways, which allows the service in the private subnet to
+  # make calls to the internet.
+  has_external_non_aws_service = true
 
   environment_configs = {
     dev     = module.dev_config

@@ -78,6 +78,7 @@ data "aws_security_groups" "aws_services" {
 module "database" {
   source                      = "../../modules/database"
   name                        = "${local.prefix}${local.database_config.cluster_name}"
+  access_policy_name          = "${local.prefix}${local.database_config.access_policy_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
   # The following are not AWS infra resources and therefore do not need to be

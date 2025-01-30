@@ -10,10 +10,6 @@ output "environments" {
   value = local.environments
 }
 
-output "feature_flags" {
-  value = local.feature_flags
-}
-
 output "has_database" {
   value = local.has_database
 }
