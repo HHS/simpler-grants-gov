@@ -1,15 +1,29 @@
 """Pydantic schemas for validating GitHub API responses."""
 
 # pylint: disable=no-self-argument
+# mypy: disable-error-code="literal-required"
+# This mypy disable is needed so we can use constants for field aliases
+
 from datetime import datetime, timedelta
 
 from pydantic import BaseModel, Field, computed_field, model_validator
 
-# Declares class level constants for the fields that need to be aliased
+# Declare constants for the fields that need to be aliased from the GitHub data
+# so that we only have to change these values in one place.
+#
+# We need to declare them at the module-level instead of class-level
+# because pydantic throws an error when using class level constants.
+
+# Issue content aliases
 ISSUE_TYPE = "issueType"
 CLOSED_AT = "closedAt"
 CREATED_AT = "createdAt"
 PARENT = "parent"
+# Iteration aliases
+ITERATION_ID = "iterationId"
+START_DATE = "startDate"
+# Single select aliases
+OPTION_ID = "optionId"
 
 
 def safe_default_factory(data: dict, keys_to_replace: list[str]) -> dict:
@@ -57,7 +71,7 @@ class IssueContent(BaseModel):
 
     @model_validator(mode="before")
     def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
-        """Replace None with default_factory instances."""
+        """Replace keys that are set to None with default_factory instances."""
         # Replace None with default_factory instances
         return safe_default_factory(values, [ISSUE_TYPE, PARENT])
 
@@ -70,9 +84,9 @@ class IssueContent(BaseModel):
 class IterationValue(BaseModel):
     """Schema for iteration field values like Sprint or Quad."""
 
-    iteration_id: str | None = Field(alias="iterationId", default=None)
+    iteration_id: str | None = Field(alias=ITERATION_ID, default=None)
     title: str | None = None
-    start_date: str | None = Field(alias="startDate", default=None)
+    start_date: str | None = Field(alias=START_DATE, default=None)
     duration: int | None = None
 
     @computed_field
@@ -89,7 +103,7 @@ class IterationValue(BaseModel):
 class SingleSelectValue(BaseModel):
     """Schema for single select field values like Status or Pillar."""
 
-    option_id: str | None = Field(alias="optionId", default=None)
+    option_id: str | None = Field(alias=OPTION_ID, default=None)
     name: str | None = None
 
 
@@ -119,7 +133,7 @@ class ProjectItem(BaseModel):
 
     @model_validator(mode="before")
     def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
-        """Replace None with default_factory instances."""
+        """Replace keys that are set to None with default_factory instances."""
         return safe_default_factory(
             values,
             ["sprint", "points", "quad", "pillar", "status"],
