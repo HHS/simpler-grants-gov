@@ -5,6 +5,12 @@ from datetime import datetime, timedelta
 
 from pydantic import BaseModel, Field, computed_field, model_validator
 
+# Declares class level constants for the fields that need to be aliased
+ISSUE_TYPE = "issueType"
+CLOSED_AT = "closedAt"
+CREATED_AT = "createdAt"
+PARENT = "parent"
+
 
 def safe_default_factory(data: dict, keys_to_replace: list[str]) -> dict:
     """
@@ -40,19 +46,20 @@ class IssueType(BaseModel):
 class IssueContent(BaseModel):
     """Schema for core issue metadata."""
 
+    # The fields that we're parsing from the raw GitHub output
     title: str
     url: str
     closed: bool
-    created_at: str = Field(alias="createdAt")
-    closed_at: str | None = Field(alias="closedAt", default=None)
-    issue_type: IssueType = Field(alias="type", default_factory=IssueType)
+    created_at: str = Field(alias=CREATED_AT)
+    closed_at: str | None = Field(alias=CLOSED_AT, default=None)
+    issue_type: IssueType = Field(alias=ISSUE_TYPE, default_factory=IssueType)
     parent: IssueParent = Field(default_factory=IssueParent)
 
     @model_validator(mode="before")
     def replace_none_with_defaults(cls, values) -> dict:  # noqa: ANN001, N805
         """Replace None with default_factory instances."""
         # Replace None with default_factory instances
-        return safe_default_factory(values, ["type", "parent"])
+        return safe_default_factory(values, [ISSUE_TYPE, PARENT])
 
 
 # #############################################
