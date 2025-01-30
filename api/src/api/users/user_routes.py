@@ -3,7 +3,8 @@ from uuid import UUID
 
 import flask
 
-from src.adapters import db
+import src.adapters.search.flask_opensearch as flask_opensearch
+from src.adapters import db, search
 from src.adapters.db import flask_db
 from src.api import response
 from src.api.route_utils import raise_flask_error
@@ -26,6 +27,7 @@ from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.db.models.user_models import UserSavedOpportunity, UserTokenSession
+from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
@@ -246,8 +248,9 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
+@flask_opensearch.with_search_client()
 def user_save_search(
-    db_session: db.Session, user_id: UUID, json_data: dict
+    search_client: search.SearchClient, db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-searches")
 
@@ -257,8 +260,11 @@ def user_save_search(
     if user_token_session.user_id != user_id:
         raise_flask_error(401, "Unauthorized user")
 
+    # Retrieve opportunity IDs
+    opportunity_ids = search_opportunities_id(search_client, json_data)
+
     with db_session.begin():
-        saved_search = create_saved_search(db_session, user_id, json_data)
+        saved_search = create_saved_search(db_session, user_id, json_data, opportunity_ids)
 
     logger.info(
         "Saved search for user",
