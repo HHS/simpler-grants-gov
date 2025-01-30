@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
@@ -82,6 +84,7 @@ def test_user_save_search_post(
     user_auth_token,
     enable_factory_create,
     db_session,
+    monkeypatch,
 ):
     # Test data
     search_name = "Test Search"
@@ -96,7 +99,10 @@ def test_user_save_search_post(
     search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
 
     # Swap the search index alias
-    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+    alias = f"test-user_save_search-index-alias-{uuid.uuid4().int}"
+    monkeypatch.setenv("OPPORTUNITY_SEARCH_INDEX_ALIAS", alias)
+
+    search_client.swap_alias_index(opportunity_index, alias)
 
     # Make the request to save a search
     response = client.post(
@@ -122,5 +128,4 @@ def test_user_save_search_post(
             "sort_direction": "ascending",
         },
     }
-    assert 1 == 2
     assert saved_search.searched_opportunity_ids == [LOC_HIGHER_EDUCATION.opportunity_id]
