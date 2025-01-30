@@ -13,6 +13,7 @@ from sqlalchemy import text
 
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
+from analytics.datasets.utils import transform_data
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb
@@ -77,6 +78,8 @@ def export_github_data(
 ) -> None:
     """Export and flatten metadata about GitHub issues used for delivery metrics."""
     # Configure ETL pipeline
+
+
     config_path = Path(config_file)
     if not config_path.exists():
         typer.echo(f"Not a path to a valid config file: {config_path}")
@@ -191,6 +194,7 @@ def pipeline(data: GitHubIssues, effective_date: str) ->None:
         print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
 
+    print("running pipeline")
     mapping = {
         "deliverable_url": "deliverable_ghid",
         "deliverable_title": "deliverable_title",
@@ -220,14 +224,19 @@ def pipeline(data: GitHubIssues, effective_date: str) ->None:
         "quad_length": "quad_length",
         "quad_end": "quad_end",
     }
-    # hydrate a dataset instance from the input data
-    data.df.rename(columns = mapping, inplace=True)
+    # # hydrate a dataset instance from the input data
+    # data.df.rename(columns = mapping, inplace=True)
 
+    
+
+    dataset = transform_data(input=data.df, column_map=mapping,
+            date_cols=["issue_opened_at", "issue_closed_at"])
+    
     prefix = "https://github.com/"
     for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
-        data.df[col] = data.df[col].str.replace(prefix, "")
+        dataset[col] = dataset[col].str.replace(prefix, "")
 
-    dataset = EtlDataset(data.df)
+    dataset = EtlDataset(dataset)
 
     # sync data to db
     etldb.sync_data(dataset, datestamp)

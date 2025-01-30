@@ -51,6 +51,20 @@ def load_json_data_as_df(
     return df
 
 
+def transform_data(input: pd.DataFrame, column_map: dict,
+    date_cols: list[str] | None = None,
+    key_for_nested_items: str | None = None)-> pd.DataFrame:
+    """"Function for transforming data"""
+
+    input = input[column_map.keys()]
+    input = input.rename(columns=column_map)
+
+    if date_cols:
+        for col in date_cols:
+            input[col] = pd.to_datetime(input[col]).dt.floor("d")
+
+    return input
+
 def load_json_file(path: str) -> list[dict]:
     """Load contents of a JSON file into a dictionary."""
     with open(path) as f:
