@@ -232,3 +232,55 @@ def test_combined_notifications_cli(
     db_session.refresh(saved_search)
     assert saved_opportunity.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
+
+
+def test_grouped_search_queries_cli(
+    cli_runner, db_session, enable_factory_create, clear_notification_logs
+):
+    """Test that verifies we properly handle multiple users with the same search query"""
+    # Create two users with the same search query
+    user1 = factories.UserFactory.create()
+    user2 = factories.UserFactory.create()
+
+    same_search_query = {"keywords": "shared search"}
+
+    # Create saved searches with the same query but different results
+    saved_search1 = factories.UserSavedSearchFactory.create(
+        user=user1,
+        search_query=same_search_query,
+        name="User 1 Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2, 3],
+    )
+
+    saved_search2 = factories.UserSavedSearchFactory.create(
+        user=user2,
+        search_query=same_search_query,
+        name="User 2 Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[4, 5, 6],
+    )
+
+    result = cli_runner.invoke(args=["task", "generate-notifications"])
+
+    assert result.exit_code == 0
+
+    # Verify notification logs were created for both users
+    notification_logs = (
+        db_session.query(UserNotificationLog)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .all()
+    )
+    assert len(notification_logs) == 2
+
+    # Verify each user got their own notification
+    user_ids = {log.user_id for log in notification_logs}
+    assert user_ids == {user1.user_id, user2.user_id}
+
+    # Verify both searches were updated with the same new results
+    db_session.refresh(saved_search1)
+    db_session.refresh(saved_search2)
+
+    assert saved_search1.searched_opportunity_ids == saved_search2.searched_opportunity_ids
+    assert saved_search1.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
+    assert saved_search2.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
