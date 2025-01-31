@@ -1,10 +1,20 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { downloadSearchResultsCSV } from "src/services/fetch/fetchers/clientSearchResultsDownloadFetcher";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
 const fakeBlob = new Blob();
+
+const getFakeFile = () =>
+  new File(
+    [fakeBlob],
+    `grants-search-${getConfiguredDayJs()(new Date()).format("YYYYMMDDHHmm")}.csv`,
+    {
+      type: "data:text/csv",
+    },
+  );
 
 const mockBlob = jest.fn(() => fakeBlob);
 
@@ -60,7 +70,7 @@ describe("downloadSearchResultsCSV", () => {
     await downloadSearchResultsCSV(
       new ReadonlyURLSearchParams("status=fake&agency=alsoFake"),
     );
-    expect(mockCreateObjectUrl).toHaveBeenCalledWith(fakeBlob);
+    expect(mockCreateObjectUrl).toHaveBeenCalledWith(getFakeFile());
     expect(mockLocationAssign).toHaveBeenCalledWith("an object url");
   });
 });

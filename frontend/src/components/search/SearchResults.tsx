@@ -37,7 +37,7 @@ export default function SearchResults({
         />
       </Suspense>
       <div className="usa-prose">
-        <div className="tablet-lg:display-flex display-static">
+        <div className="tablet-lg:display-flex">
           <ExportSearchResultsButton />
           <Suspense
             key={pager1key}

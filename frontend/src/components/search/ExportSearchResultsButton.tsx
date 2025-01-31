@@ -22,7 +22,7 @@ export function ExportSearchResultsButton() {
 
   return (
     <div
-      className="flex-justify-start"
+      className="desktop:grid-col-4 desktop:display-flex flex-align-self-center"
       data-testid="search-download-button-container"
     >
       <Button
