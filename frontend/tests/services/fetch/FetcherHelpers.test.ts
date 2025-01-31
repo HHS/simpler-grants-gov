@@ -7,27 +7,6 @@ import {
 } from "src/services/fetch/fetcherHelpers";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-// const searchInputs: QueryParamData = {
-//   status: new Set(["active"]),
-//   fundingInstrument: new Set(["grant"]),
-//   eligibility: new Set(["public"]),
-//   agency: new Set(["NASA"]),
-//   category: new Set(["science"]),
-//   query: "space exploration",
-//   sortby: "relevancy",
-//   page: 1,
-// };
-
-// const responseJsonMock = jest
-//   .fn()
-//   .mockResolvedValue({ data: [], errors: [], warnings: [] });
-
-// const fetchMock = jest.fn().mockResolvedValue({
-//   json: responseJsonMock,
-//   ok: true,
-//   status: 200,
-// });
-
 describe("createRequestUrl", () => {
   it("creates the correct url without search params", () => {
     const method = "GET";

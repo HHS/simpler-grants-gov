@@ -76,7 +76,7 @@ export function requesterForEndpoint({
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
-      throwError(jsonBody, url);
+      return throwError(jsonBody, url);
     } else if (!response.ok) {
       throw new ApiRequestError(
         `unable to fetch ${url}`,

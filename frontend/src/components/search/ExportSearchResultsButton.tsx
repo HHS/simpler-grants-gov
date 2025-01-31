@@ -1,32 +1,23 @@
 "use client";
 
+import { downloadSearchResultsCSV } from "src/services/fetch/fetchers/clientSearchResultsDownloadFetcher";
+
 import { useTranslations } from "next-intl";
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-const getSearchResultsCSV = (searchParams: ReadonlyURLSearchParams) => {
-  return fetch(`/api/search/export?${searchParams.toString()}`);
-};
 
 export function ExportSearchResultsButton() {
   const t = useTranslations("Search.exportButton");
   const searchParams = useSearchParams();
 
   const downloadSearchResults = useCallback(() => {
-    getSearchResultsCSV(searchParams)
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error(`Unsuccessful csv download. ${response.status}`);
-        }
-        return response.blob();
-      })
-      .then((csvBlob) => {
-        location.assign(URL.createObjectURL(csvBlob));
-      })
-      .catch((e) => console.error(e));
+    // catch included here to satisfy linter
+    downloadSearchResultsCSV(searchParams).catch((e) => {
+      throw e;
+    });
   }, [searchParams]);
 
   return (
