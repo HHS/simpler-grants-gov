@@ -5,6 +5,7 @@ from typing import Sequence, Tuple
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
+from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
@@ -51,6 +52,15 @@ FILTER_RULE_MAPPING = {
     ScoringRule.EXPANDED: EXPANDED,
     ScoringRule.AGENCY: AGENCY,
     ScoringRule.DEFAULT: DEFAULT,
+}
+
+STATIC_PAGINATION = {
+    "pagination": {
+        "order_by": "post_date",
+        "page_offset": 1,
+        "page_size": 1000,
+        "sort_direction": "descending",
+    }
 }
 
 SCHEMA = OpportunityV1Schema()
@@ -183,10 +193,11 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
     return builder.build()
 
 
-def search_opportunities(
-    search_client: search.SearchClient, raw_search_params: dict
-) -> Tuple[Sequence[dict], dict, PaginationInfo]:
-    search_params = SearchOpportunityParams.model_validate(raw_search_params)
+def _search_opportunities(
+    search_client: search.SearchClient,
+    search_params: SearchOpportunityParams,
+    includes: list | None = None,
+) -> SearchResponse:
     search_request = _get_search_request(search_params)
 
     index_alias = get_search_config().opportunity_search_index_alias
@@ -194,7 +205,19 @@ def search_opportunities(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
 
-    response = search_client.search(index_alias, search_request, excludes=["attachments"])
+    response = search_client.search(
+        index_alias, search_request, includes=includes, excludes=["attachments"]
+    )
+
+    return response
+
+
+def search_opportunities(
+    search_client: search.SearchClient, raw_search_params: dict
+) -> Tuple[Sequence[dict], dict, PaginationInfo]:
+
+    search_params = SearchOpportunityParams.model_validate(raw_search_params)
+    response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo(
         page_offset=search_params.pagination.page_offset,
@@ -217,27 +240,9 @@ def search_opportunities(
 
 def search_opportunities_id(search_client: search.SearchClient, search_query: dict) -> list:
     # Override pagination when calling opensearch
-    updated_search_query = {
-        **search_query,
-        "pagination": {
-            "order_by": "post_date",
-            "page_offset": 1,
-            "page_size": 1000,
-            "sort_direction": "descending",
-        },
-    }
-
+    updated_search_query = search_query | STATIC_PAGINATION
     search_params = SearchOpportunityParams.model_validate(updated_search_query)
 
-    search_request = _get_search_request(search_params, False)
-
-    index_alias = get_search_config().opportunity_search_index_alias
-    logger.info(
-        "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
-    )
-
-    response = search_client.search(
-        index_alias, search_request, includes=["opportunity_id"], excludes=["attachments"]
-    )
+    response = _search_opportunities(search_client, search_params, includes=["opportunity_id"])
 
     return [opp["opportunity_id"] for opp in response.records]
