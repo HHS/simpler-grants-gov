@@ -11,6 +11,7 @@ from typing import Annotated
 import typer
 from sqlalchemy import text
 
+from analytics.datasets import etl_dataset
 from analytics.datasets.etl_dataset import EtlDataset
 from analytics.datasets.issues import GitHubIssues
 from analytics.datasets.utils import transform_data
@@ -73,9 +74,7 @@ def callback() -> None:
 @export_app.command(name="gh_delivery_data")
 def export_github_data(
     config_file: Annotated[str, CONFIG_FILE_ARG],
-    output_file: Annotated[str, OUTPUT_FILE_ARG],
-    temp_dir: Annotated[str, TMP_DIR_ARG],
-) -> None:
+) -> GitHubIssues:
     """Export and flatten metadata about GitHub issues used for delivery metrics."""
     # Configure ETL pipeline
 
@@ -84,12 +83,11 @@ def export_github_data(
     if not config_path.exists():
         typer.echo(f"Not a path to a valid config file: {config_path}")
     config = load_config(config_path, GitHubProjectConfig)
-    config.temp_dir = temp_dir
-    config.output_file = output_file
-    # Run ETL pipeline
-    data_to_load = GitHubProjectETL(config).run()
 
-    pipeline(data_to_load, "2025-01-29")
+    # Run ETL pipeline
+    return GitHubProjectETL(config).run()
+
+    # pipeline(data_to_load, "2025-01-29")
 
 # ===========================================================
 # Import commands
@@ -156,6 +154,7 @@ def migrate_database() -> None:
 def transform_and_load(
     issue_file: Annotated[str, ISSUE_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+    config_file: Annotated[str, CONFIG_FILE_ARG],
 ) -> None:
     """Transform and load etl data."""
     # validate effective date arg
@@ -172,8 +171,49 @@ def transform_and_load(
         return
 
     # hydrate a dataset instance from the input data
-    dataset = EtlDataset.load_from_json_file(file_path=issue_file)
+    data =export_github_data(config_file)
+    mapping = {
+        "deliverable_url": "deliverable_ghid",
+        "deliverable_title": "deliverable_title",
+        "deliverable_pillar": "deliverable_pillar",
+        "deliverable_status": "deliverable_status",
+        "epic_url": "epic_ghid",
+        "epic_title": "epic_title",
+        "issue_url": "issue_ghid",
+        "issue_title": "issue_title",
+        "issue_parent": "issue_parent",
+        "issue_type": "issue_type",
+        "issue_is_closed": "issue_is_closed",
+        "issue_opened_at": "issue_opened_at",
+        "issue_closed_at": "issue_closed_at",
+        "issue_points": "issue_points",
+        "issue_status": "issue_status",
+        "project_owner": "project_name",
+        "project_number": "project_ghid",
+        "sprint_id": "sprint_ghid",
+        "sprint_name": "sprint_name",
+        "sprint_start": "sprint_start",
+        "sprint_length": "sprint_length",
+        "sprint_end": "sprint_end",
+        "quad_id": "quad_ghid",
+        "quad_name": "quad_name",
+        "quad_start": "quad_start",
+        "quad_length": "quad_length",
+        "quad_end": "quad_end",
+    }
+    # # hydrate a dataset instance from the input data
+    # data.df.rename(columns = mapping, inplace=True)
 
+    
+
+    dataset = transform_data(input=data.df, column_map=mapping,
+            date_cols=["issue_opened_at", "issue_closed_at"])
+    
+    prefix = "https://github.com/"
+    for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
+        dataset[col] = dataset[col].str.replace(prefix, "")
+
+    dataset = EtlDataset(dataset)
     # sync data to db
     etldb.sync_data(dataset, datestamp)
 

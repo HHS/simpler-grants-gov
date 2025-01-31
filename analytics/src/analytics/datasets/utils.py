@@ -61,7 +61,7 @@ def transform_data(input: pd.DataFrame, column_map: dict,
 
     if date_cols:
         for col in date_cols:
-            input[col] = pd.to_datetime(input[col]).dt.floor("d")
+            input[col] = pd.to_datetime(input[col]).dt.date
 
     return input
 

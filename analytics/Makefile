@@ -161,7 +161,8 @@ gh-transform-and-load:
 	@echo "====================================================="
 	$(POETRY) analytics etl transform_and_load \
 	--issue-file $(ISSUE_FILE) \
-	--effective-date $(EFFECTIVE_DATE)
+	--effective-date $(EFFECTIVE_DATE) \
+	--config-file $(PROJECT_CONFIG_FILE)
 	@echo "====================================================="
 
 gh-db-data-import:
