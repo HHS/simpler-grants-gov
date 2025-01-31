@@ -5,9 +5,9 @@ import {
   EndpointConfig,
   fetchOpportunityEndpoint,
   opportunitySearchEndpoint,
-  userLogoutEndpoint,
   userDeleteSavedOpportunityEndpoint,
   userGetSavedOpportunityEndpoint,
+  userLogoutEndpoint,
   userPostSavedOpportunityEndpoint,
 } from "src/services/fetch/endpointConfigs";
 import {
