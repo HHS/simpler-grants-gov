@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const revalidate = 0;
 
 /*
-  so the request flow here goes something like:
+  the data flow here goes like:
 
   ExportSearchResultsButton click ->
   /export route ->
@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
     return new NextResponse(apiResponseBody, {
       headers: {
         "Content-Type": "text/csv",
+        "Content-Disposition":
+          "attachment; filename=simpler-grants-search-results.csv",
       },
     });
   } catch (e) {

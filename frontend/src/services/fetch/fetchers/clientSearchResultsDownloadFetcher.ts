@@ -12,7 +12,9 @@ export const downloadSearchResultsCSV = async (
       throw new Error(`Unsuccessful csv download. ${response.status}`);
     }
     const csvBlob = await response.blob();
-    location.assign(URL.createObjectURL(csvBlob));
+    location.assign(
+      URL.createObjectURL(new Blob([csvBlob], { type: "data:text/csv" })),
+    );
   } catch (e) {
     console.error(e);
   }
