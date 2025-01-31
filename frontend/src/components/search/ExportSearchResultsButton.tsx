@@ -21,7 +21,10 @@ export function ExportSearchResultsButton() {
   }, [searchParams]);
 
   return (
-    <div className="flex-justify-start">
+    <div
+      className="flex-justify-start"
+      data-testid="search-download-button-container"
+    >
       <Button
         outline={true}
         type={"submit"}
