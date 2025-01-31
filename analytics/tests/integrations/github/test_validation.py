@@ -24,7 +24,7 @@ VALID_ISSUE_CONTENT = {
         "title": "Test Parent",
         "url": "https://github.com/test/repo/issues/2",
     },
-    "type": {
+    "issueType": {
         "name": "Bug",
     },
 }
