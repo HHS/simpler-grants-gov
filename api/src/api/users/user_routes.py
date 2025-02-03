@@ -323,16 +323,16 @@ def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.A
     return response.ApiResponse(message="Success", data=saved_searches)
 
 
-@user_blueprint.patch("/<uuid:user_id>/saved-searches/:saved_search_id")
+@user_blueprint.patch("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
 @user_blueprint.input(UserUpdateSavedSearchRequestSchema, location="json")
 @user_blueprint.output(UserUpdateSavedSearchResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_save_search_update(
+def user_update_saved_search(
     db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    logger.info("POST /v1/users/:user_id/saved-searches/:saved_search_id")
+    logger.info("PATCH /v1/users/:user_id/saved-searches/:saved_search_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
@@ -341,13 +341,13 @@ def user_save_search_update(
         raise_flask_error(401, "Unauthorized user")
 
     with db_session.begin():
-        update_saved_search(db_session, user_id, saved_search_id, json_data)
+        updated_saved_search = update_saved_search(db_session, user_id, saved_search_id, json_data)
 
     logger.info(
         "Updated saved search for user",
         extra={
             "user.id": str(user_id),
-            "saved_search.id": str(saved_search_id),
+            "saved_search.id": str(updated_saved_search.saved_search_id),
         },
     )
 
