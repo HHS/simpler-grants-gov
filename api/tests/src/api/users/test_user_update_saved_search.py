@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 from src.db.models.user_models import UserSavedSearch, UserTokenSession
-from tests.src.db.models.factories import UserSavedSearchFactory, UserFactory
+from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
 @pytest.fixture
@@ -18,15 +18,15 @@ def saved_search(enable_factory_create, user, db_session):
 def clear_data(db_session):
     db_session.query(UserSavedSearch).delete()
     db_session.query(UserTokenSession).delete()
-    db_session.commit()
     yield
 
 
 def test_user_update_saved_search(client, db_session, user, user_auth_token, saved_search):
+    updated_name = "Update Search"
     response = client.put(
         f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
         headers={"X-SGG-Token": user_auth_token},
-        json={"name": "Update Search"},
+        json={"name": updated_name},
     )
 
     db_session.refresh(saved_search)
@@ -34,11 +34,10 @@ def test_user_update_saved_search(client, db_session, user, user_auth_token, sav
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
-
     # Verify search was updated
     updated_saved_search = db_session.query(UserSavedSearch).first()
 
-    assert updated_saved_search.name == "Update Search"
+    assert updated_saved_search.name == updated_name
 
 
 def test_user_update_saved_search_not_found(
@@ -63,7 +62,7 @@ def test_user_update_saved_search_unauthorized(
     client, enable_factory_create, db_session, user, user_auth_token, saved_search
 ):
     # Try to update a search with another user
-    unauthorized_user= UserFactory.create()
+    unauthorized_user = UserFactory.create()
     response = client.put(
         f"/v1/users/{unauthorized_user.user_id}/saved-searches/{saved_search.saved_search_id}",
         headers={"X-SGG-Token": user_auth_token},
@@ -77,9 +76,11 @@ def test_user_update_saved_search_unauthorized(
 
     # Verify search was not updated
     saved_searches = db_session.query(UserSavedSearch).first()
-    assert saved_searches.name == "Save Search"
+    assert saved_searches.name == saved_search.name
 
-def test_user_update_saved_search_no_auth(client, enable_factory_create, db_session, user, user_auth_token, saved_search
+
+def test_user_update_saved_search_no_auth(
+    client, enable_factory_create, db_session, user, user_auth_token, saved_search
 ):
     # Try to update a search without authentication
     response = client.put(
@@ -93,4 +94,4 @@ def test_user_update_saved_search_no_auth(client, enable_factory_create, db_sess
 
     # Verify search was not updated
     saved_searches = db_session.query(UserSavedSearch).first()
-    assert saved_searches.name == "Save Search"
+    assert saved_searches.name == saved_search.name

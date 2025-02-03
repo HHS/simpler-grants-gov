@@ -1,18 +1,19 @@
-from dataclasses import Field
-
-from sqlalchemy import select
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
+from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserSavedSearch
 
+
 class UpdateSavedSearchInput(BaseModel):
     name: str
 
+
 def update_saved_search(
-    db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: UpdateSavedSearchInput
+    db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
 ) -> UserSavedSearch:
     """Update saved search for a user"""
     update_input = UpdateSavedSearchInput.model_validate(json_data)
