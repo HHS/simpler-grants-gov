@@ -628,7 +628,7 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
-    patch:
+    put:
       parameters:
       - in: path
         name: user_id
