@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 }
 
 // TODO: layout with breadcrumbs and such
+// HOw to handle redirecting user away on logout?
 export default async function SavedGrants({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });

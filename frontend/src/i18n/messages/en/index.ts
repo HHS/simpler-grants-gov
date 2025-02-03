@@ -487,6 +487,7 @@ export const messages = {
     nav_link_search: "Search",
     nav_link_login: "Sign in",
     nav_link_logout: "Sign out",
+    nav_link_saved_grants: "Saved grants",
     title: "Simpler.Grants.gov",
   },
   LoginButtonModal: {
