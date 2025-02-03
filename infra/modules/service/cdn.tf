@@ -65,27 +65,42 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled = local.enable_cdn ? true : false
   aliases = local.cdn_domain_name == null ? null : [local.cdn_domain_name]
 
-  origin {
-    domain_name              = local.origin_domain_name
-    origin_id                = local.default_origin_id
-    origin_access_control_id = aws_cloudfront_origin_access_control.cdn[0].id
+  dynamic "origin" {
+    for_each = var.enable_alb_cdn ? [1] : []
 
-    dynamic "custom_origin_config" {
-      for_each = var.enable_alb_cdn ? [1] : []
-      content {
+    content {
+      domain_name = local.origin_domain_name
+      origin_id   = local.default_origin_id
+      custom_origin_config {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = "https-only"
-        # https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_OriginSslProtocols.html
-        origin_ssl_protocols = local.ssl_protocols
+        origin_protocol_policy = var.cert_arn == null ? "http-only" : "https-only"
+        origin_ssl_protocols   = local.ssl_protocols
+      }
+
+      dynamic "origin_shield" {
+        for_each = var.cert_arn == null ? [1] : []
+        content {
+          enabled              = true
+          origin_shield_region = data.aws_region.current.name
+        }
       }
     }
-    # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html
-    dynamic "origin_shield" {
-      for_each = var.cert_arn == null ? [1] : []
-      content {
-        enabled              = true
-        origin_shield_region = data.aws_region.current.name
+  }
+
+  dynamic "origin" {
+    for_each = var.enable_s3_cdn ? [1] : []
+    content {
+      domain_name              = local.origin_domain_name
+      origin_id                = local.default_origin_id
+      origin_access_control_id = aws_cloudfront_origin_access_control.cdn[0].id
+
+      dynamic "origin_shield" {
+        for_each = var.cert_arn == null ? [1] : []
+        content {
+          enabled              = true
+          origin_shield_region = data.aws_region.current.name
+        }
       }
     }
   }
