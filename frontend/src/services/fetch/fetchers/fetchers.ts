@@ -36,9 +36,10 @@ export function requesterForEndpoint({
       subPath?: string;
       body?: JSONRequestBody;
       additionalHeaders?: HeadersDict;
+      nextOptions?: NextFetchRequestConfig;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath } = options;
+    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -58,6 +59,7 @@ export function requesterForEndpoint({
         body: method === "GET" || !body ? null : createRequestBody(body),
         headers,
         method,
+        next: nextOptions,
       });
     } catch (error) {
       // API most likely down, but also possibly an error setting up or sending a request

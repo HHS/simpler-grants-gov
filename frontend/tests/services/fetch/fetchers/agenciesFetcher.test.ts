@@ -58,6 +58,9 @@ describe("obtainAgencies", () => {
           sort_direction: "ascending",
         },
       },
+      nextOptions: {
+        revalidate: 604800,
+      },
     });
 
     expect(result).toEqual(fakeAgencyResponseData);

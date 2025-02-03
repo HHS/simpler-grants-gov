@@ -23,6 +23,9 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
         sort_direction: "ascending",
       },
     },
+    nextOptions: {
+      revalidate: 604800,
+    },
   });
   return response.data as RelevantAgencyRecord[];
 };
