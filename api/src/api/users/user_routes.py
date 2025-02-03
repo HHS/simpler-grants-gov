@@ -323,7 +323,7 @@ def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.A
     return response.ApiResponse(message="Success", data=saved_searches)
 
 
-@user_blueprint.patch("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
+@user_blueprint.put("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
 @user_blueprint.input(UserUpdateSavedSearchRequestSchema, location="json")
 @user_blueprint.output(UserUpdateSavedSearchResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
@@ -332,7 +332,7 @@ def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.A
 def user_update_saved_search(
     db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    logger.info("PATCH /v1/users/:user_id/saved-searches/:saved_search_id")
+    logger.info("PUT /v1/users/:user_id/saved-searches/:saved_search_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
