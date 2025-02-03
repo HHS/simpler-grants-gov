@@ -30,11 +30,14 @@ def test_user_update_saved_search(client, db_session, user, user_auth_token, sav
         json={"name": "Update Search"},
     )
 
+    db_session.refresh(saved_search)
+
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
+
     # Verify search was updated
-    updated_saved_search = db_session.query(UserSavedSearch).all()
+    updated_saved_search = db_session.query(UserSavedSearch).first()
 
     assert updated_saved_search.name == "Update Search"
 
@@ -65,6 +68,7 @@ def test_user_update_saved_search_no_auth(
         f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
         json={"name": "Update Search"},
     )
+    db_session.refresh(saved_search)
 
     assert response.status_code == 401
     assert response.json["message"] == "Unable to process token"
