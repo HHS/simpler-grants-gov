@@ -124,11 +124,9 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   });
 
   const nofoPath =
-    opportunityData.attachments.filter(
-      (document) =>
-        document.opportunity_attachment_type ===
-        "notice_of_funding_opportunity",
-    )[0]?.download_path || "";
+    opportunityData.attachments.length === 1
+      ? opportunityData.attachments[0]?.download_path
+      : "";
 
   return (
     <div>

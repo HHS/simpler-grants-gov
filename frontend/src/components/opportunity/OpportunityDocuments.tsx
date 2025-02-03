@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { Link, Table } from "@trussworks/react-uswds";
 
 interface OpportunityDocument {
-  opportunity_attachment_type: string;
   file_name: string;
   download_path: string;
   updated_at: string;
@@ -26,7 +25,6 @@ const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
     <>
       <thead>
         <tr>
-          <th scope="col">{t("table_col_category")}</th>
           <th scope="col">{t("table_col_file_name")}</th>
           <th scope="col">{t("table_col_last_updated")}</th>
         </tr>
@@ -34,12 +32,6 @@ const DocumentTable = ({ documents }: OpportunityDocumentsProps) => {
       <tbody>
         {documents.map((document, index) => (
           <tr key={index}>
-            <th data-label={t("table_col_category")} scope="row">
-              {document.opportunity_attachment_type ===
-              "notice_of_funding_opportunity"
-                ? t("type.funding_details")
-                : t("type.other")}
-            </th>
             <td data-label={t("table_col_file_name")}>
               <Link target="_blank" href={document.download_path}>
                 {document.file_name}
