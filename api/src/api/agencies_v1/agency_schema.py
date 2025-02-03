@@ -1,6 +1,5 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.constants.lookup_constants import AgencyDownloadFileType
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -47,20 +46,8 @@ class AgencyResponseSchema(Schema):
     agency_id = fields.Integer()
     agency_name = fields.String()
     agency_code = fields.String()
-    sub_agency_code = fields.String(allow_none=True)
-    assistance_listing_number = fields.String()
-    agency_submission_notification_setting = fields.String()  # Enum value
 
     top_level_agency = fields.Nested(lambda: AgencyResponseSchema(exclude=("top_level_agency",)))
-
-    # Agency contact info as nested object
-    agency_contact_info = fields.Nested(AgencyContactInfoSchema, allow_none=True)
-
-    # File types as a list of strings
-    agency_download_file_types = fields.List(
-        fields.Enum(AgencyDownloadFileType),
-        metadata={"description": "List of download file types supported by the agency"},
-    )
 
     # Add timestamps from TimestampMixin
     created_at = fields.DateTime()
