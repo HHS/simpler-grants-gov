@@ -14,6 +14,12 @@ export const messages = {
       saved: "Saved",
       loading: "Updating",
     },
+    save_message: {
+      success: "This opportunity was saved to Saved grants.",
+      unsave: "This opportunity was unsaved.",
+      error_save: "Error saving. Please try again.",
+      error_unsave: "Error undoing save. Please try again.",
+    },
     save_login_modal: {
       title: "Sign in to save this opportunity",
       help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",

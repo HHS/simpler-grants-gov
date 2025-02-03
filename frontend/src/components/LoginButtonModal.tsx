@@ -38,6 +38,7 @@ export const LoginButtonModal = ({
         closeText={t("close")}
         descriptionText={t("description")}
         titleText={t("title")}
+        modalId="login-modal"
       />
     </>
   );

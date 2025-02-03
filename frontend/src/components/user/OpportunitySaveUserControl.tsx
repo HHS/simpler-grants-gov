@@ -5,7 +5,7 @@ import { useUser } from "src/services/auth/useUser";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
+import { Alert, ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
@@ -19,9 +19,13 @@ export const OpportunitySaveUserControl = () => {
 
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
+  const [savedAlert, setSavedAlert] = useState(false);
+  const [savedError, setSavedError] = useState(false);
+
   const [loading, setloading] = useState(false);
 
   const userSavedOppCallback = async () => {
+    setSavedError(false);
     const method = saved ? "DELETE" : "POST";
     setloading(true);
     const res = await fetch("/api/user/saved-opportunities", {
@@ -33,9 +37,12 @@ export const OpportunitySaveUserControl = () => {
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data = await res.json();
+    // if error
+
     setloading(false);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     data.type === "save" ? setSaved(true) : setSaved(false);
+    saved ?? setSavedAlert(true);
   };
 
   useEffect(() => {
@@ -69,6 +76,7 @@ export const OpportunitySaveUserControl = () => {
             closeText={t("save_login_modal.close")}
             descriptionText={t("save_login_modal.description")}
             titleText={t("save_login_modal.title")}
+            modalId="opp-save-login-modal"
           />
         </>
       )}
@@ -81,6 +89,22 @@ export const OpportunitySaveUserControl = () => {
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={userSavedOppCallback}
           loading={loading}
+        />
+      )}
+      {savedAlert && (
+        <Alert
+          slim={true}
+          type="success"
+          heading={t("save_message.success")}
+          headingLevel="h4"
+        />
+      )}
+      {savedError && (
+        <Alert
+          slim={true}
+          type="success"
+          heading={t("save_message.error_save")}
+          headingLevel="h4"
         />
       )}
     </>
