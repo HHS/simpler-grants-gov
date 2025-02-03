@@ -628,6 +628,53 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
+    patch:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: saved_search_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdateSavedSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Update Saved Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateSavedSearchRequest'
+      security:
+      - ApiJwtAuth: []
     delete:
       parameters:
       - in: path
@@ -2293,6 +2340,28 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserUpdateSavedSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the saved search
+          example: Example search
+      required:
+      - name
+    UserUpdateSavedSearchResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
