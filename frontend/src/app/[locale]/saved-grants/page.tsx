@@ -1,13 +1,10 @@
 import { Metadata } from "next";
-import { SAVED_GRANTS_CRUMBS } from "src/constants/breadcrumbs";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
-import { SessionCheck } from "src/components/user/SessionCheck";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -26,8 +23,6 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <Breadcrumbs breadcrumbList={SAVED_GRANTS_CRUMBS} />
-      <SessionCheck />
       <GridContainer>
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
           {t("SavedGrants.heading")}

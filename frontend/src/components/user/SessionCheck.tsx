@@ -18,7 +18,7 @@ export function SessionCheck() {
       return;
     }
     if (!user.token) {
-      router.push("/unauthenticated", {});
+      router.push("/unauthenticated");
     }
   }, [user, router]);
   return <></>;
