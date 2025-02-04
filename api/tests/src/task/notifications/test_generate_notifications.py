@@ -3,11 +3,10 @@ from datetime import timedelta
 import pytest
 
 import tests.src.db.models.factories as factories
-from src.db.models.user_models import UserNotificationLog
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.db.models.user_models import UserNotificationLog
 from src.task.notifications.generate_notifications import NotificationConstants
 from src.util import datetime_util
-
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 
 
@@ -312,3 +311,70 @@ def test_grouped_search_queries_cli(
     assert saved_search1.searched_opportunity_ids == saved_search2.searched_opportunity_ids
     assert saved_search1.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
     assert saved_search2.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
+
+
+def test_search_notifications_on_index_change(
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    user,
+    opportunity_index,
+    search_client,
+    clear_notification_logs,
+):
+    """Test that verifies notifications are generated when search results change due to index updates"""
+    # Create a saved search with initial results
+    saved_search = factories.UserSavedSearchFactory.create(
+        user=user,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2],  # Initial results
+    )
+
+    # Update the search index with new data that will change the results
+    schema = OpportunityV1Schema()
+    new_opportunity = factories.OpportunityFactory.create(
+        opportunity_id=999,
+        opportunity_title="New Test Opportunity",
+    )
+    factories.OpportunitySummaryFactory.build(
+        opportunity=new_opportunity,
+        summary_description="This should appear in test search results",
+    )
+    json_record = schema.dump(new_opportunity)
+    search_client.bulk_upsert(opportunity_index, [json_record], "opportunity_id")
+
+    # Run the notification task
+    result = cli_runner.invoke(args=["task", "generate-notifications"])
+    assert result.exit_code == 0
+
+    # Verify notification log was created due to changed results
+    notification_logs = (
+        db_session.query(UserNotificationLog)
+        .filter(
+            UserNotificationLog.user_id == user.user_id,
+            UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES,
+        )
+        .all()
+    )
+    assert len(notification_logs) == 1
+
+    # Verify the saved search was updated with new results
+    db_session.refresh(saved_search)
+    assert 999 in saved_search.searched_opportunity_ids  # New opportunity should be in results
+    assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
+
+    # Run the task again - should not generate new notifications since results haven't changed
+    result = cli_runner.invoke(args=["task", "generate-notifications"])
+    assert result.exit_code == 0
+
+    notification_logs = (
+        db_session.query(UserNotificationLog)
+        .filter(
+            UserNotificationLog.user_id == user.user_id,
+            UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES,
+        )
+        .all()
+    )
+    assert len(notification_logs) == 1  # Should still only be one notification
