@@ -114,7 +114,7 @@ class NotificationTask(Task):
             query_map[query_key].append(saved_search)
 
         # For each unique query, check if results have changed
-        for _, searches in query_map.items():
+        for searches in query_map.values():
             current_results: list[int] = search_opportunities_id(
                 self.search_client, searches[0].search_query
             )
