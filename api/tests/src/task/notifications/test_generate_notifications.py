@@ -5,10 +5,13 @@ import pytest
 import tests.src.db.models.factories as factories
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
-from src.task.notifications.generate_notifications import NotificationConstants, NotificationTask
+from src.task.notifications.generate_notifications import (
+    NotificationConstants,
+    NotificationTask,
+    _strip_pagination_params,
+)
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
-from src.task.notifications.generate_notifications import _strip_pagination_params
 
 
 @pytest.fixture
