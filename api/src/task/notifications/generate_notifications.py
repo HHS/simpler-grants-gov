@@ -108,7 +108,10 @@ class NotificationTask(Task):
         # Group searches by query to minimize search index calls
         query_map: dict[str, list[UserSavedSearch]] = {}
         for saved_search in saved_searches:
-            query_key = str(saved_search.search_query)
+            # Remove pagination parameters before using as key
+            search_query = _strip_pagination_params(saved_search.search_query)
+            query_key = str(search_query)
+
             if query_key not in query_map:
                 query_map[query_key] = []
             query_map[query_key].append(saved_search)
@@ -201,3 +204,10 @@ class NotificationTask(Task):
             self.increment(self.Metrics.SEARCHES_TRACKED, len(container.saved_searches))
             self.increment(self.Metrics.NOTIFICATIONS_SENT)
             self.increment(self.Metrics.USERS_NOTIFIED)
+
+
+def _strip_pagination_params(search_query: dict) -> dict:
+    """Remove pagination parameters from a search query"""
+    search_query = search_query.copy()
+    search_query.pop("pagination", None)
+    return search_query

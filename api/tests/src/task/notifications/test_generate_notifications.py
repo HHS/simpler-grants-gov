@@ -8,6 +8,7 @@ from src.db.models.user_models import UserNotificationLog
 from src.task.notifications.generate_notifications import NotificationConstants
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
+from src.task.notifications.generate_notifications import _strip_pagination_params
 
 
 @pytest.fixture
@@ -379,3 +380,22 @@ def test_search_notifications_on_index_change(
         .all()
     )
     assert len(notification_logs) == 1  # Should still only be one notification
+
+
+def test_pagination_params_are_stripped_from_search_query(
+    cli_runner, db_session, enable_factory_create, user, clear_notification_logs
+):
+    """Test that pagination parameters are stripped from search queries"""
+    saved_search = factories.UserSavedSearchFactory.create(
+        user=user,
+        search_query={
+            "query": "test",
+            "pagination": {"page": 1, "per_page": 10},
+        },
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2],
+    )
+
+    params = _strip_pagination_params(saved_search.search_query)
+    assert params.keys() == {"query"}
