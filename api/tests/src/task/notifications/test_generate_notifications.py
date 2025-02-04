@@ -152,10 +152,11 @@ def test_search_notifications_cli(
     enable_factory_create,
     user,
     caplog,
-    clear_notification_logs,
     setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
+    db_session.query(UserNotificationLog).delete()
+
     # Create a saved search that needs notification
     saved_search = factories.UserSavedSearchFactory.create(
         user=user,
