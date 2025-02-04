@@ -14,6 +14,6 @@ test.describe("Search results export", () => {
       .locator('div[data-testid="search-download-button-container"] > button')
       .click();
     const download = await downloadPromise;
-    expect(download.url()).toBeTruthy();
+    expect(download.suggestedFilename()).toMatch(/grants-search-\d+\.csv/);
   });
 });
