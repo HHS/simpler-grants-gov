@@ -28,6 +28,9 @@ class SearchResponseFormat(StrEnum):
     JSON = "json"
     CSV = "csv"
 
+class SearchQueryOperator(StrEnum):
+    AND = "AND"
+    OR = "OR"
 
 class OpportunitySummaryV1Schema(Schema):
     summary_description = fields.String(
@@ -470,11 +473,13 @@ class OpportunitySearchRequestV1Schema(Schema):
         },
         validate=[validators.Length(min=1, max=100)],
     )
-    query_operator = fields.String(
+    query_operator = fields.Enum(
+        SearchQueryOperator,
+        laud_default=SearchQueryOperator.AND,
         metadata={
-            "description": "Query operator for combining search conditions.",
+            "description": "Query operator for combining search conditions",
             "example": "OR",
-        }
+        },
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
