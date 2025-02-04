@@ -133,12 +133,17 @@ export class FeatureFlagsManager {
     // beyond default values. Unfortunately, this breaks the implementation of the feature
     // flag admin view, which depends on reading all flags from cookies, so the logic has beeen removed
 
+    console.log(
+      "~~~ reading flags from cookie",
+      getFeatureFlagsFromCookie(request.cookies),
+    );
     const featureFlags = {
       ...this.featureFlags,
       ...getFeatureFlagsFromCookie(request.cookies),
       ...featureFlagsFromQuery,
     };
 
+    console.log("~~~ setting flags on cookie", featureFlags);
     setCookie(JSON.stringify(featureFlags), response.cookies);
 
     return response;

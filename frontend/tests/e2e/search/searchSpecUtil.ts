@@ -1,9 +1,14 @@
 // =========================
-// Test Helper Functions
+// Search Test Helper Functions
 // =========================
 
 import { expect, Locator, Page } from "@playwright/test";
 import { camelCase } from "lodash";
+
+import {
+  waitForURLContainsQueryParam,
+  waitForURLContainsQueryParamValue,
+} from "../playwrightUtils";
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");
@@ -15,117 +20,12 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   await page.click(".usa-search > button[type='submit']");
 }
 
-const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-// adapted from https://stackoverflow.com/a/1349426
-export const generateRandomString = (desiredPattern: number[]) => {
-  const numberOfPossibleCharacters = characters.length;
-  return desiredPattern.reduce((randomString, numberOfCharacters, index) => {
-    let counter = 0;
-    while (counter < numberOfCharacters) {
-      randomString += characters.charAt(
-        Math.floor(Math.random() * numberOfPossibleCharacters),
-      );
-      counter += 1;
-    }
-    if (index < desiredPattern.length - 1) {
-      randomString += " ";
-    }
-    return randomString;
-  }, "");
-};
-
 export function expectURLContainsQueryParam(
   page: Page,
   queryParamName: string,
 ) {
   const currentURL = page.url();
   expect(currentURL).toContain(queryParamName);
-}
-
-export async function waitForURLChange(
-  page: Page,
-  changeCheck: (url: string) => boolean,
-  timeout = 30000, // query params get set after a debounce period)
-) {
-  const endTime = Date.now() + timeout;
-
-  while (Date.now() < endTime) {
-    const changeComplete = changeCheck(page.url());
-    if (changeComplete) {
-      return;
-    }
-
-    await page.waitForTimeout(500);
-  }
-
-  throw new Error(`URL did not update as expected within ${timeout}ms`);
-}
-
-export async function waitForURLContainsQueryParamValue(
-  page: Page,
-  queryParamName: string,
-  queryParamValue: string,
-  timeout = 30000, // query params get set after a debounce period
-) {
-  const changeCheck = (pageUrl: string): boolean => {
-    const url = new URL(pageUrl);
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
-
-    return actualValue === queryParamValue;
-  };
-  await waitForURLChange(page, changeCheck, timeout);
-}
-
-export async function waitForUrl(
-  page: Page,
-  url: string,
-  timeout = 30000, // query params get set after a debounce period
-) {
-  const changeCheck = (pageUrl: string): boolean => {
-    return pageUrl === url;
-  };
-  await waitForURLChange(page, changeCheck, timeout);
-}
-
-export async function waitForURLContainsQueryParam(
-  page: Page,
-  queryParamName: string,
-  timeout = 30000, // query params get set after a debounce period
-) {
-  const changeCheck = (pageUrl: string): boolean => {
-    const url = new URL(pageUrl);
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
-
-    return !!actualValue;
-  };
-  await waitForURLChange(page, changeCheck, timeout);
-}
-
-export async function waitForAnyURLChange(
-  page: Page,
-  initialUrl: string,
-  timeout = 30000, // query params get set after a debounce period
-) {
-  const changeCheck = (pageUrl: string): boolean => {
-    return pageUrl !== initialUrl;
-  };
-  await waitForURLChange(page, changeCheck, timeout);
-}
-
-export function getMobileMenuButton(page: Page) {
-  return page.locator("button >> text=MENU");
-}
-
-export async function hasMobileMenu(page: Page) {
-  const menuButton = getMobileMenuButton(page);
-  return await menuButton.isVisible();
-}
-
-export async function clickMobileNavMenu(menuButton: Locator) {
-  await menuButton.click();
 }
 
 export async function expectCheckboxIDIsChecked(
