@@ -4,9 +4,10 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Button, Grid, GridContainer, Icon } from "@trussworks/react-uswds";
+import { Button, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { SessionCheck } from "src/components/user/SessionCheck";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -19,8 +20,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-// TODO: layout with breadcrumbs and such
-// HOw to handle redirecting user away on logout?
 export default async function SavedGrants({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -28,6 +27,7 @@ export default async function SavedGrants({ params }: LocalizedPageProps) {
   return (
     <>
       <Breadcrumbs breadcrumbList={SAVED_GRANTS_CRUMBS} />
+      <SessionCheck />
       <GridContainer>
         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
           {t("SavedGrants.heading")}

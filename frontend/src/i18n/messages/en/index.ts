@@ -1,5 +1,3 @@
-import SavedGrants from "src/app/[locale]/saved-grants/page";
-
 export const messages = {
   Beta_alert: {
     alert_title:
@@ -470,6 +468,9 @@ export const messages = {
     unauthorized: {
       page_title: "Unauthorized | Simpler.Grants.gov",
     },
+    unauthenticated: {
+      page_title: "Unauthenticated | Simpler.Grants.gov",
+    },
     page_not_found: {
       page_title: "Page Not Found | Simpler.Grants.gov",
       title: "Oops! Page Not Found",
@@ -540,7 +541,10 @@ export const messages = {
     generic_message: "There seems to have been an error.",
     try_again: "Please try again.",
     unauthorized: "Unauthorized",
-    authorization_fail: "Login or user authorization failed. Please try again.",
+    unauthenticated: "Not signed in",
+    authorization_fail:
+      "Sign in or user authorization failed. Please try again.",
+    signInCTA: "Sign in first in order to view this page",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",

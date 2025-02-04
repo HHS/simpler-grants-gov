@@ -63,7 +63,6 @@ const NavLinks = ({
       return anonymousNavLinks;
     }
 
-    console.log("!!!", user);
     return anonymousNavLinks.toSpliced(2, 0, {
       text: t("nav_link_saved_grants"),
       href: "/saved-grants",
