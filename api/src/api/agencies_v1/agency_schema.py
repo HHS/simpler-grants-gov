@@ -18,28 +18,6 @@ class AgencyListRequestSchema(Schema):
     )
 
 
-class AgencyContactInfoSchema(Schema):
-    """Schema for agency contact information"""
-
-    contact_name = fields.String(metadata={"description": "Full name of the agency contact person"})
-    address_line_1 = fields.String(metadata={"description": "Primary street address of the agency"})
-    address_line_2 = fields.String(
-        allow_none=True,
-        metadata={"description": "Additional address information (suite, unit, etc.)"},
-    )
-    city = fields.String(metadata={"description": "City where the agency is located"})
-    state = fields.String(metadata={"description": "State where the agency is located"})
-    zip_code = fields.String(metadata={"description": "Postal code for the agency address"})
-    phone_number = fields.String(metadata={"description": "Contact phone number for the agency"})
-    primary_email = fields.String(
-        metadata={"description": "Main email address for agency communications"}
-    )
-    secondary_email = fields.String(
-        allow_none=True,
-        metadata={"description": "Alternative email address for agency communications"},
-    )
-
-
 class AgencyResponseSchema(Schema):
     """Schema for agency response"""
 
