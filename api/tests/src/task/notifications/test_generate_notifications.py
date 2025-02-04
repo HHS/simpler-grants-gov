@@ -5,7 +5,7 @@ import pytest
 import tests.src.db.models.factories as factories
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.user_models import UserNotificationLog
-from src.task.notifications.generate_notifications import NotificationConstants
+from src.task.notifications.generate_notifications import NotificationConstants, NotificationTask
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
 from src.task.notifications.generate_notifications import _strip_pagination_params
@@ -348,8 +348,8 @@ def test_search_notifications_on_index_change(
     search_client.bulk_upsert(opportunity_index, [json_record], "opportunity_id")
 
     # Run the notification task
-    result = cli_runner.invoke(args=["task", "generate-notifications"])
-    assert result.exit_code == 0
+    task = NotificationTask(db_session, search_client)
+    task.run()
 
     # Verify notification log was created due to changed results
     notification_logs = (
@@ -368,8 +368,8 @@ def test_search_notifications_on_index_change(
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
     # Run the task again - should not generate new notifications since results haven't changed
-    result = cli_runner.invoke(args=["task", "generate-notifications"])
-    assert result.exit_code == 0
+    task_rerun = NotificationTask(db_session, search_client)
+    task_rerun.run()
 
     notification_logs = (
         db_session.query(UserNotificationLog)
