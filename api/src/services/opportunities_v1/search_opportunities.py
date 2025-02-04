@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 import src.adapters.search as search
 from src.adapters.search.opensearch_response import SearchResponse
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -89,14 +89,17 @@ class OpportunityFilters(BaseModel):
 class Experimental(BaseModel):
     scoring_rule: ScoringRule = Field(default=ScoringRule.DEFAULT)
 
+class QueryOperator(BaseModel):
+    query_operator: SearchQueryOperator = Field(default=SearchQueryOperator.AND)
+
 
 class SearchOpportunityParams(BaseModel):
     pagination: PaginationParams
 
     query: str | None = Field(default=None)
+    query_operator: str | None = Field(default=QueryOperator())
     filters: OpportunityFilters | None = Field(default=None)
     experimental: Experimental = Field(default=Experimental())
-
 
 def _adjust_field_name(field: str) -> str:
     return REQUEST_FIELD_NAME_MAPPING.get(field, field)
@@ -181,7 +184,7 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
     # Query
     if params.query:
         filter_rule = FILTER_RULE_MAPPING.get(params.experimental.scoring_rule, DEFAULT)
-        builder.simple_query(params.query, filter_rule)
+        builder.simple_query(params.query, filter_rule, params.query_operator)
 
     # Filters
     _add_search_filters(builder, params.filters)
@@ -199,6 +202,8 @@ def _search_opportunities(
     includes: list | None = None,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
+
+    logger.error(search_request)
 
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
