@@ -4,8 +4,22 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.db.models.user_models import UserNotificationLog
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.task.notifications.generate_notifications import NotificationConstants
 from src.util import datetime_util
+
+from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
+
+
+@pytest.fixture
+def setup_search_data(opportunity_index, opportunity_index_alias, search_client):
+    # Load into the search index
+    schema = OpportunityV1Schema()
+    json_records = [schema.dump(opportunity) for opportunity in OPPORTUNITIES]
+    search_client.bulk_upsert(opportunity_index, json_records, "opportunity_id")
+
+    # Swap the search index alias
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
 
 
 @pytest.fixture
@@ -134,7 +148,13 @@ def test_no_notification_log_when_no_updates(
 
 
 def test_search_notifications_cli(
-    cli_runner, db_session, enable_factory_create, user, caplog, clear_notification_logs
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    user,
+    caplog,
+    clear_notification_logs,
+    setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
     # Create a saved search that needs notification
@@ -176,7 +196,12 @@ def test_search_notifications_cli(
 
 
 def test_combined_notifications_cli(
-    cli_runner, db_session, enable_factory_create, user, caplog, clear_notification_logs
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    user,
+    caplog,
+    clear_notification_logs,
 ):
     """Test that verifies we can handle both opportunity and search notifications together"""
     # Create a saved opportunity that needs notification
@@ -235,7 +260,10 @@ def test_combined_notifications_cli(
 
 
 def test_grouped_search_queries_cli(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    clear_notification_logs,
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
     # Create two users with the same search query

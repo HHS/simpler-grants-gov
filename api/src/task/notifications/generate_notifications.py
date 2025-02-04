@@ -7,8 +7,11 @@ from sqlalchemy import select, update
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.adapters.search as search
+import src.adapters.search.flask_opensearch as flask_opensearch
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
+from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -21,10 +24,11 @@ logger = logging.getLogger(__name__)
     "generate-notifications", help="Send notifications for opportunity and search changes"
 )
 @ecs_background_task("generate-notifications")
+@flask_opensearch.with_search_client()
 @flask_db.with_db_session()
-def run_notification_task(db_session: db.Session) -> None:
+def run_notification_task(db_session: db.Session, search_client: search.SearchClient) -> None:
     """Run the daily notification task"""
-    task = NotificationTask(db_session)
+    task = NotificationTask(db_session, search_client)
     task.run()
 
 
@@ -51,9 +55,10 @@ class NotificationTask(Task):
         SEARCHES_TRACKED = "searches_tracked"
         NOTIFICATIONS_SENT = "notifications_sent"
 
-    def __init__(self, db_session: db.Session) -> None:
+    def __init__(self, db_session: db.Session, search_client: search.SearchClient) -> None:
         super().__init__(db_session)
         self.user_notification_map: dict[uuid.UUID, NotificationContainer] = {}
+        self.search_client = search_client
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
@@ -110,13 +115,13 @@ class NotificationTask(Task):
 
         # For each unique query, check if results have changed
         for _, searches in query_map.items():
-            # TODO: Replace with actual search index query
-            # current_results = search_index.search(search_query)
-            current_results: set[int] = set()  # Placeholder for actual search results
+            current_results: list[int] = search_opportunities_id(
+                self.search_client, searches[0].search_query
+            )
 
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids)
-                if current_results != previous_results:
+                if set(current_results) != previous_results:
                     user_id = saved_search.user_id
                     if user_id not in self.user_notification_map:
                         self.user_notification_map[user_id] = NotificationContainer()
