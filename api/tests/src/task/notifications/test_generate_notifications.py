@@ -4,7 +4,7 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.db.models.user_models import UserNotificationLog
+from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
 from src.task.notifications.generate_notifications import NotificationConstants, NotificationTask
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
@@ -26,6 +26,8 @@ def setup_search_data(opportunity_index, opportunity_index_alias, search_client)
 def clear_notification_logs(db_session):
     """Clear all notification logs"""
     db_session.query(UserNotificationLog).delete()
+    db_session.query(UserSavedOpportunity).delete()
+    db_session.query(UserSavedSearch).delete()
 
 
 def test_via_cli(cli_runner, db_session, enable_factory_create, user):
@@ -153,10 +155,10 @@ def test_search_notifications_cli(
     enable_factory_create,
     user,
     caplog,
+    clear_notification_logs,
     setup_search_data,
 ):
     """Test that verifies we can collect and send search notifications via CLI"""
-    db_session.query(UserNotificationLog).delete()
 
     # Create a saved search that needs notification
     saved_search = factories.UserSavedSearchFactory.create(
