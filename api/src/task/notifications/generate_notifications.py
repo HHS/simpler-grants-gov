@@ -130,7 +130,6 @@ class NotificationTask(Task):
                     # Update the saved search with new results
                     saved_search.searched_opportunity_ids = list(current_results)
 
-        logger.info(f"User notification map: {self.user_notification_map}")
         logger.info(
             "Collected search notifications",
             extra={
