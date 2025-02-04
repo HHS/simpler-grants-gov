@@ -470,6 +470,12 @@ class OpportunitySearchRequestV1Schema(Schema):
         },
         validate=[validators.Length(min=1, max=100)],
     )
+    query_operator = fields.String(
+        metadata={
+            "description": "Query operator for combining search conditions.",
+            "example": "OR",
+        }
+    )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())
     experimental = fields.Nested(ExperimentalV1Schema())
