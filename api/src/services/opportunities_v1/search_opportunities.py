@@ -90,10 +90,6 @@ class Experimental(BaseModel):
     scoring_rule: ScoringRule = Field(default=ScoringRule.DEFAULT)
 
 
-class QueryOperator(BaseModel):
-    query_operator: SearchQueryOperator = Field(default=SearchQueryOperator.AND)
-
-
 class SearchOpportunityParams(BaseModel):
     pagination: PaginationParams
 
