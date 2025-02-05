@@ -78,6 +78,7 @@ export class BaseFrontendError extends Error {
  * An API response returned a status code greater than 400
  */
 export class ApiRequestError extends BaseFrontendError {
+  status?: number;
   constructor(
     message: string,
     type = "APIRequestError",
@@ -170,7 +171,7 @@ type SearchInputsSimple = {
   [key: string]: string[] | string | number | null | undefined;
 };
 
-export interface ParsedError {
+export interface ApiResponseError {
   message: string;
   searchInputs: ServerSideSearchParams;
   status: number;

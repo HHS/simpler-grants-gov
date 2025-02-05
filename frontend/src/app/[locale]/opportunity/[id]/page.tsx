@@ -18,6 +18,7 @@ import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
+import OpportunityIntro from "src/components/opportunity/OpportunityIntro";
 import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
@@ -93,35 +94,10 @@ function emptySummary() {
   };
 }
 
-const AssistanceListingsDisplay = ({
-  assistanceListings,
-  assistanceListingsText,
-}: {
-  assistanceListings: OpportunityAssistanceListing[];
-  assistanceListingsText: string;
-}) => {
-  if (!assistanceListings.length) {
-    // note that the dash here is an em dash, not just a regular dash
-    return (
-      <p className="tablet-lg:font-sans-2xs">{`${assistanceListingsText} —`}</p>
-    );
-  }
-
-  return assistanceListings.map((listing, index) => (
-    <p className="tablet-lg:font-sans-2xs" key={index}>
-      {index === 0 && `${assistanceListingsText}`}
-      {listing.assistance_listing_number}
-      {" -- "}
-      {listing.program_title}
-    </p>
-  ));
-};
-
 async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
   const idForParsing = Number(id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
-  const t = await getTranslations("OpportunityListing.intro");
 
   // Opportunity id needs to be a number greater than 1
   if (isNaN(idForParsing) || idForParsing < 1) {
@@ -147,22 +123,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
   });
 
-  const agencyName = opportunityData.agency_name || "--";
-
-  const lastUpdated = (timestamp: string) => {
-    if (!timestamp) return `${t("last_updated")} --`;
-    else {
-      const date = new Date(timestamp);
-      const formattedDate = new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(date);
-
-      return `${t("last_updated")} ${formattedDate}`;
-    }
-  };
-
   const nofoPath =
     opportunityData.attachments.length === 1
       ? opportunityData.attachments[0]?.download_path
@@ -182,16 +142,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         </div>
         <div className="grid-row grid-gap">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
-            <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg">{`${t("agency")} ${agencyName}`}</p>
-            <AssistanceListingsDisplay
-              assistanceListings={
-                opportunityData.opportunity_assistance_listings
-              }
-              assistanceListingsText={t("assistance_listings")}
-            />
-            <p className="tablet-lg:font-sans-2xs">
-              {lastUpdated(opportunityData.updated_at)}
-            </p>
+            <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
               summary={opportunityData.summary}
               nofoPath={nofoPath}

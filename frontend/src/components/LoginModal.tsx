@@ -22,7 +22,7 @@ export const LoginModal = ({
   buttonText,
   closeText,
   modalId,
-  renderToPortal=true
+  renderToPortal = true,
 }: {
   modalRef: RefObject<ModalRef>;
   helpText: string;
@@ -31,7 +31,7 @@ export const LoginModal = ({
   buttonText: string;
   closeText: string;
   modalId: string;
-  renderToPortal?: boolean
+  renderToPortal?: boolean;
 }) => {
   return (
     <Modal

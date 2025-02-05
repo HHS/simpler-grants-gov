@@ -1,7 +1,7 @@
 "use client";
 
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import { ParsedError } from "src/errors";
+import { ApiResponseError } from "src/errors";
 import { usePrevious } from "src/hooks/usePrevious";
 <<<<<<< HEAD
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
@@ -30,7 +30,7 @@ function isValidJSON(str: string) {
   }
 }
 
-function createBlankParsedError(): ParsedError {
+function createBlankParsedError(): ApiResponseError {
   return {
     type: "NetworkError",
     searchInputs: {
@@ -79,7 +79,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
     parsedErrorData = createBlankParsedError();
   } else {
     // Valid error thrown from server component
-    parsedErrorData = JSON.parse(error.message) as ParsedError;
+    parsedErrorData = JSON.parse(error.message) as ApiResponseError;
   }
   const convertedSearchParams = convertSearchParamsToProperTypes(
     parsedErrorData.searchInputs,

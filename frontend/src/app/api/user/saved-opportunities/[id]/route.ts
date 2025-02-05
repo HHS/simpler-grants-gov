@@ -1,4 +1,4 @@
-import { ParsedError } from "src/errors";
+import { ApiResponseError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
@@ -29,7 +29,7 @@ export async function GET(
     });
   } catch (e) {
     const error = e as Error;
-    const apiError = JSON.parse(error.message) as ParsedError;
+    const apiError = JSON.parse(error.message) as ApiResponseError;
     return new Response(`Error fetching opportunity: ${apiError.message}`, {
       status: apiError.status,
     });
