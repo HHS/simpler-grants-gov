@@ -4,9 +4,9 @@ from decimal import Decimal
 from typing import Any, Iterable
 from uuid import UUID
 
-from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
+from sqlalchemy import TIMESTAMP, MetaData, Text, inspect, event
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, declarative_mixin, mapped_column, attributes, make_transient, make_transient_to_detached, Session
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.constants.schema import Schemas
@@ -134,3 +134,76 @@ class TimestampMixin:
         onupdate=datetime_util.utcnow,
         server_default=sqlnow(),
     )
+
+
+class VersionMixin:
+
+    start: Mapped[datetime] = mapped_column(default=datetime_util.utcnow, server_default=sqlnow())
+    end: Mapped[datetime | None] = mapped_column(default=None)
+
+    def new_version(self, db_session):
+        now = datetime_util.utcnow()
+
+        primary_key_columns = [k.name for k in self.__table__.primary_key.columns]
+
+        old_key = inspect(self).key
+        print(old_key)
+
+        # TODO - it called the primary keys here to make sure they're not expired, not sure we need that?
+
+        # turn us into an INSERT
+        make_transient(self)
+
+        old_values = {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+
+        # Insert an old copy
+        old_copy_of_us = self.__class__(
+            **old_values
+        )
+
+        make_transient_to_detached(old_copy_of_us)
+        db_session.add(old_copy_of_us)
+        old_copy_of_us.end = now
+
+        # Remove any primary keys
+        for k in primary_key_columns:
+            setattr(self, k, None)
+
+        self.start = now
+        self.end = None
+        # updated_at doesn't update automatically for this logic, so do that here
+        self.updated_at = now # TODO - make safe for chance this isn't set
+
+@event.listens_for(Session, "before_flush")
+def before_flush(session, flush_context, instances):
+    for instance in session.dirty:
+        if not isinstance(instance, VersionMixin):
+            continue
+        if not session.is_modified(instance):
+            continue
+
+        if not attributes.instance_state(instance).has_identity:
+            continue
+
+        # make it transient
+        instance.new_version(session)
+        # re-add
+        session.add(instance)
+
+"""
+TODO - might not want this, but can consider using it
+
+@event.listens_for(Session, "do_orm_execute", retval=True)
+def do_orm_execute(execute_state):
+    #ensure all queries for VersionedStartEnd include criteria
+
+    ct = current_time() + datetime.timedelta(seconds=1)
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            VersionMixin,
+            lambda cls: and_(ct > cls.start, ct < cls.end),
+            include_aliases=True,
+        )
+    )
+
+"""

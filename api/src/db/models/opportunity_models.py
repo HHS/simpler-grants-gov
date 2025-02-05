@@ -1,9 +1,10 @@
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING
-
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, make_transient_to_detached, make_transient
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
@@ -15,7 +16,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.agency_models import Agency
-from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.base import ApiSchemaTable, TimestampMixin, VersionMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -459,3 +460,121 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+
+class Parent(ApiSchemaTable, TimestampMixin, VersionMixin):
+    __tablename__ = "parent"
+
+    __table_args__ = (
+        # nulls not distinct makes it so nulls work in the unique constraint
+        UniqueConstraint(
+            "opportunity_id", "end", postgresql_nulls_not_distinct=True
+        ),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+
+    parent_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    # TODO - while we need the legacy opportunity ID, should we make a table
+    #        that maps legacy IDs to UUIDs and use that instead?
+    opportunity_id: Mapped[int] = mapped_column(index=True)
+
+    title: Mapped[str]
+
+    other_field: Mapped[str | None]
+
+    all_children: Mapped[list["Child"]] = relationship(
+        back_populates="parent", uselist=True, cascade="all, delete-orphan",
+        primaryjoin="Parent.opportunity_id == foreign(Child.opportunity_id)",
+    )
+
+
+    # We configure a relationship from a summary to the current opportunity summary
+    # Just in case we delete this record, we can cascade to deleting the current_opportunity_summary
+    # record as well automatically.
+    current_child: Mapped["CurrentChild | None"] = relationship(
+        back_populates="parent", single_parent=True, cascade="delete"
+    )
+
+    def new_version(self, db_session):
+        prior_current_child = self.current_child
+        VersionMixin.new_version(self, db_session)
+
+        # This automatically moves the current_opportunity_summary
+        # to point to the new opportunity we just made.
+        if prior_current_child is not None:
+            new_current_child = CurrentChild(parent=self, child=prior_current_child.child, opportunity_status=prior_current_child.opportunity_status)
+            db_session.add(new_current_child)
+            db_session.delete(prior_current_child)
+
+class ParentAssistanceListing(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "parent_assistance_listing"
+
+    parent_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    parent_id: Mapped[int] = mapped_column(
+        UUID, ForeignKey(Parent.parent_id), primary_key=True, index=True
+    )
+    parent: Mapped[Parent] = relationship(single_parent=True)
+
+    assistance_listing_number: Mapped[str]
+
+
+class Child(ApiSchemaTable, TimestampMixin, VersionMixin):
+    __tablename__ = "child"
+
+    __table_args__ = (
+        # nulls not distinct makes it so nulls work in the unique constraint
+        UniqueConstraint(
+            "opportunity_id", "is_forecast", "end", postgresql_nulls_not_distinct=True
+        ),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    child_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    opportunity_id: Mapped[int] = mapped_column(index=True)
+
+    is_forecast: Mapped[bool] = mapped_column(index=True)
+
+    description: Mapped[str]
+
+    parent: Mapped[Parent] = relationship(Parent, primaryjoin="and_(Child.opportunity_id == foreign(Parent.opportunity_id), Parent.end.is_(None))")
+
+
+class CurrentChild(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "current_child"
+
+    parent_id: Mapped[int] = mapped_column(
+        UUID, ForeignKey(Parent.parent_id), primary_key=True, index=True
+    )
+    parent: Mapped[Parent] = relationship(single_parent=True)
+
+    child_id: Mapped[int] = mapped_column(
+        UUID,
+        ForeignKey(Child.child_id),
+        primary_key=True,
+        index=True,
+    )
+    child: Mapped[Child] = relationship(single_parent=True)
+
+    opportunity_status: Mapped[OpportunityStatus] = mapped_column(
+        "opportunity_status_id",
+        LookupColumn(LkOpportunityStatus),
+        ForeignKey(LkOpportunityStatus.opportunity_status_id),
+        index=True,
+    )
+
+
+
+
+
+# TODO
+# * Current opportunity summary style logic (what happens when the IDs get changed? Can that be handled at least when the parent changes?)
+# * Behavior of our one-to-many link tables - can we make them pretend to be versioned on the parent
+# * Verify no weird behavior with our lk tables
