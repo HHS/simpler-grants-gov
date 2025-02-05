@@ -624,6 +624,12 @@ export const messages = {
     exportButton: {
       title: "Export results",
     },
+    beta_alert: {
+      alert_title:
+        "We’re actively building this search experience. Help us improve!",
+      alert:
+        "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
+    },
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
