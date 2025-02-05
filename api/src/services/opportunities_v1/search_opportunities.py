@@ -201,8 +201,6 @@ def _search_opportunities(
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
 
-    logger.error(search_request)
-
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
