@@ -144,9 +144,7 @@ class SearchQueryBuilder:
         self._track_total_hits = track_total_hits
         return self
 
-    def simple_query(
-        self, query: str, fields: list[str], query_operator: str
-    ) -> typing.Self:
+    def simple_query(self, query: str, fields: list[str], query_operator: str) -> typing.Self:
         """
         Adds a simple_query_string which queries against the provided fields.
 
