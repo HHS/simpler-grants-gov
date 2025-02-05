@@ -144,7 +144,9 @@ class SearchQueryBuilder:
         self._track_total_hits = track_total_hits
         return self
 
-    def simple_query(self, query: str, fields: list[str], query_operator: str) -> typing.Self:
+    def simple_query(
+        self, query: str, fields: list[str], query_operator: str
+    ) -> typing.Self:
         """
         Adds a simple_query_string which queries against the provided fields.
 
@@ -155,7 +157,13 @@ class SearchQueryBuilder:
         See: https://opensearch.org/docs/latest/query-dsl/full-text/simple-query-string/
         """
         self.must.append(
-            {"simple_query_string": {"query": query, "fields": fields, "default_operator": query_operator}}
+            {
+                "simple_query_string": {
+                    "query": query,
+                    "fields": fields,
+                    "default_operator": query_operator,
+                }
+            }
         )
 
         return self

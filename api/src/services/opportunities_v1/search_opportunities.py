@@ -89,6 +89,7 @@ class OpportunityFilters(BaseModel):
 class Experimental(BaseModel):
     scoring_rule: ScoringRule = Field(default=ScoringRule.DEFAULT)
 
+
 class QueryOperator(BaseModel):
     query_operator: SearchQueryOperator = Field(default=SearchQueryOperator.AND)
 
@@ -97,9 +98,10 @@ class SearchOpportunityParams(BaseModel):
     pagination: PaginationParams
 
     query: str | None = Field(default=None)
-    query_operator: str | None = Field(default=QueryOperator())
+    query_operator: str = Field(default=SearchQueryOperator.AND)
     filters: OpportunityFilters | None = Field(default=None)
     experimental: Experimental = Field(default=Experimental())
+
 
 def _adjust_field_name(field: str) -> str:
     return REQUEST_FIELD_NAME_MAPPING.get(field, field)

@@ -28,9 +28,11 @@ class SearchResponseFormat(StrEnum):
     JSON = "json"
     CSV = "csv"
 
+
 class SearchQueryOperator(StrEnum):
     AND = "AND"
     OR = "OR"
+
 
 class OpportunitySummaryV1Schema(Schema):
     summary_description = fields.String(
