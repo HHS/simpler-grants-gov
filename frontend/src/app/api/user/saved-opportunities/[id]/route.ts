@@ -30,8 +30,9 @@ export async function GET(
   } catch (e) {
     const error = e as Error;
     const apiError = JSON.parse(error.message) as ApiResponseError;
-    return new Response(`Error fetching opportunity: ${apiError.message}`, {
-      status: apiError.status,
-    });
+    return Response.json(
+      { message: `Error fetching saved opportunity: ${apiError.message}` },
+      { status: apiError.status },
+    );
   }
 }

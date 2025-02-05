@@ -1,5 +1,7 @@
 import clsx from "clsx";
 
+import { ReactNode } from "react";
+
 import Spinner from "./Spinner";
 import { USWDSIcon } from "./USWDSIcon";
 
@@ -13,7 +15,7 @@ interface SaveButtonProps {
   loadingText: string;
   error: boolean;
   message: boolean;
-  messageText: string;
+  messageText: string | ReactNode;
 }
 
 const SaveButton: React.FC<SaveButtonProps> = ({

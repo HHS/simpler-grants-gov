@@ -3,6 +3,7 @@
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
@@ -35,12 +36,12 @@ export const OpportunitySaveUserControl = () => {
       const res = await fetch("/api/user/saved-opportunities", {
         method,
         headers: {
-          saved: "true",
           opportunity_id,
         },
       });
       if (res.ok && res.status === 200) {
         const data = (await res.json()) as { type: string };
+        console.log(res, data);
         data.type === "save" ? setSaved(true) : setSaved(false);
       } else {
         setSavedError(true);
@@ -58,17 +59,9 @@ export const OpportunitySaveUserControl = () => {
     if (!user?.token) return;
     setLoading(true);
     fetch(`/api/user/saved-opportunities/${opportunity_id}`)
-      .then((res) => {
-        if (res.ok && res.status === 200) {
-          res
-            .json()
-            .then((data: { length: number }) => {
-              data.length ?? setSaved(true);
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        }
+      .then((res) => (res.ok && res.status === 200 ? res.json() : []))
+      .then((data: { length: number }) => {
+        data.length ?? setSaved(true);
       })
       .finally(() => {
         setLoading(false);
@@ -81,7 +74,13 @@ export const OpportunitySaveUserControl = () => {
   const messageText = saved
     ? savedError
       ? t("save_message.error_unsave")
-      : t("save_message.save")
+      : t.rich("save_message.save", {
+          linkSavedGrants: (chunks) => (
+            <Link className="text-black" href="/my-grants">
+              {chunks}
+            </Link>
+          ),
+        })
     : savedError
       ? t("save_message.error_save")
       : t("save_message.unsave");

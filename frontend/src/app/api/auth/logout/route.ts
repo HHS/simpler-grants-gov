@@ -1,3 +1,4 @@
+import { ApiResponseError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { deleteSession } from "src/services/auth/sessionUtils";
 import { postLogout } from "src/services/fetch/fetchers/userFetcher";
@@ -18,9 +19,10 @@ export async function POST() {
     return Response.json({ message: "logout success" });
   } catch (e) {
     const error = e as Error;
+    const apiError = JSON.parse(error.message) as ApiResponseError;
     return Response.json(
-      { message: `Error logging out: ${error.message}` },
-      { status: 500 },
+      { message: `Error logging out: ${apiError.message}` },
+      { status: apiError.status },
     );
   }
 }

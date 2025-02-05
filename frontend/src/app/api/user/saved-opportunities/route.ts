@@ -19,19 +19,20 @@ export const POST = async (request: Request) => {
       session.user_id as string,
       Number(opportunity_id),
     );
-    if (!response) {
-      throw new Error("No logout response from API");
+    if (!response || response.status_code !== 200) {
+      throw new Error(`Error saving saved opportunity: ${response.message}`);
     }
     return Response.json({
       type: "save",
-      message: "saved opportunity save success",
+      message: "saved opportunity success",
     });
   } catch (e) {
     const error = e as Error;
     const apiError = JSON.parse(error.message) as ApiResponseError;
-    return new Response(`Error saving saved opportunity: ${apiError.message}`, {
-      status: apiError.status,
-    });
+    return Response.json(
+      { message: `Error saving saved opportunity: ${apiError.message}` },
+      { status: apiError.status },
+    );
   }
 };
 
@@ -59,11 +60,9 @@ export const DELETE = async (request: Request) => {
   } catch (e) {
     const error = e as Error;
     const apiError = JSON.parse(error.message) as ApiResponseError;
-    return new Response(
-      `Error deleting saved opportunity: ${apiError.message}`,
-      {
-        status: apiError.status,
-      },
+    return Response.json(
+      { message: `Error deleting saved opportunity: ${apiError.message}` },
+      { status: apiError.status },
     );
   }
 };

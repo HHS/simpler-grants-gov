@@ -1,4 +1,4 @@
-import { BadRequestError, ApiResponseError } from "src/errors";
+import { ApiResponseError, BadRequestError } from "src/errors";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 describe("BadRequestError (as an example of other error types)", () => {
