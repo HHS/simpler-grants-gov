@@ -1482,6 +1482,14 @@ components:
           maxLength: 100
           description: Query string which searches against several text fields
           example: research
+        query_operator:
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
         filters:
           type:
           - object
