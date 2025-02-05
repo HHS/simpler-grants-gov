@@ -1,8 +1,10 @@
 from datetime import timedelta
 
 import pytest
+from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
+from src.adapters.aws.pinpoint_adapter import _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
 from src.task.notifications.generate_notifications import (
@@ -12,6 +14,13 @@ from src.task.notifications.generate_notifications import (
 )
 from src.util import datetime_util
 from tests.src.api.opportunities_v1.test_opportunity_route_search import OPPORTUNITIES
+
+
+@pytest.fixture
+def user_with_email(db_session, user, monkeypatch):
+    monkeypatch.setenv("PINPOINT_APP_ID", "test-app-id")
+    factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
+    return user
 
 
 @pytest.fixture
@@ -33,14 +42,91 @@ def clear_notification_logs(db_session):
     db_session.query(UserSavedSearch).delete()
 
 
-def test_via_cli(cli_runner, db_session, enable_factory_create, user):
+def test_via_cli(cli_runner, db_session, enable_factory_create, user, user_with_email):
     """Simple test that verifies we can invoke the notification task via CLI"""
     result = cli_runner.invoke(args=["task", "generate-notifications"])
 
     assert result.exit_code == 0
 
 
-def test_collect_notifications_cli(cli_runner, db_session, enable_factory_create, user, caplog):
+def test_search_notifications_cli(
+    cli_runner,
+    db_session,
+    enable_factory_create,
+    user,
+    user_with_email,
+    caplog,
+    clear_notification_logs,
+    setup_search_data,
+):
+    """Test that verifies we can collect and send search notifications via CLI"""
+
+    # Create a saved search that needs notification
+    saved_search = factories.UserSavedSearchFactory.create(
+        user=user,
+        search_query={"keywords": "test"},
+        name="Test Search",
+        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
+        searched_opportunity_ids=[1, 2, 3],
+    )
+
+    notification_logs_count = (
+        db_session.query(UserNotificationLog)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .count()
+    )
+
+    result = cli_runner.invoke(args=["task", "generate-notifications"])
+
+    assert result.exit_code == 0
+
+    # Verify expected log messages
+    assert "Collected search notifications" in caplog.text
+    assert "Sending notification to user" in caplog.text
+
+    # Verify the log contains the correct metrics
+    log_records = [r for r in caplog.records if "Sending notification to user" in r.message]
+    assert len(log_records) == 1
+    extra = log_records[0].__dict__
+    assert extra["user_id"] == user.user_id
+    assert extra["opportunity_count"] == 0
+    assert extra["search_count"] == 1
+
+    # Verify notification log was created
+    notification_logs = (
+        db_session.query(UserNotificationLog)
+        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
+        .all()
+    )
+    assert len(notification_logs) == notification_logs_count + 1
+
+    # Verify last_notified_at was updated
+    db_session.refresh(saved_search)
+    assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
+
+    # Verify email was sent via Pinpoint
+    mock_responses = _get_mock_responses()
+    assert len(mock_responses) == 1
+
+    request = mock_responses[0][0]
+    assert request["MessageRequest"]["Addresses"] == {"test@example.com": {"ChannelType": "EMAIL"}}
+
+    # Verify notification log was created
+    notification_logs = (
+        db_session.execute(
+            select(UserNotificationLog).where(UserNotificationLog.user_id == user.user_id)
+        )
+        .scalars()
+        .all()
+    )
+
+    assert len(notification_logs) == 2
+    assert notification_logs[0].notification_sent is True
+
+
+def test_collect_notifications_cli(
+    cli_runner, db_session, enable_factory_create, user, user_with_email, caplog
+):
     """Simple test that verifies we can invoke the notification task via CLI"""
     # Create a saved opportunity that needs notification
     opportunity = factories.OpportunityFactory.create()
@@ -60,10 +146,10 @@ def test_collect_notifications_cli(cli_runner, db_session, enable_factory_create
 
     # Verify expected log messages
     assert "Collected opportunity notifications" in caplog.text
-    assert "Would send notification to user" in caplog.text
+    assert "Sending notification to user" in caplog.text
 
     # Verify the log contains the correct metrics
-    log_records = [r for r in caplog.records if "Would send notification to user" in r.message]
+    log_records = [r for r in caplog.records if "Sending notification to user" in r.message]
     assert len(log_records) == 1
     extra = log_records[0].__dict__
     assert extra["user_id"] == user.user_id
@@ -71,7 +157,9 @@ def test_collect_notifications_cli(cli_runner, db_session, enable_factory_create
     assert extra["search_count"] == 0
 
 
-def test_last_notified_at_updates(cli_runner, db_session, enable_factory_create, user):
+def test_last_notified_at_updates(
+    cli_runner, db_session, enable_factory_create, user, user_with_email
+):
     """Test that last_notified_at gets updated after sending notifications"""
     # Create an opportunity that was updated after the last notification
     opportunity = factories.OpportunityFactory.create()
@@ -101,7 +189,7 @@ def test_last_notified_at_updates(cli_runner, db_session, enable_factory_create,
 
 
 def test_notification_log_creation(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs, user
+    cli_runner, db_session, enable_factory_create, clear_notification_logs, user, user_with_email
 ):
     """Test that notification logs are created when notifications are sent"""
     # Create a saved opportunity that needs notification
@@ -132,7 +220,7 @@ def test_notification_log_creation(
 
 
 def test_no_notification_log_when_no_updates(
-    cli_runner, db_session, enable_factory_create, clear_notification_logs, user
+    cli_runner, db_session, enable_factory_create, clear_notification_logs, user, user_with_email
 ):
     """Test that no notification log is created when there are no updates"""
     # Create a saved opportunity that doesn't need notification
@@ -152,60 +240,12 @@ def test_no_notification_log_when_no_updates(
     assert len(notification_logs) == 0
 
 
-def test_search_notifications_cli(
-    cli_runner,
-    db_session,
-    enable_factory_create,
-    user,
-    caplog,
-    clear_notification_logs,
-    setup_search_data,
-):
-    """Test that verifies we can collect and send search notifications via CLI"""
-
-    # Create a saved search that needs notification
-    saved_search = factories.UserSavedSearchFactory.create(
-        user=user,
-        search_query={"keywords": "test"},
-        name="Test Search",
-        last_notified_at=datetime_util.utcnow() - timedelta(days=1),
-        searched_opportunity_ids=[1, 2, 3],
-    )
-
-    result = cli_runner.invoke(args=["task", "generate-notifications"])
-
-    assert result.exit_code == 0
-
-    # Verify expected log messages
-    assert "Collected search notifications" in caplog.text
-    assert "Would send notification to user" in caplog.text
-
-    # Verify the log contains the correct metrics
-    log_records = [r for r in caplog.records if "Would send notification to user" in r.message]
-    assert len(log_records) == 1
-    extra = log_records[0].__dict__
-    assert extra["user_id"] == user.user_id
-    assert extra["opportunity_count"] == 0
-    assert extra["search_count"] == 1
-
-    # Verify notification log was created
-    notification_logs = (
-        db_session.query(UserNotificationLog)
-        .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
-        .all()
-    )
-    assert len(notification_logs) == 1
-
-    # Verify last_notified_at was updated
-    db_session.refresh(saved_search)
-    assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
-
-
 def test_combined_notifications_cli(
     cli_runner,
     db_session,
     enable_factory_create,
     user,
+    user_with_email,
     caplog,
     clear_notification_logs,
 ):
@@ -238,10 +278,10 @@ def test_combined_notifications_cli(
     # Verify expected log messages
     assert "Collected opportunity notifications" in caplog.text
     assert "Collected search notifications" in caplog.text
-    assert "Would send notification to user" in caplog.text
+    assert "Sending notification to user" in caplog.text
 
     # Verify the log contains the correct metrics
-    log_records = [r for r in caplog.records if "Would send notification to user" in r.message]
+    log_records = [r for r in caplog.records if "Sending notification to user" in r.message]
     assert len(log_records) == 1
     extra = log_records[0].__dict__
     assert extra["user_id"] == user.user_id
@@ -270,11 +310,15 @@ def test_grouped_search_queries_cli(
     db_session,
     enable_factory_create,
     clear_notification_logs,
+    user,
+    user_with_email,
 ):
     """Test that verifies we properly handle multiple users with the same search query"""
     # Create two users with the same search query
     user1 = factories.UserFactory.create()
     user2 = factories.UserFactory.create()
+    factories.LinkExternalUserFactory.create(user=user1, email="user1@example.com")
+    factories.LinkExternalUserFactory.create(user=user2, email="user2@example.com")
 
     same_search_query = {"keywords": "shared search"}
 
@@ -325,6 +369,7 @@ def test_search_notifications_on_index_change(
     db_session,
     enable_factory_create,
     user,
+    user_with_email,
     opportunity_index,
     search_client,
     clear_notification_logs,
