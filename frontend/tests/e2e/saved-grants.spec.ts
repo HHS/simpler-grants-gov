@@ -24,7 +24,7 @@ test("shows save / search cta if logged in", async ({ page }, { project }) => {
     await openMobileNav(page);
   }
   const savedGrantsNavItem = page.locator(".usa-nav li:nth-child(3)");
-  expect(savedGrantsNavItem).toHaveText("Saved grants");
+  await expect(savedGrantsNavItem).toHaveText("Saved grants");
   await savedGrantsNavItem.click();
 
   await waitForURLChange(page, (url) => !!url.match(/saved-grants/));

@@ -8,7 +8,7 @@ jest.mock("next-intl/server", () => ({
 }));
 
 describe("Saved Grants page", () => {
-  it("renders intro text for non logged in user", async () => {
+  it("renders intro text for user with no saved grants", async () => {
     const component = await SavedGrants({ params: localeParams });
     render(component);
 

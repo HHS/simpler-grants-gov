@@ -4,11 +4,10 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 import { camelCase } from "lodash";
-
 import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
-} from "../playwrightUtils";
+} from "tests/e2e/playwrightUtils";
 
 export function getSearchInput(page: Page) {
   return page.locator("#query");

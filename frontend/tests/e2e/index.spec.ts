@@ -85,7 +85,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
 
 test("hides mobile nav at expected times", async ({ page }, { project }) => {
   if (project.name.match(/[Mm]obile/)) {
-    await openMobileNav(page);
+    const menuOpener = await openMobileNav(page);
 
     // mobile menu closes when a navigation link is clicked
     const firstNavItem = page

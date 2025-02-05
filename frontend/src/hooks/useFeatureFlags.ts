@@ -42,7 +42,6 @@ export function useFeatureFlags(): {
         ...featureFlags,
         [flagName]: value,
       };
-      console.log("!!! set cookie", newFlags);
       setFeatureFlags(newFlags);
       Cookies.set(FEATURE_FLAGS_KEY, JSON.stringify(newFlags), {
         expires: getCookieExpiration(),

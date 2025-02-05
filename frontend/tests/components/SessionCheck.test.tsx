@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render } from "tests/react-utils";
 
 import { SessionCheck } from "src/components/user/SessionCheck";
 

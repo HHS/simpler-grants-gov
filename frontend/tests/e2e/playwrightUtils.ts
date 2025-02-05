@@ -108,7 +108,7 @@ export const generateRandomString = (desiredPattern: number[]) => {
 // on login callback redirect and this test won't work
 export const performSignIn = async (page: Page, project: FullProject) => {
   const signInButton = page.locator('button[data-testid="sign-in-button"]');
-  expect(signInButton).toHaveText("Sign in");
+  await expect(signInButton).toHaveText("Sign in");
   await signInButton.click();
   const secondSignInButton = page.locator(".usa-modal__footer a");
   await secondSignInButton.click();
@@ -142,4 +142,5 @@ export const performSignIn = async (page: Page, project: FullProject) => {
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
+  return menuOpener;
 };
