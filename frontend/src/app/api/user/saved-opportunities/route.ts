@@ -1,3 +1,4 @@
+import { ParsedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
   deleteSavedOpportunity,
@@ -27,10 +28,10 @@ export const POST = async (request: Request) => {
     });
   } catch (e) {
     const error = e as Error;
-    return Response.json(
-      { message: `Error saving opportunity: ${error.message}` },
-      { status: 500 },
-    );
+    const apiError = JSON.parse(error.message) as ParsedError;
+    return new Response(`Error saving saved opportunity: ${apiError.message}`, {
+      status: apiError.status,
+    });
   }
 };
 
@@ -57,9 +58,12 @@ export const DELETE = async (request: Request) => {
     });
   } catch (e) {
     const error = e as Error;
-    return Response.json(
-      { message: `Error saving opportunity: ${error.message}` },
-      { status: 500 },
+    const apiError = JSON.parse(error.message) as ParsedError;
+    return new Response(
+      `Error deleting saved opportunity: ${apiError.message}`,
+      {
+        status: apiError.status,
+      },
     );
   }
 };

@@ -3,9 +3,9 @@
  * Note that the errors defined here rely on stringifying JSON data into the Error's message parameter
  * That data will need to be parsed back out into JSON when reading the error
  */
-
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
@@ -169,6 +169,14 @@ export class ServiceUnavailableError extends ApiRequestError {
 type SearchInputsSimple = {
   [key: string]: string[] | string | number | null | undefined;
 };
+
+export interface ParsedError {
+  message: string;
+  searchInputs: ServerSideSearchParams;
+  status: number;
+  type: string;
+  details?: FrontendErrorDetails;
+}
 
 function convertSearchInputSetsToArrays(
   searchInputs: QueryParamData,

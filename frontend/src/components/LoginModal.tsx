@@ -22,6 +22,7 @@ export const LoginModal = ({
   buttonText,
   closeText,
   modalId,
+  renderToPortal=true
 }: {
   modalRef: RefObject<ModalRef>;
   helpText: string;
@@ -30,14 +31,17 @@ export const LoginModal = ({
   buttonText: string;
   closeText: string;
   modalId: string;
+  renderToPortal?: boolean
 }) => {
   return (
     <Modal
       ref={modalRef}
       forceAction
+      className="text-wrap"
       aria-labelledby={`${modalId}-heading`}
       aria-describedby={`${modalId}-description`}
       id={modalId}
+      renderToPortal={renderToPortal}
     >
       <ModalHeading id={`${modalId}-heading`}>{titleText}</ModalHeading>
       <div className="usa-prose">

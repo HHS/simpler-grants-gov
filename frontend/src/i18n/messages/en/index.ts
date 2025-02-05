@@ -15,7 +15,7 @@ export const messages = {
       loading: "Updating",
     },
     save_message: {
-      success: "This opportunity was saved to Saved grants.",
+      save: "This opportunity was saved to Saved grants.",
       unsave: "This opportunity was unsaved.",
       error_save: "Error saving. Please try again.",
       error_unsave: "Error undoing save. Please try again.",

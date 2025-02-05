@@ -9,6 +9,8 @@ const meta: Meta<typeof SaveButton> = {
     defaultText: "Save",
     savedText: "Saved",
     loadingText: "Updating",
+    messageText: "This opportunity was saved to Saved grants.",
+    message: true,
   },
 };
 export default meta;

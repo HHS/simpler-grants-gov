@@ -1,5 +1,4 @@
-import { ParsedError } from "src/app/[locale]/search/error";
-import { BadRequestError } from "src/errors";
+import { BadRequestError, ParsedError } from "src/errors";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 describe("BadRequestError (as an example of other error types)", () => {

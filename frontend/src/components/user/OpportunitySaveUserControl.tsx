@@ -5,7 +5,7 @@ import { useUser } from "src/services/auth/useUser";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Alert, ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
+import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
@@ -19,43 +19,72 @@ export const OpportunitySaveUserControl = () => {
 
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
-  const [savedAlert, setSavedAlert] = useState(false);
+  const [showMessage, setshowMessage] = useState(false);
   const [savedError, setSavedError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setloading] = useState(false);
+  const closeMessage = () => {
+    setshowMessage(false);
+  };
 
   const userSavedOppCallback = async () => {
-    setSavedError(false);
-    const method = saved ? "DELETE" : "POST";
-    setloading(true);
-    const res = await fetch("/api/user/saved-opportunities", {
-      method,
-      headers: {
-        saved: "true",
-        opportunity_id,
-      },
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const data = await res.json();
-    // if error
+    setLoading(true);
 
-    setloading(false);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    data.type === "save" ? setSaved(true) : setSaved(false);
-    saved ?? setSavedAlert(true);
+    const method = saved ? "DELETE" : "POST";
+    try {
+      const res = await fetch("/api/user/saved-opportunities", {
+        method,
+        headers: {
+          saved: "true",
+          opportunity_id,
+        },
+      });
+      if (res.ok && res.status === 200) {
+        const data = (await res.json()) as { type: string };
+        data.type === "save" ? setSaved(true) : setSaved(false);
+      } else {
+        setSavedError(true);
+      }
+    } catch (error) {
+      setSavedError(true);
+      console.error(error);
+    } finally {
+      setshowMessage(true);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
+    if (!user?.token) return;
+    setLoading(true);
     fetch(`/api/user/saved-opportunities/${opportunity_id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        data.length ?? setSaved(true);
+      .then((res) => {
+        if (res.ok && res.status === 200) {
+          res
+            .json()
+            .then((data: { length: number }) => {
+              data.length ?? setSaved(true);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        }
       })
-      .catch(() => {
-        setSaved(false);
+      .finally(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
       });
-  }, [opportunity_id]);
+  }, [opportunity_id, user]);
+
+  const messageText = saved
+    ? savedError
+      ? t("save_message.error_unsave")
+      : t("save_message.save")
+    : savedError
+      ? t("save_message.error_save")
+      : t("save_message.unsave");
 
   return (
     <>
@@ -77,6 +106,7 @@ export const OpportunitySaveUserControl = () => {
             descriptionText={t("save_login_modal.description")}
             titleText={t("save_login_modal.title")}
             modalId="opp-save-login-modal"
+            renderToPortal={false}
           />
         </>
       )}
@@ -86,25 +116,12 @@ export const OpportunitySaveUserControl = () => {
           savedText={t("save_button.saved")}
           loadingText={t("save_button.loading")}
           saved={saved}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={userSavedOppCallback}
+          error={savedError}
+          messageClick={closeMessage}
+          messageText={messageText}
+          message={showMessage}
+          buttonClick={userSavedOppCallback}
           loading={loading}
-        />
-      )}
-      {savedAlert && (
-        <Alert
-          slim={true}
-          type="success"
-          heading={t("save_message.success")}
-          headingLevel="h4"
-        />
-      )}
-      {savedError && (
-        <Alert
-          slim={true}
-          type="success"
-          heading={t("save_message.error_save")}
-          headingLevel="h4"
         />
       )}
     </>
