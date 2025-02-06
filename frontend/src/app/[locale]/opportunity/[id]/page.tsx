@@ -98,7 +98,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
   const idForParsing = Number(id);
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
-
   // Opportunity id needs to be a number greater than 1
   if (isNaN(idForParsing) || idForParsing < 1) {
     return <NotFound />;
