@@ -16,7 +16,6 @@ export default async function SearchResultsListFetch({
 }: ServerPageProps) {
   const searchResults = await searchResultsPromise;
 
-  const maxPaginationError = null;
   const t = await getTranslations("Search");
 
   if (searchResults.status_code !== 200) {
@@ -38,8 +37,6 @@ export default async function SearchResultsListFetch({
 
   return (
     <ul className="usa-list--unstyled">
-      {/* TODO #1485: show proper USWDS error  */}
-      {maxPaginationError && <h4>{t("resultsListFetch.paginationError")}</h4>}
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem opportunity={opportunity} />
