@@ -2,51 +2,62 @@
  * @jest-environment node
  */
 
-import { POST } from "src/app/api/user/saved-opportunities/route";
+import { DELETE, POST } from "src/app/api/user/saved-opportunities/route";
 
-const fetchMock = jest.fn().mockResolvedValue({
-  json: jest.fn().mockResolvedValue({ status_code: 200 }),
-  ok: true,
-  status: 200,
-});
+import { NextRequest } from "next/server";
+
 const getSessionMock = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
-jest.mock("src/constants/environments", () => ({
-  environment: {
-    API_URL: "http://example.com",
-  },
+const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
+
+jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
+  handleSavedOpportunity: () =>
+    mockPostSavedOpp({ status_code: 200 }),
 }));
 
+const fakeRequestForSavedOpps = () => {
+  return {
+    headers: {
+      get: jest.fn(() => {return {
+        "opportunity_id": 1
+      }}),
+    },
+  } as unknown as NextRequest;
+};
+
 describe("POST request", () => {
-  let originalFetch: typeof global.fetch;
-  beforeAll(() => {
-    originalFetch = global.fetch;
-  });
-  afterAll(() => {
-    global.fetch = originalFetch;
-  });
-  beforeEach(() => {
-    global.fetch = fetchMock;
-  });
   afterEach(() => jest.clearAllMocks());
-  it("returns saved opportunity", async () => {
+  it("saves saved opportunity", async () => {
     getSessionMock.mockImplementation(() => ({
       token: "fakeToken",
-      user_id: 1,
     }));
-    const requestObj = {
-      headers: { opportunity_id: 1 },
-    } as any;
-    const req = new Request("http://localhost:3000");
-    req.headers.set("opportunity_id", "1");
-    const response = await POST(req);
-    const json = await response.json();
+
+    const response = await POST(fakeRequestForSavedOpps());
+
+    const json = await response.json() as {'message': string};
     expect(response.status).toBe(200);
-    expect(json.message).toBe("saved opportunity success");
+    expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
+
+    expect(json.message).toBe("save saved opportunity success");
+    expect(getSessionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("deletes saved opportunity", async () => {
+    getSessionMock.mockImplementation(() => ({
+      token: "fakeToken",
+    }));
+
+    const response = await DELETE(fakeRequestForSavedOpps());
+
+    const json = await response.json() as {'message': string};
+    expect(response.status).toBe(200);
+    expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
+
+    expect(json.message).toBe("delete saved opportunity success");
     expect(getSessionMock).toHaveBeenCalledTimes(1);
   });
 });

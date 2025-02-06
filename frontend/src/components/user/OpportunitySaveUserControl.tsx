@@ -41,7 +41,6 @@ export const OpportunitySaveUserControl = () => {
       });
       if (res.ok && res.status === 200) {
         const data = (await res.json()) as { type: string };
-        console.log(res, data);
         data.type === "save" ? setSaved(true) : setSaved(false);
       } else {
         setSavedError(true);
@@ -87,7 +86,20 @@ export const OpportunitySaveUserControl = () => {
 
   return (
     <>
-      {!user?.token && (
+      {user?.token ? (
+        <SaveButton
+          defaultText={t("save_button.save")}
+          savedText={t("save_button.saved")}
+          loadingText={t("save_button.loading")}
+          saved={saved}
+          error={savedError}
+          messageClick={closeMessage}
+          messageText={messageText}
+          message={showMessage}
+          buttonClick={userSavedOppCallback}
+          loading={loading}
+        />
+      ) : (
         <>
           <ModalToggleButton
             modalRef={modalRef}
@@ -108,20 +120,6 @@ export const OpportunitySaveUserControl = () => {
             renderToPortal={false}
           />
         </>
-      )}
-      {!!user?.token && (
-        <SaveButton
-          defaultText={t("save_button.save")}
-          savedText={t("save_button.saved")}
-          loadingText={t("save_button.loading")}
-          saved={saved}
-          error={savedError}
-          messageClick={closeMessage}
-          messageText={messageText}
-          message={showMessage}
-          buttonClick={userSavedOppCallback}
-          loading={loading}
-        />
       )}
     </>
   );

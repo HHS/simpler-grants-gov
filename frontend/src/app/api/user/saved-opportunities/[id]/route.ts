@@ -19,7 +19,7 @@ export async function GET(
       Number(opportunity_id),
     );
     if (!savedOpportunities) {
-      throw new Error("No response from API");
+      throw new Error(`Error fetching saved opportunity: ${opportunity_id}`);
     }
     return new Response(JSON.stringify(savedOpportunities), {
       status: 200,
