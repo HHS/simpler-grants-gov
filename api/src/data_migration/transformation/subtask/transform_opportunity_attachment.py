@@ -43,11 +43,9 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             TsynopsisAttachment,
             OpportunityAttachment,
             [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id],
-            batch_size=(
-                self.attachment_config.total_attachments_to_process
-                if self.attachment_config.total_attachments_to_process
-                else 1000
-            ),
+            # We load opportunity attachments into memory, so need to process very small batches
+            # to avoid running out of memory.
+            batch_size=100,
         )
 
         self.process_opportunity_attachment_group(records)
