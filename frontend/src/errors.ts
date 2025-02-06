@@ -5,7 +5,6 @@
  */
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
@@ -169,14 +168,6 @@ export class ServiceUnavailableError extends ApiRequestError {
 type SearchInputsSimple = {
   [key: string]: string[] | string | number | null | undefined;
 };
-
-export interface ApiResponseError {
-  message: string;
-  searchInputs: ServerSideSearchParams;
-  status: number;
-  type: string;
-  details?: FrontendErrorDetails;
-}
 
 function convertSearchInputSetsToArrays(
   searchInputs: QueryParamData,

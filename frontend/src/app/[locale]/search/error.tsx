@@ -1,13 +1,9 @@
 "use client";
 
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
-import { ApiResponseError } from "src/errors";
 import { usePrevious } from "src/hooks/usePrevious";
-<<<<<<< HEAD
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { OptionalStringDict } from "src/types/searchRequestURLTypes";
-=======
->>>>>>> b6c0c6d0 (Update modal message)
+import { ServerSideSearchParams } from "src/types/searchRequestURLTypes";
 import { Breakpoints, ErrorProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
@@ -21,6 +17,14 @@ import SearchBar from "src/components/search/SearchBar";
 import SearchFilters from "src/components/search/SearchFilters";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
+export interface ParsedError {
+  message: string;
+  searchInputs: ServerSideSearchParams;
+  status: number;
+  type: string;
+  details?: FrontendErrorDetails;
+}
+
 function isValidJSON(str: string) {
   try {
     JSON.parse(str);
@@ -30,7 +34,7 @@ function isValidJSON(str: string) {
   }
 }
 
-function createBlankParsedError(): ApiResponseError {
+function createBlankParsedError(): ParsedError {
   return {
     type: "NetworkError",
     searchInputs: {
@@ -79,7 +83,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
     parsedErrorData = createBlankParsedError();
   } else {
     // Valid error thrown from server component
-    parsedErrorData = JSON.parse(error.message) as ApiResponseError;
+    parsedErrorData = JSON.parse(error.message) as ParsedError;
   }
   const convertedSearchParams = convertSearchParamsToProperTypes(
     parsedErrorData.searchInputs,
