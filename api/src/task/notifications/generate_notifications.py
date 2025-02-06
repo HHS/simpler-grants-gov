@@ -170,8 +170,6 @@ class NotificationTask(Task):
     def _send_notifications(self) -> None:
         """Send collected notifications to users"""
         for user_id, container in self.user_notification_map.items():
-            print(user_id)
-            print(container)
             if not container.saved_opportunities and not container.saved_searches:
                 continue
 
