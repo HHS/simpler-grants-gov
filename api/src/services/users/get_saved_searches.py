@@ -6,7 +6,7 @@ from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
 
 
-def get_saved_searches(db_session: db.Session, user_id: UUID) -> list[UserSavedSearch]:
+def get_saved_searches(db_session: db.Session, user_id: UUID, json_data: dict) -> list[UserSavedSearch]:
     """Get all saved searches for a user"""
     saved_searches = (
         db_session.execute(
