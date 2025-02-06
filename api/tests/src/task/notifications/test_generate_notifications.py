@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _get_mock_responses
+from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
 from src.task.notifications.generate_notifications import (
@@ -75,6 +75,8 @@ def test_search_notifications_cli(
         .filter(UserNotificationLog.notification_reason == NotificationConstants.SEARCH_UPDATES)
         .count()
     )
+
+    _clear_mock_responses()
 
     result = cli_runner.invoke(args=["task", "generate-notifications"])
 
