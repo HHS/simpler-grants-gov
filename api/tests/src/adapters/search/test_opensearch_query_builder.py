@@ -659,7 +659,7 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         # Add a sort by ID ascending to make it so any relevancy from this is ignored, just testing that values returned
         builder = SearchQueryBuilder().sort_by([("id", SortDirection.ASCENDING)])
 
-        builder.simple_query(query, fields)
+        builder.simple_query(query, fields, "AND")
 
         # Statically add the same aggregated fields every time
         builder.aggregation_terms("author", "author.keyword", minimum_count=0).aggregation_terms(
@@ -694,3 +694,52 @@ class TestOpenSearchQueryBuilder(BaseTestClass):
         validate_valid_request(
             search_client, search_index, builder, expected_results, expected_aggregations
         )
+
+    @pytest.mark.parametrize(
+        "query,fields,query_operator,expected_results",
+        [
+            # AND
+            (
+                "king Tolkien",
+                ["title", "author"],
+                "AND",
+                [RETURN_OF_THE_KING],
+            ),
+            # OR
+            (
+                "king Tolkien",
+                ["title", "author"],
+                "OR",
+                [
+                    RETURN_OF_THE_KING,
+                    WAY_OF_KINGS,
+                    CLASH_OF_KINGS,
+                    FELLOWSHIP_OF_THE_RING,
+                    TWO_TOWERS,
+                ],
+            ),
+        ],
+    )
+    def test_query_builder_query_operator(
+        self, search_client, search_index, query, fields, query_operator, expected_results
+    ):
+        builder = SearchQueryBuilder()
+        builder.simple_query(query, fields, query_operator)
+
+        resp = builder.build()
+
+        assert resp["query"] == {
+            "bool": {
+                "must": [
+                    {
+                        "simple_query_string": {
+                            "query": query,
+                            "fields": fields,
+                            "default_operator": query_operator,
+                        }
+                    }
+                ]
+            }
+        }
+
+        validate_valid_request(search_client, search_index, builder, expected_results)

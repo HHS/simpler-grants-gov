@@ -648,6 +648,53 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
+    put:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: saved_search_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdateSavedSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Update Saved Search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateSavedSearchRequest'
+      security:
+      - ApiJwtAuth: []
     delete:
       parameters:
       - in: path
@@ -1068,40 +1115,6 @@ components:
           - $ref: '#/components/schemas/AgencyPaginationV1'
       required:
       - pagination
-    AgencyContactInfo:
-      type: object
-      properties:
-        contact_name:
-          type: string
-          description: Full name of the agency contact person
-        address_line_1:
-          type: string
-          description: Primary street address of the agency
-        address_line_2:
-          type:
-          - string
-          - 'null'
-          description: Additional address information (suite, unit, etc.)
-        city:
-          type: string
-          description: City where the agency is located
-        state:
-          type: string
-          description: State where the agency is located
-        zip_code:
-          type: string
-          description: Postal code for the agency address
-        phone_number:
-          type: string
-          description: Contact phone number for the agency
-        primary_email:
-          type: string
-          description: Main email address for agency communications
-        secondary_email:
-          type:
-          - string
-          - 'null'
-          description: Alternative email address for agency communications
     AgencyResponse:
       type: object
       properties:
@@ -1111,35 +1124,11 @@ components:
           type: string
         agency_code:
           type: string
-        sub_agency_code:
-          type:
-          - string
-          - 'null'
-        assistance_listing_number:
-          type: string
-        agency_submission_notification_setting:
-          type: string
         top_level_agency:
           type:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyResponse'
-        agency_contact_info:
-          type:
-          - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/AgencyContactInfo'
-          - type: 'null'
-        agency_download_file_types:
-          type: array
-          description: List of download file types supported by the agency
-          items:
-            enum:
-            - xml
-            - pdf
-            type:
-            - string
         created_at:
           type: string
           format: date-time
@@ -1571,6 +1560,14 @@ components:
           maxLength: 100
           description: Query string which searches against several text fields
           example: research
+        query_operator:
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
         filters:
           type:
           - object
@@ -2375,6 +2372,28 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserUpdateSavedSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the saved search
+          example: Example search
+      required:
+      - name
+    UserUpdateSavedSearchResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserDeleteSavedSearchResponse:
       type: object
       properties:
@@ -2410,4 +2429,3 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-
