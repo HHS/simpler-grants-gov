@@ -1,5 +1,6 @@
 "use client";
 
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -84,6 +85,8 @@ export const OpportunitySaveUserControl = () => {
       ? t("save_message.error_save")
       : t("save_message.unsave");
 
+  const { checkFeatureFlag } = useFeatureFlags();
+  if (!checkFeatureFlag("authOn")) return null;
   return (
     <>
       {user?.token ? (
