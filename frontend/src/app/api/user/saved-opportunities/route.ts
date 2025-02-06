@@ -1,3 +1,4 @@
+import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
@@ -25,24 +26,22 @@ const handleRequest = async (request: Request, type: "DELETE" | "POST") => {
       session.user_id as string,
       Number(opportunity_id),
     );
-    if (!response || response.status_code !== 200) {
-      throw new Error(`Error ${action} saved opportunity: ${response.message}`);
+    const res = (await response.json()) as {
+      status_code: number;
+      message: string;
+    };
+    if (!res || res.status_code !== 200) {
+      throw new Error(`Error ${action} saved opportunity: ${res.message}`);
     }
     return Response.json({
       type: action,
       message: `${action} saved opportunity success`,
     });
   } catch (e) {
-    const { message, cause } = e as Error;
-    const status = cause
-      ? Object.assign(
-          { status: 500 },
-          JSON.parse(cause as string) as { status: number },
-        ).status
-      : 500;
+    const { status, message } = readError(e as Error, 500);
     return Response.json(
       {
-        message: `Error attempting to ${action} saved opportunity: ${(cause as string) ?? message}`,
+        message: `Error attempting to ${action} saved opportunity: ${message}`,
       },
       { status },
     );

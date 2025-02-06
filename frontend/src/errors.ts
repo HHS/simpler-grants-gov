@@ -53,13 +53,13 @@ export class BaseFrontendError extends Error {
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
 
-    const cause = JSON.stringify({
+    const cause = {
       type,
       searchInputs: serializedSearchInputs,
       message: message || "Unknown Error",
       status,
       details: additionalDetails,
-    });
+    };
 
     super(message || "Unknown Error", { cause });
 
@@ -188,3 +188,17 @@ function convertSearchInputSetsToArrays(
     page: searchInputs.page,
   };
 }
+
+// Helper function to read error details
+export const readError = (e: Error, defaultStatus: number) => {
+  const { message, cause } = e;
+  const status =
+    cause && typeof cause === "object" && "status" in cause
+      ? cause.status
+      : defaultStatus;
+
+  return {
+    status: Number(status),
+    message: cause ? JSON.stringify(cause) : message,
+  };
+};

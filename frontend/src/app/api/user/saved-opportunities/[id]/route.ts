@@ -1,3 +1,4 @@
+import { readError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
@@ -27,16 +28,10 @@ export async function GET(
       },
     });
   } catch (e) {
-    const { message, cause } = e as Error;
-    const status = cause
-      ? Object.assign(
-          { status: 500 },
-          JSON.parse(cause as string) as { status: number },
-        ).status
-      : 500;
+    const { status, message } = readError(e as Error, 500);
     return Response.json(
       {
-        message: `Error fetching saved opportunity: ${(cause as string) ?? message}`,
+        message: `Error fetching saved opportunity: ${message}`,
       },
       { status },
     );

@@ -12,7 +12,9 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
-const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
+const mockPostSavedOpp = jest.fn((params: unknown): unknown =>
+  Promise.resolve({ json: () => Promise.resolve(params) }),
+);
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   handleSavedOpportunity: () => mockPostSavedOpp({ status_code: 200 }),

@@ -40,7 +40,8 @@ export const getSavedOpportunity = async (
     subPath,
     additionalHeaders: ssgToken,
   });
-  const savedOpportunities = resp.data as [];
+  const json = (await resp.json()) as { data: [] };
+  const savedOpportunities = json.data;
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: number }) =>
       savedOpportunity.opportunity_id === opportunity_id,

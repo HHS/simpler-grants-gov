@@ -19,7 +19,7 @@ describe("BadRequestError (as an example of other error types)", () => {
       searchInputs: dummySearchInputs,
     });
     const { cause } = error as Error;
-    const errorData = JSON.parse(cause as string) as ParsedError;
+    const errorData = cause as ParsedError;
 
     expect(errorData.type).toEqual("BadRequestError");
     expect(errorData.status).toEqual(400);
@@ -30,18 +30,14 @@ describe("BadRequestError (as an example of other error types)", () => {
 
   it("handles non-Error inputs correctly", () => {
     const error = new BadRequestError("Some string error");
-    const { cause } = error as Error;
-    const errorData = JSON.parse(cause as string) as ParsedError;
-
-    expect(errorData.message).toEqual("Some string error");
+    const { message } = error as Error;
+    expect(message).toEqual("Some string error");
   });
 
   it("sets a default message when error is not an instance of Error", () => {
     const error = new BadRequestError("");
-    const { cause } = error as Error;
-    const errorData = JSON.parse(cause as string) as ParsedError;
-
-    expect(errorData.message).toEqual("Unknown Error");
+    const { message } = error as Error;
+    expect(message).toEqual("Unknown Error");
   });
 
   it("passes along additional error details", () => {
@@ -51,7 +47,7 @@ describe("BadRequestError (as an example of other error types)", () => {
       type: "a subtype",
     });
     const { cause } = error as Error;
-    const errorData = JSON.parse(cause as string) as ParsedError;
+    const errorData = cause as ParsedError;
 
     expect(errorData.details?.field).toEqual("fieldName");
     expect(errorData.details?.message).toEqual("a more detailed message");

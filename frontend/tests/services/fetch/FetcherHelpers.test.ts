@@ -72,18 +72,16 @@ describe("throwError", () => {
       );
     });
     expect(expectedError).toBeInstanceOf(UnauthorizedError);
-    expect(expectedError.cause).toEqual(
-      JSON.stringify({
-        type: "UnauthorizedError",
-        searchInputs: {},
-        message: "response message",
-        status: 401,
-        details: {
-          field: "fieldName",
-          type: "a subtype",
-          message: "a detailed message",
-        },
-      }),
-    );
+    expect(expectedError.cause).toEqual({
+      details: {
+        field: "fieldName",
+        message: "a detailed message",
+        type: "a subtype",
+      },
+      message: "response message",
+      searchInputs: {},
+      status: 401,
+      type: "UnauthorizedError",
+    });
   });
 });
