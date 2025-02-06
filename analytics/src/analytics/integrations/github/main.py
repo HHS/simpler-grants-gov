@@ -1,5 +1,6 @@
 """Integrate with GitHub to read and write data from projects and repos."""
 
+import json
 import shlex
 import subprocess
 from pathlib import Path
@@ -17,15 +18,47 @@ def pipe_command_output_to_file(command: str, output_file: str) -> None:
         subprocess.call(shlex.split(command), stdout=f)  # noqa: S603
 
 
-def export_sprint_data(
+def export_sprint_data_to_object(
+    owner: str,
+    project: int,
+    sprint_field: str,
+    points_field: str,
+) -> list[dict]:
+    """Export the issue and project data from a Sprint Board."""
+    # get the subprocess command
+    command = get_sprint_export_command(owner, project, sprint_field, points_field)
+
+    # invoke the subprocess command and capture the output
+    result = subprocess.run(command, capture_output=True, text=True, check=True) # noqa: S603
+
+    # convert the output to a JSON object
+    return json.loads(result.stdout)
+
+
+def export_sprint_data_to_file(
     owner: str,
     project: int,
     sprint_field: str,
     points_field: str,
     output_file: str,
 ) -> None:
+    """Export the issue and project data from a Sprint Board."""
+    # get the subprocess command
+    command = get_sprint_export_command(owner, project, sprint_field, points_field)
+
+    # invoke the command via a subprocess and write the output to a file
+    with open(output_file, "w", encoding="utf-8") as f:
+        subprocess.call(command, stdout=f)  # noqa: S603
+
+
+def get_sprint_export_command(
+    owner: str,
+    project: int,
+    sprint_field: str,
+    points_field: str,
+) -> list[str]:
     """
-    Export the issue and project data from a Sprint Board.
+    Generate the command for exporting issue and project data from a Sprint Board.
 
     TODO(widal001): 2024-10-25 - Replace this with a direct call to the GraphQL API
     https://github.com/HHS/simpler-grants-gov/issues/2590
@@ -73,7 +106,6 @@ def export_sprint_data(
 ]
 """
     # Make the command
-    # fmt: off
     command: list[str] = [
         str(script),
         "--batch", "100",
@@ -85,21 +117,51 @@ def export_sprint_data(
         "--paginate-jq", "'.data.organization.projectV2.items.nodes'",
         "--transform-jq", jq,
     ]
-    # fmt: on
-    # invoke the command via a subprocess and write the output to a file
-    with open(output_file, "w", encoding="utf-8") as f:
-        subprocess.call(command, stdout=f)  # noqa: S603
+
+    return command
 
 
-def export_roadmap_data(
+def export_roadmap_data_to_object(
+    owner: str,
+    project: int,
+    quad_field: str,
+    pillar_field: str,
+) -> list[dict]:
+    """Export deliverable and epic data from GitHub."""
+    # get subprocess command
+    command = get_roadmap_export_command(owner, project, quad_field, pillar_field)
+
+    # invoke the subprocess command and capture the output
+    result = subprocess.run(command, capture_output=True, text=True, check=True) # noqa: S603
+
+    # convert the output to a JSON object
+    return json.loads(result.stdout)
+
+
+def export_roadmap_data_to_file(
     owner: str,
     project: int,
     quad_field: str,
     pillar_field: str,
     output_file: str,
 ) -> None:
+    """Export deliverable and epic data from GitHub."""
+    # get subprocess command
+    command = get_roadmap_export_command(owner, project, quad_field, pillar_field)
+
+    # invoke the command via a subprocess and write the output to a file
+    with open(output_file, "w", encoding="utf-8") as f:
+        subprocess.call(command, stdout=f)  # noqa: S603
+
+
+def get_roadmap_export_command(
+    owner: str,
+    project: int,
+    quad_field: str,
+    pillar_field: str,
+) -> list[str]:
     """
-    Export the issue and project data from a Sprint Board.
+    Generate the command for exporting deliverable and epic data from GitHub.
 
     TODO(widal001): 2024-10-25 - Replace this with a direct call to the GraphQL API
     https://github.com/HHS/simpler-grants-gov/issues/2590
@@ -146,7 +208,6 @@ def export_roadmap_data(
 ]
 """
     # Make the command
-    # fmt: off
     command: list[str] = [
         str(script),
         "--batch", "100",
@@ -158,7 +219,5 @@ def export_roadmap_data(
         "--paginate-jq", "'.data.organization.projectV2.items.nodes'",
         "--transform-jq", jq,
     ]
-    # fmt: on
-    # invoke the command via a subprocess and write the output to a file
-    with open(output_file, "w", encoding="utf-8") as f:
-        subprocess.call(command, stdout=f)  # noqa: S603
+
+    return command

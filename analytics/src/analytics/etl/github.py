@@ -107,7 +107,7 @@ class GitHubProjectETL:
         """Run the ETL pipeline."""
         self.extract()
         self.transform()
-        self.load()
+        self.write_to_file()
 
     def extract(self) -> None:
         """Run the extract step of the ETL pipeline."""
@@ -116,19 +116,26 @@ class GitHubProjectETL:
         # Export the roadmap data
         roadmap_file = str(temp_dir / "roadmap-data.json")
         roadmap = self.config.roadmap_project
-        self._export_roadmap_data(
-            roadmap=roadmap,
+        logger.info("Exporting roadmap data from project %d", roadmap.project_number)
+        github.export_roadmap_data_to_file(
+            owner=roadmap.owner,
+            project=roadmap.project_number,
+            quad_field=roadmap.quad_field,
+            pillar_field=roadmap.pillar_field,
             output_file=roadmap_file,
         )
 
         # Export sprint data
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
-            project = sprint_board.project_number
-            sprint_file = str(temp_dir / f"sprint-data-{project}.json")
-            # Export data
-            self._export_sprint_data(
-                sprint_board=sprint_board,
+            n = sprint_board.project_number
+            sprint_file = str(temp_dir / f"sprint-data-{n}.json")
+            logger.info("Exporting sprint data for project %d", n)
+            github.export_sprint_data_to_file(
+                owner=sprint_board.owner,
+                project=sprint_board.project_number,
+                sprint_field=sprint_board.sprint_field,
+                points_field=sprint_board.points_field,
                 output_file=sprint_file,
             )
             # Add to file list
@@ -142,56 +149,52 @@ class GitHubProjectETL:
         self._transient_files = input_files
 
     def transform(self) -> None:
-        """Run the transformation step of the ETL pipeline."""
+        """Transform exported data and write to file."""
         # Load sprint and roadmap data
         issues = []
         for f in self._transient_files:
             issues.extend(run_transformation_pipeline(files=f))
         self.dataset = GitHubIssues(pd.DataFrame(data=issues))
 
-    def load(self) -> None:
-        """Run the load step of the ETL pipeline."""
+    def write_to_file(self) -> None:
+        """Dump dataset to file."""
         self.dataset.to_json(self.config.output_file)
 
-    def _export_roadmap_data(
-        self,
-        roadmap: RoadmapConfig,
-        output_file: str,
-    ) -> None:
-        """Export data from the roadmap project."""
-        # Log the export step
-        logger.info(
-            "Exporting roadmap data from %s/%d",
-            roadmap.owner,
-            roadmap.project_number,
-        )
-        # Export the data
-        github.export_roadmap_data(
+    def extract_and_transform_in_memory(self) -> list[dict]:
+        """Export from GitHub and transform to JSON."""
+
+        # export roadmap data
+        roadmap = self.config.roadmap_project
+        roadmap_json = github.export_roadmap_data_to_object(
             owner=roadmap.owner,
             project=roadmap.project_number,
             quad_field=roadmap.quad_field,
             pillar_field=roadmap.pillar_field,
-            output_file=output_file,
         )
 
-    def _export_sprint_data(
-        self,
-        sprint_board: SprintBoardConfig,
-        output_file: str,
-    ) -> None:
-        """Export data from a sprint board project."""
-        logger.info(
-            "Exporting sprint data from %s/%s",
-            sprint_board.owner,
-            sprint_board.project_number,
-        )
-        github.export_sprint_data(
-            owner=sprint_board.owner,
-            project=sprint_board.project_number,
-            sprint_field=sprint_board.sprint_field,
-            points_field=sprint_board.points_field,
-            output_file=output_file,
-        )
+        # export sprint data
+        issues = []
+        for sprint_board in self.config.sprint_projects:
+            sprint_json = github.export_sprint_data_to_object(
+                owner=sprint_board.owner,
+                project=sprint_board.project_number,
+                sprint_field=sprint_board.sprint_field,
+                points_field=sprint_board.points_field,
+            )
+
+            # flatten sprint and roadmap data into issue data
+            issues.extend(
+                run_transformation_pipeline_on_json(
+                    roadmap=roadmap_json,
+                    sprint=sprint_json,
+                ),
+            )
+
+        # hydrate issue dataset
+        dataset = GitHubIssues(pd.DataFrame(data=issues))
+
+        # dump issue dataset to JSON
+        return dataset.to_dict()
 
 
 # ===============================================================
@@ -208,6 +211,16 @@ def run_transformation_pipeline(files: InputFiles) -> list[dict]:
     lookup: dict = {}
     lookup = populate_issue_lookup_table(lookup, roadmap_data_in)
     lookup = populate_issue_lookup_table(lookup, sprint_data_in)
+    # Flatten and write issue level data to output file
+    return flatten_issue_data(lookup)
+
+
+def run_transformation_pipeline_on_json(roadmap: list[dict], sprint: list[dict]) -> list[dict]:
+    """Apply transformations."""
+    # Populate a lookup table with this data
+    lookup: dict = {}
+    lookup = populate_issue_lookup_table(lookup, roadmap)
+    lookup = populate_issue_lookup_table(lookup, sprint)
     # Flatten and write issue level data to output file
     return flatten_issue_data(lookup)
 
