@@ -35,6 +35,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   return (
     <div className="display-flex flex-align-start">
       <button
+        data-testId="simpler-save-button"
         className={clsx("simpler-save-button usa-button usa-button--outline", {
           "simpler-save-button--saved": saved,
           "simpler-save-button--loading": loading,
@@ -54,6 +55,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
       </button>
       {message && (
         <div
+          data-testid="simpler-save-button-alert"
           className={clsx(
             `usa-alert usa-alert--${type} usa-alert--slim margin-left-1 margin-y-0`,
             {
@@ -71,7 +73,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
           >
             <div
               className={clsx(
-                "usa-alert__heading  margin-bottom-0 margin-top-05 font-weight-100",
+                "usa-alert__heading margin-bottom-0 margin-top-05 font-weight-100",
                 {
                   "margin-left-2 font-sans-xs": !error,
                   "margin-left-5 font-sans-sm": error,
@@ -81,6 +83,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
               {messageText}
             </div>
             <button
+              data-testid="simpler-save-button-message"
               type="button"
               className="usa-button usa-button--unstyled font-sans-lg text-black margin-left-2"
               onClick={messageClick}
