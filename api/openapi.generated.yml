@@ -1561,6 +1561,8 @@ components:
           description: Query string which searches against several text fields
           example: research
         query_operator:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
+          - AND
           description: Query operator for combining search conditions
           example: OR
           enum:
@@ -2429,3 +2431,4 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+
