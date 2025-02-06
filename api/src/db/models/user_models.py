@@ -14,6 +14,28 @@ from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
 
+class LinkExternalUser(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "link_external_user"
+
+    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+
+    external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
+
+    external_user_type: Mapped[ExternalUserType] = mapped_column(
+        "external_user_type_id",
+        LookupColumn(LkExternalUserType),
+        ForeignKey(LkExternalUserType.external_user_type_id),
+        index=True,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("User.user_id"), index=True)
+    user: Mapped["User"] = relationship(
+        "User", primaryjoin="LinkExternalUser.user_id==foreign(User.user_id)"
+    )
+
+    email: Mapped[str]
+
+
 class User(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user"
 
@@ -30,25 +52,18 @@ class User(ApiSchemaTable, TimestampMixin):
         "UserSavedSearch", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
-
-class LinkExternalUser(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "link_external_user"
-
-    link_external_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-
-    external_user_id: Mapped[str] = mapped_column(index=True, unique=True)
-
-    external_user_type: Mapped[ExternalUserType] = mapped_column(
-        "external_user_type_id",
-        LookupColumn(LkExternalUserType),
-        ForeignKey(LkExternalUserType.external_user_type_id),
-        index=True,
+    linked_external_user: Mapped[LinkExternalUser | None] = relationship(
+        "LinkExternalUser",
+        primaryjoin="LinkExternalUser.user_id==foreign(User.user_id)",
+        uselist=False,
+        overlaps="user",
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
-    user: Mapped[User] = relationship(User)
-
-    email: Mapped[str]
+    @property
+    def email(self) -> str | None:
+        if self.linked_external_user is not None:
+            return self.linked_external_user.email
+        return None
 
 
 class UserTokenSession(ApiSchemaTable, TimestampMixin):

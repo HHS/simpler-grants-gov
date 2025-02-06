@@ -14,7 +14,7 @@ import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.opportunity_models import OpportunityChangeAudit
 from src.db.models.user_models import (
-    LinkExternalUser,
+    User,
     UserNotificationLog,
     UserSavedOpportunity,
     UserSavedSearch,
@@ -173,9 +173,9 @@ class NotificationTask(Task):
             if not container.saved_opportunities and not container.saved_searches:
                 continue
 
-            # Get user email from LinkExternalUser using select pattern
-            stmt = select(LinkExternalUser).where(LinkExternalUser.user_id == user_id)
-            user = self.db_session.execute(stmt).scalar_one_or_none()
+            user = self.db_session.execute(
+                select(User).where(User.user_id == user_id)
+            ).scalar_one_or_none()
 
             if not user or not user.email:
                 logger.warning("No email found for user", extra={"user_id": user_id})
@@ -187,14 +187,6 @@ class NotificationTask(Task):
                 f"You have updates to {len(container.saved_opportunities)} saved opportunities"
             )
 
-            send_pinpoint_email_raw(
-                to_address=user.email,
-                subject=subject,
-                message=message,
-                pinpoint_client=self.pinpoint_client,
-                app_id=self.config.app_id,
-            )
-
             logger.info(
                 "Sending notification to user",
                 extra={
@@ -204,21 +196,48 @@ class NotificationTask(Task):
                 },
             )
 
-            # Create notification log entry
             notification_log = UserNotificationLog(
                 user_id=user_id,
                 notification_reason=NotificationConstants.OPPORTUNITY_UPDATES,
-                notification_sent=True,
+                notification_sent=False,  # Default to False, update on success
             )
             self.db_session.add(notification_log)
 
+            try:
+                send_pinpoint_email_raw(
+                    to_address=user.email,
+                    subject=subject,
+                    message=message,
+                    pinpoint_client=self.pinpoint_client,
+                    app_id=self.config.app_id,
+                )
+                notification_log.notification_sent = True
+                logger.info(
+                    "Successfully sent notification to user",
+                    extra={
+                        "user_id": user_id,
+                        "opportunity_count": len(container.saved_opportunities),
+                        "search_count": len(container.saved_searches),
+                    },
+                )
+            except Exception:
+                # Notification log will be updated in the finally block
+                logger.exception(
+                    "Failed to send notification email",
+                    extra={"user_id": user_id, "email": user.email},
+                )
+
+            self.db_session.add(notification_log)
+
             if container.saved_searches:
-                notification_log = UserNotificationLog(
+                search_notification_log = UserNotificationLog(
                     user_id=user_id,
                     notification_reason=NotificationConstants.SEARCH_UPDATES,
-                    notification_sent=True,
+                    notification_sent=False,  # Default to False, update if email was successful
                 )
-                self.db_session.add(notification_log)
+                self.db_session.add(search_notification_log)
+                if notification_log.notification_sent:
+                    search_notification_log.notification_sent = True
 
             # Update last_notified_at for all opportunities we just notified about
             opportunity_ids = [
