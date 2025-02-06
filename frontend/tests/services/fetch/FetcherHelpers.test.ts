@@ -72,7 +72,7 @@ describe("throwError", () => {
       );
     });
     expect(expectedError).toBeInstanceOf(UnauthorizedError);
-    expect(expectedError.message).toEqual(
+    expect(expectedError.cause).toEqual(
       JSON.stringify({
         type: "UnauthorizedError",
         searchInputs: {},

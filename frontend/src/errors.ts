@@ -30,14 +30,14 @@ export class NetworkError extends Error {
     const serializedSearchInputs = searchInputs
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
-
-    const serializedData = JSON.stringify({
+    const message = error instanceof Error ? error.message : "Unknown Error";
+    const cause = {
       type: "NetworkError",
       searchInputs: serializedSearchInputs,
-      message: error instanceof Error ? error.message : "Unknown Error",
+      message,
       status: 500,
-    });
-    super(serializedData);
+    };
+    super(message, { cause });
   }
 }
 
@@ -54,7 +54,7 @@ export class BaseFrontendError extends Error {
       ? convertSearchInputSetsToArrays(searchInputs)
       : {};
 
-    const serializedData = JSON.stringify({
+    const cause = JSON.stringify({
       type,
       searchInputs: serializedSearchInputs,
       message: message || "Unknown Error",
@@ -62,7 +62,7 @@ export class BaseFrontendError extends Error {
       details: additionalDetails,
     });
 
-    super(serializedData);
+    super(message || "Unknown Error", { cause });
 
     if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, this.constructor);

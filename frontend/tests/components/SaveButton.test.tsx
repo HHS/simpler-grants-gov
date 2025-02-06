@@ -9,22 +9,20 @@ const SaveButtonProps = {
   loading: false,
   defaultText: "Save",
   savedText: "Saved",
-  loadingText: "Saving",
+  loadingText: "Loading",
   error: false,
   message: false,
   messageText: "You have saved this item",
-}
+};
 
 describe("Footer", () => {
   it("Renders without errors", () => {
     render(<SaveButton {...SaveButtonProps} />);
     const saveButton = screen.getByTestId("simpler-save-button");
     expect(saveButton).toBeInTheDocument();
+    expect(screen.getByText("Saved")).toBeInTheDocument();
     expect(
-      screen.getByText("Saved"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText("You have saved this item")
+      screen.queryByText("You have saved this item"),
     ).not.toBeInTheDocument();
   });
 
@@ -32,35 +30,36 @@ describe("Footer", () => {
     render(<SaveButton {...SaveButtonProps} />);
     const saveButton = screen.getByTestId("simpler-save-button");
     saveButton.click();
-    expect(SaveButtonProps.buttonClick).toHaveBeenCalled();  
+    expect(SaveButtonProps.buttonClick).toHaveBeenCalled();
   });
   it("Message shows and click fires", () => {
-    const SaveButtonPropsWithMessage = Object.assign(SaveButtonProps,{ message: true });
+    const SaveButtonPropsWithMessage = Object.assign(SaveButtonProps, {
+      message: true,
+    });
     render(<SaveButton {...SaveButtonPropsWithMessage} />);
-    expect(
-      screen.getByText("You have saved this item"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("You have saved this item")).toBeInTheDocument();
     const alert = screen.getByTestId("simpler-save-button-alert");
-    expect(alert).toHaveClass('usa-alert--success');
+    expect(alert).toHaveClass("usa-alert--success");
 
     const saveMessageButton = screen.getByTestId("simpler-save-button-message");
     saveMessageButton.click();
-    expect(SaveButtonPropsWithMessage.messageClick).toHaveBeenCalled();  
+    expect(SaveButtonPropsWithMessage.messageClick).toHaveBeenCalled();
   });
   it("Error shows", () => {
-    const SaveButtonPropsWithErrorMessage = Object.assign(SaveButtonProps,{ message: true, error: true });
+    const SaveButtonPropsWithErrorMessage = Object.assign(SaveButtonProps, {
+      message: true,
+      error: true,
+    });
     render(<SaveButton {...SaveButtonPropsWithErrorMessage} />);
     const alert = screen.getByTestId("simpler-save-button-alert");
-    expect(alert).toHaveClass('usa-alert--error');
+    expect(alert).toHaveClass("usa-alert--error");
   });
   it("Loading shows", () => {
-    const SaveButtonPropsLoading = Object.assign(SaveButtonProps,{ loading: true });
+    const SaveButtonPropsLoading = Object.assign(SaveButtonProps, {
+      loading: true,
+    });
     render(<SaveButton {...SaveButtonPropsLoading} />);
-    expect(
-      screen.queryByText("Saved")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Loading"),
-    ).toBeInTheDocument();
+    expect(screen.queryByText("Saved")).not.toBeInTheDocument();
+    expect(screen.getByText("Loading")).toBeInTheDocument();
   });
 });

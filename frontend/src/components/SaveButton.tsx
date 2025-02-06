@@ -35,7 +35,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   return (
     <div className="display-flex flex-align-start">
       <button
-        data-testId="simpler-save-button"
+        data-testid="simpler-save-button"
         className={clsx("simpler-save-button usa-button usa-button--outline", {
           "simpler-save-button--saved": saved,
           "simpler-save-button--loading": loading,

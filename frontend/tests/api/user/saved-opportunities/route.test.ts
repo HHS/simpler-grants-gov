@@ -15,21 +15,22 @@ jest.mock("src/services/auth/session", () => ({
 const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  handleSavedOpportunity: () =>
-    mockPostSavedOpp({ status_code: 200 }),
+  handleSavedOpportunity: () => mockPostSavedOpp({ status_code: 200 }),
 }));
 
 const fakeRequestForSavedOpps = () => {
   return {
     headers: {
-      get: jest.fn(() => {return {
-        "opportunity_id": 1
-      }}),
+      get: jest.fn(() => {
+        return {
+          opportunity_id: 1,
+        };
+      }),
     },
   } as unknown as NextRequest;
 };
 
-describe("POST request", () => {
+describe("POST and DELETE request", () => {
   afterEach(() => jest.clearAllMocks());
   it("saves saved opportunity", async () => {
     getSessionMock.mockImplementation(() => ({
@@ -38,7 +39,7 @@ describe("POST request", () => {
 
     const response = await POST(fakeRequestForSavedOpps());
 
-    const json = await response.json() as {'message': string};
+    const json = (await response.json()) as { message: string };
     expect(response.status).toBe(200);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
 
@@ -53,7 +54,7 @@ describe("POST request", () => {
 
     const response = await DELETE(fakeRequestForSavedOpps());
 
-    const json = await response.json() as {'message': string};
+    const json = (await response.json()) as { message: string };
     expect(response.status).toBe(200);
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
 

@@ -1,4 +1,3 @@
-import { ApiResponseError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
@@ -34,13 +33,18 @@ const handleRequest = async (request: Request, type: "DELETE" | "POST") => {
       message: `${action} saved opportunity success`,
     });
   } catch (e) {
-    const error = e as Error;
-    const apiError = JSON.parse(error.message) as ApiResponseError;
+    const { message, cause } = e as Error;
+    const status = cause
+      ? Object.assign(
+          { status: 500 },
+          JSON.parse(cause as string) as { status: number },
+        ).status
+      : 500;
     return Response.json(
       {
-        message: `Error attempting to ${action} saved opportunity: ${apiError.message}`,
+        message: `Error attempting to ${action} saved opportunity: ${(cause as string) ?? message}`,
       },
-      { status: apiError.status },
+      { status },
     );
   }
 };
