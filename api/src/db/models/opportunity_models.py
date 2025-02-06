@@ -1,7 +1,8 @@
-from datetime import date
+import uuid
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -459,3 +460,25 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+class HistoryMixin:
+
+    version_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+
+    is_deleted: Mapped[bool]
+
+    start: Mapped[datetime] # updated_at
+    end: Mapped[datetime]
+
+class ParentBaseMixin:
+
+    parent_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    opportunity_number: Mapped[str | None]
+    opportunity_title: Mapped[str | None] = mapped_column(index=True)
+
+class ParentHistory(ApiSchemaTable, ParentBaseMixin, TimestampMixin, HistoryMixin):
+    __tablename__ = "parent_history"
+
+class Parent(ApiSchemaTable, ParentBaseMixin, TimestampMixin):
+    __tablename__ = "parent"
