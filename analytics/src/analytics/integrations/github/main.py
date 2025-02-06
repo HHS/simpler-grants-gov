@@ -85,7 +85,7 @@ def export_sprint_data_to_file(
 ) -> None:
     """Export the issue and project data from a Sprint Board."""
 
-    transformed_data = self.export_sprint_data_to_object(
+    transformed_data = export_sprint_data_to_object(
         client=client,
         owner=owner,
         project=project,
@@ -191,5 +191,3 @@ def export_roadmap_data_to_object(
 
     # Transform data
     return transform_project_data(data, owner, project)
-
-

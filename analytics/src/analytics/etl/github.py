@@ -119,8 +119,13 @@ class GitHubProjectETL:
         roadmap = self.config.roadmap_project
         self._export_roadmap_data_to_file(
             roadmap=roadmap,
+<<<<<<< HEAD
             output_file_path=roadmap_file_path,
+=======
+            output_file_path=roadmap_file_path
+>>>>>>> f7d9164f (resolve merge conflicts)
         )
+
 
         # Export sprint data for each GitHub project that the scrum teams use
         # to manage their sprints, e.g. HHS/17 and HHS/13
@@ -128,6 +133,10 @@ class GitHubProjectETL:
         for sprint_board in self.config.sprint_projects:
             n = sprint_board.project_number
             sprint_file_path = str(temp_dir / f"sprint-data-{n}.json")
+<<<<<<< HEAD
+=======
+            logger.info("Exporting sprint data for project %d", n)
+>>>>>>> f7d9164f (resolve merge conflicts)
             self._export_sprint_data_to_file(
                 sprint_board=sprint_board,
                 output_file_path=sprint_file_path,
@@ -162,7 +171,11 @@ class GitHubProjectETL:
 
         logger.info("Exporting roadmap data from project %d", roadmap.project_number)
         github.export_roadmap_data_to_file(
+<<<<<<< HEAD
             client-self.client,
+=======
+            client=self.client,
+>>>>>>> f7d9164f (resolve merge conflicts)
             owner=roadmap.owner,
             project=roadmap.project_number,
             quad_field=roadmap.quad_field,
@@ -178,12 +191,17 @@ class GitHubProjectETL:
 
         logger.info("Exporting sprint data for project %d", sprint_board.project_number)
         github.export_sprint_data_to_file(
+<<<<<<< HEAD
             client-self.client,
+=======
+            client=self.client,
+>>>>>>> f7d9164f (resolve merge conflicts)
             owner=sprint_board.owner,
             project=sprint_board.project_number,
             sprint_field=sprint_board.sprint_field,
             points_field=sprint_board.points_field,
             output_file=output_file_path,
+<<<<<<< HEAD
        )
 
     def extract_and_transform_in_memory(self) -> list[dict]:
@@ -198,10 +216,31 @@ class GitHubProjectETL:
             pillar_field=roadmap.pillar_field,
         )
 
+=======
+        )
+
+    def extract_and_transform_in_memory(self) -> list[dict]:
+        """Export from GitHub and transform to JSON."""
+
+        # export roadmap data
+        roadmap = self.config.roadmap_project
+        roadmap_json = github.export_roadmap_data_to_object(
+            client=self.client,
+            owner=roadmap.owner,
+            project=roadmap.project_number,
+            quad_field=roadmap.quad_field,
+            pillar_field=roadmap.pillar_field,
+        )
+
+>>>>>>> f7d9164f (resolve merge conflicts)
         # export sprint data
         issues = []
         for sprint_board in self.config.sprint_projects:
             sprint_json = github.export_sprint_data_to_object(
+<<<<<<< HEAD
+=======
+                client=self.client,
+>>>>>>> f7d9164f (resolve merge conflicts)
                 owner=sprint_board.owner,
                 project=sprint_board.project_number,
                 sprint_field=sprint_board.sprint_field,
