@@ -91,10 +91,6 @@ export default function SearchError({ error, reset }: ErrorProps) {
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
 
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   // note that the validation error will contain untranslated strings
   const ErrorAlert =
     parsedErrorData.details && parsedErrorData.type === "ValidationError" ? (

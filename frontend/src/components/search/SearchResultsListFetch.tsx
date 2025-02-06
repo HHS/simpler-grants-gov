@@ -4,6 +4,7 @@ import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 
+import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
@@ -15,9 +16,21 @@ export default async function SearchResultsListFetch({
   searchResultsPromise,
 }: ServerPageProps) {
   const searchResults = await searchResultsPromise;
-
-  const maxPaginationError = null;
   const t = await getTranslations("Search");
+
+  if (
+    !searchResults.data.length &&
+    searchResults.pagination_info.total_pages > 0 &&
+    searchResults.pagination_info.page_offset >
+      searchResults.pagination_info.total_pages
+  ) {
+    return (
+      <ClientSideUrlUpdater
+        param={"page"}
+        value={searchResults.pagination_info.total_pages.toString()}
+      />
+    );
+  }
 
   if (searchResults.status_code !== 200) {
     return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
@@ -26,9 +39,9 @@ export default async function SearchResultsListFetch({
   if (searchResults.data.length === 0) {
     return (
       <div>
-        <h2>{t("resultsListFetch.title")}</h2>
+        <h2>{t("resultsListFetch.noResultsTitle")}</h2>
         <ul>
-          {t.rich("resultsListFetch.body", {
+          {t.rich("resultsListFetch.noResultsBody", {
             li: (chunks) => <li>{chunks}</li>,
           })}
         </ul>
@@ -38,8 +51,6 @@ export default async function SearchResultsListFetch({
 
   return (
     <ul className="usa-list--unstyled">
-      {/* TODO #1485: show proper USWDS error  */}
-      {maxPaginationError && <h4>{t("resultsListFetch.paginationError")}</h4>}
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem opportunity={opportunity} />
