@@ -9,7 +9,6 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
     JobStatus,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -25,12 +24,8 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig(
-    [
-        LookupStr(OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY, 1),
-        LookupStr(OpportunityAttachmentType.OTHER, 2),
-    ]
-)
+# TODO: Remove this once we've removed the opportunity attachment type from the database
+OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig([])
 
 OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     [

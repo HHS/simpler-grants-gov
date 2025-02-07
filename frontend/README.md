@@ -30,8 +30,6 @@
 
 ### Running the app locally
 
-Before running the server, duplicate the `/frontend/env.development` file and name the copy `/frontend/.env.local`, in order to avoid checking in any sensitive data to Github.
-
 From the `/frontend` directory:
 
 1. Install dependencies
@@ -41,6 +39,10 @@ From the `/frontend` directory:
 1. Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
    ```bash
    npx next telemetry disable
+   ```
+1. Create local environment file
+   ```bash
+   cp .env.development .env.local
    ```
 1. Run the local development server
    ```bash

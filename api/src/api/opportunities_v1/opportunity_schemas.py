@@ -16,7 +16,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -27,6 +26,11 @@ from src.services.opportunities_v1.experimental_constant import ScoringRule
 class SearchResponseFormat(StrEnum):
     JSON = "json"
     CSV = "csv"
+
+
+class SearchQueryOperator(StrEnum):
+    AND = "AND"
+    OR = "OR"
 
 
 class OpportunitySummaryV1Schema(Schema):
@@ -318,13 +322,6 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
             "example": "The full announcement NOFO",
         }
     )
-    opportunity_attachment_type = fields.Enum(
-        OpportunityAttachmentType,
-        metadata={
-            "description": "The type of attachment",
-            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
-        },
-    )
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
@@ -469,6 +466,14 @@ class OpportunitySearchRequestV1Schema(Schema):
             "example": "research",
         },
         validate=[validators.Length(min=1, max=100)],
+    )
+    query_operator = fields.Enum(
+        SearchQueryOperator,
+        laud_default=SearchQueryOperator.AND,
+        metadata={
+            "description": "Query operator for combining search conditions",
+            "example": "OR",
+        },
     )
 
     filters = fields.Nested(OpportunitySearchFilterV1Schema())

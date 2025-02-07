@@ -14,7 +14,7 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-Run `make init && make run logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
+Run `make init && make run-logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
 This stands up the following services:
 
