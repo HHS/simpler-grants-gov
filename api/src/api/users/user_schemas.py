@@ -146,3 +146,14 @@ class UserGetSavedSearchesResponseSchema(Schema):
 
 class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserUpdateSavedSearchRequestSchema(Schema):
+    name = fields.String(
+        required=True,
+        metadata={"description": "Name of the saved search", "example": "Example search"},
+    )
+
+
+class UserUpdateSavedSearchResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

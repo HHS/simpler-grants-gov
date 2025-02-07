@@ -1,13 +1,20 @@
 import { useTranslations } from "next-intl";
+import { ReactNode } from "react";
 import { GridContainer, Alert as USWDSAlert } from "@trussworks/react-uswds";
 
-type Props = {
+type BetaAlertProps = {
   containerClasses?: string;
+  heading?: string;
+  alertMessage?: string | ReactNode;
 };
 
-const BetaAlert = ({ containerClasses }: Props) => {
+const BetaAlert = ({
+  containerClasses,
+  heading,
+  alertMessage,
+}: BetaAlertProps) => {
   const t = useTranslations("Beta_alert");
-  const alert = t.rich("alert", {
+  const defaultAlertMessage = t.rich("alert", {
     LinkToGrants: (content) => <a href="https://www.grants.gov">{content}</a>,
   });
 
@@ -17,10 +24,10 @@ const BetaAlert = ({ containerClasses }: Props) => {
         <USWDSAlert
           type="warning"
           headingLevel="h2"
-          heading={t("alert_title")}
+          heading={heading || t("alert_title")}
           noIcon
         >
-          {alert}
+          {alertMessage || defaultAlertMessage}
         </USWDSAlert>
       </GridContainer>
     </div>
