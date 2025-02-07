@@ -30,7 +30,7 @@ class User(ApiSchemaTable, TimestampMixin):
         "UserSavedSearch", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
-    linked_external_user: Mapped["LinkExternalUser | None"] = relationship(
+    linked_login_gov_external_user: Mapped["LinkExternalUser | None"] = relationship(
         "LinkExternalUser",
         primaryjoin=lambda: and_(
             LinkExternalUser.user_id == User.user_id,
@@ -42,8 +42,8 @@ class User(ApiSchemaTable, TimestampMixin):
 
     @property
     def email(self) -> str | None:
-        if self.linked_external_user is not None:
-            return self.linked_external_user.email
+        if self.linked_login_gov_external_user is not None:
+            return self.linked_login_gov_external_user.email
         return None
 
 
