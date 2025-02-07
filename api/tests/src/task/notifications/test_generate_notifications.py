@@ -22,6 +22,8 @@ def user_with_email(db_session, user, monkeypatch):
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
+
+@pytest.fixture
 def setup_search_data(opportunity_index, opportunity_index_alias, search_client):
     # Load into the search index
     schema = OpportunityV1Schema()
@@ -47,8 +49,7 @@ def test_via_cli(cli_runner, db_session, enable_factory_create, user, user_with_
     assert result.exit_code == 0
 
 
-def 
-(
+def test_search_notifications_cli(
     cli_runner,
     db_session,
     enable_factory_create,
