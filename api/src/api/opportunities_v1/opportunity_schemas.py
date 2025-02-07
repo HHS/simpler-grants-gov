@@ -16,7 +16,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
