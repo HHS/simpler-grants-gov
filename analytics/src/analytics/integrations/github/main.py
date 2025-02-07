@@ -75,7 +75,7 @@ def transform_project_data(
     return transformed_data
 
 
-def export_sprint_data(
+def export_sprint_data_to_file(
     client: GitHubGraphqlClient,
     owner: str,
     project: int,
@@ -84,6 +84,29 @@ def export_sprint_data(
     output_file: str,
 ) -> None:
     """Export the issue and project data from a Sprint Board."""
+
+    transformed_data = export_sprint_data_to_object(
+        client=client,
+        owner=owner,
+        project=project,
+        sprint_field=sprint_field,
+        points_field=points_field,
+    )
+    print("=========> transformed data is of type %s", str(type(transformed_data)))
+
+    # Write output
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(transformed_data, f, indent=2)
+
+def export_sprint_data_to_object(
+    client: GitHubGraphqlClient,
+    owner: str,
+    project: int,
+    sprint_field: str,
+    points_field: str,
+) -> list[dict]:
+    """Export the issue and project data from a Sprint Board."""
+
     # Load query
     query_path = PARENT_DIR / "getSprintData.graphql"
     with open(query_path) as f:
@@ -107,19 +130,15 @@ def export_sprint_data(
     # Transform data
     # And exclude deliverables if they appear on the sprint boards
     # so that we use their status value from the roadmap board instead
-    transformed_data = transform_project_data(
+    return transform_project_data(
         raw_data=data,
         owner=owner,
         project=project,
         excluded_types=("Deliverable",),
     )
 
-    # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
 
-
-def export_roadmap_data(
+def export_roadmap_data_to_file(
     client: GitHubGraphqlClient,
     owner: str,
     project: int,
@@ -127,7 +146,30 @@ def export_roadmap_data(
     pillar_field: str,
     output_file: str,
 ) -> None:
-    """Export the issue and project data from a Roadmap Board."""
+    """Export the epic and deliverable data from GitHub."""
+
+    transformed_data = export_roadmap_data_to_object(
+        client=client,
+        owner=owner,
+        project=project,
+        quad_field=quad_field,
+        pillar_field=pillar_field,
+    )
+
+    # Write output
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(transformed_data, f, indent=2)
+
+
+def export_roadmap_data_to_object(
+    client: GitHubGraphqlClient,
+    owner: str,
+    project: int,
+    quad_field: str,
+    pillar_field: str,
+) -> list[dict]:
+    """Export the epic and deliverable data from GitHub."""
+
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
     with open(query_path) as f:
@@ -149,8 +191,4 @@ def export_roadmap_data(
     )
 
     # Transform data
-    transformed_data = transform_project_data(data, owner, project)
-
-    # Write output
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(transformed_data, f, indent=2)
+    return transform_project_data(data, owner, project)
