@@ -122,7 +122,7 @@ def test_user_get_saved_searches(client, user, user_auth_token, saved_searches):
                 "page_offset": 1,
                 "page_size": 25,
                 "sort_order": [
-                    {"order_by": "name", "sort_direction": "descending"},
+                    {"order_by": "name", "sort_direction": "ascending"},
                     {"order_by": "created_at", "sort_direction": "descending"},
                 ],
             }
@@ -135,17 +135,17 @@ def test_user_get_saved_searches(client, user, user_auth_token, saved_searches):
     data = response.json["data"]
     assert len(data) == 3
 
-    # Verify the searches are returned in descending order by name, then descending order by created_at
+    # Verify the searches are returned in ascending order by name, then descending order by created_at
     assert data[0]["name"] == "Test Search 1"
     assert data[0]["search_query"]["filters"]["funding_instrument"]["one_of"] == ["grant"]
     assert data[1]["name"] == "Test Search 2"
     assert data[1]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
-        "cooperative_agreement"
+        "procurement_contract"
     ]
 
     assert data[2]["name"] == "Test Search 2"
     assert data[2]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
-        "procurement_contract"
+        "cooperative_agreement"
     ]
 
     # Verify UUIDs are properly serialized
