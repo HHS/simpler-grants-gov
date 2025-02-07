@@ -20,6 +20,7 @@ export default async function SearchResultsListFetch({
 
   if (
     !searchResults.data.length &&
+    searchResults.pagination_info.total_pages > 0 &&
     searchResults.pagination_info.page_offset >
       searchResults.pagination_info.total_pages
   ) {
