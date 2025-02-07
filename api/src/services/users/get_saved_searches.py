@@ -2,7 +2,7 @@ from typing import Sequence, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import select, asc, desc
+from sqlalchemy import asc, desc, select
 
 from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
