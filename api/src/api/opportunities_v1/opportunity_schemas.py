@@ -16,7 +16,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -322,13 +321,6 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
             "description": "A description of the attachment",
             "example": "The full announcement NOFO",
         }
-    )
-    opportunity_attachment_type = fields.Enum(
-        OpportunityAttachmentType,
-        metadata={
-            "description": "The type of attachment",
-            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
-        },
     )
 
 
