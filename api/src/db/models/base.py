@@ -122,15 +122,18 @@ class TimestampMixin:
     https://docs.sqlalchemy.org/en/20/orm/declarative_mixins.html#mixing-in-columns
     """
 
+    # TODO - while this works, it might break other things
+    # Consider just adding the start/end timestamps to the base models
+    # instead with this approach
     created_at: Mapped[datetime] = mapped_column(
         nullable=False,
-        default=datetime_util.utcnow,
+        default=sqlnow(),
         server_default=sqlnow(),
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         nullable=False,
-        default=same_as_created_at,
-        onupdate=datetime_util.utcnow,
+        default=sqlnow(),
+        onupdate=sqlnow(),
         server_default=sqlnow(),
     )

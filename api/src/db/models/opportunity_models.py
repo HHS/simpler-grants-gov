@@ -1,10 +1,10 @@
 import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
-
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, UUID
+from sqlalchemy.sql.functions import now as sqlnow
+from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, UUID, event, inspect
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, attributes, make_transient, make_transient_to_detached, Session, object_mapper
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
@@ -468,7 +468,9 @@ class HistoryMixin:
     is_deleted: Mapped[bool]
 
     start: Mapped[datetime] # updated_at
-    end: Mapped[datetime]
+    end: Mapped[datetime] = mapped_column(
+        server_default=sqlnow(),
+    )
 
 class ParentBaseMixin:
 
@@ -477,8 +479,142 @@ class ParentBaseMixin:
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
 
+    my_new_column: Mapped[str | None]
+
 class ParentHistory(ApiSchemaTable, ParentBaseMixin, TimestampMixin, HistoryMixin):
     __tablename__ = "parent_history"
 
 class Parent(ApiSchemaTable, ParentBaseMixin, TimestampMixin):
     __tablename__ = "parent"
+
+    __history_cls__ = ParentHistory
+
+    current_child: Mapped["CurrentChild | None"] = relationship(
+        back_populates="parent", single_parent=True, cascade="all, delete-orphan"
+    )
+
+
+class ChildBaseMixin:
+    child_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    is_forecast: Mapped[bool]
+
+    description: Mapped[str | None]
+
+    # Foreign key is added on derived table(s)
+    parent_id: Mapped[int] = mapped_column(index=True)
+
+class ChildHistory(ApiSchemaTable, ChildBaseMixin, TimestampMixin, HistoryMixin):
+    __tablename__ = "child_history"
+
+
+
+class Child(ApiSchemaTable, ChildBaseMixin, TimestampMixin):
+    __tablename__ = "child"
+    __history_cls__ = ChildHistory
+
+    __table_args__ = (
+        # nulls not distinct makes it so nulls work in the unique constraint
+        UniqueConstraint(
+            "is_forecast", "parent_id"
+        ),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    parent_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Parent.parent_id), index=True
+    )
+    parent: Mapped[Parent] = relationship(Parent)
+
+
+class CurrentChildBaseMixin:
+    # FOREIGN KEY / RELATIONSHIP ADDED ON DERIVED
+    parent_id: Mapped[int] = mapped_column(
+        BigInteger, primary_key=True, index=True
+    )
+
+    # FOREIGN KEY / RELATIONSHIP ADDED ON DERIVED
+    child_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        primary_key=True,
+        index=True,
+    )
+
+    # This is fine to leave a foreign key even in the base as opportunity status is not versioned
+    opportunity_status: Mapped[OpportunityStatus] = mapped_column(
+        "opportunity_status_id",
+        LookupColumn(LkOpportunityStatus),
+        ForeignKey(LkOpportunityStatus.opportunity_status_id),
+        index=True,
+    )
+
+
+class CurrentChildHistory(ApiSchemaTable, CurrentChildBaseMixin, TimestampMixin, HistoryMixin):
+    __tablename__ = "current_child_history"
+
+class CurrentChild(ApiSchemaTable, CurrentChildBaseMixin, TimestampMixin):
+    __tablename__ = "current_child"
+    __history_cls__ = CurrentChildHistory
+
+    parent_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Parent.parent_id), primary_key=True, index=True
+    )
+    parent: Mapped[Parent] = relationship(single_parent=True)
+
+    child_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(Child.child_id),
+        primary_key=True,
+        index=True,
+    )
+    child: Mapped[Child] = relationship(Child)
+
+
+def new_version(obj, db_session, is_deleted: bool = False):
+    history_cls = obj.__history_cls__
+
+    insp_obj = inspect(obj)
+
+    old_values = {}
+    obj_changed = False
+    # TODO - document what this loop is doing
+    for attr in insp_obj.mapper.column_attrs:
+        adds, unchanged, deleted = insp_obj.get_history(attr.key, True)
+
+        if deleted:
+            old_values[attr.key] = deleted[0]
+            obj_changed = True
+        elif unchanged:
+            old_values[attr.key] = unchanged[0]
+        elif adds:
+            # If the attribute had no value
+            attr[attr.key] = adds[0]
+            obj_changed = True
+
+    # If nothing changed, don't emit history
+    if not obj_changed and not is_deleted:
+        return
+
+    old_values["start"] = old_values["updated_at"]
+    old_values["is_deleted"] = is_deleted
+
+    historical_record = history_cls(**old_values)
+    db_session.add(historical_record)
+
+def get_versioned_objects(objects):
+    for obj in objects:
+        if hasattr(obj, "__history_cls__"):
+            yield obj
+
+
+@event.listens_for(Session, "before_flush")
+def before_flush(session, flush_context, instances):
+    # TODO - also inserts somehow?
+
+    if True:
+        for instance in get_versioned_objects(session.dirty):
+            new_version(instance, session, is_deleted=False)
+
+        for instance in get_versioned_objects(session.deleted):
+            new_version(instance, session, is_deleted=True)
