@@ -13,6 +13,7 @@ from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
+    UserGetSavedSearchesResponseSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -20,7 +21,7 @@ from src.api.users.user_schemas import (
     UserSaveSearchRequestSchema,
     UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
-    UserTokenRefreshResponseSchema, UserGetSavedSearchesResponseSchema,
+    UserTokenRefreshResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
@@ -271,7 +272,6 @@ def user_save_search(
     return response.ApiResponse(message="Success")
 
 
-
 @user_blueprint.delete("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
 @user_blueprint.output(UserDeleteSavedSearchResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
@@ -308,7 +308,9 @@ def user_delete_saved_search(
 @user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get_saved_searches(db_session: db.Session, user_id: UUID, json_data: dict) -> response.ApiResponse:
+def user_get_saved_searches(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-searches/list")
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
@@ -318,5 +320,8 @@ def user_get_saved_searches(db_session: db.Session, user_id: UUID, json_data: di
 
     saved_searches, pagination_info = get_saved_searches(db_session, user_id, json_data)
 
-    return response.ApiResponse(message="Success", data=saved_searches, pagination_info=pagination_info,
-)
+    return response.ApiResponse(
+        message="Success",
+        data=saved_searches,
+        pagination_info=pagination_info,
+    )
