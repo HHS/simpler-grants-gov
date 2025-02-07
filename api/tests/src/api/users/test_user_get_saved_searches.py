@@ -65,9 +65,15 @@ def test_user_get_saved_searches_unauthorized_user(
     different_user = UserFactory.create()
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{different_user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{different_user.user_id}/saved-searches/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 401
@@ -76,8 +82,14 @@ def test_user_get_saved_searches_unauthorized_user(
 
 def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searches):
     # Try to get searches without authentication
-    response = client.get(
-        f"/v1/users/{user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 401
@@ -85,9 +97,15 @@ def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searche
 
 
 def test_user_get_saved_searches_empty(client, user, user_auth_token):
-    response = client.get(
-        f"/v1/users/{user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 200
