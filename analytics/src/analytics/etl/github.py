@@ -114,35 +114,27 @@ class GitHubProjectETL:
         temp_dir = Path(self.config.temp_dir)
 
         # Export the roadmap data
-        roadmap_file = str(temp_dir / "roadmap-data.json")
+        roadmap_file_path = str(temp_dir / "roadmap-data.json")
         roadmap = self.config.roadmap_project
-        logger.info("Exporting roadmap data from project %d", roadmap.project_number)
-        github.export_roadmap_data_to_file(
-            owner=roadmap.owner,
-            project=roadmap.project_number,
-            quad_field=roadmap.quad_field,
-            pillar_field=roadmap.pillar_field,
-            output_file=roadmap_file,
+        self._export_roadmap_data_to_file(
+            roadmap=roadmap,
+            output_file_path=roadmap_file_path,
         )
 
         # Export sprint data
         input_files: list[InputFiles] = []
         for sprint_board in self.config.sprint_projects:
             n = sprint_board.project_number
-            sprint_file = str(temp_dir / f"sprint-data-{n}.json")
-            logger.info("Exporting sprint data for project %d", n)
-            github.export_sprint_data_to_file(
-                owner=sprint_board.owner,
-                project=sprint_board.project_number,
-                sprint_field=sprint_board.sprint_field,
-                points_field=sprint_board.points_field,
-                output_file=sprint_file,
+            sprint_file_path = str(temp_dir / f"sprint-data-{n}.json")
+            self._export_sprint_data_to_file(
+                sprint_board=sprint_board,
+                output_file_path=sprint_file_path,
             )
             # Add to file list
             input_files.append(
                 InputFiles(
-                    roadmap=roadmap_file,
-                    sprint=sprint_file,
+                    roadmap=roadmap_file_path,
+                    sprint=sprint_file_path,
                 ),
             )
         # store transient files for re-use during the transform step
@@ -159,6 +151,36 @@ class GitHubProjectETL:
     def write_to_file(self) -> None:
         """Dump dataset to file."""
         self.dataset.to_json(self.config.output_file)
+
+    def _export_roadmap_data_to_file(
+        self,
+        roadmap: RoadmapConfig,
+        output_file_path: str,
+    ) -> None:
+
+        logger.info("Exporting roadmap data from project %d", roadmap.project_number)
+        github.export_roadmap_data_to_file(
+            owner=roadmap.owner,
+            project=roadmap.project_number,
+            quad_field=roadmap.quad_field,
+            pillar_field=roadmap.pillar_field,
+            output_file=output_file_path,
+        )
+
+    def _export_sprint_data_to_file(
+        self,
+        sprint_board: SprintBoardConfig,
+        output_file_path: str,
+    ) -> None:
+
+        logger.info("Exporting sprint data for project %d", sprint_board.project_number)
+        github.export_sprint_data_to_file(
+            owner=sprint_board.owner,
+            project=sprint_board.project_number,
+            sprint_field=sprint_board.sprint_field,
+            points_field=sprint_board.points_field,
+            output_file=output_file_path,
+       )
 
     def extract_and_transform_in_memory(self) -> list[dict]:
         """Export from GitHub and transform to JSON."""
