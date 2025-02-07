@@ -4,9 +4,9 @@ import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 
+import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-import { ClientSideUrlUpdater } from "../ClientSideUrlUpdater";
 
 interface ServerPageProps {
   searchResultsPromise: Promise<SearchAPIResponse>;

@@ -24,17 +24,19 @@ export function ClientSideUrlUpdater({
 }) {
   const router = useRouter();
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
+  // if query has been passed in, use that, otherwise pass through the current query
   const updatedQuery = query !== undefined ? query : searchParams.get("query");
+
   useEffect(() => {
     if (url) {
       router.push(url);
     }
+  }, [url, router]);
+  useEffect(() => {
     if (param && value !== undefined) {
-      // if query has been passed in, use that, otherwise pass through the current query
-      const updatedQuery =
-        query !== undefined ? query : searchParams.get("query");
+      // console.log("~~~ running");
       updateQueryParams(value, param, updatedQuery);
     }
-  }, [url, param, value, updatedQuery]);
+  }, [param, value, updatedQuery, updateQueryParams]);
   return <></>;
 }
