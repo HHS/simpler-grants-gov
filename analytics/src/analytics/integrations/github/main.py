@@ -146,6 +146,7 @@ def export_roadmap_data_to_file(
     pillar_field: str,
     output_file: str,
 ) -> None:
+    """Export the epic and deliverable data from GitHub."""
 
     transformed_data = export_roadmap_data_to_object(
         client=client,
@@ -167,7 +168,7 @@ def export_roadmap_data_to_object(
     quad_field: str,
     pillar_field: str,
 ) -> list[dict]:
-    """Export the issue and project data from a Roadmap Board."""
+    """Export the epic and deliverable data from GitHub."""
 
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
