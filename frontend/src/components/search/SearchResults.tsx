@@ -4,11 +4,11 @@ import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { Suspense } from "react";
 
+import { ClientSideUrlUpdater } from "src/components/ClientSideUrlUpdater";
 import Loading from "src/components/Loading";
-import SearchPagination from "src/components/search/SearchPagination";
-import SearchResultsHeader from "src/components/search/SearchResultsHeader";
-import { ClientSideUrlUpdater } from "../ClientSideUrlUpdater";
 import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
+import SearchPagination from "./SearchPagination";
+import SearchResultsHeader from "./SearchResultsHeader";
 import SearchResultsList from "./SearchResultsList";
 
 const SearchResultsSkeleton = ({
