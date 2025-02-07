@@ -209,15 +209,6 @@ def _search_opportunities(
         index_alias, search_request, includes=includes, excludes=["attachments"]
     )
 
-    total_pages = int(math.ceil(response.total_records / search_params.pagination.page_size))
-
-    if total_pages < search_params.pagination.page_offset:
-        logger.info("Requested page_offset goes past last page of results, re-running search to fetch last page")
-        new_raw_search_params = {**search_params.__dict__}
-        new_raw_search_params['pagination'].page_offset = total_pages
-        new_raw_search_class = SearchOpportunityParams.model_validate(new_raw_search_params)
-        return _search_opportunities(search_client, new_raw_search_class)
-
     return response
 
 
