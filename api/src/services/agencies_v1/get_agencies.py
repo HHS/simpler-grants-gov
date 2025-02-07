@@ -27,13 +27,15 @@ class AgencyListParams(BaseModel):
 def get_agencies(
     db_session: db.Session, list_params: AgencyListParams
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
+    search_params = AgencyListParams.model_validate(list_params)
+
     stmt = (
         select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
         # Exclude test agencies
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    # TODO https://github.com/HHS/simpler-grants-gov/issues/3697
+
     # use the sorting parameters from the request
     stmt.order_by(asc("agency_code"))
 

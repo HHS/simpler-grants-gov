@@ -12,7 +12,8 @@ class AgencyListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "AgencyPaginationV1Schema",
-            ["created_at"],
+            ["agency_code, agency_name, created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
     )
