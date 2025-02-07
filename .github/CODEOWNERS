@@ -2,6 +2,8 @@
 
 * @mdragon # project lead
 
+/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @mdragon @widal001 # everyone
+
 /analytics/               @acouch @coilysiren @widal001
 /documentation/analytics/ @acouch @coilysiren @widal001
 
@@ -15,5 +17,3 @@
 /documentation/infra/ @acouch @coilysiren @mdragon
 /.github/             @acouch @coilysiren @mdragon
 /bin/                 @acouch @coilysiren @mdragon
-
-/documentation/  @acouch @andycochran @btabaska @chouinar @coilysiren @doug-s-nava @mdragon @widal001 # everyone
