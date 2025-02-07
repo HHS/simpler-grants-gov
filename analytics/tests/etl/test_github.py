@@ -88,8 +88,16 @@ class TestGitHubProjectETL:
         """Test the extract step by mocking export functions."""
         mock_export_roadmap_data_to_file = MagicMock()
         mock_export_sprint_data_to_file = MagicMock()
-        monkeypatch.setattr(etl, "_export_roadmap_data_to_file", mock_export_roadmap_data_to_file)
-        monkeypatch.setattr(etl, "_export_sprint_data_to_file", mock_export_sprint_data_to_file)
+        monkeypatch.setattr(
+            etl,
+            "_export_roadmap_data_to_file",
+            mock_export_roadmap_data_to_file,
+        )
+        monkeypatch.setattr(
+            etl,
+            "_export_sprint_data_to_file",
+            mock_export_sprint_data_to_file,
+        )
 
         # Run the extract method
         etl.extract()
