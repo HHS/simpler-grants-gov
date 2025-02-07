@@ -574,8 +574,12 @@ export const messages = {
     },
     resultsListFetch: {
       noResultsTitle: "Your search did not return any results.",
-      noResultsBody:
-        "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
+      noResultsBody: [
+        "Check any terms you've, entered for typos",
+        "Try different keywords",
+        "Make sure you've selected the right statuses",
+        "Try resetting filters or selecting fewer options",
+      ],
     },
     resultsListItem: {
       status: {

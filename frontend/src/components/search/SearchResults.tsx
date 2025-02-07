@@ -48,8 +48,12 @@ const ResolvedSearchResults = async ({
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) => {
   const searchResults = await searchResultsPromise;
+
+  // if there are no results because we've requested a page beyond the number of total pages
+  // update page to the last page to trigger a new search
   if (
     !searchResults.data.length &&
+    searchResults.pagination_info.total_pages > 0 &&
     searchResults.pagination_info.page_offset >
       searchResults.pagination_info.total_pages
   ) {

@@ -25,9 +25,10 @@ export default async function SearchResultsList({
       <div>
         <h2>{t("resultsListFetch.noResultsTitle")}</h2>
         <ul>
-          {t.rich("resultsListFetch.noResultsBody", {
-            li: (chunks) => <li>{chunks}</li>,
-          })}
+          <li>{t("resultsListFetch.noResultsBody.0")}</li>
+          <li>{t("resultsListFetch.noResultsBody.1")}</li>
+          <li>{t("resultsListFetch.noResultsBody.2")}</li>
+          <li>{t("resultsListFetch.noResultsBody.3")}</li>
         </ul>
       </div>
     );
