@@ -84,7 +84,6 @@ def export_sprint_data_to_file(
     output_file: str,
 ) -> None:
     """Export the issue and project data from a Sprint Board."""
-
     transformed_data = export_sprint_data_to_object(
         client=client,
         owner=owner,
@@ -92,11 +91,11 @@ def export_sprint_data_to_file(
         sprint_field=sprint_field,
         points_field=points_field,
     )
-    print("=========> transformed data is of type %s", str(type(transformed_data)))
 
     # Write output
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(transformed_data, f, indent=2)
+
 
 def export_sprint_data_to_object(
     client: GitHubGraphqlClient,
@@ -106,7 +105,6 @@ def export_sprint_data_to_object(
     points_field: str,
 ) -> list[dict]:
     """Export the issue and project data from a Sprint Board."""
-
     # Load query
     query_path = PARENT_DIR / "getSprintData.graphql"
     with open(query_path) as f:
@@ -147,7 +145,6 @@ def export_roadmap_data_to_file(
     output_file: str,
 ) -> None:
     """Export the epic and deliverable data from GitHub."""
-
     transformed_data = export_roadmap_data_to_object(
         client=client,
         owner=owner,
@@ -169,7 +166,6 @@ def export_roadmap_data_to_object(
     pillar_field: str,
 ) -> list[dict]:
     """Export the epic and deliverable data from GitHub."""
-
     # Load query
     query_path = PARENT_DIR / "getRoadmapData.graphql"
     with open(query_path) as f:

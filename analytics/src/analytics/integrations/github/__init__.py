@@ -9,7 +9,6 @@ __all__ = [
 ]
 
 from analytics.integrations.github.client import GitHubGraphqlClient
-
 from analytics.integrations.github.main import (
     export_roadmap_data_to_file,
     export_roadmap_data_to_object,

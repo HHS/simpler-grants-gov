@@ -65,10 +65,6 @@ def load_json_data_as_df_from_object(
         Pandas dataframe with columns renamed to match the values of the column map
 
     """
-    # if the items we want to convert are nested under a key extract them
-    #if key_for_nested_items:
-    #    json_data = json_data[key_for_nested_items]
-
     # flatten the nested json into a dataframe
     df = pd.json_normalize(json_data)
     # reorder and rename the columns

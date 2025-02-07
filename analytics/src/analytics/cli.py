@@ -189,7 +189,6 @@ def extract_transform_and_load(
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
     """Export data from GitHub, transform it, and load into analytics warehouse."""
-
     # get configuration
     config_path = Path(config_file)
     if not config_path.exists():

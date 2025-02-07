@@ -184,11 +184,10 @@ class GitHubProjectETL:
             sprint_field=sprint_board.sprint_field,
             points_field=sprint_board.points_field,
             output_file=output_file_path,
-       )
+        )
 
     def extract_and_transform_in_memory(self) -> list[dict]:
         """Export from GitHub and transform to JSON."""
-
         # export roadmap data
         roadmap = self.config.roadmap_project
         roadmap_json = github.export_roadmap_data_to_object(
@@ -245,7 +244,10 @@ def run_transformation_pipeline(files: InputFiles) -> list[dict]:
     return flatten_issue_data(lookup)
 
 
-def run_transformation_pipeline_on_json(roadmap: list[dict], sprint: list[dict]) -> list[dict]:
+def run_transformation_pipeline_on_json(
+    roadmap: list[dict],
+    sprint: list[dict],
+) -> list[dict]:
     """Apply transformations."""
     # Populate a lookup table with this data
     lookup: dict = {}
