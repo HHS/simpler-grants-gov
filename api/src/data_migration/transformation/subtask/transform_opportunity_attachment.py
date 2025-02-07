@@ -4,6 +4,7 @@ from typing import Sequence
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
 from src.adapters.aws import S3Config
+from src.constants.lookup_constants import OpportunityAttachmentType
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
@@ -186,6 +187,8 @@ def transform_opportunity_attachment(
     target_attachment = OpportunityAttachment(
         attachment_id=source_attachment.syn_att_id,
         opportunity_id=source_attachment.opportunity_id,
+        # TODO - we'll eventually remove attachment type, for now just arbitrarily set the value
+        opportunity_attachment_type=OpportunityAttachmentType.OTHER,
         # Note we calculate the file location here, but haven't yet done anything
         # with s3, the calling function, will handle writing the file to s3.
         file_location=file_location,
