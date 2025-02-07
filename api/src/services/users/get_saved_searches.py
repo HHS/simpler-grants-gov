@@ -1,4 +1,4 @@
-from typing import Tuple, Sequence
+from typing import Sequence, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+
 
 class SavedSearchListParams(BaseModel):
     pagination: PaginationParams

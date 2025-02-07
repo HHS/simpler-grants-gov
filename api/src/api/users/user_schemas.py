@@ -132,6 +132,7 @@ class UserSavedSearchesResponseSchema(AbstractResponseSchema):
         fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
     )
 
+
 class UserGetSavedSearchesResponseSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
