@@ -24,6 +24,7 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
+# TODO: Remove this once we've removed the opportunity attachment type from the database
 OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig([])
 
 OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
