@@ -162,7 +162,7 @@ class GitHubProjectETL:
 
         logger.info("Exporting roadmap data from project %d", roadmap.project_number)
         github.export_roadmap_data_to_file(
-            client-self.client,
+            client=self.client,
             owner=roadmap.owner,
             project=roadmap.project_number,
             quad_field=roadmap.quad_field,
@@ -178,7 +178,7 @@ class GitHubProjectETL:
 
         logger.info("Exporting sprint data for project %d", sprint_board.project_number)
         github.export_sprint_data_to_file(
-            client-self.client,
+            client=self.client,
             owner=sprint_board.owner,
             project=sprint_board.project_number,
             sprint_field=sprint_board.sprint_field,
