@@ -24,14 +24,12 @@ export default async function SearchPaginationFetch({
   const totalResults = searchResults.pagination_info?.total_records;
 
   return (
-    <>
-      <SearchPagination
-        totalPages={totalPages}
-        page={page}
-        query={query}
-        scroll={scroll}
-        totalResults={String(totalResults)}
-      />
-    </>
+    <SearchPagination
+      totalPages={totalPages}
+      page={page}
+      query={query}
+      scroll={scroll}
+      totalResults={String(totalResults)}
+    />
   );
 }
