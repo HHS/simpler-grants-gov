@@ -323,13 +323,6 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
             "example": "The full announcement NOFO",
         }
     )
-    opportunity_attachment_type = fields.Enum(
-        OpportunityAttachmentType,
-        metadata={
-            "description": "The type of attachment",
-            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
-        },
-    )
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
