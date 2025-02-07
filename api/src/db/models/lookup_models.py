@@ -24,12 +24,7 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig(
-    [
-        LookupStr(OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY, 1),
-        LookupStr(OpportunityAttachmentType.OTHER, 2),
-    ]
-)
+OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig([])
 
 OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     [
