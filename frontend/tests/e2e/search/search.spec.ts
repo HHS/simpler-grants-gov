@@ -197,6 +197,16 @@ test.describe("Search page tests", () => {
 
     expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
   });
+
+  test("should redirect to the last page of results when page param is too high", async ({
+    page,
+  }) => {
+    await page.goto("/search?page=1000000");
+
+    await waitForAnyURLChange(page, "/search?page=1000000");
+
+    expect(page.url()).toMatch(/search\?page=\d{1,3}/);
+  });
   test.describe("selecting and clearing filters", () => {
     const filterTypes = [
       "Funding instrument",

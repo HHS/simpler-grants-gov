@@ -34,7 +34,6 @@ export function ClientSideUrlUpdater({
   }, [url, router]);
   useEffect(() => {
     if (param && value !== undefined) {
-      // console.log("~~~ running");
       updateQueryParams(value, param, updatedQuery);
     }
   }, [param, value, updatedQuery, updateQueryParams]);
