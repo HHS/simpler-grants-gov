@@ -9,7 +9,6 @@ def load_json_data_as_df(
     file_path: str,
     column_map: dict,
     date_cols: list[str] | None = None,
-    key_for_nested_items: str | None = None,
 ) -> pd.DataFrame:
     """
     Load a file that contains JSON data and format is as a DataFrame.
@@ -18,6 +17,40 @@ def load_json_data_as_df(
     ----------
     file_path: str
         Path to the JSON file with the exported issue data
+    column_map: dict
+        Dictionary mapping of existing JSON keys to their new column names
+    date_cols: list[str]
+        List of columns that need to be converted to date types
+
+    Returns
+    -------
+    pd.DataFrame
+        Pandas dataframe with columns renamed to match the values of the column map
+
+    """
+    # load json data from the local file
+    with open(file_path, encoding="utf-8") as f:
+        json_data = json.loads(f.read())
+
+    return load_json_data_as_df_from_object(
+        json_data,
+        column_map,
+        date_cols,
+    )
+
+
+def load_json_data_as_df_from_object(
+    json_data: list,
+    column_map: dict,
+    date_cols: list[str] | None = None,
+) -> pd.DataFrame:
+    """
+    Load JSON data and format it as a DataFrame.
+
+    Parameters
+    ----------
+    json_data: list
+        JSON object with the exported issue data
     column_map: dict
         Dictionary mapping of existing JSON keys to their new column names
     date_cols: list[str]
@@ -32,12 +65,6 @@ def load_json_data_as_df(
         Pandas dataframe with columns renamed to match the values of the column map
 
     """
-    # load json data from the local file
-    with open(file_path, encoding="utf-8") as f:
-        json_data = json.loads(f.read())
-    # if the items we want to convert are nested under a key extract them
-    if key_for_nested_items:
-        json_data = json_data[key_for_nested_items]
     # flatten the nested json into a dataframe
     df = pd.json_normalize(json_data)
     # reorder and rename the columns

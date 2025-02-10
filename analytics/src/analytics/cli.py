@@ -162,9 +162,9 @@ def transform_and_load(
             .astimezone()
             .strftime(dateformat)
         )
-        print(f"running transform and load with effective date {datestamp}")
+        logger.info("running transform and load with effective date %s", datestamp)
     except ValueError:
-        print("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        logger.info("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
 
     # hydrate a dataset instance from the input data
@@ -174,10 +174,50 @@ def transform_and_load(
     etldb.sync_data(dataset, datestamp)
 
     # finish
-    print("transform and load is done")
+    logger.info("transform and load is done")
 
 
 @etl_app.command(name="opportunity-load")
 def load_opportunity_data() -> None:
     """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()
+
+
+@etl_app.command(name="extract_transform_and_load")
+def extract_transform_and_load(
+    config_file: Annotated[str, CONFIG_FILE_ARG],
+    effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+) -> None:
+    """Export data from GitHub, transform it, and load into analytics warehouse."""
+    # get configuration
+    config_path = Path(config_file)
+    if not config_path.exists():
+        typer.echo(f"Not a path to a valid config file: {config_path}")
+    config = load_config(config_path, GitHubProjectConfig)
+
+    # validate effective_date
+    try:
+        dateformat = "%Y-%m-%d"
+        datestamp = (
+            datetime.strptime(effective_date, dateformat)
+            .astimezone()
+            .strftime(dateformat)
+        )
+        logger.info("running ETL workflow with effective date %s", datestamp)
+    except ValueError:
+        logger.info("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
+        return
+
+    # extract data from GitHub
+    logger.info("extracting data from GitHub")
+    extracted_json = GitHubProjectETL(config).extract_and_transform_in_memory()
+
+    # hydrate a dataset instance from the input data
+    logger.info("transforming data")
+    dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
+
+    # sync dataset to db
+    logger.info("writing to database")
+    etldb.sync_data(dataset, datestamp)
+
+    logger.info("workflow is done!")
