@@ -1,6 +1,6 @@
 # Common module
 
-The purpose of this module is to contain environment agnostic items. e.g. tags that are common to all environments are stored here.
+The purpose of this module is to contain environment-agnostic items. e.g. tags that are common to all environments are stored here.
 
 ## Usage
 
