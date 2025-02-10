@@ -15,6 +15,7 @@ from src.api.users.user_schemas import (
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedSearchesRequestSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
     UserSaveOpportunityResponseSchema,
@@ -23,7 +24,7 @@ from src.api.users.user_schemas import (
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
     UserUpdateSavedSearchRequestSchema,
-    UserUpdateSavedSearchResponseSchema, UserSavedSearchesRequestSchema,
+    UserUpdateSavedSearchResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
