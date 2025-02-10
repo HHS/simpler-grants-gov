@@ -1,0 +1,11 @@
+# serializer version: 1
+# name: test_snapshot
+  list([
+    dict({
+      'name': 'Test',
+    }),
+    dict({
+      'output': 'correct',
+    }),
+  ])
+# ---
