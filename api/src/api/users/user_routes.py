@@ -14,7 +14,7 @@ from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
-    UserGetSavedSearchesResponseSchema,
+    UserGetSavedSearchesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -308,7 +308,7 @@ def user_delete_saved_search(
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-searches/list")
-@user_blueprint.input(UserGetSavedSearchesResponseSchema, location="json")
+@user_blueprint.input(UserGetSavedSearchesRequestSchema, location="json")
 @user_blueprint.output(UserSavedSearchesResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)

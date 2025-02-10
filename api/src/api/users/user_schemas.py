@@ -133,7 +133,7 @@ class UserSavedSearchesResponseSchema(AbstractResponseSchema):
     )
 
 
-class UserGetSavedSearchesResponseSchema(Schema):
+class UserGetSavedSearchesRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedSearchPaginationV1Schema",

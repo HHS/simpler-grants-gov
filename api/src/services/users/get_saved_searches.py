@@ -22,14 +22,17 @@ def get_saved_searches(
     search_params = SavedSearchListParams.model_validate(raw_search_params)
 
     stmt = select(UserSavedSearch).where(UserSavedSearch.user_id == user_id)
-    for order in search_params.pagination.sort_order:
 
+    order_cols: list = []
+    for order in search_params.pagination.sort_order:
         column = getattr(UserSavedSearch, order.order_by)
 
         if order.sort_direction == SortDirection.ASCENDING:
-            stmt = stmt.order_by(asc(column))
+            order_cols.append(asc(column))
         elif order.sort_direction == SortDirection.DESCENDING:
-            stmt = stmt.order_by(desc(column))
+            order_cols.append(desc(column))
+
+    stmt = stmt.order_by(*order_cols)
 
     paginator: Paginator[UserSavedSearch] = Paginator(
         UserSavedSearch, stmt, db_session, page_size=search_params.pagination.page_size
