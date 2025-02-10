@@ -28,6 +28,7 @@ boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 psycopg = "^3.2.3"
 smart-open = "^7.0.5"
+syrupy = "^4.8.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
