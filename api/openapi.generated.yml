@@ -452,37 +452,6 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSavedSearchesResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - User v1
-      summary: User Get Saved Searches
-      security:
-      - ApiJwtAuth: []
     post:
       parameters:
       - in: path
@@ -597,6 +566,49 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserSaveOpportunityRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/saved-searches/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedSearchesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Searches
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGetSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}/versions:
@@ -2179,48 +2191,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    SavedSearchResponse:
-      type: object
-      properties:
-        saved_search_id:
-          type: string
-          format: uuid
-          description: The ID of the saved search
-          example: 123e4567-e89b-12d3-a456-426614174000
-        name:
-          type: string
-          description: Name of the saved search
-          example: Grant opportunities in California
-        search_query:
-          description: The saved search query parameters
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
-        created_at:
-          type: string
-          format: date-time
-          description: When the search was saved
-          example: '2024-01-01T00:00:00Z'
-    UserSavedSearchesResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: List of saved searches
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/SavedSearchResponse'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
     UserSaveSearchRequest:
       type: object
       properties:
@@ -2329,6 +2299,108 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderUserGetSavedSearchPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          - updated_at
+          - name
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserGetSavedSearchPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    UserGetSavedSearchesRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
+      required:
+      - pagination
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
+    UserSavedSearchesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of saved searches
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
