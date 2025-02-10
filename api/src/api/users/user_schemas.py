@@ -126,14 +126,7 @@ class SavedSearchResponseSchema(Schema):
         metadata={"description": "When the search was saved", "example": "2024-01-01T00:00:00Z"}
     )
 
-
-class UserSavedSearchesResponseSchema(AbstractResponseSchema):
-    data = fields.List(
-        fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
-    )
-
-
-class UserGetSavedSearchesRequestSchema(Schema):
+class UserSavedSearchesRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedSearchPaginationV1Schema",
@@ -143,6 +136,10 @@ class UserGetSavedSearchesRequestSchema(Schema):
         required=True,
     )
 
+class UserSavedSearchesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}
+    )
 
 class UserDeleteSavedSearchResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})

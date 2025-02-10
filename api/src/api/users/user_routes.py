@@ -14,7 +14,6 @@ from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
-    UserGetSavedSearchesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -24,7 +23,7 @@ from src.api.users.user_schemas import (
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
     UserUpdateSavedSearchRequestSchema,
-    UserUpdateSavedSearchResponseSchema,
+    UserUpdateSavedSearchResponseSchema, UserSavedSearchesRequestSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
@@ -308,7 +307,7 @@ def user_delete_saved_search(
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-searches/list")
-@user_blueprint.input(UserGetSavedSearchesRequestSchema, location="json")
+@user_blueprint.input(UserSavedSearchesRequestSchema, location="json")
 @user_blueprint.output(UserSavedSearchesResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
