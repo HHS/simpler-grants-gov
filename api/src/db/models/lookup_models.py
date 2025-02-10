@@ -9,7 +9,6 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
     JobStatus,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -22,13 +21,6 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
         LookupStr(OpportunityStatus.POSTED, 2),
         LookupStr(OpportunityStatus.CLOSED, 3),
         LookupStr(OpportunityStatus.ARCHIVED, 4),
-    ]
-)
-
-OPPORTUNITY_ATTACHMENT_TYPE_CONFIG = LookupConfig(
-    [
-        LookupStr(OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY, 1),
-        LookupStr(OpportunityAttachmentType.OTHER, 2),
     ]
 )
 
@@ -230,21 +222,6 @@ class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> "LkAgencySubmissionNotificationSetting":
         return LkAgencySubmissionNotificationSetting(
             agency_submission_notification_setting_id=lookup.lookup_val,
-            description=lookup.get_description(),
-        )
-
-
-@LookupRegistry.register_lookup(OPPORTUNITY_ATTACHMENT_TYPE_CONFIG)
-class LkOpportunityAttachmentType(LookupTable, TimestampMixin):
-    __tablename__ = "lk_opportunity_attachment_type"
-
-    opportunity_attachment_type_id: Mapped[int] = mapped_column(primary_key=True)
-    description: Mapped[str]
-
-    @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkOpportunityAttachmentType":
-        return LkOpportunityAttachmentType(
-            opportunity_attachment_type_id=lookup.lookup_val,
             description=lookup.get_description(),
         )
 

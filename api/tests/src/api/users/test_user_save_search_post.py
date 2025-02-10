@@ -166,13 +166,18 @@ def test_user_save_search_post(
     assert saved_search.user_id == user.user_id
     assert saved_search.name == search_name
     assert saved_search.search_query == {
+        "query_operator": "AND",
         "format": "json",
         "filters": {"agency": {"one_of": ["USAID"]}, "funding_instrument": {"one_of": ["grant"]}},
         "pagination": {
-            "order_by": "opportunity_id",
             "page_size": 25,
             "page_offset": 1,
-            "sort_direction": "ascending",
+            "sort_order": [
+                {
+                    "order_by": "opportunity_id",
+                    "sort_direction": "ascending",
+                }
+            ],
         },
     }
     # Verify pagination for the query was over-written. searched_opportunity_ids should be ordered by "post_date"
