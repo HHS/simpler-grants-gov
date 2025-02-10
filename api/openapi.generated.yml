@@ -608,7 +608,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserGetSavedSearchesRequest'
+              $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}/versions:
@@ -2353,7 +2353,7 @@ components:
       required:
       - page_offset
       - page_size
-    UserGetSavedSearchesRequest:
+    UserSavedSearchesRequest:
       type: object
       properties:
         pagination:
