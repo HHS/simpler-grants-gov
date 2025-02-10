@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy import BigInteger, ForeignKey, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
@@ -29,6 +29,22 @@ class User(ApiSchemaTable, TimestampMixin):
     saved_searches: Mapped[list["UserSavedSearch"]] = relationship(
         "UserSavedSearch", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
+
+    linked_login_gov_external_user: Mapped["LinkExternalUser | None"] = relationship(
+        "LinkExternalUser",
+        primaryjoin=lambda: and_(
+            LinkExternalUser.user_id == User.user_id,
+            LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV,
+        ),
+        uselist=False,
+        viewonly=True,
+    )
+
+    @property
+    def email(self) -> str | None:
+        if self.linked_login_gov_external_user is not None:
+            return self.linked_login_gov_external_user.email
+        return None
 
 
 class LinkExternalUser(ApiSchemaTable, TimestampMixin):
