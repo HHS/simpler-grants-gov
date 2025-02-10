@@ -2073,15 +2073,6 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
-        opportunity_attachment_type:
-          description: The type of attachment
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
-          - notice_of_funding_opportunity
-          enum:
-          - notice_of_funding_opportunity
-          - other
-          type:
-          - string
     OpportunityWithAttachmentsV1:
       type: object
       properties:
