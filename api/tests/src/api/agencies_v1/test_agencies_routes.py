@@ -32,11 +32,11 @@ class TestAgenciesRoutes(BaseTestClass):
         payload = {
             "filters": {},
             "pagination": {
-                "page": 1,
                 "page_size": 10,
                 "page_offset": 1,
-                "order_by": "created_at",
-                "sort_direction": "descending",
+                "sort_order": [
+                    {"order_by": "created_at", "sort_direction": "descending"},
+                ],
             },
         }
         response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
@@ -60,11 +60,11 @@ class TestAgenciesRoutes(BaseTestClass):
         payload = {
             "filters": {},
             "pagination": {
-                "page": 1,
                 "page_size": 10,
                 "page_offset": 1,
-                "order_by": "created_at",
-                "sort_direction": "descending",
+                "sort_order": [
+                    {"order_by": "created_at", "sort_direction": "descending"},
+                ],
             },
         }
 

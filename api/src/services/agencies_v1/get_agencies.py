@@ -2,12 +2,12 @@ import logging
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import asc, select
+from sqlalchemy import asc, desc, select
 from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.db.models.agency_models import Agency
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,6 @@ class AgencyListParams(BaseModel):
 def get_agencies(
     db_session: db.Session, list_params: AgencyListParams
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
-    search_params = AgencyListParams.model_validate(list_params)
 
     stmt = (
         select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
@@ -35,9 +34,16 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-
+    order_cols: list = []
     # use the sorting parameters from the request
-    stmt.order_by(asc("agency_code"))
+    for order in list_params.pagination.sort_order:
+        column = getattr(Agency, order.order_by)
+        if order.sort_direction == SortDirection.ASCENDING:
+            order_cols.append(asc(column))
+        elif order.sort_direction == SortDirection.DESCENDING:
+            order_cols.append(desc(column))
+
+    stmt = stmt.order_by(*order_cols)
 
     if list_params.filters:
         if list_params.filters.agency_name:
