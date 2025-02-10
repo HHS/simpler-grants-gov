@@ -111,18 +111,6 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
 module "service" {
   source                         = "../../modules/service"
   service_name                   = local.service_name
@@ -168,15 +156,4 @@ module "service" {
       api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
     },
   )
-}
-
-module "feature_flags" {
-  source        = "../../modules/feature-flags"
-  service_name  = local.service_name
-  feature_flags = module.app_config.feature_flags
-}
-
-module "storage" {
-  source = "../../modules/storage"
-  name   = local.bucket_name
 }

@@ -1,8 +1,7 @@
 locals {
-  app_name              = "analytics"
-  project_name          = module.project_config.project_name
-  environments          = ["dev", "staging", "prod"]
-  image_repository_name = "${local.project_name}-${local.app_name}"
+  app_name     = "analytics"
+  project_name = module.project_config.project_name
+  environments = ["dev", "staging", "prod"]
 
   # Whether or not the application has a database
   # If enabled:
@@ -11,7 +10,7 @@ locals {
   # 2. Each environment's config will have a database_config property that is used to
   #    pass db_vars into the infra/modules/service module, which provides the necessary
   #    configuration for the service to access the database
-  has_database = false
+  has_database = true
 
   # Whether or not the application depends on external non-AWS services.
   # If enabled, the networks associated with this application's environments
