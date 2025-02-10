@@ -241,9 +241,10 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID, json_dat
         raise_flask_error(401, "Unauthorized user")
 
     # Get all saved opportunities for the user with their related opportunity data
-    saved_opportunities = get_saved_opportunities(db_session, user_id, json_data)
+    saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
 
-    return response.ApiResponse(message="Success", data=saved_opportunities)
+    return response.ApiResponse(message="Success", data=saved_opportunities,         pagination_info=pagination_info,
+)
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-searches")
