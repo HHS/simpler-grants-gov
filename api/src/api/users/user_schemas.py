@@ -5,6 +5,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ExternalUserType
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class UserTokenHeaderSchema(Schema):
@@ -83,6 +84,17 @@ class UserSaveOpportunityResponseSchema(AbstractResponseSchema):
 
 class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserSavedOpportunitiesRequestSchema(Schema):
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserGetSavedOpportunityPaginationV1Schema",
+            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
 
 
 class UserSavedOpportunitiesResponseSchema(AbstractResponseSchema):
