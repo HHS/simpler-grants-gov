@@ -1,8 +1,7 @@
 locals {
-  app_name              = "analytics"
-  project_name          = module.project_config.project_name
-  environments          = ["dev", "staging", "prod"]
-  image_repository_name = "${local.project_name}-${local.app_name}"
+  app_name     = "analytics"
+  project_name = module.project_config.project_name
+  environments = ["dev", "staging", "prod"]
 
   # Whether or not the application has a database
   # If enabled:
