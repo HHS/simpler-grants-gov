@@ -3,21 +3,34 @@ import uuid
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+import botocore.client
+from pydantic import Field
 from sqlalchemy import select, update
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
+from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.opportunity_models import OpportunityChangeAudit
-from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity, UserSavedSearch
+from src.db.models.user_models import (
+    User,
+    UserNotificationLog,
+    UserSavedOpportunity,
+    UserSavedSearch,
+)
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
 from src.util import datetime_util
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+class GenerateNotificationsConfig(PydanticBaseEnvConfig):
+    app_id: str = Field(alias="PINPOINT_APP_ID")
 
 
 @task_blueprint.cli.command(
@@ -55,10 +68,20 @@ class NotificationTask(Task):
         SEARCHES_TRACKED = "searches_tracked"
         NOTIFICATIONS_SENT = "notifications_sent"
 
-    def __init__(self, db_session: db.Session, search_client: search.SearchClient) -> None:
+    def __init__(
+        self,
+        db_session: db.Session,
+        search_client: search.SearchClient,
+        pinpoint_client: botocore.client.BaseClient | None = None,
+        pinpoint_app_id: str | None = None,
+    ) -> None:
         super().__init__(db_session)
+        self.config = GenerateNotificationsConfig()
+
         self.user_notification_map: dict[uuid.UUID, NotificationContainer] = {}
         self.search_client = search_client
+        self.pinpoint_client = pinpoint_client
+        self.app_id = pinpoint_app_id
 
     def run_task(self) -> None:
         """Main task logic to collect and send notifications"""
@@ -150,9 +173,22 @@ class NotificationTask(Task):
             if not container.saved_opportunities and not container.saved_searches:
                 continue
 
-            # TODO: Implement actual notification sending in future ticket
+            user = self.db_session.execute(
+                select(User).where(User.user_id == user_id)
+            ).scalar_one_or_none()
+
+            if not user or not user.email:
+                logger.warning("No email found for user", extra={"user_id": user_id})
+                continue
+
+            # Send email via Pinpoint
+            subject = "Updates to Your Saved Opportunities"
+            message = (
+                f"You have updates to {len(container.saved_opportunities)} saved opportunities"
+            )
+
             logger.info(
-                "Would send notification to user",
+                "Sending notification to user",
                 extra={
                     "user_id": user_id,
                     "opportunity_count": len(container.saved_opportunities),
@@ -160,21 +196,48 @@ class NotificationTask(Task):
                 },
             )
 
-            # Create notification log entry
             notification_log = UserNotificationLog(
                 user_id=user_id,
                 notification_reason=NotificationConstants.OPPORTUNITY_UPDATES,
-                notification_sent=True,
+                notification_sent=False,  # Default to False, update on success
             )
             self.db_session.add(notification_log)
 
+            try:
+                send_pinpoint_email_raw(
+                    to_address=user.email,
+                    subject=subject,
+                    message=message,
+                    pinpoint_client=self.pinpoint_client,
+                    app_id=self.config.app_id,
+                )
+                notification_log.notification_sent = True
+                logger.info(
+                    "Successfully sent notification to user",
+                    extra={
+                        "user_id": user_id,
+                        "opportunity_count": len(container.saved_opportunities),
+                        "search_count": len(container.saved_searches),
+                    },
+                )
+            except Exception:
+                # Notification log will be updated in the finally block
+                logger.exception(
+                    "Failed to send notification email",
+                    extra={"user_id": user_id, "email": user.email},
+                )
+
+            self.db_session.add(notification_log)
+
             if container.saved_searches:
-                notification_log = UserNotificationLog(
+                search_notification_log = UserNotificationLog(
                     user_id=user_id,
                     notification_reason=NotificationConstants.SEARCH_UPDATES,
-                    notification_sent=True,
+                    notification_sent=False,  # Default to False, update if email was successful
                 )
-                self.db_session.add(notification_log)
+                self.db_session.add(search_notification_log)
+                if notification_log.notification_sent:
+                    search_notification_log.notification_sent = True
 
             # Update last_notified_at for all opportunities we just notified about
             opportunity_ids = [
