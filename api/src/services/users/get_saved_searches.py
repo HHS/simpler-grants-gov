@@ -21,7 +21,7 @@ def apply_sorting(stmt: Select, model: Type, sort_order: list) -> Select:
 
     :param stmt: The SQLAlchemy query statement to which sorting should be applied.
     :param model: The model class on which the sorting should be applied.
-    :param sort_order: A list of columns to sort by.
+    :param sort_order: A list of object describing the sorting order for a column.
     :return: The modified query statement with the applied sorting.
     """
 
