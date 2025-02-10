@@ -90,10 +90,14 @@ describe("downloadOpportunities", () => {
     expect(mockfetchOpportunitySearch).toHaveBeenCalledWith({
       body: {
         pagination: {
-          order_by: "opportunity_number", // This should be the actual value being used in the API method
+          sort_order: [
+            {
+              order_by: "opportunity_number", // This should be the actual value being used in the API method
+              sort_direction: "ascending", // or "descending" based on your sortby parameter
+            },
+          ],
           page_offset: 1,
           page_size: 5000,
-          sort_direction: "ascending", // or "descending" based on your sortby parameter
         },
         query: "research",
         filters: {
