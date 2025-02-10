@@ -469,7 +469,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
-        laud_default=SearchQueryOperator.AND,
+        load_default=SearchQueryOperator.AND,
         metadata={
             "description": "Query operator for combining search conditions",
             "example": "OR",
@@ -490,6 +490,7 @@ class OpportunitySearchRequestV1Schema(Schema):
                 "close_date",
                 "agency_code",
             ],
+            default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "descending"}],
         ),
         required=True,
     )
