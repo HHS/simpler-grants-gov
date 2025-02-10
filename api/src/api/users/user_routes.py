@@ -3,7 +3,8 @@ from uuid import UUID
 
 import flask
 
-from src.adapters import db
+import src.adapters.search.flask_opensearch as flask_opensearch
+from src.adapters import db, search
 from src.adapters.db import flask_db
 from src.api import response
 from src.api.route_utils import raise_flask_error
@@ -21,6 +22,8 @@ from src.api.users.user_schemas import (
     UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
+    UserUpdateSavedSearchRequestSchema,
+    UserUpdateSavedSearchResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
@@ -36,6 +39,7 @@ from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
 )
+from src.services.users.update_saved_searches import update_saved_search
 
 logger = logging.getLogger(__name__)
 
@@ -246,8 +250,9 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID) -> respo
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
+@flask_opensearch.with_search_client()
 def user_save_search(
-    db_session: db.Session, user_id: UUID, json_data: dict
+    search_client: search.SearchClient, db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-searches")
 
@@ -258,7 +263,7 @@ def user_save_search(
         raise_flask_error(401, "Unauthorized user")
 
     with db_session.begin():
-        saved_search = create_saved_search(db_session, user_id, json_data)
+        saved_search = create_saved_search(search_client, db_session, user_id, json_data)
 
     logger.info(
         "Saved search for user",
@@ -318,3 +323,34 @@ def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.A
     saved_searches = get_saved_searches(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=saved_searches)
+
+
+@user_blueprint.put("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
+@user_blueprint.input(UserUpdateSavedSearchRequestSchema, location="json")
+@user_blueprint.output(UserUpdateSavedSearchResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_update_saved_search(
+    db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("PUT /v1/users/:user_id/saved-searches/:saved_search_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(401, "Unauthorized user")
+
+    with db_session.begin():
+        updated_saved_search = update_saved_search(db_session, user_id, saved_search_id, json_data)
+
+    logger.info(
+        "Updated saved search for user",
+        extra={
+            "user.id": str(user_id),
+            "saved_search.id": str(updated_saved_search.saved_search_id),
+        },
+    )
+
+    return response.ApiResponse(message="Success")

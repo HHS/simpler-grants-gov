@@ -10,7 +10,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -20,7 +19,6 @@ from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
     LkFundingInstrument,
-    LkOpportunityAttachmentType,
     LkOpportunityCategory,
     LkOpportunityStatus,
 )
@@ -435,12 +433,6 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
-    opportunity_attachment_type: Mapped[OpportunityAttachmentType] = mapped_column(
-        "opportunity_attachment_type_id",
-        LookupColumn(LkOpportunityAttachmentType),
-        ForeignKey(LkOpportunityAttachmentType.opportunity_attachment_type_id),
-        index=True,
-    )
 
     file_location: Mapped[str]
     mime_type: Mapped[str]
