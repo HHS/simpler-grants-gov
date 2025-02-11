@@ -120,7 +120,6 @@ export const OpportunitySaveUserControl = () => {
             descriptionText={t("save_login_modal.description")}
             titleText={t("save_login_modal.title")}
             modalId="opp-save-login-modal"
-            renderToPortal={false}
           />
         </>
       )}
