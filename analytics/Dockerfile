@@ -18,10 +18,9 @@ RUN apt-get update \
     libpq-dev \
     postgresql \
     wget \
-    libtasn1-6 \
-    libgnutls30 \
   # Install security updates
   # https://pythonspeed.com/articles/security-updates-in-docker/
+  && apt-get upgrade --yes \
   && apt-get install --no-install-recommends --yes \
     build-essential \
     libc-dev \
@@ -29,8 +28,6 @@ RUN apt-get update \
     postgresql \
     wget \
     libtasn1-6 \
-    libgnutls30 \
-  && apt-get upgrade --yes \
   # Reduce the image size by clear apt cached lists
   # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
   && rm -fr /var/lib/apt/lists/* \
