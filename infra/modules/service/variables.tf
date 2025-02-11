@@ -132,23 +132,9 @@ variable "enable_drafts_bucket" {
   default     = false
 }
 
-variable "secrets" {
-  type = set(object({
-    name      = string
-    valueFrom = string
-  }))
-  description = "List of configurations for defining environment variables that pull from SSM parameter store"
-}
-
 variable "aws_services_security_group_id" {
   type        = string
   description = "Security group ID for VPC endpoints that access AWS Services"
-}
-
-variable "extra_environment_variables" {
-  type        = map(string)
-  description = "Additional environment variables to pass to the service container. Map from environment variable name to the value."
-  default     = {}
 }
 
 variable "secrets" {
@@ -311,10 +297,4 @@ variable "file_upload_jobs" {
       python etl.py path/to/file.txt
   EOT
   default     = {}
-}
-
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection for the load balancer."
-  type        = bool
-  default     = false
 }
