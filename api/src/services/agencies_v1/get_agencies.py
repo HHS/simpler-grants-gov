@@ -2,12 +2,12 @@ import logging
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import asc, desc, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.db.models.agency_models import Agency
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.services.users.get_saved_searches import apply_sorting
 
@@ -35,7 +35,11 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
+    print(list_params.pagination.sort_order)
+
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
+
+    print(stmt)
 
     if list_params.filters:
         if list_params.filters.agency_name:
