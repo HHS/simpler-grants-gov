@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 
 
-def mock_graphql_sprintboard_data(client = Mock, owner = Mock, project = Mock,sprint_field = Mock,
-                                   points_field = Mock) -> list[dict]:
+def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
+                               pillarField = Mock) -> list[dict]:
     """Sprintboard input for snapshot testing."""
     return [
         {

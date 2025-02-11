@@ -1,8 +1,8 @@
 from unittest.mock import Mock
 
 
-def mock_graphql_roadmap_data(client=Mock, owner=Mock, project=Mock, quad_field=Mock,  # noqa: ANN001, ARG001
-                               pillar_field=Mock) -> list[dict]:  # noqa: ARG001, ANN001
+def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
+                               pillarField = Mock) -> list[dict]:  # noqa: ARG001, ANN001
     """Mock input for snapshot testing of roadmap data."""
     return [
          {
