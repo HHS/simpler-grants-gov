@@ -9,6 +9,7 @@ import src.adapters.db as db
 from src.db.models.agency_models import Agency
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
+from src.services.users.get_saved_searches import apply_sorting
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,7 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    order_cols: list = []
-    # use the sorting parameters from the request
-    for order in list_params.pagination.sort_order:
-        column = getattr(Agency, order.order_by)
-        if order.sort_direction == SortDirection.ASCENDING:
-            order_cols.append(asc(column))
-        elif order.sort_direction == SortDirection.DESCENDING:
-            order_cols.append(desc(column))
-
-    stmt = stmt.order_by(*order_cols)
+    stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
 
     if list_params.filters:
         if list_params.filters.agency_name:
