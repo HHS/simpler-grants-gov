@@ -146,12 +146,6 @@ variable "has_incident_management_service" {
   type = bool
 }
 
-variable "domain" {
-  type        = string
-  description = "DNS domain of the website managed by HHS"
-  default     = null
-}
-
 variable "service_override_extra_environment_variables" {
   type        = map(string)
   description = <<EOT

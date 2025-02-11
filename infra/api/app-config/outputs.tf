@@ -3,13 +3,7 @@ output "app_name" {
 }
 
 output "account_names_by_environment" {
-  value = merge(
-    {
-      for environment, environment_config in local.environment_configs :
-      environment => environment_config.account_name
-    },
-    { shared = local.shared_account_name },
-  )
+  value = local.account_names_by_environment
 }
 
 output "environments" {
@@ -38,8 +32,4 @@ output "build_repository_config" {
 
 output "environment_configs" {
   value = local.environment_configs
-}
-
-output "shared_account_name" {
-  value = local.shared_account_name
 }
