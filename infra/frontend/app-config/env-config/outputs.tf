@@ -53,6 +53,6 @@ output "incident_management_service_integration" {
   } : null
 }
 
-output "domain" {
-  value = var.domain
+output "domain_name" {
+  value = var.domain_name
 }

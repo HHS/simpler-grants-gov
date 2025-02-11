@@ -1,9 +1,13 @@
 module "prod_config" {
   source                          = "./env-config"
+  project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "prod"
+  account_name                    = "prod"
   network_name                    = "prod"
+  domain_name                     = null
+  enable_https                    = false
   has_database                    = local.has_database
   domain                          = "api.simpler.grants.gov"
   database_enable_http_endpoint   = true
@@ -55,4 +59,11 @@ module "prod_config" {
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
   }
+  instance_cpu    = 1024
+  instance_memory = 4096
+
+  # Enables ECS Exec access for debugging or jump access.
+  # Defaults to `false`. Uncomment the next line to enable.
+  # ⚠️ Warning! It is not recommended to enable this in a production environment.
+  # enable_command_execution = true
 }
