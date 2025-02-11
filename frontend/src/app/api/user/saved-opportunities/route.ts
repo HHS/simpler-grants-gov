@@ -1,27 +1,33 @@
-import { readError } from "src/errors";
+import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
 export const POST = async (request: Request) => {
-  return await handleRequest(request, "POST");
+  return await handleRequest(request);
 };
 
 export const DELETE = async (request: Request) => {
-  return await handleRequest(request, "DELETE");
+  return await handleRequest(request);
 };
 
-const handleRequest = async (request: Request, type: "DELETE" | "POST") => {
+const handleRequest = async (request: Request) => {
   const headers = request.headers;
   const opportunity_id = headers.get("opportunity_id");
-  const action = type === "POST" ? "save" : "delete";
+  if (request.method !== "POST" && request.method !== "DELETE") {
+    return Response.json(
+      { message: `Method ${request.method} not allowed` },
+      { status: 405 },
+    );
+  }
+  const action = request.method === "POST" ? "save" : "delete";
 
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      throw new Error("No active session to save opportunity");
+      throw new UnauthorizedError("No active session to save opportunity");
     }
     const response = await handleSavedOpportunity(
-      type,
+      request.method,
       session.token,
       session.user_id as string,
       Number(opportunity_id),
@@ -31,10 +37,14 @@ const handleRequest = async (request: Request, type: "DELETE" | "POST") => {
       message: string;
     };
     if (!res || res.status_code !== 200) {
-      throw new Error(`Error ${action} saved opportunity: ${res.message}`);
+      throw new ApiRequestError(
+        `Error ${request.method} saved opportunity: ${res.message}`,
+        "APIRequestError",
+        res.status_code,
+      );
     }
     return Response.json({
-      type: action,
+      type: request.method,
       message: `${action} saved opportunity success`,
     });
   } catch (e) {

@@ -1,4 +1,5 @@
 import { userSavedOpportunity } from "src/services/fetch/fetchers/fetchers";
+import { savedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
@@ -31,7 +32,7 @@ export const getSavedOpportunity = async (
   token: string,
   user_id: string,
   opportunity_id: number,
-) => {
+): Promise<savedOpportunity | null> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -46,5 +47,5 @@ export const getSavedOpportunity = async (
     (savedOpportunity: { opportunity_id: number }) =>
       savedOpportunity.opportunity_id === opportunity_id,
   );
-  return savedOpportunity ?? [];
+  return savedOpportunity ?? null;
 };

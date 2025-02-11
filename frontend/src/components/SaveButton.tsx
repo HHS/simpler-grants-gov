@@ -18,7 +18,7 @@ interface SaveButtonProps {
   messageText: string | ReactNode;
 }
 
-const SaveButton: React.FC<SaveButtonProps> = ({
+const SaveButton = ({
   buttonClick,
   messageClick,
   defaultText,
@@ -29,7 +29,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
   messageText,
   error,
   message,
-}) => {
+}: SaveButtonProps) => {
   const text = saved ? savedText : defaultText;
   const type = error ? "error" : "success";
   return (

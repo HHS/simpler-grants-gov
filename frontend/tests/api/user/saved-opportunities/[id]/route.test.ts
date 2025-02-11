@@ -13,7 +13,11 @@ jest.mock("src/services/auth/session", () => ({
 const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  getSavedOpportunity: () => mockPostSavedOpp({ opportunity_id: 1 }),
+  getSavedOpportunity: (
+    _token: string,
+    _user_id: number,
+    opportunity_id: number,
+  ) => mockPostSavedOpp(opportunity_id ? { opportunity_id: 1 } : null),
 }));
 
 describe("GET request", () => {
@@ -31,5 +35,29 @@ describe("GET request", () => {
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
     expect(json.opportunity_id).toBe(1);
     expect(getSessionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("unauthorized getting a saved opportunity", async () => {
+    getSessionMock.mockImplementation(() => ({
+      token: "",
+    }));
+
+    const response = await GET(new Request("http://simpler.grants.gov"), {
+      params: Promise.resolve({ id: "1" }),
+    });
+    expect(response.status).toBe(401);
+    expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
+  });
+
+  it("error getting a saved opportunity", async () => {
+    getSessionMock.mockImplementation(() => ({
+      token: "",
+    }));
+
+    const response = await GET(new Request("http://simpler.grants.gov"), {
+      params: Promise.resolve({ id: "" }),
+    });
+    expect(response.status).toBe(401);
+    expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
 });
