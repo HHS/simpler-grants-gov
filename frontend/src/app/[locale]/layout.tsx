@@ -11,6 +11,8 @@ import Script from "next/script";
 
 import "src/styles/styles.scss";
 
+import { LayoutProps } from "src/types/generalTypes";
+
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 
@@ -19,11 +21,6 @@ import Layout from "src/components/Layout";
 export const metadata: Metadata = {
   icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
 };
-
-interface Props {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}
 
 type NRType = typeof newrelic;
 
@@ -55,7 +52,7 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params }: Props) {
+export default async function LocaleLayout({ children, params }: LayoutProps) {
   const { locale } = await params;
   // Enable static rendering
   setRequestLocale(locale);
