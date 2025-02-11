@@ -231,8 +231,10 @@ def user_delete_saved_opportunity(
 @user_blueprint.doc(responses=[200, 401])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get_saved_opportunities(db_session: db.Session, user_id: UUID, json_data: dict) -> response.ApiResponse:
-    logger.info("GET /v1/users/:user_id/saved-opportunities")
+def user_get_saved_opportunities(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/saved-opportunities/list")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
@@ -243,8 +245,11 @@ def user_get_saved_opportunities(db_session: db.Session, user_id: UUID, json_dat
     # Get all saved opportunities for the user with their related opportunity data
     saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
 
-    return response.ApiResponse(message="Success", data=saved_opportunities,         pagination_info=pagination_info,
-)
+    return response.ApiResponse(
+        message="Success",
+        data=saved_opportunities,
+        pagination_info=pagination_info,
+    )
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-searches")
