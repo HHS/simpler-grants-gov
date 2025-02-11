@@ -138,6 +138,17 @@ class SavedSearchResponseSchema(Schema):
     )
 
 
+class UserSavedSearchesRequestSchema(Schema):
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserGetSavedSearchPaginationV1Schema",
+            ["created_at", "updated_at", "name"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
 class UserSavedSearchesResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(SavedSearchResponseSchema), metadata={"description": "List of saved searches"}

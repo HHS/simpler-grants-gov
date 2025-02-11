@@ -16,6 +16,7 @@ from src.api.users.user_schemas import (
     UserGetResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedSearchesRequestSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
     UserSaveOpportunityResponseSchema,
@@ -314,23 +315,29 @@ def user_delete_saved_search(
     return response.ApiResponse(message="Success")
 
 
-@user_blueprint.get("/<uuid:user_id>/saved-searches")
+@user_blueprint.post("/<uuid:user_id>/saved-searches/list")
+@user_blueprint.input(UserSavedSearchesRequestSchema, location="json")
 @user_blueprint.output(UserSavedSearchesResponseSchema)
-@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get_saved_searches(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
-    logger.info("GET /v1/users/:user_id/saved-searches")
-
+def user_get_saved_searches(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /v1/users/:user_id/saved-searches/list")
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
         raise_flask_error(401, "Unauthorized user")
 
-    saved_searches = get_saved_searches(db_session, user_id)
+    saved_searches, pagination_info = get_saved_searches(db_session, user_id, json_data)
 
-    return response.ApiResponse(message="Success", data=saved_searches)
+    return response.ApiResponse(
+        message="Success",
+        data=saved_searches,
+        pagination_info=pagination_info,
+    )
 
 
 @user_blueprint.put("/<uuid:user_id>/saved-searches/<uuid:saved_search_id>")
