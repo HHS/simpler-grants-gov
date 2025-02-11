@@ -495,37 +495,6 @@ paths:
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - User v1
-      summary: User Get Saved Opportunities
-      security:
-      - ApiJwtAuth: []
     post:
       parameters:
       - in: path
@@ -659,6 +628,49 @@ paths:
         '
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedOpportunitiesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Opportunities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -1072,6 +1084,8 @@ components:
         order_by:
           type: string
           enum:
+          - agency_code
+          - agency_name
           - created_at
           description: The field to sort the response by
         sort_direction:
@@ -1089,6 +1103,9 @@ components:
       properties:
         sort_order:
           type: array
+          default:
+          - order_by: agency_code
+            sort_direction: ascending
           minItems: 1
           maxItems: 5
           description: The list of sorting rules
@@ -1111,7 +1128,6 @@ components:
       required:
       - page_offset
       - page_size
-      - sort_order
     AgencyListRequest:
       type: object
       properties:
@@ -2218,71 +2234,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    SavedOpportunitySummaryV1:
-      type: object
-      properties:
-        post_date:
-          type: string
-          format: date
-          description: The date the opportunity was posted
-          example: '2024-01-01'
-        close_date:
-          type: string
-          format: date
-          description: The date the opportunity will close
-          example: '2024-01-01'
-        is_forecast:
-          type: boolean
-          description: Whether the opportunity is forecasted
-          example: false
-    SavedOpportunityResponseV1:
-      type: object
-      properties:
-        opportunity_id:
-          type: integer
-          description: The ID of the saved opportunity
-          example: 1234
-        opportunity_title:
-          type:
-          - string
-          - 'null'
-          description: The title of the opportunity
-          example: my title
-        opportunity_status:
-          description: The current status of the opportunity
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
-          - posted
-          enum:
-          - forecasted
-          - posted
-          - closed
-          - archived
-          type:
-          - string
-        summary:
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
-    UserSavedOpportunitiesResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: List of saved opportunities
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
     UserSaveOpportunityRequest:
       type: object
       properties:
@@ -2433,6 +2384,132 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityVersionV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderUserGetSavedOpportunityPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          - updated_at
+          - opportunity_title
+          - close_date
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserGetSavedOpportunityPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderUserGetSavedOpportunityPaginationV1'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    UserSavedOpportunitiesRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/UserGetSavedOpportunityPaginationV1'
+      required:
+      - pagination
+    SavedOpportunitySummaryV1:
+      type: object
+      properties:
+        post_date:
+          type: string
+          format: date
+          description: The date the opportunity was posted
+          example: '2024-01-01'
+        close_date:
+          type: string
+          format: date
+          description: The date the opportunity will close
+          example: '2024-01-01'
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted
+          example: false
+    SavedOpportunityResponseV1:
+      type: object
+      properties:
+        opportunity_id:
+          type: integer
+          description: The ID of the saved opportunity
+          example: 1234
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: my title
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
+        summary:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+    UserSavedOpportunitiesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of saved opportunities
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SavedOpportunityResponseV1'
         status_code:
           type: integer
           description: The HTTP status code
