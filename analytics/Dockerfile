@@ -19,6 +19,7 @@ RUN apt-get update \
     postgresql \
     wget \
     libtasn1-6 \
+    libgnutls30 \
   # Install security updates
   # https://pythonspeed.com/articles/security-updates-in-docker/
   && apt-get upgrade --yes \
