@@ -1,11 +1,11 @@
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
+import { OptionalStringDict } from "src/types/generalTypes";
 import {
   QueryParamData,
   QuerySetParam,
   SearchFetcherActionType,
   SortOptions,
 } from "src/types/search/searchRequestTypes";
-import { OptionalStringDict } from "src/types/searchRequestURLTypes";
 
 // Search params (query string) coming from the request URL into the server
 // can be a string, string[], or undefined.

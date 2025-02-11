@@ -1,6 +1,8 @@
 /* eslint-disable testing-library/prefer-screen-queries */
 import { expect, test } from "@playwright/test";
 
+import { openMobileNav } from "./playwrightUtils";
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
@@ -69,10 +71,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
       }),
     );
 
-    // confirm that nav items are present once menu opens
-    const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
-    await expect(menuOpener).toBeVisible();
-    await menuOpener.click();
+    await openMobileNav(page);
     const nav = page.locator(".usa-nav");
     await expect(nav).toHaveClass(/is-visible/);
 
@@ -86,8 +85,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
 
 test("hides mobile nav at expected times", async ({ page }, { project }) => {
   if (project.name.match(/[Mm]obile/)) {
-    const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
-    await menuOpener.click();
+    const menuOpener = await openMobileNav(page);
 
     // mobile menu closes when a navigation link is clicked
     const firstNavItem = page

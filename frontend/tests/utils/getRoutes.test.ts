@@ -34,12 +34,13 @@ describe("getNextRoutes", () => {
       "/",
       "/process",
       "/research",
+      "/saved-grants",
       "/search",
       "/subscribe/confirmation",
       "/subscribe",
       "/subscribe/unsubscribe",
+      "/unauthenticated",
       "/unauthorized",
-      "/user",
     ]);
   });
 });
