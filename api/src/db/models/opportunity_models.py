@@ -572,16 +572,23 @@ class CurrentChild(ApiSchemaTable, CurrentChildBaseMixin, TimestampMixin):
 
 
 def new_version(obj, db_session, is_deleted: bool = False):
+    # TODO - need a way of saying that a row should
+    #        not be included in this
+    #
+    #        Maybe some sort of global var we set for the import process?
+
     history_cls = obj.__history_cls__
 
     insp_obj = inspect(obj)
 
     old_values = {}
     obj_changed = False
-    # TODO - document what this loop is doing
+    # Iterate over each column, and for each get the history (the value before we modified)
     for attr in insp_obj.mapper.column_attrs:
+        # get_history -> gets the value before we modified anything
         adds, unchanged, deleted = insp_obj.get_history(attr.key, True)
 
+        # Deleted and adds are the only ones we'll care about
         if deleted:
             old_values[attr.key] = deleted[0]
             obj_changed = True
