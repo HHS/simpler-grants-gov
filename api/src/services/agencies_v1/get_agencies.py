@@ -35,11 +35,7 @@ def get_agencies(
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    print(list_params.pagination.sort_order)
-
     stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
-
-    print(stmt)
 
     if list_params.filters:
         if list_params.filters.agency_name:
