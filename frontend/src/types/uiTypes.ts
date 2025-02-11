@@ -1,4 +1,4 @@
-import { OptionalStringDict } from "src/types/searchRequestURLTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 
 export enum Breakpoints {
   CARD = "card",
