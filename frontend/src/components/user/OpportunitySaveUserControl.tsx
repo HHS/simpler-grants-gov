@@ -86,7 +86,7 @@ export const OpportunitySaveUserControl = () => {
       : t("save_message.unsave");
 
   const { checkFeatureFlag } = useFeatureFlags();
-  if (!checkFeatureFlag("authOn")) return null;
+  if (!checkFeatureFlag("savedOpportunitiesOn")) return null;
   return (
     <>
       {user?.token ? (
