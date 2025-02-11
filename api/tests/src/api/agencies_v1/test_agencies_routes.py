@@ -1,6 +1,7 @@
 import pytest
 
 from src.db.models.agency_models import Agency
+from src.pagination.pagination_models import PaginationParams
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import AgencyFactory
 
@@ -105,17 +106,10 @@ class TestAgenciesRoutes(BaseTestClass):
         assert data[0]["agency_code"] < data[1]["agency_code"]
 
         # Test multi-sort
-        payload = {
-            "filters": {},
-            "pagination": {
-                "page_size": 10,
-                "page_offset": 1,
-                "sort_order": [
+        payload["pagination"]["sort_order"] =  [
                     {"order_by": "agency_name", "sort_direction": "descending"},
                     {"order_by": "agency_code", "sort_direction": "descending"},
-                ],
-            },
-        }
+                ]
 
         response = client.post("/v1/agencies", headers={"X-Auth": api_auth_token}, json=payload)
         assert response.status_code == 200
