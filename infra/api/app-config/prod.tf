@@ -6,10 +6,9 @@ module "prod_config" {
   environment                     = "prod"
   account_name                    = "prod"
   network_name                    = "prod"
-  domain_name                     = null
+  domain_name                     = "api.simpler.grants.gov"
   enable_https                    = false
   has_database                    = local.has_database
-  domain                          = "api.simpler.grants.gov"
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
 

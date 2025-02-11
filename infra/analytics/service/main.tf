@@ -43,11 +43,9 @@ locals {
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -168,15 +166,19 @@ module "service" {
     local.api_analytics_bucket_environment_variables,
     { "ENVIRONMENT" : var.environment_name }
   )
+
   secrets = concat(
     [for secret_name in keys(local.service_config.secrets) : {
       name      = secret_name
       valueFrom = module.secrets[secret_name].secret_arn
     }],
   )
+
   extra_policies = merge(
     {
       api_analytics_bucket_access = aws_iam_policy.api_analytics_bucket_access.arn
     },
   )
+
+  is_temporary = local.is_temporary
 }

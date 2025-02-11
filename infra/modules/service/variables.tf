@@ -161,18 +161,6 @@ variable "db_vars" {
   default = null
 }
 
-variable "app_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the app service role for database access"
-  type        = string
-  default     = null
-}
-
-variable "migrator_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the migrator task role for database access"
-  type        = string
-  default     = null
-}
-
 variable "extra_policies" {
   description = "Map of extra IAM policies to attach to the service's task role. The map's keys define the resource name in terraform."
   type        = map(string)

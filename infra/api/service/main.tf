@@ -48,11 +48,9 @@ locals {
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
-  domain                                         = local.environment_config.domain
 }
 
 terraform {
@@ -91,8 +89,8 @@ data "aws_rds_cluster" "db_cluster" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count  = local.domain != null ? 1 : 0
-  domain = local.domain
+  count  = local.service_config.domain_name != null ? 1 : 0
+  domain = local.service_config.domain_name
 }
 
 data "aws_iam_policy" "app_db_access_policy" {
@@ -171,13 +169,15 @@ module "service" {
   migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
 
   db_vars = module.app_config.has_database ? {
-    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
+    security_group_ids         = module.database[0].security_group_ids
+    app_access_policy_arn      = module.database[0].app_access_policy_arn
+    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
     connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
+      host        = module.database[0].host
+      port        = module.database[0].port
+      user        = module.database[0].app_username
+      db_name     = module.database[0].db_name
+      schema_name = module.database[0].schema_name
     }
   } : null
 
@@ -206,8 +206,8 @@ module "service" {
   )
 
   extra_policies = {
-    feature_flags_access = module.feature_flags.access_policy_arn,
-    storage_access       = module.storage.access_policy_arn
+    # feature_flags_access = module.feature_flags.access_policy_arn,
+    # storage_access       = module.storage.access_policy_arn
   }
 
   is_temporary = local.is_temporary

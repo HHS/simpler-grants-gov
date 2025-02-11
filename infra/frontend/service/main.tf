@@ -47,10 +47,8 @@ locals {
 
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
-  domain                                         = local.environment_config.domain
   network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
 }
 
@@ -84,21 +82,6 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_rds_cluster" "db_cluster" {
-  count              = module.app_config.has_database ? 1 : 0
-  cluster_identifier = local.database_config.cluster_name
-}
-
-data "aws_iam_policy" "app_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.app_access_policy_name
-}
-
-data "aws_iam_policy" "migrator_db_access_policy" {
-  count = module.app_config.has_database ? 1 : 0
-  name  = local.database_config.migrator_access_policy_name
-}
-
 # Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
@@ -107,8 +90,8 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 data "aws_acm_certificate" "cert" {
-  count  = local.domain != null ? 1 : 0
-  domain = local.domain
+  count  = local.service_config.domain_name != null ? 1 : 0
+  domain = local.service_config.domain_name
 }
 
 data "aws_security_groups" "aws_services" {
@@ -149,9 +132,8 @@ module "service" {
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
   hostname        = module.app_config.hostname
 
-  cpu                      = local.service_config.cpu
-  memory                   = local.service_config.memory
-  desired_instance_count   = local.service_config.desired_instance_count
+  cpu                      = local.service_config.instance_cpu
+  memory                   = local.service_config.instance_memory
   enable_command_execution = local.service_config.enable_command_execution
   max_capacity             = local.service_config.instance_scaling_max_capacity
   min_capacity             = local.service_config.instance_scaling_min_capacity
@@ -166,17 +148,6 @@ module "service" {
   app_access_policy_arn      = null
   migrator_access_policy_arn = null
 
-  db_vars = module.app_config.has_database ? {
-    security_group_ids = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
-    }
-  } : null
-
   extra_environment_variables = merge({
     # FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
     # BUCKET_NAME           = local.storage_config.bucket_name
@@ -190,8 +161,8 @@ module "service" {
   ]
 
   extra_policies = {
-    feature_flags_access = module.feature_flags.access_policy_arn,
-    storage_access       = module.storage.access_policy_arn
+    # feature_flags_access = module.feature_flags.access_policy_arn,
+    # storage_access       = module.storage.access_policy_arn
   }
 
   is_temporary = local.is_temporary
