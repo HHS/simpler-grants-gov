@@ -14,7 +14,7 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-Run `make init && make run logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
+Run `make init && make run-logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
 This stands up the following services:
 
@@ -27,7 +27,7 @@ This stands up the following services:
 
 ### Seed data
 
-Run `make db-seed-local && populate-search-opportunities` to create local data in the database and make it available in the API.
+Run `make db-seed-local && make populate-search-opportunities` to create local data in the database and make it available in the API.
 
 ### API Authenticaion
 
