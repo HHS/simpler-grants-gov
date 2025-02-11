@@ -63,7 +63,7 @@ RUN apt-get update \
   libtasn1-6 \
   && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --only-upgrade libc-bin libc6 \
-  && apt-get install --no-install-recommends --yes libtasn1-6 \
+  && apt-get install --no-install-recommends --yes libtasn1-6 libgnutls30 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
