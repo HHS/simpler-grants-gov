@@ -1,4 +1,4 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
+import { readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
@@ -18,11 +18,6 @@ export async function GET(
       session.user_id as string,
       Number(opportunity_id),
     );
-    if (!savedOpportunities) {
-      throw new ApiRequestError(
-        `Error fetching saved opportunity: ${opportunity_id}`,
-      );
-    }
     return new Response(JSON.stringify(savedOpportunities), {
       status: 200,
       headers: {

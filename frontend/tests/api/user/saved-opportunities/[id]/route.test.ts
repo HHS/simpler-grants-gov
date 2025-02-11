@@ -49,15 +49,17 @@ describe("GET request", () => {
     expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
   });
 
-  it("error getting a saved opportunity", async () => {
+  it("getting an empty saved opportunity", async () => {
     getSessionMock.mockImplementation(() => ({
-      token: "",
+      token: "fakeToken",
     }));
 
     const response = await GET(new Request("http://simpler.grants.gov"), {
       params: Promise.resolve({ id: "" }),
     });
-    expect(response.status).toBe(401);
-    expect(mockPostSavedOpp).toHaveBeenCalledTimes(0);
+    const json = (await response.json()) as null;
+    expect(response.status).toBe(200);
+    expect(mockPostSavedOpp).toHaveBeenCalledTimes(1);
+    expect(json).toBeNull();
   });
 });

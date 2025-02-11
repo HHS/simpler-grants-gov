@@ -60,8 +60,8 @@ export const OpportunitySaveUserControl = () => {
     setLoading(true);
     fetch(`/api/user/saved-opportunities/${opportunity_id}`)
       .then((res) => (res.ok && res.status === 200 ? res.json() : []))
-      .then((data: { length: number }) => {
-        data.length ?? setSaved(true);
+      .then((data) => {
+        data && setSaved(true);
       })
       .finally(() => {
         setLoading(false);
