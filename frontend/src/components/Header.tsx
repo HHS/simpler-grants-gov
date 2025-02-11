@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -48,16 +49,25 @@ const NavLinks = ({
     },
     [t],
   );
+  const { user } = useUser();
 
   const navLinkList = useMemo(() => {
-    return [
+    const anonymousNavLinks = [
       { text: t("nav_link_home"), href: "/" },
       getSearchLink(path.includes("/search")),
       { text: t("nav_link_process"), href: "/process" },
       { text: t("nav_link_research"), href: "/research" },
       { text: t("nav_link_subscribe"), href: "/subscribe" },
     ];
-  }, [t, path, getSearchLink]);
+    if (!user?.token) {
+      return anonymousNavLinks;
+    }
+
+    return anonymousNavLinks.toSpliced(2, 0, {
+      text: t("nav_link_saved_grants"),
+      href: "/saved-grants",
+    });
+  }, [t, path, getSearchLink, user]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
@@ -69,7 +79,7 @@ const NavLinks = ({
         const baseHref = href.split("?")[0];
         return currentPath.match(new RegExp(`^(?:/e[ns])?${baseHref}`));
       });
-      // account for home path
+      // account for home path as default / not found
       return index === -1 ? index : index + 1;
     },
     [navLinkList],
