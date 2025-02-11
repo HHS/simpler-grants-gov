@@ -27,6 +27,7 @@ RUN apt-get update \
         libpq-dev \
         postgresql \
         wget \
+        libtasn1-6 \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && rm -fr /var/lib/apt/lists/* \
