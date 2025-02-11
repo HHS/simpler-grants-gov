@@ -99,7 +99,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 resource "aws_lb_listener" "alb_listener_https" {
   count = var.certificate_arn != null ? 1 : 0
 
-  load_balancer_arn = aws_lb.alb.arn
+  load_balancer_arn = aws_lb.alb[0].arn
   port              = 443
   protocol          = "HTTPS"
   certificate_arn   = var.certificate_arn

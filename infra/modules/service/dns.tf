@@ -6,8 +6,8 @@ resource "aws_route53_record" "app" {
   zone_id = var.hosted_zone_id
   type    = "A"
   alias {
-    name                   = aws_lb.alb.dns_name
-    zone_id                = aws_lb.alb.zone_id
+    name                   = aws_lb.alb[0].dns_name
+    zone_id                = aws_lb.alb[0].zone_id
     evaluate_target_health = true
   }
 }
