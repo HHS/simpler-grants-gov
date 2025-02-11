@@ -7,6 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const opportunity_id = (await params).id;
+
   try {
     const session = await getSession();
     if (!session || !session.token) {

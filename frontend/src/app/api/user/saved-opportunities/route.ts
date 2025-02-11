@@ -44,7 +44,7 @@ const handleRequest = async (request: Request) => {
       );
     }
     return Response.json({
-      type: request.method,
+      type: action,
       message: `${action} saved opportunity success`,
     });
   } catch (e) {
