@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import desc, select
+from sqlalchemy import asc, desc, select
 
 import src.adapters.db as db
 from src.constants.lookup_constants import ExtractType
