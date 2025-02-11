@@ -88,10 +88,6 @@ variable "search_availability_zone_count" {
   default = 3
 }
 
-variable "has_database" {
-  type = bool
-}
-
 variable "database_instance_count" {
   description = "Number of database instances. Should be 2+ for production environments."
   type        = number
@@ -144,15 +140,6 @@ variable "instance_scaling_min_capacity" {
 
 variable "has_incident_management_service" {
   type = bool
-}
-
-variable "service_override_extra_environment_variables" {
-  type        = map(string)
-  description = <<EOT
-    Map that overrides the default extra environment variables defined in environment-variables.tf.
-    Map from environment variable name to environment variable value
-    EOT
-  default     = {}
 }
 
 variable "service_override_extra_environment_variables" {

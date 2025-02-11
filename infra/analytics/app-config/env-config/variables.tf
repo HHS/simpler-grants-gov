@@ -71,15 +71,6 @@ variable "database_instance_count" {
   default     = 1
 }
 
-variable "service_override_extra_environment_variables" {
-  type        = map(string)
-  description = <<EOT
-    Map that overrides the default extra environment variables defined in environment-variables.tf.
-    Map from environment variable name to environment variable value
-    EOT
-  default     = {}
-}
-
 variable "service_cpu" {
   type    = number
   default = 256
