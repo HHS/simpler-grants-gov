@@ -84,8 +84,8 @@ class TestAgenciesRoutes(BaseTestClass):
 
     def test_agencies_sorting(self, client, api_auth_token, enable_factory_create, db_session):
         # Create agencies
-        AgencyFactory.create(agency_name="HHS")
-        AgencyFactory.create(agency_name="DOD")
+        AgencyFactory.create(agency_name="HHS", agency_code="DOI")
+        AgencyFactory.create(agency_name="DOD", agency_code="HHS-ACL")
 
         # Test default sort order
         payload = {
@@ -105,7 +105,7 @@ class TestAgenciesRoutes(BaseTestClass):
         assert data[0]["agency_code"] < data[1]["agency_code"]
 
         # Test multi-sort
-        AgencyFactory.create(agency_name="DOD")
+        AgencyFactory.create(agency_name="DOD", agency_code="HHS-ACF")
 
         payload["pagination"]["sort_order"] = [
             {"order_by": "agency_name", "sort_direction": "descending"},
