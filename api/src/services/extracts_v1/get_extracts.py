@@ -52,7 +52,7 @@ def get_extracts(
             sort_column = getattr(ExtractMetadata, sort_order.order_by)
 
         if sort_order.sort_direction == SortDirection.ASCENDING:
-            stmt = stmt.order_by(sort_column)
+            stmt = stmt.order_by(asc(sort_column))
         else:
             stmt = stmt.order_by(desc(sort_column))
 
