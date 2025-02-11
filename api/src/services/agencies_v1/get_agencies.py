@@ -9,7 +9,7 @@ import src.adapters.db as db
 from src.db.models.agency_models import Agency
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
-from src.services.users.get_saved_searches import apply_sorting
+from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
 
