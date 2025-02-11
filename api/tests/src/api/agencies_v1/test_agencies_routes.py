@@ -105,6 +105,8 @@ class TestAgenciesRoutes(BaseTestClass):
         assert data[0]["agency_code"] < data[1]["agency_code"]
 
         # Test multi-sort
+        AgencyFactory.create(agency_name="DOD")
+
         payload["pagination"]["sort_order"] = [
             {"order_by": "agency_name", "sort_direction": "descending"},
             {"order_by": "agency_code", "sort_direction": "descending"},
@@ -114,5 +116,6 @@ class TestAgenciesRoutes(BaseTestClass):
         assert response.status_code == 200
         data = response.json["data"]
 
-        # assert order by agency_name asc
+        # assert order by agency_name desc then agency_code desc
         assert data[0]["agency_name"] > data[1]["agency_name"]
+        assert data[1]["agency_code"] > data[2]["agency_code"]
