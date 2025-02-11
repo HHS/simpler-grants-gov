@@ -116,5 +116,10 @@ def _handle_mock_response(request: dict, to_address: str) -> PinpointResponse:
     return response
 
 
+def _clear_mock_responses() -> None:
+    global _mock_responses
+    _mock_responses = []
+
+
 def _get_mock_responses() -> list[tuple[dict, PinpointResponse]]:
     return _mock_responses

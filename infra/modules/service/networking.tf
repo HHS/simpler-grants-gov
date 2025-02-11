@@ -69,20 +69,4 @@ resource "aws_security_group" "app" {
     # just ignore it
     ignore_changes = [description]
   }
-
-  ingress {
-    description     = "Allow HTTP traffic to application container port"
-    protocol        = "tcp"
-    from_port       = var.container_port
-    to_port         = var.container_port
-    security_groups = [aws_security_group.alb.id]
-  }
-
-  egress {
-    description = "Allow all outgoing traffic from application"
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
