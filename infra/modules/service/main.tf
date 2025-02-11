@@ -29,6 +29,7 @@ locals {
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },
+    { name : "AWS_DEFAULT_REGION", value : data.aws_region.current.name },
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
     { name : "ENVIRONMENT", value : var.environment_name },
@@ -46,7 +47,7 @@ locals {
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
   cdn_environment_variables = local.enable_cdn ? [
-    { name : "CDN_URL", value : local.cdn_domain_name_env_var },
+    { name : "CDN_URL", value : "https://${local.cdn_domain_name_env_var}" },
   ] : []
   environment_variables = concat(
     local.base_environment_variables,

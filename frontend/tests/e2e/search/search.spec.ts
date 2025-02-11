@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { camelCase } from "lodash";
-import { PageProps } from "tests/e2e/playwrightUtils";
+import {
+  PageProps,
+  waitForAnyURLChange,
+  waitForUrl,
+  waitForURLContainsQueryParam,
+} from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -18,10 +23,7 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   validateTopLevelAndNestedSelectedFilterCounts,
-  waitForAnyURLChange,
   waitForSearchResultsInitialLoad,
-  waitForUrl,
-  waitForURLContainsQueryParam,
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {

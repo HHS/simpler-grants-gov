@@ -81,10 +81,11 @@ paths:
                 summary: No filters
                 value:
                   pagination:
-                    order_by: created_at
+                    sort_order:
+                    - order_by: created_at
+                      sort_direction: descending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v1/agencies:
@@ -122,10 +123,11 @@ paths:
                 summary: No filters
                 value:
                   pagination:
-                    order_by: created_at
+                    sort_order:
+                    - order_by: created_at
+                      sort_direction: descending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
       security:
       - ApiKeyAuth: []
   /v1/users/login:
@@ -249,10 +251,11 @@ paths:
                 summary: No filters
                 value:
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: ascending
               example2:
                 summary: All filters
                 value:
@@ -286,10 +289,11 @@ paths:
                     close_date:
                       start_date: '2024-01-01'
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
               example3:
                 summary: Query & opportunity_status filters
                 value:
@@ -300,10 +304,11 @@ paths:
                       - forecasted
                       - posted
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
               example4:
                 summary: CSV file response
                 value:
@@ -314,10 +319,11 @@ paths:
                       - forecasted
                       - posted
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 100
-                    sort_direction: ascending
               example5:
                 summary: Filter by award fields
                 value:
@@ -332,12 +338,13 @@ paths:
                       min: 100000
                       max: 250000
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
               example6:
-                summary: FIlter by assistance listing numbers
+                summary: Filter by assistance listing numbers
                 value:
                   filters:
                     assistance_listing_number:
@@ -345,10 +352,23 @@ paths:
                       - '43.001'
                       - '47.049'
                   pagination:
-                    order_by: opportunity_id
+                    sort_order:
+                    - order_by: opportunity_id
+                      sort_direction: ascending
                     page_offset: 1
                     page_size: 25
-                    sort_direction: descending
+              example7:
+                summary: Primary sort agency_code desc, secondary sort opportunity_id
+                  asc
+                value:
+                  pagination:
+                    page_offset: 1
+                    page_size: 25
+                    sort_order:
+                    - order_by: agency_code
+                      sort_direction: descending
+                    - order_by: opportunity_id
+                      sort_direction: ascending
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}:
@@ -432,37 +452,6 @@ paths:
       security:
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
-    get:
-      parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSavedSearchesResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - User v1
-      summary: User Get Saved Searches
-      security:
-      - ApiJwtAuth: []
     post:
       parameters:
       - in: path
@@ -577,6 +566,49 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserSaveOpportunityRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/saved-searches/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedSearchesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - User v1
+      summary: User Get Saved Searches
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSavedSearchesRequest'
       security:
       - ApiJwtAuth: []
   /v1/opportunities/{opportunity_id}/versions:
@@ -866,7 +898,7 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/DateRange'
-    ExtractMetadataPaginationV1:
+    SortOrderExtractMetadataPaginationV1:
       type: object
       properties:
         order_by:
@@ -881,6 +913,22 @@ components:
           - descending
           type:
           - string
+      required:
+      - order_by
+      - sort_direction
+    ExtractMetadataPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderExtractMetadataPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -893,10 +941,9 @@ components:
           description: The page number to fetch, starts counting from 1
           example: 1
       required:
-      - order_by
       - page_offset
       - page_size
-      - sort_direction
+      - sort_order
     ExtractMetadataRequest:
       type: object
       properties:
@@ -922,6 +969,20 @@ components:
           - $ref: '#/components/schemas/ExtractMetadataPaginationV1'
       required:
       - pagination
+    SortOrder:
+      type: object
+      properties:
+        order_by:
+          type: string
+          description: The field that the records were sorted by
+          example: id
+        sort_direction:
+          description: The direction the records are sorted
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
     PaginationInfo:
       type: object
       properties:
@@ -941,17 +1002,14 @@ components:
           type: integer
           description: The total number of pages that can be fetched
           example: 2
-        order_by:
-          type: string
-          description: The field that the records were sorted by
-          example: id
-        sort_direction:
-          description: The direction the records are sorted
-          enum:
-          - ascending
-          - descending
-          type:
-          - string
+        sort_order:
+          type: array
+          description: The sort order passed in originally
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrder'
     ExtractMetadataResponse:
       type: object
       properties:
@@ -1008,7 +1066,7 @@ components:
       properties:
         agency_id:
           type: integer
-    AgencyPaginationV1:
+    SortOrderAgencyPaginationV1:
       type: object
       properties:
         order_by:
@@ -1023,6 +1081,22 @@ components:
           - descending
           type:
           - string
+      required:
+      - order_by
+      - sort_direction
+    AgencyPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1035,10 +1109,9 @@ components:
           description: The page number to fetch, starts counting from 1
           example: 1
       required:
-      - order_by
       - page_offset
       - page_size
-      - sort_direction
+      - sort_order
     AgencyListRequest:
       type: object
       properties:
@@ -1054,40 +1127,6 @@ components:
           - $ref: '#/components/schemas/AgencyPaginationV1'
       required:
       - pagination
-    AgencyContactInfo:
-      type: object
-      properties:
-        contact_name:
-          type: string
-          description: Full name of the agency contact person
-        address_line_1:
-          type: string
-          description: Primary street address of the agency
-        address_line_2:
-          type:
-          - string
-          - 'null'
-          description: Additional address information (suite, unit, etc.)
-        city:
-          type: string
-          description: City where the agency is located
-        state:
-          type: string
-          description: State where the agency is located
-        zip_code:
-          type: string
-          description: Postal code for the agency address
-        phone_number:
-          type: string
-          description: Contact phone number for the agency
-        primary_email:
-          type: string
-          description: Main email address for agency communications
-        secondary_email:
-          type:
-          - string
-          - 'null'
-          description: Alternative email address for agency communications
     AgencyResponse:
       type: object
       properties:
@@ -1097,35 +1136,11 @@ components:
           type: string
         agency_code:
           type: string
-        sub_agency_code:
-          type:
-          - string
-          - 'null'
-        assistance_listing_number:
-          type: string
-        agency_submission_notification_setting:
-          type: string
         top_level_agency:
           type:
           - object
           allOf:
           - $ref: '#/components/schemas/AgencyResponse'
-        agency_contact_info:
-          type:
-          - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/AgencyContactInfo'
-          - type: 'null'
-        agency_download_file_types:
-          type: array
-          description: List of download file types supported by the agency
-          items:
-            enum:
-            - xml
-            - pdf
-            type:
-            - string
         created_at:
           type: string
           format: date-time
@@ -1494,7 +1509,7 @@ components:
           - agency
           type:
           - string
-    OpportunityPaginationV1:
+    SortOrderOpportunityPaginationV1:
       type: object
       properties:
         order_by:
@@ -1515,6 +1530,25 @@ components:
           - descending
           type:
           - string
+      required:
+      - order_by
+      - sort_direction
+    OpportunityPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: opportunity_id
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderOpportunityPaginationV1'
         page_size:
           type: integer
           minimum: 1
@@ -1527,10 +1561,8 @@ components:
           description: The page number to fetch, starts counting from 1
           example: 1
       required:
-      - order_by
       - page_offset
       - page_size
-      - sort_direction
     OpportunitySearchRequestV1:
       type: object
       properties:
@@ -1540,6 +1572,16 @@ components:
           maxLength: 100
           description: Query string which searches against several text fields
           example: research
+        query_operator:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
+          - AND
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
         filters:
           type:
           - object
@@ -2043,15 +2085,6 @@ components:
           type: string
           description: A description of the attachment
           example: The full announcement NOFO
-        opportunity_attachment_type:
-          description: The type of attachment
-          example: !!python/object/apply:src.constants.lookup_constants.OpportunityAttachmentType
-          - notice_of_funding_opportunity
-          enum:
-          - notice_of_funding_opportunity
-          - other
-          type:
-          - string
     OpportunityWithAttachmentsV1:
       type: object
       properties:
@@ -2154,48 +2187,6 @@ components:
           - object
           allOf:
           - $ref: '#/components/schemas/OpportunityWithAttachmentsV1'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    SavedSearchResponse:
-      type: object
-      properties:
-        saved_search_id:
-          type: string
-          format: uuid
-          description: The ID of the saved search
-          example: 123e4567-e89b-12d3-a456-426614174000
-        name:
-          type: string
-          description: Name of the saved search
-          example: Grant opportunities in California
-        search_query:
-          description: The saved search query parameters
-          type:
-          - object
-          allOf:
-          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
-        created_at:
-          type: string
-          format: date-time
-          description: When the search was saved
-          example: '2024-01-01T00:00:00Z'
-    UserSavedSearchesResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: List of saved searches
-          items:
-            type:
-            - object
-            allOf:
-            - $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2308,6 +2299,108 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderUserGetSavedSearchPaginationV1:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          - updated_at
+          - name
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserGetSavedSearchPaginationV1:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SortOrderUserGetSavedSearchPaginationV1'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    UserSavedSearchesRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/UserGetSavedSearchPaginationV1'
+      required:
+      - pagination
+    SavedSearchResponse:
+      type: object
+      properties:
+        saved_search_id:
+          type: string
+          format: uuid
+          description: The ID of the saved search
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          description: Name of the saved search
+          example: Grant opportunities in California
+        search_query:
+          description: The saved search query parameters
+          type:
+          - object
+          allOf:
+          - $ref: '#/components/schemas/OpportunitySearchRequestV1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the search was saved
+          example: '2024-01-01T00:00:00Z'
+    UserSavedSearchesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of saved searches
+          items:
+            type:
+            - object
+            allOf:
+            - $ref: '#/components/schemas/SavedSearchResponse'
         status_code:
           type: integer
           description: The HTTP status code
