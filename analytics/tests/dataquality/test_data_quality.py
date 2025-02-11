@@ -32,9 +32,3 @@ def output() -> list[dict]|None:
 
     return GitHubProjectETL(config).extract_and_transform_in_memory()
 
-
-def side_effects(*args):
-    """Call the roadmap data on first call then sprintboard data on subsequent calls."""
-    if args[0] == "0":
-        return mock_graphql_roadmap_data
-    return mock_graphql_sprintboard_data
