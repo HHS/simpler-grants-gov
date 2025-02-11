@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { chromium } from "playwright-core";
-import {
-  fillSearchInputAndSubmit,
-  generateRandomString,
-} from "tests/e2e/search/searchSpecUtil";
+import { generateRandomString } from "tests/e2e/playwrightUtils";
+import { fillSearchInputAndSubmit } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
   // Loadiing indicator resolves too quickly to reliably test in e2e.

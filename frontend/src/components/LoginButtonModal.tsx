@@ -28,7 +28,8 @@ export const LoginButtonModal = ({
           <ModalToggleButton
             modalRef={modalRef}
             opener
-            className="usa-nav__link text-ysaprimary font-sans-2xs display-flex text-normal border-0"
+            className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
+            data-testid="sign-in-button"
           >
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"

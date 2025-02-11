@@ -98,7 +98,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         if self.agency_record is not None and self.agency_record.top_level_agency is not None:
             return self.agency_record.top_level_agency.agency_name
 
-        return None
+        return self.agency_name
 
     @property
     def agency_name(self) -> str | None:

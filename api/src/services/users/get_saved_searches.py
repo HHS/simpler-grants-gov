@@ -1,39 +1,18 @@
-from typing import Sequence, Tuple, Type
+from typing import Sequence, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import asc, desc, select
-from sqlalchemy.sql import Select
+from sqlalchemy import select
 
 from src.adapters import db
 from src.db.models.user_models import UserSavedSearch
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.services.service_utils import apply_sorting
 
 
 class SavedSearchListParams(BaseModel):
     pagination: PaginationParams
-
-
-def apply_sorting(stmt: Select, model: Type, sort_order: list) -> Select:
-    """
-    Applies sorting to a SQLAlchemy select statement based on the provided sorting orders.
-
-    :param stmt: The SQLAlchemy query statement to which sorting should be applied.
-    :param model: The model class on which the sorting should be applied.
-    :param sort_order: A list of object describing the sorting order for a column.
-    :return: The modified query statement with the applied sorting.
-    """
-
-    order_cols: list = []
-    for order in sort_order:
-        column = getattr(model, order.order_by)
-        if order.sort_direction == SortDirection.ASCENDING:
-            order_cols.append(asc(column))
-        elif order.sort_direction == SortDirection.DESCENDING:
-            order_cols.append(desc(column))
-
-    return stmt.order_by(*order_cols)
 
 
 def get_saved_searches(
