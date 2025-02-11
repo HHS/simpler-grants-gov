@@ -165,9 +165,6 @@ module "service" {
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = true
 
-  app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-  migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
-
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
     app_access_policy_arn      = module.database[0].app_access_policy_arn
