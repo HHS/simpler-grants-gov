@@ -139,7 +139,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         <div className="usa-prose padding-y-3">
           <OpportunitySaveUserControl />
         </div>
-        <div className="grid-row grid-gap">
+        <div className="grid-row grid-gap margin-top-2">
           <div className="desktop:grid-col-8 tablet:grid-col-12 tablet:order-1 desktop:order-first">
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription
