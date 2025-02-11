@@ -27,22 +27,46 @@ class AbstractTransformSubTask(SubTask):
 
         self.transform_time: datetime = transform_time
 
-    def run_subtask(self) -> None:
-        with self.db_session.begin():
-            self.transform_records()
-            logger.info(
-                "Finished running transformations for %s - committing results", self.cls_name()
-            )
+    def has_more_to_process(self) -> bool:
+        """Method for the derived classes to override if
+        they want to indicate they have more batches to process
 
-        # As a safety net, expire all references in the session
-        # after running. This avoids any potential complexities in
-        # cached data between separate subtasks running.
-        # By default sessions actually do this when committing, but
-        # our db session creation logic disables it, so it's the ordinary behavior.
-        self.db_session.expire_all()
+        If you do not override this, exactly one batch will get processed
+        """
+        return False
+
+    def run_subtask(self) -> None:
+        batch_num = 0
+        while True:
+            batch_num += 1
+            with self.db_session.begin():
+                self.transform_records()
+                logger.info(
+                    "Finished running set of transformations for %s - committing results",
+                    self.cls_name(),
+                )
+
+                if not self.has_more_to_process():
+                    break
+
+                # As a sanity check, if more than 100 batches run, stop processing
+                # and we'll assume the job got stuck.
+                if batch_num > 100:
+                    logger.error(
+                        "Job %s has run 100 batches, stopping further processing in case job is stuck",
+                        self.cls_name,
+                    )
+
+            # As a safety net, expire all references in the session
+            # after running. This avoids any potential complexities in
+            # cached data between separate subtasks running.
+            # By default sessions actually do this when committing, but
+            # our db session creation logic disables it, so it's the ordinary behavior.
+            self.db_session.expire_all()
 
     @abc.abstractmethod
     def transform_records(self) -> None:
+        """Abstract method implemented by derived, returns True when done processing"""
         pass
 
     def _handle_delete(
@@ -120,23 +144,29 @@ class AbstractTransformSubTask(SubTask):
         destination_model: Type[transform_constants.D],
         join_clause: Sequence,
         batch_size: int = 5000,
+        limit: int | None = None,
     ) -> list[Tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
 
+        select_query = (
+            select(source_model, destination_model, Opportunity)
+            .join(destination_model, and_(*join_clause), isouter=True)
+            .join(
+                Opportunity,
+                source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
+                isouter=True,
+            )
+            .where(source_model.transformed_at.is_(None))
+            .execution_options(yield_per=batch_size)
+        )
+
+        if limit is not None:
+            select_query = select_query.limit(limit)
+
         return cast(
             list[Tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],
-            self.db_session.execute(
-                select(source_model, destination_model, Opportunity)
-                .join(destination_model, and_(*join_clause), isouter=True)
-                .join(
-                    Opportunity,
-                    source_model.opportunity_id == Opportunity.opportunity_id,  # type: ignore[attr-defined]
-                    isouter=True,
-                )
-                .where(source_model.transformed_at.is_(None))
-                .execution_options(yield_per=batch_size)
-            ),
+            self.db_session.execute(select_query),
         )
 
     def fetch_with_opportunity_summary(
