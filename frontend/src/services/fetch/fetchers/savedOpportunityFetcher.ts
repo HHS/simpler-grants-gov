@@ -4,21 +4,21 @@ import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityRe
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
   token: string,
-  user_id: string,
-  opportunity_id: number,
+  userId: string,
+  opportunityId: number,
 ) => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
   const subPath =
     type === "POST"
-      ? `${user_id}/saved-opportunities`
-      : `${user_id}/saved-opportunities/${opportunity_id}`;
+      ? `${userId}/saved-opportunities`
+      : `${userId}/saved-opportunities/${opportunityId}`;
 
   const body =
     type === "POST"
       ? {
-          opportunity_id: String(opportunity_id),
+          opportunityId: String(opportunityId),
         }
       : {};
   return userSavedOpportunity(type)({
@@ -30,13 +30,13 @@ export const handleSavedOpportunity = async (
 
 export const getSavedOpportunity = async (
   token: string,
-  user_id: string,
-  opportunity_id: number,
+  userId: string,
+  opportunityId: number,
 ): Promise<SavedOpportunity | null> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const subPath = `${user_id}/saved-opportunities`;
+  const subPath = `${userId}/saved-opportunities`;
   const resp = await userSavedOpportunity("GET")({
     subPath,
     additionalHeaders: ssgToken,
@@ -45,7 +45,7 @@ export const getSavedOpportunity = async (
   const savedOpportunities = json.data;
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: number }) =>
-      savedOpportunity.opportunity_id === opportunity_id,
+      savedOpportunity.opportunity_id === opportunityId,
   );
   return savedOpportunity ?? null;
 };

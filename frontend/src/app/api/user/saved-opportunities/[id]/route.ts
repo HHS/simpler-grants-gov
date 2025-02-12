@@ -6,7 +6,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const opportunity_id = (await params).id;
+  const opportunityId = (await params).id;
 
   try {
     const session = await getSession();
@@ -16,7 +16,7 @@ export async function GET(
     const savedOpportunities = await getSavedOpportunity(
       session.token,
       session.user_id as string,
-      Number(opportunity_id),
+      Number(opportunityId),
     );
     return new Response(JSON.stringify(savedOpportunities), {
       status: 200,

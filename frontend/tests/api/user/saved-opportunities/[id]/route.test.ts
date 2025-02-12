@@ -15,9 +15,9 @@ const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   getSavedOpportunity: (
     _token: string,
-    _user_id: number,
-    opportunity_id: number,
-  ) => mockPostSavedOpp(opportunity_id ? { opportunity_id: 1 } : null),
+    _userId: number,
+    opportunityId: number,
+  ) => mockPostSavedOpp(opportunityId ? { opportunity_id: 1 } : null),
 }));
 
 describe("GET request", () => {

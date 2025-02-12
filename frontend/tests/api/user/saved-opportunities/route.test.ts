@@ -20,11 +20,11 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   handleSavedOpportunity: (
     _type: string,
     _token: string,
-    _user_id: number,
-    opportunity_id: number,
+    _userId: number,
+    opportunityId: number,
   ) =>
     mockPostSavedOpp(
-      opportunity_id ? { status_code: 200 } : { status_code: 500 },
+      opportunityId ? { status_code: 200 } : { status_code: 500 },
     ),
 }));
 

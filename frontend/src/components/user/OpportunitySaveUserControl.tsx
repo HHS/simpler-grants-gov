@@ -17,7 +17,7 @@ export const OpportunitySaveUserControl = () => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
   const params = useParams();
-  const opportunity_id = String(params.id);
+  const opportunityId = String(params.id);
 
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
@@ -37,7 +37,7 @@ export const OpportunitySaveUserControl = () => {
       const res = await fetch("/api/user/saved-opportunities", {
         method,
         headers: {
-          opportunity_id,
+          opportunityId,
         },
       });
       if (res.ok && res.status === 200) {
@@ -58,7 +58,7 @@ export const OpportunitySaveUserControl = () => {
   useEffect(() => {
     if (!user?.token) return;
     setLoading(true);
-    fetch(`/api/user/saved-opportunities/${opportunity_id}`)
+    fetch(`/api/user/saved-opportunities/${opportunityId}`)
       .then((res) => (res.ok && res.status === 200 ? res.json() : null))
       .then((data) => {
         data && setSaved(true);
@@ -69,7 +69,7 @@ export const OpportunitySaveUserControl = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, [opportunity_id, user]);
+  }, [opportunityId, user]);
 
   const messageText = saved
     ? savedError

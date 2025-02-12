@@ -12,7 +12,7 @@ export const DELETE = async (request: Request) => {
 
 const handleRequest = async (request: Request) => {
   const headers = request.headers;
-  const opportunity_id = headers.get("opportunity_id");
+  const opportunityId = headers.get("opportunityId");
   if (request.method !== "POST" && request.method !== "DELETE") {
     return Response.json(
       { message: `Method ${request.method} not allowed` },
@@ -30,7 +30,7 @@ const handleRequest = async (request: Request) => {
       request.method,
       session.token,
       session.user_id as string,
-      Number(opportunity_id),
+      Number(opportunityId),
     );
     const res = (await response.json()) as {
       status_code: number;

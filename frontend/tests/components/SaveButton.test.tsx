@@ -5,14 +5,15 @@ import SaveButton from "src/components/SaveButton";
 const SaveButtonProps = {
   buttonClick: jest.fn(),
   messageClick: jest.fn(),
-  saved: true,
-  loading: false,
+  buttonId: "save-button",
   defaultText: "Save",
-  savedText: "Saved",
-  loadingText: "Loading",
   error: false,
+  loading: false,
+  loadingText: "Loading",
   message: false,
   messageText: "You have saved this item",
+  saved: true,
+  savedText: "Saved",
 };
 
 describe("Footer", () => {
