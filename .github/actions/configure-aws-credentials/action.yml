@@ -17,6 +17,7 @@ runs:
     - name: Get AWS account authentication details (AWS account, IAM role, AWS region)
       env:
         TF_LOG: INFO
+        TF_CLI_ARGS_apply: "-input=false"
       run: |
         # Get AWS account authentication details (AWS account, IAM role, AWS region)
         # associated with the application environment to figure out which AWS
