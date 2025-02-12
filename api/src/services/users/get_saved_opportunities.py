@@ -25,15 +25,12 @@ class SavedOpportunityListParams(BaseModel):
 
 
 def add_sort_order(stmt: Select, sort_order: list) -> Select:
-    model_mapping = {
-        "opportunity_title": Opportunity.opportunity_title,
-        "close_date": OpportunitySummary.close_date,
-    }
+    model_mapping = {"opportunity_title": Opportunity, "close_date": OpportunitySummary}
 
     order_cols: list = []
     for order in sort_order:
         column = (
-            model_mapping.get(order.order_by)
+            getattr(model_mapping[order.order_by], order.order_by)
             if order.order_by in model_mapping
             else getattr(UserSavedOpportunity, order.order_by)
         )
@@ -43,10 +40,10 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
         ):  # defaults to nulls at the end when asc order
             order_cols.append(asc(column))
         elif order.sort_direction == SortDirection.DESCENDING:
-            order_col = desc(column)
             if order.order_by == "close_date":
-                order_col = order_col.nullslast()
-            order_cols.append(order_col)
+                order_cols.append(desc(column).nullslast())
+                continue
+            order_cols.append(desc(column))
 
     return stmt.order_by(*order_cols)
 
