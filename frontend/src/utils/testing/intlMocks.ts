@@ -1,6 +1,6 @@
 import { TFn } from "src/types/intl";
 
-function mockUseTranslations(translationKey: string) {
+export function mockUseTranslations(translationKey: string) {
   return translationKey;
 }
 

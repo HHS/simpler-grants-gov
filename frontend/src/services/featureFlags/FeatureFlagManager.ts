@@ -14,7 +14,7 @@ import {
   parseFeatureFlagsFromString,
   setCookie,
 } from "src/services/featureFlags/featureFlagHelpers";
-import { OptionalStringDict } from "src/types/searchRequestURLTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";

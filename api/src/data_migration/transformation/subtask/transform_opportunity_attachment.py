@@ -22,6 +22,8 @@ class TransformOpportunityAttachmentConfig(PydanticBaseEnvConfig):
     # import a few attachments when manually testing.
     total_attachments_to_process: int | None = None
 
+    transform_opportunity_attachment_batch_size: int = 100
+
 
 class TransformOpportunityAttachment(AbstractTransformSubTask):
 
@@ -35,6 +37,12 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
 
         self.attachment_config = TransformOpportunityAttachmentConfig()
 
+        self.total_attachments_processed = 0
+        self.has_unprocessed_records = True
+
+    def has_more_to_process(self) -> bool:
+        return self.has_unprocessed_records
+
     def transform_records(self) -> None:
 
         # Fetch staging attachment / our attachment / opportunity groups
@@ -44,29 +52,38 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
             [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id],
             # We load opportunity attachments into memory, so need to process very small batches
             # to avoid running out of memory.
-            batch_size=100,
+            batch_size=self.attachment_config.transform_opportunity_attachment_batch_size,
+            limit=self.attachment_config.transform_opportunity_attachment_batch_size,
         )
 
-        self.process_opportunity_attachment_group(records)
+        records_processed = self.process_opportunity_attachment_group(records)
+
+        # If we have processed up to the test config value, stop processing entirely
+        if (
+            self.attachment_config.total_attachments_to_process is not None
+            and self.total_attachments_processed
+            >= self.attachment_config.total_attachments_to_process
+        ):
+            self.has_unprocessed_records = False
+
+        # Assume if we had fewer than the batch size
+        # we're probably done
+        if records_processed != self.attachment_config.transform_opportunity_attachment_batch_size:
+            self.has_unprocessed_records = False
 
     def process_opportunity_attachment_group(
         self,
         records: Sequence[
             tuple[TsynopsisAttachment, OpportunityAttachment | None, Opportunity | None]
         ],
-    ) -> None:
+    ) -> int:
 
         records_processed = 0
         for source_attachment, target_attachment, opportunity in records:
             try:
                 # Note we increment first in case there are errors, want it to always increment
                 records_processed += 1
-                if (
-                    self.attachment_config.total_attachments_to_process is not None
-                    and self.attachment_config.total_attachments_to_process <= records_processed
-                ):
-                    logger.info("Ending processing early due to configuration")
-                    break
+                self.total_attachments_processed += 1
 
                 self.process_opportunity_attachment(
                     source_attachment, target_attachment, opportunity
@@ -80,6 +97,8 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
                     "Failed to process opportunity attachment",
                     extra=transform_util.get_log_extra_opportunity_attachment(source_attachment),
                 )
+
+        return records_processed
 
     def process_opportunity_attachment(
         self,

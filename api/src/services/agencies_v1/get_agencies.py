@@ -2,13 +2,14 @@ import logging
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import asc, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.db.models.agency_models import Agency
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
 
@@ -27,15 +28,14 @@ class AgencyListParams(BaseModel):
 def get_agencies(
     db_session: db.Session, list_params: AgencyListParams
 ) -> Tuple[Sequence[Agency], PaginationInfo]:
+
     stmt = (
         select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
         # Exclude test agencies
         .where(Agency.is_test_agency.isnot(True))
     )
 
-    # TODO https://github.com/HHS/simpler-grants-gov/issues/3697
-    # use the sorting parameters from the request
-    stmt.order_by(asc("agency_code"))
+    stmt = apply_sorting(stmt, Agency, list_params.pagination.sort_order)
 
     if list_params.filters:
         if list_params.filters.agency_name:

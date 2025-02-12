@@ -98,7 +98,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
         ForeignKey(agency_id),
         nullable=True,
     )
-    top_level_agency: Mapped["Agency"] = relationship(
+    top_level_agency: Mapped["Agency | None"] = relationship(
         lambda: Agency,
         remote_side=[agency_id],
     )
