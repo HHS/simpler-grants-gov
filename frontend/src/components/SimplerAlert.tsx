@@ -23,13 +23,13 @@ const SimplerAlert = ({
   const open = type === "error" ? true : undefined;
   return (
     <Wrapper
-      data-testid="simpler-save-button-alert"
+      data-testid="simpler-alert"
       aria-describedby={buttonId}
       role={role}
       open={open}
       autoFocus={autofocus}
       className={clsx(
-        `usa-alert usa-alert--${type} usa-alert--slim margin-left-1 margin-y-0`,
+        `usa-alert usa-alert--${type} usa-alert--slim margin-left-1 margin-y-0 display-inline-block`,
         {
           "usa-alert--no-icon border-0": type === "success",
           "position-relative padding-0 border-top-0 border-right-0 border-bottom-0":
@@ -57,7 +57,7 @@ const SimplerAlert = ({
           {messageText}
         </div>
         <button
-          data-testid="simpler-save-button-message"
+          data-testid="simpler-alert-close-button"
           type="button"
           className="usa-button usa-button--unstyled font-sans-lg text-black margin-left-2"
           onClick={alertClick}
