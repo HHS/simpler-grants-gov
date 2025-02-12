@@ -1,10 +1,8 @@
 import { expect, Page, test } from "@playwright/test";
 import { BrowserContextOptions } from "playwright-core";
+import { generateRandomString } from "tests/e2e/playwrightUtils";
 
-import {
-  fillSearchInputAndSubmit,
-  generateRandomString,
-} from "./searchSpecUtil";
+import { fillSearchInputAndSubmit } from "./searchSpecUtil";
 
 interface PageProps {
   page: Page;

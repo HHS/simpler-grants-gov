@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { camelCase } from "lodash";
-import { PageProps } from "tests/e2e/playwrightUtils";
+import {
+  PageProps,
+  waitForAnyURLChange,
+  waitForUrl,
+  waitForURLContainsQueryParam,
+} from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -18,10 +23,7 @@ import {
   toggleCheckboxes,
   toggleMobileSearchFilters,
   validateTopLevelAndNestedSelectedFilterCounts,
-  waitForAnyURLChange,
   waitForSearchResultsInitialLoad,
-  waitForUrl,
-  waitForURLContainsQueryParam,
 } from "tests/e2e/search/searchSpecUtil";
 
 test.describe("Search page tests", () => {
@@ -196,6 +198,16 @@ test.describe("Search page tests", () => {
       await getNumberOfOpportunitySearchResults(page);
 
     expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
+  });
+
+  test("should redirect to the last page of results when page param is too high", async ({
+    page,
+  }) => {
+    await page.goto("/search?page=1000000");
+
+    await waitForAnyURLChange(page, "/search?page=1000000");
+
+    expect(page.url()).toMatch(/search\?page=\d{1,3}/);
   });
   test.describe("selecting and clearing filters", () => {
     const filterTypes = [

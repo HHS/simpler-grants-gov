@@ -53,19 +53,6 @@ export async function clickSearchNavLink(page: Page) {
   await page.click("nav >> text=Search");
 }
 
-export function getMobileMenuButton(page: Page) {
-  return page.locator("button >> text=MENU");
-}
-
-export async function hasMobileMenu(page: Page) {
-  const menuButton = getMobileMenuButton(page);
-  return await menuButton.isVisible();
-}
-
-export async function clickMobileNavMenu(menuButton: Locator) {
-  await menuButton.click();
-}
-
 export async function expectCheckboxIDIsChecked(
   page: Page,
   idWithHash: string,

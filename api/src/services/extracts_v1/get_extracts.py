@@ -3,12 +3,13 @@ from datetime import timedelta
 from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import asc, desc, select
 
 import src.adapters.db as db
 from src.constants.lookup_constants import ExtractType
 from src.db.models.extract_models import ExtractMetadata
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.db.models.lookup_models import LkExtractType
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 from src.search.search_models import DateSearchFilter
 from src.util import datetime_util
@@ -38,6 +39,22 @@ def get_extracts(
     db_session: db.Session, list_params: ExtractListParams
 ) -> Tuple[Sequence[ExtractMetadata], PaginationInfo]:
     stmt = select(ExtractMetadata)
+
+    # Apply sorting from pagination params
+    for sort_order in list_params.pagination.sort_order:
+        if sort_order.order_by == "extract_type":
+            # Join with lookup table for extract type description
+            stmt = stmt.join(
+                LkExtractType, ExtractMetadata.extract_type == LkExtractType.extract_type_id
+            )
+            sort_column = LkExtractType.description
+        else:
+            sort_column = getattr(ExtractMetadata, sort_order.order_by)
+
+        if sort_order.sort_direction == SortDirection.ASCENDING:
+            stmt = stmt.order_by(asc(sort_column))
+        else:
+            stmt = stmt.order_by(desc(sort_column))
 
     if list_params.filters:
         if list_params.filters.extract_type:

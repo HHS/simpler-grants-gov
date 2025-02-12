@@ -3,7 +3,7 @@
 import QueryProvider from "src/app/[locale]/search/QueryProvider";
 import { usePrevious } from "src/hooks/usePrevious";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { OptionalStringDict } from "src/types/searchRequestURLTypes";
+import { OptionalStringDict } from "src/types/generalTypes";
 import { Breakpoints, ErrorProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/convertSearchParamsToProperTypes";
 
@@ -67,7 +67,7 @@ export default function SearchError({ error, reset }: ErrorProps) {
     ) {
       reset();
     }
-  }, [searchParams, reset]);
+  }, [searchParams, reset, previousSearchParams]);
 
   useEffect(() => {
     console.error(error);
@@ -90,10 +90,6 @@ export default function SearchError({ error, reset }: ErrorProps) {
   );
   const { agency, category, eligibility, fundingInstrument, query, status } =
     convertedSearchParams;
-
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
 
   // note that the validation error will contain untranslated strings
   const ErrorAlert =

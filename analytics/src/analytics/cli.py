@@ -155,17 +155,13 @@ def transform_and_load(
 ) -> None:
     """Transform and load etl data."""
     # validate effective date arg
-    try:
-        dateformat = "%Y-%m-%d"
-        datestamp = (
-            datetime.strptime(effective_date, dateformat)
-            .astimezone()
-            .strftime(dateformat)
+    datestamp = validate_effective_date(effective_date)
+    if datestamp is None:
+        logger.error(
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
-        logger.info("running transform and load with effective date %s", datestamp)
-    except ValueError:
-        logger.info("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
+    logger.info("running transform and load with effective date %s", datestamp)
 
     # hydrate a dataset instance from the input data
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
@@ -175,12 +171,6 @@ def transform_and_load(
 
     # finish
     logger.info("transform and load is done")
-
-
-@etl_app.command(name="opportunity-load")
-def load_opportunity_data() -> None:
-    """Grabs data from s3 bucket and loads it into opportunity tables."""
-    extract_copy_opportunity_data()
 
 
 @etl_app.command(name="extract_transform_and_load")
@@ -195,18 +185,14 @@ def extract_transform_and_load(
         typer.echo(f"Not a path to a valid config file: {config_path}")
     config = load_config(config_path, GitHubProjectConfig)
 
-    # validate effective_date
-    try:
-        dateformat = "%Y-%m-%d"
-        datestamp = (
-            datetime.strptime(effective_date, dateformat)
-            .astimezone()
-            .strftime(dateformat)
+    # validate effective date arg
+    datestamp = validate_effective_date(effective_date)
+    if datestamp is None:
+        logger.error(
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
-        logger.info("running ETL workflow with effective date %s", datestamp)
-    except ValueError:
-        logger.info("FATAL ERROR: malformed effective date, expected YYYY-MM-DD format")
         return
+    logger.info("running transform and load with effective date %s", datestamp)
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
@@ -221,3 +207,26 @@ def extract_transform_and_load(
     etldb.sync_data(dataset, datestamp)
 
     logger.info("workflow is done!")
+
+
+def validate_effective_date(effective_date: str) -> str | None:
+    """Validate that string value conforms to effective date expected format."""
+    stamp = None
+
+    try:
+        dateformat = "%Y-%m-%d"
+        stamp = (
+            datetime.strptime(effective_date, dateformat)
+            .astimezone()
+            .strftime(dateformat)
+        )
+    except ValueError:
+        stamp = None
+
+    return stamp
+
+
+@etl_app.command(name="opportunity-load")
+def load_opportunity_data() -> None:
+    """Grabs data from s3 bucket and loads it into opportunity tables."""
+    extract_copy_opportunity_data()

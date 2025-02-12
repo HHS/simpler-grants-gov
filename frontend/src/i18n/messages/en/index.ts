@@ -9,6 +9,25 @@ export const messages = {
     page_title: "Opportunity Listing",
     meta_description:
       "Read detailed information about this funding opportunity.",
+    save_button: {
+      save: "Save",
+      saved: "Saved",
+      loading: "Updating",
+    },
+    save_message: {
+      save: "This opportunity was saved to <linkSavedGrants>Saved grants</linkSavedGrants>.",
+      unsave: "This opportunity was unsaved.",
+      error_save: "Error saving. Please try again.",
+      error_unsave: "Error undoing save. Please try again.",
+    },
+    save_login_modal: {
+      title: "Sign in to save this opportunity",
+      help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don’t have an account? You can create one.",
+      description:
+        "You’ll be redirected to Login.gov to sign in or create an account. Then, you’ll return to Simpler.Grants.gov as a signed-in user.",
+      button: "Sign in with Login.gov",
+      close: "Cancel",
+    },
     intro: {
       agency: "Agency: ",
       assistance_listings: "Assistance Listings: ",
@@ -468,6 +487,9 @@ export const messages = {
     unauthorized: {
       page_title: "Unauthorized | Simpler.Grants.gov",
     },
+    unauthenticated: {
+      page_title: "Unauthenticated | Simpler.Grants.gov",
+    },
     page_not_found: {
       page_title: "Page Not Found | Simpler.Grants.gov",
       title: "Oops! Page Not Found",
@@ -485,9 +507,10 @@ export const messages = {
     nav_link_search: "Search",
     nav_link_login: "Sign in",
     nav_link_logout: "Sign out",
+    nav_link_saved_grants: "Saved grants",
     title: "Simpler.Grants.gov",
   },
-  LoginButtonModal: {
+  HeaderLoginModal: {
     title: "Sign in to Simpler.Grants.gov",
     help: "Simpler.Grants.gov uses Login.gov to verify your identity and manage your account securely. You don't need a separate username or password for this site.",
     description:
@@ -537,7 +560,10 @@ export const messages = {
     generic_message: "There seems to have been an error.",
     try_again: "Please try again.",
     unauthorized: "Unauthorized",
-    authorization_fail: "Login or user authorization failed. Please try again.",
+    unauthenticated: "Not signed in",
+    authorization_fail:
+      "Sign in or user authorization failed. Please try again.",
+    signInCTA: "Sign in first in order to view this page",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -573,10 +599,13 @@ export const messages = {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListFetch: {
-      title: "Your search did not return any results.",
-      body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
-      paginationError:
-        "You're trying to access opportunity results that are beyond the last page of data.",
+      noResultsTitle: "Your search did not return any results.",
+      noResultsBody: [
+        "Check any terms you've, entered for typos",
+        "Try different keywords",
+        "Make sure you've selected the right statuses",
+        "Try resetting filters or selecting fewer options",
+      ],
     },
     resultsListItem: {
       status: {
@@ -637,9 +666,10 @@ export const messages = {
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
-  User: {
-    heading: "User",
-    pageTitle: "User | Simpler.Grants.Gov",
-    errorHeading: "Error",
+  SavedGrants: {
+    heading: "Saved grants",
+    noSavedCTA: `To add an opportunity to your list, use the Save button next to its title on the listing’s page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page`,
+    searchButton: "Start a new search",
+    title: "Saved Grants | Simpler.Grants.gov",
   },
 };
