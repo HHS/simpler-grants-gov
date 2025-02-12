@@ -107,8 +107,6 @@
   * [Open source community metrics](product/simpler-grants.gov-analytics/open-source-community-metrics.md)
   * [API metrics](product/simpler-grants.gov-analytics/api-metrics.md)
 
-## Decisions
-
 ## DESIGN & RESEARCH
 
 * [Brand guidelines](design-and-research/brand-guidelines/README.md)
