@@ -56,12 +56,12 @@ def mask_pii(record: logging.LogRecord) -> bool:
 # Regular expression to match a tax identifier (SSN), 9 digits with optional dashes.
 # Matches between word boundaries (\b), except when:
 #  - Preceded by word character and dash (e.g. "ip-10-11-12-134")
-#  - Followed by a dot and digit, for decimal numbers (e.g. 999000000.5)
-# See https://docs.python.org/3/library/re.html#regular-expression-syntax
+#  - Preceded by or followed by a decimal point (for floating point numbers)
 TIN_RE = re.compile(
     r"""
         \b          # word boundary
         (?<!\w-)    # not preceded by word character and dash
+        (?<!\.)     # not preceded by decimal point
         (\d-?){8}   # digit then optional dash, 8 times
         \d          # last digit
         \b          # word boundary
