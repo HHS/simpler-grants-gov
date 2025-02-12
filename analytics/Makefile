@@ -164,6 +164,14 @@ gh-transform-and-load:
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
 
+gh-extract-transform-and-load:
+	@echo "=> Extract, transform and load GitHub data into analytics warebase"
+	@echo "====================================================="
+	$(POETRY) analytics etl extract_transform_and_load \
+	--config-file $(PROJECT_CONFIG_FILE) \
+	--effective-date $(EFFECTIVE_DATE)
+	@echo "====================================================="
+
 gh-db-data-import:
 	@echo "=> Importing sprint data to the database"
 	@echo "====================================================="
