@@ -27,7 +27,7 @@ This stands up the following services:
 
 ### Seed data
 
-Run `make db-seed-local && populate-search-opportunities` to create local data in the database and make it available in the API.
+Run `make db-seed-local && make populate-search-opportunities` to create local data in the database and make it available in the API.
 
 ### API Authenticaion
 
