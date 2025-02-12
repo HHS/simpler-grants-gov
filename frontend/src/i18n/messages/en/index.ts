@@ -599,10 +599,13 @@ export const messages = {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListFetch: {
-      title: "Your search did not return any results.",
-      body: "<li>Check any terms you've entered for typos</li><li>Try different keywords</li><li>Make sure you've selected the right statuses</li><li>Try resetting filters or selecting fewer options</li>",
-      paginationError:
-        "You're trying to access opportunity results that are beyond the last page of data.",
+      noResultsTitle: "Your search did not return any results.",
+      noResultsBody: [
+        "Check any terms you've, entered for typos",
+        "Try different keywords",
+        "Make sure you've selected the right statuses",
+        "Try resetting filters or selecting fewer options",
+      ],
     },
     resultsListItem: {
       status: {
