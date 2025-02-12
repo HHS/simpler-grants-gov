@@ -15,10 +15,13 @@ def test_roadmap_snapshot(snapshot):  # noqa: ANN001
     """Extract and transform for comparison to pre-committed snapshot of roadmap."""
     assert roadmap_output() == snapshot()
 
-@mock.patch.object(GitHubGraphqlClient,
-                "execute_paginated_query",
-             mock_graphql_roadmap_data)
-def roadmap_output() -> list[dict]|None:
+
+@mock.patch.object(
+    GitHubGraphqlClient,
+    "execute_paginated_query",
+    mock_graphql_roadmap_data,
+)
+def roadmap_output() -> list[dict] | None:
     """Call the new pipeline code to be used for comparison."""
     config_path = Path("config/github-projects.json")
     config = load_config(config_path, GitHubProjectConfig)
@@ -33,10 +36,12 @@ def test_sprint_snapshot(snapshot):  # noqa: ANN001
     assert sprint_board_output() == snapshot
 
 
-@mock.patch.object(GitHubGraphqlClient,
-                "execute_paginated_query",
-             mock_graphql_sprintboard_data)
-def sprint_board_output() -> list[dict]|None:
+@mock.patch.object(
+    GitHubGraphqlClient,
+    "execute_paginated_query",
+    mock_graphql_sprintboard_data,
+)
+def sprint_board_output() -> list[dict] | None:
     """Call the new pipeline code to be used for comparison."""
     config_path = Path("config/github-projects.json")
     config = load_config(config_path, GitHubProjectConfig)
@@ -44,4 +49,3 @@ def sprint_board_output() -> list[dict]|None:
     # validate effective_date
 
     return GitHubProjectETL(config).extract_and_transform_in_memory()
-

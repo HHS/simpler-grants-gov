@@ -1,9 +1,14 @@
 """Mock data output of the sprintboard data used in snapshot tests."""
+
 from unittest.mock import Mock
 
 
-def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,  # noqa: ANN001, ARG001, N803
-                               pillarField = Mock) -> list[dict]:  # noqa: ANN001, ARG001, N803
+def mock_graphql_sprintboard_data(
+    login=Mock,  # noqa: ANN001, ARG001
+    project=Mock,  # noqa: ANN001, ARG001
+    quadField=Mock,  # noqa: ANN001, ARG001, N803
+    pillarField=Mock,  # noqa: ANN001, ARG001, N803
+) -> list[dict]:
     """Sprintboard input for snapshot testing."""
     return [
         {
