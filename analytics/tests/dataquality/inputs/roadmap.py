@@ -1,4 +1,5 @@
-from unittest.mock import Mock  # noqa: D100
+"""Mock data output of the roadmap data used in snapshot tests."""
+from unittest.mock import Mock
 
 
 def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,

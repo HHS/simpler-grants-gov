@@ -1,3 +1,4 @@
+"""Mock data output of the sprintboard data used in snapshot tests."""
 from unittest.mock import Mock
 
 
