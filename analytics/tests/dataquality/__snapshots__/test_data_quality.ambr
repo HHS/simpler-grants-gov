@@ -289,7 +289,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Review',
-      'issue_title': 'Adjust GET saved-search endpoint to take in sorting/pagination and use it',
+      'issue_title': '''
+        Adjust GET saved-search endpoint to
+                          take in sorting/pagination and use it
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3692',
       'project_number': 13,
@@ -409,7 +412,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Progress',
-      'issue_title': 'Content for email notifications about opportunities with upcoming due dates',
+      'issue_title': '''
+        Content for email notifications about
+                          opportunities with upcoming due dates
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3769',
       'project_number': 13,
@@ -439,7 +445,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Progress',
-      'issue_title': 'Content for email notifications about newly published opportunities that match a saved search',
+      'issue_title': '''
+        Content for email notifications about newly published
+                          opportunities that match a saved search
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3602',
       'project_number': 13,
@@ -709,7 +718,10 @@
       'issue_points': 5.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Modify sorting in search endpoint to support passing in multiple order_by values to support secondary+ sorting',
+      'issue_title': '''
+        Modify sorting in search endpoint to support passing
+                          in multiple order_by values to support secondary+ sorting
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3577',
       'project_number': 13,
@@ -1039,7 +1051,10 @@
       'issue_points': 2.0,
       'issue_state': 'open',
       'issue_status': 'In Review',
-      'issue_title': 'Redirect to the highest valid page of search results when page query param has value beyond the max page possible',
+      'issue_title': '''
+        Redirect to the highest valid page of search results when page
+                          query param has value beyond the max page possible
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/1485',
       'project_number': 13,
@@ -1459,7 +1474,10 @@
       'issue_points': 1.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': "Modify frontend so it doesn't look for attachment type in the API response",
+      'issue_title': '''
+        Modify frontend so it doesn't look
+                          for attachment type in the API response
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3584',
       'project_number': 13,
@@ -1549,7 +1567,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Add an allow list for specific file types to be uploaded into the search index',
+      'issue_title': '''
+        Add an allow list for specific file types to be
+                          uploaded into the search index
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3497',
       'project_number': 13,
@@ -1669,7 +1690,10 @@
       'issue_points': 2.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Make it possible to run opportunity attachment logic for a subset of attachments',
+      'issue_title': '''
+        Make it possible to run opportunity attachment
+                          logic for a subset of attachments
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3520',
       'project_number': 13,
@@ -1699,7 +1723,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Handle opportunity attachments when opportunity changes is_draft or is deleted',
+      'issue_title': '''
+        Handle opportunity attachments when
+                          opportunity changes is_draft or is deleted
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3500',
       'project_number': 13,
@@ -1849,7 +1876,10 @@
       'issue_points': 2.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Setup configuration to run job that generates extracts of Opportunity DB tables for analytics daily',
+      'issue_title': '''
+        Setup configuration to run job that generates
+                          extracts of Opportunity DB tables for analytics daily
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3160',
       'project_number': 13,
@@ -2149,7 +2179,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Adjust jwt auth to avoid needing to cast/ignore typing whenever we fetch the user',
+      'issue_title': '''
+        Adjust jwt auth to avoid needing to cast/ignore
+                          typing whenever we fetch the user
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3499',
       'project_number': 13,
@@ -2839,7 +2872,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Delivery Dashboard: display data for deliverable regardless of quad boundaries',
+      'issue_title': '''
+        Delivery Dashboard: display data for deliverable
+                          regardless of quad boundaries
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3622',
       'project_number': 13,
@@ -5029,7 +5065,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Review',
-      'issue_title': 'Adjust GET saved-search endpoint to take in sorting/pagination and use it',
+      'issue_title': '''
+        Adjust GET saved-search endpoint to
+                          take in sorting/pagination and use it
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3692',
       'project_number': 17,
@@ -5149,7 +5188,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Progress',
-      'issue_title': 'Content for email notifications about opportunities with upcoming due dates',
+      'issue_title': '''
+        Content for email notifications about
+                          opportunities with upcoming due dates
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3769',
       'project_number': 17,
@@ -5179,7 +5221,10 @@
       'issue_points': None,
       'issue_state': 'open',
       'issue_status': 'In Progress',
-      'issue_title': 'Content for email notifications about newly published opportunities that match a saved search',
+      'issue_title': '''
+        Content for email notifications about newly published
+                          opportunities that match a saved search
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3602',
       'project_number': 17,
@@ -5449,7 +5494,10 @@
       'issue_points': 5.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Modify sorting in search endpoint to support passing in multiple order_by values to support secondary+ sorting',
+      'issue_title': '''
+        Modify sorting in search endpoint to support passing
+                          in multiple order_by values to support secondary+ sorting
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3577',
       'project_number': 17,
@@ -5779,7 +5827,10 @@
       'issue_points': 2.0,
       'issue_state': 'open',
       'issue_status': 'In Review',
-      'issue_title': 'Redirect to the highest valid page of search results when page query param has value beyond the max page possible',
+      'issue_title': '''
+        Redirect to the highest valid page of search results when page
+                          query param has value beyond the max page possible
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/1485',
       'project_number': 17,
@@ -6199,7 +6250,10 @@
       'issue_points': 1.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': "Modify frontend so it doesn't look for attachment type in the API response",
+      'issue_title': '''
+        Modify frontend so it doesn't look
+                          for attachment type in the API response
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3584',
       'project_number': 17,
@@ -6289,7 +6343,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Add an allow list for specific file types to be uploaded into the search index',
+      'issue_title': '''
+        Add an allow list for specific file types to be
+                          uploaded into the search index
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3497',
       'project_number': 17,
@@ -6409,7 +6466,10 @@
       'issue_points': 2.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Make it possible to run opportunity attachment logic for a subset of attachments',
+      'issue_title': '''
+        Make it possible to run opportunity attachment
+                          logic for a subset of attachments
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3520',
       'project_number': 17,
@@ -6439,7 +6499,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Handle opportunity attachments when opportunity changes is_draft or is deleted',
+      'issue_title': '''
+        Handle opportunity attachments when
+                          opportunity changes is_draft or is deleted
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3500',
       'project_number': 17,
@@ -6589,7 +6652,10 @@
       'issue_points': 2.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Setup configuration to run job that generates extracts of Opportunity DB tables for analytics daily',
+      'issue_title': '''
+        Setup configuration to run job that generates
+                          extracts of Opportunity DB tables for analytics daily
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3160',
       'project_number': 17,
@@ -6889,7 +6955,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Adjust jwt auth to avoid needing to cast/ignore typing whenever we fetch the user',
+      'issue_title': '''
+        Adjust jwt auth to avoid needing to cast/ignore
+                          typing whenever we fetch the user
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3499',
       'project_number': 17,
@@ -7579,7 +7648,10 @@
       'issue_points': 3.0,
       'issue_state': 'closed',
       'issue_status': 'Done',
-      'issue_title': 'Delivery Dashboard: display data for deliverable regardless of quad boundaries',
+      'issue_title': '''
+        Delivery Dashboard: display data for deliverable
+                          regardless of quad boundaries
+      ''',
       'issue_type': 'Task',
       'issue_url': 'https://github.com/HHS/simpler-grants-gov/issues/3622',
       'project_number': 17,
