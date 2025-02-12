@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy.exc import InvalidRequestError, IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.task_models import JobLog, JobStatus

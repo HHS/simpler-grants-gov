@@ -3,7 +3,6 @@ import logging
 import time
 from enum import StrEnum
 from typing import Any
-from sqlalchemy import exc
 
 import src.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
