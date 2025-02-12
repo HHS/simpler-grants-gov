@@ -28,6 +28,8 @@ on:
         default: "main"
         description: Tag or branch or SHA to deploy
 
+# pls deploy
+
 jobs:
   api-checks:
     name: Run API Checks
