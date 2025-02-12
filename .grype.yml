@@ -31,3 +31,7 @@ ignore:
   # Issue with asyncio library in Python, should be fixed
   # in 3.13.2 (early February 2025)
   - vulnerability: CVE-2024-12254
+
+  # https://github.com/HHS/simpler-grants-gov/issues/3855
+  # esbuild fixed in a new minor version, but we don't install/call esbuild directly
+  - vulnerability: GHSA-67mh-4wv8-2f99
