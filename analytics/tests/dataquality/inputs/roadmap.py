@@ -6,8 +6,8 @@ from unittest.mock import Mock
 def mock_graphql_roadmap_data(
     login=Mock,  # noqa: ANN001, ARG001
     project=Mock,  # noqa: ANN001, ARG001
-    quadField=Mock,  # noqa: ANN001, ARG001, N803
-    pillarField=Mock,  # noqa: ANN001, ARG001, N803
+    quad_field=Mock,  # noqa: ANN001, ARG001
+    pillar_field=Mock,  # noqa: ANN001, ARG001
 ) -> list[dict]:
     """Mock input for snapshot testing of roadmap data."""
     return [
@@ -660,7 +660,8 @@ def mock_graphql_roadmap_data(
         },
         {
             "content": {
-                "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
+                "title": """Enable users to save an opportunity and
+                  view/delete their saved opportunities""",
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 "issueType": {"name": "Epic"},
                 "closed": False,
@@ -694,7 +695,8 @@ def mock_graphql_roadmap_data(
         },
         {
             "content": {
-                "title": "Draft and finalize session plan and create artifacts for January 2025 Co-design group meetings",  # noqa: E501
+                "title": """Draft and finalize session plan and create artifacts
+                  for January 2025 Co-design group meetings""",
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3171",
                 "issueType": {"name": "Epic"},
                 "closed": True,
@@ -1236,7 +1238,8 @@ def mock_graphql_roadmap_data(
         },
         {
             "content": {
-                "title": "Branding & Comms Phase 2 - Follow on from High Priority Quad 1 Deliverable ",  # noqa: E501
+                "title": """Branding & Comms Phase 2 - Follow on
+                  from High Priority Quad 1 Deliverable """,
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/2314",
                 "issueType": {"name": "Epic"},
                 "closed": False,
