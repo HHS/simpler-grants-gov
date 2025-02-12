@@ -33,6 +33,18 @@ def saved_searches(user, db_session):
             },
             created_at=datetime(2024, 1, 2, tzinfo=timezone.utc),
         ),
+        UserSavedSearchFactory.create(
+            user=user,
+            name="Test Search 2",
+            search_query={
+                "query": "python",
+                "filters": {
+                    "keywords": "java",
+                    "funding_instrument": {"one_of": [FundingInstrument.PROCUREMENT_CONTRACT]},
+                },
+            },
+            created_at=datetime(2024, 1, 3, tzinfo=timezone.utc),
+        ),
     ]
     db_session.commit()
     return searches
@@ -53,9 +65,15 @@ def test_user_get_saved_searches_unauthorized_user(
     different_user = UserFactory.create()
     db_session.commit()
 
-    response = client.get(
-        f"/v1/users/{different_user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{different_user.user_id}/saved-searches/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 401
@@ -64,8 +82,14 @@ def test_user_get_saved_searches_unauthorized_user(
 
 def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searches):
     # Try to get searches without authentication
-    response = client.get(
-        f"/v1/users/{user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 401
@@ -73,9 +97,15 @@ def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searche
 
 
 def test_user_get_saved_searches_empty(client, user, user_auth_token):
-    response = client.get(
-        f"/v1/users/{user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
     )
 
     assert response.status_code == 200
@@ -84,25 +114,41 @@ def test_user_get_saved_searches_empty(client, user, user_auth_token):
 
 
 def test_user_get_saved_searches(client, user, user_auth_token, saved_searches):
-    response = client.get(
-        f"/v1/users/{user.user_id}/saved-searches",
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-searches/list",
         headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_order": [
+                    {"order_by": "name", "sort_direction": "ascending"},
+                    {"order_by": "created_at", "sort_direction": "descending"},
+                ],
+            }
+        },
     )
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
     data = response.json["data"]
-    assert len(data) == 2
+    assert len(data) == 3
 
-    # Verify the searches are returned in descending order by created_at
-    assert data[0]["name"] == "Test Search 2"
-    assert data[0]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
+    # Verify the searches are returned in ascending order by name, then descending order by created_at
+    assert data[0]["name"] == "Test Search 1"
+    assert data[0]["search_query"]["filters"]["funding_instrument"]["one_of"] == ["grant"]
+    assert data[1]["name"] == "Test Search 2"
+    assert data[1]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
+        "procurement_contract"
+    ]
+
+    assert data[2]["name"] == "Test Search 2"
+    assert data[2]["search_query"]["filters"]["funding_instrument"]["one_of"] == [
         "cooperative_agreement"
     ]
-    assert data[1]["name"] == "Test Search 1"
-    assert data[1]["search_query"]["filters"]["funding_instrument"]["one_of"] == ["grant"]
 
     # Verify UUIDs are properly serialized
     assert uuid.UUID(data[0]["saved_search_id"])
     assert uuid.UUID(data[1]["saved_search_id"])
+    assert uuid.UUID(data[2]["saved_search_id"])

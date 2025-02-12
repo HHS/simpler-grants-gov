@@ -16,7 +16,7 @@ export async function generateMetadata() {
 const Unauthorized = () => {
   const t = useTranslations("Errors");
   return (
-    <GridContainer>
+    <GridContainer className="margin-top-4">
       <Alert type="error" heading={t("unauthorized")} headingLevel="h4">
         {t("authorization_fail")}
       </Alert>

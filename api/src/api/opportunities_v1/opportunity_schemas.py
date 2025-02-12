@@ -16,7 +16,6 @@ from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
     FundingInstrument,
-    OpportunityAttachmentType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -323,13 +322,6 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
             "example": "The full announcement NOFO",
         }
     )
-    opportunity_attachment_type = fields.Enum(
-        OpportunityAttachmentType,
-        metadata={
-            "description": "The type of attachment",
-            "example": OpportunityAttachmentType.NOTICE_OF_FUNDING_OPPORTUNITY,
-        },
-    )
 
 
 class OpportunityWithAttachmentsV1Schema(OpportunityV1Schema):
@@ -477,7 +469,7 @@ class OpportunitySearchRequestV1Schema(Schema):
     )
     query_operator = fields.Enum(
         SearchQueryOperator,
-        laud_default=SearchQueryOperator.AND,
+        load_default=SearchQueryOperator.AND,
         metadata={
             "description": "Query operator for combining search conditions",
             "example": "OR",
@@ -497,7 +489,10 @@ class OpportunitySearchRequestV1Schema(Schema):
                 "post_date",
                 "close_date",
                 "agency_code",
+                "agency_name",
+                "top_level_agency_name",
             ],
+            default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "descending"}],
         ),
         required=True,
     )

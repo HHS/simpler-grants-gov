@@ -7,7 +7,12 @@ from pydantic import BaseModel, Field
 import src.adapters.search as search
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
+from src.pagination.pagination_models import (
+    PaginationInfo,
+    PaginationParams,
+    SortDirection,
+    SortOrder,
+)
 from src.search.search_config import get_search_config
 from src.search.search_models import (
     BoolSearchFilter,
@@ -37,6 +42,8 @@ REQUEST_FIELD_NAME_MAPPING = {
     "close_date": "summary.close_date",
     "agency_code": "agency_code.keyword",
     "agency": "agency_code.keyword",
+    "agency_name": "agency_name.keyword",
+    "top_level_agency_name": "top_level_agency_name.keyword",
     "opportunity_status": "opportunity_status.keyword",
     "funding_instrument": "summary.funding_instruments.keyword",
     "funding_category": "summary.funding_categories.keyword",
@@ -56,10 +63,14 @@ FILTER_RULE_MAPPING = {
 
 STATIC_PAGINATION = {
     "pagination": {
-        "order_by": "post_date",
         "page_offset": 1,
         "page_size": 1000,
-        "sort_direction": "descending",
+        "sort_order": [
+            {
+                "order_by": "post_date",
+                "sort_direction": "descending",
+            }
+        ],
     }
 }
 
@@ -106,11 +117,8 @@ def _adjust_field_name(field: str) -> str:
 def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]]:
     sort_by: list[tuple[str, SortDirection]] = []
 
-    sort_by.append((_adjust_field_name(pagination.order_by), pagination.sort_direction))
-
-    # Add a secondary sort for relevancy to sort by post date (matching the sort direction)
-    if pagination.order_by == "relevancy":
-        sort_by.append((_adjust_field_name("post_date"), pagination.sort_direction))
+    for sort_order in pagination.sort_order:
+        sort_by.append((_adjust_field_name(sort_order.order_by), sort_order.sort_direction))
 
     return sort_by
 
@@ -223,10 +231,12 @@ def search_opportunities(
     pagination_info = PaginationInfo(
         page_offset=search_params.pagination.page_offset,
         page_size=search_params.pagination.page_size,
-        order_by=search_params.pagination.order_by,
-        sort_direction=search_params.pagination.sort_direction,
         total_records=response.total_records,
         total_pages=int(math.ceil(response.total_records / search_params.pagination.page_size)),
+        sort_order=[
+            SortOrder(order_by=p.order_by, sort_direction=p.sort_direction)
+            for p in search_params.pagination.sort_order
+        ],
     )
 
     # While the data returned is already JSON/dicts like we want to return
