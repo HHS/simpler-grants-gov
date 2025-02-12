@@ -91,6 +91,10 @@ def test_successful_task_completion(db_session):
 
 def test_task_handles_duplicate_key_error(db_session, enable_factory_create):
     """Test that task properly handles SQLAlchemy errors e.g. integrity errors"""
+    # Clear any existing ExtractMetadata records
+    db_session.query(ExtractMetadata).delete()
+    db_session.commit()
+
     task = DuplicateKeyTask(db_session)
 
     with pytest.raises(IntegrityError):
