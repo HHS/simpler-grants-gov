@@ -3,7 +3,7 @@ from typing import Sequence, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import asc, desc, select
+from sqlalchemy import asc, desc, nulls_last, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
@@ -40,10 +40,9 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
         ):  # defaults to nulls at the end when asc order
             order_cols.append(asc(column))
         elif order.sort_direction == SortDirection.DESCENDING:
-            if order.order_by == "close_date":
-                order_cols.append(desc(column).nullslast())
-                continue
-            order_cols.append(desc(column))
+            order_cols.append(
+                nulls_last(desc(column)) if order.order_by == "close_date" else desc(column)
+            )
 
     return stmt.order_by(*order_cols)
 
