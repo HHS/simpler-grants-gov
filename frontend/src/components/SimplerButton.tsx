@@ -13,10 +13,12 @@ interface SimplerButtonProps
   loadingText: string;
   children: string | ReactNode;
   icon?: string;
+  iconActive?: boolean;
 }
 
 const SimplerButton = ({
   loading = false,
+  iconActive = false,
   loadingText,
   children,
   icon,
@@ -24,8 +26,10 @@ const SimplerButton = ({
 }: SimplerButtonProps & ButtonProps) => {
   return (
     <Button
-      className={clsx("simpler-save-button", {
+      className={clsx("simpler-button", {
         loading,
+        "icon-active": iconActive,
+        icon,
       })}
       disabled={loading}
       outline
@@ -37,11 +41,8 @@ const SimplerButton = ({
         </>
       ) : (
         <>
-          {icon && (
-            <>
-              <USWDSIcon name={icon} /> {children}
-            </>
-          )}
+          {icon && <USWDSIcon name={icon} />}
+          {children}
         </>
       )}
     </Button>

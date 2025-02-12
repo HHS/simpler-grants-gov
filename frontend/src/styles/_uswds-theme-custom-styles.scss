@@ -238,18 +238,23 @@ i.e.
   padding: units(1) units(2);
 }
 
-.simpler-save-button {
-  padding: units(0.5) units(2) units(0.5) units(1);
+.simpler-button {
+  padding: 0 units(2);
+  min-height: units(6);
 
   svg {
     font-size: 2rem;
   }
-  &--saved {
+  &.icon {
+    padding: units(0.5) units(2) units(0.5) units(1);
+  }
+  &.icon-active {
     svg {
       color: color("orange-40v");
     }
   }
-  &--loading:disabled {
+  &.loading:disabled {
+    padding: units(0.5) units(2) units(0.5) units(1);
     color: color("gray-70");
     border-color: color("gray-70");
     box-shadow: inset 0 0 0 2px color("gray-70");
