@@ -13,6 +13,8 @@ import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
+const SAVED_OPPS_PAGE_LINK = "/saved-grants";
+
 export const OpportunitySaveUserControl = () => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
@@ -76,7 +78,7 @@ export const OpportunitySaveUserControl = () => {
       ? t("save_message.error_unsave")
       : t.rich("save_message.save", {
           linkSavedGrants: (chunks) => (
-            <Link className="text-black" href="/my-grants">
+            <Link className="text-black" href={SAVED_OPPS_PAGE_LINK}>
               {chunks}
             </Link>
           ),
