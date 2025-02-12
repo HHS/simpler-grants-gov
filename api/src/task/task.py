@@ -3,6 +3,7 @@ import logging
 import time
 from enum import StrEnum
 from typing import Any
+from sqlalchemy import exc
 
 import src.adapters.db as db
 from src.db.models.task_models import JobLog, JobStatus
@@ -40,11 +41,6 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             self.db_session.add(self.job)
             self.db_session.commit()
 
-            # Create initial job record
-            self.job = JobLog(job_type=self.cls_name(), job_status=JobStatus.STARTED)
-            self.db_session.add(self.job)
-            self.db_session.commit()
-
             # Initialize the metrics
             self.initialize_metrics()
 
@@ -65,13 +61,12 @@ class Task(abc.ABC, metaclass=abc.ABCMeta):
             raise
         finally:
             job_status = JobStatus.COMPLETED if job_succeeded else JobStatus.FAILED
-            # If the session is active, we can commit the job update
-            if job_succeeded:
-                self.update_job(job_status, metrics=self.metrics)
-            else:
-                # If the session is not active due to an error upstream, we need to begin a new transaction
-                with self.db_session.begin():
-                    self.update_job(job_status, metrics=self.metrics)
+
+            # Rollback if the session is not active due to error above
+            if not self.db_session.is_active:
+                self.db_session.rollback()
+
+            self.update_job(job_status, metrics=self.metrics)
 
     def initialize_metrics(self) -> None:
         zero_metrics_dict: dict[str, Any] = {metric: 0 for metric in self.Metrics}

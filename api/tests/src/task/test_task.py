@@ -1,8 +1,28 @@
 import pytest
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, IntegrityError
 
-from src.db.models.task_models import JobStatus
+from src.db.models.extract_models import ExtractMetadata
+from src.db.models.task_models import JobLog, JobStatus
 from src.task.task import Task
+from tests.src.db.models.factories import ExtractMetadataFactory, ExtractType
+
+
+class DuplicateKeyTask(Task):
+    """Test implementation that triggers a duplicate key error"""
+
+    def run_task(self) -> None:
+        # Create first record
+        extract1 = ExtractMetadataFactory.create(
+            file_path="s3://test-bucket/file1.csv", extract_type=ExtractType.OPPORTUNITIES_CSV
+        )
+
+        # Attempt to create second record with same primary key
+        extract2 = ExtractMetadataFactory.build(
+            file_path="s3://test-bucket/file2.csv", extract_type=ExtractType.OPPORTUNITIES_CSV
+        )
+        extract2.extract_metadata_id = extract1.extract_metadata_id  # Force duplicate PK
+        self.db_session.add(extract2)
+        self.db_session.flush()  # This will trigger the duplicate key error
 
 
 class SimpleTask(Task):
@@ -67,3 +87,28 @@ def test_successful_task_completion(db_session):
     # Verify session is still usable by starting a new transaction
     db_session.begin()  # Start a new transaction
     assert db_session.is_active  # Session should be active with new transaction
+
+
+def test_task_handles_duplicate_key_error(db_session, enable_factory_create):
+    """Test that task properly handles SQLAlchemy errors e.g. integrity errors"""
+    task = DuplicateKeyTask(db_session)
+
+    with pytest.raises(IntegrityError):
+        task.run()
+
+    # Verify job was created and updated to failed status
+    assert task.job is not None
+    assert task.job.job_status == JobStatus.FAILED
+
+    # Verify session was rolled back and is usable
+    db_session.begin()  # Start a new transaction
+    assert db_session.is_active  # Session should be active with new transaction
+
+    # Verify only one record exists
+    count = db_session.query(ExtractMetadata).count()
+    assert count == 1
+
+    # Verify the job status is persisted in the database
+    db_job = db_session.query(JobLog).filter_by(job_id=task.job.job_id).first()
+    assert db_job is not None
+    assert db_job.job_status == JobStatus.FAILED
