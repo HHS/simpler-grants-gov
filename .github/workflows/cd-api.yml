@@ -5,9 +5,11 @@ on:
   push:
     branches:
       - "main"
+      - "kai/tf-deploy"
     paths:
       - "api/**"
       - "infra/api/**"
+      - ".github/workflows/cd-api.yml"
   release:
     types: [published]
   workflow_dispatch:
