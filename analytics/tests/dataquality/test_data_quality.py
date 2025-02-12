@@ -34,7 +34,7 @@ def output() -> list[dict]|None:
 
 def test_sprint_snapshot(snapshot):
     """Compare pipeline for sprintboard snapshot."""
-    assert sprint_board_output == snapshot
+    assert sprint_board_output() == snapshot
 
 
 @mock.patch.object(GitHubGraphqlClient,

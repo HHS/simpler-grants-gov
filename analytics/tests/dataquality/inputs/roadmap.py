@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: D100
 
 
 def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
