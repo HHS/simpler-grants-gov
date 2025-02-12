@@ -8,27 +8,29 @@ import { USWDSIcon } from "./USWDSIcon";
 interface SaveButtonProps {
   buttonClick?: () => Promise<void>;
   messageClick: () => void;
-  saved: boolean;
-  loading: boolean;
+  buttonId: string;
   defaultText: string;
-  savedText: string;
-  loadingText: string;
   error: boolean;
+  loading: boolean;
+  loadingText: string;
   message: boolean;
   messageText: string | ReactNode;
+  saved: boolean;
+  savedText: string;
 }
 
 const SaveButton = ({
   buttonClick,
   messageClick,
+  buttonId,
   defaultText,
-  savedText,
-  saved = false,
+  error,
   loading = false,
   loadingText,
-  messageText,
-  error,
   message,
+  messageText,
+  saved = false,
+  savedText,
 }: SaveButtonProps) => {
   const text = saved ? savedText : defaultText;
   const type = error ? "error" : "success";
@@ -42,6 +44,7 @@ const SaveButton = ({
         })}
         onClick={buttonClick}
         disabled={loading}
+        id={buttonId}
       >
         {loading ? (
           <>
@@ -56,6 +59,7 @@ const SaveButton = ({
       {message && (
         <div
           data-testid="simpler-save-button-alert"
+          aria-describedby={buttonId}
           className={clsx(
             `usa-alert usa-alert--${type} usa-alert--slim margin-left-1 margin-y-0`,
             {

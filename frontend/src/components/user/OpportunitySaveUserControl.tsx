@@ -91,16 +91,17 @@ export const OpportunitySaveUserControl = () => {
     <>
       {user?.token ? (
         <SaveButton
-          defaultText={t("save_button.save")}
-          savedText={t("save_button.saved")}
-          loadingText={t("save_button.loading")}
-          saved={saved}
-          error={savedError}
+          buttonClick={userSavedOppCallback}
           messageClick={closeMessage}
+          buttonId="opp-save-button"
+          defaultText={t("save_button.save")}
+          error={savedError}
           messageText={messageText}
           message={showMessage}
-          buttonClick={userSavedOppCallback}
           loading={loading}
+          loadingText={t("save_button.loading")}
+          saved={saved}
+          savedText={t("save_button.saved")}
         />
       ) : (
         <>

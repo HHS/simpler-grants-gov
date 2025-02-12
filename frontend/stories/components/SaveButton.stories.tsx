@@ -7,6 +7,7 @@ const meta: Meta<typeof SaveButton> = {
   component: SaveButton,
   args: {
     defaultText: "Save",
+    buttonId: "save-button",
     savedText: "Saved",
     loadingText: "Updating",
     messageText: "This opportunity was saved to Saved grants.",
