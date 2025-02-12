@@ -28,6 +28,8 @@ locals {
     description = "Database resources for the ${var.environment_name} environment"
   })
 
+  is_temporary = terraform.workspace != "default"
+
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
   network_config     = module.project_config.network_configs[local.environment_config.network_name]
@@ -94,4 +96,5 @@ module "database" {
   database_subnet_group_name     = var.environment_name
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
+  is_temporary                   = local.is_temporary
 }

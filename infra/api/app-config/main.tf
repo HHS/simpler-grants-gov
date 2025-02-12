@@ -1,15 +1,16 @@
 locals {
-  app_name                        = "api"
-  environments                    = ["dev", "prod"]
-  project_name                    = module.project_config.project_name
-  has_database                    = true
-  has_incident_management_service = false
+  app_name     = "api"
+  environments = ["dev", "prod"]
+  project_name = module.project_config.project_name
+  has_database = true
 
   # Whether or not the application depends on external non-AWS services.
   # If enabled, the networks associated with this application's environments
   # will have NAT gateways, which allows the service in the private subnet to
   # make calls to the internet.
   has_external_non_aws_service = true
+
+  has_incident_management_service = false
 
   environment_configs = {
     dev     = module.dev_config
