@@ -160,7 +160,11 @@ class GitHubProjectETL:
         output_file_path: str,
     ) -> None:
 
-        logger.info("Exporting roadmap data from project %d", roadmap.project_number)
+        logger.info(
+            "Exporting roadmap data from %s/%d",
+            roadmap.owner,
+            roadmap.project_number,
+        )
         github.export_roadmap_data_to_file(
             client=self.client,
             owner=roadmap.owner,
@@ -176,7 +180,11 @@ class GitHubProjectETL:
         output_file_path: str,
     ) -> None:
 
-        logger.info("Exporting sprint data for project %d", sprint_board.project_number)
+        logger.info(
+            "Exporting sprint data from %s/%d",
+            sprint_board.owner,
+            sprint_board.project_number,
+        )
         github.export_sprint_data_to_file(
             client=self.client,
             owner=sprint_board.owner,
