@@ -18,7 +18,7 @@ export const handleSavedOpportunity = async (
   const body =
     type === "POST"
       ? {
-          opportunityId: String(opportunityId),
+          opportunity_id: String(opportunityId),
         }
       : {};
   return userSavedOpportunity(type)({
