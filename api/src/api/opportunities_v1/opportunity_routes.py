@@ -13,7 +13,7 @@ import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.api_key_auth import api_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities_v1.get_opportunity import get_opportunity, get_opportunity_versions
+from src.services.opportunities_v1.get_opportunity import get_opportunity
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
