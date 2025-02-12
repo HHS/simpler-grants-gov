@@ -10,7 +10,10 @@ export function useSearchParamUpdater() {
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
 
-  // note that providing an empty string as `queryParamValue` will remove the param
+  // note that providing an empty string as `queryParamValue` will remove the param.
+  // also note that "query" is the name of a query param, but it being handled separately
+  // in this implementation. To set a new keyword query in the url without touching other params,
+  // you can use a call such as `updateQueryParams("", "query", queryTerm)`.
   const updateQueryParams = (
     // The parameter value that is not the query term. Query term is treated
     // separately because updates to it are captured, ie if a user updates the

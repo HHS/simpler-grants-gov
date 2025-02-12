@@ -31,10 +31,10 @@ describe("/api/auth/logout POST handler", () => {
     const response = await POST();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(0);
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(401);
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual(
-      "Error logging out: No active session to logout",
+      'Error logging out: {"type":"UnauthorizedError","searchInputs":{},"message":"No active session to logout","status":401,"details":{}}',
     );
   });
   it("calls postLogout with token from session", async () => {
@@ -71,10 +71,11 @@ describe("/api/auth/logout POST handler", () => {
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
     expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(400);
     const json = (await response.json()) as { message: string };
+    // const message = JSON.parse(json) as FrontendErrorDetails;
     expect(json.message).toEqual(
-      "Error logging out: No logout response from API",
+      'Error logging out: {"type":"APIRequestError","searchInputs":{},"message":"No logout response from API","status":400,"details":{}}',
     );
   });
   it("calls deleteSession", async () => {
