@@ -45,7 +45,7 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
         elif order.sort_direction == SortDirection.DESCENDING:
             order_col = desc(column)
             if order.order_by == "close_date":
-                order_cols.append(order_col.nullslast())
+                order_col = order_col.nullslast()
             order_cols.append(order_col)
 
     return stmt.order_by(*order_cols)
