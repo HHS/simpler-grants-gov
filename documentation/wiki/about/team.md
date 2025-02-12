@@ -2,7 +2,7 @@
 description: Meet the team working on Simpler.Grants.gov
 ---
 
-# 👋 Team
+# Team
 
 ## Product and delivery
 

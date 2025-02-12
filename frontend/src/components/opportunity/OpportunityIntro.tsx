@@ -5,8 +5,6 @@ import {
 
 import { useTranslations } from "next-intl";
 
-import ContentLayout from "src/components/ContentLayout";
-
 type Props = {
   opportunityData: Opportunity;
 };
@@ -55,13 +53,9 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
   };
 
   return (
-    <ContentLayout
-      title={opportunityData.opportunity_title}
-      data-testid="opportunity-intro-content"
-      paddingTop={false}
-    >
+    <>
       <div className="usa-prose">
-        <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg">{`${t("agency")} ${agencyName}`}</p>
+        <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg margin-top-0">{`${t("agency")} ${agencyName}`}</p>
         <AssistanceListingsDisplay
           assistanceListings={opportunityData.opportunity_assistance_listings}
           assistanceListingsText={t("assistance_listings")}
@@ -70,7 +64,7 @@ const OpportunityIntro = ({ opportunityData }: Props) => {
           {lastUpdated(opportunityData.updated_at)}
         </p>
       </div>
-    </ContentLayout>
+    </>
   );
 };
 

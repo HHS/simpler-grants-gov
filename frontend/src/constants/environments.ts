@@ -15,6 +15,7 @@ const {
   FEATURE_SEARCH_OFF,
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_AUTH_ON,
+  FEATURE_SAVED_OPPORTUNITIES_ON,
   AUTH_LOGIN_URL,
   API_JWT_PUBLIC_KEY,
 } = process.env;
@@ -23,6 +24,7 @@ export const featureFlags = {
   opportunityOff: stringToBoolean(FEATURE_OPPORTUNITY_OFF),
   searchOff: stringToBoolean(FEATURE_SEARCH_OFF),
   authOn: stringToBoolean(FEATURE_AUTH_ON),
+  savedOpportunitiesOn: stringToBoolean(FEATURE_SAVED_OPPORTUNITIES_ON),
 };
 
 // home for all interpreted server side environment variables
