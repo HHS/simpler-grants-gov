@@ -1,4 +1,4 @@
-import { ParsedError } from "src/app/[locale]/search/error";
+import { ParsedError } from "src/app/[locale]/search/error_old";
 import { BadRequestError } from "src/errors";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
