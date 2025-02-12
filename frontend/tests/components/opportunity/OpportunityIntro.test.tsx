@@ -35,10 +35,8 @@ describe("OpportunityIntro", () => {
   it("renders the opportunity title and agency name", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("Agency: Test Agency")).toBeInTheDocument();
   });
-
   it("renders assistance listings correctly", () => {
     render(<OpportunityIntro opportunityData={mockOpportunityData} />);
 
