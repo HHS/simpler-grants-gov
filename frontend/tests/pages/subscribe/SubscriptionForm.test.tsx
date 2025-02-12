@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { ValidationError } from "src/errors";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
@@ -11,30 +10,8 @@ jest.mock("next-intl", () => ({
   useMessages: () => mockMessages,
 }));
 
-jest.mock("react-dom", () => {
-  return {
-    ...jest.requireActual<typeof import("react-dom")>("react-dom"),
-    useFormStatus: jest.fn(() => ({ pending: false })),
-    useFormState: () => [
-      [
-        {
-          // Return a mock state object
-          errorMessage: "errors.server",
-          validationErrors: {
-            name: ["errors.missing_name"],
-            email: ["errors.missing_email", "errors.invalid_email"],
-          },
-        },
-        // Mock setState function
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        () => {},
-      ],
-    ],
-  };
-});
-
 jest.mock("src/app/[locale]/subscribe/actions", () => ({
-  subscribeEmail: (...args) => mockSubscribeEmail(...args),
+  subscribeEmail: (...args: unknown[]): unknown => mockSubscribeEmail(...args),
 }));
 
 describe("SubscriptionForm", () => {
@@ -59,7 +36,11 @@ describe("SubscriptionForm", () => {
     );
   });
 
-  it("shows relevant errors returned by action", () => {
+  // unclear why, but React server actions are still not working with Jest here
+  // action function is replaced with `javascript:throw new Error('A React form was unexpectedly submitted')`
+  // See also https://github.com/facebook/react/blob/f83903bfcc5a61811bd1b69b14f0ebbac4754462/packages/react-dom-bindings/src/client/ReactDOMComponent.js#L468
+  // - DWS 2-12-25
+  it.skip("shows relevant errors returned by action", () => {
     mockSubscribeEmail.mockImplementation(() =>
       Promise.resolve({
         errorMessage: "an error message",
@@ -69,11 +50,19 @@ describe("SubscriptionForm", () => {
         },
       }),
     );
-    render(<SubscriptionForm />);
+    const { rerender } = render(<SubscriptionForm />);
 
     const button = screen.getByRole("button", { name: "form.button" });
     button.click();
 
-    expect(mockSubscribeEmail).toHaveBeenCalled();
+    rerender(<SubscriptionForm />);
+
+    const errorAlerts = screen.getAllByRole("alert");
+
+    expect(errorAlerts).toHaveLength(2);
+    expect(errorAlerts[0]).toHaveTextContent("bad name, sorry");
+    expect(errorAlerts[1]).toHaveTextContent(
+      "this really was not a valid email",
+    );
   });
 });
