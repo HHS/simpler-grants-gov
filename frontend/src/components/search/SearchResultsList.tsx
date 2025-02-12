@@ -8,15 +8,12 @@ import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 interface ServerPageProps {
-  searchResultsPromise: Promise<SearchAPIResponse>;
+  searchResults: SearchAPIResponse;
 }
 
-export default async function SearchResultsListFetch({
-  searchResultsPromise,
+export default async function SearchResultsList({
+  searchResults,
 }: ServerPageProps) {
-  const searchResults = await searchResultsPromise;
-
-  const maxPaginationError = null;
   const t = await getTranslations("Search");
 
   if (searchResults.status_code !== 200) {
@@ -26,11 +23,12 @@ export default async function SearchResultsListFetch({
   if (searchResults.data.length === 0) {
     return (
       <div>
-        <h2>{t("resultsListFetch.title")}</h2>
+        <h2>{t("resultsListFetch.noResultsTitle")}</h2>
         <ul>
-          {t.rich("resultsListFetch.body", {
-            li: (chunks) => <li>{chunks}</li>,
-          })}
+          <li>{t("resultsListFetch.noResultsBody.0")}</li>
+          <li>{t("resultsListFetch.noResultsBody.1")}</li>
+          <li>{t("resultsListFetch.noResultsBody.2")}</li>
+          <li>{t("resultsListFetch.noResultsBody.3")}</li>
         </ul>
       </div>
     );
@@ -38,8 +36,6 @@ export default async function SearchResultsListFetch({
 
   return (
     <ul className="usa-list--unstyled">
-      {/* TODO #1485: show proper USWDS error  */}
-      {maxPaginationError && <h4>{t("resultsListFetch.paginationError")}</h4>}
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem opportunity={opportunity} />
