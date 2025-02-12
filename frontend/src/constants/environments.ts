@@ -31,7 +31,7 @@ export const environment: { [key: string]: string } = {
     ENVIRONMENT === "prod" ? "https://grants.gov" : "https://test.grants.gov",
   NEXT_PUBLIC_BASE_PATH: NEXT_PUBLIC_BASE_PATH ?? "",
   USE_SEARCH_MOCK_DATA: USE_SEARCH_MOCK_DATA || "",
-  SENDY_API_URL: SENDY_API_URL || "http://localhost:3000",
+  SENDY_API_URL: SENDY_API_URL || "",
   SENDY_API_KEY: SENDY_API_KEY || "",
   SENDY_LIST_ID: SENDY_LIST_ID || "",
   API_URL: API_URL || "",
