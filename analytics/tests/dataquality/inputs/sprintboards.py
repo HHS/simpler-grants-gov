@@ -2,8 +2,8 @@
 from unittest.mock import Mock
 
 
-def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
-                               pillarField = Mock) -> list[dict]:
+def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,  # noqa: ANN001, ARG001, N803
+                               pillarField = Mock) -> list[dict]:  # noqa: ANN001, ARG001, N803
     """Sprintboard input for snapshot testing."""
     return [
         {
@@ -103,7 +103,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2024-12-18T21:51:03Z",
                 "closedAt": None,
                 "parent": {
-                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 },
             },
@@ -118,14 +118,14 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Adjust GET saved-search endpoint to take in sorting/pagination and use it",
+                "title": "Adjust GET saved-search endpoint to take in sorting/pagination and use it",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3692",
                 "issueType": {"name": "Task"},
                 "closed": False,
                 "createdAt": "2025-01-30T19:05:06Z",
                 "closedAt": None,
                 "parent": {
-                    "title": "Enable users to save a search and view/open/delete their saved searches",
+                    "title": "Enable users to save a search and view/open/delete their saved searches",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3119",
                 },
             },
@@ -166,7 +166,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2025-02-03T19:01:10Z",
                 "closedAt": "2025-02-06T18:57:51Z",
                 "parent": {
-                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 },
             },
@@ -200,7 +200,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Content for email notifications about opportunities with upcoming due dates",
+                "title": "Content for email notifications about opportunities with upcoming due dates",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3769",
                 "issueType": {"name": "Task"},
                 "closed": False,
@@ -222,7 +222,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Content for email notifications about newly published opportunities that match a saved search",
+                "title": "Content for email notifications about newly published opportunities that match a saved search",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3602",
                 "issueType": {"name": "Task"},
                 "closed": False,
@@ -273,7 +273,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2024-12-18T21:45:52Z",
                 "closedAt": None,
                 "parent": {
-                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 },
             },
@@ -412,7 +412,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Modify sorting in search endpoint to support passing in multiple order_by values to support secondary+ sorting",
+                "title": "Modify sorting in search endpoint to support passing in multiple order_by values to support secondary+ sorting",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3577",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -460,7 +460,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2025-01-07T17:44:38Z",
                 "closedAt": None,
                 "parent": {
-                    "title": "Enable users to save a search and view/open/delete their saved searches",
+                    "title": "Enable users to save a search and view/open/delete their saved searches",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3119",
                 },
             },
@@ -640,7 +640,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Redirect to the highest valid page of search results when page query param has value beyond the max page possible",
+                "title": "Redirect to the highest valid page of search results when page query param has value beyond the max page possible",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/1485",
                 "issueType": {"name": "Task"},
                 "closed": False,
@@ -768,7 +768,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2025-01-09T15:24:57Z",
                 "closedAt": "2025-01-21T17:58:55Z",
                 "parent": {
-                    "title": "Branding & Comms Phase 2 - Follow on from High Priority Quad 1 Deliverable ",
+                    "title": "Branding & Comms Phase 2 - Follow on from High Priority Quad 1 Deliverable ",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/2314",
                 },
             },
@@ -829,7 +829,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2024-12-18T21:50:29Z",
                 "closedAt": "2025-01-17T23:27:42Z",
                 "parent": {
-                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 },
             },
@@ -851,7 +851,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
                 "createdAt": "2024-12-18T21:52:18Z",
                 "closedAt": "2025-01-17T23:30:13Z",
                 "parent": {
-                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                    "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                     "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                 },
             },
@@ -929,7 +929,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Modify frontend so it doesn't look for attachment type in the API response",
+                "title": "Modify frontend so it doesn't look for attachment type in the API response",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3584",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -992,7 +992,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Add an allow list for specific file types to be uploaded into the search index",
+                "title": "Add an allow list for specific file types to be uploaded into the search index",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3497",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -1080,7 +1080,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Make it possible to run opportunity attachment logic for a subset of attachments",
+                "title": "Make it possible to run opportunity attachment logic for a subset of attachments",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3520",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -1102,7 +1102,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Handle opportunity attachments when opportunity changes is_draft or is deleted",
+                "title": "Handle opportunity attachments when opportunity changes is_draft or is deleted",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3500",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -1209,7 +1209,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Setup configuration to run job that generates extracts of Opportunity DB tables for analytics daily",
+                "title": "Setup configuration to run job that generates extracts of Opportunity DB tables for analytics daily",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3160",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -1418,7 +1418,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Adjust jwt auth to avoid needing to cast/ignore typing whenever we fetch the user",
+                "title": "Adjust jwt auth to avoid needing to cast/ignore typing whenever we fetch the user",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3499",
                 "issueType": {"name": "Task"},
                 "closed": True,
@@ -1921,7 +1921,7 @@ def mock_graphql_sprintboard_data(ogin = Mock, project = Mock, quadField = Mock,
         },
         {
             "content": {
-                "title": "Delivery Dashboard: display data for deliverable regardless of quad boundaries",
+                "title": "Delivery Dashboard: display data for deliverable regardless of quad boundaries",  # noqa: E501
                 "url": "https://github.com/HHS/simpler-grants-gov/issues/3622",
                 "issueType": {"name": "Task"},
                 "closed": True,

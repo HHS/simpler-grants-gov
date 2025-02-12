@@ -2,8 +2,8 @@
 from unittest.mock import Mock
 
 
-def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
-                               pillarField = Mock) -> list[dict]:  # noqa: ARG001, ANN001
+def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,  # noqa: ANN001, ARG001, N803
+                               pillarField = Mock) -> list[dict]:  # noqa: ANN001, ARG001, N803
     """Mock input for snapshot testing of roadmap data."""
     return [
          {
@@ -655,7 +655,7 @@ def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
          },
          {
              "content": {
-                 "title": "Enable users to save an opportunity and view/delete their saved opportunities",
+                 "title": "Enable users to save an opportunity and view/delete their saved opportunities",  # noqa: E501
                  "url": "https://github.com/HHS/simpler-grants-gov/issues/3118",
                  "issueType": {"name": "Epic"},
                  "closed": False,
@@ -689,7 +689,7 @@ def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
          },
          {
              "content": {
-                 "title": "Draft and finalize session plan and create artifacts for January 2025 Co-design group meetings",
+                 "title": "Draft and finalize session plan and create artifacts for January 2025 Co-design group meetings",  # noqa: E501
                  "url": "https://github.com/HHS/simpler-grants-gov/issues/3171",
                  "issueType": {"name": "Epic"},
                  "closed": True,
@@ -1231,7 +1231,7 @@ def mock_graphql_roadmap_data(login = Mock, project = Mock, quadField = Mock,
          },
          {
              "content": {
-                 "title": "Branding & Comms Phase 2 - Follow on from High Priority Quad 1 Deliverable ",
+                 "title": "Branding & Comms Phase 2 - Follow on from High Priority Quad 1 Deliverable ",  # noqa: E501
                  "url": "https://github.com/HHS/simpler-grants-gov/issues/2314",
                  "issueType": {"name": "Epic"},
                  "closed": False,

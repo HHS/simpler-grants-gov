@@ -11,7 +11,7 @@ from tests.dataquality.inputs.roadmap import mock_graphql_roadmap_data
 from tests.dataquality.inputs.sprintboards import mock_graphql_sprintboard_data
 
 
-def test_roadmap_snapshot(snapshot):
+def test_roadmap_snapshot(snapshot):  # noqa: ANN001
     """Extract and transform for comparison to pre-committed snapshot of roadmap."""
     assert roadmap_output() == snapshot()
 
@@ -28,9 +28,7 @@ def roadmap_output() -> list[dict]|None:
     return GitHubProjectETL(config).extract_and_transform_in_memory()
 
 
-
-
-def test_sprint_snapshot(snapshot):
+def test_sprint_snapshot(snapshot):  # noqa: ANN001
     """Extract and transform for comparison to pre-committed snapshot of sprint board."""
     assert sprint_board_output() == snapshot
 
@@ -46,6 +44,4 @@ def sprint_board_output() -> list[dict]|None:
     # validate effective_date
 
     return GitHubProjectETL(config).extract_and_transform_in_memory()
-
-
 
