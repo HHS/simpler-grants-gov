@@ -59,7 +59,7 @@ export const OpportunitySaveUserControl = () => {
     if (!user?.token) return;
     setLoading(true);
     fetch(`/api/user/saved-opportunities/${opportunity_id}`)
-      .then((res) => (res.ok && res.status === 200 ? res.json() : []))
+      .then((res) => (res.ok && res.status === 200 ? res.json() : null))
       .then((data) => {
         data && setSaved(true);
       })
