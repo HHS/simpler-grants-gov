@@ -70,19 +70,6 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
     return opportunity
 
 
-def get_opportunity_versions(db_session: db.Session, opportunity_id: int) -> dict:
-    opportunity = _fetch_opportunity(
-        db_session, opportunity_id, load_all_opportunity_summaries=True
-    )
-
-    now_us_eastern = datetime_util.get_now_us_eastern_date()
-
-    forecasts = _filter_summaries(opportunity.all_forecasts, now_us_eastern)
-    non_forecasts = _filter_summaries(opportunity.all_non_forecasts, now_us_eastern)
-
-    return {"opportunity": opportunity, "forecasts": forecasts, "non_forecasts": non_forecasts}
-
-
 def _filter_summaries(
     summaries: list[OpportunitySummary], current_date: date
 ) -> list[OpportunitySummary]:
