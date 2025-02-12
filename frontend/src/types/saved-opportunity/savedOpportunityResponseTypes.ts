@@ -1,4 +1,4 @@
-export interface savedOpportunity {
+export interface SavedOpportunity {
   opportunity_id: number;
   opportunity_status: "forecasted" | "posted" | "closed" | "archived";
   opportunity_title: string | null;
