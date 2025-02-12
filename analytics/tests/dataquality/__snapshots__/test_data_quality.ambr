@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: test_snapshot
+# name: test_roadmap_snapshot
   list([
     dict({
       'deliverable_pillar': '🔎 SimplerFind',
@@ -122,4 +122,7 @@
       'sprint_start': None,
     }),
   ])
+# ---
+# name: test_sprint_snapshot
+  'sprint_board_output() -> list[dict] | None'
 # ---
