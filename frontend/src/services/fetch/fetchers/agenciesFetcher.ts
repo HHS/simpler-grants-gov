@@ -27,7 +27,8 @@ export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
       revalidate: 604800,
     },
   });
-  return (await response.json()) as RelevantAgencyRecord[];
+  const { data } = (await response.json()) as { data: RelevantAgencyRecord[] };
+  return data;
 };
 
 // translates API response containing flat list of agencies into nested filter options
