@@ -21,6 +21,7 @@ data "external" "deploy_github_sha" {
 locals {
   alb_name                = var.service_name
   cluster_name            = var.service_name
+  container_name          = var.service_name
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
@@ -37,7 +38,8 @@ locals {
     { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
-    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value }
+    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value },
+    { name : "IMAGE_TAG", value : var.image_tag },
   ], local.hostname)
   db_environment_variables = var.db_vars == null ? [] : [
     { name : "DB_HOST", value : var.db_vars.connection_info.host },
@@ -77,11 +79,12 @@ locals {
 #-------------------
 
 resource "aws_ecs_service" "app" {
-  name            = var.service_name
-  cluster         = aws_ecs_cluster.cluster.arn
-  launch_type     = "FARGATE"
-  task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = var.desired_instance_count
+  name                   = var.service_name
+  cluster                = aws_ecs_cluster.cluster.arn
+  launch_type            = "FARGATE"
+  task_definition        = aws_ecs_task_definition.app.arn
+  desired_count          = var.desired_instance_count
+  enable_execute_command = var.enable_command_execution ? true : null
 
   # Allow changes to the desired_count without differences in terraform plan.
   # This allows autoscaling to manage the desired count for us.
@@ -112,7 +115,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name                   = var.service_name,
+      name                   = local.container_name,
       image                  = local.image_url,
       memory                 = var.memory,
       cpu                    = var.cpu,
@@ -134,10 +137,13 @@ resource "aws_ecs_task_definition" "app" {
       portMappings = [
         {
           containerPort = var.container_port,
+          hostPort      = var.container_port,
+          protocol      = "tcp"
         }
       ],
       linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
+          add  = []
           drop = ["ALL"]
         },
         initProcessEnabled = true
@@ -150,6 +156,9 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
       }
+      mountPoints    = []
+      systemControls = []
+      volumesFrom    = []
     }
   ])
 
