@@ -1,6 +1,5 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
