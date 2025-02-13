@@ -24,7 +24,7 @@ from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
 
-logger = logging.getLogger(__name__)
+logger = None
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -53,8 +53,15 @@ app.add_typer(etl_app, name="etl", help="Transform and load local file")
 def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
-    init_logging(__package__)
+    initialize_logger()
     init_app(logging.root)
+
+
+def initialize_logger() -> None:
+    global logger
+    if logger is None:
+        logger = logging.getLogger(__name__)
+        init_logging(__package__)
 
 
 @app.callback()
@@ -123,6 +130,7 @@ def test_connection() -> None:
 @ecs_background_task("db_migrate")
 def migrate_database() -> None:
     """Initialize etl database."""
+    initialize_logger() # needed for nontyper entry point
     logger.info("initializing database")
     etldb.migrate_database()
     logger.info("done")
