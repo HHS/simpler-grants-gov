@@ -12,7 +12,10 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from analytics.datasets.base import BaseDataset
-from analytics.datasets.utils import load_json_data_as_df
+from analytics.datasets.utils import (
+    load_json_data_as_df,
+    load_json_data_as_df_from_object,
+)
 
 
 class EtlEntityType(Enum):
@@ -83,11 +86,46 @@ class EtlDataset(BaseDataset):
         )
 
         # transform entity id columns
+        df = EtlDataset.transform_entity_id_columns(df)
+
+        return cls(df)
+
+    @classmethod
+    def load_from_json_object(cls, json_data: list) -> Self:
+        """
+        Instantiate an instance of EtlDataset from a json object.
+
+        Parameters
+        ----------
+        json_data: list
+            In-memory json object containing data exported from GitHub
+
+        Returns
+        -------
+        Self:
+            An instance of the EtlDataset dataset class
+
+        """
+        # load input datasets
+        df = load_json_data_as_df_from_object(
+            json_data=json_data,
+            column_map=cls.COLUMN_MAP,
+            date_cols=None,
+        )
+
+        # transform entity id columns
+        df = EtlDataset.transform_entity_id_columns(df)
+
+        return cls(df)
+
+    @classmethod
+    def transform_entity_id_columns(cls, df: pd.DataFrame) -> pd.DataFrame:
+        """Remove fqdn from urls."""
         prefix = "https://github.com/"
         for col in ("deliverable_ghid", "epic_ghid", "issue_ghid", "issue_parent"):
             df[col] = df[col].str.replace(prefix, "")
 
-        return cls(df)
+        return df
 
     # QUAD getters
 

@@ -6,6 +6,24 @@ variable "service_name" {
   }
 }
 
+variable "domain_name" {
+  type        = string
+  description = "The fully qualified domain name for the application"
+  default     = null
+}
+
+variable "certificate_arn" {
+  type        = string
+  description = "The ARN of the certificate to use for the application"
+  default     = null
+}
+
+variable "hosted_zone_id" {
+  type        = string
+  description = "The Route53 hosted zone id for the domain"
+  default     = null
+}
+
 variable "image_tag" {
   type        = string
   description = "The tag of the image to deploy"
@@ -41,6 +59,11 @@ variable "memory" {
   description = "Amount (in MiB) of memory used by the task. e.g. 2048"
 }
 
+variable "enable_command_execution" {
+  type        = bool
+  default     = false
+  description = "Whether the service should enable ECS Exec, such as for debugging"
+}
 
 variable "container_port" {
   type        = number
@@ -109,23 +132,26 @@ variable "enable_drafts_bucket" {
   default     = false
 }
 
+variable "aws_services_security_group_id" {
+  type        = string
+  description = "Security group ID for VPC endpoints that access AWS Services"
+}
+
 variable "secrets" {
   type = set(object({
     name      = string
     valueFrom = string
   }))
   description = "List of configurations for defining environment variables that pull from SSM parameter store"
-}
-
-variable "aws_services_security_group_id" {
-  type        = string
-  description = "Security group ID for VPC endpoints that access AWS Services"
+  default     = []
 }
 
 variable "db_vars" {
   description = "Variables for integrating the app service with a database"
   type = object({
-    security_group_ids = list(string)
+    security_group_ids         = list(string)
+    app_access_policy_arn      = string
+    migrator_access_policy_arn = string
     connection_info = object({
       host        = string
       port        = string
@@ -135,18 +161,6 @@ variable "db_vars" {
     })
   })
   default = null
-}
-
-variable "app_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the app service role for database access"
-  type        = string
-  default     = null
-}
-
-variable "migrator_access_policy_arn" {
-  description = "The ARN of the IAM policy to attach to the migrator task role for database access"
-  type        = string
-  default     = null
 }
 
 variable "extra_policies" {
@@ -245,4 +259,32 @@ variable "healthcheck_path" {
   description = "The path to check the health of the container, used on the load balancer health check"
   type        = string
   default     = "/health"
+}
+variable "file_upload_jobs" {
+  type = map(object({
+    source_bucket = string
+    path_prefix   = string
+    task_command  = list(string)
+  }))
+
+  description = <<EOT
+    Configurations for jobs that trigger on a file upload event.
+    Each configuration is a map from the job name to an object defining the
+    event's source bucket (the bucket the file was uploaded to), a
+    path prefix filter (only files that match the path prefix will trigger
+    the job), and the task command to run (this overrides the CMD entrypoint
+    in the container).
+
+    To reference the file path and bucket that triggered the event, the task
+    command can optionally include the placeholder values `<object_key>`
+    and `<bucket_name>`. For example if task_command is:
+
+      ["python", "etl.py", "<object_key>"]
+
+    Then if an object was uploaded to s3://somebucket/path/to/file.txt, the
+    task will execute the command:
+
+      python etl.py path/to/file.txt
+  EOT
+  default     = {}
 }

@@ -120,7 +120,7 @@ const OpportunityDescription = ({ summary, nofoPath }: Props) => {
 
   return (
     <>
-      <div className="usa-prose">
+      <div className="usa-prose margin-top-3">
         <h2>{t("title")}</h2>
         <OpportunityDownload nofoPath={nofoPath} />
         <h3>{t("summary")}</h3>

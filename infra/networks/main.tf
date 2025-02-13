@@ -8,6 +8,7 @@ locals {
   region = module.project_config.default_region
 
   network_config = module.project_config.network_configs[var.network_name]
+  domain_config  = local.network_config.domain_config
 
   # List of configuration for all applications, even ones that are not in the current network
   # If project has multiple applications, add other app configs to this list
@@ -29,6 +30,14 @@ locals {
 
   # Whether any of the applications in the network have dependencies on an external non-AWS service
   has_external_non_aws_service = anytrue([for app in local.apps_in_network : app.has_external_non_aws_service])
+
+  # Whether any of the applications in the network has an environment that needs container execution access
+  enable_command_execution = anytrue([
+    for app in local.apps_in_network :
+    anytrue([
+      for environment_config in app.environment_configs : true if environment_config.service_config.enable_command_execution == true && environment_config.network_name == var.network_name
+    ])
+  ])
 }
 
 terraform {
@@ -68,6 +77,8 @@ module "network" {
   database_subnet_group_name              = var.environment_name
   aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
   second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
+  has_external_non_aws_service            = local.has_external_non_aws_service
+  enable_command_execution                = local.enable_command_execution
 }
 
 module "dms_networking" {

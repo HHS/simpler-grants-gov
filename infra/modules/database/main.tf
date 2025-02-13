@@ -42,19 +42,22 @@ resource "aws_rds_cluster" "db" {
   manage_master_user_password = true
   storage_encrypted           = true
   kms_key_id                  = aws_kms_key.db.arn
+  allow_major_version_upgrade = false
 
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.rds_query_logging.name
 
   # checkov:skip=CKV_AWS_128:Auth decision needs to be ironed out
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
   iam_database_authentication_enabled = true
-  deletion_protection                 = true
   copy_tags_to_snapshot               = true
   enable_http_endpoint                = var.enable_http_endpoint
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
   backup_retention_period = 35
+  # Use a separate line to support automated terraform destroy commands
+  # checkov:skip=CKV_AWS_139:Allow disabling deletion protection for automated tests
+  deletion_protection = !var.is_temporary
 
   serverlessv2_scaling_configuration {
     max_capacity = var.max_capacity
@@ -95,7 +98,7 @@ resource "aws_kms_key" "db" {
 # -------------
 
 resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
-  name        = var.name
+  name        = "${var.name}-${local.engine_major_version}"
   family      = "aurora-postgresql${local.engine_major_version}"
   description = "Default cluster parameter group"
 

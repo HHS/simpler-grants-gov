@@ -18,6 +18,9 @@ resource "aws_backup_plan" "backup_plan" {
 resource "aws_backup_vault" "backup_vault" {
   name        = "${var.name}-db-backup-vault"
   kms_key_arn = data.aws_kms_key.backup_vault_key.arn
+
+  # Use a separate line to support automated terraform destroy commands
+  force_destroy = var.is_temporary
 }
 
 # KMS Key for the vault
