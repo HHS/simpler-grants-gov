@@ -29,3 +29,9 @@ variable "has_external_non_aws_service" {
   description = "Whether the application(s) in this network need to call external non-AWS services. Determines whether or not to create NAT gateways."
   default     = true
 }
+
+variable "enable_command_execution" {
+  type        = bool
+  description = "Whether the application(s) in this network need ECS Exec access. Determines whether to create VPC endpoints needed by ECS Exec."
+  default     = false
+}

@@ -27,7 +27,7 @@ export default function SearchBar({ query }: SearchBarProps) {
     if (validationError) {
       setValidationError(undefined);
     }
-    updateQueryParams("", "query", queryTerm, false);
+    updateQueryParams("", "query", queryTerm);
   };
 
   // if we have "refresh=true" query param, clear the input

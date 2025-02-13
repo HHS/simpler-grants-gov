@@ -1,12 +1,15 @@
 module "prod_config" {
   source                          = "./env-config"
+  project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
   environment                     = "prod"
+  account_name                    = "prod"
   network_name                    = "prod"
+  domain_name                     = "simpler.grants.gov"
+  enable_https                    = false
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
-  domain                          = "simpler.grants.gov"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/frontend-prod/services/frontend-prod/health?region=us-east-1
@@ -20,4 +23,9 @@ module "prod_config" {
 
   instance_cpu    = 1024
   instance_memory = 2048
+
+  # Enables ECS Exec access for debugging or jump access.
+  # Defaults to `false`. Uncomment the next line to enable.
+  # ⚠️ Warning! It is not recommended to enable this in a production environment.
+  # enable_command_execution = true
 }
