@@ -1,5 +1,5 @@
-import { ParsedError } from "src/app/[locale]/search/error_old";
 import { BadRequestError } from "src/errors";
+import { ParsedError } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
 describe("BadRequestError (as an example of other error types)", () => {
@@ -49,6 +49,7 @@ describe("BadRequestError (as an example of other error types)", () => {
     const { cause } = error as Error;
     const errorData = cause as ParsedError;
 
+    expect(errorData.details).toBeTruthy();
     expect(errorData.details?.field).toEqual("fieldName");
     expect(errorData.details?.message).toEqual("a more detailed message");
     expect(errorData.details?.type).toEqual("a subtype");

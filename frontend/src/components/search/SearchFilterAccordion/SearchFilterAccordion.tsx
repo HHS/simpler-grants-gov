@@ -3,10 +3,10 @@
 import { camelCase } from "lodash";
 import { QueryContext } from "src/app/[locale]/search/QueryProvider";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { useGlobalState } from "src/services/globalState/GlobalStateProvider";
+// import { useGlobalState } from "src/services/globalState/GlobalStateProvider";
 import { QueryParamKey } from "src/types/search/searchResponseTypes";
 
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";

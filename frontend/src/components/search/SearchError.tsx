@@ -1,21 +1,12 @@
 "use client";
 
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { OptionalStringDict } from "src/types/generalTypes";
+import { ParsedError } from "src/types/generalTypes";
 import { ErrorProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-
-export interface ParsedError {
-  message?: string;
-  searchInputs?: OptionalStringDict;
-  status?: number;
-  type?: string;
-  details?: FrontendErrorDetails;
-}
 
 function isValidJSON(str: string) {
   try {
