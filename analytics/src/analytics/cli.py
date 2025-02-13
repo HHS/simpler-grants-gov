@@ -23,8 +23,6 @@ from analytics.logs import init as init_logging
 from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
 
-logger = None
-
 # fmt: off
 # Instantiate typer options with help text for the commands below
 CONFIG_FILE_ARG = typer.Option(help="Path to JSON file with configurations for this entrypoint")
@@ -48,19 +46,23 @@ app.add_typer(export_app, name="export", help="Export data needed to calculate m
 app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
+LOGGER = None
+
 
 def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
-    initialize_logger()
+    _ = get_logger()
     init_app(logging.root)
 
 
-def initialize_logger() -> None:
-    global logger
-    if logger is None:
-        logger = logging.getLogger(__name__)
+def get_logger() -> logging.Logger:
+    """Retrieve the logger instance, initializing it if necessary."""
+    global LOGGER  # noqa: PLW0603, pylint: disable=global-statement
+    if LOGGER is None:
+        LOGGER = logging.getLogger(__name__)
         init_logging(__package__)
+    return LOGGER
 
 
 @app.callback()
@@ -129,7 +131,7 @@ def test_connection() -> None:
 @ecs_background_task("db_migrate")
 def migrate_database() -> None:
     """Initialize etl database."""
-    initialize_logger()  # needed for nontyper entry point
+    logger = get_logger()
     logger.info("initializing database")
     etldb.migrate_database()
     logger.info("done")
@@ -141,6 +143,8 @@ def transform_and_load(
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
     """Transform and load etl data."""
+    logger = get_logger()
+
     # validate effective date arg
     datestamp = validate_effective_date(effective_date)
     if datestamp is None:
@@ -166,6 +170,8 @@ def extract_transform_and_load(
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
 ) -> None:
     """Export data from GitHub, transform it, and load into analytics warehouse."""
+    logger = get_logger()
+
     # get configuration
     config_path = Path(config_file)
     if not config_path.exists():
