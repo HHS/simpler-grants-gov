@@ -1,7 +1,11 @@
+import clsx from "clsx";
+
 import { ReactNode } from "react";
+import { Button } from "@trussworks/react-uswds";
 
 import SimplerAlert from "./SimplerAlert";
-import SimplerButton from "./SimplerButton";
+import Spinner from "./Spinner";
+import { USWDSIcon } from "./USWDSIcon";
 
 interface SaveButtonProps {
   buttonClick?: () => Promise<void>;
@@ -34,18 +38,29 @@ const SaveButton = ({
   const type = error ? "error" : "success";
   return (
     <div className="display-flex flex-align-start">
-      <SimplerButton
-        icon={saved ? "star" : "star_outline"}
-        loadingText={loadingText}
-        data-testid="simpler-save-button"
-        loading={loading}
-        onClick={buttonClick}
+      <Button
         type="button"
         disabled={loading}
-        id={buttonId}
+        outline
+        onClick={buttonClick}
+        data-testid="simpler-save-button"
       >
-        {text}
-      </SimplerButton>
+        {loading ? (
+          <>
+            <Spinner className="height-3 width-3" /> {loadingText}
+          </>
+        ) : (
+          <>
+            <USWDSIcon
+              className={clsx("button-icon-large", {
+                "icon-active": saved,
+              })}
+              name={saved ? "star" : "star_outline"}
+            />
+            {text}
+          </>
+        )}
+      </Button>
       {message && (
         <SimplerAlert
           type={type}

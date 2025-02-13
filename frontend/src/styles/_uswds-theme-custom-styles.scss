@@ -238,38 +238,13 @@ i.e.
   padding: units(1) units(2);
 }
 
-.simpler-button {
-  padding: 0 units(2);
-  min-height: units(6);
+.button-icon-large {
+  transform: scale(2);
+  margin: 0 units(0.5) 0 0;
+}
 
-  svg {
-    font-size: 2rem;
-  }
-  &.icon {
-    padding: units(0.5) units(2) units(0.5) units(1);
-  }
-  &.icon-active {
-    svg {
-      color: color("orange-40v");
-    }
-  }
-  &.loading:disabled {
-    padding: units(0.5) units(2) units(0.5) units(1);
-    color: color("gray-70");
-    border-color: color("gray-70");
-    box-shadow: inset 0 0 0 2px color("gray-70");
-    svg {
-      color: color("gray-70");
-    }
-  }
-  .grants-spinner {
-    height: units(3);
-    width: units(3);
-    margin: units(0.5);
-    &::after {
-      border-width: 3px;
-    }
-  }
+.icon-active {
+  color: color("orange-40v");
 }
 
 // There is no config for setting the current nav item border color

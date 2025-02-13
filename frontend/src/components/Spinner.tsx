@@ -1,7 +1,11 @@
 import React from "react";
 
-const Spinner = () => (
-  <span aria-label="Loading!" className="grants-spinner" role="progressbar" />
+const Spinner = ({ className }: { className?: string }) => (
+  <span
+    aria-label="Loading!"
+    className={className ? `grants-spinner ${className}` : "grants-spinner"}
+    role="progressbar"
+  />
 );
 
 export default Spinner;
