@@ -12,7 +12,6 @@ import typer
 from sqlalchemy import text
 
 from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb
@@ -130,7 +129,7 @@ def test_connection() -> None:
 @ecs_background_task("db_migrate")
 def migrate_database() -> None:
     """Initialize etl database."""
-    initialize_logger() # needed for nontyper entry point
+    initialize_logger()  # needed for nontyper entry point
     logger.info("initializing database")
     etldb.migrate_database()
     logger.info("done")
