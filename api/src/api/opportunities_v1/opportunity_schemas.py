@@ -517,10 +517,6 @@ class OpportunityVersionV1Schema(Schema):
     non_forecasts = fields.Nested(OpportunitySummaryV1Schema(many=True))
 
 
-class OpportunityVersionsGetResponseV1Schema(AbstractResponseSchema):
-    data = fields.Nested(OpportunityVersionV1Schema())
-
-
 class OpportunitySearchResponseV1Schema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.Nested(OpportunityV1Schema(many=True))
 
