@@ -88,7 +88,7 @@ def export_github_data(
 
 
 # ===========================================================
-# Import commands
+# Diagnostic commands
 # ===========================================================
 
 
@@ -112,26 +112,6 @@ def test_connection() -> None:
     # commits the transaction to the db
     connection.commit()
     result.close()
-
-
-@import_app.command(name="db_import")
-def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
-    """Import JSON data to the database."""
-    logger.info("Beginning import")
-
-    # Get the database engine and establish a connection
-    client = PostgresDbClient()
-
-    # Load data from the sprint board
-    issues = GitHubIssues.from_json(delivery_file)
-
-    issues.to_sql(
-        output_table="github_project_data",
-        engine=client.engine(),
-        replace_table=True,
-    )
-    rows = len(issues.to_dict())
-    logger.info("Number of rows in table: %s", rows)
 
 
 # ===========================================================
