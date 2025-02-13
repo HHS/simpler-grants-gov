@@ -10,6 +10,7 @@ import { USWDSIcon } from "./USWDSIcon";
 interface SaveButtonProps {
   buttonClick?: () => Promise<void>;
   messageClick: () => void;
+  // This is the id of the button which will be tied to the aria-describedby of the alert
   buttonId: string;
   defaultText: string;
   error: boolean;

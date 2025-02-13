@@ -6,6 +6,7 @@ import { USWDSIcon } from "./USWDSIcon";
 
 interface SimplerAlertProps {
   alertClick: () => void;
+  // This is the id which will be tied to the aria-describedby of the alert
   buttonId: string;
   messageText: string | ReactNode;
   type: "error" | "success";
