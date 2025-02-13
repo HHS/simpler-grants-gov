@@ -7,8 +7,8 @@ from src.data_migration.transformation.subtask.abstract_transform_subtask import
     AbstractTransformSubTask,
 )
 from src.db.models.opportunity_models import LinkOpportunitySummaryApplicantType, OpportunitySummary
-from src.db.models.staging.forecast import TapplicanttypesForecast, TapplicanttypesForecastHist
-from src.db.models.staging.synopsis import TapplicanttypesSynopsis, TapplicanttypesSynopsisHist
+from src.db.models.staging.forecast import TapplicanttypesForecast
+from src.db.models.staging.synopsis import TapplicanttypesSynopsis
 
 logger = logging.getLogger(__name__)
 
@@ -34,22 +34,6 @@ class TransformApplicantType(AbstractTransformSubTask):
         )
         self.process_link_applicant_types_group(forecast_applicant_type_records)
 
-        logger.info("Processing historical forecast applicant types")
-        forecast_applicant_type_hist_records = self.fetch_with_opportunity_summary(
-            TapplicanttypesForecastHist,
-            link_table,
-            [
-                TapplicanttypesForecastHist.at_frcst_id
-                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
-            ],
-            is_forecast=True,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_applicant_types_group(forecast_applicant_type_hist_records)
-
         logger.info("Processing synopsis applicant types")
         synopsis_applicant_type_records = self.fetch_with_opportunity_summary(
             TapplicanttypesSynopsis,
@@ -65,22 +49,6 @@ class TransformApplicantType(AbstractTransformSubTask):
             relationship_load_value=relationship_load_value,
         )
         self.process_link_applicant_types_group(synopsis_applicant_type_records)
-
-        logger.info("Processing historical synopsis applicant types")
-        synopsis_applicant_type_hist_records = self.fetch_with_opportunity_summary(
-            TapplicanttypesSynopsisHist,
-            link_table,
-            [
-                TapplicanttypesSynopsisHist.at_syn_id
-                == LinkOpportunitySummaryApplicantType.legacy_applicant_type_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryApplicantType.opportunity_summary_id,
-            ],
-            is_forecast=False,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_applicant_types_group(synopsis_applicant_type_hist_records)
 
     def process_link_applicant_types_group(
         self,
