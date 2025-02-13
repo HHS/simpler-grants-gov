@@ -402,10 +402,10 @@ class TestTransformFullRunTask(BaseTestClass):
         validate_agency(db_session, subagency, deleted_fields={"ldapGp", "description"})
 
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 39,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 10,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 41,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 7,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 11,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 8,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 7,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 15,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
             transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 1,
