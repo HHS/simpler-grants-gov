@@ -7,34 +7,36 @@ import {
 
 const fakeAgencyResponseData: RelevantAgencyRecord[] = [
   {
-    agency_code: "DOC-NIST",
+    agency_code: "DOCNIST",
     agency_name: "National Institute of Standards and Technology",
-    sub_agency_code: "DOC-NIST",
+    top_level_agency: null,
     agency_id: 1,
   },
   {
-    agency_code: "MOCK-NIST",
+    agency_code: "MOCKNIST",
     agency_name: "Mational Institute",
-    sub_agency_code: "MOCK-NIST",
+    top_level_agency: null,
     agency_id: 1,
   },
   {
-    agency_code: "MOCK-TRASH",
+    agency_code: "MOCKTRASH",
     agency_name: "Mational TRASH",
-    sub_agency_code: "MOCK-TRASH",
+    top_level_agency: null,
     agency_id: 1,
   },
   {
-    agency_code: "FAKE",
+    agency_code: "FAKEORG",
     agency_name: "Completely fake",
-    sub_agency_code: "FAKE",
+    top_level_agency: null,
     agency_id: 1,
   },
 ];
 
-const mockfetchAgencies = jest
-  .fn()
-  .mockResolvedValue({ data: fakeAgencyResponseData });
+const mockfetchAgencies = jest.fn((_arg) => {
+  return Promise.resolve({
+    json: () => Promise.resolve({ data: fakeAgencyResponseData }),
+  });
+});
 const mockSortFilterOptions = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
@@ -71,24 +73,24 @@ describe("agenciesToFilterOptions", () => {
   it("converts a simple list of top level agencies to filter options", () => {
     expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
       {
-        id: "DOC-NIST",
+        id: "DOCNIST",
         label: "National Institute of Standards and Technology",
-        value: "DOC-NIST",
+        value: "DOCNIST",
       },
       {
-        id: "MOCK-NIST",
+        id: "MOCKNIST",
         label: "Mational Institute",
-        value: "MOCK-NIST",
+        value: "MOCKNIST",
       },
       {
-        id: "MOCK-TRASH",
+        id: "MOCKTRASH",
         label: "Mational TRASH",
-        value: "MOCK-TRASH",
+        value: "MOCKTRASH",
       },
       {
-        id: "FAKE",
+        id: "FAKEORG",
         label: "Completely fake",
-        value: "FAKE",
+        value: "FAKEORG",
       },
     ]);
   });
@@ -96,87 +98,87 @@ describe("agenciesToFilterOptions", () => {
   it("converts a complex list of nested agencies to filter options", () => {
     const fakeAgencyResponseData: RelevantAgencyRecord[] = [
       {
-        agency_code: "DOC-NIST",
+        agency_code: "DOCNIST",
         agency_name: "National Institute of Standards and Technology",
-        sub_agency_code: "DOC-NIST",
+        top_level_agency: null,
         agency_id: 1,
       },
       {
-        agency_code: "HI",
+        agency_code: "Hello-HI",
         agency_name: "Hello",
-        sub_agency_code: "DOC-NIST",
+        top_level_agency: { agency_code: "DOCNIST" },
         agency_id: 1,
       },
       {
-        agency_code: "MOCK-NIST",
+        agency_code: "MOCKNIST",
         agency_name: "Mational Institute",
-        sub_agency_code: "MOCK-NIST",
+        top_level_agency: null,
         agency_id: 1,
       },
       {
-        agency_code: "TRASH",
+        agency_code: "MORE-TRASH",
         agency_name: "More TRASH",
-        sub_agency_code: "MOCK-TRASH",
+        top_level_agency: { agency_code: "MOCKTRASH" },
         agency_id: 1,
       },
       {
-        agency_code: "MOCK-TRASH",
+        agency_code: "MOCKTRASH",
         agency_name: "Mational TRASH",
-        sub_agency_code: "MOCK-TRASH",
+        top_level_agency: null,
         agency_id: 1,
       },
       {
-        agency_code: "FAKE",
+        agency_code: "FAKEORG",
         agency_name: "Completely fake",
-        sub_agency_code: "FAKE",
+        top_level_agency: null,
         agency_id: 1,
       },
       {
-        agency_code: "There",
+        agency_code: "There-Again",
         agency_name: "Again",
-        sub_agency_code: "DOC-NIST",
+        top_level_agency: { agency_code: "DOCNIST" },
         agency_id: 1,
       },
     ];
     expect(agenciesToFilterOptions(fakeAgencyResponseData)).toEqual([
       {
-        id: "DOC-NIST",
+        id: "DOCNIST",
         label: "National Institute of Standards and Technology",
-        value: "DOC-NIST",
+        value: "DOCNIST",
         children: [
           {
-            id: "HI",
+            id: "Hello-HI",
             label: "Hello",
-            value: "HI",
+            value: "Hello-HI",
           },
           {
-            id: "There",
+            id: "There-Again",
             label: "Again",
-            value: "There",
+            value: "There-Again",
           },
         ],
       },
       {
-        id: "MOCK-NIST",
+        id: "MOCKNIST",
         label: "Mational Institute",
-        value: "MOCK-NIST",
+        value: "MOCKNIST",
       },
       {
-        id: "MOCK-TRASH",
+        id: "MOCKTRASH",
         label: "Mational TRASH",
-        value: "MOCK-TRASH",
+        value: "MOCKTRASH",
         children: [
           {
-            id: "TRASH",
+            id: "MORE-TRASH",
             label: "More TRASH",
-            value: "TRASH",
+            value: "MORE-TRASH",
           },
         ],
       },
       {
-        id: "FAKE",
+        id: "FAKEORG",
         label: "Completely fake",
-        value: "FAKE",
+        value: "FAKEORG",
       },
     ]);
   });
@@ -186,24 +188,24 @@ describe("getAgenciesForFilterOptions", () => {
   it("immediately returns prefetched agencies if supplied", async () => {
     const prefetchedOptions = [
       {
-        id: "DOC-NIST",
+        id: "DOCNIST",
         label: "National Institute of Standards and Technology",
-        value: "DOC-NIST",
+        value: "DOCNIST",
       },
       {
-        id: "MOCK-NIST",
+        id: "MOCKNIST",
         label: "Mational Institute",
-        value: "MOCK-NIST",
+        value: "MOCKNIST",
       },
       {
-        id: "MOCK-TRASH",
+        id: "MOCKTRASH",
         label: "Mational TRASH",
-        value: "MOCK-TRASH",
+        value: "MOCKTRASH",
       },
       {
-        id: "FAKE",
+        id: "FAKEORG",
         label: "Completely fake",
-        value: "FAKE",
+        value: "FAKEORG",
       },
     ];
     const result = await getAgenciesForFilterOptions(prefetchedOptions);
@@ -213,24 +215,24 @@ describe("getAgenciesForFilterOptions", () => {
     await getAgenciesForFilterOptions();
     expect(mockSortFilterOptions).toHaveBeenCalledWith([
       {
-        id: "DOC-NIST",
+        id: "DOCNIST",
         label: "National Institute of Standards and Technology",
-        value: "DOC-NIST",
+        value: "DOCNIST",
       },
       {
-        id: "MOCK-NIST",
+        id: "MOCKNIST",
         label: "Mational Institute",
-        value: "MOCK-NIST",
+        value: "MOCKNIST",
       },
       {
-        id: "MOCK-TRASH",
+        id: "MOCKTRASH",
         label: "Mational TRASH",
-        value: "MOCK-TRASH",
+        value: "MOCKTRASH",
       },
       {
-        id: "FAKE",
+        id: "FAKEORG",
         label: "Completely fake",
-        value: "FAKE",
+        value: "FAKEORG",
       },
     ]);
   });

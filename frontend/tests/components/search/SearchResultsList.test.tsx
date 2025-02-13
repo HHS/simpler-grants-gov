@@ -54,6 +54,12 @@ const makeOpportunity = (overrides = {}) => ({
   ...overrides,
 });
 
+jest.mock("src/services/globalState/GlobalStateProvider", () => ({
+  useGlobalState: () => ({
+    flattenedAgencyOptions: [{ id: "hi", label: "yes", value: "sure" }],
+  }),
+}));
+
 describe("SearchResultsList", () => {
   it("should not have accessibility violations", async () => {
     const component = await SearchResultsList({

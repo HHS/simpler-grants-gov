@@ -9,8 +9,14 @@ export interface RelevantAgencyRecord {
   agency_code: string;
   agency_id: number;
   agency_name: string;
-  sub_agency_code: string; // if this == agency_code then we're dealing with a potential for children
+  top_level_agency: null | {
+    agency_code: string;
+  };
 }
+
+const isTopLevelAgency = (agency: RelevantAgencyRecord) => {
+  return !agency.agency_code.includes("-");
+};
 
 // would have called this getAgencies, but technically it's a POST
 export const obtainAgencies = async (): Promise<RelevantAgencyRecord[]> => {
@@ -37,11 +43,14 @@ export const agenciesToFilterOptions = (
 ): FilterOption[] => {
   // this should put all parent agencies at the top of the list to make it simpler to nest
   const agenciesWithTopLevelAgenciesFloated = agencies.sort((a, b) => {
-    // when sub_agency_code == agency_code we know we're dealing with a parent agency
-    if (a.sub_agency_code === a.agency_code) {
-      return b.sub_agency_code === b.agency_code ? 0 : -1;
+    // when the agency code does not contain a dash we know we're dealing with a top level agency
+    if (isTopLevelAgency(a) && !isTopLevelAgency(b)) {
+      return -1;
     }
-    return b.sub_agency_code === b.agency_code ? 1 : 0;
+    if (!isTopLevelAgency(a) && isTopLevelAgency(b)) {
+      return 1;
+    }
+    return 0;
   });
 
   return agenciesWithTopLevelAgenciesFloated.reduce((acc, rawAgency) => {
@@ -51,17 +60,20 @@ export const agenciesToFilterOptions = (
       value: rawAgency.agency_code,
     };
     if (
-      !rawAgency.sub_agency_code ||
-      rawAgency.sub_agency_code === rawAgency.agency_code
+      !rawAgency.top_level_agency ||
+      rawAgency.top_level_agency.agency_code === rawAgency.agency_code
     ) {
       return [...acc, agencyOption];
     }
     const parent = acc.find(
-      (agency: FilterOption) => agency.id === rawAgency.sub_agency_code,
+      (agency: FilterOption) =>
+        agency.id === rawAgency.top_level_agency?.agency_code,
     );
     // parent should always exist because of the pre-sort
     if (!parent) {
-      throw new Error(`Parent agency not found: ${rawAgency.sub_agency_code}`);
+      throw new Error(
+        `Parent agency not found: ${rawAgency.top_level_agency?.agency_code}`,
+      );
     }
     if (!parent.children) {
       parent.children = [];
