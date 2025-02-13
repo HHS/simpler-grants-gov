@@ -1,5 +1,3 @@
-"use client";
-
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
 export interface LayoutProps {

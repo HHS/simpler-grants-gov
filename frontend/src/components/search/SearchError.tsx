@@ -17,9 +17,6 @@ function isValidJSON(str: string) {
   }
 }
 
-// note that the SearchFilters component is not used here since that is a server component
-// we work around that by including the rendered components from SearchFilters, but manually
-// passing through the agency options as received from global state rather than fetching from API
 export function SearchError({ error }: ErrorProps) {
   const t = useTranslations("Search");
 

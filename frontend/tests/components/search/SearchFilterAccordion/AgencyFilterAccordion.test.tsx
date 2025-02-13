@@ -18,12 +18,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-// jest.mock("src/services/globalState/GlobalStateProvider", () => ({
-//   useGlobalState: () => ({
-//     setAgencyOptions: () => undefined,
-//   }),
-// }));
-
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
