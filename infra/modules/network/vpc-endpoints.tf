@@ -18,6 +18,9 @@ locals {
 
     # AWS services used by the database's role manager
     var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
+
+    # AWS services used by ECS Exec
+    var.enable_command_execution ? ["ssmmessages"] : [],
   )
 
   # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints

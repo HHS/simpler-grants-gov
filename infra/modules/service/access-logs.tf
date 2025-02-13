@@ -21,8 +21,11 @@ locals {
 
 resource "aws_s3_bucket" "access_logs" {
   bucket_prefix = "${var.service_name}-access-logs"
-  force_destroy = false
-  # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket especially due to likely use of lifecycle rules
+
+  # Use a separate line to support automated terraform destroy commands
+  force_destroy = var.is_temporary
+
+  # checkov:skip=CKV2_AWS_62:Event notification not necessary for this bucket expecially due to likely use of lifecycle rules
   # checkov:skip=CKV_AWS_18:Access logging was not considered necessary for this bucket
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
