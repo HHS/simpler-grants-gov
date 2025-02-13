@@ -48,11 +48,13 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            with _ecs_background_task_impl(task_name):
-                # Finally execute the function with New Relic instrumentation
-                return newrelic.agent.background_task(name=task_name, group="Python/ECSTask")(f)(
-                    *args, **kwargs
-                )
+            # Wrap with New Relic instrumentation
+            application = newrelic.agent.register_application(timeout=10.0)
+            with newrelic.agent.BackgroundTask(application, name=task_name, group="Python/ECSTask"):
+                # Wrap with our own logging (timing/general logs)
+                with _ecs_background_task_impl(task_name):
+                    # Finally actually run the task
+                    return f(*args, **kwargs)
 
         return wrapper
 
