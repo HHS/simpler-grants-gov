@@ -15,7 +15,14 @@ async function AgencyFilterAccordionWithFetchedOptions({
   agenciesPromise: Promise<FilterOption[]>;
   title: string;
 }) {
-  const agencies = await agenciesPromise;
+  let agencies: FilterOption[];
+  try {
+    agencies = await agenciesPromise;
+  } catch (e) {
+    // Come back to this to show the user an error
+    console.error("Unable to fetch agencies for filter list", e);
+    agencies = [];
+  }
   return (
     <SearchFilterAccordion
       filterOptions={agencies}

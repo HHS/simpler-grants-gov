@@ -57,12 +57,6 @@ jest.mock("react", () => ({
   use: jest.fn((e: { [key: string]: string }) => e),
 }));
 
-jest.mock("src/services/globalState/GlobalStateProvider", () => ({
-  useGlobalState: () => ({
-    agencyOptions: [],
-  }),
-}));
-
 const fetchMock = jest.fn().mockResolvedValue({
   json: jest.fn().mockResolvedValue({ data: [], errors: [], warnings: [] }),
   ok: true,
