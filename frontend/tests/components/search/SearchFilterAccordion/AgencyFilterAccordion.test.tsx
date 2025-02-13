@@ -66,72 +66,24 @@ const fakeOptions = [
 ];
 
 describe("AgencyFilterAccordion", () => {
-  it("is accessible (sync)", async () => {
-    const { container } = render(
-      <AgencyFilterAccordion agencyOptions={fakeOptions} query={new Set()} />,
-    );
+  it("is accessible", async () => {
+    const component = await AgencyFilterAccordion({
+      agencyOptionsPromise: Promise.resolve(fakeOptions),
+      query: new Set(),
+    });
+    const { container } = render(component);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
-  it("renders passed prefetched options (non nested)", () => {
-    render(
-      <AgencyFilterAccordion agencyOptions={fakeOptions} query={new Set()} />,
-    );
-
-    expect(screen.getByText("Completely fake")).toBeInTheDocument();
-    expect(screen.getByText("Mational TRASH")).toBeInTheDocument();
-    expect(screen.getByText("Mational Institute")).toBeInTheDocument();
-    expect(
-      screen.getByText("National Institute of Standards and Technology"),
-    ).toBeInTheDocument();
-  });
-
-  it("renders passed prefetched options (nested)", () => {
-    const { rerender } = render(
-      <AgencyFilterAccordion agencyOptions={fakeOptions} query={new Set()} />,
-    );
-
-    const expanderOne = screen.getByText("Mational TRASH");
-    const expanderTwo = screen.getByText(
-      "National Institute of Standards and Technology",
-    );
-
-    act(() => {
-      expanderOne.click();
-      expanderTwo.click();
-    });
-
-    rerender(
-      <AgencyFilterAccordion agencyOptions={fakeOptions} query={new Set()} />,
-    );
-    expect(screen.getByText("More TRASH")).toBeInTheDocument();
-    expect(screen.getByText("Hello")).toBeInTheDocument();
-    expect(screen.getByText("Again")).toBeInTheDocument();
-    expect(
-      screen.getByText("National Institute of Standards and Technology"),
-    ).toBeInTheDocument();
-  });
-
   // just want to confirm it renders
-  it("renders async component if passed a promise (asserting on mock suspended state)", () => {
-    render(
-      <AgencyFilterAccordion
-        agencyOptionsPromise={Promise.resolve(fakeOptions)}
-        query={new Set()}
-      />,
-    );
+  it("renders async component (asserting on mock suspended state)", async () => {
+    const component = await AgencyFilterAccordion({
+      agencyOptionsPromise: Promise.resolve(fakeOptions),
+      query: new Set(),
+    });
+    render(component);
 
     expect(screen.getByText("accordion.titles.agency")).toBeInTheDocument();
-  });
-
-  it("errors if neither agencyOptions or agencyOptionsPromise are provided", async () => {
-    const error = await wrapForExpectedError<Error>(() =>
-      render(<AgencyFilterAccordion query={new Set()} />),
-    );
-
-    expect(error.message).toEqual(
-      "AgencyFilterAccordion must have either agencyOptions or agencyOptionsPromise prop",
-    );
   });
 });

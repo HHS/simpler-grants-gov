@@ -6,86 +6,52 @@ import SearchFilterAccordion, {
   FilterOption,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
-async function AgencyFilterAccordionWithFetchedOptions({
+// functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
+// with prefetched options we have a synchronous render
+// with a Promise we have an async render with Suspense
+export async function AgencyFilterAccordion({
   query,
-  agenciesPromise,
-  title,
+  agencyOptionsPromise,
 }: {
   query: Set<string>;
-  agenciesPromise: Promise<FilterOption[]>;
-  title: string;
+  agencyOptionsPromise: Promise<FilterOption[]>;
 }) {
+  const t = useTranslations("Search");
+  const title = t("accordion.titles.agency");
+
   let agencies: FilterOption[];
   try {
-    agencies = await agenciesPromise;
+    agencies = await agencyOptionsPromise;
   } catch (e) {
     // Come back to this to show the user an error
     console.error("Unable to fetch agencies for filter list", e);
     agencies = [];
   }
   return (
-    <SearchFilterAccordion
-      filterOptions={agencies}
-      query={query}
-      queryParamKey={"agency"}
-      title={title}
-    />
-  );
-}
-
-// functionality differs depending on whether `agencyOptions` or `agencyOptionsPromise` is passed
-// with prefetched options we have a synchronous render
-// with a Promise we have an async render with Suspense
-export function AgencyFilterAccordion({
-  query,
-  agencyOptions,
-  agencyOptionsPromise,
-}: {
-  query: Set<string>;
-  agencyOptions?: FilterOption[];
-  agencyOptionsPromise?: Promise<FilterOption[]>;
-}) {
-  const t = useTranslations("Search");
-  const title = t("accordion.titles.agency");
-  if (agencyOptions) {
-    return (
+    <Suspense
+      fallback={
+        <Accordion
+          bordered={true}
+          items={[
+            {
+              title,
+              content: [],
+              expanded: false,
+              id: `opportunity-filter-agency-disabled`,
+              headingLevel: "h2",
+            },
+          ]}
+          multiselectable={true}
+          className="margin-top-4"
+        />
+      }
+    >
       <SearchFilterAccordion
-        filterOptions={agencyOptions}
+        filterOptions={agencies}
         query={query}
         queryParamKey={"agency"}
         title={title}
       />
-    );
-  }
-  if (agencyOptionsPromise) {
-    return (
-      <Suspense
-        fallback={
-          <Accordion
-            bordered={true}
-            items={[
-              {
-                title,
-                content: [],
-                expanded: false,
-                id: `opportunity-filter-agency-disabled`,
-                headingLevel: "h2",
-              },
-            ]}
-            multiselectable={true}
-            className="margin-top-4"
-          />
-        }
-      >
-        <AgencyFilterAccordionWithFetchedOptions
-          agenciesPromise={agencyOptionsPromise}
-          query={query}
-          title={title}
-        />
-      </Suspense>
-    );
-  }
-  throw new Error(
-    "AgencyFilterAccordion must have either agencyOptions or agencyOptionsPromise prop",
+    </Suspense>
   );
 }
