@@ -7,6 +7,7 @@ from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations.github.client import GitHubGraphqlClient
 
+from tests.dataquality.inputs.extracted_json import mock_extracted_json
 from tests.dataquality.inputs.roadmap import mock_graphql_roadmap_data
 from tests.dataquality.inputs.sprintboards import mock_graphql_sprintboard_data
 
@@ -49,3 +50,23 @@ def sprint_board_output() -> list[dict] | None:
     # validate effective_date
 
     return GitHubProjectETL(config).extract_and_transform_in_memory()
+
+
+@mock.patch.object(
+    GitHubProjectETL,
+    "extract_and_transform_in_memory",
+    mock_extracted_json,
+)
+def etl_output() -> list[dict]:
+    """Call the pipeline code to be used with comparison."""
+    config_path = Path("config/github-projects.json")
+    config = load_config(config_path, GitHubProjectConfig)
+
+    # validate effective_date
+
+    return GitHubProjectETL(config).extract_and_transform_in_memory()
+
+
+def test_load_from_json_object(snapshot):  # noqa: ANN001
+    """Extract JSON and compare to pre-committed snapshot."""
+    assert etl_output() == snapshot
