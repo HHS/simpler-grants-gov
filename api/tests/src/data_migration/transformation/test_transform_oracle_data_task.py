@@ -74,23 +74,6 @@ class TestTransformFullRunTask(BaseTestClass):
         # Duplicate here as well
         f.StagingTfundinstrForecastFactory(forecast=forecast, fi_id="G")
 
-        ### Forecast Hist 1 (only applicant types)
-        forecast_hist1 = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=1, opportunity=opportunity
-        )
-
-        ### Forecast Hist 2 (only funding instrument and funding categories)
-        forecast_hist2 = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=2, opportunity=opportunity
-        )
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="ED")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="HU")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="IIJ")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="T")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="G")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="CA")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="PC")
-
         ### Synopsis (has some invalid values)
         synopsis = setup_synopsis_forecast(
             create_existing=False, is_forecast=False, revision_number=None, opportunity=opportunity
@@ -107,11 +90,6 @@ class TestTransformFullRunTask(BaseTestClass):
         f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="G")
         # Invalid value
         f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="x")
-
-        # Synopsis Hist (has no link values, is also marked as deleted)
-        synopsis_hist = setup_synopsis_forecast(
-            create_existing=False, is_forecast=False, revision_number=5, opportunity=opportunity
-        )
 
         transform_oracle_data_task.run()
 
