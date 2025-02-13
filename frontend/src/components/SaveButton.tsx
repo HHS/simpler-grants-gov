@@ -41,6 +41,7 @@ const SaveButton = ({
       <Button
         type="button"
         disabled={loading}
+        id={buttonId}
         outline
         onClick={buttonClick}
         data-testid="simpler-save-button"
