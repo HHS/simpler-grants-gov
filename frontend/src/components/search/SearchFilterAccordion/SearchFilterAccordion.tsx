@@ -67,15 +67,15 @@ export function SearchFilterAccordion({
 }: SearchFilterAccordionProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
-  const { setAgencyOptions } = useGlobalState(({ setAgencyOptions }) => ({
-    setAgencyOptions,
-  }));
+  // const { setAgencyOptions } = useGlobalState(({ setAgencyOptions }) => ({
+  //   setAgencyOptions,
+  // }));
 
-  useEffect(() => {
-    if (queryParamKey === "agency" && filterOptions && setAgencyOptions) {
-      setAgencyOptions(filterOptions);
-    }
-  }, [queryParamKey, filterOptions, setAgencyOptions]);
+  // useEffect(() => {
+  //   if (queryParamKey === "agency" && filterOptions && setAgencyOptions) {
+  //     setAgencyOptions(filterOptions);
+  //   }
+  // }, [queryParamKey, filterOptions, setAgencyOptions]);
 
   const totalCheckedCount = query.size;
   // all top level selectable filter options
