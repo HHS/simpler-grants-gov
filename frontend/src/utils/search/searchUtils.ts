@@ -38,14 +38,14 @@ export const sortFilterOptions = (
                         agencyNameLookup[opportunity?.summary?.agency_code]
                       : "--")}
 */
-export const lookUpAgencyName = (
-  opportunity: Opportunity,
-  agencyOptions: FilterOption[],
-): string => {
-  const match = agencyOptions.find(
-    (option) =>
-      option.value === opportunity.agency ||
-      option.value === opportunity.summary.agency_code,
-  );
-  return match?.label || "--";
+export const getAgencyDisplayName = (opportunity: Opportunity): string => {
+  if (
+    opportunity.top_level_agency_name &&
+    opportunity.agency_name &&
+    opportunity.top_level_agency_name !== opportunity.agency_name
+  ) {
+    return `${opportunity.top_level_agency_name} - ${opportunity.agency_name}`;
+  }
+
+  return opportunity.agency_name || opportunity.agency_code || "--";
 };

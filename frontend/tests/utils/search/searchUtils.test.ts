@@ -1,6 +1,6 @@
 import { Opportunity } from "src/types/search/searchResponseTypes";
 import {
-  lookUpAgencyName,
+  getAgencyDisplayName,
   sortFilterOptions,
 } from "src/utils/search/searchUtils";
 
@@ -122,9 +122,11 @@ describe("sortFilterOptions", () => {
   });
 });
 
-describe("lookUpAgencyName", () => {
+describe("getAgencyDisplayName", () => {
   const fakeOpportunity = {
-    agency: "NON-HMN-READABWOL",
+    agency_code: "NON-HMN-READABWOL",
+    agency_name: "This Agency",
+    top_level_agency_name: "The Parent",
     summary: {
       estimated_total_program_funding: 5000000,
       expected_number_of_awards: 10,
@@ -140,49 +142,36 @@ describe("lookUpAgencyName", () => {
     category_explanation: "Funds allocated by agency discretion",
   } as Opportunity;
 
-  const agencyListItem = {
-    value: "NON-HMN-READABWOL",
-    id: "NON-HMN-READABWOL",
-    label: "Nice Agency Name",
-  };
-
   it("returns `--` if agency lookup fails", () => {
     expect(
-      lookUpAgencyName(fakeOpportunity, [
-        { ...agencyListItem, value: "EXTRA-NON-HMN-READABWOL" },
-      ]),
+      getAgencyDisplayName({
+        ...fakeOpportunity,
+        ...{ agency_code: null, agency_name: null },
+      }),
     ).toEqual("--");
   });
 
-  it("finds agency and returns label (agency)", () => {
-    expect(lookUpAgencyName(fakeOpportunity, [agencyListItem])).toEqual(
-      "Nice Agency Name",
+  it("returns top level agency with agency name if available", () => {
+    expect(getAgencyDisplayName(fakeOpportunity)).toEqual(
+      "The Parent - This Agency",
     );
   });
-  it("finds agency and returns label (summary)", () => {
-    expect(
-      lookUpAgencyName(
-        {
-          ...fakeOpportunity,
-          agency: null,
-          summary: {
-            ...fakeOpportunity.summary,
-            agency_code: "NON-HMN-READABWOL",
-          },
-        },
-        [agencyListItem],
-      ),
-    ).toEqual("Nice Agency Name");
+  it("falls back to agency name for top level agencies", () => {
+    expect(getAgencyDisplayName(fakeOpportunity)).toEqual(
+      "The Parent - This Agency",
+    );
   });
-  it("does not find nested agencies", () => {
+  it("falls back to agency name if top level agency is not available", () => {
     expect(
-      lookUpAgencyName(fakeOpportunity, [
-        {
-          ...agencyListItem,
-          value: "sometihng else",
-          children: [agencyListItem],
-        },
-      ]),
-    ).toEqual("--");
+      getAgencyDisplayName({
+        ...fakeOpportunity,
+        ...{ top_level_agency_name: null },
+      }),
+    ).toEqual("This Agency");
+  });
+  it("falls back to agency code if agency name is not available", () => {
+    expect(
+      getAgencyDisplayName({ ...fakeOpportunity, ...{ agency_name: null } }),
+    ).toEqual("NON-HMN-READABWOL");
   });
 });

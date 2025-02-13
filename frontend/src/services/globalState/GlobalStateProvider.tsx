@@ -10,7 +10,6 @@ import { FilterOption } from "src/components/search/SearchFilterAccordion/Search
 
 type GlobalStateItems = {
   agencyOptions: FilterOption[];
-  flattenedAgencyOptions: FilterOption[];
 };
 
 type GlobalStateActions = {
@@ -27,16 +26,6 @@ interface GlobalStateProviderProps {
 
 const defaultInitState: GlobalStateItems = {
   agencyOptions: [],
-  flattenedAgencyOptions: [],
-};
-
-// gives us a flattened list of all filter options and children
-const flattenChildren = (options: FilterOption[]): FilterOption[] => {
-  return options.reduce((flattened, option) => {
-    return option.children
-      ? flattened.concat([option, ...option.children])
-      : flattened.concat([option]);
-  }, [] as FilterOption[]);
 };
 
 const createGlobalStore = (initState = defaultInitState) => {
@@ -45,7 +34,6 @@ const createGlobalStore = (initState = defaultInitState) => {
     setAgencyOptions: (agencyOptions: FilterOption[]) =>
       set(() => ({
         agencyOptions,
-        flattenedAgencyOptions: flattenChildren(agencyOptions),
       })),
   }));
 };

@@ -1,9 +1,8 @@
 "use client";
 
-import { useGlobalState } from "src/services/globalState/GlobalStateProvider";
 import { Opportunity } from "src/types/search/searchResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
-import { lookUpAgencyName } from "src/utils/search/searchUtils";
+import { getAgencyDisplayName } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -35,11 +34,7 @@ export default function SearchResultsListItem({
   opportunity,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
-  const { flattenedAgencyOptions } = useGlobalState(
-    ({ flattenedAgencyOptions }) => ({
-      flattenedAgencyOptions,
-    }),
-  );
+
   return (
     <div className={resultBorderClasses}>
       <div className="grid-row grid-gap">
@@ -103,7 +98,7 @@ export default function SearchResultsListItem({
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
               <span className={metadataBorderClasses}>
                 <strong>{t("resultsListItem.summary.agency")}</strong>
-                {lookUpAgencyName(opportunity, flattenedAgencyOptions)}
+                {getAgencyDisplayName(opportunity)}
               </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
