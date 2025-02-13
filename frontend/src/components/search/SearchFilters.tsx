@@ -1,6 +1,8 @@
 import { getAgenciesForFilterOptions } from "src/services/fetch/fetchers/agenciesFetcher";
 
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterAccordion from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import {
@@ -42,10 +44,29 @@ export default function SearchFilters({
         queryParamKey={"eligibility"}
         title={t("accordion.titles.eligibility")}
       />
-      <AgencyFilterAccordion
-        query={agency}
-        agencyOptionsPromise={agenciesPromise}
-      />
+      <Suspense
+        fallback={
+          <Accordion
+            bordered={true}
+            items={[
+              {
+                title: t("accordion.titles.agency"),
+                content: [],
+                expanded: false,
+                id: `opportunity-filter-agency-disabled`,
+                headingLevel: "h2",
+              },
+            ]}
+            multiselectable={true}
+            className="margin-top-4"
+          />
+        }
+      >
+        <AgencyFilterAccordion
+          query={agency}
+          agencyOptionsPromise={agenciesPromise}
+        />
+      </Suspense>
       <SearchFilterAccordion
         filterOptions={categoryOptions}
         query={category}

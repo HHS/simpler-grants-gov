@@ -1,6 +1,4 @@
 import { useTranslations } from "next-intl";
-import { Suspense } from "react";
-import { Accordion } from "@trussworks/react-uswds";
 
 import SearchFilterAccordion, {
   FilterOption,
@@ -17,7 +15,6 @@ export async function AgencyFilterAccordion({
   agencyOptionsPromise: Promise<FilterOption[]>;
 }) {
   const t = useTranslations("Search");
-  const title = t("accordion.titles.agency");
 
   let agencies: FilterOption[];
   try {
@@ -28,30 +25,11 @@ export async function AgencyFilterAccordion({
     agencies = [];
   }
   return (
-    <Suspense
-      fallback={
-        <Accordion
-          bordered={true}
-          items={[
-            {
-              title,
-              content: [],
-              expanded: false,
-              id: `opportunity-filter-agency-disabled`,
-              headingLevel: "h2",
-            },
-          ]}
-          multiselectable={true}
-          className="margin-top-4"
-        />
-      }
-    >
-      <SearchFilterAccordion
-        filterOptions={agencies}
-        query={query}
-        queryParamKey={"agency"}
-        title={title}
-      />
-    </Suspense>
+    <SearchFilterAccordion
+      filterOptions={agencies}
+      query={query}
+      queryParamKey={"agency"}
+      title={t("accordion.titles.agency")}
+    />
   );
 }
