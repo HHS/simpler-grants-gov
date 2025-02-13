@@ -41,11 +41,11 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   }),
 }));
 
-jest.mock("src/services/globalState/GlobalStateProvider", () => ({
-  useGlobalState: () => ({
-    setAgencyOptions: () => undefined,
-  }),
-}));
+// jest.mock("src/services/globalState/GlobalStateProvider", () => ({
+//   useGlobalState: () => ({
+//     setAgencyOptions: () => undefined,
+//   }),
+// }));
 
 describe("SearchFilterAccordion", () => {
   const title = "Test Accordion";

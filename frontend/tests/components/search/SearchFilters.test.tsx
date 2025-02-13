@@ -23,11 +23,11 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-jest.mock("src/services/globalState/GlobalStateProvider", () => ({
-  useGlobalState: () => ({
-    setAgencyOptions: () => undefined,
-  }),
-}));
+// jest.mock("src/services/globalState/GlobalStateProvider", () => ({
+//   useGlobalState: () => ({
+//     setAgencyOptions: () => undefined,
+//   }),
+// }));
 
 // otherwise we have to deal with mocking suspense
 jest.mock(
