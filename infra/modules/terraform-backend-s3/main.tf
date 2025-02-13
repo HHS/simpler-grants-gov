@@ -54,6 +54,7 @@ resource "aws_s3_bucket" "tf_state" {
 
   # Prevent accidental destruction a developer executing terraform destory in the wrong directory. Contains terraform state files.
   lifecycle {
+    # Use a separate line to support automated terraform destroy commands
     prevent_destroy = true
   }
 }
