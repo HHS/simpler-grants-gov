@@ -39,6 +39,7 @@ ruff = "^0.8.0"
 safety = "^3.0.0"
 types-requests = "^2.32.0.20241016"
 moto = "^5.0.22"
+syrupy = "^4.8.1"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

@@ -176,7 +176,6 @@ def extract_transform_and_load(
     # extract data from GitHub
     logger.info("extracting data from GitHub")
     extracted_json = GitHubProjectETL(config).extract_and_transform_in_memory()
-
     # hydrate a dataset instance from the input data
     logger.info("transforming data")
     dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
