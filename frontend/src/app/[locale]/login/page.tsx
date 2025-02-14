@@ -12,7 +12,11 @@ export default function Login() {
       const redirectURL = window?.sessionStorage?.getItem("login-redirect");
       window?.sessionStorage?.removeItem("login-redirect");
 
-      if (redirectURL === null || redirectURL === "") {
+      if (
+        redirectURL === null ||
+        redirectURL === "" ||
+        redirectURL.substring(0, 1) !== "/"
+      ) {
         window.location.assign("/");
         return;
       }
