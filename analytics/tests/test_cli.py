@@ -3,8 +3,10 @@
 from dataclasses import dataclass  # noqa: I001
 from pathlib import Path
 
+import logging
 import pytest
 from typer.testing import CliRunner
+from _pytest.logging import LogCaptureFixture
 
 from analytics.cli import app
 from tests.conftest import (
@@ -64,7 +66,7 @@ class TestEtlEntryPoint:
     TEST_FILE_1 = "./tests/etldb_test_01.json"
     EFFECTIVE_DATE = "2024-10-07"
 
-    def test_init_db(self):
+    def test_init_db(self, caplog: LogCaptureFixture):
         """Test the db initialization command."""
         # setup - create command
         command = [
@@ -72,14 +74,14 @@ class TestEtlEntryPoint:
             "db_migrate",
         ]
         # execution
-        result = runner.invoke(app, command)
-        print(result.stdout)
+        with caplog.at_level(logging.INFO):
+            result = runner.invoke(app, command)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert "initializing database" in result.stdout
-        assert "done" in result.stdout
+        assert "initializing database" in caplog.text
+        assert "done" in caplog.text
 
-    def test_transform_and_load_with_valid_parameters(self):
+    def test_transform_and_load_with_valid_parameters(self, caplog: LogCaptureFixture):
         """Test the transform and load command."""
         # setup - create command
         command = [
@@ -91,23 +93,26 @@ class TestEtlEntryPoint:
             str(self.EFFECTIVE_DATE),
         ]
         # execution
-        result = runner.invoke(app, command)
-        print(result.stdout)
+        with caplog.at_level(logging.INFO):
+            result = runner.invoke(app, command)
         # validation - check there wasn't an error
         assert result.exit_code == 0
         assert (
             f"running transform and load with effective date {self.EFFECTIVE_DATE}"
-            in result.stdout
+            in caplog.text
         )
-        assert "project row(s) processed: 2" in result.stdout
-        assert "quad row(s) processed: 1" in result.stdout
-        assert "deliverable row(s) processed: 4" in result.stdout
-        assert "sprint row(s) processed: 4" in result.stdout
-        assert "epic row(s) processed: 6" in result.stdout
-        assert "issue row(s) processed: 22" in result.stdout
-        assert "transform and load is done" in result.stdout
+        assert "project row(s) processed: 2" in caplog.text
+        assert "quad row(s) processed: 1" in caplog.text
+        assert "deliverable row(s) processed: 4" in caplog.text
+        assert "sprint row(s) processed: 4" in caplog.text
+        assert "epic row(s) processed: 6" in caplog.text
+        assert "issue row(s) processed: 22" in caplog.text
+        assert "transform and load is done" in caplog.text
 
-    def test_transform_and_load_with_malformed_effective_date_parameter(self):
+    def test_transform_and_load_with_malformed_effective_date_parameter(
+        self,
+        caplog: LogCaptureFixture,
+    ):
         """Test the transform and load command."""
         # setup - create command
         command = [
@@ -119,8 +124,11 @@ class TestEtlEntryPoint:
             "2024-Oct-07",
         ]
         # execution
-        result = runner.invoke(app, command)
-        print(result.stdout)
+        with caplog.at_level(logging.INFO):
+            result = runner.invoke(app, command)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert "FATAL ERROR: malformed effective date" in result.stdout
+        assert (
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format"
+            in caplog.text
+        )

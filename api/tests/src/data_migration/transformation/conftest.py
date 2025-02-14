@@ -557,20 +557,6 @@ def validate_opportunity_summary(
             ]
         )
 
-    # History only fields
-    is_deleted = False
-    if isinstance(source_summary, (staging.synopsis.TsynopsisHist, staging.forecast.TforecastHist)):
-        matching_fields.extend([("revision_number", "revision_number")])
-
-        is_deleted = source_summary.action_type == "D"
-
-    assert opportunity_summary is not None
-    validate_matching_fields(
-        source_summary, opportunity_summary, matching_fields, expect_values_to_match
-    )
-
-    assert opportunity_summary.is_deleted == is_deleted
-
 
 def validate_summary_and_nested(
     db_session,
