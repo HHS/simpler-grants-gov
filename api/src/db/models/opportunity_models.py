@@ -511,8 +511,8 @@ class OpportunityCompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
     )
 
 
-class ApplicationForm(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "application_form"
+class OpportunityApplicationForm(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_application_form"
 
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_name: Mapped[str]
@@ -521,3 +521,16 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     description: Mapped[str]
     agency_code_id: Mapped[str]
     omb_number: Mapped[str | None]
+
+
+class OpportunityCompetitionForm(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_competition_form"
+
+    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    form_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(OpportunityApplicationForm.form_id), index=True, primary_key=True
+    )
+    opportunity_application_form: Mapped[OpportunityApplicationForm] = relationship(
+        OpportunityApplicationForm
+    )
+    is_required: Mapped[bool]

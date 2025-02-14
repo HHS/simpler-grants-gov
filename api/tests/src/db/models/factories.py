@@ -1861,9 +1861,9 @@ class OpportunityCompetitionInstructionFactory(BaseFactory):
     file_location = "file_location"
 
 
-class ApplicationForm(BaseFactory):
+class OpportunityApplicationForm(BaseFactory):
     class Meta:
-        model = opportunity_models.ApplicationForm
+        model = opportunity_models.OpportunityApplicationForm
 
     form_id = Generators.UuidObj
     form_name = factory.Faker("sentence")
@@ -1871,3 +1871,14 @@ class ApplicationForm(BaseFactory):
     is_active = False
     description = factory.Faker("sentence")
     agency_code_id = factory.Faker("sentence")
+
+
+class OpportunityCompetitionFormFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityCompetitionForm
+
+    opportunity_application_form = factory.SubFactory(OpportunityApplicationForm)
+    form_id = factory.LazyAttribute(lambda o: o.opportunity_application_form.form_id)
+
+    competition_id = Generators.UuidObj
+    is_required = False
