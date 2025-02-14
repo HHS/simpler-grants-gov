@@ -93,6 +93,10 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         viewonly=True,
     )
 
+    opportunity_competition: Mapped[list["OpportunityCompetition"]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
     @property
     def top_level_agency_name(self) -> str | None:
         if self.agency_record is not None and self.agency_record.top_level_agency is not None:
@@ -451,3 +455,23 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+
+class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_competition"
+
+    competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    legacy_competition_id: Mapped[int | None] = mapped_column(BigInteger, index=True)
+    public_competition_id: Mapped[str | None]
+    legacy_package_id: Mapped[str | None]
+    competition_title: Mapped[str | None]
+
+    opening_date: Mapped[date | None]
+    closing_date: Mapped[date | None]
+    grace_period: Mapped[int | None] = mapped_column(BigInteger)
+    contact_info: Mapped[str | None]

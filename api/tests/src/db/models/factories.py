@@ -1821,3 +1821,31 @@ class UserSavedSearchFactory(BaseFactory):
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
     searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
+
+class OpportunityCompetitionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityCompetition
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+    legacy_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
+    public_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
+    legacy_package_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
+
+    competition_title = sometimes_none(factory.Faker("sentence"))
+
+    opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
+    closing_date = factory.LazyAttribute(lambda o: fake.date_time_between(start_date=o.opening_date))
+
+    grace_period = factory.Faker("random_int", min=1, max=10)
+    contact_info = sometimes_none(factory.Faker("sentence"))
+
+    created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+    updated_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
+    )
+
+
+
+
