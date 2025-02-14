@@ -144,7 +144,7 @@ while true; do
     echo "Timing out task $ecs_task_id waiting for logs"
     exit 1
   fi
-  is_log_stream_created=$(aws logs describe-log-streams --no-cli-pager --log-group-name "$log_group" --query "length(logStreams[?logStreamName==\`$log_stream\`])")
+  is_log_stream_created=$(aws logs describe-log-streams --no-cli-pager --log-group-name "$log_group" --log-stream-name-prefix "$log_stream" | jq -r '.logStreams | length')
   if [ "$is_log_stream_created" == "1" ]; then
     break
   fi
