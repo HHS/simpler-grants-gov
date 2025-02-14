@@ -12,7 +12,6 @@ import typer
 from sqlalchemy import text
 
 from analytics.datasets.etl_dataset import EtlDataset
-from analytics.datasets.issues import GitHubIssues
 from analytics.etl.github import GitHubProjectConfig, GitHubProjectETL
 from analytics.etl.utils import load_config
 from analytics.integrations import etldb
@@ -25,6 +24,7 @@ from analytics.logs.app_logger import init_app
 from analytics.logs.ecs_background_task import ecs_background_task
 
 logger = logging.getLogger(__name__)
+init_logging(__package__)
 
 # fmt: off
 # Instantiate typer options with help text for the commands below
@@ -53,7 +53,6 @@ app.add_typer(etl_app, name="etl", help="Transform and load local file")
 def init() -> None:
     """Shared init function for all scripts."""
     # Setup logging
-    init_logging(__package__)
     init_app(logging.root)
 
 
@@ -88,7 +87,7 @@ def export_github_data(
 
 
 # ===========================================================
-# Import commands
+# Diagnostic commands
 # ===========================================================
 
 
@@ -112,26 +111,6 @@ def test_connection() -> None:
     # commits the transaction to the db
     connection.commit()
     result.close()
-
-
-@import_app.command(name="db_import")
-def export_json_to_database(delivery_file: Annotated[str, ISSUE_FILE_ARG]) -> None:
-    """Import JSON data to the database."""
-    logger.info("Beginning import")
-
-    # Get the database engine and establish a connection
-    client = PostgresDbClient()
-
-    # Load data from the sprint board
-    issues = GitHubIssues.from_json(delivery_file)
-
-    issues.to_sql(
-        output_table="github_project_data",
-        engine=client.engine(),
-        replace_table=True,
-    )
-    rows = len(issues.to_dict())
-    logger.info("Number of rows in table: %s", rows)
 
 
 # ===========================================================
@@ -192,7 +171,7 @@ def extract_transform_and_load(
             "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
         return
-    logger.info("running transform and load with effective date %s", datestamp)
+    logger.info("running extract transform and load with effective date %s", datestamp)
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
