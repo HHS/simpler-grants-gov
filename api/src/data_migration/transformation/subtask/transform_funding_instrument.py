@@ -10,8 +10,8 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingInstrument,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import TfundinstrForecast, TfundinstrForecastHist
-from src.db.models.staging.synopsis import TfundinstrSynopsis, TfundinstrSynopsisHist
+from src.db.models.staging.forecast import TfundinstrForecast
+from src.db.models.staging.synopsis import TfundinstrSynopsis
 
 logger = logging.getLogger(__name__)
 
@@ -37,22 +37,6 @@ class TransformFundingInstrument(AbstractTransformSubTask):
         )
         self.process_link_funding_instruments_group(forecast_funding_instrument_records)
 
-        logger.info("Processing historical forecast funding instruments")
-        forecast_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
-            TfundinstrForecastHist,
-            link_table,
-            [
-                TfundinstrForecastHist.fi_frcst_id
-                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
-            ],
-            is_forecast=True,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_funding_instruments_group(forecast_funding_instrument_hist_records)
-
         logger.info("Processing synopsis funding instruments")
         synopsis_funding_instrument_records = self.fetch_with_opportunity_summary(
             TfundinstrSynopsis,
@@ -68,22 +52,6 @@ class TransformFundingInstrument(AbstractTransformSubTask):
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_instruments_group(synopsis_funding_instrument_records)
-
-        logger.info("Processing historical synopsis funding instruments")
-        synopsis_funding_instrument_hist_records = self.fetch_with_opportunity_summary(
-            TfundinstrSynopsisHist,
-            link_table,
-            [
-                TfundinstrSynopsisHist.fi_syn_id
-                == LinkOpportunitySummaryFundingInstrument.legacy_funding_instrument_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryFundingInstrument.opportunity_summary_id,
-            ],
-            is_forecast=False,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_funding_instruments_group(synopsis_funding_instrument_hist_records)
 
     def process_link_funding_instruments_group(
         self,
