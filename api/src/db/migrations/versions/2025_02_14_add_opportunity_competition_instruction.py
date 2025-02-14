@@ -1,8 +1,8 @@
 """add opportunity competition & instruction
 
-Revision ID: 6cb372415e07
+Revision ID: 638cfdb499f3
 Revises: 56d129425397
-Create Date: 2025-02-14 19:54:40.489002
+Create Date: 2025-02-14 20:21:13.482585
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "6cb372415e07"
+revision = "638cfdb499f3"
 down_revision = "56d129425397"
 branch_labels = None
 depends_on = None
@@ -65,6 +65,43 @@ def upgrade():
         schema="api",
     )
     op.create_table(
+        "opportunity_competition_assistance_listing",
+        sa.Column("competition_id", sa.UUID(), nullable=False),
+        sa.Column("opportunity_assistance_listing_id", sa.BigInteger(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["competition_id"],
+            ["api.opportunity_competition.competition_id"],
+            name=op.f(
+                "opportunity_competition_assistance_listing_competition_id_opportunity_competition_fkey"
+            ),
+        ),
+        sa.PrimaryKeyConstraint(
+            "competition_id",
+            "opportunity_assistance_listing_id",
+            name=op.f("opportunity_competition_assistance_listing_pkey"),
+        ),
+        schema="api",
+    )
+    op.create_index(
+        op.f("opportunity_competition_assistance_listing_competition_id_idx"),
+        "opportunity_competition_assistance_listing",
+        ["competition_id"],
+        unique=False,
+        schema="api",
+    )
+    op.create_table(
         "opportunity_competition_instruction",
         sa.Column("competition_instruction_id", sa.UUID(), nullable=False),
         sa.Column("competition_id", sa.UUID(), nullable=False),
@@ -113,6 +150,12 @@ def downgrade():
         schema="api",
     )
     op.drop_table("opportunity_competition_instruction", schema="api")
+    op.drop_index(
+        op.f("opportunity_competition_assistance_listing_competition_id_idx"),
+        table_name="opportunity_competition_assistance_listing",
+        schema="api",
+    )
+    op.drop_table("opportunity_competition_assistance_listing", schema="api")
     op.drop_index(
         op.f("opportunity_competition_opportunity_id_idx"),
         table_name="opportunity_competition",

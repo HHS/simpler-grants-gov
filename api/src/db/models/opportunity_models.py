@@ -490,8 +490,14 @@ class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
 
+class OpportunityCompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_competition_assistance_listing"
 
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
+    )
+    opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
 
-
-
+    opportunity_assistance_listing_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_assistance_listing: Mapped[OpportunityAssistanceListing] = relationship(OpportunityAssistanceListing)
 
