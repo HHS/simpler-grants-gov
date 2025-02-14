@@ -1854,7 +1854,7 @@ class OpportunityCompetitionInstructionFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityCompetitionInstruction
 
-    opportunity_competition = factory.SubFactory(OpportunityCompetitionFactory)
-    opportunity_competition_id = factory.LazyAttribute(
-        lambda o: o.opportunity_competition.opportunity_competition_id
+    competition = factory.SubFactory(OpportunityCompetitionFactory)
+    competition_id = factory.LazyAttribute(
+        lambda o: o.opportunity_competition.competition_id
     )

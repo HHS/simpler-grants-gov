@@ -1,5 +1,7 @@
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -460,7 +462,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition"
 
-    opportunity_competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
@@ -480,15 +482,22 @@ class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition_instruction"
 
-    opportunity_competition_instruction_id: Mapped[int] = mapped_column(
-        BigInteger, primary_key=True
-    )
-    opportunity_competition_id: Mapped[int] = mapped_column(
-        BigInteger,
-        ForeignKey(OpportunityCompetition.opportunity_competition_id),
-        index=True,
-        primary_key=True,
+    competition_instruction_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    competition_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
     )
     opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
 
     file_location: Mapped[str]
+
+class OpportunityCompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_competition_assistance_listing"
+
+    opportunity_assistance_listing_id: Mapped[int] = mapped_column(UUID, primary_key=True)
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True
+    )
+
+
+
+
