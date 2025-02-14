@@ -12,7 +12,7 @@ export function formatDate(dateStr: string | null): string {
     return "";
   }
 
-  return dayjs(dateStr).format('LL');
+  return dayjs(dateStr).format("LL");
 }
 
 export const getConfiguredDayJs = () => dayjs;
