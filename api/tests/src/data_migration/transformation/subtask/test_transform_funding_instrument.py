@@ -126,12 +126,15 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
 
-    @pytest.mark.parametrize("is_forecast,revision_number", [(True, None), (False, None)])
+    @pytest.mark.parametrize("is_forecast", [True, False])
     def test_process_funding_instrument_but_current_missing(
-        self, db_session, transform_funding_instrument, is_forecast, revision_number
+        self,
+        db_session,
+        transform_funding_instrument,
+        is_forecast,
     ):
         opportunity_summary = f.OpportunitySummaryFactory.create(
-            is_forecast=is_forecast, revision_number=revision_number, no_link_values=True
+            is_forecast=is_forecast, no_link_values=True
         )
         delete_but_current_missing = setup_funding_instrument(
             create_existing=False,
@@ -149,19 +152,18 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
         assert delete_but_current_missing.transformation_notes == "orphaned_delete_record"
 
     @pytest.mark.parametrize(
-        "is_forecast,revision_number,legacy_lookup_value",
-        [(True, None, "X"), (False, None, "4"), (True, 5, "Y"), (False, 10, "A")],
+        "is_forecast,legacy_lookup_value",
+        [(True, "X"), (False, "4"), (True, "Y"), (False, "A")],
     )
     def test_process_funding_instrument_but_invalid_lookup_value(
         self,
         db_session,
         transform_funding_instrument,
         is_forecast,
-        revision_number,
         legacy_lookup_value,
     ):
         opportunity_summary = f.OpportunitySummaryFactory.create(
-            is_forecast=is_forecast, revision_number=revision_number, no_link_values=True
+            is_forecast=is_forecast, no_link_values=True
         )
         insert_but_invalid_value = setup_funding_instrument(
             create_existing=False,
