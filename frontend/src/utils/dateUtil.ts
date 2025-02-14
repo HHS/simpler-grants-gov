@@ -1,9 +1,11 @@
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 
-dayjs.extend(timezone);
 dayjs.extend(advancedFormat);
+dayjs.extend(localizedFormat);
+dayjs.extend(timezone);
 
 // Convert "2024-02-21" to "February 21, 2024"
 export function formatDate(dateStr: string | null): string {
