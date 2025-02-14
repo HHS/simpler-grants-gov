@@ -5,11 +5,11 @@ describe("formatDate", () => {
   beforeEach(() => {
     jest.spyOn(console, "warn").mockImplementation(identity);
   });
-  it("returns empty string when an incorrectly formatted string is passed", () => {
+  it("returns empty string when an invalid date string is passed", () => {
     expect(formatDate(null)).toEqual("");
     expect(formatDate("")).toEqual("");
     expect(formatDate("Wednesday")).toEqual("");
-    expect(formatDate("20241010")).toEqual("");
+    expect(formatDate("202441010")).toEqual("");
     expect(formatDate(Date.now().toString())).toEqual("");
     expect(formatDate("24-10-10")).toEqual("");
   });
