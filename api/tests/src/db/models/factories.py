@@ -1828,13 +1828,13 @@ class CompetitionFactory(BaseFactory):
     class Meta:
         model = competition_models.Competition
 
+    competition_id = Generators.UuidObj
+
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
-    competition_id = Generators.UuidObj
-    legacy_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
-    public_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
-    legacy_package_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
+    public_competition_id = sometimes_none("ABC-134-56789")
+    legacy_package_id = sometimes_none("PKG-00260155")
 
     competition_title = sometimes_none(factory.Faker("sentence"))
 
@@ -1844,7 +1844,7 @@ class CompetitionFactory(BaseFactory):
     )
 
     grace_period = factory.Faker("random_int", min=1, max=10)
-    contact_info = sometimes_none(factory.Faker("sentence"))
+    contact_info = sometimes_none(factory.Faker("agency_contact_description"))
 
     created_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
     updated_at = factory.LazyAttribute(
@@ -1856,9 +1856,9 @@ class CompetitionInstructionFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionInstruction
 
+    competition_instruction_id = Generators.UuidObj
     competition = factory.SubFactory(CompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-    competition_instruction_id = Generators.UuidObj
     file_location = "file_location"
 
 
@@ -1878,8 +1878,8 @@ class CompetitionFormFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionForm
 
+    competition_id = Generators.UuidObj
     application_form = factory.SubFactory(ApplicationForm)
     form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
 
-    competition_id = Generators.UuidObj
     is_required = False
