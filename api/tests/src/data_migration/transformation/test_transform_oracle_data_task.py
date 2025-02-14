@@ -74,28 +74,6 @@ class TestTransformFullRunTask(BaseTestClass):
         # Duplicate here as well
         f.StagingTfundinstrForecastFactory(forecast=forecast, fi_id="G")
 
-        ### Forecast Hist 1 (only applicant types)
-        forecast_hist1 = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=1, opportunity=opportunity
-        )
-        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="05")
-        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="06")
-        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="25")
-        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="13")
-        f.StagingTapplicanttypesForecastHistFactory(forecast=forecast_hist1, at_id="11")
-
-        ### Forecast Hist 2 (only funding instrument and funding categories)
-        forecast_hist2 = setup_synopsis_forecast(
-            create_existing=False, is_forecast=True, revision_number=2, opportunity=opportunity
-        )
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="ED")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="HU")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="IIJ")
-        f.StagingTfundactcatForecastHistFactory(forecast=forecast_hist2, fac_id="T")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="G")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="CA")
-        f.StagingTfundinstrForecastHistFactory(forecast=forecast_hist2, fi_id="PC")
-
         ### Synopsis (has some invalid values)
         synopsis = setup_synopsis_forecast(
             create_existing=False, is_forecast=False, revision_number=None, opportunity=opportunity
@@ -112,11 +90,6 @@ class TestTransformFullRunTask(BaseTestClass):
         f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="G")
         # Invalid value
         f.StagingTfundinstrSynopsisFactory(synopsis=synopsis, fi_id="x")
-
-        # Synopsis Hist (has no link values, is also marked as deleted)
-        synopsis_hist = setup_synopsis_forecast(
-            create_existing=False, is_forecast=False, revision_number=5, opportunity=opportunity
-        )
 
         transform_oracle_data_task.run()
 
@@ -137,7 +110,7 @@ class TestTransformFullRunTask(BaseTestClass):
             for al in created_opportunity.opportunity_assistance_listings
         } == {cfda1.opp_cfda_id, cfda2.opp_cfda_id}
 
-        assert len(created_opportunity.all_opportunity_summaries) == 5
+        assert len(created_opportunity.all_opportunity_summaries) == 2
 
         created_forecast = get_summary_from_source(db_session, forecast)
         assert created_forecast is not None
@@ -150,35 +123,6 @@ class TestTransformFullRunTask(BaseTestClass):
         )
         validate_summary_and_nested(
             db_session,
-            forecast_hist1,
-            [
-                ApplicantType.OTHER,
-                ApplicantType.INDEPENDENT_SCHOOL_DISTRICTS,
-                ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
-                ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITHOUT_501C3,
-                ApplicantType.OTHER_NATIVE_AMERICAN_TRIBAL_ORGANIZATIONS,
-            ],
-            [],
-            [],
-        )
-        validate_summary_and_nested(
-            db_session,
-            forecast_hist2,
-            [],
-            [
-                FundingCategory.TRANSPORTATION,
-                FundingCategory.EDUCATION,
-                FundingCategory.INFRASTRUCTURE_INVESTMENT_AND_JOBS_ACT,
-                FundingCategory.HUMANITIES,
-            ],
-            [
-                FundingInstrument.COOPERATIVE_AGREEMENT,
-                FundingInstrument.GRANT,
-                FundingInstrument.PROCUREMENT_CONTRACT,
-            ],
-        )
-        validate_summary_and_nested(
-            db_session,
             synopsis,
             [
                 ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
@@ -188,14 +132,13 @@ class TestTransformFullRunTask(BaseTestClass):
             [FundingCategory.AFFORDABLE_CARE_ACT, FundingCategory.OTHER],
             [FundingInstrument.GRANT],
         )
-        validate_summary_and_nested(db_session, synopsis_hist, [], [], [])
 
         validate_agency(db_session, parent_agency)
         validate_agency(db_session, subagency)
 
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 39,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 33,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 24,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 18,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 0,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 0,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 3,
@@ -290,15 +233,6 @@ class TestTransformFullRunTask(BaseTestClass):
             opportunity_summary=summary_forecast,
             funding_instrument=FundingInstrument.OTHER,
             legacy_funding_instrument_id=3001,
-        )
-
-        ### Forecast Hist (deleted)
-        # note that by default the factory creates 1-3 of each link value, those will automatically get deleted uneventfully by cascades
-        f.OpportunitySummaryFactory(
-            is_forecast=True, revision_number=1, opportunity=existing_opportunity
-        )
-        forecast_hist_delete = f.StagingTforecastHistFactory(
-            revision_number=1, is_deleted=True, opportunity=opportunity
         )
 
         ### Synopsis (not modified as the update was already processed)
@@ -406,9 +340,6 @@ class TestTransformFullRunTask(BaseTestClass):
             legacy_funding_instrument_id=3001,
         )
 
-        ### Synopsis Hist (Insert - no nested values created)
-        synopsis_hist_insert = f.StagingTsynopsisHistFactory(opportunity=opportunity)
-
         transform_oracle_data_task.run()
 
         updated_opportunity: Opportunity = (
@@ -432,9 +363,6 @@ class TestTransformFullRunTask(BaseTestClass):
             [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT],
         )
         validate_summary_and_nested(
-            db_session, forecast_hist_delete, [], [], [], expect_in_db=False
-        )
-        validate_summary_and_nested(
             db_session,
             synopsis_already_processed,
             [
@@ -448,16 +376,14 @@ class TestTransformFullRunTask(BaseTestClass):
             [FundingInstrument.PROCUREMENT_CONTRACT, FundingInstrument.OTHER],
             expect_values_to_match=False,
         )
-        validate_summary_and_nested(db_session, synopsis_hist_insert, [], [], [])
-
         validate_agency(db_session, parent_agency)
         validate_agency(db_session, subagency, deleted_fields={"ldapGp", "description"})
 
         assert {
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 43,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 8,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_PROCESSED: 41,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_INSERTED: 7,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_UPDATED: 11,
-            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 8,
+            transform_oracle_data_task.Metrics.TOTAL_RECORDS_DELETED: 7,
             transform_oracle_data_task.Metrics.TOTAL_DUPLICATE_RECORDS_SKIPPED: 15,
             transform_oracle_data_task.Metrics.TOTAL_RECORDS_ORPHANED: 0,
             transform_oracle_data_task.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED: 1,
