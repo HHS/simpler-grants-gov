@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function Login() {
   const redirecting = useRef<boolean>(false);
