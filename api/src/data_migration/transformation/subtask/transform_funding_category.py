@@ -10,8 +10,8 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryFundingCategory,
     OpportunitySummary,
 )
-from src.db.models.staging.forecast import TfundactcatForecast, TfundactcatForecastHist
-from src.db.models.staging.synopsis import TfundactcatSynopsis, TfundactcatSynopsisHist
+from src.db.models.staging.forecast import TfundactcatForecast
+from src.db.models.staging.synopsis import TfundactcatSynopsis
 
 logger = logging.getLogger(__name__)
 
@@ -37,22 +37,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
         )
         self.process_link_funding_categories_group(forecast_funding_category_records)
 
-        logger.info("Processing historical forecast funding categories")
-        forecast_funding_category_hist_records = self.fetch_with_opportunity_summary(
-            TfundactcatForecastHist,
-            link_table,
-            [
-                TfundactcatForecastHist.fac_frcst_id
-                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
-            ],
-            is_forecast=True,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_funding_categories_group(forecast_funding_category_hist_records)
-
         logger.info("Processing synopsis funding categories")
         synopsis_funding_category_records = self.fetch_with_opportunity_summary(
             TfundactcatSynopsis,
@@ -68,22 +52,6 @@ class TransformFundingCategory(AbstractTransformSubTask):
             relationship_load_value=relationship_load_value,
         )
         self.process_link_funding_categories_group(synopsis_funding_category_records)
-
-        logger.info("Processing historical synopsis funding categories")
-        synopsis_funding_category_hist_records = self.fetch_with_opportunity_summary(
-            TfundactcatSynopsisHist,
-            link_table,
-            [
-                TfundactcatSynopsisHist.fac_syn_id
-                == LinkOpportunitySummaryFundingCategory.legacy_funding_category_id,
-                OpportunitySummary.opportunity_summary_id
-                == LinkOpportunitySummaryFundingCategory.opportunity_summary_id,
-            ],
-            is_forecast=False,
-            is_historical_table=True,
-            relationship_load_value=relationship_load_value,
-        )
-        self.process_link_funding_categories_group(synopsis_funding_category_hist_records)
 
     def process_link_funding_categories_group(
         self,
