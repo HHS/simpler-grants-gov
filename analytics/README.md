@@ -36,6 +36,17 @@ The service does not listen on a port or run as a daemon. Instead, it must be tr
 
 In current practice, the service is triggered daily via an AWS Step Function (akin to a cron job) orchestrated with Terraform. This results in a daily update to the analytics data warehouse in Postgres, and a visible data refresh for viewers of SGG program-level metrics dashboards in Metabase. 
 
+
+## Snapshot Data Quality Tests
+
+The service contains plugings to the pytest library to perform data comparisons.  The plugin that performs these operations is [syrupy](https://github.com/syrupy-project/syrupy).  These snapshot comparions run as part of the standard `pytest` command.  The files for comparison are inside of `root/analytics/tests/dataquality/__snapshots__`. The tests exist inside of `root/analytics/tests/dataquality`
+
+### Updating snapshots
+
+In the scenario where snapshots need to be updated you can follow the below instructions
+
+After verifying that any changes To update the snapshots you can run ``pytest --snapshot-update` and the snapshots contained in the repo will be updated. Commit these updates.
+
 ##  Developer Information
 
 The service is open-source and can be installed and run in a local development environment, which is useful for project maintainers and/or open source contributors. Follow the links below for more information:
