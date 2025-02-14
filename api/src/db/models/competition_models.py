@@ -36,9 +36,9 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
     competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
+        UUID, ForeignKey(Competition.competition_id), index=True, primary_key=True
     )
-    opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
+    opportunity_competition: Mapped[Competition] = relationship(Competition)
 
     file_location: Mapped[str]
 
@@ -47,9 +47,9 @@ class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "competition_assistance_listing"
 
     competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
+        UUID, ForeignKey(Competition.competition_id), index=True, primary_key=True
     )
-    opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
+    opportunity_competition: Mapped[Competition] = relationship(Competition)
 
     opportunity_assistance_listing_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -78,9 +78,7 @@ class CompetitionForm(ApiSchemaTable, TimestampMixin):
 
     competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(OpportunityApplicationForm.form_id), index=True, primary_key=True
+        UUID, ForeignKey(ApplicationForm.form_id), index=True, primary_key=True
     )
-    opportunity_application_form: Mapped[OpportunityApplicationForm] = relationship(
-        OpportunityApplicationForm
-    )
+    opportunity_application_form: Mapped[ApplicationForm] = relationship(ApplicationForm)
     is_required: Mapped[bool]

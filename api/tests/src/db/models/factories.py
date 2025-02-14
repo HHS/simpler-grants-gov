@@ -1824,9 +1824,9 @@ class UserSavedSearchFactory(BaseFactory):
     searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
 
 
-class OpportunityCompetitionFactory(BaseFactory):
+class CompetitionFactory(BaseFactory):
     class Meta:
-        model = competition_models.OpportunityCompetition
+        model = competition_models.Competition
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
@@ -1852,19 +1852,19 @@ class OpportunityCompetitionFactory(BaseFactory):
     )
 
 
-class OpportunityCompetitionInstructionFactory(BaseFactory):
+class CompetitionInstructionFactory(BaseFactory):
     class Meta:
-        model = competition_models.OpportunityCompetitionInstruction
+        model = competition_models.CompetitionInstruction
 
-    opportunity_competition = factory.SubFactory(OpportunityCompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.opportunity_competition.competition_id)
+    competition = factory.SubFactory(CompetitionFactory)
+    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
     competition_instruction_id = Generators.UuidObj
     file_location = "file_location"
 
 
-class OpportunityApplicationForm(BaseFactory):
+class ApplicationForm(BaseFactory):
     class Meta:
-        model = competition_models.OpportunityApplicationForm
+        model = competition_models.ApplicationForm
 
     form_id = Generators.UuidObj
     form_name = factory.Faker("sentence")
@@ -1874,12 +1874,12 @@ class OpportunityApplicationForm(BaseFactory):
     agency_code_id = factory.Faker("sentence")
 
 
-class OpportunityCompetitionFormFactory(BaseFactory):
+class CompetitionFormFactory(BaseFactory):
     class Meta:
-        model = competition_models.OpportunityCompetitionForm
+        model = competition_models.CompetitionForm
 
-    opportunity_application_form = factory.SubFactory(OpportunityApplicationForm)
-    form_id = factory.LazyAttribute(lambda o: o.opportunity_application_form.form_id)
+    application_form = factory.SubFactory(ApplicationForm)
+    form_id = factory.LazyAttribute(lambda o: o.application_form.form_id)
 
     competition_id = Generators.UuidObj
     is_required = False

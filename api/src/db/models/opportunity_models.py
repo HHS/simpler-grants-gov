@@ -15,7 +15,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.competition_models import OpportunityCompetition
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -25,6 +24,7 @@ from src.db.models.lookup_models import (
 )
 
 if TYPE_CHECKING:
+    from src.db.models.competition_models import Competition
     from src.db.models.user_models import UserSavedOpportunity
 
 
@@ -94,7 +94,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         viewonly=True,
     )
 
-    opportunity_competition: Mapped[list["OpportunityCompetition"]] = relationship(
+    competitions: Mapped[list["Competition"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
