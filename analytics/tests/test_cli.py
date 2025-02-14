@@ -65,7 +65,7 @@ class TestEtlEntryPoint:
     TEST_FILE_1 = "./tests/etldb_test_01.json"
     EFFECTIVE_DATE = "2024-10-07"
 
-    def test_init_db(self):
+    def test_init_db(self, caplog):
         """Test the db initialization command."""
         # setup - create command
         command = [
@@ -73,12 +73,12 @@ class TestEtlEntryPoint:
             "db_migrate",
         ]
         # execution
-        result = runner.invoke(app, command)
-        print(result.stdout)
+        with caplog.at_level(logging.INFO):
+            result = runner.invoke(app, command)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert "initializing database" in result.stdout
-        assert "done" in result.stdout
+        assert "initializing database" in caplog.text
+        assert "done" in caplog.text
 
     def test_transform_and_load_with_valid_parameters(self, caplog):
         """Test the transform and load command."""
@@ -94,7 +94,6 @@ class TestEtlEntryPoint:
         # execution
         with caplog.at_level(logging.INFO):
             result = runner.invoke(app, command)
-        print("========> caplog = " + str(caplog.text))
         # validation - check there wasn't an error
         assert result.exit_code == 0
         assert (
@@ -123,7 +122,6 @@ class TestEtlEntryPoint:
         # execution
         with caplog.at_level(logging.INFO):
             result = runner.invoke(app, command)
-        print("========> caplog = " + str(caplog.text))
         # validation - check there wasn't an error
         assert result.exit_code == 0
         assert "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format" in caplog.text
