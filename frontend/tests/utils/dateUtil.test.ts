@@ -13,7 +13,7 @@ describe("formatDate", () => {
     expect(formatDate("24-10-10")).toEqual("");
     expect(formatDate(Date.now().toString())).toEqual("");
   });
-  
+
   it("returns a human readable string for properly formatted dates", () => {
     expect(formatDate("2024-10-10")).toBe("October 10, 2024");
   });

@@ -11,7 +11,7 @@ dayjs.extend(timezone);
 
 // Convert "2024-02-21" to "February 21, 2024"
 export function formatDate(dateStr: string | null): string {
-  if (!dateStr || !dayjs(dateStr, 'YYYY-MM-DD', true).isValid()) {
+  if (!dateStr || !dayjs(dateStr, "YYYY-MM-DD", true).isValid()) {
     console.warn("invalid date string provided for parse");
     return "";
   }
