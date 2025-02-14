@@ -46,7 +46,7 @@ app.add_typer(export_app, name="export", help="Export data needed to calculate m
 app.add_typer(import_app, name="import", help="Import data into the database")
 app.add_typer(etl_app, name="etl", help="Transform and load local file")
 
-LOGGER = None
+LOGGER: logging.Logger | None = None
 
 
 def init() -> None:
