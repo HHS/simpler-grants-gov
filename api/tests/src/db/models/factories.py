@@ -1822,6 +1822,7 @@ class UserSavedSearchFactory(BaseFactory):
 
     searched_opportunity_ids = factory.LazyAttribute(lambda _: random.sample(range(1, 1000), 5))
 
+
 class OpportunityCompetitionFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityCompetition
@@ -1836,7 +1837,9 @@ class OpportunityCompetitionFactory(BaseFactory):
     competition_title = sometimes_none(factory.Faker("sentence"))
 
     opening_date = factory.Faker("date_between", start_date="-3w", end_date="-1d")
-    closing_date = factory.LazyAttribute(lambda o: fake.date_time_between(start_date=o.opening_date))
+    closing_date = factory.LazyAttribute(
+        lambda o: fake.date_time_between(start_date=o.opening_date)
+    )
 
     grace_period = factory.Faker("random_int", min=1, max=10)
     contact_info = sometimes_none(factory.Faker("sentence"))
@@ -1845,7 +1848,3 @@ class OpportunityCompetitionFactory(BaseFactory):
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
-
-
-
-
