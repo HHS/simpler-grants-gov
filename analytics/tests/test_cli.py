@@ -3,8 +3,8 @@
 from dataclasses import dataclass  # noqa: I001
 from pathlib import Path
 
-import pytest
 import logging
+import pytest
 from typer.testing import CliRunner
 from _pytest.logging import LogCaptureFixture
 
