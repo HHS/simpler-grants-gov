@@ -145,9 +145,6 @@ module "service" {
 
   enable_alb_cdn = true
 
-  app_access_policy_arn      = null
-  migrator_access_policy_arn = null
-
   extra_environment_variables = merge({
     # FEATURE_FLAGS_PROJECT = module.feature_flags.evidently_project_name
     # BUCKET_NAME           = local.storage_config.bucket_name
