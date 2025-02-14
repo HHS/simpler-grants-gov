@@ -462,7 +462,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition"
 
-    competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
@@ -482,9 +482,9 @@ class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition_instruction"
 
-    competition_instruction_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    competition_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
+    competition_instruction_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    competition_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
     )
     opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
 

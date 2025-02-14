@@ -1830,6 +1830,7 @@ class OpportunityCompetitionFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
+    competition_id = Generators.UuidObj
     legacy_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
     public_competition_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
     legacy_package_id = sometimes_none(factory.Faker("random_int", min=1, max=15))
@@ -1858,3 +1859,5 @@ class OpportunityCompetitionInstructionFactory(BaseFactory):
     competition_id = factory.LazyAttribute(
         lambda o: o.opportunity_competition.competition_id
     )
+
+    competition_instruction_id: Generators.UuidObj
