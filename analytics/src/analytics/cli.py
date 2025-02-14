@@ -185,7 +185,7 @@ def extract_transform_and_load(
             "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
         return
-    logger.info("running transform and load with effective date %s", datestamp)
+    logger.info("running extract transform and load with effective date %s", datestamp)
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
