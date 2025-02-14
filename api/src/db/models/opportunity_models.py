@@ -1,11 +1,11 @@
 import uuid
 from datetime import date
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
@@ -462,7 +462,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition"
 
-    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    competition_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
@@ -482,7 +482,7 @@ class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition_instruction"
 
-    competition_instruction_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True)
+    competition_instruction_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     competition_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(OpportunityCompetition.competition_id), index=True, primary_key=True
     )
@@ -490,13 +490,7 @@ class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
 
-class OpportunityCompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "opportunity_competition_assistance_listing"
 
-    opportunity_assistance_listing_id: Mapped[int] = mapped_column(UUID, primary_key=True)
-    competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True
-    )
 
 
 

@@ -1855,9 +1855,9 @@ class OpportunityCompetitionInstructionFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityCompetitionInstruction
 
-    competition = factory.SubFactory(OpportunityCompetitionFactory)
+    opportunity_competition = factory.SubFactory(OpportunityCompetitionFactory)
     competition_id = factory.LazyAttribute(
         lambda o: o.opportunity_competition.competition_id
     )
-
-    competition_instruction_id: Generators.UuidObj
+    competition_instruction_id =  Generators.UuidObj
+    file_location = f"file_location"
