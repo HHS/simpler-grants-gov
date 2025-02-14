@@ -47,7 +47,17 @@ export const LoginModal = ({
       </div>
       <ModalFooter>
         <ButtonGroup>
-          <a href={LOGIN_URL} key="login-link" className="usa-button">
+          <a
+            href={LOGIN_URL}
+            key="login-link"
+            className="usa-button"
+            onClick={(e) => {
+              const startURL = `${location.pathname}${location.search}`;
+              if (startURL !== "") {
+                window?.sessionStorage?.setItem("login-redirect", startURL);
+              }
+            }}
+          >
             {buttonText}
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"
