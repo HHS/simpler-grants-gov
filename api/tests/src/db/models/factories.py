@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.competition_models as competition_models
 import src.db.models.extract_models as extract_models
 import src.db.models.foreign as foreign
 import src.db.models.opportunity_models as opportunity_models
@@ -1825,7 +1826,7 @@ class UserSavedSearchFactory(BaseFactory):
 
 class OpportunityCompetitionFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunityCompetition
+        model = competition_models.OpportunityCompetition
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
@@ -1853,7 +1854,7 @@ class OpportunityCompetitionFactory(BaseFactory):
 
 class OpportunityCompetitionInstructionFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunityCompetitionInstruction
+        model = competition_models.OpportunityCompetitionInstruction
 
     opportunity_competition = factory.SubFactory(OpportunityCompetitionFactory)
     competition_id = factory.LazyAttribute(lambda o: o.opportunity_competition.competition_id)
@@ -1863,7 +1864,7 @@ class OpportunityCompetitionInstructionFactory(BaseFactory):
 
 class OpportunityApplicationForm(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunityApplicationForm
+        model = competition_models.OpportunityApplicationForm
 
     form_id = Generators.UuidObj
     form_name = factory.Faker("sentence")
@@ -1875,7 +1876,7 @@ class OpportunityApplicationForm(BaseFactory):
 
 class OpportunityCompetitionFormFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.OpportunityCompetitionForm
+        model = competition_models.OpportunityCompetitionForm
 
     opportunity_application_form = factory.SubFactory(OpportunityApplicationForm)
     form_id = factory.LazyAttribute(lambda o: o.opportunity_application_form.form_id)
