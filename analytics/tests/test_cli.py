@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 import logging
 from typer.testing import CliRunner
+from _pytest.logging import LogCaptureFixture
 
 from analytics.cli import app
 from tests.conftest import (
@@ -65,7 +66,7 @@ class TestEtlEntryPoint:
     TEST_FILE_1 = "./tests/etldb_test_01.json"
     EFFECTIVE_DATE = "2024-10-07"
 
-    def test_init_db(self, caplog):
+    def test_init_db(self, caplog: LogCaptureFixture):
         """Test the db initialization command."""
         # setup - create command
         command = [
@@ -80,7 +81,7 @@ class TestEtlEntryPoint:
         assert "initializing database" in caplog.text
         assert "done" in caplog.text
 
-    def test_transform_and_load_with_valid_parameters(self, caplog):
+    def test_transform_and_load_with_valid_parameters(self, caplog: LogCaptureFixture):
         """Test the transform and load command."""
         # setup - create command
         command = [
@@ -108,7 +109,10 @@ class TestEtlEntryPoint:
         assert "issue row(s) processed: 22" in caplog.text
         assert "transform and load is done" in caplog.text
 
-    def test_transform_and_load_with_malformed_effective_date_parameter(self, caplog):
+    def test_transform_and_load_with_malformed_effective_date_parameter(
+        self,
+        caplog: LogCaptureFixture,
+    ):
         """Test the transform and load command."""
         # setup - create command
         command = [
@@ -124,4 +128,7 @@ class TestEtlEntryPoint:
             result = runner.invoke(app, command)
         # validation - check there wasn't an error
         assert result.exit_code == 0
-        assert "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format" in caplog.text
+        assert (
+            "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format"
+            in caplog.text
+        )
