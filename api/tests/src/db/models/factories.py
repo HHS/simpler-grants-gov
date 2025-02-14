@@ -1861,6 +1861,7 @@ class CompetitionInstructionFactory(BaseFactory):
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
     file_location = "file_location"
 
+
 class CompetitionAssistanceListingFactory(BaseFactory):
     class Meta:
         model = competition_models.CompetitionAssistanceListing
@@ -1869,7 +1870,10 @@ class CompetitionAssistanceListingFactory(BaseFactory):
     competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
 
     opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
-    opportunity_assistance_listing_id = factory.LazyAttribute(lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id)
+    opportunity_assistance_listing_id = factory.LazyAttribute(
+        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
+    )
+
 
 class ApplicationForm(BaseFactory):
     class Meta:
@@ -1879,7 +1883,6 @@ class ApplicationForm(BaseFactory):
     form_name = fake.bs()
     form_version = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
     is_active = True
-    description = factory.Faker("sentence")
     agency_code = factory.Faker("agency_code")
 
 
