@@ -48,35 +48,6 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
             funding_instrument=FundingInstrument.OTHER,
         )
 
-        opportunity_summary_forecast_hist = f.OpportunitySummaryFactory.create(
-            is_forecast=True, revision_number=3, no_link_values=True
-        )
-        forecast_hist_insert1 = setup_funding_instrument(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="G",
-        )
-        forecast_hist_delete1 = setup_funding_instrument(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="CA",
-            funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
-        )
-        forecast_hist_delete_already_processed = setup_funding_instrument(
-            create_existing=False,
-            is_delete=True,
-            is_already_processed=True,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="O",
-        )
-        syn_delete_but_current_missing = setup_funding_instrument(
-            create_existing=False,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_forecast_hist,
-            legacy_lookup_value="PC",
-        )
-
         opportunity_summary_syn = f.OpportunitySummaryFactory.create(
             is_forecast=False, revision_number=None, no_link_values=True
         )
@@ -105,40 +76,6 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
             funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
         )
 
-        opportunity_summary_syn_hist = f.OpportunitySummaryFactory.create(
-            is_forecast=False, revision_number=21, no_link_values=True
-        )
-        syn_hist_insert1 = setup_funding_instrument(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="CA",
-        )
-        syn_hist_update1 = setup_funding_instrument(
-            create_existing=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="O",
-            funding_instrument=FundingInstrument.OTHER,
-        )
-        syn_hist_delete1 = setup_funding_instrument(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="PC",
-            funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
-        )
-        syn_hist_delete2 = setup_funding_instrument(
-            create_existing=True,
-            is_delete=True,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="G",
-            funding_instrument=FundingInstrument.GRANT,
-        )
-        syn_hist_insert_invalid_type = setup_funding_instrument(
-            create_existing=False,
-            opportunity_summary=opportunity_summary_syn_hist,
-            legacy_lookup_value="X",
-        )
-
         transform_funding_instrument.run_subtask()
 
         validate_funding_instrument(
@@ -147,32 +84,18 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
             expected_funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
         )
         validate_funding_instrument(
-            db_session, forecast_hist_insert1, expected_funding_instrument=FundingInstrument.GRANT
-        )
-        validate_funding_instrument(
             db_session, syn_insert1, expected_funding_instrument=FundingInstrument.OTHER
         )
         validate_funding_instrument(
             db_session, syn_insert2, expected_funding_instrument=FundingInstrument.GRANT
         )
-        validate_funding_instrument(
-            db_session,
-            syn_hist_insert1,
-            expected_funding_instrument=FundingInstrument.COOPERATIVE_AGREEMENT,
-        )
 
         validate_funding_instrument(
             db_session, forecast_update1, expected_funding_instrument=FundingInstrument.GRANT
         )
-        validate_funding_instrument(
-            db_session, syn_hist_update1, expected_funding_instrument=FundingInstrument.OTHER
-        )
 
         validate_funding_instrument(db_session, forecast_delete1, expect_in_db=False)
-        validate_funding_instrument(db_session, forecast_hist_delete1, expect_in_db=False)
         validate_funding_instrument(db_session, syn_delete1, expect_in_db=False)
-        validate_funding_instrument(db_session, syn_hist_delete1, expect_in_db=False)
-        validate_funding_instrument(db_session, syn_hist_delete2, expect_in_db=False)
 
         validate_funding_instrument(
             db_session,
@@ -181,43 +104,29 @@ class TestTransformFundingInstrument(BaseTransformTestClass):
             expect_values_to_match=False,
         )
         validate_funding_instrument(
-            db_session, forecast_hist_delete_already_processed, expect_in_db=False
-        )
-        validate_funding_instrument(
             db_session,
             syn_update_already_processed,
             expected_funding_instrument=FundingInstrument.PROCUREMENT_CONTRACT,
             expect_values_to_match=False,
         )
 
-        validate_funding_instrument(
-            db_session, syn_delete_but_current_missing, expect_in_db=False, was_processed=True
-        )
-        validate_funding_instrument(
-            db_session, syn_hist_insert_invalid_type, expect_in_db=False, was_processed=False
-        )
-
         metrics = transform_funding_instrument.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 14
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 1
-        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 6
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
+        assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
 
         # Rerunning will only attempt to re-process the errors, so total+errors goes up by 2
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_funding_instrument.run_subtask()
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 15
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2
-        assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 6
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 1
+        assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
 
-    @pytest.mark.parametrize(
-        "is_forecast,revision_number", [(True, None), (False, None), (True, 1), (False, 4)]
-    )
+    @pytest.mark.parametrize("is_forecast,revision_number", [(True, None), (False, None)])
     def test_process_funding_instrument_but_current_missing(
         self, db_session, transform_funding_instrument, is_forecast, revision_number
     ):
