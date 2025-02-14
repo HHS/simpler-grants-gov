@@ -1848,3 +1848,13 @@ class OpportunityCompetitionFactory(BaseFactory):
     updated_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(start_date=o.created_at, end_date="-1y")
     )
+
+
+class OpportunityCompetitionInstructionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.OpportunityCompetitionInstruction
+
+    opportunity_competition = factory.SubFactory(OpportunityCompetitionFactory)
+    opportunity_competition_id = factory.LazyAttribute(
+        lambda o: o.opportunity_competition.opportunity_competition_id
+    )

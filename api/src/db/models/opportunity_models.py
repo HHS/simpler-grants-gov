@@ -460,7 +460,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_competition"
 
-    competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    opportunity_competition_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     opportunity_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey(Opportunity.opportunity_id), index=True
     )
@@ -475,3 +475,20 @@ class OpportunityCompetition(ApiSchemaTable, TimestampMixin):
     closing_date: Mapped[date | None]
     grace_period: Mapped[int | None] = mapped_column(BigInteger)
     contact_info: Mapped[str | None]
+
+
+class OpportunityCompetitionInstruction(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_competition_instruction"
+
+    opportunity_competition_instruction_id: Mapped[int] = mapped_column(
+        BigInteger, primary_key=True
+    )
+    opportunity_competition_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(OpportunityCompetition.opportunity_competition_id),
+        index=True,
+        primary_key=True,
+    )
+    opportunity_competition: Mapped[OpportunityCompetition] = relationship(OpportunityCompetition)
+
+    file_location: Mapped[str]
