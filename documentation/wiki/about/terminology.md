@@ -2,7 +2,7 @@
 description: Understand some of the key acronyms and terms we use on the project.
 ---
 
-# 📖 Terminology
+# Terminology
 
 ## Federal abbreviations
 

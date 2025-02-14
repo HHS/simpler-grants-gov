@@ -107,3 +107,9 @@ variable "aws_services_security_group_id" {
 variable "grants_gov_oracle_cidr_block" {
   type = string
 }
+
+variable "is_temporary" {
+  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection."
+  type        = bool
+  default     = false
+}

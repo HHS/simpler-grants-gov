@@ -61,7 +61,7 @@ resource "aws_lambda_function" "role_manager" {
 # environment.
 # Timestamp is used to always trigger replacement.
 resource "terraform_data" "role_manager_python_vendor_packages" {
-  triggers_replace = timestamp()
+  triggers_replace = fileexists(local.role_manager_package) ? file("${path.module}/role_manager/requirements.txt") : timestamp()
   provisioner "local-exec" {
     command = "pip3 install -r ${path.module}/role_manager/requirements.txt -t ${path.module}/role_manager/vendor --upgrade"
   }

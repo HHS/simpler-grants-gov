@@ -86,26 +86,34 @@ class TestGitHubProjectETL:
         etl: GitHubProjectETL,
     ):
         """Test the extract step by mocking export functions."""
-        mock_export_roadmap_data = MagicMock()
-        mock_export_sprint_data = MagicMock()
-        monkeypatch.setattr(etl, "_export_roadmap_data", mock_export_roadmap_data)
-        monkeypatch.setattr(etl, "_export_sprint_data", mock_export_sprint_data)
+        mock_export_roadmap_data_to_file = MagicMock()
+        mock_export_sprint_data_to_file = MagicMock()
+        monkeypatch.setattr(
+            etl,
+            "_export_roadmap_data_to_file",
+            mock_export_roadmap_data_to_file,
+        )
+        monkeypatch.setattr(
+            etl,
+            "_export_sprint_data_to_file",
+            mock_export_sprint_data_to_file,
+        )
 
         # Run the extract method
         etl.extract()
 
         # Assert roadmap export was called with expected arguments
         roadmap = etl.config.roadmap_project
-        mock_export_roadmap_data.assert_called_once_with(
+        mock_export_roadmap_data_to_file.assert_called_once_with(
             roadmap=roadmap,
-            output_file=str(Path(etl.config.temp_dir) / "roadmap-data.json"),
+            output_file_path=str(Path(etl.config.temp_dir) / "roadmap-data.json"),
         )
 
         # Assert sprint export was called with expected arguments
         sprint_board = etl.config.sprint_projects[0]
-        mock_export_sprint_data.assert_called_once_with(
+        mock_export_sprint_data_to_file.assert_called_once_with(
             sprint_board=sprint_board,
-            output_file=str(
+            output_file_path=str(
                 Path(etl.config.temp_dir)
                 / f"sprint-data-{sprint_board.project_number}.json",
             ),
@@ -158,7 +166,7 @@ class TestGitHubProjectETL:
         etl.dataset.to_json = mock_to_json
 
         # Run the load method
-        etl.load()
+        etl.write_to_file()
 
         # Check if to_json was called with the correct output file
         mock_to_json.assert_called_once_with(etl.config.output_file)
@@ -172,8 +180,8 @@ class TestGitHubProjectETL:
     ):
         """Test the entire ETL pipeline by verifying method calls in run."""
         # Arrange - Mock the export private methods
-        monkeypatch.setattr(github, "export_roadmap_data", MagicMock())
-        monkeypatch.setattr(github, "export_sprint_data", MagicMock())
+        monkeypatch.setattr(github, "export_roadmap_data_to_file", MagicMock())
+        monkeypatch.setattr(github, "export_sprint_data_to_file", MagicMock())
         # Arrange - specify the output wanted
         output_data = [
             issue(

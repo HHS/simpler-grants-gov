@@ -66,7 +66,6 @@ describe("SearchBar", () => {
       "",
       "query",
       "new query",
-      false,
     );
   });
 
@@ -102,7 +101,6 @@ describe("SearchBar", () => {
       "",
       "query",
       "totally valid search terms",
-      false,
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
