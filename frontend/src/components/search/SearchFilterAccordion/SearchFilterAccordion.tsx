@@ -30,10 +30,10 @@ export interface FilterOption {
 }
 
 export interface SearchFilterAccordionProps {
-  filterOptions: FilterOption[];
   query: Set<string>;
   queryParamKey: ValidSearchQueryParam; // Ex - In query params, search?{key}=first,second,third
   title: string; // Title in header of accordion
+  filterOptions: FilterOption[];
 }
 
 export interface FilterOptionWithChildren {
