@@ -146,7 +146,7 @@ def transform_and_load(
             "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
         return
-    logger.info("running transform and load workflow with effective date %s", datestamp)
+    logger.info("running transform and load with effective date %s", datestamp)
 
     # hydrate a dataset instance from the input data
     start_time = time.perf_counter()
@@ -154,7 +154,7 @@ def transform_and_load(
     # sync data to db
     etldb.sync_data(dataset, datestamp)
     end_time = time.perf_counter()
-    logger.info("transform and load executed in %.5f seconds", end_time - start_time)
+    logger.info("transform and load is done after %.5f seconds", end_time - start_time)
 
 
 @etl_app.command(name="extract_transform_and_load")
@@ -176,7 +176,7 @@ def extract_transform_and_load(
             "FATAL ERROR: malformed effective date, expected YYYY-MM-DD format",
         )
         return
-    logger.info("running ETL workflow with effective date %s", datestamp)
+    logger.info("running extract transform and load with effective date %s", datestamp)
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
