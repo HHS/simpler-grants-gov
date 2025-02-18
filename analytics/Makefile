@@ -156,14 +156,6 @@ opportunity-load:
 	$(POETRY) analytics etl opportunity-load
 	@echo "====================================================="
 
-gh-transform-and-load:
-	@echo "=> Transforming and loading GitHub data into the database"
-	@echo "====================================================="
-	$(POETRY) analytics etl transform_and_load \
-	--issue-file $(ISSUE_FILE) \
-	--effective-date $(EFFECTIVE_DATE)
-	@echo "====================================================="
-
 gh-extract-transform-and-load:
 	@echo "=> Extract, transform and load GitHub data into analytics warebase"
 	@echo "====================================================="
@@ -172,10 +164,13 @@ gh-extract-transform-and-load:
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
 
-gh-db-data-import:
-	@echo "=> Importing sprint data to the database"
+gh-transform-and-load:
+	@echo "=> Transforming and loading GitHub data into the database"
 	@echo "====================================================="
-	$(POETRY) analytics import db_import --delivery-file $(ISSUE_FILE)
+	$(POETRY) analytics etl transform_and_load \
+	--issue-file $(ISSUE_FILE) \
+	--effective-date $(EFFECTIVE_DATE)
+	@echo "====================================================="
 
 gh-data-export:
 	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"

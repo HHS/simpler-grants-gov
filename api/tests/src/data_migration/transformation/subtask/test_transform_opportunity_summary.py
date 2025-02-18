@@ -28,15 +28,8 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         synopsis_insert1 = setup_synopsis_forecast(
             is_forecast=False, revision_number=None, create_existing=False, opportunity=opportunity1
         )
-        forecast_hist_insert1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=1, create_existing=False, opportunity=opportunity1
-        )
-        synopsis_hist_insert1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=1, create_existing=False, opportunity=opportunity1
-        )
 
-        # Mix of updates and inserts, somewhat resembling what happens when summary objects
-        # get moved to the historical table (we'd update the synopsis/forecast records, and create new historical)
+        # Mix of updates and inserts
         opportunity2 = f.OpportunityFactory.create(
             no_current_summary=True, opportunity_assistance_listings=[]
         )
@@ -45,18 +38,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
         synopsis_update1 = setup_synopsis_forecast(
             is_forecast=False, revision_number=None, create_existing=True, opportunity=opportunity2
-        )
-        forecast_hist_update1 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=1, create_existing=True, opportunity=opportunity2
-        )
-        synopsis_hist_update1 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=1, create_existing=True, opportunity=opportunity2
-        )
-        forecast_hist_insert2 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity2
-        )
-        synopsis_hist_insert2 = setup_synopsis_forecast(
-            is_forecast=False, revision_number=2, create_existing=False, opportunity=opportunity2
         )
 
         # Mix of inserts, updates, and deletes
@@ -76,16 +57,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             revision_number=None,
             create_existing=True,
             is_delete=True,
-            opportunity=opportunity3,
-        )
-        forecast_hist_insert3 = setup_synopsis_forecast(
-            is_forecast=True, revision_number=2, create_existing=False, opportunity=opportunity3
-        )
-        synopsis_hist_update2 = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=1,
-            create_existing=True,
-            source_values={"action_type": "D"},
             opportunity=opportunity3,
         )
 
@@ -108,40 +79,15 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             source_values={"sendmail": "E"},
             opportunity=opportunity4,
         )
-        synopsis_hist_insert_invalid_yn_field = setup_synopsis_forecast(
-            is_forecast=False,
-            revision_number=1,
-            create_existing=False,
-            source_values={"cost_sharing": "1"},
-            opportunity=opportunity4,
-        )
-        forecast_hist_update_invalid_action_type = setup_synopsis_forecast(
-            is_forecast=True,
-            revision_number=2,
-            create_existing=True,
-            source_values={"action_type": "X"},
-            opportunity=opportunity4,
-        )
 
         transform_opportunity_summary.run_subtask()
 
         validate_opportunity_summary(db_session, forecast_insert1)
         validate_opportunity_summary(db_session, synopsis_insert1)
-        validate_opportunity_summary(db_session, forecast_hist_insert1)
-        validate_opportunity_summary(db_session, synopsis_hist_insert1)
-        validate_opportunity_summary(db_session, forecast_hist_insert2)
-        validate_opportunity_summary(db_session, synopsis_hist_insert2)
-        validate_opportunity_summary(db_session, forecast_hist_insert3)
-
         validate_opportunity_summary(db_session, forecast_update1)
         validate_opportunity_summary(db_session, synopsis_update1)
-        validate_opportunity_summary(db_session, forecast_hist_update1)
-        validate_opportunity_summary(db_session, synopsis_hist_update1)
-        validate_opportunity_summary(db_session, synopsis_hist_update2)
-
         validate_opportunity_summary(db_session, forecast_delete1, expect_in_db=False)
         validate_opportunity_summary(db_session, synopsis_delete1, expect_in_db=False)
-
         validate_opportunity_summary(
             db_session, forecast_delete_but_current_missing, expect_in_db=False
         )
@@ -151,37 +97,26 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             expect_in_db=True,
             expect_values_to_match=False,
         )
-        validate_opportunity_summary(
-            db_session, synopsis_hist_insert_invalid_yn_field, expect_in_db=False
-        )
-        validate_opportunity_summary(
-            db_session,
-            forecast_hist_update_invalid_action_type,
-            expect_in_db=True,
-            expect_values_to_match=False,
-        )
 
         metrics = transform_opportunity_summary.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 18
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 8
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 7
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 3
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 1
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 3
+        # Rerunning will only attempt to re-process the errors, so total+errors goes up by 1
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_opportunity_summary.run_subtask()
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 21
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 9
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_DELETED] == 2
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 7
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 5
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 6
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 2
+        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-    @pytest.mark.parametrize(
-        "is_forecast,revision_number", [(True, None), (False, None), (True, 5), (False, 10)]
-    )
+    @pytest.mark.parametrize("is_forecast,revision_number", [(True, None), (False, None)])
     def test_process_opportunity_summary_delete_but_current_missing(
         self, db_session, transform_opportunity_summary, is_forecast, revision_number
     ):
@@ -209,8 +144,6 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         [
             (True, None, {"sendmail": "z"}, "Unexpected Y/N bool value: z"),
             (False, None, {"cost_sharing": "v"}, "Unexpected Y/N bool value: v"),
-            (True, 5, {"action_type": "T"}, "Unexpected action type value: T"),
-            (False, 10, {"action_type": "5"}, "Unexpected action type value: 5"),
         ],
     )
     def test_process_opportunity_summary_invalid_value_errors(
