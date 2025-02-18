@@ -77,16 +77,6 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
                 source_summary, target_summary, transform_constants.OPPORTUNITY_SUMMARY, extra
             )
 
-        # Historical records are linked to other historical records, however
-        # we don't import historical opportunity records, so if the opportunity
-        # was deleted, we don't have anything to link these to. Whenever we do
-        # support historical opportunities, we'll have these all marked with a
-        # flag that we can use to reprocess these.
-        elif self._is_orphaned_historical(opportunity, source_summary):
-            self._handle_orphaned_historical(
-                source_summary, transform_constants.OPPORTUNITY_SUMMARY, extra
-            )
-
         elif opportunity is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists

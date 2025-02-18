@@ -476,9 +476,6 @@ def get_log_extra_summary(source_summary: SourceSummary) -> dict:
     return {
         "opportunity_id": source_summary.opportunity_id,
         "is_forecast": source_summary.is_forecast,
-        # This value only exists on non-historical records
-        # use getattr instead of an isinstance if/else for simplicity
-        "revision_number": getattr(source_summary, "revision_number", None),
         "table_name": source_summary.__tablename__,
     }
 
@@ -488,7 +485,6 @@ def get_log_extra_applicant_type(source_applicant_type: SourceApplicantType) -> 
         "opportunity_id": source_applicant_type.opportunity_id,
         "at_frcst_id": getattr(source_applicant_type, "at_frcst_id", None),
         "at_syn_id": getattr(source_applicant_type, "at_syn_id", None),
-        "revision_number": getattr(source_applicant_type, "revision_number", None),
         "table_name": source_applicant_type.__tablename__,
     }
 
@@ -498,7 +494,6 @@ def get_log_extra_funding_category(source_funding_category: SourceFundingCategor
         "opportunity_id": source_funding_category.opportunity_id,
         "fac_frcst_id": getattr(source_funding_category, "fac_frcst_id", None),
         "fac_syn_id": getattr(source_funding_category, "fac_syn_id", None),
-        "revision_number": getattr(source_funding_category, "revision_number", None),
         "table_name": source_funding_category.__tablename__,
     }
 
@@ -508,7 +503,6 @@ def get_log_extra_funding_instrument(source_funding_instrument: SourceFundingIns
         "opportunity_id": source_funding_instrument.opportunity_id,
         "fi_frcst_id": getattr(source_funding_instrument, "fi_frcst_id", None),
         "fi_syn_id": getattr(source_funding_instrument, "fi_syn_id", None),
-        "revision_number": getattr(source_funding_instrument, "revision_number", None),
         "table_name": source_funding_instrument.__tablename__,
     }
 
@@ -517,5 +511,4 @@ def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment)
     return {
         "opportunity_id": source_attachment.opportunity_id,
         "syn_att_id": source_attachment.syn_att_id,
-        "att_revision_number": source_attachment.att_revision_number,
     }
