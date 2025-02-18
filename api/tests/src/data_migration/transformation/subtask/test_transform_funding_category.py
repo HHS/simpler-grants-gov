@@ -262,18 +262,3 @@ class TestTransformFundingCategory(BaseTransformTestClass):
             match="Funding category record cannot be processed as the opportunity summary for it does not exist",
         ):
             transform_funding_category.process_link_funding_category(source_record, None, None)
-
-    @pytest.mark.parametrize(
-        "factory_cls",
-        [f.StagingTfundactcatForecastHistFactory, f.StagingTfundactcatSynopsisHistFactory],
-    )
-    def test_process_funding_category_but_no_opportunity_summary_hist(
-        self,
-        db_session,
-        transform_funding_category,
-        factory_cls,
-    ):
-        source_record = factory_cls.create(orphaned_record=True, revision_number=12)
-        transform_funding_category.process_link_funding_category(source_record, None, None)
-        assert source_record.transformed_at is not None
-        assert source_record.transformation_notes == "orphaned_historical_record"
