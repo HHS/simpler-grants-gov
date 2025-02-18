@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -70,6 +70,8 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     is_active: Mapped[bool]
     agency_code: Mapped[str]
     omb_number: Mapped[str | None]
+    active_at: Mapped[datetime]
+    inactive_at: Mapped[datetime | None]
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
