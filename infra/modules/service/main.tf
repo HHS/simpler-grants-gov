@@ -1,5 +1,6 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
+<<<<<<< before updating
 data "aws_ecr_repository" "app" {
   count = var.image_repository_name != null ? 1 : 0
   name  = var.image_repository_name
@@ -17,6 +18,8 @@ data "external" "whoami" {
 data "external" "deploy_github_sha" {
   program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
 }
+=======
+>>>>>>> after updating
 
 locals {
   alb_name                = var.service_name
@@ -25,8 +28,12 @@ locals {
   log_group_name          = "service/${var.service_name}"
   log_stream_prefix       = var.service_name
   task_executor_role_name = "${var.service_name}-task-executor"
+<<<<<<< before updating
   image_url               = var.image_repository_url != null ? "${var.image_repository_url}:${var.image_tag}" : "${data.aws_ecr_repository.app[0].repository_url}:${var.image_tag}"
   hostname                = var.hostname != null ? [{ name = "HOSTNAME", value = var.hostname }] : []
+=======
+  image_url               = "${var.image_repository_url}:${var.image_tag}"
+>>>>>>> after updating
 
   base_environment_variables = concat([
     { name : "PORT", value : tostring(var.container_port) },

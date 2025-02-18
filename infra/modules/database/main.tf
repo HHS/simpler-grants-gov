@@ -12,8 +12,11 @@ locals {
   master_username       = random_id.db_superuser.hex
   primary_instance_name = "${var.name}-primary"
   role_manager_name     = "${var.name}-role-manager"
+<<<<<<< before updating
   role_manager_package  = "${path.root}/role_manager.zip"
 
+=======
+>>>>>>> after updating
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"

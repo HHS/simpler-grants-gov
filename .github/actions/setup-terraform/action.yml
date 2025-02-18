@@ -1,5 +1,10 @@
+<<<<<<< before updating
 name: "Set up Terraform"
 description: "Set up Terraform with the version stored in the .terraform-version file"
+=======
+name: 'Set up Terraform'
+description: 'Set up Terraform with the version stored in the .terraform-version file'
+>>>>>>> after updating
 runs:
   using: "composite"
   steps:

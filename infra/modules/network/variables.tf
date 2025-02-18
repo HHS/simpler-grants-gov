@@ -1,3 +1,4 @@
+<<<<<<< before updating
 variable "name" {
   type        = string
   description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
@@ -8,6 +9,8 @@ variable "second_octet" {
   description = "Second octet of the VPC CIDR block. Must be between 0 and 255."
 }
 
+=======
+>>>>>>> after updating
 variable "aws_services_security_group_name_prefix" {
   type        = string
   description = "Prefix for the name of the security group attached to VPC endpoints"
@@ -16,6 +19,12 @@ variable "aws_services_security_group_name_prefix" {
 variable "database_subnet_group_name" {
   type        = string
   description = "Name of the database subnet group"
+}
+
+variable "enable_command_execution" {
+  type        = bool
+  description = "Whether the application(s) in this network need ECS Exec access. Determines whether to create VPC endpoints needed by ECS Exec."
+  default     = false
 }
 
 variable "has_database" {
@@ -30,8 +39,7 @@ variable "has_external_non_aws_service" {
   default     = true
 }
 
-variable "enable_command_execution" {
-  type        = bool
-  description = "Whether the application(s) in this network need ECS Exec access. Determines whether to create VPC endpoints needed by ECS Exec."
-  default     = false
+variable "name" {
+  type        = string
+  description = "Name to give the VPC. Will be added to the VPC under the 'network_name' tag."
 }

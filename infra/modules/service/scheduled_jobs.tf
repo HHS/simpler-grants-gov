@@ -5,7 +5,11 @@ resource "aws_scheduler_schedule" "scheduled_jobs" {
   # checkov:skip=CKV_AWS_297:Encrypt with customer key in future work
 
   name                         = "${var.service_name}-${each.key}"
+<<<<<<< before updating
   state                        = each.value.state
+=======
+  state                        = "ENABLED"
+>>>>>>> after updating
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = "Etc/UTC"
 
@@ -75,7 +79,11 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
 resource "aws_cloudwatch_log_group" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
+<<<<<<< before updating
   name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}"
+=======
+  name_prefix = "/aws/vendedlogs/states/${var.service_name}-${each.key}/scheduled-jobs/"
+>>>>>>> after updating
 
   # Conservatively retain logs for 5 years.
   # Looser requirements may allow shorter retention periods

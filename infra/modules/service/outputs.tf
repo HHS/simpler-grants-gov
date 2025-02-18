@@ -1,6 +1,15 @@
+<<<<<<< before updating
 output "public_endpoint" {
   description = "The public endpoint for the service."
   value       = var.enable_load_balancer ? "http://${aws_lb.alb[0].dns_name}" : null
+=======
+output "application_log_group" {
+  value = local.log_group_name
+}
+
+output "application_log_stream_prefix" {
+  value = local.log_stream_prefix
+>>>>>>> after updating
 }
 
 # output "cdn_endpoint" {
@@ -17,19 +26,12 @@ output "load_balancer_arn_suffix" {
   value       = var.enable_load_balancer ? aws_lb.alb[0].arn_suffix : null
 }
 
-output "application_log_group" {
-  value = local.log_group_name
-}
-
-output "application_log_stream_prefix" {
-  value = local.log_stream_prefix
-}
-
 output "migrator_role_arn" {
   description = "ARN for role to use for migration"
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
 
+<<<<<<< before updating
 output "cluster_arn" {
   value = aws_ecs_cluster.cluster.arn
 }
@@ -52,4 +54,9 @@ output "app_security_group_id" {
 
 output "service_logs_arn" {
   value = aws_cloudwatch_log_group.service_logs.arn
+=======
+output "public_endpoint" {
+  description = "The public endpoint for the service."
+  value       = "http://${aws_lb.alb.dns_name}"
+>>>>>>> after updating
 }

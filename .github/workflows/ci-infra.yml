@@ -41,7 +41,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+<<<<<<< before updating
       - uses: hashicorp/setup-terraform@v3
+=======
+      - uses: hashicorp/setup-terraform@v2
+>>>>>>> after updating
         with:
           terraform_version: 1.9.7
           terraform_wrapper: false
@@ -54,7 +58,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+<<<<<<< before updating
       - uses: hashicorp/setup-terraform@v3
+=======
+      - uses: hashicorp/setup-terraform@v2
+>>>>>>> after updating
         with:
           terraform_version: 1.9.7
           terraform_wrapper: false
