@@ -1,5 +1,7 @@
 "use-client";
 
+import SessionStorage from "src/utils/sessionStorage";
+
 import { RefObject } from "react";
 import {
   ButtonGroup,
@@ -51,10 +53,10 @@ export const LoginModal = ({
             href={LOGIN_URL}
             key="login-link"
             className="usa-button"
-            onClick={(e) => {
+            onClick={() => {
               const startURL = `${location.pathname}${location.search}`;
               if (startURL !== "") {
-                window?.sessionStorage?.setItem("login-redirect", startURL);
+                SessionStorage.setItem("login-redirect", startURL);
               }
             }}
           >

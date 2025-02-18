@@ -1,5 +1,7 @@
 "use client";
 
+import SessionStorage from "src/utils/sessionStorage";
+
 import { useRef } from "react";
 
 export default function Login() {
@@ -9,8 +11,8 @@ export default function Login() {
     // without this check, even wrapped in a useEffect this would fire twice and the second time redirect to / because sessionStorage was empty.
     if (!redirecting.current) {
       redirecting.current = true;
-      const redirectURL = window?.sessionStorage?.getItem("login-redirect");
-      window?.sessionStorage?.removeItem("login-redirect");
+      const redirectURL = SessionStorage.getItem("login-redirect");
+      SessionStorage.removeItem("login-redirect");
 
       if (
         redirectURL === null ||
