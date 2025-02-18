@@ -1,7 +1,9 @@
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -451,3 +453,18 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
         BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True, index=True
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+
+class OpportunityVersion(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "opportunity_version"
+
+    opportunity_version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    opportunity_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey(Opportunity.opportunity_id), primary_key=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    opportunity_data: Mapped[dict | None] = mapped_column(JSONB)
