@@ -209,9 +209,6 @@ def transform_opportunity_summary(
         target_summary = OpportunitySummary(
             opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
-            # Revision number is only found in the historical table, use getattr
-            # to avoid type checking
-            revision_number=getattr(source_summary, "revision_number", None),
         )
     else:
         # We create a new summary object and merge it outside this function
@@ -269,11 +266,6 @@ def transform_opportunity_summary(
         source_summary, "est_project_start_date", None
     )
     target_summary.fiscal_year = getattr(source_summary, "fiscal_year", None)
-
-    # Set whether it is deleted based on action_type, which only appears on the historical records
-    target_summary.is_deleted = convert_action_type_to_is_deleted(
-        getattr(source_summary, "action_type", None)
-    )
 
     transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
@@ -463,23 +455,6 @@ def convert_null_like_to_none(value: str | None) -> str | None:
         return None
 
     return value
-
-
-def convert_action_type_to_is_deleted(value: str | None) -> bool:
-    # Action type can be U (update) or D (delete)
-    # however many older records seem to not have this set at all
-    # The legacy system looks like it treats anything that isn't D
-    # the same, so we'll go with that assumption as well.
-    if is_empty_str(value):
-        return False
-
-    if value == "D":  # D = Delete
-        return True
-
-    if value == "U":  # U = Update
-        return False
-
-    raise ValueError("Unexpected action type value: %s" % value)
 
 
 def convert_numeric_str_to_int(value: str | None) -> int | None:

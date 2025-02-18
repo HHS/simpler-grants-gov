@@ -83,7 +83,6 @@ class TsynopsisHistMixin:
     sendmail: Mapped[str | None]
     response_date_desc: Mapped[str | None]
     applicant_elig_desc: Mapped[str | None]
-    action_type: Mapped[str | None]
     action_date: Mapped[datetime.datetime | None]
     version_nbr: Mapped[int]
     modification_comments: Mapped[str | None]
