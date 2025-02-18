@@ -1832,4 +1832,4 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
-    opportunity_data = factory.LazyAttribute(lambda o: o.opportunity.opportunity_data)
+    opportunity_data = factory.LazyAttribute(lambda o: o.opportunity_data)
