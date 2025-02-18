@@ -37,3 +37,10 @@ export const userSavedOpportunityEndpoint = (type: "POST" | "DELETE") => {
     method: type as ApiMethod,
   };
 };
+
+export const fetchAgenciesEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "agencies",
+  method: "POST" as ApiMethod,
+};
