@@ -39,10 +39,10 @@ describe("Footer", () => {
     });
     render(<SaveButton {...SaveButtonPropsWithMessage} />);
     expect(screen.getByText("You have saved this item")).toBeInTheDocument();
-    const alert = screen.getByTestId("simpler-save-button-alert");
+    const alert = screen.getByTestId("simpler-alert");
     expect(alert).toHaveClass("usa-alert--success");
 
-    const saveMessageButton = screen.getByTestId("simpler-save-button-message");
+    const saveMessageButton = screen.getByTestId("simpler-alert-close-button");
     saveMessageButton.click();
     expect(SaveButtonPropsWithMessage.messageClick).toHaveBeenCalled();
   });
@@ -52,7 +52,7 @@ describe("Footer", () => {
       error: true,
     });
     render(<SaveButton {...SaveButtonPropsWithErrorMessage} />);
-    const alert = screen.getByTestId("simpler-save-button-alert");
+    const alert = screen.getByTestId("simpler-alert");
     expect(alert).toHaveClass("usa-alert--error");
   });
   it("Loading shows", () => {
