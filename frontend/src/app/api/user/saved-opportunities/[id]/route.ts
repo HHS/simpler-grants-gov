@@ -2,10 +2,7 @@ import { readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET({ params }: { params: Promise<{ id: string }> }) {
   const opportunityId = (await params).id;
 
   try {
