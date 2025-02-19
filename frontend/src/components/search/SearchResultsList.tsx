@@ -1,5 +1,8 @@
 "use server";
 
+import { getSession } from "src/services/auth/session";
+import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { SavedOpportunity } from "src/types/saved-opportunity/savedOpportunityResponseTypes";
 import { SearchAPIResponse } from "src/types/search/searchResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -11,10 +14,24 @@ interface ServerPageProps {
   searchResults: SearchAPIResponse;
 }
 
+const fetchSavedOpportunities = async (): Promise<SavedOpportunity[]> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    return [];
+  }
+  const savedOpportunities = await getSavedOpportunities(
+    session.token,
+    session.user_id as string,
+  );
+  return savedOpportunities;
+};
+
 export default async function SearchResultsList({
   searchResults,
 }: ServerPageProps) {
   const t = await getTranslations("Search");
+
+  const savedOpportunities = await fetchSavedOpportunities();
 
   if (searchResults.status_code !== 200) {
     return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
@@ -38,7 +55,10 @@ export default async function SearchResultsList({
     <ul className="usa-list--unstyled">
       {searchResults.data.map((opportunity) => (
         <li key={opportunity?.opportunity_id}>
-          <SearchResultsListItem opportunity={opportunity} />
+          <SearchResultsListItem
+            opportunity={opportunity}
+            saved={opportunity?.opportunity_id in savedOpportunities}
+          />
         </li>
       ))}
     </ul>

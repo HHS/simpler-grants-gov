@@ -7,14 +7,19 @@ import { AgencyNamyLookup } from "src/utils/search/generateAgencyNameLookup";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { USWDSIcon } from "src/components/USWDSIcon";
+import SearchResultListItemStatus from "./SearchResultListItemStatus";
+
 interface SearchResultsListItemProps {
   opportunity: Opportunity;
   agencyNameLookup?: AgencyNamyLookup;
+  saved?: boolean;
 }
 
 export default function SearchResultsListItem({
   opportunity,
   agencyNameLookup,
+  saved = false,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
@@ -53,52 +58,38 @@ export default function SearchResultsListItem({
               </h2>
             </div>
             <div className="grid-col tablet:order-1 overflow-hidden font-body-xs">
-              {opportunity.opportunity_status === "archived" && (
-                <span className={metadataBorderClasses}>
-                  <strong>{t("resultsListItem.status.archived")}</strong>
-                  {opportunity?.summary?.archive_date
-                    ? formatDate(opportunity?.summary?.archive_date)
-                    : "--"}
-                </span>
-              )}
-              {(opportunity?.opportunity_status === "archived" ||
-                opportunity?.opportunity_status === "closed") &&
-                opportunity?.summary?.close_date && (
-                  <span className={metadataBorderClasses}>
-                    <strong>{t("resultsListItem.status.closed")}</strong>
-                    {opportunity?.summary?.close_date
-                      ? formatDate(opportunity?.summary?.close_date)
-                      : "--"}
-                  </span>
-                )}
-              {opportunity?.opportunity_status === "posted" && (
-                <span className={metadataBorderClasses}>
-                  <span className="usa-tag bg-accent-warm-dark">
-                    <strong>{t("resultsListItem.status.posted")}</strong>
-                    <span className="text-no-uppercase">
-                      {opportunity?.summary?.close_date
-                        ? formatDate(opportunity?.summary?.close_date)
-                        : "--"}
-                    </span>
-                  </span>
-                </span>
-              )}
-              {opportunity?.opportunity_status === "forecasted" && (
-                <span className={metadataBorderClasses}>
-                  <span className="usa-tag">
-                    <strong>{t("resultsListItem.status.forecasted")}</strong>
-                  </span>
-                </span>
-              )}
+              <SearchResultListItemStatus
+                archiveDate={opportunity?.summary?.archive_date}
+                archivedString={t("resultsListItem.status.archived")}
+                closedDate={opportunity?.summary?.close_date}
+                closedString={t("resultsListItem.status.closed")}
+                forecastedString={t("resultsListItem.status.forecasted")}
+                postedString={t("resultsListItem.status.posted")}
+                status={opportunity?.opportunity_status}
+              />
               <span className={metadataBorderClasses}>
                 <strong>{t("resultsListItem.summary.posted")}</strong>
                 {opportunity?.summary?.post_date
                   ? formatDate(opportunity?.summary?.post_date)
                   : "--"}
               </span>
+              {saved && (
+                <div className="bg-base-lighter display-inline-block padding-left-1 padding-right-105">
+                  <div className="display-flex flex-align-center">
+                    <USWDSIcon
+                      name="star"
+                      className="text-accent-warm-dark usa-icon--size-3 padding-right-05"
+                    />
+                    <span className="font-body-3xs">
+                      {t("opportunitySaved")}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
+
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
-              <span className={metadataBorderClasses}>
+              <span className="">
                 <strong>{t("resultsListItem.summary.agency")}</strong>
                 {opportunity?.top_level_agency_name &&
                 opportunity?.agency_name &&
@@ -112,7 +103,7 @@ export default function SearchResultsListItem({
               </span>
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
-              <span className={metadataBorderClasses}>
+              <span className="">
                 <strong>{t("resultsListItem.opportunity_number")}</strong>
                 {opportunity?.opportunity_number}
               </span>
@@ -123,7 +114,7 @@ export default function SearchResultsListItem({
           <div className="overflow-hidden font-body-xs">
             {/* TODO: Better way to format as a dollar amounts */}
             <span
-              className={`${metadataBorderClasses} desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
+              className={`desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
             >
               <strong>{t("resultsListItem.award_ceiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
@@ -131,7 +122,7 @@ export default function SearchResultsListItem({
               </span>
             </span>
             <span
-              className={`${metadataBorderClasses} desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
+              className={`margin-left-3 desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0`}
             >
               <strong>{t("resultsListItem.floor")}</strong>
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
