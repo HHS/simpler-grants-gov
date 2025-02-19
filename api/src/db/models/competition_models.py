@@ -67,10 +67,9 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     form_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     form_name: Mapped[str]
     form_version: Mapped[str]
-    is_active: Mapped[bool]
     agency_code: Mapped[str]
     omb_number: Mapped[str | None]
-    active_at: Mapped[datetime]
+    active_at: Mapped[datetime | None]
     inactive_at: Mapped[datetime | None]
 
 
