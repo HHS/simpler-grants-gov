@@ -30,43 +30,46 @@ def transform_project_data(
 
     for i, item in enumerate(raw_data):
         try:
+            # Filter out invalid content from boards local user may not have permission to
+            if item["content"] is not None:
             # Validate and parse the raw item
-            validated_item = ProjectItem.model_validate(item)
+                validated_item = ProjectItem.model_validate(item)
+                # Skip excluded issue types
+                if validated_item.content.issue_type.name in excluded_types:
+                    continue
 
-            # Skip excluded issue types
-            if validated_item.content.issue_type.name in excluded_types:
-                continue
-
-            # Transform into flattened format
-            transformed = {
-                # project metadata
-                "project_owner": owner,
-                "project_number": project,
-                # issue metadata
-                "issue_title": validated_item.content.title,
-                "issue_url": validated_item.content.url,
-                "issue_parent": validated_item.content.parent.url,
-                "issue_type": validated_item.content.issue_type.name,
-                "issue_status": validated_item.status.name,
-                "issue_is_closed": validated_item.content.closed,
-                "issue_opened_at": validated_item.content.created_at,
-                "issue_closed_at": validated_item.content.closed_at,
-                "issue_points": validated_item.points.number,
-                # sprint metadata
-                "sprint_id": validated_item.sprint.iteration_id,
-                "sprint_name": validated_item.sprint.title,
-                "sprint_start": validated_item.sprint.start_date,
-                "sprint_length": validated_item.sprint.duration,
-                "sprint_end": validated_item.sprint.end_date,
-                # roadmap metadata
-                "deliverable_pillar": validated_item.pillar.name,
-                "quad_id": validated_item.quad.iteration_id,
-                "quad_name": validated_item.quad.title,
-                "quad_start": validated_item.quad.start_date,
-                "quad_length": validated_item.quad.duration,
-                "quad_end": validated_item.quad.end_date,
-            }
-            transformed_data.append(transformed)
+                # Transform into flattened format
+                transformed = {
+                    # project metadata
+                    "project_owner": owner,
+                    "project_number": project,
+                    # issue metadata
+                    "issue_title": validated_item.content.title,
+                    "issue_url": validated_item.content.url,
+                    "issue_parent": validated_item.content.parent.url,
+                    "issue_type": validated_item.content.issue_type.name,
+                    "issue_status": validated_item.status.name,
+                    "issue_is_closed": validated_item.content.closed,
+                    "issue_opened_at": validated_item.content.created_at,
+                    "issue_closed_at": validated_item.content.closed_at,
+                    "issue_points": validated_item.points.number,
+                    # sprint metadata
+                    "sprint_id": validated_item.sprint.iteration_id,
+                    "sprint_name": validated_item.sprint.title,
+                    "sprint_start": validated_item.sprint.start_date,
+                    "sprint_length": validated_item.sprint.duration,
+                    "sprint_end": validated_item.sprint.end_date,
+                    # roadmap metadata
+                    "deliverable_pillar": validated_item.pillar.name,
+                    "quad_id": validated_item.quad.iteration_id,
+                    "quad_name": validated_item.quad.title,
+                    "quad_start": validated_item.quad.start_date,
+                    "quad_length": validated_item.quad.duration,
+                    "quad_end": validated_item.quad.end_date,
+                }
+                transformed_data.append(transformed)
+            else:
+                logger.debug(f"skipped {item}")
         except ValidationError as err:
             logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
             logger.debug("Error: %s", err)

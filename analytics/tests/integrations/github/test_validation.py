@@ -2,6 +2,7 @@
 
 import pytest  # noqa: I001
 from pydantic import ValidationError
+from analytics.integrations.github.main import transform_project_data
 from analytics.integrations.github.validation import (
     IssueContent,
     IterationValue,
@@ -41,6 +42,35 @@ VALID_SINGLE_SELECT = {
     "name": "In Progress",
 }
 
+
+
+class TestTransformProjectData:
+    """Test cases for the entire transform function."""
+
+    def test_content_none(self) -> None:
+        """Test validating a project item that has none for it's content filters that item out."""
+        data = [{
+        "content": None,
+        "status": None,
+        "sprint": None,
+        "points": None,
+        "quad": None,
+        "pillar": None,
+        },
+        {
+            "content": VALID_ISSUE_CONTENT,
+            "status": VALID_SINGLE_SELECT,
+            "sprint": VALID_ITERATION_VALUE,
+            "points": {"number": 5},
+            "quad": VALID_ITERATION_VALUE,
+            "pillar": VALID_SINGLE_SELECT,
+        },
+        ]
+        result = transform_project_data(data, "test", project=17)
+
+        assert len(result) == 1
+        print(result[0])
+        assert result[0]["issue_title"] == "Test Issue"
 
 # #############################################
 # Project items tests
