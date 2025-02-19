@@ -88,18 +88,16 @@ export default function SearchResultsListItem({
               )}
             </div>
             <div className="grid-col tablet:order-2 overflow-hidden font-body-xs">
-              <span className="">
-                <strong>{t("resultsListItem.summary.agency")}</strong>
-                {opportunity?.top_level_agency_name &&
-                opportunity?.agency_name &&
-                opportunity?.top_level_agency_name !== opportunity?.agency_name
-                  ? `${opportunity?.top_level_agency_name} - ${opportunity?.agency_name}`
-                  : opportunity?.agency_name ||
-                    (agencyNameLookup && opportunity?.summary?.agency_code
-                      ? // Use same exact label we're using for the agency filter list
-                        agencyNameLookup[opportunity?.summary?.agency_code]
-                      : "--")}
-              </span>
+              <strong>{t("resultsListItem.summary.agency")}</strong>
+              {opportunity?.top_level_agency_name &&
+              opportunity?.agency_name &&
+              opportunity?.top_level_agency_name !== opportunity?.agency_name
+                ? `${opportunity?.top_level_agency_name} - ${opportunity?.agency_name}`
+                : opportunity?.agency_name ||
+                  (agencyNameLookup && opportunity?.summary?.agency_code
+                    ? // Use same exact label we're using for the agency filter list
+                      agencyNameLookup[opportunity?.summary?.agency_code]
+                    : "--")}
             </div>
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
               <strong>{t("resultsListItem.opportunity_number")}</strong>
