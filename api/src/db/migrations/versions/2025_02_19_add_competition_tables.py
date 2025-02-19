@@ -1,8 +1,8 @@
 """add competition tables
 
-Revision ID: 5cca3d44dfd4
+Revision ID: d5f73aa58acb
 Revises: 56d129425397
-Create Date: 2025-02-18 21:38:03.418140
+Create Date: 2025-02-19 15:40:40.408114
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "5cca3d44dfd4"
+revision = "d5f73aa58acb"
 down_revision = "56d129425397"
 branch_labels = None
 depends_on = None
@@ -23,10 +23,9 @@ def upgrade():
         sa.Column("form_id", sa.UUID(), nullable=False),
         sa.Column("form_name", sa.Text(), nullable=False),
         sa.Column("form_version", sa.Text(), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("agency_code", sa.Text(), nullable=False),
         sa.Column("omb_number", sa.Text(), nullable=True),
-        sa.Column("active_at", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("active_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("inactive_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
             "created_at",
