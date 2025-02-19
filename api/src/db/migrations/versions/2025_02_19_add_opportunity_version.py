@@ -1,8 +1,8 @@
-"""add competition tables
+"""add opportunity version
 
-Revision ID: 5aa7b08a78fe
+Revision ID: ab2123834345
 Revises: 56d129425397
-Create Date: 2025-02-19 16:38:40.437190
+Create Date: 2025-02-19 20:37:11.085557
 
 """
 
@@ -11,7 +11,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "5aa7b08a78fe"
+revision = "ab2123834345"
 down_revision = "56d129425397"
 branch_labels = None
 depends_on = None
@@ -23,7 +23,7 @@ def upgrade():
         "opportunity_version",
         sa.Column("opportunity_version_id", sa.UUID(), nullable=False),
         sa.Column("opportunity_id", sa.BigInteger(), nullable=False),
-        sa.Column("opportunity_data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("opportunity_data", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
