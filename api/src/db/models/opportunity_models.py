@@ -467,4 +467,4 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
-    opportunity_data: Mapped[dict | None] = mapped_column(JSONB)
+    opportunity_data: Mapped[dict] = mapped_column(JSONB)
