@@ -127,10 +127,10 @@ data "aws_acm_certificate" "certificate" {
   domain = local.service_config.domain_name
 }
 
-data "aws_route53_zone" "zone" {
-  count = local.service_config.domain_name != null ? 1 : 0
-  name  = local.network_config.domain_config.hosted_zone
-}
+# data "aws_route53_zone" "zone" {
+#   count = local.service_config.domain_name != null ? 1 : 0
+#   name  = local.network_config.domain_config.hosted_zone
+# }
 
 module "service" {
   source           = "../../modules/service"
@@ -144,8 +144,9 @@ module "service" {
   public_subnet_ids  = data.aws_subnets.public.ids
   private_subnet_ids = data.aws_subnets.private.ids
 
-  domain_name     = local.service_config.domain_name
-  hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  domain_name    = local.service_config.domain_name
+  hosted_zone_id = null
+  # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
 
   cpu                      = local.service_config.cpu
