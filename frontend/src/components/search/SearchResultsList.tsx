@@ -32,7 +32,9 @@ export default async function SearchResultsList({
   const t = await getTranslations("Search");
 
   const savedOpportunities = await fetchSavedOpportunities();
-
+  const savedOpportunityIds = savedOpportunities.map(
+    (opportunity) => opportunity.opportunity_id,
+  );
   if (searchResults.status_code !== 200) {
     return <ServerErrorAlert callToAction={t("generic_error_cta")} />;
   }
@@ -57,7 +59,7 @@ export default async function SearchResultsList({
         <li key={opportunity?.opportunity_id}>
           <SearchResultsListItem
             opportunity={opportunity}
-            saved={opportunity?.opportunity_id in savedOpportunities}
+            saved={savedOpportunityIds.includes(opportunity?.opportunity_id)}
           />
         </li>
       ))}

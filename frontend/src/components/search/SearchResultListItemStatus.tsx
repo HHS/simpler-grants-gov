@@ -18,8 +18,7 @@ const StatusItem = ({
 }: StatusItemProps) => {
   return (
     <span
-      className="  display-block
-  tablet:display-inline-block
+      className="
   tablet:padding-x-1
   tablet:margin-left-neg-1
   tablet:margin-right-1

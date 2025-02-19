@@ -57,7 +57,7 @@ export default function SearchResultsListItem({
                 </Link>
               </h2>
             </div>
-            <div className="grid-col tablet:order-1 overflow-hidden font-body-xs">
+            <div className="font-body-xs display-flex">
               <SearchResultListItemStatus
                 archiveDate={opportunity?.summary?.archive_date}
                 archivedString={t("resultsListItem.status.archived")}
@@ -74,11 +74,11 @@ export default function SearchResultsListItem({
                   : "--"}
               </span>
               {saved && (
-                <div className="bg-base-lighter display-inline-block padding-left-1 padding-right-105">
+                <div className="bg-base-lighter padding-x-105 height-205 font-body-3xs">
                   <div className="display-flex flex-align-center">
                     <USWDSIcon
                       name="star"
-                      className="text-accent-warm-dark usa-icon--size-3 padding-right-05"
+                      className="text-accent-warm-dark button-icon-large padding-right-05"
                     />
                     <span className="font-body-3xs">
                       {t("opportunitySaved")}
