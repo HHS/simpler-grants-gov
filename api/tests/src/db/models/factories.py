@@ -1882,21 +1882,13 @@ class ApplicationFormFactory(BaseFactory):
     form_id = Generators.UuidObj
     form_name = fake.bs()
     form_version = factory.Faker("pyfloat", left_digits=1, right_digits=1, positive=True)
-    is_active = True
     agency_code = factory.Faker("agency_code")
-    active_at = factory.Faker("date_time_between", start_date="-3y", end_date="-1d")
-    inactive_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(start_date=o.active_at) if not o.is_active else None
+    active_at = sometimes_none(factory.Faker("date_time_between", start_date="-3y", end_date="-1d"))
+    inactive_at = sometimes_none(
+        factory.LazyAttribute(
+            lambda o: fake.date_time_between(start_date=o.active_at) if o.active_at else None
+        )
     )
-
-    @factory.post_generation
-    def set_inactive_at(obj, create, extracted, **kwargs):
-        if not obj.is_active:
-            obj.inactive_at = fake.date_time_between(
-                start_date=obj.active_at
-            )  # set inactive_at if is_active is False
-        else:
-            obj.inactive_at = None
 
 
 class CompetitionFormFactory(BaseFactory):
