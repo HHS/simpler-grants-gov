@@ -32,7 +32,7 @@ def transform_project_data(
         try:
             # Filter out invalid content from boards local user may not have permission to
             if item["content"] is not None:
-            # Validate and parse the raw item
+                # Validate and parse the raw item
                 validated_item = ProjectItem.model_validate(item)
                 # Skip excluded issue types
                 if validated_item.content.issue_type.name in excluded_types:
@@ -68,8 +68,7 @@ def transform_project_data(
                     "quad_end": validated_item.quad.end_date,
                 }
                 transformed_data.append(transformed)
-            else:
-                logger.debug(f"skipped {item}")
+
         except ValidationError as err:
             logger.error("Error parsing row %d, skipped.", i)  # noqa: TRY400
             logger.debug("Error: %s", err)
