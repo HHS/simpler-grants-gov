@@ -4,6 +4,7 @@
 
 import logging
 import logging.config
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated
@@ -82,8 +83,13 @@ def export_github_data(
     config = load_config(config_path, GitHubProjectConfig)
     config.temp_dir = temp_dir
     config.output_file = output_file
+
     # Run ETL pipeline
+    logger.info("running extract workflow")
+    start_time = time.perf_counter()
     GitHubProjectETL(config).run()
+    end_time = time.perf_counter()
+    logger.info("extract workflow executed in %.5f seconds", end_time - start_time)
 
 
 # ===========================================================
@@ -143,13 +149,12 @@ def transform_and_load(
     logger.info("running transform and load with effective date %s", datestamp)
 
     # hydrate a dataset instance from the input data
+    start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_file(file_path=issue_file)
-
     # sync data to db
     etldb.sync_data(dataset, datestamp)
-
-    # finish
-    logger.info("transform and load is done")
+    end_time = time.perf_counter()
+    logger.info("transform and load is done after %.5f seconds", end_time - start_time)
 
 
 @etl_app.command(name="extract_transform_and_load")
@@ -175,16 +180,21 @@ def extract_transform_and_load(
 
     # extract data from GitHub
     logger.info("extracting data from GitHub")
+    start_time = time.perf_counter()
     extracted_json = GitHubProjectETL(config).extract_and_transform_in_memory()
+    end_time = time.perf_counter()
+    logger.info("extract executed in %.5f seconds", end_time - start_time)
+
     # hydrate a dataset instance from the input data
-    logger.info("transforming data")
+    logger.info("transforming and loading data")
+    start_time = time.perf_counter()
     dataset = EtlDataset.load_from_json_object(json_data=extracted_json)
-
     # sync dataset to db
-    logger.info("writing to database")
     etldb.sync_data(dataset, datestamp)
+    end_time = time.perf_counter()
+    logger.info("transform and load executed in %.5f seconds", end_time - start_time)
 
-    logger.info("workflow is done!")
+    logger.info("ETL workflow is done")
 
 
 def validate_effective_date(effective_date: str) -> str | None:
