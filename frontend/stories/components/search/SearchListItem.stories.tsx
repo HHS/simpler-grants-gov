@@ -10,7 +10,7 @@ const meta: Meta<typeof Item> = {
     opportunity: {
       opportunity_id: 1,
       opportunity_title: "Opportunity Title",
-      agency_code: "123",
+      agency: "123",
       agency_name: "Agency Name",
       category: "category",
       category_explanation: "Category Explanation",
